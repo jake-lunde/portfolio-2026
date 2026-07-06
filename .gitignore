@@ -1,0 +1,25 @@
+# deps
+/node_modules
+
+# next
+/.next/
+/out/
+next-env.d.ts
+
+# misc
+.DS_Store
+*.pem
+.vercel
+
+# env
+.env*.local
+
+# ts
+*.tsbuildinfo
+
+# local-only source docs — internal metrics, coworker names, reference
+# images. Keep out of the public repo; the case-study MDX is the public copy.
+portfolio-tracker.md
+session-log.md
+invest-pull-quotes.md
+docs/

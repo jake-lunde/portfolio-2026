@@ -1,0 +1,153 @@
+import {
+  Hero,
+  Section,
+  Lead,
+  Plate,
+  Placeholder,
+  Moves,
+  Move,
+  Decide,
+  PullQuote,
+  Metrics,
+  Stat,
+} from '@/components/case/CaseComponents'
+import { MoatDiagram } from '@/components/case/MoatDiagram'
+import { ScrubGraph } from '@/components/case/ScrubGraph'
+import { FrequencyBars } from '@/components/case/FrequencyBars'
+import { CaseFooter } from '@/components/case/CaseFooter'
+
+<Hero
+  eyebrow="Greenlight · Investing for kids · Fintech"
+  title="Greenlight Invest"
+  thesis={<>A kid told me the numbers meant nothing. So I built the <span className="hl-pink">understanding</span> — in&nbsp;code.</>}
+  meta={[
+    ['Role', 'Lead product designer'],
+    ['Partners', 'PM · iOS/Android eng · data'],
+    ['Timeline', '2024 – 2025'],
+    ['Shipped', 'SwiftUI interaction · AI-data components · decision flow'],
+  ]}
+/>
+
+<Section no="01" label="The gap" title="We made a prettier balance sheet.">
+  <Lead>
+    A kid looked at the new stock screen — cleaner charts, better-formatted
+    financials, everything we thought they wanted — and said it was just
+    numbers on a screen. They didn&rsquo;t know what the company was. They
+    didn&rsquo;t know what to do with any of it.
+  </Lead>
+
+  That was the first round of research, run with the children of Greenlight
+  employees, and it quietly reset the whole project. The old Invest was, in a
+  word, *undecidable* — the facts of a company with no path from *I&rsquo;ve
+  heard of Nike* to *I&rsquo;d like to own a piece of it.* For an adult
+  that&rsquo;s a gap you bridge with experience. For a nine-year-old
+  it&rsquo;s a wall.
+
+  <Plate cap="Plate 01 · before" fig="FIG. A" caption="Before: financial facts, no path to a decision.">
+    <Placeholder>Before / after — old detail screen<br />(drop real capture here)</Placeholder>
+  </Plate>
+</Section>
+
+<Section no="02" label="The system" title="Three moves to make a company decidable.">
+  The redesign stopped trying to present information and started trying to
+  make a company something a kid could actually decide on.
+
+  <Moves>
+    <Move n="01" title="Know it">
+      A minute-long overview for every company in the S&amp;P 500 — what it
+      makes, how it earns, why it touches a kid&rsquo;s life — built from real
+      filings, formatted like the stories they already watch. NVIDIA stops
+      being a ticker.
+    </Move>
+    <Move n="02" title="Size it up">
+      The Economic Moat: the company at the center of three rings — rivals,
+      competitors, distant threats — each tappable for <em>why</em> it sits
+      where it does. A hard idea, readable at a glance.
+    </Move>
+    <Move n="03" title="Decide it">
+      We can&rsquo;t give a child advice — so we taught them what to ask.
+      <em> Help me decide</em> hands the kid the pieces and reflects their own
+      reasoning back. A thinker, not a follower.
+    </Move>
+  </Moves>
+
+  <Plate cap="Plate 02 · economic moat" fig="FIG. B — NFLX" caption="Netflix at center; tap Comcast to learn it owns Peacock. Built from the same filings data.">
+    <MoatDiagram />
+  </Plate>
+
+  <Decide
+    cap="Help me decide — the three questions"
+    questions={[
+      { n: '01', q: 'Is this a leading company in its industry?', tag: 'P/E · rank' },
+      { n: '02', q: 'Will it keep growing and making money?', tag: 'projections' },
+      { n: '03', q: 'Is it worth buying right now?', tag: 'bulls · bears' },
+    ]}
+  />
+
+  The product doesn&rsquo;t render a verdict. It reflects the kid&rsquo;s own
+  reasoning back — *based on your answers, this might be worth considering*,
+  or *this doesn&rsquo;t look like a fit.* The compliance line we
+  couldn&rsquo;t cross became the best thing that happened to the design: it
+  forced the product to make a thinker instead of a follower.
+</Section>
+
+<Section no="03" label="Built, not just designed" title="The part I was told couldn't be done.">
+  The interactive performance graph — press and hold, scrub across time, feel
+  a haptic tick at each interval — came back from engineering as too hard to
+  build. It&rsquo;s an industry-standard interaction; being told it was out of
+  reach annoyed me enough to go build it.
+
+  <Plate cap="Plate 03 · performance graph" fig="FIG. C — haptic scrub" caption="Scrub it — each interval ticks. The shipped SwiftUI version does this under your thumb, with real haptics.">
+    <ScrubGraph />
+  </Plate>
+
+  I paired with an engineer who gave me access to the real repo and a
+  playground inside it, used the current generation of AI coding tools, and
+  wrote the interaction in SwiftUI against our actual codebase — state by
+  state, until it felt right. Most of that code shipped. It was the first
+  haptic feedback anywhere in the app, and the first time the thing felt
+  alive under my thumb.
+
+  That&rsquo;s the honest shape of how I work now. I wrote and shipped the
+  interaction. I designed and specced the AI-data components — the Moat
+  logic, the overview-video pipeline — that a data team and I generated at
+  scale. Design and engineering stopped being a handoff and started being
+  the same motion.
+</Section>
+
+<Section no="04" label="The call" title="What didn't ship.">
+  The most ambitious idea, *Grows with You*, didn&rsquo;t make it. It would
+  have read the whole picture of a young investor — their experience, their
+  spending, their family&rsquo;s financial context — and leveled the entire
+  interface up with them: the language, the data density, the complexity all
+  rising as the kid grew into it. A real curriculum.
+
+  We couldn&rsquo;t afford it in time or resources, so we made the hard call
+  to index for the lowest common denominator instead — simple enough for
+  everyone, on day one. I still believe in the adaptive version. But shipping
+  the simple thing that works beats shipping the ambitious thing that
+  doesn&rsquo;t, and knowing which is which is most of the job.
+</Section>
+
+<Section no="05" label="What it did" title="It moved the numbers. It also started a conversation.">
+  <Metrics>
+    <div>
+      <Stat big={<span className="hl-pink">3–4×</span>} label="first-trade rate among kids exposed to the new detail screens vs. those who weren't" />
+      <Stat secondary big={<>355%<span className="hl-pink">↑</span></>} label="growth in detail-screen views" />
+    </div>
+    <Plate cap="Plate 05 · signal" fig="FIG. D" caption="Placeholder viz — swap for the real adoption series.">
+      <FrequencyBars />
+    </Plate>
+  </Metrics>
+
+  But the outcome I keep is quieter than a metric. Investing used to be a kid
+  alone with a screen they couldn&rsquo;t read. Now a parent asks *why this
+  one* — and the kid can actually answer.
+
+  <PullQuote cite="Parent, user research">&ldquo;It encouraged conversation.&rdquo;</PullQuote>
+
+  We didn&rsquo;t teach a kid to buy a stock. We gave a family something to
+  talk about.
+</Section>
+
+<CaseFooter next={{ name: 'Greenlight Family Hub', live: false }} />

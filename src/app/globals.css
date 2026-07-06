@@ -1,0 +1,182 @@
+/* ============================================================
+   LUNDE OS — design tokens (CLAUDE.md §3, hexes sampled from
+   docs/inspo: NASA EP-1 blue, Doppler 明显的频率 pink)
+   ============================================================ */
+
+:root {
+  /* LIGHT (default) — warm print stock */
+  --paper: #e7e1d2;
+  --paper-2: #ded7c4;
+  --ink: #17150d;
+  --ink-soft: #5a564a;
+  --plate: #131811;
+  --plate-ink: #e7e1d2;
+  --line: rgba(23, 21, 13, 0.18);
+
+  /* ACCENTS */
+  --blue: #2036c8; /* NASA cobalt — system: active chrome, links, focus */
+  --pink: #f2a6c2; /* Doppler pink — expressive: marks, highlights */
+  --green: #2e4a38; /* retained duotone family (old-report green) */
+
+  /* pink is annotation-only on light paper (fails AA as text) */
+  --pink-text: var(--ink);
+  --pink-mark: var(--pink);
+
+  --focus: var(--blue);
+
+  --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --mono: var(--font-mono), 'SF Mono', ui-monospace, Menlo, monospace;
+  --cjk: var(--font-cjk), sans-serif;
+
+  --menubar-h: 34px;
+}
+
+[data-theme='dark'] {
+  /* DARK — CRT / terminal night */
+  --paper: #0d100c;
+  --paper-2: #14181a;
+  --ink: #e9e4d5;
+  --ink-soft: #8a9a93;
+  --plate: #090c0a;
+  --plate-ink: #e9e4d5;
+  --line: rgba(233, 228, 213, 0.16);
+
+  --blue: #5c7cff; /* same hue, luminous — reads as a glow */
+  --pink: #f2a6c2;
+
+  /* pink may speak directly on the void */
+  --pink-text: var(--pink);
+  --pink-mark: transparent;
+}
+
+/* ---------- base ---------- */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  overflow: hidden; /* the OS owns the viewport; windows scroll internally */
+}
+
+body,
+button,
+input {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+a {
+  color: var(--blue);
+}
+
+::selection {
+  background: var(--pink);
+  color: #17150d;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ---------- texture: paper grain (identity-critical) ---------- */
+
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.28'/%3E%3C/svg%3E");
+}
+
+[data-theme='dark'] .grain {
+  mix-blend-mode: overlay;
+  opacity: 0.28;
+}
+
+/* ---------- texture: halftone (dark plate figures) ---------- */
+
+.halftone {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  background-image: radial-gradient(rgba(231, 225, 210, 0.5) 0.6px, transparent 0.7px);
+  background-size: 5px 5px;
+}
+
+/* ---------- texture: CRT (dark/terminal surfaces) ---------- */
+
+.crt {
+  position: relative;
+}
+
+.crt::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.14) 3px
+  );
+}
+
+[data-theme='dark'] .crt-glow {
+  text-shadow: 0 0 8px currentColor;
+}
+
+/* ---------- shared vocabulary ---------- */
+
+.mono-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* pink annotation: highlighter swipe on light paper, pink type on dark */
+.hl-pink {
+  color: var(--pink-text);
+  font-weight: 800;
+  background: linear-gradient(transparent 8%, var(--pink-mark) 8%, var(--pink-mark) 94%, transparent 94%);
+  padding: 0 0.08em;
+}
+
+/* reduced motion: kill decorative animation globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

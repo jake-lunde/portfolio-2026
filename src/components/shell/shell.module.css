@@ -1,0 +1,346 @@
+/* ================= MENU BAR ================= */
+
+.menubar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--menubar-h);
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 14px;
+  background: var(--paper);
+  border-bottom: 1.5px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.wordmark {
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.wordmark span {
+  color: var(--ink-soft);
+  font-weight: 400;
+  margin-left: 10px;
+}
+
+.menuRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.menuBtn {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  color: var(--ink);
+}
+
+.menuBtn:hover {
+  border-color: var(--line);
+}
+
+.menuBtn[aria-pressed='true'] {
+  color: var(--blue);
+}
+
+.clock {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  min-width: 74px;
+  text-align: right;
+}
+
+/* ================= DESKTOP ================= */
+
+.desktop {
+  position: fixed;
+  inset: var(--menubar-h) 0 0 0;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+/* ambient CJK texture — decorative, aria-hidden, behind windows */
+.glyphField {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+  font-family: var(--cjk);
+  font-weight: 800;
+  color: var(--ink);
+  user-select: none;
+}
+
+.glyph {
+  position: absolute;
+  opacity: 0.045;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .glyph {
+  opacity: 0.06;
+}
+
+/* ================= DESKTOP ICONS ================= */
+
+.icons {
+  position: absolute;
+  top: 26px;
+  left: 20px;
+  z-index: 2;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(5, auto);
+  gap: 18px 10px;
+}
+
+.iconBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: 88px;
+  padding: 10px 4px 8px;
+  color: var(--ink);
+  border: 1px solid transparent;
+}
+
+.iconBtn:hover {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--paper-2) 60%, transparent);
+}
+
+.iconBtn:active svg {
+  transform: translateY(1px);
+}
+
+.iconLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ================= WINDOW ================= */
+
+.window {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  box-shadow: 6px 6px 0 rgba(23, 21, 13, 0.14);
+  min-width: 280px;
+  max-width: calc(100% - 24px);
+  max-height: calc(100% - 24px);
+}
+
+[data-theme='dark'] .window {
+  border-color: var(--line);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
+}
+
+.window:focus {
+  outline: none;
+}
+
+.windowZoomed {
+  left: 12px !important;
+  top: 12px !important;
+  width: calc(100% - 24px) !important;
+  height: calc(100% - 24px) !important;
+  transform: none !important;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-bottom: 1.5px solid var(--ink);
+  background: var(--paper);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  flex: 0 0 auto;
+}
+
+.titlebar:active {
+  cursor: grabbing;
+}
+
+[data-theme='dark'] .titlebar {
+  border-bottom-color: var(--line);
+}
+
+/* active window: blue system chrome */
+.windowActive .titlebar {
+  background: var(--blue);
+  color: #f4f1e6;
+  border-bottom-color: var(--ink);
+}
+
+[data-theme='dark'] .windowActive .titlebar {
+  color: #0d100c;
+}
+
+.titleControls {
+  display: flex;
+  gap: 6px;
+}
+
+.ctrl {
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid currentColor;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  line-height: 1;
+  color: inherit;
+}
+
+.ctrl:hover {
+  background: var(--pink);
+  color: #17150d;
+  border-color: #17150d;
+}
+
+.title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titleMeta {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  opacity: 0.6;
+}
+
+.windowBody {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  position: relative;
+}
+
+.windowBody.crt {
+  background: var(--plate);
+  color: var(--plate-ink);
+}
+
+/* ================= BOOT ================= */
+
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+
+.bootInner {
+  width: min(420px, 80vw);
+  color: var(--ink);
+}
+
+.bootLine {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.bootLine em {
+  font-style: normal;
+  color: var(--blue);
+}
+
+.bootBar {
+  height: 12px;
+  border: 1.5px solid var(--ink);
+  margin-top: 14px;
+  overflow: hidden;
+}
+
+.bootFill {
+  height: 100%;
+  background: var(--blue);
+  transform-origin: left;
+  animation: bootfill 0.7s steps(14) forwards;
+}
+
+@keyframes bootfill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ================= MOBILE: launcher + full-bleed stack ================= */
+
+@media (max-width: 720px) {
+  .icons {
+    top: 18px;
+    left: 12px;
+    right: 12px;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: none;
+  }
+
+  .iconBtn {
+    width: auto;
+  }
+
+  .window {
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none;
+    max-height: none;
+    transform: none !important;
+    box-shadow: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+  }
+
+  .titlebar {
+    cursor: default;
+  }
+
+  .clock,
+  .wordmark span {
+    display: none;
+  }
+}
