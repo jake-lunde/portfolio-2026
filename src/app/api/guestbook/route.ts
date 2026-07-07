@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server'
 import { list, put } from '@vercel/blob'
 
 /* Guestbook ledger — one blob per entry under guestbook/ in the connected
-   public store. The store was linked with the env prefix "guestbook", so
-   the token arrives as guestbook_READ_WRITE_TOKEN (BLOB_READ_WRITE_TOKEN
-   kept as fallback). Race-free (no read-modify-write). Without a token
-   (fresh local dev) it degrades to a "ledger not connected" state. */
+   public store ("guestbook" env prefix). Auth is Vercel OIDC + store id
+   (guestbook_STORE_ID) — no read-write token is injected in this setup.
+   Race-free (no read-modify-write). Without a store id (fresh local dev)
+   it degrades to a "ledger not connected" state. */
 
 export type GuestbookEntry = {
   name: string
@@ -17,10 +17,9 @@ const MAX_NAME = 40
 const MAX_NOTE = 280
 const MAX_ENTRIES = 200
 
-const blobToken = () =>
-  process.env.BLOB_READ_WRITE_TOKEN ?? process.env.guestbook_READ_WRITE_TOKEN
+const storeId = () => process.env.guestbook_STORE_ID ?? process.env.BLOB_STORE_ID
 
-const hasStore = () => Boolean(blobToken())
+const hasStore = () => Boolean(storeId() ?? process.env.BLOB_READ_WRITE_TOKEN)
 
 // per-instance cooldown — best-effort, resets on cold start
 const lastPost = new Map<string, number>()
@@ -28,13 +27,9 @@ const COOLDOWN_MS = 5000
 
 export async function GET() {
   if (!hasStore()) {
-    // temporary diagnostic: which storage-ish env KEYS exist (names only)
-    const envKeys = Object.keys(process.env).filter((k) =>
-      /blob|guestbook|read_write|store/i.test(k)
-    )
-    return NextResponse.json({ entries: [], durable: false, envKeys })
+    return NextResponse.json({ entries: [], durable: false })
   }
-  const { blobs } = await list({ prefix: 'guestbook/', limit: 1000, token: blobToken() })
+  const { blobs } = await list({ prefix: 'guestbook/', limit: 1000, storeId: storeId() })
   const recent = blobs
     .sort((a, b) => +new Date(b.uploadedAt) - +new Date(a.uploadedAt))
     .slice(0, MAX_ENTRIES)
@@ -93,7 +88,7 @@ export async function POST(req: Request) {
   await put(
     `guestbook/${now}-${Math.random().toString(36).slice(2, 8)}.json`,
     JSON.stringify(entry),
-    { access: 'public', addRandomSuffix: false, contentType: 'application/json', token: blobToken() }
+    { access: 'public', addRandomSuffix: false, contentType: 'application/json', storeId: storeId() }
   )
   return NextResponse.json({ entry })
 }
