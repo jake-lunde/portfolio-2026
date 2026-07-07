@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { list, put } from '@vercel/blob'
 
-/* Guestbook ledger — one public blob per entry under guestbook/.
+/* Guestbook ledger — one private blob per entry under guestbook/ (the
+   connected store is private; reads go through signed downloadUrls).
    Race-free (no read-modify-write), plenty for a personal site's volume.
    Without BLOB_READ_WRITE_TOKEN (e.g. fresh local dev) it degrades to a
    read-only "ledger not connected" state the UI can render honestly. */
@@ -34,7 +35,8 @@ export async function GET() {
     await Promise.all(
       recent.map(async (b) => {
         try {
-          const res = await fetch(b.url, { cache: 'no-store' })
+          // private store: downloadUrl is signed; url alone won't serve
+          const res = await fetch(b.downloadUrl ?? b.url, { cache: 'no-store' })
           return (await res.json()) as GuestbookEntry
         } catch {
           return null
@@ -85,7 +87,7 @@ export async function POST(req: Request) {
   await put(
     `guestbook/${now}-${Math.random().toString(36).slice(2, 8)}.json`,
     JSON.stringify(entry),
-    { access: 'public', addRandomSuffix: false, contentType: 'application/json' }
+    { access: 'private', addRandomSuffix: false, contentType: 'application/json' }
   )
   return NextResponse.json({ entry })
 }
