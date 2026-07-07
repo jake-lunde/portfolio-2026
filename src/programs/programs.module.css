@@ -169,6 +169,54 @@
   letter-spacing: 0.05em;
 }
 
+.setCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 16px;
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 4px;
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+}
+
+.swatch[aria-pressed='true'] {
+  border-color: var(--blue);
+}
+
+.swatch[aria-pressed='true'] .swatchName {
+  color: var(--blue);
+}
+
+.swatchTile {
+  display: block;
+  width: 100%;
+  height: 30px;
+  opacity: 0.5;
+  border: 1px solid var(--line);
+}
+
+.swatchName {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
 .segmented {
   display: flex;
   border: 1.5px solid var(--ink);

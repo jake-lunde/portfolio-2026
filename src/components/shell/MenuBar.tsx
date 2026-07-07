@@ -42,7 +42,7 @@ export function MenuBar() {
     <header className={styles.menubar}>
       <div className={styles.wordmark}>
         LUNDE&nbsp;OS
-        <span aria-hidden="true">v0.1 · 1984年アメリカ製</span>
+        <span aria-hidden="true">v0.2 · 1992年アメリカ製</span>
       </div>
       <div className={styles.menuRight}>
         <button

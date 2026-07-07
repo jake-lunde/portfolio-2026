@@ -10,7 +10,7 @@ A custom-coded portfolio for **Jake Lunde**, a principal-level product designer 
 
 **The concept has evolved.** This is no longer a linear "scroll through case studies" site. It is a **retro desktop operating system you explore** — a small, beautiful, fictional OS where each part of the portfolio is a *program* you open in a *window*. Think **[poolsuite.net](https://poolsuite.net)** for the interaction model (desktop, icons, windowed apps, a persistent vibe), fused with the **print-archive aesthetic** of the references in §2 (duotone government reports, CRT terminals, redacted dossiers, bold foreign-language type).
 
-**Tone:** simple, concise, beautiful, experimental, a little playful. Restrained but cutting-edge. It should feel like operating a well-made machine from a parallel 1984 that somehow runs on modern web tech. Never a template. Never a deck. **Scale and simplicity above all** — one clear thing at a time, generous space, nothing crowded.
+**Tone:** simple, concise, beautiful, experimental, a little playful. Restrained but cutting-edge. It should feel like operating a well-made machine from a parallel 1992 that somehow runs on modern web tech. Never a template. Never a deck. **Scale and simplicity above all** — one clear thing at a time, generous space, nothing crowded.
 
 **Non-negotiables**
 - Every interaction is intentional, fast, and tactile. No jank, no gratuitous animation.
@@ -38,7 +38,7 @@ A **desktop environment**. On load: a textured desktop, a top **menu bar** (syst
 
 Treat this list as a starting set, not a spec to complete in one pass. **`Projects` (with Invest) + `README` + the desktop shell + light/dark are the v1 core.** Everything else is scaffolded and filled in over time.
 
-**Ambient foreign type.** Subtle, overlapping foreign-language characters (CJK especially — see the Doppler and Bell Atlantic refs) as a decorative texture layer: low-opacity, oversized, partially behind windows, occasionally as window labels/version strings (`1984年アメリカ製`). It's a *vibe*, never content. Always `aria-hidden`, never conveying meaning.
+**Desktop wallpaper patterns (revised 2026-07-07 — replaced the oversized ambient CJK glyphs, which read as over-used).** The desktop texture layer is a user-selectable tiled **pattern wallpaper** in the spirit of classic Mac OS desktop patterns crossed with the print refs (fisheries guilloché waves, De School grid, halftone specks). Theme-aware (ink-on-paper both modes, low opacity), picked in Settings, persisted. Adding a pattern = one SVG tile + one registry entry. Foreign type survives only in small accents (version strings like `1992年アメリカ製`, stamps) — always `aria-hidden`, never content.
 
 ---
 
@@ -120,7 +120,7 @@ The identity is **"a retro OS built out of old printed technical documents."** T
 
 ## 5. Desktop & window chrome
 
-- **Menu bar (top):** system wordmark (invent a name — e.g. `LUNDE OS` / `JL-1984`), live clock, light/dark toggle, sound toggle. Classic-Mac restraint.
+- **Menu bar (top):** system wordmark (`LUNDE OS`, version string `1992年アメリカ製`), live clock, light/dark toggle, sound toggle. Classic-Mac restraint.
 - **Desktop:** textured field; program icons (and/or a dock). Ambient foreign glyphs behind.
 - **Window:** titled bar (name + mono meta like `SPEC-01`), close/zoom controls, framed body with the archival/CRT texture appropriate to the program. Windows open with tactile spring motion (§9), can stack/focus (blue active chrome), and are responsive — on mobile they go full-bleed and become a stack/tab model rather than free-floating.
 - **Boot/empty states:** lean into the conceit — a brief boot line, a "CALLING…" progress bar (Bell Atlantic ref), a stamped "UNDER CONSTRUCTION" plate for stubs.

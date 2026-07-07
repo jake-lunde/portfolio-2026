@@ -50,20 +50,31 @@ const flights = rows
   }))
   .sort((a, b) => a.date.localeCompare(b.date))
 
-const iatas = [...new Set(flights.flatMap((f) => [f.from, f.to]))]
-console.log(`${flights.length} flights · airports: ${iatas.join(' ')}`)
+let iatas = [...new Set(flights.flatMap((f) => [f.from, f.to]))]
 
-// airport coords from OpenFlights
+// airport coords + country from OpenFlights
 const dat = await (await fetch(
   'https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat'
 )).text()
 const coords = {}
 for (const row of parseCSV(dat)) {
   const iata = row[4]
-  if (iatas.includes(iata)) coords[iata] = { lat: +row[6], lon: +row[7] }
+  if (iatas.includes(iata)) coords[iata] = { lat: +row[6], lon: +row[7], country: row[3] }
 }
 const missing = iatas.filter((i) => !coords[i])
 if (missing.length) console.warn('MISSING COORDS:', missing)
+
+// domestic log only — drop flights touching a non-US airport
+const isUS = (i) => coords[i]?.country === 'United States'
+const dropped = flights.filter((f) => !isUS(f.from) || !isUS(f.to))
+if (dropped.length) {
+  console.log(`dropping ${dropped.length} international: ${dropped.map((f) => `${f.from}→${f.to}`).join(' ')}`)
+}
+const kept = flights.filter((f) => isUS(f.from) && isUS(f.to))
+flights.length = 0
+flights.push(...kept)
+iatas = [...new Set(flights.flatMap((f) => [f.from, f.to]))]
+console.log(`${flights.length} flights · airports: ${iatas.join(' ')}`)
 
 // US states outline (contiguous; keep AK/HI only if flown to)
 const gj = await (await fetch(

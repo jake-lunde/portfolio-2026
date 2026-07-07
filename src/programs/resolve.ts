@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import { getProgram, PROGRAMS } from '@/programs/registry'
 import { CASES, getCase } from '@/programs/projects/cases'
+import { VIZ, getViz } from '@/programs/visualizers/vizRegistry'
 
 export type ResolvedWindow = {
   id: string
@@ -13,9 +14,24 @@ export type ResolvedWindow = {
   path: string | null
 }
 
-/* A window id is either a program id, or `case:<slug>`. */
+/* A window id is a program id, `case:<slug>`, or `viz:<id>`. */
 
 export function resolveWindow(id: string): ResolvedWindow | null {
+  if (id.startsWith('viz:')) {
+    const v = getViz(id.slice(4))
+    if (!v?.component) return null
+    const i = VIZ.indexOf(v)
+    return {
+      id,
+      name: v.name,
+      meta: `VIZ-${v.no} · ${v.source.toUpperCase()}`,
+      chrome: 'crt',
+      component: v.component,
+      size: v.size,
+      pos: { x: 250 + i * 16, y: 48 + i * 14 },
+      path: `/visualizers/${v.id}`,
+    }
+  }
   if (id.startsWith('case:')) {
     const c = getCase(id.slice(5))
     if (!c) return null
@@ -53,6 +69,10 @@ export function windowsForPath(path: string[]): string[] {
     if (path[1] && getCase(path[1])) return ['projects', `case:${path[1]}`]
     return ['projects']
   }
+  if (path[0] === 'visualizers') {
+    if (path[1] && getViz(path[1])?.component) return ['visualizers', `viz:${path[1]}`]
+    return ['visualizers']
+  }
   const p = PROGRAMS.find((x) => x.path === `/${path.join('/')}`)
   return p ? [p.id] : ['readme']
 }
@@ -64,4 +84,5 @@ export const ALL_PATHS: string[][] = [
   ['guestbook'],
   ['visualizers'],
   ...CASES.filter((c) => c.status === 'live').map((c) => ['projects', c.slug]),
+  ...VIZ.filter((v) => v.status === 'live').map((v) => ['visualizers', v.id]),
 ]

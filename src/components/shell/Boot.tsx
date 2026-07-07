@@ -34,10 +34,10 @@ export function Boot() {
         >
           <div className={styles.bootInner}>
             <p className={styles.bootLine}>
-              LUNDE OS <em>v0.1</em>
+              LUNDE OS <em>v0.2</em>
             </p>
             <p className={styles.bootLine} aria-hidden="true">
-              1984年アメリカ製 · MEM OK · CALLING…
+              1992年アメリカ製 · MEM OK · CALLING…
             </p>
             <div className={styles.bootBar}>
               <div className={styles.bootFill} />

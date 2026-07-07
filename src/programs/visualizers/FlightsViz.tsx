@@ -98,9 +98,9 @@ export function FlightsViz() {
           <span className={styles.hudV}>{cur ? `${cur.airline} ${cur.no}` : thisYear}</span>
         </div>
         <div className={styles.hudCell}>
-          <span className={styles.hudK}>{cur ? 'Aircraft' : 'Farthest pin'}</span>
+          <span className={styles.hudK}>{cur ? 'Aircraft' : 'Airlines'}</span>
           <span className={styles.hudV} style={{ fontSize: cur ? 12 : undefined }}>
-            {cur ? cur.aircraft || '—' : 'PMI'}
+            {cur ? cur.aircraft || '—' : new Set(FLIGHTS.map((f) => f.airline)).size}
           </span>
         </div>
       </div>
