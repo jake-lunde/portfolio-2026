@@ -14,10 +14,11 @@
 }
 
 .aboutName {
-  font-size: clamp(30px, 6vw, 40px);
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  line-height: 1;
+  font-family: var(--display);
+  font-size: clamp(28px, 5.5vw, 38px);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.05;
   margin: 0 0 18px;
 }
 
@@ -98,9 +99,10 @@
 }
 
 .projName {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.015em;
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0;
 }
 
 .projOrg,

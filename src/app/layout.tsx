@@ -1,16 +1,26 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, JetBrains_Mono, Noto_Sans_JP } from 'next/font/google'
+import { Geist, Geist_Mono, Noto_Sans_JP } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 
-const sans = Inter({
+const sans = Geist({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
 })
 
-const mono = JetBrains_Mono({
+const mono = Geist_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
+  display: 'swap',
+})
+
+/* Geist Pixel isn't in this Next version's google-font data yet; self-hosted
+   (OFL) from fonts/GeistPixel-latin.woff2 */
+const pixel = localFont({
+  src: './fonts/GeistPixel-latin.woff2',
+  weight: '400',
+  variable: '--font-pixel',
   display: 'swap',
 })
 
@@ -46,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${sans.variable} ${mono.variable} ${cjk.variable}`}
+      className={`${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />

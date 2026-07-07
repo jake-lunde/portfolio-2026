@@ -112,8 +112,7 @@ The identity is **"a retro OS built out of old printed technical documents."** T
 
 ## 4. Typography
 
-- **Sans (display + UI):** clean neo-grotesk in the family of the refs (ABC Diatype / Neue Haas Grotesk / Söhne; Inter as free fallback). 800 display, 600 subheads, 400 body. Display tight (−.02 to −.03em), near-flush-left. Body ~17–18px, line-height ~1.6, measure ~64ch.
-- **Mono (technical):** labels, captions, window chrome, figure numbers, metadata, the "terminal" surfaces (JetBrains Mono / Söhne Mono / SF Mono).
+- **Type system (decided 2026-07-07): the Geist family.** **Geist Pixel** for display/headings (single 400 weight, letter-spacing 0 — never negative-track a pixel font; it has no CJK glyphs, so CJK never sets in it). **Geist** for body (~17–18px, line-height ~1.6, measure ~64ch). **Geist Mono** for all mono surfaces (labels, captions, window chrome, figure numbers, metadata, terminals). Geist + Geist Mono via `next/font/google`; Geist Pixel self-hosted (`src/app/fonts/`, OFL) until next/font's data includes it.
 - **CJK / foreign display:** a bold sans CJK face for the big decorative frequency-poster moments and ambient glyph texture. Decorative only, `aria-hidden`.
 - Self-host; preload; `font-display:swap`; no CLS.
 

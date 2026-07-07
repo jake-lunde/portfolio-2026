@@ -61,5 +61,7 @@ export const ALL_PATHS: string[][] = [
   [],
   ['readme'],
   ['projects'],
+  ['guestbook'],
+  ['visualizers'],
   ...CASES.filter((c) => c.status === 'live').map((c) => ['projects', c.slug]),
 ]

@@ -27,6 +27,8 @@
   --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   --mono: var(--font-mono), 'SF Mono', ui-monospace, Menlo, monospace;
   --cjk: var(--font-cjk), sans-serif;
+  /* display: Geist Pixel — single weight, no negative tracking (pixels shear) */
+  --display: var(--font-pixel), var(--font-mono), monospace;
 
   --menubar-h: 34px;
 }

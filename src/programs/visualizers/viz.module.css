@@ -1,0 +1,133 @@
+/* Visualizers live on the always-dark CRT plate, so the system blue is
+   pinned to its luminous variant regardless of theme. */
+.viz {
+  --blue: #5c7cff;
+  padding: 16px 18px 22px;
+  color: #e7e1d2;
+}
+
+.vizNav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.vizChip {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border: 1px solid rgba(231, 225, 210, 0.3);
+  color: rgba(231, 225, 210, 0.75);
+}
+
+.vizChip[aria-pressed='true'] {
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
+.vizChip:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ---- ride ---- */
+
+.rideHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.rideTitle {
+  font-family: var(--display);
+  font-size: 18px;
+  color: #e7e1d2;
+  margin: 0;
+}
+
+.rideSub {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(231, 225, 210, 0.55);
+}
+
+.hud {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: rgba(231, 225, 210, 0.25);
+  border: 1px solid rgba(231, 225, 210, 0.25);
+  margin: 10px 0 14px;
+}
+
+.hudCell {
+  background: var(--plate);
+  padding: 8px 10px;
+}
+
+.hudK {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(231, 225, 210, 0.5);
+  display: block;
+}
+
+.hudV {
+  font-family: var(--display);
+  font-size: 17px;
+  color: #e7e1d2;
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hudV em {
+  font-style: normal;
+  color: var(--pink);
+}
+
+.panel {
+  position: relative;
+  border: 1px solid rgba(231, 225, 210, 0.25);
+  margin-bottom: 10px;
+}
+
+.panelLabel {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(231, 225, 210, 0.5);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.panel svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.scrubHint {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(231, 225, 210, 0.45);
+  text-align: center;
+  margin: 2px 0 0;
+}
