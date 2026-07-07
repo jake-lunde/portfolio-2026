@@ -134,6 +134,122 @@
   cursor: grabbing;
 }
 
+/* ---- scrobbles ---- */
+
+.scrobCols {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+@media (max-width: 560px) {
+  .scrobCols {
+    grid-template-columns: 1fr;
+  }
+}
+
+.artistList {
+  border: 1px solid rgba(231, 225, 210, 0.25);
+  padding: 6px 10px;
+}
+
+.artistRow {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1.4fr) minmax(0, 0.9fr) 1fr 34px;
+  gap: 8px;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(231, 225, 210, 0.12);
+  cursor: default;
+}
+
+.artistRow:last-child {
+  border-bottom: none;
+}
+
+.artistRow[data-active] .artistName {
+  color: var(--pink);
+}
+
+.artistRank {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(231, 225, 210, 0.5);
+}
+
+.artistName {
+  font-family: var(--display);
+  font-size: 12.5px;
+  color: #e7e1d2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artistGenre {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(231, 225, 210, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artistBarWrap {
+  align-self: center;
+  height: 4px;
+  background: rgba(231, 225, 210, 0.12);
+}
+
+.artistBar {
+  display: block;
+  height: 100%;
+  background: var(--pink);
+  opacity: 0.85;
+}
+
+.artistPlays {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(231, 225, 210, 0.6);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.artPanel {
+  border: 1px solid rgba(231, 225, 210, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  min-height: 180px;
+  text-align: center;
+}
+
+.artImg {
+  width: 132px;
+  height: 132px;
+  object-fit: cover;
+  image-rendering: pixelated;
+  filter: grayscale(0.85) contrast(1.05);
+  border: 1px solid rgba(231, 225, 210, 0.3);
+}
+
+.artCap,
+.artIdle {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(231, 225, 210, 0.55);
+  line-height: 1.7;
+}
+
 .scrubHint {
   font-family: var(--mono);
   font-size: 9px;

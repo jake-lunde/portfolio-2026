@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { RideViz } from './RideViz'
 import { FlowerViz } from './FlowerViz'
+import { ScrobblesViz } from './ScrobblesViz'
 import { sfx } from '@/lib/sound'
 import styles from './viz.module.css'
 
@@ -12,9 +13,10 @@ import styles from './viz.module.css'
 const LIVE = [
   { id: 'ride', label: 'Ride', component: RideViz },
   { id: 'flowers', label: 'Flowers', component: FlowerViz },
+  { id: 'scrobbles', label: 'Scrobbles', component: ScrobblesViz },
 ] as const
 
-const QUEUE = ['Flights', 'Slopes', 'Scrobbles', 'Louie', 'Daily tracker']
+const QUEUE = ['Flights', 'Slopes', 'Louie', 'Daily tracker']
 
 export default function Visualizers() {
   const [active, setActive] = useState<(typeof LIVE)[number]['id']>('ride')
