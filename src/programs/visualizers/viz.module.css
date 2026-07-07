@@ -250,6 +250,29 @@
   line-height: 1.7;
 }
 
+/* ---- slopes ---- */
+
+.runList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.runChip {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  padding: 3px 7px;
+  border: 1px solid rgba(231, 225, 210, 0.25);
+  color: rgba(231, 225, 210, 0.7);
+}
+
+.runChip[data-active] {
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
 .scrubHint {
   font-family: var(--mono);
   font-size: 9px;
