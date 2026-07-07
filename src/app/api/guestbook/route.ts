@@ -28,7 +28,11 @@ const COOLDOWN_MS = 5000
 
 export async function GET() {
   if (!hasStore()) {
-    return NextResponse.json({ entries: [], durable: false })
+    // temporary diagnostic: which storage-ish env KEYS exist (names only)
+    const envKeys = Object.keys(process.env).filter((k) =>
+      /blob|guestbook|read_write|store/i.test(k)
+    )
+    return NextResponse.json({ entries: [], durable: false, envKeys })
   }
   const { blobs } = await list({ prefix: 'guestbook/', limit: 1000, token: blobToken() })
   const recent = blobs
