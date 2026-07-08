@@ -28,8 +28,17 @@ die-cuts) · Coloring (4 tattoo pages, artist-credited) · About This Machine
 **Shell:** wallpaper system (7 patterns) · classic-Mac scrollbars · Geist/
 Geist Mono/Geist Pixel type system · LOU.SYS screensaver (5-min idle; pixel
 Lou over the perspective checkerboard; triple-click the menu-bar clock to
-summon) · Now-Playing desktop widget (polls /api/now-playing) · conceit year
-1992 · v0.2.
+summon) · Now-Playing desktop widget (polls /api/now-playing) · **resizable
+windows** (bottom-right ribbed grip; size persisted per-window in the store
+for the session; `store/windows.ts` `sizes` map) · conceit year 1992 · v0.2.
+
+**Windows now fit their content on open** (Opus 4.8, 2026-07-08): default
+sizes in registry.tsx/vizRegistry.tsx were re-fitted from measured overflow.
+Method if you add/change a window: open it in preview at 1280×820, measure
+`windowBody.scrollHeight - clientHeight`, add that + ~8px buffer to the
+declared height, keep ≤ ~730 so it clears the `max-height: calc(100%-24px)`
+clamp on an 800px laptop. Long-form windows (case study, About This Machine
+essay) intentionally still scroll.
 
 **Known debts:** first-load JS is ~242 kB (was 155) — perf pass overdue;
 Photo Booth's live-camera path has never been human-verified end to end;
@@ -94,11 +103,9 @@ the snake coloring page is the weakest drawing (Jake may ask for a redraw).
 ## 5. THE BACKLOG (updated 2026-07-08 from Jake's doc — his freshest edits first)
 
 ### Jake's current emphasis (newly added/edited by him in the doc)
-1. **Window resizing** — add resize affordance (corner grip, classic-Mac
-   style) to `Window.tsx`. Persist per-window size in the session. He listed
-   this under "Stuff for Jake" but it's an engineering task — take it.
-2. **Windows fit their content** (his standing gripe): audit every program/
-   viz window height at 1280×800; no internal scrollbar on open. Pairs with #1.
+1. ~~**Window resizing**~~ ✅ SHIPPED 2026-07-08 (Opus 4.8).
+2. ~~**Windows fit their content**~~ ✅ SHIPPED 2026-07-08 — defaults re-fitted;
+   resize handles anything left. See §1 method note.
 3. **Daily tracker → ambient desktop widget.** His words: "run in a lil
    container all day on the desktop in an unobtrusive way. Remove from
    visualizers folder." Pattern exists: NowPlayingWidget. Add: animate-in,
@@ -153,6 +160,22 @@ the snake coloring page is the weakest drawing (Jake may ask for a redraw).
 21. **Screen time / silly stats** — needs a joke angle from Jake.
 22. **Invest updates** — multi-company Moat (hand-write 3–4 datasets),
     haptics extended to Moat taps + viz milestones (navigator.vibrate).
+
+### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
+- **Gallery Wall** — "record of what people are doing on the site." Pairs with
+  "more logging when users use my site." A privacy-respecting activity feed
+  (window opens, viz interactions, guestbook signs) rendered as a live wall.
+  Needs a logging endpoint + store decision (Blob append? KV?). Ask Jake how
+  public/identifying he wants it.
+- **Synth Program: 16 bars** — a step sequencer ("save tunes for others to
+  listen to"). WebAudio (reuse studioPlayer patterns); persistence = Blob.
+  A real project; scope with Jake.
+- **Photo Booth: pin last photo to home** — the most recent booth capture
+  shows as a desktop artifact. Needs Blob + the same moderation call as the
+  scrapbook (public storage of webcam images).
+- **Jigsaw: leaderboard timer + completion celebration** — time-to-solve,
+  localStorage best; confetti/stamp burst on solve. Celebration is quick and
+  unblocked; leaderboard-across-users needs a store.
 
 ### From-Claude ideas Jake adopted into his doc (still open)
 23. **Trash contents** — the killed-ideas archive ("Grows with You" et al.
