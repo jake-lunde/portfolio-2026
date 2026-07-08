@@ -10,6 +10,8 @@ export type IconName =
   | 'camera'
   | 'puzzle'
   | 'brush'
+  | 'chip'
+  | 'trash'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -88,6 +90,20 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M25 5l-11 11 2 2L27 7z" />
       <path d="M14 16c-3 0-4 2-4 4 0 3-2 4-4 4 6 3 11 0 10-6z" />
+    </>
+  ),
+  chip: (
+    <>
+      <rect x="9" y="9" width="14" height="14" />
+      <rect x="13" y="13" width="6" height="6" />
+      <path d="M12 9V4M16 9V4M20 9V4M12 28v-5M16 28v-5M20 28v-5M9 12H4M9 16H4M9 20H4M28 12h-5M28 16h-5M28 20h-5" />
+    </>
+  ),
+  trash: (
+    <>
+      <path d="M9 11h14l-1.5 17h-11z" />
+      <path d="M7 8h18M13 8V5h6v3" />
+      <path d="M13 14v10M19 14v10" />
     </>
   ),
 }

@@ -2,38 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { sfx } from '@/lib/sound'
+import { PAGES } from './pages'
 import styles from './paint.module.css'
 
 /* Coloring book — MS Paint by way of the print archive. A scanline flood
    fill that respects the line art as barriers, a brush, an undo stack,
-   and a limited archival palette. The line art is a placeholder page of
-   OS motifs; Jake's tattoo SVGs drop into LINE_ART when they exist. */
+   and a limited archival palette. Pages are Jake's tattoos, redrawn as
+   flash-style line art (see pages.ts — each credits the artist). */
 
 const W = 460
 const H = 480
-
-/* placeholder page: flower, star, ringed planet — thick closed outlines */
-const LINE_ART = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <rect width="${W}" height="${H}" fill="white"/>
-  <g fill="white" stroke="black" stroke-width="5" stroke-linejoin="round">
-    <rect x="14" y="14" width="${W - 28}" height="${H - 28}"/>
-    <!-- flower -->
-    <ellipse cx="150" cy="150" rx="34" ry="62"/>
-    <ellipse cx="150" cy="150" rx="34" ry="62" transform="rotate(60 150 150)"/>
-    <ellipse cx="150" cy="150" rx="34" ry="62" transform="rotate(120 150 150)"/>
-    <circle cx="150" cy="150" r="30"/>
-    <path d="M150 212 L150 330"/>
-    <path d="M150 260 C 110 250 95 225 92 205 C 125 210 145 230 150 260 Z"/>
-    <path d="M150 290 C 190 280 205 255 208 235 C 175 240 155 260 150 290 Z"/>
-    <!-- star -->
-    <path d="M355 90 L367 125 L404 125 L374 147 L385 182 L355 160 L325 182 L336 147 L306 125 L343 125 Z"/>
-    <!-- ringed planet -->
-    <circle cx="350" cy="330" r="52"/>
-    <path d="M270 355 C 300 385 400 385 430 355 C 400 325 300 325 270 355 Z" fill="none"/>
-    <!-- ground -->
-    <path d="M14 420 Q 120 400 230 420 T 446 420 L446 ${H - 14} L14 ${H - 14} Z"/>
-  </g>
-</svg>`
 
 const PALETTE = [
   { name: 'blue', hex: '#2036C8' },
@@ -112,6 +90,7 @@ export default function Paint() {
   const [tool, setTool] = useState<Tool>('fill')
   const [color, setColor] = useState(PALETTE[0].hex)
   const [ready, setReady] = useState(false)
+  const [page, setPage] = useState(0)
 
   const loadArt = () => {
     const canvas = canvasRef.current
@@ -125,10 +104,11 @@ export default function Paint() {
       undoRef.current = []
       setReady(true)
     }
-    img.src = `data:image/svg+xml,${encodeURIComponent(LINE_ART)}`
+    img.src = `data:image/svg+xml,${encodeURIComponent(PAGES[page].svg)}`
   }
 
-  useEffect(loadArt, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(loadArt, [page])
 
   const pushUndo = () => {
     const g = canvasRef.current!.getContext('2d', { willReadFrequently: true })!
@@ -213,6 +193,22 @@ export default function Paint() {
         </div>
       </div>
 
+      <div className={styles.pages} role="group" aria-label="Coloring page">
+        {PAGES.map((p, i) => (
+          <button
+            key={p.id}
+            className={styles.pageChip}
+            aria-pressed={page === i}
+            onClick={() => {
+              sfx.tap()
+              setPage(i)
+            }}
+          >
+            {p.title.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
       <div className={styles.palette} role="group" aria-label="Color">
         {PALETTE.map((c) => (
           <button
@@ -238,9 +234,9 @@ export default function Paint() {
         onPointerMove={onMove}
         onPointerUp={onUp}
         role="img"
-        aria-label="Coloring page — flower, star, and ringed planet line art. Click a region to fill it with the selected color."
+        aria-label={`Coloring page: ${PAGES[page].title} tattoo line art. Click a region to fill it with the selected color.`}
       />
-      <p className={styles.note}>PAGE 01 · PLACEHOLDER PLATES — TATTOO PAGES COMING</p>
+      <p className={styles.note}>PAGE {String(page + 1).padStart(2, '0')} · {PAGES[page].credit} · FROM JAKE'S ACTUAL ARM</p>
     </div>
   )
 }

@@ -85,3 +85,22 @@
   color: var(--ink-soft);
   margin: 0;
 }
+.pages {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.pageChip {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  padding: 4px 9px;
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.pageChip[aria-pressed="true"] {
+  border-color: var(--pink);
+  color: var(--ink);
+}

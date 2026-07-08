@@ -1,0 +1,88 @@
+.machine {
+  padding: 24px 26px 32px;
+}
+
+.eyebrow {
+  font-family: var(--display);
+  font-size: 18px;
+  margin: 0 0 16px;
+}
+
+.specs {
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  margin-bottom: 22px;
+}
+
+[data-theme='dark'] .specs {
+  border-color: var(--line);
+}
+
+.specRow {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.specRow:last-child {
+  border-bottom: none;
+}
+
+.specK {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-top: 2px;
+}
+
+.specV {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+}
+
+.essayNote {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  border: 1px dashed var(--line);
+  padding: 10px 12px;
+  margin: 0 0 20px;
+}
+
+.essay h2 {
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+  margin: 22px 0 8px;
+  color: var(--blue);
+}
+
+.essay p {
+  font-size: 14.5px;
+  line-height: 1.65;
+  margin: 0 0 12px;
+  max-width: 58ch;
+}
+
+.sig {
+  font-family: var(--display);
+  font-size: 14px;
+  margin-top: 26px;
+}
+
+.sig span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+  margin-top: 5px;
+}
