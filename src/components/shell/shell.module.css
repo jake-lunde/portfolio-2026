@@ -314,6 +314,43 @@
   color: var(--plate-ink);
 }
 
+/* classic-Mac resize grip — bottom-right, ribbed corner */
+.resizeGrip {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  z-index: 4;
+  cursor: nwse-resize;
+  touch-action: none;
+  background-color: var(--paper);
+  border-top: 1.5px solid var(--ink);
+  border-left: 1.5px solid var(--ink);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--ink) 0,
+    var(--ink) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+[data-theme='dark'] .resizeGrip {
+  border-color: var(--line);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--ink-soft) 0,
+    var(--ink-soft) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.windowActive .resizeGrip {
+  border-color: var(--blue);
+}
+
 /* ================= BOOT ================= */
 
 .boot {
@@ -398,6 +435,10 @@
 
   .titlebar {
     cursor: default;
+  }
+
+  .resizeGrip {
+    display: none;
   }
 
   .clock,

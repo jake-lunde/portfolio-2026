@@ -36,7 +36,7 @@ export const VIZ: VizDef[] = [
     source: 'Strava',
     status: 'live',
     component: wrap(() => import('./RideViz').then((m) => m.RideViz)),
-    size: { w: 720, h: 560 },
+    size: { w: 720, h: 716 },
   },
   {
     id: 'flowers',
@@ -54,7 +54,7 @@ export const VIZ: VizDef[] = [
     source: 'Last.fm',
     status: 'live',
     component: wrap(() => import('./ScrobblesViz').then((m) => m.ScrobblesViz)),
-    size: { w: 720, h: 600 },
+    size: { w: 720, h: 664 },
   },
   {
     id: 'flights',
@@ -63,7 +63,7 @@ export const VIZ: VizDef[] = [
     source: 'Flighty',
     status: 'live',
     component: wrap(() => import('./FlightsViz').then((m) => m.FlightsViz)),
-    size: { w: 720, h: 620 },
+    size: { w: 720, h: 664 },
   },
   {
     id: 'slopes',
@@ -72,7 +72,7 @@ export const VIZ: VizDef[] = [
     source: 'Slopes',
     status: 'live',
     component: wrap(() => import('./SlopesViz').then((m) => m.SlopesViz)),
-    size: { w: 720, h: 640 },
+    size: { w: 720, h: 662 },
   },
   {
     id: 'daily',

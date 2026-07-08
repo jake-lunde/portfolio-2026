@@ -5,13 +5,17 @@ export type OpenWindow = {
   z: number
 }
 
+export type Size = { w: number; h: number }
+
 type WindowsState = {
   windows: OpenWindow[]
   zTop: number
   focused: string | null
+  sizes: Record<string, Size> // per-window resize, persisted for the session
   open: (id: string) => void
   close: (id: string) => void
   focus: (id: string) => void
+  setSize: (id: string, size: Size) => void
   setInitial: (ids: string[]) => void
 }
 
@@ -19,6 +23,7 @@ export const useWindows = create<WindowsState>((set, get) => ({
   windows: [],
   zTop: 10,
   focused: null,
+  sizes: {},
 
   setInitial: (ids) =>
     set({
@@ -62,4 +67,6 @@ export const useWindows = create<WindowsState>((set, get) => ({
       focused: id,
     })
   },
+
+  setSize: (id, size) => set((s) => ({ sizes: { ...s.sizes, [id]: size } })),
 }))
