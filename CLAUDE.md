@@ -1,6 +1,7 @@
 # Portfolio Site — Build Brief
 
 > Single source of truth for what we're building and how it should look, feel, and perform. Claude Code reads this every session. When in doubt, match the references and honor the guardrails (§14).
+> **Also read `HANDOFF.md`** — the living operating manual + prioritized backlog written at the v0.2 handoff (2026-07-07). This file is design law; that file is process + state.
 
 ---
 
