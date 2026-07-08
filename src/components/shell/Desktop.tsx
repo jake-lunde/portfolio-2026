@@ -8,6 +8,7 @@ import { BASE } from '@/lib/base'
 import { MenuBar } from './MenuBar'
 import { DesktopIcons } from './DesktopIcons'
 import { Wallpaper } from './Wallpaper'
+import { NowPlayingWidget } from './NowPlayingWidget'
 import { Window } from './Window'
 import { Boot } from './Boot'
 import styles from './shell.module.css'
@@ -50,6 +51,7 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
       <MenuBar />
       <main ref={desktopRef} className={styles.desktop}>
         <Wallpaper />
+        <NowPlayingWidget />
         <DesktopIcons />
         <AnimatePresence>
           {windows.map((w) => {

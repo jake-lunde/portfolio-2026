@@ -135,6 +135,64 @@
   }
 }
 
+/* ---------- Now Playing window ---------- */
+
+.npLoading {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: rgba(231, 225, 210, 0.6);
+  text-align: center;
+  padding-top: 40px;
+}
+
+.npWindow {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #e7e1d2;
+}
+
+.npWindowArt {
+  width: min(240px, 70%);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1.5px solid rgba(231, 225, 210, 0.4);
+}
+
+.npWindowLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pink);
+  margin: 16px 0 4px;
+}
+
+.npWindowTitle {
+  font-family: var(--display);
+  font-size: 19px;
+  font-weight: 400;
+  margin: 0 0 6px;
+}
+
+.npWindowArtist {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: rgba(231, 225, 210, 0.65);
+  margin: 0 0 16px;
+}
+
+.npWindowLink {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  color: #5c7cff;
+}
+
 /* ---------- Settings ---------- */
 
 .settings {
