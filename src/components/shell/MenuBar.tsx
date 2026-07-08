@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSettings } from '@/store/settings'
 import styles from './shell.module.css'
 
 function Clock() {
   const [time, setTime] = useState<string | null>(null)
+  const clicks = useRef<number[]>([])
 
   useEffect(() => {
     const tick = () =>
@@ -22,8 +23,18 @@ function Clock() {
   }, [])
 
   // SSR renders a blank slot; no CLS because width is reserved
+  // easter egg: triple-click summons LOU.SYS
+  const onClick = () => {
+    const now = Date.now()
+    clicks.current = [...clicks.current.filter((t) => now - t < 900), now]
+    if (clicks.current.length >= 3) {
+      clicks.current = []
+      window.dispatchEvent(new Event('lunde:screensaver'))
+    }
+  }
+
   return (
-    <span className={styles.clock} aria-hidden="true">
+    <span className={styles.clock} aria-hidden="true" onClick={onClick}>
       {time ?? ''}
     </span>
   )

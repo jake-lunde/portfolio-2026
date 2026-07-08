@@ -1,0 +1,98 @@
+.saver {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  background: var(--paper);
+  padding: 12px;
+}
+
+/* classic-Mac window frame */
+.frame {
+  width: 100%;
+  height: 100%;
+  border: 1.5px solid #17150d;
+  background: #e7e1d2;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 0 0 1px rgba(231, 225, 210, 0.6);
+}
+
+.titleBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 10px;
+  border-bottom: 1.5px solid #17150d;
+  background: #e7e1d2;
+  flex: 0 0 auto;
+}
+
+.titleStripes {
+  flex: 1;
+  height: 11px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #17150d 0,
+    #17150d 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity: 0.75;
+}
+
+.titleText {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #17150d;
+  white-space: nowrap;
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: #131811;
+}
+
+.sky {
+  position: absolute;
+  inset: 0 0 46% 0;
+  background: #131811;
+}
+
+/* the hallway floor — tan/cream checker in perspective */
+.floor {
+  position: absolute;
+  left: -30%;
+  right: -30%;
+  bottom: 0;
+  height: 54%;
+  background: repeating-conic-gradient(#b5a183 0% 25%, #e7e1d2 0% 50%);
+  background-size: 140px 140px;
+  transform: perspective(520px) rotateX(52deg);
+  transform-origin: top center;
+}
+
+.lou {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+  filter: drop-shadow(3px 5px 0 rgba(19, 24, 17, 0.35));
+}
+
+.wake {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(231, 225, 210, 0.55);
+  margin: 0;
+  pointer-events: none;
+}

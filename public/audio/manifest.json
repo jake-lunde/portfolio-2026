@@ -1,4 +1,25 @@
 {
-  "_note": "Jakes tracks. Drop MP3s in this folder and list them here — Studio picks them up on next load.",
-  "tracks": []
+  "_note": "Jake's tracks. Drop MP3s in this folder and list them here \u2014 Studio picks them up on next load.",
+  "tracks": [
+    {
+      "title": "catch these fists - Wet Leg (jaique remix)",
+      "file": "/audio/catch these fists v4.mp3"
+    },
+    {
+      "title": "Crave - Paramore (jaique remix)",
+      "file": "/audio/crave.09.01.mp3"
+    },
+    {
+      "title": "Velvet Elvis - Kacey Musgraves (jaique remix)",
+      "file": "/audio/velvetElvis.mp3"
+    },
+    {
+      "title": "These Walls - Dua Lipa (jaique remix)",
+      "file": "/audio/these.walls.v3.mp3"
+    },
+    {
+      "title": "Love Me Different - Hayley Williams (jaique remix)",
+      "file": "/audio/lovemedifferent-v3.mp3"
+    }
+  ]
 }

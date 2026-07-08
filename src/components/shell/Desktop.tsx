@@ -9,6 +9,7 @@ import { MenuBar } from './MenuBar'
 import { DesktopIcons } from './DesktopIcons'
 import { Wallpaper } from './Wallpaper'
 import { NowPlayingWidget } from './NowPlayingWidget'
+import { Screensaver } from './Screensaver'
 import { Window } from './Window'
 import { Boot } from './Boot'
 import styles from './shell.module.css'
@@ -70,6 +71,7 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
         </AnimatePresence>
       </main>
       <Boot />
+      <Screensaver />
     </>
   )
 }

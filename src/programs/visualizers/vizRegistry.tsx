@@ -83,7 +83,16 @@ export const VIZ: VizDef[] = [
     component: wrap(() => import('./DailyViz').then((m) => m.DailyViz)),
     size: { w: 540, h: 460 },
   },
-  { id: 'louie', no: '07', name: 'Louie', source: 'Toy poodle', status: 'soon', size: { w: 700, h: 560 } },
+  {
+    id: 'taurus',
+    no: '07',
+    name: 'Taurus',
+    source: 'The sky',
+    status: 'live',
+    component: wrap(() => import('./TaurusViz').then((m) => m.TaurusViz)),
+    size: { w: 720, h: 660 },
+  },
+  { id: 'louie', no: '08', name: 'Louie', source: 'Toy poodle', status: 'soon', size: { w: 700, h: 560 } },
 ]
 
 export const getViz = (id: string): VizDef | undefined => VIZ.find((v) => v.id === id)
