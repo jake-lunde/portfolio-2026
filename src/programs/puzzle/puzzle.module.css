@@ -1,0 +1,93 @@
+.puzzle {
+  padding: 14px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+}
+
+.shuffle {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  padding: 4px 10px;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+}
+
+.shuffle:hover {
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+[data-theme='dark'] .shuffle {
+  border-color: var(--line);
+}
+
+.board {
+  position: relative;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  overflow: hidden;
+  touch-action: none;
+  max-width: 100%;
+}
+
+[data-theme='dark'] .board {
+  border-color: var(--line);
+}
+
+.tray {
+  position: absolute;
+  border: 1.5px dashed var(--line);
+  background: color-mix(in srgb, var(--paper-2) 55%, transparent);
+}
+
+.piece {
+  position: absolute;
+  cursor: grab;
+  touch-action: none;
+}
+
+.piece:active {
+  cursor: grabbing;
+}
+
+.piece[data-locked] {
+  cursor: default;
+}
+
+.doneOverlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.doneOverlay > * {
+  transform: rotate(-6deg) scale(1.6);
+}
+
+.hint {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0;
+}

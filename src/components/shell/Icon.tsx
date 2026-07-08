@@ -7,6 +7,9 @@ export type IconName =
   | 'book'
   | 'sliders'
   | 'rings'
+  | 'camera'
+  | 'puzzle'
+  | 'brush'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -67,6 +70,24 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <circle cx="16" cy="16" r="4" />
       <circle cx="16" cy="16" r="8" opacity=".7" />
       <circle cx="16" cy="16" r="12" opacity=".4" />
+    </>
+  ),
+  camera: (
+    <>
+      <path d="M5 10h6l2-3h6l2 3h6v15H5z" />
+      <circle cx="16" cy="17" r="5" />
+      <circle cx="16" cy="17" r="1.5" />
+    </>
+  ),
+  puzzle: (
+    <>
+      <path d="M6 10h6c-2-4 6-4 4 0h6v6c4-2 4 6 0 4v6h-6c2 4-6 4-4 0H6v-6c4 2 4-6 0-4z" />
+    </>
+  ),
+  brush: (
+    <>
+      <path d="M25 5l-11 11 2 2L27 7z" />
+      <path d="M14 16c-3 0-4 2-4 4 0 3-2 4-4 4 6 3 11 0 10-6z" />
     </>
   ),
 }
