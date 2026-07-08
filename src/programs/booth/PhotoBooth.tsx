@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Stamp } from '@/components/primitives/Stamp'
+import { pinPhoto } from '@/components/shell/PhotoWall'
 import { sfx } from '@/lib/sound'
 import styles from './booth.module.css'
 
@@ -89,6 +90,8 @@ export default function PhotoBooth() {
   const [filter, setFilter] = useState<Filter>('vhs')
   const [count, setCount] = useState<number | null>(null)
   const [shotUrl, setShotUrl] = useState<string | null>(null)
+  const [pinUrl, setPinUrl] = useState<string | null>(null)
+  const [pinned, setPinned] = useState(false)
   filterRef.current = filter
 
   // draw loop
@@ -197,11 +200,23 @@ export default function PhotoBooth() {
     g.fillStyle = '#F2A6C2'
     g.fillText('■', W - 4, H + 70)
     setShotUrl(card.toDataURL('image/png'))
+    setPinUrl(card.toDataURL('image/jpeg', 0.82)) // compact copy for the wall
+    setPinned(false)
     setPhase('shot')
+  }
+
+  const pin = () => {
+    if (!pinUrl || pinned) return
+    if (pinPhoto(pinUrl)) {
+      sfx.tap()
+      setPinned(true)
+    }
   }
 
   const back = () => {
     setShotUrl(null)
+    setPinUrl(null)
+    setPinned(false)
     setPhase('live')
   }
 
@@ -278,6 +293,9 @@ export default function PhotoBooth() {
 
           {phase === 'shot' && shotUrl && (
             <div className={styles.shotRow}>
+              <button className={styles.bigBtn} onClick={pin} disabled={pinned}>
+                {pinned ? '✓ PINNED' : '📌 PIN TO WALL'}
+              </button>
               <a className={styles.bigBtn} href={shotUrl} download={`lunde-booth-${Date.now()}.png`}>
                 ↓ DOWNLOAD
               </a>

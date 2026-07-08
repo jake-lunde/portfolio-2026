@@ -12,6 +12,12 @@ export type IconName =
   | 'brush'
   | 'chip'
   | 'trash'
+  | 'bike'
+  | 'flower'
+  | 'disc'
+  | 'plane'
+  | 'mountain'
+  | 'star'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -105,6 +111,42 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M7 8h18M13 8V5h6v3" />
       <path d="M13 14v10M19 14v10" />
     </>
+  ),
+  bike: (
+    <>
+      <circle cx="8" cy="22" r="5" />
+      <circle cx="24" cy="22" r="5" />
+      <path d="M8 22l6-10h6M14 12l5 10M20 12h4M11 12h6" />
+    </>
+  ),
+  flower: (
+    <>
+      <circle cx="16" cy="12" r="3.5" />
+      <ellipse cx="16" cy="6" rx="2.6" ry="4" />
+      <ellipse cx="16" cy="18" rx="2.6" ry="4" />
+      <ellipse cx="10" cy="12" rx="4" ry="2.6" />
+      <ellipse cx="22" cy="12" rx="4" ry="2.6" />
+      <path d="M16 18v10M16 24c-3 0-5-1-6-3" />
+    </>
+  ),
+  disc: (
+    <>
+      <circle cx="16" cy="16" r="12" />
+      <circle cx="16" cy="16" r="3" />
+      <path d="M16 4a12 12 0 0 1 10 6" opacity=".5" />
+    </>
+  ),
+  plane: (
+    <path d="M28 5c-1.4-1.4-4 0-4 0l-6 6-11-3-2 2 8 6-4 4-4-1-1.5 1.5 5 3 3 5L20 39l-1-4 4-4 6 8 2-2-3-11 6-6s1.4-2.6 0-4z" transform="scale(0.72) translate(4 -1)" />
+  ),
+  mountain: (
+    <>
+      <path d="M3 25l8-14 5 8 3-5 8 11z" />
+      <path d="M9 15l2 3 2-2" opacity=".5" />
+    </>
+  ),
+  star: (
+    <path d="M16 3l3.2 8.6L28 12l-6.8 5.4L23.5 26 16 21l-7.5 5 2.3-8.6L4 12l8.8-.4z" />
   ),
 }
 

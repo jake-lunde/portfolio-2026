@@ -70,7 +70,9 @@ export function windowsForPath(path: string[]): string[] {
     return ['projects']
   }
   if (path[0] === 'visualizers') {
-    if (path[1] && getViz(path[1])?.component) return ['visualizers', `viz:${path[1]}`]
+    // a specific viz opens standalone (matches its desktop icon); bare
+    // /visualizers opens the folder index
+    if (path[1] && getViz(path[1])?.component) return [`viz:${path[1]}`]
     return ['visualizers']
   }
   const p = PROGRAMS.find((x) => x.path === `/${path.join('/')}`)

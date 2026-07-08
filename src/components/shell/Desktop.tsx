@@ -9,6 +9,8 @@ import { MenuBar } from './MenuBar'
 import { DesktopIcons } from './DesktopIcons'
 import { Wallpaper } from './Wallpaper'
 import { NowPlayingWidget } from './NowPlayingWidget'
+import { DailyWidget } from './DailyWidget'
+import { PhotoWall } from './PhotoWall'
 import { Screensaver } from './Screensaver'
 import { Window } from './Window'
 import { Boot } from './Boot'
@@ -54,6 +56,8 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
         <Wallpaper />
         <NowPlayingWidget />
         <DesktopIcons />
+        <DailyWidget />
+        <PhotoWall />
         <AnimatePresence>
           {windows.map((w) => {
             const def = resolveWindow(w.id)

@@ -70,6 +70,8 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/studio',
   },
   {
+    // the visualizers now live as individual desktop icons (see DesktopIcons);
+    // this folder stays as the /visualizers deep-link index, off the desktop
     id: 'visualizers',
     name: 'Visualizers',
     meta: 'IDX-04',
@@ -77,7 +79,7 @@ export const PROGRAMS: ProgramDef[] = [
     component: dynamic(() => import('@/programs/visualizers/Visualizers')),
     size: { w: 500, h: 524 },
     pos: { x: 240, y: 80 },
-    onDesktop: true,
+    onDesktop: false,
     path: '/visualizers',
   },
   {

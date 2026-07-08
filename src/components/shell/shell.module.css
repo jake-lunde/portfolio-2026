@@ -190,8 +190,169 @@
   color: var(--ink-soft);
 }
 
+/* ================= DAILY WIDGET (ambient, bottom-left) ================= */
+
+.dailyWidget {
+  position: absolute;
+  left: 20px;
+  bottom: 22px;
+  z-index: 2;
+  width: 224px;
+  padding: 11px 13px 13px;
+  background: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  box-shadow: 5px 5px 0 rgba(23, 21, 13, 0.12);
+}
+
+[data-theme='dark'] .dailyWidget {
+  border-color: var(--line);
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.4);
+}
+
+.dailyHead {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 7px;
+  margin-bottom: 10px;
+}
+
+.dailyRow {
+  margin-bottom: 10px;
+}
+
+.dailyRow:last-child {
+  margin-bottom: 0;
+}
+
+.dailyLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.dailyPct {
+  font-family: var(--display);
+  font-size: 12px;
+  color: var(--blue);
+}
+
+.dailyTrack {
+  height: 9px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  overflow: hidden;
+}
+
+[data-theme='dark'] .dailyTrack {
+  border-color: var(--line);
+}
+
+.dailyFill {
+  height: 100%;
+  background: var(--pink);
+  transition: width 0.6s ease;
+}
+
+.dailyStatus {
+  display: block;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+/* ================= PHOTO WALL (pinned booth snaps, right edge) ========= */
+
+.photoWall {
+  position: absolute;
+  right: 20px;
+  top: 336px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 132px;
+}
+
+.pinned {
+  position: relative;
+  background: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  padding: 7px 7px 9px;
+  box-shadow: 4px 4px 0 rgba(23, 21, 13, 0.14);
+  transform: rotate(var(--tilt, 2deg));
+}
+
+[data-theme='dark'] .pinned {
+  border-color: var(--line);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.pinnedImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--ink);
+}
+
+[data-theme='dark'] .pinnedImg {
+  border-color: var(--line);
+}
+
+.pin {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--blue);
+  border: 1.5px solid var(--ink);
+  box-shadow: 0 2px 2px rgba(23, 21, 13, 0.3);
+}
+
+.pinRemove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.pinned:hover .pinRemove {
+  opacity: 1;
+}
+
+.pinRemove:hover {
+  background: var(--pink);
+  color: #17150d;
+}
+
 @media (max-width: 900px) {
-  .npWidget {
+  .npWidget,
+  .dailyWidget,
+  .photoWall {
     display: none;
   }
 }

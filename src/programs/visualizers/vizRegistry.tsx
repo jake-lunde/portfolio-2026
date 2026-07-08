@@ -1,9 +1,10 @@
 import dynamic from 'next/dynamic'
 import type { ComponentType } from 'react'
+import type { IconName } from '@/components/shell/Icon'
 import { VizShell } from './VizShell'
 
 /* Registered visualizers — each opens in its own CRT window (id `viz:<id>`,
-   deep link /visualizers/<id>) from the Visualizers folder.
+   deep link /visualizers/<id>) directly from a desktop icon.
    Adding one: build the component, add an entry here. */
 
 export type VizDef = {
@@ -12,6 +13,7 @@ export type VizDef = {
   name: string
   source: string
   status: 'live' | 'soon'
+  icon: IconName
   component?: ComponentType
   size: { w: number; h: number }
 }
@@ -35,6 +37,7 @@ export const VIZ: VizDef[] = [
     name: 'Ride',
     source: 'Strava',
     status: 'live',
+    icon: 'bike',
     component: wrap(() => import('./RideViz').then((m) => m.RideViz)),
     size: { w: 720, h: 716 },
   },
@@ -44,6 +47,7 @@ export const VIZ: VizDef[] = [
     name: 'Flowers',
     source: 'Garden scan',
     status: 'live',
+    icon: 'flower',
     component: wrap(() => import('./FlowerViz').then((m) => m.FlowerViz)),
     size: { w: 700, h: 560 },
   },
@@ -53,6 +57,7 @@ export const VIZ: VizDef[] = [
     name: 'Scrobbles',
     source: 'Last.fm',
     status: 'live',
+    icon: 'disc',
     component: wrap(() => import('./ScrobblesViz').then((m) => m.ScrobblesViz)),
     size: { w: 720, h: 664 },
   },
@@ -62,6 +67,7 @@ export const VIZ: VizDef[] = [
     name: 'Flights',
     source: 'Flighty',
     status: 'live',
+    icon: 'plane',
     component: wrap(() => import('./FlightsViz').then((m) => m.FlightsViz)),
     size: { w: 720, h: 664 },
   },
@@ -71,28 +77,21 @@ export const VIZ: VizDef[] = [
     name: 'Slopes',
     source: 'Slopes',
     status: 'live',
+    icon: 'mountain',
     component: wrap(() => import('./SlopesViz').then((m) => m.SlopesViz)),
     size: { w: 720, h: 662 },
   },
   {
-    id: 'daily',
-    no: '06',
-    name: 'Daily',
-    source: 'Live systems',
-    status: 'live',
-    component: wrap(() => import('./DailyViz').then((m) => m.DailyViz)),
-    size: { w: 540, h: 460 },
-  },
-  {
     id: 'taurus',
-    no: '07',
+    no: '06',
     name: 'Taurus',
     source: 'The sky',
     status: 'live',
+    icon: 'star',
     component: wrap(() => import('./TaurusViz').then((m) => m.TaurusViz)),
     size: { w: 720, h: 660 },
   },
-  { id: 'louie', no: '08', name: 'Louie', source: 'Toy poodle', status: 'soon', size: { w: 700, h: 560 } },
+  { id: 'louie', no: '07', name: 'Louie', source: 'Toy poodle', status: 'soon', icon: 'rings', size: { w: 700, h: 560 } },
 ]
 
 export const getViz = (id: string): VizDef | undefined => VIZ.find((v) => v.id === id)
