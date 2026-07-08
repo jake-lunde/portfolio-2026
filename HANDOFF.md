@@ -143,6 +143,11 @@ Keep it this cheap — it's a CLAUDE.md guardrail.
     ("LIVE" chip vs "BAKED" chip). Low effort after activation.
 
 ### P2 — bigger toys (each is a real project; scope with Jake first)
+> UPDATE 2026-07-07 (later): Photo Booth, Jigsaw, and Coloring Book SHIPPED
+> (live at /booth, /puzzle, /paint). Booth's live camera path still needs a
+> human verification (test browser has no camera). Remaining below: scrapbook
+> persistence (booth phase 2), tattoo pages (needs Jake's SVGs), puzzle photos.
+
 16. **Photo Booth** — webcam via getUserMedia, 90s filters (CSS/canvas: VHS chroma
     shift, dither, duotone, CRT scanline), countdown + snap + polaroid frame, and
     "pin to scrapbook" = post to a Blob-backed board (reuse guestbook API pattern,
