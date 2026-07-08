@@ -16,14 +16,14 @@
 
 **Programs, all live:** README · Projects → Greenlight Invest case study
 (MDX + interactive Moat/Scrub/FrequencyBars) · Guestbook (durable, Blob) ·
-Visualizers folder → 7 windows (Ride, Flowers, Scrobbles, Flights, Slopes,
-Daily, Taurus) · Studio (Jake's 5 remixes through a WMP-style WebAudio
-visualizer — BARS/SCOPE/RINGS) · Now Playing (**Apple Music LIVE** — env
-vars set, `/musickit-setup` minted the user token) · Photo Booth (real
-per-pixel VHS/dither/duotone/CRT pipeline) · Jigsaw (procedural bezier
-die-cuts) · Coloring (4 tattoo pages, artist-credited) · About This Machine
-(AI-authored appraisal of Jake, signed, unedited by him) · Trash (padlocked,
-"trash day coming soon") · Settings (theme/sound/wallpaper).
+6 Visualizers now **broken out as desktop icons** (Ride, Flowers, Scrobbles,
+Flights, Slopes, Taurus — each opens its viz:<id> window standalone; the
+Visualizers folder still exists as the /visualizers index but is off the
+desktop) · Studio (Jake's 5 remixes, WMP-style WebAudio viz — BARS/SCOPE/
+RINGS) · Now Playing (**Apple Music LIVE**) · Photo Booth (per-pixel VHS/
+dither/duotone/CRT; **PIN TO WALL** stores last 3 snaps in localStorage) ·
+Jigsaw · Coloring (4 tattoo pages) · About This Machine · Trash (padlocked) ·
+Settings.
 
 **Shell:** wallpaper system (7 patterns) · classic-Mac scrollbars · Geist/
 Geist Mono/Geist Pixel type system · LOU.SYS screensaver (5-min idle; pixel
@@ -31,6 +31,12 @@ Lou over the perspective checkerboard; triple-click the menu-bar clock to
 summon) · Now-Playing desktop widget (polls /api/now-playing) · **resizable
 windows** (bottom-right ribbed grip; size persisted per-window in the store
 for the session; `store/windows.ts` `sizes` map) · conceit year 1992 · v0.2.
+
+**Desktop widgets** (edges, z-index 2, hidden < 900px): NowPlayingWidget
+(top-right, Apple recent-played) · DailyWidget (bottom-left, live coffee +
+Lou's-meds gauges from `lib/dailySystems.ts`) · PhotoWall (right edge, last
+3 pinned booth snaps from localStorage key `lunde-booth-wall`; Photo Booth
+calls `pinPhoto()` exported from PhotoWall.tsx).
 
 **Windows now fit their content on open** (Opus 4.8, 2026-07-08): default
 sizes in registry.tsx/vizRegistry.tsx were re-fitted from measured overflow.
@@ -106,12 +112,9 @@ the snake coloring page is the weakest drawing (Jake may ask for a redraw).
 1. ~~**Window resizing**~~ ✅ SHIPPED 2026-07-08 (Opus 4.8).
 2. ~~**Windows fit their content**~~ ✅ SHIPPED 2026-07-08 — defaults re-fitted;
    resize handles anything left. See §1 method note.
-3. **Daily tracker → ambient desktop widget.** His words: "run in a lil
-   container all day on the desktop in an unobtrusive way. Remove from
-   visualizers folder." Pattern exists: NowPlayingWidget. Add: animate-in,
-   and his idea — hover cursor shows his face getting happier as coffee
-   fills (needs his face art; a pixel-face from the booth photos could work,
-   ask first).
+3. ~~**Daily tracker → ambient desktop widget**~~ ✅ SHIPPED 2026-07-08 (Opus).
+   Still open sub-idea: hover cursor shows Jake's face getting happier as
+   coffee fills — needs his face art; deferred until it exists.
 4. **Studio: album artwork per track** — he'll need to drop art files in
    `ref/` or `public/audio/art/`; extend the manifest schema (`art` field).
 5. **Now Playing: spinning record** — vinyl disc rendered behind/beside the
@@ -170,9 +173,10 @@ the snake coloring page is the weakest drawing (Jake may ask for a redraw).
 - **Synth Program: 16 bars** — a step sequencer ("save tunes for others to
   listen to"). WebAudio (reuse studioPlayer patterns); persistence = Blob.
   A real project; scope with Jake.
-- **Photo Booth: pin last photo to home** — the most recent booth capture
-  shows as a desktop artifact. Needs Blob + the same moderation call as the
-  scrapbook (public storage of webcam images).
+- ~~**Photo Booth: pin last photo(s) to the desktop**~~ ✅ SHIPPED 2026-07-08
+  (Opus) — last 3 snaps, **localStorage per-visitor** (no server, no
+  moderation exposure). A *shared/public* wall would still need Blob + a
+  moderation decision from Jake; not built.
 - **Jigsaw: leaderboard timer + completion celebration** — time-to-solve,
   localStorage best; confetti/stamp burst on solve. Celebration is quick and
   unblocked; leaderboard-across-users needs a store.
