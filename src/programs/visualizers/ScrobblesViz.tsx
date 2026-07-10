@@ -33,7 +33,12 @@ export function ScrobblesViz() {
   const [week, setWeek] = useState<number | null>(null)
   const [artist, setArtist] = useState<string | null>(null)
 
-  const weeks = data.weeks as { from: number; plays: number }[]
+  // timeframe ends where the last.fm signal does (+2 carrier stubs as the
+  // era mark) — no months of empty axis
+  const weeks = useMemo(() => {
+    const all = data.weeks as { from: number; plays: number }[]
+    return apple ? all.slice(0, Math.min(all.length, apple.gapFrom + 2)) : all
+  }, [])
   const maxPlays = useMemo(() => Math.max(...weeks.map((w) => w.plays), 1), [weeks])
   const peakIdx = useMemo(() => weeks.findIndex((w) => w.plays === maxPlays), [weeks, maxPlays])
   const maxArtist = Math.max(...(data.artists as { plays: number }[]).map((a) => a.plays), 1)

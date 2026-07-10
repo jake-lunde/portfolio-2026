@@ -13,6 +13,11 @@ import styles from './shell.module.css'
 export const WALL_KEY = 'lunde-booth-wall'
 export const WALL_MAX = 3
 
+/* Jake's own booth snap ships as the wall's founding pin — removable,
+   and remembered if dismissed */
+const DEFAULT_PHOTO = '/booth/jake-default.jpg'
+const DISMISS_KEY = 'lunde-booth-default-dismissed'
+
 function readWall(): string[] {
   try {
     const raw = localStorage.getItem(WALL_KEY)
@@ -38,7 +43,21 @@ export function PhotoWall() {
     }
   }, [])
 
+  const [defaultDismissed, setDefaultDismissed] = useState(true)
+  useEffect(() => {
+    try {
+      setDefaultDismissed(localStorage.getItem(DISMISS_KEY) === '1')
+    } catch {}
+  }, [])
+
   const remove = (photo: string) => {
+    if (photo === DEFAULT_PHOTO) {
+      try {
+        localStorage.setItem(DISMISS_KEY, '1')
+      } catch {}
+      setDefaultDismissed(true)
+      return
+    }
     const next = photos.filter((p) => p !== photo)
     try {
       localStorage.setItem(WALL_KEY, JSON.stringify(next))
@@ -46,12 +65,14 @@ export function PhotoWall() {
     setPhotos(next)
   }
 
-  if (photos.length === 0) return null
+  const display = defaultDismissed ? photos : [...photos, DEFAULT_PHOTO]
+
+  if (display.length === 0) return null
 
   return (
     <div className={styles.photoWall} aria-label="Pinned photos">
       <AnimatePresence>
-        {photos.map((photo, i) => (
+        {display.map((photo, i) => (
           <motion.div
             key={photo}
             className={styles.pinned}

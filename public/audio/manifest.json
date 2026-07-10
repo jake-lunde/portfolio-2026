@@ -3,23 +3,28 @@
   "tracks": [
     {
       "title": "catch these fists - Wet Leg (jaique remix)",
-      "file": "/audio/catch these fists v4.mp3"
+      "file": "/audio/catch these fists v4.mp3",
+      "art": "/audio/artwork/catch-these-fists.jpg"
     },
     {
       "title": "Crave - Paramore (jaique remix)",
-      "file": "/audio/crave.09.01.mp3"
+      "file": "/audio/crave.09.01.mp3",
+      "art": "/audio/artwork/crave.webp"
     },
     {
       "title": "Velvet Elvis - Kacey Musgraves (jaique remix)",
-      "file": "/audio/velvetElvis.mp3"
+      "file": "/audio/velvetElvis.mp3",
+      "art": "/audio/artwork/velvet-elvis.jpeg"
     },
     {
       "title": "These Walls - Dua Lipa (jaique remix)",
-      "file": "/audio/these.walls.v3.mp3"
+      "file": "/audio/these.walls.v3.mp3",
+      "art": "/audio/artwork/these-walls.jpeg"
     },
     {
       "title": "Love Me Different - Hayley Williams (jaique remix)",
-      "file": "/audio/lovemedifferent-v3.mp3"
+      "file": "/audio/lovemedifferent-v3.mp3",
+      "art": "/audio/artwork/love-me-different.jpeg"
     }
   ]
 }

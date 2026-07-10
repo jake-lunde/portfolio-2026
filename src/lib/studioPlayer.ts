@@ -8,7 +8,7 @@ import { metric } from '@/lib/metrics'
    under /audio (the WebAudio analyser needs same-origin media; streaming
    services don't allow it). Manifest: public/audio/manifest.json */
 
-export type StudioTrack = { title: string; file: string }
+export type StudioTrack = { title: string; file: string; art?: string }
 
 let audio: HTMLAudioElement | null = null
 let ctx: AudioContext | null = null
@@ -48,12 +48,14 @@ type StudioState = {
   playing: boolean
   time: number
   duration: number
+  volume: number
   load: () => Promise<void>
   play: (i?: number) => void
   pause: () => void
   toggle: () => void
   next: () => void
   prev: () => void
+  setVolume: (v: number) => void
 }
 
 export const useStudio = create<StudioState>((set, get) => ({
@@ -63,6 +65,13 @@ export const useStudio = create<StudioState>((set, get) => ({
   playing: false,
   time: 0,
   duration: 0,
+  volume: 0.85,
+
+  setVolume: (v) => {
+    const vol = Math.max(0, Math.min(1, v))
+    if (audio) audio.volume = vol
+    set({ volume: vol })
+  },
 
   load: async () => {
     if (get().loaded) return
@@ -80,6 +89,7 @@ export const useStudio = create<StudioState>((set, get) => ({
     if (!tracks.length) return
     const target = i ?? index
     const el = ensureGraph()
+    el.volume = get().volume
     void ctx?.resume()
     const want = tracks[target].file
     if (!el.src.endsWith(want)) el.src = want

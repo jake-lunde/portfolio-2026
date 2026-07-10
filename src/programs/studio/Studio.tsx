@@ -34,11 +34,28 @@ export default function Studio() {
   const playing = useStudio((s) => s.playing)
   const time = useStudio((s) => s.time)
   const duration = useStudio((s) => s.duration)
+  const volume = useStudio((s) => s.volume)
   const load = useStudio((s) => s.load)
   const play = useStudio((s) => s.play)
   const toggle = useStudio((s) => s.toggle)
   const next = useStudio((s) => s.next)
   const prev = useStudio((s) => s.prev)
+  const setVolume = useStudio((s) => s.setVolume)
+
+  // rotary knob: vertical drag turns it; -135°..135° maps 0..1
+  const knobDrag = useRef<{ y: number; v: number } | null>(null)
+  const onKnobDown = (e: React.PointerEvent) => {
+    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+    knobDrag.current = { y: e.clientY, v: volume }
+  }
+  const onKnobMove = (e: React.PointerEvent) => {
+    if (!knobDrag.current) return
+    setVolume(knobDrag.current.v + (knobDrag.current.y - e.clientY) / 140)
+  }
+  const onKnobUp = () => {
+    if (knobDrag.current) sfx.tap()
+    knobDrag.current = null
+  }
 
   useEffect(() => {
     void load()
@@ -193,6 +210,10 @@ export default function Studio() {
       </div>
 
       <div className={styles.transport}>
+        {current?.art && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={current.art} alt="" className={styles.tArt} aria-hidden="true" />
+        )}
         <button className={styles.tBtn} aria-label="Previous track" onClick={prev}>
           ⏮
         </button>
@@ -206,6 +227,28 @@ export default function Studio() {
         <span className={styles.tTime}>
           {fmt(time)} / {fmt(duration)}
         </span>
+        <div className={styles.knobWrap}>
+          <div
+            className={styles.knob}
+            role="slider"
+            aria-label="Volume"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(volume * 100)}
+            tabIndex={0}
+            style={{ transform: `rotate(${-135 + volume * 270}deg)` }}
+            onPointerDown={onKnobDown}
+            onPointerMove={onKnobMove}
+            onPointerUp={onKnobUp}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowUp' || e.key === 'ArrowRight') setVolume(volume + 0.05)
+              if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') setVolume(volume - 0.05)
+            }}
+          >
+            <span className={styles.knobTick} aria-hidden="true" />
+          </div>
+          <span className={styles.knobLabel}>VOL</span>
+        </div>
       </div>
 
       <div className={styles.trackList} role="list" aria-label="Tracks">

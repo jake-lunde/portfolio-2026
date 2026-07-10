@@ -27,7 +27,10 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    useWindows.getState().setInitial(initialWindows)
+    // mobile lands on the launcher, not a full-bleed README
+    const mobileRoot =
+      window.innerWidth <= 720 && initialWindows.length === 1 && initialWindows[0] === 'readme'
+    useWindows.getState().setInitial(mobileRoot ? [] : initialWindows)
     setHydrated(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

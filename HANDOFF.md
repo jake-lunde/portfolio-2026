@@ -40,6 +40,22 @@ timestamps — per HERTZ research; never fake weekly counts), bake via
 `scripts/applemusic-bake.mjs` against the live route, gap weeks render as
 dashed blue carrier band. Legacy /visualizers/flowers aliases to models.
 
+**2026-07-10 (Fable, usage-limited sprint):** Scrobbles timeframe truncated
+at the last.fm dropoff (+2 carrier stubs). Mobile: no auto-README (launcher
+first), 28px touch targets on titlebars. Studio: volume knob (rotary, drag
+vertical, keyboard arrows) + per-track album art (`art` field in manifest).
+PhotoWall: Jake's default polaroid pin (public/booth/jake-default.jpg,
+dismissible via localStorage). COMMAND.CTR: **live mode** — /api/cc-feed
+(Blob `cc/feed.json`; POST guarded by CC_FEED_KEY env — in Jake's Vercel +
+.env.local; report with `scripts/cc-report.mjs`), LIVE chip when feed fresh
+<15min, replay fallback, **marker-blackout redactions** (`redact:true` events
+→ deterministic black bars; reporter must pre-strip secret text), telemetry
+blips (dispatch rises/return falls/merge lands; status silent). Jigsaw: 5
+generated puzzles (rings/louie-3D/crew/moat/pixel-lou in puzzleImages.ts),
+timer from first touch, local top-5 leaderboard (names from guest-name key),
+confetti. ORCHESTRATION RULE: when dispatching agents in live sessions,
+report via cc-report.mjs so the site's deck mirrors reality.
+
 **Shell:** wallpaper system (7 patterns) · classic-Mac scrollbars · Geist/
 Geist Mono/Geist Pixel type system · LOU.SYS screensaver (5-min idle; pixel
 Lou over the perspective checkerboard; triple-click the menu-bar clock to
@@ -195,6 +211,36 @@ the snake coloring page is the weakest drawing (Jake may ask for a redraw).
 - **Jigsaw: leaderboard timer + completion celebration** — time-to-solve,
   localStorage best; confetti/stamp burst on solve. Celebration is quick and
   unblocked; leaderboard-across-users needs a store.
+
+### Ambient roaming agents (Jake asked for ideas, 2026-07-10 — not built)
+The crew shouldn't live only in COMMAND.CTR. Sketches, cheapest first:
+1. **Wandering avatar**: one agent shape at a time strolls the desktop edge
+   (like Lou in the saver but tiny, 20px, during active use) — pauses near
+   the window you have focused, "inspects" it, moves on. Pure CSS/motion.
+2. **Dispatch flashes**: when a visitor opens a program, the matching agent
+   briefly appears next to the window titlebar ("NYQUIST · MOUNTING") then
+   fades. Ties agents to real UI events without a backend.
+3. **Menu-bar presence**: a rotating tiny avatar in the menu bar showing
+   "on duty" agent; clicking it opens COMMAND.CTR.
+4. **Boot cameo**: agents' shapes flick past during the boot sequence.
+5. **Live-mode spillover**: when the cc-feed is LIVE, the dispatched agent's
+   avatar physically walks from the Command Center window to the desktop
+   edge and back on each dispatch/return. The showpiece; needs #1's walker.
+Recommend building #1 + #2 first (no backend, high charm), #5 when live
+sessions become routine.
+
+### Photo-wall moderation (Jake wants a shared public wall — design agreed)
+Current: per-visitor localStorage + Jake's default pin. To go shared-public:
+1. Booth "PIN TO WALL" → POST to /api/wall (new) → Blob `wall/pending/<ts>.jpg`
+   (compressed ≤120KB, honeypot + rate-limit like guestbook).
+2. NOTHING shows publicly from pending. Jake reviews at `/wall-review` — a
+   page gated by CC_FEED_KEY-style secret (`?key=`) listing pending images
+   with APPROVE (move to `wall/live/`) / REJECT (delete) buttons.
+3. PhotoWall renders `wall/live/` (last 3) + visitor's own local pins
+   (instant gratification while awaiting review — pins feel immediate to the
+   pinner, appear to everyone only post-approval).
+4. Vercel Blob TTL cleanup: pending older than 14 days gets purged by the
+   review page on load. Estimated build: one session. Storage cost: pennies.
 
 ### From-Claude ideas Jake adopted into his doc (still open)
 23. **Trash contents** — the killed-ideas archive ("Grows with You" et al.

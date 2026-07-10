@@ -77,10 +77,82 @@
   display: grid;
   place-items: center;
   pointer-events: none;
+  overflow: hidden;
 }
 
-.doneOverlay > * {
-  transform: rotate(-6deg) scale(1.6);
+.doneCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transform: rotate(-5deg) scale(1.4);
+}
+
+.doneTime {
+  font-family: var(--display);
+  font-size: 20px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  padding: 2px 10px;
+}
+
+.confetti {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 12px;
+}
+
+.pickRow {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.pick {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  padding: 4px 9px;
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.pick[aria-pressed='true'] {
+  border-color: var(--blue);
+  color: var(--ink);
+}
+
+.timer {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.scores {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.scoresHead {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  color: var(--blue);
+}
+
+.scoreRow {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
 }
 
 .hint {

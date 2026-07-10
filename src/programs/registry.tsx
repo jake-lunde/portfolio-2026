@@ -109,7 +109,7 @@ export const PROGRAMS: ProgramDef[] = [
     meta: 'TOY-08',
     icon: 'puzzle',
     component: dynamic(() => import('@/programs/puzzle/Puzzle')),
-    size: { w: 660, h: 660 },
+    size: { w: 660, h: 728 },
     pos: { x: 260, y: 40 },
     onDesktop: true,
     path: '/puzzle',

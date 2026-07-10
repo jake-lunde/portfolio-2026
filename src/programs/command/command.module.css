@@ -72,9 +72,13 @@
   font-family: var(--mono);
   font-size: 8.5px;
   letter-spacing: 0.14em;
-  border: 1px solid var(--pink);
-  color: var(--pink);
+  border: 1px solid rgba(231, 225, 210, 0.5);
+  color: rgba(231, 225, 210, 0.75);
   padding: 3px 8px;
+}
+
+.recChip .recDot {
+  background: rgba(231, 225, 210, 0.75);
 }
 
 .recDot {
@@ -83,6 +87,33 @@
   border-radius: 50%;
   background: var(--pink);
   animation: ccblink 1.6s steps(2, jump-none) infinite;
+}
+
+.recChip[data-live] {
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
+.recChip[data-live] .recDot {
+  background: var(--pink);
+  animation-duration: 0.9s;
+}
+
+/* marker blackouts */
+.redacted {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.redactBar {
+  display: inline-block;
+  height: 10px;
+  background: #e7e1d2;
+  opacity: 0.92;
+  border-radius: 1px;
+  transform: rotate(-0.4deg);
 }
 
 @keyframes ccblink {

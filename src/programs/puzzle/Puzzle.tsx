@@ -1,39 +1,33 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Stamp } from '@/components/primitives/Stamp'
+import { metric } from '@/lib/metrics'
 import { sfx } from '@/lib/sound'
+import { PUZZLES, IMG_W, IMG_H } from './puzzleImages'
 import styles from './puzzle.module.css'
 
-/* Jigsaw — 12 procedurally die-cut pieces. Tabs are cubic-bezier bulbs;
-   a shared edge is drawn by both neighbors with the walk direction
-   reversed and the sign flipped, so the world-space curve coincides and
-   the cut is exact. Image is generated on-device (no assets yet — Jake's
-   photos slot in later). */
+/* Jigsaw — procedurally die-cut pieces (complementary bezier tabs) over
+   images generated from the site itself: the rings poster, the Louie
+   model, the crew, the Moat, pixel Lou. Timer runs from first touch;
+   best times keep a local leaderboard; solving earns confetti. */
 
 const COLS = 4
 const ROWS = 3
-const PS = 120 // piece size
+const PS = 120
 const PAD = Math.round(PS * 0.28)
-const IMG_W = COLS * PS
-const IMG_H = ROWS * PS
 const BOARD_W = IMG_W + 120
 const BOARD_H = IMG_H + 120
 const TARGET_X = 60
 const TARGET_Y = 44
 const SNAP = 18
 
-type Piece = {
-  id: number
-  r: number
-  c: number
-  x: number
-  y: number
-  z: number
-  locked: boolean
-}
+const TIMES_KEY = 'lunde-jigsaw-times'
 
-/* one jigsaw side from (x0,y0)→(x1,y1); s=0 straight, ±1 tab direction */
+type Piece = { id: number; r: number; c: number; x: number; y: number; z: number; locked: boolean }
+type Score = { name: string; secs: number }
+
 function side(p: Path2D, x0: number, y0: number, x1: number, y1: number, s: number) {
   if (s === 0) {
     p.lineTo(x1, y1)
@@ -41,7 +35,6 @@ function side(p: Path2D, x0: number, y0: number, x1: number, y1: number, s: numb
   }
   const dx = x1 - x0
   const dy = y1 - y0
-  // perpendicular (left of travel); world bump = s * perp * depth
   const px = dy === 0 ? 0 : dy > 0 ? 1 : -1
   const py = dx === 0 ? 0 : dx > 0 ? -1 : 1
   const u = (t: number) => [x0 + dx * t, y0 + dy * t] as const
@@ -73,53 +66,39 @@ function piecePath(r: number, c: number, h: number[][], v: number[][]): Path2D {
   const x1 = PAD + PS
   const y1 = PAD + PS
   p.moveTo(x0, y0)
-  side(p, x0, y0, x1, y0, h[r][c]) // top L→R
-  side(p, x1, y0, x1, y1, v[r][c + 1]) // right T→B
-  side(p, x1, y1, x0, y1, -h[r + 1][c]) // bottom R→L (sign flip = complement)
-  side(p, x0, y1, x0, y0, -v[r][c]) // left B→T
+  side(p, x0, y0, x1, y0, h[r][c])
+  side(p, x1, y0, x1, y1, v[r][c + 1])
+  side(p, x1, y1, x0, y1, -h[r + 1][c])
+  side(p, x0, y1, x0, y0, -v[r][c])
   p.closePath()
   return p
 }
 
-/* on-device poster until Jake supplies photos */
-function makePoster(): HTMLCanvasElement {
-  const cv = document.createElement('canvas')
-  cv.width = IMG_W
-  cv.height = IMG_H
-  const g = cv.getContext('2d')!
-  g.fillStyle = '#131811'
-  g.fillRect(0, 0, IMG_W, IMG_H)
-  // doppler rings
-  g.strokeStyle = '#F2A6C2'
-  for (let r = 8; r < 300; r += 14) {
-    g.lineWidth = 3 + r * 0.02
-    g.beginPath()
-    g.arc(140, IMG_H / 2 + 20, r, 0, Math.PI * 2)
-    g.stroke()
+const readTimes = (): Record<string, Score[]> => {
+  try {
+    return JSON.parse(localStorage.getItem(TIMES_KEY) ?? '{}')
+  } catch {
+    return {}
   }
-  // blue field + wordmark
-  g.fillStyle = 'rgba(19,24,17,0.55)'
-  g.fillRect(0, 0, IMG_W, IMG_H)
-  g.fillStyle = '#E7E1D2'
-  g.font = 'bold 54px monospace'
-  g.fillText('LUNDE', 250, 150)
-  g.fillText('OS', 250, 208)
-  g.fillStyle = '#5C7CFF'
-  g.font = '16px monospace'
-  g.fillText('JIG-01 · 1992', 250, 250)
-  g.fillStyle = '#F2A6C2'
-  g.fillRect(250, 264, 96, 8)
-  return cv
 }
 
+const fmtSecs = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
+
 export default function Puzzle() {
-  const boardRef = useRef<HTMLDivElement>(null)
+  const reduced = useReducedMotion()
+  const [puzzleIdx, setPuzzleIdx] = useState(0)
   const [pieces, setPieces] = useState<Piece[] | null>(null)
   const [done, setDone] = useState(false)
+  const [elapsed, setElapsed] = useState(0)
+  const [board, setBoard] = useState<Record<string, Score[]>>({})
   const zTop = useRef(20)
   const drag = useRef<{ id: number; ox: number; oy: number } | null>(null)
   const edges = useRef<{ h: number[][]; v: number[][] } | null>(null)
   const posterRef = useRef<HTMLCanvasElement | null>(null)
+  const startedAt = useRef<number | null>(null)
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const puzzle = PUZZLES[puzzleIdx]
 
   const scatter = (): Piece[] => {
     let id = 0
@@ -140,8 +119,16 @@ export default function Puzzle() {
     return out
   }
 
-  // init on mount (client-only randomness)
+  const resetTimer = () => {
+    startedAt.current = null
+    setElapsed(0)
+    if (tickRef.current) clearInterval(tickRef.current)
+    tickRef.current = null
+  }
+
+  // (re)build the puzzle whenever the selection changes
   useEffect(() => {
+    let cancelled = false
     const rnd = () => (Math.random() > 0.5 ? 1 : -1)
     const h: number[][] = Array.from({ length: ROWS + 1 }, (_, r) =>
       Array.from({ length: COLS }, () => (r === 0 || r === ROWS ? 0 : rnd()))
@@ -150,11 +137,27 @@ export default function Puzzle() {
       Array.from({ length: COLS + 1 }, (_, c) => (c === 0 || c === COLS ? 0 : rnd()))
     )
     edges.current = { h, v }
-    posterRef.current = makePoster()
-    setPieces(scatter())
-  }, [])
 
-  // paint each piece canvas once pieces exist
+    const cv = document.createElement('canvas')
+    cv.width = IMG_W
+    cv.height = IMG_H
+    const g = cv.getContext('2d')!
+    Promise.resolve(puzzle.draw(g)).then(() => {
+      if (cancelled) return
+      posterRef.current = cv
+      document.querySelectorAll('[id^="pz-"]').forEach((el) => delete (el as HTMLElement).dataset.painted)
+      setDone(false)
+      resetTimer()
+      setPieces(scatter())
+    })
+    setBoard(readTimes())
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [puzzleIdx])
+
+  // paint pieces
   useEffect(() => {
     if (!pieces || !edges.current || !posterRef.current) return
     for (const piece of pieces) {
@@ -162,6 +165,7 @@ export default function Puzzle() {
       if (!cv || cv.dataset.painted) continue
       cv.dataset.painted = '1'
       const g = cv.getContext('2d')!
+      g.clearRect(0, 0, cv.width, cv.height)
       const path = piecePath(piece.r, piece.c, edges.current.h, edges.current.v)
       g.save()
       g.clip(path)
@@ -173,9 +177,18 @@ export default function Puzzle() {
     }
   }, [pieces])
 
+  useEffect(() => () => resetTimer(), [])
+
   const onDown = (e: React.PointerEvent, id: number) => {
     const p = pieces?.find((x) => x.id === id)
-    if (!p || p.locked) return
+    if (!p || p.locked || done) return
+    if (startedAt.current === null) {
+      startedAt.current = Date.now()
+      tickRef.current = setInterval(
+        () => setElapsed((Date.now() - (startedAt.current ?? Date.now())) / 1000),
+        500
+      )
+    }
     ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
     drag.current = { id, ox: e.clientX - p.x, oy: e.clientY - p.y }
     zTop.current += 1
@@ -188,6 +201,28 @@ export default function Puzzle() {
     const x = e.clientX - ox
     const y = e.clientY - oy
     setPieces((cur) => cur!.map((p) => (p.id === id ? { ...p, x, y } : p)))
+  }
+
+  const finish = () => {
+    const secs = startedAt.current ? (Date.now() - startedAt.current) / 1000 : 0
+    if (tickRef.current) clearInterval(tickRef.current)
+    setElapsed(secs)
+    sfx.open()
+    metric('puzzle_solve', { puzzle: puzzle.id })
+    let name = 'OPERATOR'
+    try {
+      name = (localStorage.getItem('lunde-guest-name') || 'OPERATOR').slice(0, 12).toUpperCase()
+    } catch {}
+    const times = readTimes()
+    const list = [...(times[puzzle.id] ?? []), { name, secs: Math.round(secs * 10) / 10 }]
+      .sort((a, b) => a.secs - b.secs)
+      .slice(0, 5)
+    times[puzzle.id] = list
+    try {
+      localStorage.setItem(TIMES_KEY, JSON.stringify(times))
+    } catch {}
+    setBoard(times)
+    setDone(true)
   }
 
   const onUp = () => {
@@ -205,10 +240,7 @@ export default function Puzzle() {
         }
         return p
       })
-      if (next.every((p) => p.locked)) {
-        sfx.open()
-        setDone(true)
-      }
+      if (next.every((p) => p.locked)) finish()
       return next
     })
   }
@@ -216,17 +248,38 @@ export default function Puzzle() {
   const reshuffle = () => {
     sfx.close()
     setDone(false)
+    resetTimer()
     document.querySelectorAll('[id^="pz-"]').forEach((el) => delete (el as HTMLElement).dataset.painted)
     setPieces(scatter())
   }
 
   const placed = pieces?.filter((p) => p.locked).length ?? 0
+  const scores = board[puzzle.id] ?? []
 
   return (
     <div className={styles.puzzle}>
+      <div className={styles.pickRow} role="group" aria-label="Puzzle">
+        {PUZZLES.map((p, i) => (
+          <button
+            key={p.id}
+            className={styles.pick}
+            aria-pressed={i === puzzleIdx}
+            onClick={() => {
+              sfx.tap()
+              setPuzzleIdx(i)
+            }}
+          >
+            {p.name.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
       <div className={styles.head}>
         <span className={styles.headLabel}>
-          JIG-01 · {placed}/{ROWS * COLS} PLACED
+          JIG-{String(puzzleIdx + 1).padStart(2, '0')} · {placed}/{ROWS * COLS} PLACED · {puzzle.hint.toUpperCase()}
+        </span>
+        <span className={styles.timer} aria-label="Timer">
+          ⏱ {fmtSecs(elapsed)}
         </span>
         <button className={styles.shuffle} onClick={reshuffle}>
           ↻ SHUFFLE
@@ -234,13 +287,11 @@ export default function Puzzle() {
       </div>
 
       <div
-        ref={boardRef}
         className={styles.board}
         style={{ width: BOARD_W, height: BOARD_H }}
         onPointerMove={onMove}
         onPointerUp={onUp}
       >
-        {/* target tray */}
         <div
           className={styles.tray}
           style={{ left: TARGET_X, top: TARGET_Y, width: IMG_W, height: IMG_H }}
@@ -248,7 +299,7 @@ export default function Puzzle() {
         />
         {pieces?.map((p) => (
           <canvas
-            key={p.id}
+            key={`${puzzle.id}-${p.id}`}
             id={`pz-${p.id}`}
             width={PS + PAD * 2}
             height={PS + PAD * 2}
@@ -262,11 +313,39 @@ export default function Puzzle() {
         ))}
         {done && (
           <div className={styles.doneOverlay}>
-            <Stamp tone="pink">Assembled</Stamp>
+            {!reduced &&
+              Array.from({ length: 26 }).map((_, i) => (
+                <motion.span
+                  key={i}
+                  className={styles.confetti}
+                  style={{
+                    left: `${8 + ((i * 37) % 84)}%`,
+                    background: i % 3 === 0 ? 'var(--pink)' : i % 3 === 1 ? 'var(--blue)' : 'var(--ink)',
+                  }}
+                  initial={{ y: -30, opacity: 1, rotate: 0 }}
+                  animate={{ y: BOARD_H + 40, opacity: [1, 1, 0.6], rotate: 260 + ((i * 53) % 240) }}
+                  transition={{ duration: 1.6 + (i % 5) * 0.22, ease: 'easeIn', delay: (i % 7) * 0.08 }}
+                />
+              ))}
+            <div className={styles.doneCard}>
+              <Stamp tone="pink">Assembled</Stamp>
+              <span className={styles.doneTime}>{fmtSecs(elapsed)}</span>
+            </div>
           </div>
         )}
       </div>
-      <p className={styles.hint}>Drag the pieces into the tray — they snap when close.</p>
+
+      {scores.length > 0 && (
+        <div className={styles.scores} aria-label="Best times">
+          <span className={styles.scoresHead}>BEST — THIS MACHINE</span>
+          {scores.map((s, i) => (
+            <span key={i} className={styles.scoreRow}>
+              {String(i + 1).padStart(2, '0')} {s.name} — {fmtSecs(s.secs)}
+            </span>
+          ))}
+        </div>
+      )}
+      <p className={styles.hint}>Drag the pieces into the tray — the clock starts on first touch.</p>
     </div>
   )
 }

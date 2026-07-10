@@ -596,6 +596,21 @@
 
   .titlebar {
     cursor: default;
+    padding: 12px 12px;
+  }
+
+  .title {
+    font-size: 13px;
+  }
+
+  .ctrl {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+
+  .titleControls {
+    gap: 10px;
   }
 
   .resizeGrip {
