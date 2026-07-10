@@ -23,7 +23,22 @@ desktop) · Studio (Jake's 5 remixes, WMP-style WebAudio viz — BARS/SCOPE/
 RINGS) · Now Playing (**Apple Music LIVE**) · Photo Booth (per-pixel VHS/
 dither/duotone/CRT; **PIN TO WALL** stores last 3 snaps in localStorage) ·
 Jigsaw · Coloring (4 tattoo pages) · About This Machine · Trash (padlocked) ·
-Settings.
+Settings · **COMMAND.CTR** (brutalist orchestration deck — five named agent
+units with animated shape avatars replaying the build history from
+`src/programs/command/cc-timeline.json`; crew + delegation policy in
+CLAUDE.md §13.5; avatars in `public/cc/avatars/`, assigned in
+CommandCenter.tsx AVATARS map).
+
+**2026-07-09 (Fable 5 finale, agent-orchestrated):** Visualizers back in a
+folder (icon-grid) with viz desktop icons retired; Flowers→**Models** shelf
+(photoscan flowers + procedural 662-face Louie from `scripts/make-louie.mjs`;
+'jake' slot pending his scan; 3D clipping fixed: scale 0.46 centered).
+`@vercel/analytics` live (pageviews free; custom events wired via
+`src/lib/metrics.ts` but need Vercel Pro to appear). Scrobbles "Apple era":
+`/api/apple-history` aggregates Apple recent-played (API caps ~50 tracks, NO
+timestamps — per HERTZ research; never fake weekly counts), bake via
+`scripts/applemusic-bake.mjs` against the live route, gap weeks render as
+dashed blue carrier band. Legacy /visualizers/flowers aliases to models.
 
 **Shell:** wallpaper system (7 patterns) · classic-Mac scrollbars · Geist/
 Geist Mono/Geist Pixel type system · LOU.SYS screensaver (5-min idle; pixel
