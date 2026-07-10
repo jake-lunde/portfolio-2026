@@ -2,20 +2,57 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
-import model from './flowers-model.json'
+import { sfx } from '@/lib/sound'
+import flowers from './flowers-model.json'
+import louie from './louie-model.json'
 import styles from './viz.module.css'
 
-/* Low-poly scan of flowers Jake's wife grew — rendered by hand (rotate,
-   project, painter-sort, flat-shade) on a canvas. No 3D library; the
-   renderer itself is part of the exhibit. Layers: solid / mesh. */
+/* The model shelf — low-poly captures of Jake's world, rendered by a
+   hand-rolled canvas engine (rotate, project, painter-sort, flat-shade;
+   no 3D library — the renderer is part of the exhibit).
+   FLOWERS: photoscan of blooms his wife grew, decimated 50k→2k faces.
+   LOUIE: no scan yet, so he's hand-modeled from overlapping low-res
+   spheres — a 3D cousin of the pixel sprite. JAKE: scan pending. */
 
 const CREAM = [231, 225, 210] as const
 
 type Layer = 'solid' | 'mesh'
+type ModelData = { name: string; verts: number[][]; faces: number[][] }
 
-export function FlowerViz() {
+const MODELS: Array<{
+  id: string
+  chip: string
+  title: string
+  sub: string
+  data: ModelData | null
+}> = [
+  {
+    id: 'flowers',
+    chip: 'FLOWERS',
+    title: '“flowers, grown & scanned”',
+    sub: `GROWN BY MY WIFE · ${flowers.faces.length} FACES · PHOTOSCAN`,
+    data: flowers as ModelData,
+  },
+  {
+    id: 'louie',
+    chip: 'LOUIE',
+    title: '“louie, from memory”',
+    sub: `NO SCAN YET — HAND-MODELED · ${louie.faces.length} FACES`,
+    data: louie as ModelData,
+  },
+  {
+    id: 'jake',
+    chip: 'JAKE',
+    title: '“the operator”',
+    sub: 'SCAN PENDING',
+    data: null,
+  },
+]
+
+export function ModelsViz() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [layer, setLayer] = useState<Layer>('solid')
+  const [modelId, setModelId] = useState('flowers')
   const reduced = useReducedMotion()
 
   const rot = useRef({ yaw: 0.6, pitch: 0.25 })
@@ -23,14 +60,17 @@ export function FlowerViz() {
   const layerRef = useRef<Layer>(layer)
   layerRef.current = layer
 
+  const model = MODELS.find((m) => m.id === modelId)!
+
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    const data = model.data
+    if (!canvas || !data) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const verts = model.verts as [number, number, number][]
-    const faces = model.faces as [number, number, number][]
+    const verts = data.verts as [number, number, number][]
+    const faces = data.faces as [number, number, number][]
     const light = [0.4, -0.7, 0.6]
     const lightLen = Math.hypot(...light)
 
@@ -51,11 +91,12 @@ export function FlowerViz() {
       const { yaw, pitch } = rot.current
       const cy = Math.cos(yaw), sy = Math.sin(yaw)
       const cp = Math.cos(pitch), sp = Math.sin(pitch)
-      const scale = Math.min(w, h) * 0.62
+      // coords are normalized to ±1 — 0.46·min keeps every pose inside
+      // the frame (the old 0.62 clipped the bloom)
+      const scale = Math.min(w, h) * 0.46
       const cx = w / 2
-      const cz = h / 2 + h * 0.04
+      const cz = h / 2
 
-      // rotate Y then X; orthographic
       const proj = new Array<[number, number, number]>(verts.length)
       for (let i = 0; i < verts.length; i++) {
         const [x, y, z] = verts[i]
@@ -75,9 +116,10 @@ export function FlowerViz() {
 
       for (const [fi] of order) {
         const [a, b, c] = faces[fi]
-        const [ax, ay, az] = proj[a]
+        const [ax, ay] = proj[a]
         const [bx, by, bz] = proj[b]
         const [cxp, cyp, czp] = proj[c]
+        const az = proj[a][2]
 
         ctx.beginPath()
         ctx.moveTo(ax, ay)
@@ -90,7 +132,6 @@ export function FlowerViz() {
           ctx.lineWidth = 0.5
           ctx.stroke()
         } else {
-          // flat normal in view space
           const ux = bx - ax, uy = by - ay, uz = bz - az
           const vx = cxp - ax, vy = cyp - ay, vz = czp - az
           const nx = uy * vz - uz * vy
@@ -118,7 +159,6 @@ export function FlowerViz() {
     }
 
     if (reduced) {
-      // static render; still re-renders on drag via pointer handlers
       draw()
     } else {
       raf = requestAnimationFrame(tick)
@@ -144,48 +184,66 @@ export function FlowerViz() {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
     }
-  }, [reduced])
+  }, [reduced, modelId, model.data])
 
   return (
     <div>
       <div className={styles.rideHead}>
-        <h3 className={styles.rideTitle}>“flowers, grown &amp; scanned”</h3>
-        <span className={styles.rideSub}>
-          GROWN BY MY WIFE · {model.faces.length} FACES · OBJ
-        </span>
+        <h3 className={styles.rideTitle}>{model.title}</h3>
+        <span className={styles.rideSub}>{model.sub}</span>
       </div>
 
-      <div className={styles.vizNav} role="group" aria-label="Render layer">
+      <div className={styles.vizNav} role="group" aria-label="Model">
+        {MODELS.map((m) => (
+          <button
+            key={m.id}
+            className={styles.vizChip}
+            aria-pressed={modelId === m.id}
+            disabled={!m.data}
+            onClick={() => {
+              sfx.tap()
+              setModelId(m.id)
+            }}
+          >
+            {m.chip}
+            {!m.data && ' · SOON'}
+          </button>
+        ))}
+        <span style={{ flex: 1 }} />
         <button
           className={styles.vizChip}
           aria-pressed={layer === 'solid'}
           onClick={() => setLayer('solid')}
         >
-          Layer · Solid
+          SOLID
         </button>
         <button
           className={styles.vizChip}
           aria-pressed={layer === 'mesh'}
           onClick={() => setLayer('mesh')}
         >
-          Layer · Mesh
+          MESH
         </button>
       </div>
 
       <div className={styles.panel}>
-        <span className={styles.panelLabel}>Model 01 · drag to rotate</span>
+        <span className={styles.panelLabel}>
+          Model {String(MODELS.findIndex((m) => m.id === modelId) + 1).padStart(2, '0')} · drag to rotate
+        </span>
         <canvas
           ref={canvasRef}
           className={styles.modelCanvas}
           role="img"
-          aria-label="Rotating low-poly 3D scan of garden flowers. Drag to rotate."
+          aria-label={`Rotating low-poly model: ${model.chip.toLowerCase()}. Drag to rotate.`}
           onPointerDown={(e) => {
             e.currentTarget.setPointerCapture(e.pointerId)
             dragging.current = { x: e.clientX, y: e.clientY }
           }}
         />
       </div>
-      <p className={styles.scrubHint}>Drag to rotate — solid for the bloom, mesh for the bones.</p>
+      <p className={styles.scrubHint}>
+        Drag to rotate — solid for the body, mesh for the bones.
+      </p>
     </div>
   )
 }

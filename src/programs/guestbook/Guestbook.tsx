@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Stamp } from '@/components/primitives/Stamp'
+import { metric } from '@/lib/metrics'
 import { sfx } from '@/lib/sound'
 import styles from './guestbook.module.css'
 
@@ -58,6 +59,7 @@ export default function Guestbook() {
       const d = await res.json()
       if (!res.ok) throw new Error(d.error ?? 'Something jammed the ledger.')
       sfx.open()
+      metric('guestbook_sign')
       setEntries((cur) => [d.entry, ...(cur ?? [])])
       setNote('')
       setSigned(true)

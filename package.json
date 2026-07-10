@@ -12,6 +12,7 @@
     "@mdx-js/loader": "^3.1.0",
     "@mdx-js/react": "^3.1.0",
     "@next/mdx": "^15.3.3",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.5.0",
     "jsonwebtoken": "^9.0.3",
     "motion": "^12.15.0",

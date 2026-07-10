@@ -193,6 +193,65 @@
   color: #5c7cff;
 }
 
+/* ---------- Visualizers folder (icon view) ---------- */
+
+.vizFolder {
+  padding: 20px 22px 24px;
+}
+
+.vizGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px 6px;
+  margin-top: 16px;
+}
+
+@media (max-width: 560px) {
+  .vizGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.vizIconBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 4px 10px;
+  color: var(--ink);
+  border: 1px solid transparent;
+}
+
+.vizIconBtn:not(:disabled):hover {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
+}
+
+.vizIconBtn:not(:disabled):hover .vizIconLabel {
+  color: var(--blue);
+}
+
+.vizIconBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.vizIconLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vizIconMeta {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
 /* ---------- Settings ---------- */
 
 .settings {

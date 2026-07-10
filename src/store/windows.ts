@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { metric } from '@/lib/metrics'
 
 export type OpenWindow = {
   id: string // one instance per program / case slug
@@ -33,6 +34,7 @@ export const useWindows = create<WindowsState>((set, get) => ({
     }),
 
   open: (id) => {
+    metric('window_open', { id })
     const { windows, zTop } = get()
     const next = zTop + 1
     if (windows.some((w) => w.id === id)) {

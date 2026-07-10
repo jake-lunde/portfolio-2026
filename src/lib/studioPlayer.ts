@@ -1,6 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
+import { metric } from '@/lib/metrics'
 
 /* Studio's audio engine — a module-level singleton so playback persists
    when the window closes (the OS keeps humming). Tracks are self-hosted
@@ -83,6 +84,7 @@ export const useStudio = create<StudioState>((set, get) => ({
     const want = tracks[target].file
     if (!el.src.endsWith(want)) el.src = want
     void el.play()
+    metric('studio_play')
     set({ index: target, playing: true })
   },
 

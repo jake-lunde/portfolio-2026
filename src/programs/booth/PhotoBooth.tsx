@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { pinPhoto } from '@/components/shell/PhotoWall'
+import { metric } from '@/lib/metrics'
 import { sfx } from '@/lib/sound'
 import styles from './booth.module.css'
 
@@ -199,6 +200,7 @@ export default function PhotoBooth() {
     g.fillText(`LUNDE BOOTH · ${date} · ${filterRef.current.toUpperCase()}`, 24, H + 70)
     g.fillStyle = '#F2A6C2'
     g.fillText('■', W - 4, H + 70)
+    metric('booth_snap')
     setShotUrl(card.toDataURL('image/png'))
     setPinUrl(card.toDataURL('image/jpeg', 0.82)) // compact copy for the wall
     setPinned(false)
@@ -209,6 +211,7 @@ export default function PhotoBooth() {
     if (!pinUrl || pinned) return
     if (pinPhoto(pinUrl)) {
       sfx.tap()
+      metric('booth_pin')
       setPinned(true)
     }
   }

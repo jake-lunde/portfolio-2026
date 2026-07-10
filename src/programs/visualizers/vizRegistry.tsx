@@ -42,13 +42,13 @@ export const VIZ: VizDef[] = [
     size: { w: 720, h: 716 },
   },
   {
-    id: 'flowers',
+    id: 'models',
     no: '02',
-    name: 'Flowers',
-    source: 'Garden scan',
+    name: 'Models',
+    source: 'Low-poly shelf',
     status: 'live',
     icon: 'flower',
-    component: wrap(() => import('./FlowerViz').then((m) => m.FlowerViz)),
+    component: wrap(() => import('./ModelsViz').then((m) => m.ModelsViz)),
     size: { w: 700, h: 560 },
   },
   {
@@ -91,7 +91,6 @@ export const VIZ: VizDef[] = [
     component: wrap(() => import('./TaurusViz').then((m) => m.TaurusViz)),
     size: { w: 720, h: 660 },
   },
-  { id: 'louie', no: '07', name: 'Louie', source: 'Toy poodle', status: 'soon', icon: 'rings', size: { w: 700, h: 560 } },
 ]
 
 export const getViz = (id: string): VizDef | undefined => VIZ.find((v) => v.id === id)

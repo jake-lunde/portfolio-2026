@@ -70,16 +70,14 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/studio',
   },
   {
-    // the visualizers now live as individual desktop icons (see DesktopIcons);
-    // this folder stays as the /visualizers deep-link index, off the desktop
     id: 'visualizers',
     name: 'Visualizers',
     meta: 'IDX-04',
     icon: 'wave',
     component: dynamic(() => import('@/programs/visualizers/Visualizers')),
-    size: { w: 500, h: 524 },
+    size: { w: 520, h: 420 },
     pos: { x: 240, y: 80 },
-    onDesktop: false,
+    onDesktop: true,
     path: '/visualizers',
   },
   {
@@ -126,6 +124,18 @@ export const PROGRAMS: ProgramDef[] = [
     pos: { x: 340, y: 30 },
     onDesktop: true,
     path: '/paint',
+  },
+  {
+    id: 'command',
+    name: 'Command Center',
+    meta: 'CTR-11',
+    icon: 'nodes',
+    component: dynamic(() => import('@/programs/command/CommandCenter')),
+    size: { w: 780, h: 700 },
+    pos: { x: 250, y: 26 },
+    chrome: 'crt',
+    onDesktop: true,
+    path: '/command',
   },
   {
     id: 'machine',

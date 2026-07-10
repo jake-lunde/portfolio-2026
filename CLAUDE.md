@@ -221,6 +221,17 @@ Minor inspiration: **[tol.is](https://tol.is)** — smooth, tactile, spring-base
 
 ---
 
+## 13.5 Agent workflow (Jake's delegation policy, 2026-07-09)
+
+When work is separable, delegate: **Sonnet 5** agents for low-level tasks and
+research; **Opus 4.8** agents for bigger delegated tasks, synthesis, and
+reviews; **Fable 5** finalizes outputs — or the orchestrating session reviews
+final outputs itself. Avoid fanning out agents; each agent gets one focused,
+self-contained task with the exact context it needs, and runs while the
+orchestrator keeps building. The crew is named (HERTZ, NYQUIST = Sonnet ·
+FOURIER, DOPPLER = Opus · FABLE = orchestrator) — use the names in dispatch
+descriptions so the Command Center program can narrate real sessions.
+
 ## 14. Guardrails
 
 - Don't add libraries not listed without a reason. Don't invent colors or type scales. Two accents only: blue (system) + pink (expressive).

@@ -1,0 +1,418 @@
+{
+  "recorded": "2026-07-09",
+  "agents": [
+    {
+      "id": "fable",
+      "name": "FABLE",
+      "model": "FABLE-5",
+      "role": "ORCHESTRATION"
+    },
+    {
+      "id": "hertz",
+      "name": "HERTZ",
+      "model": "SONNET-5",
+      "role": "RESEARCH"
+    },
+    {
+      "id": "nyquist",
+      "name": "NYQUIST",
+      "model": "SONNET-5",
+      "role": "IMPLEMENTATION"
+    },
+    {
+      "id": "fourier",
+      "name": "FOURIER",
+      "model": "OPUS-4.8",
+      "role": "SYNTHESIS"
+    },
+    {
+      "id": "doppler",
+      "name": "DOPPLER",
+      "model": "OPUS-4.8",
+      "role": "REVIEW"
+    }
+  ],
+  "sequence": [
+    {
+      "t": 0,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "nyquist",
+      "label": "SCAFFOLD NEXT SHELL · TOKENS · MOTION"
+    },
+    {
+      "t": 3,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "fourier",
+      "label": "COMPOSE INVEST CASE · MDX PROSE"
+    },
+    {
+      "t": 6,
+      "agent": "nyquist",
+      "action": "return",
+      "label": "SHELL FRAMED · LIGHT+DARK TOGGLE HOT"
+    },
+    {
+      "t": 8,
+      "agent": "fourier",
+      "action": "return",
+      "label": "INVEST CASE SEALED · MOAT+SCRUB LIVE"
+    },
+    {
+      "t": 9,
+      "agent": "fable",
+      "action": "merge",
+      "label": "V0.1 MERGED · SHIPPED TO PUBLIC WIRE"
+    },
+    {
+      "t": 12,
+      "agent": "doppler",
+      "action": "review",
+      "label": "SCANNING PUBLIC HEAD · RAW WIRE PROBE"
+    },
+    {
+      "t": 13,
+      "agent": "doppler",
+      "action": "status",
+      "label": "HTTP 200 · PROTECTED FILES EXPOSED"
+    },
+    {
+      "t": 14,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "nyquist",
+      "label": "PURGE TRACKED FILES · REWRITE HISTORY"
+    },
+    {
+      "t": 16,
+      "agent": "fable",
+      "action": "status",
+      "label": "AWAITING HUMAN · DESTRUCTIVE STEP GATED"
+    },
+    {
+      "t": 17,
+      "agent": "fable",
+      "action": "merge",
+      "label": "FORCE-PUSH APPROVED · HISTORY CLEAN"
+    },
+    {
+      "t": 18,
+      "agent": "doppler",
+      "action": "return",
+      "label": "PUBLIC WIRE SCRUBBED · 0 SECRETS TRACKED"
+    },
+    {
+      "t": 22,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "nyquist",
+      "label": "GUESTBOOK · DURABLE BLOB BACKING"
+    },
+    {
+      "t": 25,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "hertz",
+      "label": "PROBE STORAGE ENV · NAMES ONLY"
+    },
+    {
+      "t": 27,
+      "agent": "hertz",
+      "action": "return",
+      "label": "OIDC STORE ID FOUND · TOKEN PATH RETIRED"
+    },
+    {
+      "t": 28,
+      "agent": "nyquist",
+      "action": "return",
+      "label": "GUESTBOOK PERSISTS · 3 DEPLOYS · 15 MIN"
+    },
+    {
+      "t": 33,
+      "agent": "fable",
+      "action": "merge",
+      "label": "V0.2 MERGED · SHELL DRESSED · YEAR 1992"
+    },
+    {
+      "t": 37,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "hertz",
+      "label": "STRAVA RIDE · PULL THE GPX"
+    },
+    {
+      "t": 38,
+      "agent": "hertz",
+      "action": "status",
+      "label": "RIDE FOUND · ANOTHER ONE (DJ KHALED)"
+    },
+    {
+      "t": 39,
+      "agent": "nyquist",
+      "action": "status",
+      "label": "GPS TRIMMED 150M · HOME STAYS HOME"
+    },
+    {
+      "t": 41,
+      "agent": "hertz",
+      "action": "return",
+      "label": "RIDE STREAM DECODED · METERS NORMALIZED"
+    },
+    {
+      "t": 43,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "nyquist",
+      "label": "FLOWERS · PHOTOSCAN TO LOW-POLY"
+    },
+    {
+      "t": 44,
+      "agent": "nyquist",
+      "action": "status",
+      "label": "DECIMATING PHOTOSCAN · 50K→1970 FACES"
+    },
+    {
+      "t": 46,
+      "agent": "nyquist",
+      "action": "return",
+      "label": "FLOWERS CRYSTALLIZED · WIFE'S GARDEN"
+    },
+    {
+      "t": 48,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "hertz",
+      "label": "SCROBBLES · A YEAR OF LAST.FM"
+    },
+    {
+      "t": 50,
+      "agent": "hertz",
+      "action": "return",
+      "label": "12 MONTHS SCROBBLED · BAKED TO JSON"
+    },
+    {
+      "t": 51,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "nyquist",
+      "label": "FLIGHTS + SLOPES · TWO VIZ"
+    },
+    {
+      "t": 53,
+      "agent": "nyquist",
+      "action": "return",
+      "label": "US FLIGHT ARCS + SKI TRACKS LIVE"
+    },
+    {
+      "t": 54,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "fourier",
+      "label": "TAURUS · CONSTELLATION VIZ"
+    },
+    {
+      "t": 56,
+      "agent": "fourier",
+      "action": "return",
+      "label": "TAURUS WIRED · HUD FLIPS IDLE↔SCRUB"
+    },
+    {
+      "t": 59,
+      "agent": "fable",
+      "action": "merge",
+      "label": "VISUALIZERS BROKEN OUT TO DESKTOP"
+    },
+    {
+      "t": 63,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "nyquist",
+      "label": "STUDIO · WEBAUDIO WMP VISUALIZER"
+    },
+    {
+      "t": 65,
+      "agent": "nyquist",
+      "action": "return",
+      "label": "5 REMIXES · BARS/SCOPE/RINGS · SURVIVES"
+    },
+    {
+      "t": 66,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "hertz",
+      "label": "APPLE MUSIC · MINT USER TOKEN"
+    },
+    {
+      "t": 69,
+      "agent": "hertz",
+      "action": "return",
+      "label": "NOW PLAYING LIVE · APPLE WIRE HOT"
+    },
+    {
+      "t": 70,
+      "agent": "fable",
+      "action": "merge",
+      "label": "STUDIO + NOW PLAYING MERGED"
+    },
+    {
+      "t": 74,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "nyquist",
+      "label": "PHOTO BOOTH · PER-PIXEL VHS/DITHER/CRT"
+    },
+    {
+      "t": 76,
+      "agent": "nyquist",
+      "action": "return",
+      "label": "PIN TO WALL · LAST 3 SNAPS LOCAL"
+    },
+    {
+      "t": 77,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "fourier",
+      "label": "JIGSAW + COLORING · 4 TATTOO PAGES"
+    },
+    {
+      "t": 79,
+      "agent": "fourier",
+      "action": "return",
+      "label": "TATTOO PAGES INKED · SNAKE WEAKEST"
+    },
+    {
+      "t": 80,
+      "agent": "fable",
+      "action": "merge",
+      "label": "THREE TOYS MERGED · ARCADE GROWS"
+    },
+    {
+      "t": 84,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "nyquist",
+      "label": "LOU.SYS · PIXEL DOG SCREENSAVER"
+    },
+    {
+      "t": 85,
+      "agent": "nyquist",
+      "action": "status",
+      "label": "PIXEL LOU CALIBRATED · 26×20 GRID"
+    },
+    {
+      "t": 87,
+      "agent": "nyquist",
+      "action": "return",
+      "label": "LOU.SYS ARMED · 5-MIN IDLE · TRIPLE-CLICK"
+    },
+    {
+      "t": 88,
+      "agent": "fable",
+      "action": "merge",
+      "label": "LOU.SYS + ABOUT THIS MACHINE MERGED"
+    },
+    {
+      "t": 92,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "hertz",
+      "label": "MEASURE OVERFLOW · ALL WINDOWS"
+    },
+    {
+      "t": 94,
+      "agent": "hertz",
+      "action": "return",
+      "label": "OVERFLOW MAPPED · +8PX BUFFER SPEC'D"
+    },
+    {
+      "t": 95,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "nyquist",
+      "label": "RESIZABLE WINDOWS · RIBBED GRIP"
+    },
+    {
+      "t": 97,
+      "agent": "nyquist",
+      "action": "return",
+      "label": "DEFAULTS RE-FITTED · CONTENT FITS ON OPEN"
+    },
+    {
+      "t": 98,
+      "agent": "fable",
+      "action": "merge",
+      "label": "RESIZE + FIT MERGED"
+    },
+    {
+      "t": 101,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "nyquist",
+      "label": "DAILY WIDGET · AMBIENT GAUGES"
+    },
+    {
+      "t": 103,
+      "agent": "nyquist",
+      "action": "return",
+      "label": "COFFEE + LOU'S MEDS · BOTTOM-LEFT EDGE"
+    },
+    {
+      "t": 104,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "fourier",
+      "label": "PHOTO WALL · PINNED BOOTH SNAPS"
+    },
+    {
+      "t": 106,
+      "agent": "fourier",
+      "action": "return",
+      "label": "PHOTO WALL HUNG · LAST 3 · RIGHT EDGE"
+    },
+    {
+      "t": 108,
+      "agent": "fable",
+      "action": "merge",
+      "label": "AMBIENT WIDGETS MERGED · LIVE AT LUNDE.CO"
+    },
+    {
+      "t": 113,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "hertz",
+      "label": "RESEARCH APIS · READ THE DOCS"
+    },
+    {
+      "t": 115,
+      "agent": "hertz",
+      "action": "return",
+      "label": "API SURFACE MAPPED · ENDPOINTS GREEN"
+    },
+    {
+      "t": 116,
+      "agent": "fable",
+      "action": "dispatch",
+      "target": "fourier",
+      "label": "COMPOSE COMMAND CENTER TIMELINE"
+    },
+    {
+      "t": 118,
+      "agent": "fourier",
+      "action": "status",
+      "label": "WRITING THIS VERY SEQUENCE — ONE WINK"
+    },
+    {
+      "t": 119,
+      "agent": "fourier",
+      "action": "return",
+      "label": "TIMELINE SYNTHESIZED · CREW REPLAYED"
+    },
+    {
+      "t": 120,
+      "agent": "fable",
+      "action": "merge",
+      "label": "COMMAND CENTER MERGED · REPLAY ARMED"
+    }
+  ]
+}
