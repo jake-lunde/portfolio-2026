@@ -22,6 +22,7 @@ const ORDER = [
   'puzzle',
   'paint',
   'sequencer',
+  'command',
   'field-notes',
   'spec-sheet',
 ]

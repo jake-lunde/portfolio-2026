@@ -149,18 +149,16 @@ export const PROGRAMS: ProgramDef[] = [
     size: { w: 780, h: 700 },
     pos: { x: 250, y: 26 },
     chrome: 'crt',
-    // lives as the desktop CommandWidget now; the window opens from there or /command
-    onDesktop: false,
+    onDesktop: true,
     path: '/command',
   },
   {
     id: 'field-notes',
-    name: 'Field Notes',
-    desktopLabel: '???', // WIP — disguised as a mystery icon until Jake ships it
+    name: '???', // sealed until Jake clears it — swap back to 'Field Notes' + FieldNotes.tsx
     meta: 'RES-13',
     icon: 'mystery',
-    component: dynamic(() => import('@/programs/fieldnotes/FieldNotes')),
-    size: { w: 560, h: 680 },
+    component: dynamic(() => import('@/programs/fieldnotes/Sealed')),
+    size: { w: 430, h: 380 },
     pos: { x: 220, y: 44 },
     onDesktop: true,
     path: '/field-notes',

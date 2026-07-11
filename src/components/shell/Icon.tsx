@@ -178,13 +178,13 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   swatch: (
-    // a design-token card: three overlapping paint chips (fanned), a
-    // type 'A' specimen, and a hex tick — color · type · tokens
+    // a paint-chip card (Pantone-style): solid color block up top,
+    // spec lines below; a second chip peeks out behind
     <>
-      <rect x="4" y="9" width="13" height="17" rx="1.5" transform="rotate(-9 10.5 17.5)" />
-      <rect x="11" y="7" width="13" height="17" rx="1.5" transform="rotate(3 17.5 15.5)" />
-      <rect x="18" y="6" width="11" height="17" rx="1.5" fill="var(--paper)" />
-      <path d="M21 19l2.5-9 2.5 9M21.7 16h3.6" />
+      <path d="M6 6l-3 20 5 1" opacity=".5" />
+      <rect x="9" y="3" width="17" height="26" />
+      <rect x="12" y="6" width="11" height="11" fill="currentColor" stroke="none" />
+      <path d="M12 21.5h11M12 25h7" />
     </>
   ),
   mystery: (

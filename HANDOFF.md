@@ -293,6 +293,27 @@ the grid (`.trashGrid` shown ≤720px, `.trashIcon` corner hidden). ADD-A-
 PROGRAM NOTE: desktop order is now the ORDER array in DesktopIcons.tsx, not
 registry order — add new ids there (before 'settings').
 
+### 2026-07-11 (Fable, session 6 — reverts + shared-element zoom + doctrine)
+CC WIDGET REVERTED (Jake's call): CommandWidget.tsx deleted + its CSS;
+command back on the desktop (registry onDesktop:true, 'command' in the
+DesktopIcons ORDER array). SPEC.SHEET icon take 3: Pantone-style paint chip
+(solid block + spec lines, second chip behind). FIELD.NOTES fully sealed:
+registry name '???' → programs/fieldnotes/Sealed.tsx (dossier-folder SVG +
+SEALED stamp + RES-13 note, Trash-teaser pattern; window 430×380); the real
+FieldNotes.tsx stays dormant — to launch, restore name/component/size.
+PHOTO ZOOM is now a TRUE shared element (Motion layoutId=photo URL): the
+pinned polaroid itself flies to center (72vmin) and back on click-anywhere/
+Esc — no separate lightbox img; wall siblings animate the gap (layout prop).
+NOW-PLAYING widget shrunk to polaroid size (132px, matches photoWall) and
+zooms the same way (layoutId np-card). CLAUDE.md §13.5 HARDENED: deck + 
+delegation are session PROTOCOL for any orchestrating model — solo sessions
+must self-report to the deck and declare "going solo" reasoning in the final
+reply. NEW: CREW.md — delegation doctrine v1 (task-shape routing:
+closed→Sonnet, open→Opus, taste/vision→orchestrator; whole-problems-first
+splitting; economics; deck-viz roadmap incl. ownership lanes + solo events).
+Read it before dispatching. GOTCHA: hidden preview tab stalls AnimatePresence
+exits (overlay lingers at opacity 0) — state is correct, don't chase it.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed

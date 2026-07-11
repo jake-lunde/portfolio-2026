@@ -221,16 +221,30 @@ Minor inspiration: **[tol.is](https://tol.is)** — smooth, tactile, spring-base
 
 ---
 
-## 13.5 Agent workflow (Jake's delegation policy, 2026-07-09)
+## 13.5 Agent workflow (Jake's delegation policy, 2026-07-09; hardened 2026-07-11)
 
-When work is separable, delegate: **Sonnet 5** agents for low-level tasks and
-research; **Opus 4.8** agents for bigger delegated tasks, synthesis, and
-reviews; **Fable 5** finalizes outputs — or the orchestrating session reviews
-final outputs itself. Avoid fanning out agents; each agent gets one focused,
-self-contained task with the exact context it needs, and runs while the
-orchestrator keeps building. The crew is named (HERTZ, NYQUIST = Sonnet ·
-FOURIER, DOPPLER = Opus · FABLE = orchestrator) — use the names in dispatch
-descriptions so the Command Center program can narrate real sessions.
+**This is session protocol, not a preference — it applies to WHOEVER is
+orchestrating (Fable 5, Opus 4.8, any future model).** Two duties, every
+working session:
+
+1. **Run the deck live.** First action of any build session: report a
+   `dispatch` event via `scripts/cc-report.mjs` (key in `.env.local`); report
+   agent `return`s as they land and a `merge` when you ship. Even a solo
+   session reports its own start/merge — COMMAND.CTR being live IS a feature
+   of the site. Space calls ≥2s.
+2. **Delegate separable work.** Before building, ask: "which of these items
+   could a crew member do from a two-paragraph brief while I build the rest?"
+   If ≥2 such items exist, dispatch (don't fan out — one Sonnet bundle and/or
+   one Opus task, each self-contained with exact file ownership). Only skip
+   delegation when the whole turn is genuinely entangled or trivially small —
+   and say so explicitly in the final reply so Jake can veto the judgment.
+
+Crew roles: **Sonnet 5** (HERTZ research · NYQUIST implementation) for
+well-specified, low-level tasks; **Opus 4.8** (FOURIER synthesis · DOPPLER
+review) for bigger delegated builds and reviews; the orchestrator reviews all
+returns itself (or hands final polish to Fable). Use the crew names in
+dispatch descriptions so the deck narrates truthfully. `CREW.md` holds the
+evolving doctrine on how to split work — read it when planning a dispatch.
 
 ## 13.6 End of session — always
 
