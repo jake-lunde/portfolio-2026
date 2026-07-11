@@ -5,6 +5,8 @@ import type { IconName } from '@/components/shell/Icon'
 export type ProgramDef = {
   id: string
   name: string // desktop label + window title
+  /** overrides the desktop icon label only (window title stays `name`) */
+  desktopLabel?: string
   meta: string // mono doc-id in the titlebar, e.g. "SPEC-01"
   icon: IconName
   component: ComponentType
@@ -55,7 +57,8 @@ export const PROGRAMS: ProgramDef[] = [
     size: { w: 420, h: 320 },
     pos: { x: 300, y: 160 },
     chrome: 'crt',
-    onDesktop: true,
+    // off the desktop — the Now Playing state lives in the top-right widget
+    onDesktop: false,
   },
   {
     id: 'studio',
@@ -153,8 +156,9 @@ export const PROGRAMS: ProgramDef[] = [
   {
     id: 'field-notes',
     name: 'Field Notes',
+    desktopLabel: '???', // WIP — disguised as a mystery icon until Jake ships it
     meta: 'RES-13',
-    icon: 'clipboard',
+    icon: 'mystery',
     component: dynamic(() => import('@/programs/fieldnotes/FieldNotes')),
     size: { w: 560, h: 680 },
     pos: { x: 220, y: 44 },

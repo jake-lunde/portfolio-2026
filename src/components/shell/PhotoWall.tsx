@@ -31,6 +31,7 @@ function readWall(): string[] {
 export function PhotoWall() {
   const [photos, setPhotos] = useState<string[]>([])
   const [shared, setShared] = useState<string[]>([])
+  const [zoomed, setZoomed] = useState<string | null>(null)
   const reduced = useReducedMotion()
 
   useEffect(() => {
@@ -56,20 +57,13 @@ export function PhotoWall() {
     } catch {}
   }, [])
 
-  const remove = (photo: string) => {
-    if (photo === DEFAULT_PHOTO) {
-      try {
-        localStorage.setItem(DISMISS_KEY, '1')
-      } catch {}
-      setDefaultDismissed(true)
-      return
-    }
-    const next = photos.filter((p) => p !== photo)
-    try {
-      localStorage.setItem(WALL_KEY, JSON.stringify(next))
-    } catch {}
-    setPhotos(next)
-  }
+  // close the zoom on Escape
+  useEffect(() => {
+    if (!zoomed) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setZoomed(null)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [zoomed])
 
   // your own pins ride on top (instant, awaiting review), the approved
   // public wall beneath; Jake's founding polaroid holds the fort until
@@ -82,32 +76,56 @@ export function PhotoWall() {
   if (display.length === 0) return null
 
   return (
-    <div className={styles.photoWall} aria-label="Pinned photos">
-      <AnimatePresence>
-        {display.map((photo, i) => (
-          <motion.div
-            key={photo}
-            className={styles.pinned}
-            style={{ ['--tilt' as string]: `${(i % 2 === 0 ? 1 : -1) * (1.5 + i)}deg` }}
-            initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.8, y: -16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.8, y: 16 }}
-            transition={{ type: 'spring', stiffness: 340, damping: 26 }}
-          >
-            <span className={styles.pin} aria-hidden="true" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photo} alt={`Pinned booth photo ${i + 1}`} className={styles.pinnedImg} />
-            <button
-              className={styles.pinRemove}
-              aria-label={`Remove pinned photo ${i + 1}`}
-              onClick={() => remove(photo)}
+    <>
+      <div className={styles.photoWall} aria-label="Pinned photos">
+        <AnimatePresence>
+          {display.map((photo, i) => (
+            <motion.button
+              key={photo}
+              type="button"
+              className={styles.pinned}
+              style={{ ['--tilt' as string]: `${(i % 2 === 0 ? 1 : -1) * (1.5 + i)}deg` }}
+              initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.8, y: -16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.8, y: 16 }}
+              transition={{ type: 'spring', stiffness: 340, damping: 26 }}
+              onClick={() => setZoomed(photo)}
+              aria-label={`View pinned booth photo ${i + 1} larger`}
             >
-              ×
-            </button>
+              <span className={styles.pin} aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo} alt={`Pinned booth photo ${i + 1}`} className={styles.pinnedImg} />
+            </motion.button>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* click a pin to zoom; click anywhere (or Esc) to zoom back out */}
+      <AnimatePresence>
+        {zoomed && (
+          <motion.div
+            className={styles.photoZoom}
+            onClick={() => setZoomed(null)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            role="dialog"
+            aria-label="Enlarged photo"
+          >
+            <motion.img
+              src={zoomed}
+              alt="Enlarged booth photo"
+              className={styles.photoZoomImg}
+              initial={reduced ? { opacity: 0 } : { scale: 0.86, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={reduced ? { opacity: 0 } : { scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+            />
           </motion.div>
-        ))}
+        )}
       </AnimatePresence>
-    </div>
+    </>
   )
 }
 

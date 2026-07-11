@@ -52,17 +52,19 @@ export function CommandWidget() {
 
   // the full program is open — the widget stands down
   if (windows.some((w) => w.id === 'command')) return null
+  // only surface when a real session is orchestrating; silent when idle
+  if (!live) return null
 
   return (
-    <div className={styles.ccWidget} data-live={live || undefined}>
+    <div className={styles.ccWidget} data-live>
       <button
         className={styles.ccPill}
         onClick={() => setExpanded((e) => !e)}
         aria-expanded={expanded}
-        aria-label={`Command Center: ${live ? 'live session in progress' : 'idle'}. ${expanded ? 'Collapse' : 'Expand'} feed.`}
+        aria-label={`Command Center: live session in progress. ${expanded ? 'Collapse' : 'Expand'} feed.`}
       >
         <span className={styles.ccDot} aria-hidden="true" />
-        COMMAND.CTR · {live ? 'LIVE' : 'IDLE'}
+        COMMAND.CTR · LIVE
         <span className={styles.ccChevron} aria-hidden="true">
           {expanded ? '▴' : '▾'}
         </span>

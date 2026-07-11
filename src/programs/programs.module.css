@@ -30,10 +30,10 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle 4.5px at 7px 0px, var(--hole) 4px, transparent 4.6px),
-    radial-gradient(circle 4.5px at 7px 8px, var(--hole) 4px, transparent 4.6px),
-    radial-gradient(circle 4.5px at 0px 7px, var(--hole) 4px, transparent 4.6px),
-    radial-gradient(circle 4.5px at 8px 7px, var(--hole) 4px, transparent 4.6px);
+  background-image: radial-gradient(circle 4.5px at 7px 0px, var(--paper-2) 4px, transparent 4.6px),
+    radial-gradient(circle 4.5px at 7px 8px, var(--paper-2) 4px, transparent 4.6px),
+    radial-gradient(circle 4.5px at 0px 7px, var(--paper-2) 4px, transparent 4.6px),
+    radial-gradient(circle 4.5px at 8px 7px, var(--paper-2) 4px, transparent 4.6px);
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
   background-position: top left, bottom left, top left, top right;
   background-size: 14px 8px, 14px 8px, 8px 14px, 8px 14px;
@@ -88,7 +88,6 @@
   flex: none;
   width: 46%;
   min-height: 168px;
-  border: 1.5px solid var(--stamp-ink);
   background: repeating-linear-gradient(
     to bottom,
     color-mix(in srgb, var(--stamp-ink) 30%, transparent) 0,

@@ -272,6 +272,27 @@ session. GOTCHA learned: preview-pane tab reports document.hidden → rAF and
 Motion animations freeze; don't chase "stuck" opacity/transforms in
 screenshots — verify computed z/state via JS instead.
 
+### 2026-07-11 (Fable, session 5 — 10 micro-polish fixes) — SHIPPED
+(1) FIELD.NOTES hidden as a mystery icon: registry `desktopLabel: '???'` +
+new `mystery` Icon (dashed frame + '?'); window title/route unchanged, opens
+normally. (2) SPEC.SHEET icon redrawn — fanned paint-chips + 'A' type
+specimen (color/type/tokens) replacing the janky swatch. (3) Sticky notes
+repositioned to center band (left %-anchored) so the Now-Playing widget no
+longer covers them; stickies stay z-index 0 décor. (4) Now-Playing widget
+label 'Last played' → 'Now playing' (+aria). (5) Now-Playing PROGRAM off the
+desktop (onDesktop:false); state lives in the widget. (6) Carried Jake's CSS
+tweak (stamp perforation holes → var(--paper-2), plate border removed).
+(7) PhotoWall dead hover × removed. (8) PhotoWall click-to-zoom lightbox
+(`.photoZoom` fixed overlay, click-anywhere / Esc to close; pins are now
+<button>s, cursor zoom-in). (9) CommandWidget only renders when live (idle
+state gone). (10) Desktop icons: new `ProgramDef.desktopLabel`; DesktopIcons
+imposes explicit ORDER (README·GUESTBOOK·MACHINE top row, SETTINGS always
+last) and `.icons` switched to row-flow 3-col so the top row is literal;
+mobile `.icons` scrolls (overflow-y:auto, top/bottom inset) and trash joins
+the grid (`.trashGrid` shown ≤720px, `.trashIcon` corner hidden). ADD-A-
+PROGRAM NOTE: desktop order is now the ORDER array in DesktopIcons.tsx, not
+registry order — add new ids there (before 'settings').
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed

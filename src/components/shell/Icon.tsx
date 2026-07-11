@@ -22,6 +22,7 @@ export type IconName =
   | 'steps'
   | 'clipboard'
   | 'swatch'
+  | 'mystery'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -177,11 +178,21 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   swatch: (
+    // a design-token card: three overlapping paint chips (fanned), a
+    // type 'A' specimen, and a hex tick — color · type · tokens
     <>
-      <rect x="6" y="6" width="6" height="20" rx="1" />
-      <rect x="14" y="6" width="6" height="20" rx="1" opacity=".6" />
-      <path d="M22 8.5l4 1.6-6 15-3.5-1.4" opacity=".85" />
-      <path d="M9 22h.01M17 22h.01" />
+      <rect x="4" y="9" width="13" height="17" rx="1.5" transform="rotate(-9 10.5 17.5)" />
+      <rect x="11" y="7" width="13" height="17" rx="1.5" transform="rotate(3 17.5 15.5)" />
+      <rect x="18" y="6" width="11" height="17" rx="1.5" fill="var(--paper)" />
+      <path d="M21 19l2.5-9 2.5 9M21.7 16h3.6" />
+    </>
+  ),
+  mystery: (
+    // sealed / classified — a stamped question over a dashed frame
+    <>
+      <rect x="6" y="6" width="20" height="20" rx="2" strokeDasharray="3 2.5" />
+      <path d="M12 13a4 4 0 1 1 5.2 3.8c-1 .4-1.2 1-1.2 2v.6" />
+      <path d="M16 23h.02" />
     </>
   ),
 }

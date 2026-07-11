@@ -35,7 +35,7 @@ export function NowPlayingWidget() {
   if (!track?.hasTrack) return null
 
   return (
-    <aside className={styles.npWidget} aria-label="Last played track">
+    <aside className={styles.npWidget} aria-label="Now playing">
       {track.artworkUrl && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -45,7 +45,7 @@ export function NowPlayingWidget() {
         />
       )}
       <div className={styles.npMeta}>
-        <span className={styles.npLabel}>Last played ♪</span>
+        <span className={styles.npLabel}>Now playing ♪</span>
         <span className={styles.npTitle}>{track.title}</span>
         <span className={styles.npArtist}>{track.artist}</span>
       </div>
