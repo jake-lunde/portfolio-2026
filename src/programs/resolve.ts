@@ -12,6 +12,8 @@ export type ResolvedWindow = {
   size: { w: number; h: number }
   pos: { x: number; y: number }
   path: string | null
+  /** requires macrodata refinement (the sphere) before the body shows */
+  gated?: boolean
 }
 
 /* A window id is a program id, `case:<slug>`, or `viz:<id>`. */
@@ -44,6 +46,7 @@ export function resolveWindow(id: string): ResolvedWindow | null {
       size: { w: 860, h: 640 },
       pos: { x: 170, y: 40 },
       path: `/projects/${c.slug}`,
+      gated: true,
     }
   }
   const p = getProgram(id)
@@ -57,6 +60,7 @@ export function resolveWindow(id: string): ResolvedWindow | null {
     size: p.size,
     pos: p.pos,
     path: p.path ?? null,
+    gated: id === 'projects',
   }
 }
 

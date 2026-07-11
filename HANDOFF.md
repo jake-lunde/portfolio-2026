@@ -208,6 +208,33 @@ the snake coloring page is the weakest drawing (Jake may ask for a redraw).
 22. **Invest updates** — multi-company Moat (hand-write 3–4 datasets),
     haptics extended to Moat taps + viz milestones (navigator.vibrate).
 
+### 2026-07-10 (Fable, session 3 — orchestrated) — SHIPPED
+Projects wing GATED by a Severance/MDR sphere (`components/gate/GateSphere.tsx`
++ `store/gate.ts`; passcode LOUIE; fibonacci-sphere of letters, cursor-gravity
+zoom, letters fly to slots, classic-Mac verdict dialog; `gated` flag on
+resolveWindow, rendered in Window.tsx before the body; sessionStorage unlock).
+Coloring book REPLACED by **Tattoo Gun** (`programs/paint/`, was pages.ts →
+now `tattooPaths.ts`): WarioWare-style trace game, 6 tattoos as hand-authored
+pixel strokes, pixel-gun cursor, 25s timer, coverage+precision score, local
+bests. Ambient wanderer enlarged to 34px, campy speech bubbles
+(`crewDialog.ts` by FOURIER), FLEES the cursor (pink, springy). Skills ticker
+under the menu bar (`SkillsTicker.tsx`, desktop inset bumped +21px). README
+rewritten + business-card header w/ Jake's photo (NYQUIST). Puzzle leaderboard
+now always visible. Plane icon redrawn. GATE SOUNDS in `lib/sound.ts`
+(`gateSfx`: pick/remove/success/fail). Skills-flex brief (12 ideas, FOURIER)
+lives in this session's chat — top 3: user-research artifacts, design-system
+docs, product-strategy/metrics.
+BACKLOG (Jake asked, not yet built):
+- **Digital billboard** — Jake wants "a note maybe a digital billboard for
+  later." Unbuilt on purpose (underspecced). Likely: a desktop billboard/
+  marquee surface for announcements ("NOW: open to Staff/Principal roles",
+  "new case study dropping"), editable via a keyed endpoint like cc-feed, or
+  just a static rotating message. Confirm intent + copy w/ Jake first.
+- **Skills-flex programs** (FOURIER's brief): ACCESS.PANEL (a11y), FIELD.NOTES
+  (research), SPEC.SHEET (design system), METRICS.CTR (strategy), MAN pages,
+  MOTION.SPEC, EDGE.CASES gallery. These prove the *product-design* side the
+  engineering-heavy site under-shows.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed

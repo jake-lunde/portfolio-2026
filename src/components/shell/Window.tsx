@@ -5,6 +5,8 @@ import { motion, useDragControls, useReducedMotion } from 'motion/react'
 import type { RefObject } from 'react'
 import type { ResolvedWindow } from '@/programs/resolve'
 import { useWindows } from '@/store/windows'
+import { useGate } from '@/store/gate'
+import { GateSphere } from '@/components/gate/GateSphere'
 import { sfx } from '@/lib/sound'
 import styles from './shell.module.css'
 
@@ -18,6 +20,7 @@ type Props = {
 export function Window({ def, z, active, desktopRef }: Props) {
   const close = useWindows((s) => s.close)
   const focus = useWindows((s) => s.focus)
+  const unlocked = useGate((s) => s.unlocked)
   const storedSize = useWindows((s) => s.sizes[def.id])
   const setSize = useWindows((s) => s.setSize)
   const dragControls = useDragControls()
@@ -129,7 +132,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
         </span>
       </div>
       <div className={`${styles.windowBody} ${def.chrome === 'crt' ? `${styles.crt} crt` : ''}`}>
-        {Body ? <Body /> : null}
+        {def.gated && !unlocked ? <GateSphere /> : Body ? <Body /> : null}
       </div>
       {!zoomed && (
         <div

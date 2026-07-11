@@ -1,242 +1,273 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { sfx } from '@/lib/sound'
-import { PAGES } from './pages'
+import { motion, AnimatePresence } from 'motion/react'
+import { Stamp } from '@/components/primitives/Stamp'
+import { metric } from '@/lib/metrics'
+import { sfx, gateSfx } from '@/lib/sound'
+import { TATTOOS, type Tattoo } from './tattooPaths'
 import styles from './paint.module.css'
 
-/* Coloring book — MS Paint by way of the print archive. A scanline flood
-   fill that respects the line art as barriers, a brush, an undo stack,
-   and a limited archival palette. Pages are Jake's tattoos, redrawn as
-   flash-style line art (see pages.ts — each credits the artist). */
+/* TATTOO GUN — a WarioWare-Touched-style tracing game. Jake's actual
+   tattoos, redrawn as pixel flash; you get one needle, 25 seconds, and
+   a steadiness score. The cursor is the machine. Trace true. */
 
 const W = 460
-const H = 480
+const H = 460
+const SCALE = W / 100
+const HIT_R = 6 * SCALE // forgiveness radius, canvas px
+const ROUND_SECS = 25
 
-const PALETTE = [
-  { name: 'blue', hex: '#2036C8' },
-  { name: 'pink', hex: '#F2A6C2' },
-  { name: 'green', hex: '#2E4A38' },
-  { name: 'ink', hex: '#17150D' },
-  { name: 'cream', hex: '#E7E1D2' },
-  { name: 'white', hex: '#FFFFFF' },
+// pixel tattoo gun cursor (hotspot at the needle tip, bottom-left)
+const GUN =
+  'url("data:image/svg+xml,' +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26'><g fill='%2317150D'><rect x='4' y='16' width='3' height='7'/><rect x='6' y='12' width='8' height='6'/><rect x='12' y='8' width='5' height='8'/><rect x='15' y='4' width='8' height='7'/><rect x='19' y='11' width='3' height='3'/></g><rect x='2' y='22' width='3' height='3' fill='%23F2A6C2'/></svg>`
+  ) +
+  '") 3 24, crosshair'
+
+type Phase = 'pick' | 'tracing' | 'scored'
+
+const GRADES: Array<[number, string, string]> = [
+  [85, 'SOLID INK', 'THE NEEDLE SANG. WALK-INS WELCOME.'],
+  [70, 'CLEAN PASS', 'CRISP. THE CLIENT TIPS WELL.'],
+  [50, 'SHAKY HAND', 'HEALED, IT MIGHT LOOK INTENTIONAL.'],
+  [0, 'BLOWOUT', 'THE CLIENT IS CRYING. FREE TOUCH-UP.'],
 ]
 
-const hexRgb = (hex: string): [number, number, number] => [
-  parseInt(hex.slice(1, 3), 16),
-  parseInt(hex.slice(3, 5), 16),
-  parseInt(hex.slice(5, 7), 16),
-]
+const BEST_KEY = 'lunde-tattoo-best'
 
-const isLine = (d: Uint8ClampedArray, i: number) => d[i] < 90 && d[i + 1] < 90 && d[i + 2] < 90
-
-function floodFill(g: CanvasRenderingContext2D, sx: number, sy: number, hex: string) {
-  const img = g.getImageData(0, 0, W, H)
-  const d = img.data
-  const at = (x: number, y: number) => (y * W + x) * 4
-  const start = at(sx, sy)
-  if (isLine(d, start)) return // clicked the outline itself
-  const [tr, tg, tb] = [d[start], d[start + 1], d[start + 2]]
-  const [fr, fg, fb] = hexRgb(hex)
-  if (Math.abs(tr - fr) + Math.abs(tg - fg) + Math.abs(tb - fb) < 12) return
-  const match = (i: number) =>
-    !isLine(d, i) &&
-    Math.abs(d[i] - tr) < 42 &&
-    Math.abs(d[i + 1] - tg) < 42 &&
-    Math.abs(d[i + 2] - tb) < 42
-  const paint = (i: number) => {
-    d[i] = fr
-    d[i + 1] = fg
-    d[i + 2] = fb
-    d[i + 3] = 255
-  }
-  // scanline fill
-  const stack: Array<[number, number]> = [[sx, sy]]
-  while (stack.length) {
-    const [x0, y] = stack.pop()!
-    let x = x0
-    while (x >= 0 && match(at(x, y))) x--
-    x++
-    let above = false
-    let below = false
-    while (x < W && match(at(x, y))) {
-      paint(at(x, y))
-      if (y > 0) {
-        const m = match(at(x, y - 1))
-        if (m && !above) {
-          stack.push([x, y - 1])
-          above = true
-        } else if (!m) above = false
+/* resample a stroke list into evenly spaced canvas-space points */
+function samplePoints(t: Tattoo, gap = 3): Array<[number, number]> {
+  const pts: Array<[number, number]> = []
+  for (const stroke of t.strokes) {
+    for (let i = 0; i < stroke.length - 1; i++) {
+      const [x1, y1] = stroke[i]
+      const [x2, y2] = stroke[i + 1]
+      const d = Math.hypot(x2 - x1, y2 - y1)
+      const steps = Math.max(1, Math.round(d / gap))
+      for (let s = 0; s <= steps; s++) {
+        pts.push([(x1 + ((x2 - x1) * s) / steps) * SCALE, (y1 + ((y2 - y1) * s) / steps) * SCALE])
       }
-      if (y < H - 1) {
-        const m = match(at(x, y + 1))
-        if (m && !below) {
-          stack.push([x, y + 1])
-          below = true
-        } else if (!m) below = false
-      }
-      x++
     }
   }
-  g.putImageData(img, 0, 0)
+  return pts
 }
-
-type Tool = 'fill' | 'brush'
 
 export default function Paint() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const undoRef = useRef<ImageData[]>([])
+  const [tattooIdx, setTattooIdx] = useState(0)
+  const [phase, setPhase] = useState<Phase>('pick')
+  const [secs, setSecs] = useState(ROUND_SECS)
+  const [score, setScore] = useState(0)
+  const [best, setBest] = useState<Record<string, number>>({})
+  const inked = useRef<Array<[number, number]>>([])
   const drawing = useRef(false)
-  const [tool, setTool] = useState<Tool>('fill')
-  const [color, setColor] = useState(PALETTE[0].hex)
-  const [ready, setReady] = useState(false)
-  const [page, setPage] = useState(0)
+  const target = useRef<Array<[number, number]>>([])
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const loadArt = () => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const g = canvas.getContext('2d', { willReadFrequently: true })!
-    const img = new Image()
-    img.onload = () => {
-      g.fillStyle = '#FFFFFF'
-      g.fillRect(0, 0, W, H)
-      g.drawImage(img, 0, 0)
-      undoRef.current = []
-      setReady(true)
+  const tattoo = TATTOOS[tattooIdx]
+
+  useEffect(() => {
+    try {
+      setBest(JSON.parse(localStorage.getItem(BEST_KEY) ?? '{}'))
+    } catch {}
+  }, [])
+
+  const drawGuide = (ghost: boolean) => {
+    const g = canvasRef.current?.getContext('2d')
+    if (!g) return
+    g.clearRect(0, 0, W, H)
+    // paper flash-card grid
+    g.fillStyle = '#FFFFFF'
+    g.fillRect(0, 0, W, H)
+    g.strokeStyle = 'rgba(23,21,13,0.06)'
+    g.lineWidth = 1
+    for (let i = 0; i <= 10; i++) {
+      g.beginPath(); g.moveTo(i * (W / 10), 0); g.lineTo(i * (W / 10), H); g.stroke()
+      g.beginPath(); g.moveTo(0, i * (H / 10)); g.lineTo(W, i * (H / 10)); g.stroke()
     }
-    img.src = `data:image/svg+xml,${encodeURIComponent(PAGES[page].svg)}`
+    // the stencil: chunky pixel dots
+    g.fillStyle = ghost ? 'rgba(92,124,255,0.35)' : 'rgba(92,124,255,0.8)'
+    for (const [x, y] of target.current) g.fillRect(x - 2, y - 2, 4, 4)
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(loadArt, [page])
-
-  const pushUndo = () => {
-    const g = canvasRef.current!.getContext('2d', { willReadFrequently: true })!
-    undoRef.current.push(g.getImageData(0, 0, W, H))
-    if (undoRef.current.length > 12) undoRef.current.shift()
+  const redrawInk = () => {
+    const g = canvasRef.current?.getContext('2d')
+    if (!g) return
+    g.fillStyle = '#17150D'
+    for (const [x, y] of inked.current) g.fillRect(x - 2.5, y - 2.5, 5, 5)
   }
+
+  const begin = (idx: number) => {
+    setTattooIdx(idx)
+    sfx.open()
+    inked.current = []
+    target.current = samplePoints(TATTOOS[idx])
+    setSecs(ROUND_SECS)
+    setPhase('tracing')
+    setTimeout(() => drawGuide(false), 30)
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => {
+      setSecs((s) => {
+        if (s <= 1) {
+          finish()
+          return 0
+        }
+        if (s <= 6) sfx.tap()
+        return s - 1
+      })
+    }, 1000)
+  }
+
+  const finish = () => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    drawing.current = false
+    const t = target.current
+    const ink = inked.current
+    let covered = 0
+    for (const [tx, ty] of t) {
+      if (ink.some(([ix, iy]) => Math.hypot(ix - tx, iy - ty) < HIT_R)) covered++
+    }
+    let precise = 0
+    for (const [ix, iy] of ink) {
+      if (t.some(([tx, ty]) => Math.hypot(ix - tx, iy - ty) < HIT_R)) precise++
+    }
+    const coverage = t.length ? covered / t.length : 0
+    const precision = ink.length ? precise / ink.length : 0
+    const s = Math.round(100 * (coverage * 0.65 + precision * 0.35))
+    setScore(s)
+    setPhase('scored')
+    if (s >= 70) gateSfx.success()
+    else gateSfx.fail()
+    metric('tattoo_trace', { tattoo: tattoo.id })
+    setBest((cur) => {
+      const next = { ...cur, [tattoo.id]: Math.max(cur[tattoo.id] ?? 0, s) }
+      try {
+        localStorage.setItem(BEST_KEY, JSON.stringify(next))
+      } catch {}
+      return next
+    })
+  }
+
+  useEffect(() => () => {
+    if (timerRef.current) clearInterval(timerRef.current)
+  }, [])
 
   const pos = (e: React.PointerEvent): [number, number] => {
     const rect = canvasRef.current!.getBoundingClientRect()
-    return [
-      Math.floor(((e.clientX - rect.left) / rect.width) * W),
-      Math.floor(((e.clientY - rect.top) / rect.height) * H),
-    ]
+    return [((e.clientX - rect.left) / rect.width) * W, ((e.clientY - rect.top) / rect.height) * H]
   }
 
   const onDown = (e: React.PointerEvent) => {
-    if (!ready) return
-    const g = canvasRef.current!.getContext('2d', { willReadFrequently: true })!
-    const [x, y] = pos(e)
-    pushUndo()
-    if (tool === 'fill') {
-      floodFill(g, x, y, color)
-      sfx.tap()
-    } else {
-      drawing.current = true
-      canvasRef.current!.setPointerCapture(e.pointerId)
-      g.fillStyle = color
-      g.beginPath()
-      g.arc(x, y, 5, 0, Math.PI * 2)
-      g.fill()
-    }
+    if (phase !== 'tracing') return
+    drawing.current = true
+    canvasRef.current!.setPointerCapture(e.pointerId)
+    inked.current.push(pos(e))
+    redrawInk()
   }
 
   const onMove = (e: React.PointerEvent) => {
-    if (!drawing.current) return
-    const g = canvasRef.current!.getContext('2d')!
-    const [x, y] = pos(e)
-    g.fillStyle = color
-    g.beginPath()
-    g.arc(x, y, 5, 0, Math.PI * 2)
-    g.fill()
+    if (!drawing.current || phase !== 'tracing') return
+    inked.current.push(pos(e))
+    redrawInk()
   }
 
-  const onUp = () => (drawing.current = false)
-
-  const undo = () => {
-    const prev = undoRef.current.pop()
-    if (!prev) return
-    canvasRef.current!.getContext('2d')!.putImageData(prev, 0, 0)
-    sfx.close()
-  }
-
-  const save = () => {
-    const a = document.createElement('a')
-    a.href = canvasRef.current!.toDataURL('image/png')
-    a.download = `lunde-coloring-${Date.now()}.png`
-    a.click()
-    sfx.open()
-  }
+  const grade = GRADES.find(([min]) => score >= min)!
 
   return (
-    <div className={styles.paint}>
-      <div className={styles.toolbar}>
-        <div className={styles.tools} role="group" aria-label="Tool">
-          <button className={styles.toolBtn} aria-pressed={tool === 'fill'} onClick={() => setTool('fill')}>
-            ◍ FILL
-          </button>
-          <button className={styles.toolBtn} aria-pressed={tool === 'brush'} onClick={() => setTool('brush')}>
-            ✎ BRUSH
-          </button>
-        </div>
-        <div className={styles.actions}>
-          <button className={styles.toolBtn} onClick={undo}>
-            ↶ UNDO
-          </button>
-          <button className={styles.toolBtn} onClick={loadArt}>
-            ✕ CLEAR
-          </button>
-          <button className={styles.toolBtn} onClick={save}>
-            ↓ SAVE
-          </button>
-        </div>
-      </div>
+    <div className={styles.shop}>
+      {phase === 'pick' && (
+        <>
+          <p className={styles.shopHead}>FLASH WALL — PICK YOUR PIECE</p>
+          <div className={styles.flashWall}>
+            {TATTOOS.map((t, i) => (
+              <button key={t.id} className={styles.flashCard} onClick={() => begin(i)}>
+                <FlashThumb tattoo={t} />
+                <span className={styles.flashName}>{t.name.toUpperCase()}</span>
+                <span className={styles.flashMeta}>
+                  {'★'.repeat(t.difficulty)}
+                  {best[t.id] !== undefined ? ` · BEST ${best[t.id]}%` : ''}
+                </span>
+              </button>
+            ))}
+          </div>
+          <p className={styles.shopNote}>
+            TRACE THE STENCIL WITH THE MACHINE · {ROUND_SECS}s ON THE CLOCK · STEADY HANDS
+          </p>
+        </>
+      )}
 
-      <div className={styles.pages} role="group" aria-label="Coloring page">
-        {PAGES.map((p, i) => (
-          <button
-            key={p.id}
-            className={styles.pageChip}
-            aria-pressed={page === i}
-            onClick={() => {
-              sfx.tap()
-              setPage(i)
-            }}
-          >
-            {p.title.toUpperCase()}
-          </button>
-        ))}
-      </div>
-
-      <div className={styles.palette} role="group" aria-label="Color">
-        {PALETTE.map((c) => (
-          <button
-            key={c.name}
-            className={styles.chip}
-            aria-pressed={color === c.hex}
-            aria-label={`${c.name} paint`}
-            style={{ background: c.hex }}
-            onClick={() => {
-              sfx.tap()
-              setColor(c.hex)
-            }}
+      {phase !== 'pick' && (
+        <>
+          <div className={styles.traceBar}>
+            <span className={styles.traceName}>
+              {tattoo.name.toUpperCase()} · {tattoo.credit}
+            </span>
+            <span className={styles.traceClock} data-low={secs <= 5 || undefined}>
+              {phase === 'tracing' ? `0:${String(secs).padStart(2, '0')}` : `${score}%`}
+            </span>
+            {phase === 'tracing' && (
+              <button className={styles.doneBtn} onClick={finish}>
+                ✓ DONE
+              </button>
+            )}
+          </div>
+          <canvas
+            ref={canvasRef}
+            width={W}
+            height={H}
+            className={styles.skin}
+            style={{ cursor: GUN }}
+            onPointerDown={onDown}
+            onPointerMove={onMove}
+            onPointerUp={() => (drawing.current = false)}
+            role="img"
+            aria-label={`Trace the ${tattoo.name} stencil with the tattoo gun cursor`}
           />
-        ))}
-      </div>
-
-      <canvas
-        ref={canvasRef}
-        width={W}
-        height={H}
-        className={styles.page}
-        onPointerDown={onDown}
-        onPointerMove={onMove}
-        onPointerUp={onUp}
-        role="img"
-        aria-label={`Coloring page: ${PAGES[page].title} tattoo line art. Click a region to fill it with the selected color.`}
-      />
-      <p className={styles.note}>PAGE {String(page + 1).padStart(2, '0')} · {PAGES[page].credit} · FROM JAKE'S ACTUAL ARM</p>
+          <AnimatePresence>
+            {phase === 'scored' && (
+              <motion.div
+                className={styles.verdict}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <Stamp tone={score >= 70 ? 'pink' : 'blue'}>{grade[1]}</Stamp>
+                <span className={styles.verdictScore}>{score}%</span>
+                <span className={styles.verdictLine}>{grade[2]}</span>
+                <div className={styles.verdictRow}>
+                  <button className={styles.doneBtn} onClick={() => begin(tattooIdx)}>
+                    ↻ AGAIN
+                  </button>
+                  <button className={styles.doneBtn} onClick={() => setPhase('pick')}>
+                    ← FLASH WALL
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
     </div>
   )
+}
+
+/* tiny stencil preview on the flash wall */
+function FlashThumb({ tattoo }: { tattoo: Tattoo }) {
+  const ref = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const g = ref.current?.getContext('2d')
+    if (!g) return
+    g.clearRect(0, 0, 100, 100)
+    g.strokeStyle = '#17150D'
+    g.lineWidth = 2
+    g.lineJoin = 'round'
+    for (const stroke of tattoo.strokes) {
+      g.beginPath()
+      stroke.forEach(([x, y], i) => (i === 0 ? g.moveTo(x, y) : g.lineTo(x, y)))
+      g.stroke()
+    }
+  }, [tattoo])
+  return <canvas ref={ref} width={100} height={100} className={styles.thumb} aria-hidden="true" />
 }

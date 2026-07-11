@@ -139,7 +139,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   plane: (
-    <path d="M28 5c-1.4-1.4-4 0-4 0l-6 6-11-3-2 2 8 6-4 4-4-1-1.5 1.5 5 3 3 5L20 39l-1-4 4-4 6 8 2-2-3-11 6-6s1.4-2.6 0-4z" transform="scale(0.72) translate(4 -1)" />
+    <path d="M16 3v9l11 6v3l-11-3v7l4 3v2l-6-2-6 2v-2l4-3v-7L1 21v-3l11-6V3a2 2 0 0 1 4 0z" transform="translate(0 1)" />
   ),
   mountain: (
     <>

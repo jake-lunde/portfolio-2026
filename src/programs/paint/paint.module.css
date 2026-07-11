@@ -1,106 +1,171 @@
-.paint {
-  padding: 12px 16px 16px;
+/* TATTOO GUN — the shop */
+
+.shop {
+  padding: 14px 16px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  position: relative;
+  min-height: 100%;
 }
 
-.toolbar {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.tools,
-.actions {
-  display: flex;
-  gap: 5px;
-}
-
-.toolBtn {
+.shopHead {
   font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  padding: 5px 9px;
-  border: 1.5px solid var(--ink);
-  color: var(--ink);
-  background: var(--paper);
-}
-
-[data-theme='dark'] .toolBtn {
-  border-color: var(--line);
-}
-
-.toolBtn[aria-pressed='true'] {
-  background: var(--blue);
-  color: var(--paper);
-}
-
-[data-theme='dark'] .toolBtn[aria-pressed='true'] {
-  color: #0d100c;
-}
-
-.toolBtn:hover:not([aria-pressed='true']) {
+  font-size: 10px;
+  letter-spacing: 0.2em;
   color: var(--blue);
-  border-color: var(--blue);
+  margin: 4px 0 0;
 }
 
-.palette {
-  display: flex;
-  gap: 6px;
-}
-
-.chip {
-  width: 26px;
-  height: 26px;
-  border: 1.5px solid var(--ink);
-}
-
-.chip[aria-pressed='true'] {
-  outline: 2px solid var(--pink);
-  outline-offset: 2px;
-}
-
-.page {
+.flashWall {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
   width: 100%;
-  max-width: 460px;
-  height: auto;
-  border: 1.5px solid var(--ink);
-  cursor: crosshair;
-  touch-action: none;
-  background: #fff;
 }
 
-[data-theme='dark'] .page {
+@media (max-width: 560px) {
+  .flashWall {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.flashCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 8px 10px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+[data-theme='dark'] .flashCard {
   border-color: var(--line);
 }
 
-.note {
+.flashCard:hover {
+  box-shadow: 3px 3px 0 rgba(23, 21, 13, 0.2);
+  transform: translate(-1px, -1px) rotate(-0.6deg);
+}
+
+.thumb {
+  width: 84px;
+  height: 84px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.flashName {
+  font-family: var(--display);
+  font-size: 11px;
+}
+
+.flashMeta {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.shopNote {
   font-family: var(--mono);
   font-size: 8.5px;
   letter-spacing: 0.14em;
   color: var(--ink-soft);
   margin: 0;
-}
-.pages {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
+  text-align: center;
 }
 
-.pageChip {
+/* tracing */
+
+.traceBar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.traceName {
   font-family: var(--mono);
   font-size: 9px;
-  letter-spacing: 0.12em;
-  padding: 4px 9px;
-  border: 1.5px solid var(--line);
+  letter-spacing: 0.14em;
   color: var(--ink-soft);
+  flex: 1;
 }
 
-.pageChip[aria-pressed="true"] {
-  border-color: var(--pink);
+.traceClock {
+  font-family: var(--display);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.traceClock[data-low] {
+  color: var(--blue);
+}
+
+.doneBtn {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 6px 12px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
   color: var(--ink);
+}
+
+[data-theme='dark'] .doneBtn {
+  border-color: var(--line);
+}
+
+.doneBtn:hover {
+  background: var(--pink);
+  color: #17150d;
+}
+
+.skin {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  border: 1.5px solid var(--ink);
+  touch-action: none;
+}
+
+[data-theme='dark'] .skin {
+  border-color: var(--line);
+}
+
+.verdict {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: color-mix(in srgb, var(--paper-2) 82%, transparent);
+  z-index: 5;
+}
+
+.verdictScore {
+  font-family: var(--display);
+  font-size: 54px;
+  line-height: 1;
+}
+
+.verdictLine {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.verdictRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
 }

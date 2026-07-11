@@ -335,16 +335,18 @@ export default function Puzzle() {
         )}
       </div>
 
-      {scores.length > 0 && (
-        <div className={styles.scores} aria-label="Best times">
-          <span className={styles.scoresHead}>BEST — THIS MACHINE</span>
-          {scores.map((s, i) => (
+      <div className={styles.scores} aria-label="Best times">
+        <span className={styles.scoresHead}>BEST — THIS MACHINE</span>
+        {scores.length > 0 ? (
+          scores.map((s, i) => (
             <span key={i} className={styles.scoreRow}>
               {String(i + 1).padStart(2, '0')} {s.name} — {fmtSecs(s.secs)}
             </span>
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          <span className={styles.scoreRow}>NO TIMES YET — CLOCK&rsquo;S WAITING</span>
+        )}
+      </div>
       <p className={styles.hint}>Drag the pieces into the tray — the clock starts on first touch.</p>
     </div>
   )

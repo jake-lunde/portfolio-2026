@@ -6,6 +6,7 @@ import { useWindows } from '@/store/windows'
 import { resolveWindow } from '@/programs/resolve'
 import { BASE } from '@/lib/base'
 import { MenuBar } from './MenuBar'
+import { SkillsTicker } from './SkillsTicker'
 import { DesktopIcons } from './DesktopIcons'
 import { Wallpaper } from './Wallpaper'
 import { NowPlayingWidget } from './NowPlayingWidget'
@@ -56,6 +57,7 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
   return (
     <>
       <MenuBar />
+      <SkillsTicker />
       <main ref={desktopRef} className={styles.desktop}>
         <Wallpaper />
         <NowPlayingWidget />
