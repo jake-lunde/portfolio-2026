@@ -50,7 +50,9 @@ export function GateSphere() {
   const letterEls = useRef<(HTMLButtonElement | null)[]>([])
   const letters = useRef<Letter[]>([])
   const rot = useRef({ yaw: 0, pitch: 0.1 })
-  const dragging = useRef<{ x: number; y: number } | null>(null)
+  const dragging = useRef<{ x: number; y: number; t: number } | null>(null)
+  const dragDist = useRef(0)
+  const vel = useRef({ yaw: 0, pitch: 0 })
   const cursor = useRef<{ x: number; y: number } | null>(null)
 
   const [slots, setSlots] = useState<(string | null)[]>(Array(CODE.length).fill(null))
@@ -75,8 +77,16 @@ export function GateSphere() {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       if (!dragging.current && !reduced && phase === 'input') {
-        rot.current.yaw += dt * 0.22
-        rot.current.pitch = 0.1 + Math.sin(now / 4200) * 0.12
+        // inertia from the last drag, decaying…
+        rot.current.yaw += vel.current.yaw * dt
+        rot.current.pitch = Math.max(-1.2, Math.min(1.2, rot.current.pitch + vel.current.pitch * dt))
+        const decay = Math.exp(-2.6 * dt)
+        vel.current.yaw *= decay
+        vel.current.pitch *= decay
+        // …blending back into the ambient drift as it settles
+        const settled = 1 - Math.min(1, Math.abs(vel.current.yaw) / 0.6)
+        rot.current.yaw += dt * 0.22 * settled
+        rot.current.pitch += (0.1 + Math.sin(now / 4200) * 0.12 - rot.current.pitch) * dt * 0.6 * settled
       }
       const { yaw, pitch } = rot.current
       const cy = Math.cos(yaw), sy = Math.sin(yaw)
@@ -105,7 +115,8 @@ export function GateSphere() {
         el.style.transform = `translate(${px}px, ${py}px) translate(-50%,-50%) scale(${scale})`
         el.style.opacity = String(0.25 + ((z2 + 1) / 2) * 0.75)
         el.style.zIndex = String(Math.round((z2 + 1) * 50))
-        el.dataset.front = z2 > 0.05 ? '1' : undefined as unknown as string
+        if (z2 > 0.05) el.dataset.front = '1'
+        else delete el.dataset.front
       })
     }
     raf = requestAnimationFrame(tick)
@@ -114,6 +125,7 @@ export function GateSphere() {
 
   const pick = (i: number, e: React.MouseEvent) => {
     if (phase !== 'input') return
+    if (dragDist.current > 6) return // that was a drag, not a pick
     const slot = slots.findIndex((s) => s === null)
     if (slot === -1) return
     const el = letterEls.current[i]
@@ -123,18 +135,19 @@ export function GateSphere() {
     const lr = el.getBoundingClientRect()
     gateSfx.pick(slot)
     const key = flightKey.current++
-    setFlights((cur) => [
-      ...cur,
-      {
-        key,
-        char: letters.current[i].char,
-        fromX: lr.left - wr.left + lr.width / 2,
-        fromY: lr.top - wr.top + lr.height / 2,
-        slot,
-      },
-    ])
+    const flight: Flight = {
+      key,
+      char: letters.current[i].char,
+      fromX: lr.left - wr.left + lr.width / 2,
+      fromY: lr.top - wr.top + lr.height / 2,
+      slot,
+    }
+    setFlights((cur) => [...cur, flight])
     // reserve the slot immediately so double-clicks land in order
     setSlots((cur) => cur.map((s, j) => (j === slot ? '·' : s)))
+    // safety net: if the spring never reports completion (hidden tab,
+    // interrupted animation), the letter still lands
+    setTimeout(() => landFlight(flight), reduced ? 250 : 1100)
     e.preventDefault()
   }
 
@@ -226,19 +239,27 @@ export function GateSphere() {
         className={styles.sphere}
         data-receding={phase !== 'input' || undefined}
         onPointerDown={(e) => {
-          dragging.current = { x: e.clientX, y: e.clientY }
-          ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+          // NOTE: no pointer capture here — capturing on the wrapper retargets
+          // the click away from the letter buttons and picking silently dies
+          dragging.current = { x: e.clientX, y: e.clientY, t: performance.now() }
+          dragDist.current = 0
+          vel.current = { yaw: 0, pitch: 0 }
         }}
         onPointerMove={(e) => {
           const rect = e.currentTarget.getBoundingClientRect()
           cursor.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
           if (dragging.current) {
-            rot.current.yaw += (e.clientX - dragging.current.x) * 0.006
-            rot.current.pitch = Math.max(
-              -1.2,
-              Math.min(1.2, rot.current.pitch + (e.clientY - dragging.current.y) * 0.005)
-            )
-            dragging.current = { x: e.clientX, y: e.clientY }
+            const dx = e.clientX - dragging.current.x
+            const dy = e.clientY - dragging.current.y
+            const now = performance.now()
+            const dt = Math.max(8, now - dragging.current.t) / 1000
+            dragDist.current += Math.abs(dx) + Math.abs(dy)
+            rot.current.yaw += dx * 0.006
+            rot.current.pitch = Math.max(-1.2, Math.min(1.2, rot.current.pitch + dy * 0.005))
+            // remember release velocity for inertia (clamped so a flick spins, not warps)
+            vel.current.yaw = Math.max(-3, Math.min(3, (dx * 0.006) / dt))
+            vel.current.pitch = Math.max(-2, Math.min(2, (dy * 0.005) / dt))
+            dragging.current = { x: e.clientX, y: e.clientY, t: now }
           }
         }}
         onPointerUp={() => (dragging.current = null)}

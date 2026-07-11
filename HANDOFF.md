@@ -22,7 +22,7 @@ Visualizers folder still exists as the /visualizers index but is off the
 desktop) · Studio (Jake's 5 remixes, WMP-style WebAudio viz — BARS/SCOPE/
 RINGS) · Now Playing (**Apple Music LIVE**) · Photo Booth (per-pixel VHS/
 dither/duotone/CRT; **PIN TO WALL** stores last 3 snaps in localStorage) ·
-Jigsaw · Coloring (4 tattoo pages) · About This Machine · Trash (padlocked) ·
+Jigsaw · Tattoo Gun (trace game) · About This Machine · Trash (padlocked) ·
 Settings · **COMMAND.CTR** (brutalist orchestration deck — five named agent
 units with animated shape avatars replaying the build history from
 `src/programs/command/cc-timeline.json`; crew + delegation policy in
@@ -92,7 +92,7 @@ essay) intentionally still scroll.
 
 **Known debts:** first-load JS is ~242 kB (was 155) — perf pass overdue;
 Photo Booth's live-camera path has never been human-verified end to end;
-the snake coloring page is the weakest drawing (Jake may ask for a redraw).
+(coloring book retired 2026-07-10 in favor of the Tattoo Gun trace game).
 
 ## 2. Architecture map (30 seconds)
 
@@ -109,7 +109,7 @@ the snake coloring page is the weakest drawing (Jake may ask for a redraw).
   Screensaver, LouSprite (pixel map — edit the string grid), NowPlayingWidget.
 - `scripts/*.mjs` — data bakes: raw personal data in gitignored `ref/` →
   committed JSON. Never runtime-fetch personal data.
-- `content/*.mdx` — case prose. `src/programs/paint/pages.ts` — coloring pages.
+- `content/*.mdx` — case prose. `src/programs/paint/tattooPaths.ts` — tattoo stencils.
 
 ## 3. Process rules (learned the hard way — do not relearn)
 
@@ -234,6 +234,43 @@ BACKLOG (Jake asked, not yet built):
   (research), SPEC.SHEET (design system), METRICS.CTR (strategy), MAN pages,
   MOTION.SPEC, EDGE.CASES gallery. These prove the *product-design* side the
   engineering-heavy site under-shows.
+
+### 2026-07-11 (Fable, session 4 — wave-2 polish, all 10 asks) — SHIPPED
+GATE FIXED: pointer capture on the sphere wrapper was retargeting clicks away
+from the letter buttons (never capture on a parent whose children need
+clicks); also added drag-vs-click discrimination (6px), release INERTIA
+(velocity + exp decay blending back to ambient drift), a safety timer so
+letter flights always land even if Motion's onAnimationComplete never fires
+(hidden tab), and the sphere re-skinned PINK. Business card → POSTAGE STAMP
+(About.tsx `stampCard`, Kyoto Forest format: type left / pinstripe plate
+right; mark = public/mark.png alpha-extract of ref/mark/stamp-jake.png via
+PIL saturation threshold, inked var(--pink) through CSS mask; perforation =
+4-layer radial-gradient background). STICKY NOTES (shell/StickyNotes.tsx):
+4 real quotes (2 Lattice peers, parent, kid-13) — z-index 0, décor loses to
+windows. TATTOO FIDELITY PASS: all 6 stencils redrawn against the actual
+photos (tattooPaths.ts) — dice tumble w/ bounce marks (1+3 pips), heart
+carries the TAYLOR banner w/ skeleton letters, bed is the canopy cube w/
+back band, wolf is faceted w/ dotted seams + crescent, Bob = body-with-face
+holding ball-head, mouse = jack-o-lantern head + curly tail. AGENTS: first
+scare = startle JUMP (wanderJump keyframes), second = flee; edge exits walk
+fully off-screen then 5s off-duty gap before the next unit enters (no more
+corner-camping rip). CC WIDGET (shell/CommandWidget.tsx): top-center pill,
+pink pulsing dot when feed <15min fresh, expandable 4-event mini feed +
+"OPEN FULL DECK"; command program off the desktop (onDesktop:false, /command
++ window intact; widget hides while the window is open). NYQUIST: MiniPlayer
+(shell/MiniPlayer.tsx, shows when track playing & studio closed, art+◁▷❚❚×),
+PUBLIC jigsaw leaderboard (/api/puzzle-times, versioned blob paths
+puzzle/times-<ts>.json keep-3, validated POST, "BEST — WORLDWIDE", local
+fallback), piece affordances (blue drop-shadow outline unplaced, scale+shadow
+while dragging, flat when locked), trash pinned bottom-left, DailyWidget →
+bottom-right. FOURIER: FIELD.NOTES (/field-notes, RES-13, research dossier
+w/ real Invest quotes, placeholder ledger stamped) + SPEC.SHEET (/spec,
+SYS-14, LIVE token doc — getComputedStyle + real WCAG luminance math,
+re-reads on theme flip; motion values quoted from Window.tsx are hardcoded
+strings — flagged). CLAUDE.md gained §13.6: always update HANDOFF at end of
+session. GOTCHA learned: preview-pane tab reports document.hidden → rAF and
+Motion animations freeze; don't chase "stuck" opacity/transforms in
+screenshots — verify computed z/state via JS instead.
 
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with

@@ -4,45 +4,126 @@
   padding: 30px 28px 36px;
 }
 
-.card {
+/* the business card as postage — Kyoto Forest format: type block left,
+   lined plate right, perforated edge. Structure inks blue; the mark
+   (public/mark.png, alpha mask) prints pink. */
+
+.stampCard {
+  --stamp-ink: var(--blue);
+  --hole: var(--paper);
+  position: relative;
   display: flex;
-  align-items: center;
   gap: 14px;
-  padding: 14px;
-  border: 1.5px solid var(--ink);
-  background: var(--paper);
+  padding: 18px 16px 16px 18px;
+  background: color-mix(in srgb, var(--blue) 7%, var(--paper-2));
   transform: rotate(-1deg);
-  margin-bottom: 22px;
+  margin: 4px 2px 26px;
 }
 
-[data-theme='dark'] .card {
-  border-color: var(--line);
+[data-theme='dark'] .stampCard {
+  --hole: var(--paper);
+  background: color-mix(in srgb, var(--blue) 14%, var(--paper-2));
 }
 
-.cardPhoto {
-  width: 72px;
-  height: 72px;
-  object-fit: cover;
-  border: 1px solid var(--ink);
-  flex: none;
+/* perforation: half-punched holes riding every edge */
+.stampPerf {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle 4.5px at 7px 0px, var(--hole) 4px, transparent 4.6px),
+    radial-gradient(circle 4.5px at 7px 8px, var(--hole) 4px, transparent 4.6px),
+    radial-gradient(circle 4.5px at 0px 7px, var(--hole) 4px, transparent 4.6px),
+    radial-gradient(circle 4.5px at 8px 7px, var(--hole) 4px, transparent 4.6px);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-position: top left, bottom left, top left, top right;
+  background-size: 14px 8px, 14px 8px, 8px 14px, 8px 14px;
 }
 
-[data-theme='dark'] .cardPhoto {
-  border-color: var(--line);
+.stampType {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  color: var(--stamp-ink);
 }
 
-.cardName {
+.stampName {
   font-family: var(--display);
-  font-size: 16px;
+  font-size: clamp(24px, 5vw, 32px);
+  line-height: 0.98;
 }
 
-.cardMeta {
+.stampRole {
   font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.12em;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  margin-top: 6px;
+}
+
+.stampYear {
+  font-family: var(--display);
+  font-size: clamp(26px, 5vw, 34px);
+  line-height: 0.9;
+  display: flex;
+  flex-direction: column;
+  margin: 10px 0 8px;
+}
+
+.stampMeta {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  line-height: 1.8;
   color: var(--ink-soft);
-  text-transform: uppercase;
-  line-height: 1.9;
+  margin-top: auto;
+}
+
+.stampMeta a {
+  color: var(--stamp-ink);
+}
+
+/* the plate: pinstriped field, boxed, mark inked pink */
+.stampPlate {
+  flex: none;
+  width: 46%;
+  min-height: 168px;
+  border: 1.5px solid var(--stamp-ink);
+  background: repeating-linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--stamp-ink) 30%, transparent) 0,
+    color-mix(in srgb, var(--stamp-ink) 30%, transparent) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  display: grid;
+  place-items: center;
+}
+
+.stampMark {
+  display: block;
+  width: 78%;
+  aspect-ratio: 552 / 640;
+  background-color: var(--pink);
+  -webkit-mask-image: url('/mark.png');
+  mask-image: url('/mark.png');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+[data-theme='dark'] .stampMark {
+  filter: drop-shadow(0 0 6px rgba(242, 166, 194, 0.35));
+}
+
+@media (max-width: 480px) {
+  .stampPlate {
+    width: 40%;
+    min-height: 140px;
+  }
 }
 
 .aboutEyebrow {

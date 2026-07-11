@@ -232,6 +232,13 @@ orchestrator keeps building. The crew is named (HERTZ, NYQUIST = Sonnet ·
 FOURIER, DOPPLER = Opus · FABLE = orchestrator) — use the names in dispatch
 descriptions so the Command Center program can narrate real sessions.
 
+## 13.6 End of session — always
+
+Before the final reply of every working session, update `HANDOFF.md`: what
+shipped (files + gotchas), what's in flight, and any new backlog items Jake
+raised. HANDOFF.md is the continuation brief — a session that doesn't write
+itself down didn't happen.
+
 ## 14. Guardrails
 
 - Don't add libraries not listed without a reason. Don't invent colors or type scales. Two accents only: blue (system) + pink (expressive).

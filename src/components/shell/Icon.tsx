@@ -20,6 +20,8 @@ export type IconName =
   | 'star'
   | 'nodes'
   | 'steps'
+  | 'clipboard'
+  | 'swatch'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -165,6 +167,21 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <rect x="18" y="20" width="5" height="8" />
       <rect x="25" y="8" width="5" height="20" />
       <path d="M4 4h5M11 4h5M18 4h5M25 4h5" opacity=".5" />
+    </>
+  ),
+  clipboard: (
+    <>
+      <path d="M7 6h4a2 2 0 0 1 10 0h4v22H7z" />
+      <path d="M12 6a2 2 0 0 1 8 0" fill="var(--paper)" />
+      <path d="M11 15h10M11 19h10M11 23h6" />
+    </>
+  ),
+  swatch: (
+    <>
+      <rect x="6" y="6" width="6" height="20" rx="1" />
+      <rect x="14" y="6" width="6" height="20" rx="1" opacity=".6" />
+      <path d="M22 8.5l4 1.6-6 15-3.5-1.4" opacity=".85" />
+      <path d="M9 22h.01M17 22h.01" />
     </>
   ),
 }

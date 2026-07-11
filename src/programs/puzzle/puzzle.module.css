@@ -61,14 +61,43 @@
   position: absolute;
   cursor: grab;
   touch-action: none;
+  /* lift unplaced pieces off the board: a 1px blue outline that follows
+     the die-cut alpha silhouette, plus a soft ambient shadow */
+  filter: drop-shadow(0 0 0 1px color-mix(in srgb, var(--blue) 55%, transparent))
+    drop-shadow(0 2px 3px rgba(23, 21, 13, 0.25));
+  transition: filter 0.15s ease, transform 0.15s ease;
 }
 
 .piece:active {
   cursor: grabbing;
 }
 
+[data-theme='dark'] .piece {
+  filter: drop-shadow(0 0 0 1px color-mix(in srgb, var(--blue) 70%, transparent))
+    drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+.piece[data-dragging] {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 0 1px color-mix(in srgb, var(--blue) 80%, transparent))
+    drop-shadow(0 6px 9px rgba(23, 21, 13, 0.4));
+}
+
+[data-theme='dark'] .piece[data-dragging] {
+  filter: drop-shadow(0 0 0 1px color-mix(in srgb, var(--blue) 90%, transparent))
+    drop-shadow(0 6px 9px rgba(0, 0, 0, 0.65));
+}
+
 .piece[data-locked] {
   cursor: default;
+  filter: none;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piece {
+    transition: none;
+  }
 }
 
 .doneOverlay {

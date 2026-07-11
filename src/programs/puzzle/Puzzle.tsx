@@ -82,6 +82,19 @@ const readTimes = (): Record<string, Score[]> => {
   }
 }
 
+// the public "BEST — WORLDWIDE" board, backed by /api/puzzle-times
+// (Vercel Blob). Falls back to the localStorage copy above if it's
+// unreachable — the leaderboard should never hard-fail offline.
+async function fetchPublicBoard(): Promise<Record<string, Score[]> | null> {
+  try {
+    const res = await fetch('/api/puzzle-times', { cache: 'no-store' })
+    const d = await res.json()
+    return d && typeof d.times === 'object' ? (d.times as Record<string, Score[]>) : null
+  } catch {
+    return null
+  }
+}
+
 const fmtSecs = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
 
 export default function Puzzle() {
@@ -150,12 +163,24 @@ export default function Puzzle() {
       resetTimer()
       setPieces(scatter())
     })
-    setBoard(readTimes())
     return () => {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [puzzleIdx])
+
+  // seed the board once: localStorage instantly, then the public
+  // "BEST — WORLDWIDE" board (all puzzles at once) once it lands
+  useEffect(() => {
+    setBoard(readTimes())
+    let alive = true
+    fetchPublicBoard().then((d) => {
+      if (alive && d) setBoard(d)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   // paint pieces
   useEffect(() => {
@@ -190,6 +215,7 @@ export default function Puzzle() {
       )
     }
     ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+    ;(e.currentTarget as HTMLElement).dataset.dragging = '1'
     drag.current = { id, ox: e.clientX - p.x, oy: e.clientY - p.y }
     zTop.current += 1
     setPieces((cur) => cur!.map((x) => (x.id === id ? { ...x, z: zTop.current } : x)))
@@ -213,21 +239,40 @@ export default function Puzzle() {
     try {
       name = (localStorage.getItem('lunde-guest-name') || 'OPERATOR').slice(0, 12).toUpperCase()
     } catch {}
+    const roundedSecs = Math.round(secs * 10) / 10
+
+    // localStorage stays the offline fallback — keep writing it
     const times = readTimes()
-    const list = [...(times[puzzle.id] ?? []), { name, secs: Math.round(secs * 10) / 10 }]
+    const localList = [...(times[puzzle.id] ?? []), { name, secs: roundedSecs }]
       .sort((a, b) => a.secs - b.secs)
       .slice(0, 5)
-    times[puzzle.id] = list
+    times[puzzle.id] = localList
     try {
       localStorage.setItem(TIMES_KEY, JSON.stringify(times))
     } catch {}
-    setBoard(times)
+    // optimistic local render of the public board while the POST is in flight
+    setBoard((cur) => ({ ...cur, [puzzle.id]: localList }))
     setDone(true)
+
+    // public "BEST — WORLDWIDE" board — best-effort, re-fetch to reconcile
+    const puzzleId = puzzle.id
+    fetch('/api/puzzle-times', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ puzzle: puzzleId, name, secs: roundedSecs }),
+    })
+      .then(() => fetchPublicBoard())
+      .then((d) => {
+        if (d) setBoard(d)
+      })
+      .catch(() => {})
   }
 
   const onUp = () => {
     if (!drag.current || !pieces) return
     const { id } = drag.current
+    const el = document.getElementById(`pz-${id}`) as HTMLElement | null
+    if (el) delete el.dataset.dragging
     drag.current = null
     setPieces((cur) => {
       const next = cur!.map((p) => {
@@ -336,7 +381,7 @@ export default function Puzzle() {
       </div>
 
       <div className={styles.scores} aria-label="Best times">
-        <span className={styles.scoresHead}>BEST — THIS MACHINE</span>
+        <span className={styles.scoresHead}>BEST — WORLDWIDE</span>
         {scores.length > 0 ? (
           scores.map((s, i) => (
             <span key={i} className={styles.scoreRow}>

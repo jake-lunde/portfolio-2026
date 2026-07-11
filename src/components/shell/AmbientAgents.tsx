@@ -35,26 +35,51 @@ export function AmbientAgents() {
   const [inspecting, setInspecting] = useState(false)
   const [bubble, setBubble] = useState<string | null>(null)
   const [fleeing, setFleeing] = useState(false)
+  const [jumping, setJumping] = useState(false)
+  const [offDuty, setOffDuty] = useState(false)
   const pos = useRef(40)
   const dir = useRef(1)
   const mouse = useRef<{ x: number; y: number } | null>(null)
+  const scaredOnce = useRef(false) // first scare = startle jump; after that they bolt
 
   useEffect(() => {
-    if (reduced) return
+    if (reduced || offDuty) return
     const el = walkerRef.current
     if (!el) return
     let raf = 0
     let last = performance.now()
     let pauseUntil = 0
     let fleeUntil = 0
-    let fleeCooldown = 0
+    let scareCooldown = 0
     let nextPause = pos.current + 140 + Math.random() * 220
+    let exited = false
 
     const onMouse = (e: PointerEvent) => (mouse.current = { x: e.clientX, y: e.clientY })
     window.addEventListener('pointermove', onMouse, { passive: true })
 
+    const exitStage = (side: 1 | -1) => {
+      // fully off-screen: go quiet, next unit clocks in after a 5s gap
+      exited = true
+      setOffDuty(true)
+      setFleeing(false)
+      setInspecting(false)
+      setBubble(null)
+      setTimeout(() => {
+        const next = (agentIdx + 1) % CREW_IDS.length
+        // next unit enters from the same wing, walking inward
+        pos.current = side === 1 ? window.innerWidth - SIZE - 4 : -SIZE + 4
+        dir.current = side === 1 ? -1 : 1
+        scaredOnce.current = false
+        setAgentIdx(next)
+        setOffDuty(false)
+        setBubble(line(CREW_IDS[next]))
+        setTimeout(() => setBubble(null), 2400)
+      }, 5000)
+    }
+
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick)
+      if (exited) return
       const dt = Math.min(0.06, (now - last) / 1000)
       last = now
 
@@ -62,41 +87,48 @@ export function AmbientAgents() {
       const cx = rect.left + rect.width / 2
       const cy = rect.top + rect.height / 2
 
-      // cursor too close? flee. (once per few seconds, they have dignity)
+      // cursor too close?
       if (
         mouse.current &&
-        now > fleeCooldown &&
+        now > scareCooldown &&
         Math.hypot(mouse.current.x - cx, mouse.current.y - cy) < FLEE_RADIUS
       ) {
-        dir.current = mouse.current.x > cx ? -1 : 1
-        fleeUntil = now + 650
-        fleeCooldown = now + 4000
-        pauseUntil = 0
-        setFleeing(true)
-        setInspecting(false)
-        setBubble(FLEE_LINES[Math.floor(Math.random() * FLEE_LINES.length)])
-        setTimeout(() => setBubble(null), 1600)
+        if (!scaredOnce.current) {
+          // first offense: a startled hop, held ground
+          scaredOnce.current = true
+          scareCooldown = now + 1500
+          pauseUntil = now + 800
+          setJumping(true)
+          setInspecting(false)
+          setBubble(FLEE_LINES[Math.floor(Math.random() * FLEE_LINES.length)])
+          setTimeout(() => setJumping(false), 650)
+          setTimeout(() => setBubble(null), 1600)
+        } else {
+          // second offense: bolt
+          dir.current = mouse.current.x > cx ? -1 : 1
+          fleeUntil = now + 650
+          scareCooldown = now + 4000
+          pauseUntil = 0
+          setFleeing(true)
+          setInspecting(false)
+          setBubble(FLEE_LINES[Math.floor(Math.random() * FLEE_LINES.length)])
+          setTimeout(() => setBubble(null), 1600)
+        }
       }
 
       const isFleeing = now < fleeUntil
       if (!isFleeing && fleeing) setFleeing(false)
 
-      if (!isFleeing && now < pauseUntil) return
+      if (now < pauseUntil && !isFleeing) return
       if (!isFleeing && inspecting) setInspecting(false)
 
-      const max = window.innerWidth - SIZE - 24
       pos.current += (isFleeing ? FLEE_SPEED : WALK_SPEED) * dt * dir.current
 
-      if (pos.current > max || pos.current < 16) {
-        // shift change: next unit walks the other way
-        pos.current = Math.max(16, Math.min(max, pos.current))
-        dir.current *= -1
-        const next = (agentIdx + 1) % CREW_IDS.length
-        setAgentIdx(next)
-        setBubble(line(CREW_IDS[next]))
-        setTimeout(() => setBubble(null), 2400)
-        pauseUntil = now + 1400
-      } else if (!isFleeing && Math.abs(pos.current - nextPause) < 2) {
+      // walk (or bolt) fully off-stage before the shift change
+      if (pos.current > window.innerWidth + 6) return exitStage(1)
+      if (pos.current < -SIZE - 6) return exitStage(-1)
+
+      if (!isFleeing && Math.abs(pos.current - nextPause) < 2) {
         pauseUntil = now + 2200 + Math.random() * 2600
         nextPause = pos.current + dir.current * (150 + Math.random() * 240)
         setInspecting(true)
@@ -113,7 +145,7 @@ export function AmbientAgents() {
       window.removeEventListener('pointermove', onMouse)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduced, agentIdx, fleeing, inspecting])
+  }, [reduced, offDuty, agentIdx, fleeing, inspecting])
 
   /* ---- dispatch flashes ---- */
   const [flashes, setFlashes] = useState<Flash[]>([])
@@ -150,7 +182,7 @@ export function AmbientAgents() {
 
   return (
     <>
-      {!reduced && (
+      {!reduced && !offDuty && (
         <div ref={walkerRef} className={styles.wanderer} aria-hidden="true">
           <AnimatePresence>
             {bubble && (

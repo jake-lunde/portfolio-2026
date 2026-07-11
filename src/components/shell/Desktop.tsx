@@ -10,6 +10,9 @@ import { SkillsTicker } from './SkillsTicker'
 import { DesktopIcons } from './DesktopIcons'
 import { Wallpaper } from './Wallpaper'
 import { NowPlayingWidget } from './NowPlayingWidget'
+import { MiniPlayer } from './MiniPlayer'
+import { CommandWidget } from './CommandWidget'
+import { StickyNotes } from './StickyNotes'
 import { DailyWidget } from './DailyWidget'
 import { PhotoWall } from './PhotoWall'
 import { AmbientAgents } from './AmbientAgents'
@@ -63,6 +66,9 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
         <NowPlayingWidget />
         <DesktopIcons />
         <DailyWidget />
+        <MiniPlayer />
+        <CommandWidget />
+        <StickyNotes />
         <PhotoWall />
         <AmbientAgents />
         <AnimatePresence>

@@ -10,19 +10,31 @@ export default function About() {
 
   return (
     <div className={styles.about}>
-      <div className={styles.card}>
-        <img
-          src="/booth/jake-default.jpg"
-          alt="Jake Lunde — photo booth self-portrait"
-          className={styles.cardPhoto}
-        />
-        <div>
-          <div className={styles.cardName}>JAKE LUNDE</div>
-          <div className={styles.cardMeta}>STAFF PRODUCT DESIGNER · GREENLIGHT</div>
-          <div className={styles.cardMeta}>SEATTLE, WA</div>
-          <div className={styles.cardMeta}>
-            <a href="mailto:jakelunde@me.com">jakelunde@me.com</a>
+      {/* the business card, issued as postage (Kyoto Forest format) */}
+      <div className={styles.stampCard}>
+        <span className={styles.stampPerf} aria-hidden="true" />
+        <div className={styles.stampType}>
+          <div className={styles.stampName}>
+            JAKE
+            <br />
+            LUNDE
           </div>
+          <div className={styles.stampRole}>
+            DESIGN ENGINEER <span aria-hidden="true">設計技師</span>
+          </div>
+          <div className={styles.stampYear} aria-hidden="true">
+            <span>19</span>
+            <span>92</span>
+          </div>
+          <div className={styles.stampMeta}>
+            STAFF PRODUCT DESIGNER · GREENLIGHT
+            <br />
+            SEATTLE, WA ·{' '}
+            <a href="mailto:jakelunde@me.com">JAKELUNDE@ME.COM</a>
+          </div>
+        </div>
+        <div className={styles.stampPlate} aria-hidden="true">
+          <span className={styles.stampMark} />
         </div>
       </div>
       <p className={styles.aboutEyebrow}>README — Start here</p>
