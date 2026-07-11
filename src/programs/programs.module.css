@@ -102,9 +102,9 @@
 
 .stampMark {
   display: block;
-  width: 78%;
+  width: 100%;
   aspect-ratio: 552 / 640;
-  background-color: var(--pink);
+  background-color: var(--blue);
   -webkit-mask-image: url('/mark.png');
   mask-image: url('/mark.png');
   -webkit-mask-repeat: no-repeat;
