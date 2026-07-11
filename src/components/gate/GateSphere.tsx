@@ -13,8 +13,8 @@ import styles from './gate.module.css'
    classic dialog delivers the verdict. The work is mysterious and
    important. Passcode: the good boy. */
 
-const CODE = 'LOUIE'
-const HINT = 'CLEARANCE HINT: THE GOOD BOY, FIVE LETTERS'
+const CODE = 'HOWDY'
+const HINT = 'THE PASSWORD IS MYSTERIOUS AND IMPORTANT'
 const N = 92
 const PERSPECTIVE = 2.6
 
