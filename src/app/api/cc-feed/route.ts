@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { list, put } from '@vercel/blob'
+import { del, list, put } from '@vercel/blob'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -12,7 +12,9 @@ export const dynamic = 'force-dynamic'
    + OIDC storeId pattern as the guestbook. */
 
 const storeId = () => process.env.guestbook_STORE_ID ?? process.env.BLOB_STORE_ID
-const FEED_PATH = 'cc/feed.json'
+// versioned pathnames: overwriting one path serves stale CDN reads (same
+// lesson as the guestbook) — every write is a new URL, old ones pruned
+const FEED_PREFIX = 'cc/feed-'
 const MAX_EVENTS = 80
 
 type FeedEvent = {
@@ -25,8 +27,8 @@ type FeedEvent = {
 }
 
 async function readFeed(): Promise<{ updated: number; events: FeedEvent[] }> {
-  const { blobs } = await list({ prefix: FEED_PATH, limit: 1, storeId: storeId() })
-  const blob = blobs[0]
+  const { blobs } = await list({ prefix: FEED_PREFIX, limit: 10, storeId: storeId() })
+  const blob = blobs.sort((a, b) => b.pathname.localeCompare(a.pathname))[0]
   if (!blob) return { updated: 0, events: [] }
   try {
     const res = await fetch(blob.downloadUrl ?? blob.url, { cache: 'no-store' })
@@ -75,12 +77,20 @@ export async function POST(req: Request) {
   const events = [...current.events, ...incoming].slice(-MAX_EVENTS)
   const payload = { updated: Date.now(), events }
 
-  await put(FEED_PATH, JSON.stringify(payload), {
+  const stamp = String(Date.now()).padStart(14, '0')
+  await put(`${FEED_PREFIX}${stamp}.json`, JSON.stringify(payload), {
     access: 'public',
     addRandomSuffix: false,
-    allowOverwrite: true,
     contentType: 'application/json',
     storeId: storeId(),
   })
+  // prune older feed versions (keep the 3 newest)
+  try {
+    const { blobs } = await list({ prefix: FEED_PREFIX, limit: 20, storeId: storeId() })
+    const stale = blobs.sort((a, b) => b.pathname.localeCompare(a.pathname)).slice(3)
+    if (stale.length) await del(stale.map((b) => b.url), { storeId: storeId() })
+  } catch {
+    /* pruning is best-effort */
+  }
   return NextResponse.json({ ok: true, count: events.length })
 }

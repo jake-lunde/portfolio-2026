@@ -56,6 +56,19 @@ timer from first touch, local top-5 leaderboard (names from guest-name key),
 confetti. ORCHESTRATION RULE: when dispatching agents in live sessions,
 report via cc-report.mjs so the site's deck mirrors reality.
 
+**2026-07-10 (later — live crew):** cc-feed is LIVE-verified end to end
+(CC_FEED_KEY in Vercel; feed uses VERSIONED blob paths cc/feed-<ts>.json —
+single-path overwrite serves stale CDN reads, same lesson as guestbook; keep
+~3, prune rest; space cc-report calls ≥2s or batch, read-modify-write races
+lose events). Ambient agents shipped (`shell/AmbientAgents.tsx` + shared
+`shell/crew.ts`): bottom-edge wanderer w/ shift changes + dispatch flashes on
+window-open (agentForWindow mapping). Moderated public wall shipped (NYQUIST
+built /api/wall + /wall-review?key=CC_FEED_KEY): booth pins → wall/pending/,
+Jake approves → wall/live/ (≤3 shown to everyone); PhotoWall = own local pins
++ approved; Jake's default polaroid only when wall empty. SEQ-16 shipped
+(/seq): 16×3 WebAudio sequencer (kick/snare/blip), BPM 60-180, 5 blip notes,
+4 localStorage slots. ORCHESTRATION RULE stands: report dispatches live.
+
 **Shell:** wallpaper system (7 patterns) · classic-Mac scrollbars · Geist/
 Geist Mono/Geist Pixel type system · LOU.SYS screensaver (5-min idle; pixel
 Lou over the perspective checkerboard; triple-click the menu-bar clock to

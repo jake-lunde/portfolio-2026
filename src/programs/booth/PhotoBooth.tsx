@@ -213,6 +213,13 @@ export default function PhotoBooth() {
       sfx.tap()
       metric('booth_pin')
       setPinned(true)
+      // also submit to the moderated public wall — appears for everyone
+      // once Jake approves it at the review desk
+      void fetch('/api/wall', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photo: pinUrl, website: '' }),
+      }).catch(() => {})
     }
   }
 
@@ -297,7 +304,7 @@ export default function PhotoBooth() {
           {phase === 'shot' && shotUrl && (
             <div className={styles.shotRow}>
               <button className={styles.bigBtn} onClick={pin} disabled={pinned}>
-                {pinned ? '✓ PINNED' : '📌 PIN TO WALL'}
+                {pinned ? '✓ PINNED · SENT FOR REVIEW' : '📌 PIN TO WALL'}
               </button>
               <a className={styles.bigBtn} href={shotUrl} download={`lunde-booth-${Date.now()}.png`}>
                 ↓ DOWNLOAD

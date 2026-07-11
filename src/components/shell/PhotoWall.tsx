@@ -30,6 +30,7 @@ function readWall(): string[] {
 
 export function PhotoWall() {
   const [photos, setPhotos] = useState<string[]>([])
+  const [shared, setShared] = useState<string[]>([])
   const reduced = useReducedMotion()
 
   useEffect(() => {
@@ -37,6 +38,11 @@ export function PhotoWall() {
     const sync = () => setPhotos(readWall())
     window.addEventListener('lunde:booth-wall', sync)
     window.addEventListener('storage', sync) // other tabs
+    // the moderated public wall — everyone sees what Jake approved
+    fetch('/api/wall')
+      .then((r) => r.json())
+      .then((d) => Array.isArray(d.photos) && setShared(d.photos.slice(0, WALL_MAX)))
+      .catch(() => {})
     return () => {
       window.removeEventListener('lunde:booth-wall', sync)
       window.removeEventListener('storage', sync)
@@ -65,7 +71,13 @@ export function PhotoWall() {
     setPhotos(next)
   }
 
-  const display = defaultDismissed ? photos : [...photos, DEFAULT_PHOTO]
+  // your own pins ride on top (instant, awaiting review), the approved
+  // public wall beneath; Jake's founding polaroid holds the fort until
+  // anything is approved
+  const own = photos.slice(0, 2)
+  const approved = shared.filter((s) => !own.includes(s)).slice(0, WALL_MAX)
+  const display = [...own, ...approved].slice(0, 4)
+  if (display.length === 0 && !defaultDismissed) display.push(DEFAULT_PHOTO)
 
   if (display.length === 0) return null
 

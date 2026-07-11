@@ -126,6 +126,18 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/paint',
   },
   {
+    id: 'sequencer',
+    name: 'SEQ-16',
+    meta: 'SND-12',
+    icon: 'steps',
+    component: dynamic(() => import('@/programs/sequencer/Sequencer')),
+    size: { w: 640, h: 470 },
+    pos: { x: 310, y: 120 },
+    chrome: 'crt',
+    onDesktop: true,
+    path: '/seq',
+  },
+  {
     id: 'command',
     name: 'Command Center',
     meta: 'CTR-11',

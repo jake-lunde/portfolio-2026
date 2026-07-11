@@ -19,6 +19,7 @@ export type IconName =
   | 'mountain'
   | 'star'
   | 'nodes'
+  | 'steps'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -155,6 +156,15 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <rect x="3" y="21" width="8" height="7" />
       <rect x="21" y="21" width="8" height="7" />
       <path d="M16 11v5M16 16l-9 5M16 16l9 5" />
+    </>
+  ),
+  steps: (
+    <>
+      <rect x="4" y="18" width="5" height="10" />
+      <rect x="11" y="12" width="5" height="16" />
+      <rect x="18" y="20" width="5" height="8" />
+      <rect x="25" y="8" width="5" height="20" />
+      <path d="M4 4h5M11 4h5M18 4h5M25 4h5" opacity=".5" />
     </>
   ),
 }
