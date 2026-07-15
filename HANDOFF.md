@@ -314,6 +314,40 @@ splitting; economics; deck-viz roadmap incl. ownership lanes + solo events).
 Read it before dispatching. GOTCHA: hidden preview tab stalls AnimatePresence
 exits (overlay lingers at opacity 0) — state is correct, don't chase it.
 
+### 2026-07-15 (Fable, session 7 — Design-System pipeline, Milestone A start)
+On branch **design-system-pipeline** (NOT merged/deployed — feature work).
+Plan: /Users/jake/.claude/plans/lively-sauteeing-snowflake.md (approved).
+Goal: re-skinnable OS (classic|medieval|underwater) via a real token
+pipeline + Storybook + Figma (Tokens Studio). Pipeline-first; v1 = pipeline
+proven + Medieval. Classic keeps light+dark; others single-palette.
+SHIPPED A0-A2 (commit 7f3eafa): token source-of-truth established.
+- `tokens/` = Tokens Studio/DTCG JSON (core primitives color/font/layout +
+  semantic classic-light/classic-dark + $themes/$metadata). Primitives
+  resolve away; semantics alias them so --blue:#2036c8 emerges as before.
+- `scripts/build-tokens.mjs` = Style Dictionary v4 + @tokens-studio/
+  sd-transforms, one SD run per theme. TWO gotchas solved: (1) tokens-studio
+  transformGroup names camelCase → cloned the group swapping name→name/kebab
+  (kebab is what the site uses); (2) outputReferencesFilter (from
+  'style-dictionary/utils') keeps var(--blue)/var(--ink) for EMITTED tokens
+  but flattens primitive refs to literals — required for parity + the
+  component --blue cascade. Emits FINAL data-skin selector model; classic-dark
+  ALSO matches bare [data-theme='dark'] so dark works pre-store-widening.
+- `src/styles/tokens.generated.css` (committed) imported by globals.css;
+  hand-authored :root/[data-theme=dark] var blocks DELETED (utilities stay).
+  Intermediates `src/styles/generated/` are gitignored.
+- npm: tokens:build + prebuild/predev hooks + tokens:watch (onchange dep).
+- PARITY GATE PASSED: computed-value diff of all 18 tokens (light+dark),
+  hand-authored vs generated = ZERO. Clean build passes; dark CRT verified;
+  site visually identical. HMR flakes on globals @import edits — clean
+  restart (stop→build→start) needed after cutover, expected.
+NEXT: A3 Storybook (@storybook/nextjs 8.5, font decorator, data-skin/theme
+toolbar, catalog primitives+CaseComponents+Tokens board, Chromatic) — big
+greenfield, good Opus-dispatch candidate. Then A4 (spacing/radius/type/motion
+tokens + lib/motion.ts), A5 (Figma loop + end-to-end proof), A6 (Medieval
+token set). Milestone B (in-site skin swap: store widening + subsystem
+refactors) comes after the pipeline is proven. NOT pushed — awaiting Jake's
+go to merge/deploy (A0-A2 is visually a no-op so safe to land anytime).
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
