@@ -1,0 +1,22 @@
+[
+  {
+    "id": "classic-light",
+    "name": "Light",
+    "group": "classic",
+    "selectedTokenSets": {
+      "core/color": "source",
+      "core/font": "enabled",
+      "core/layout": "enabled",
+      "semantic/classic-light": "enabled"
+    }
+  },
+  {
+    "id": "classic-dark",
+    "name": "Dark",
+    "group": "classic",
+    "selectedTokenSets": {
+      "core/color": "source",
+      "semantic/classic-dark": "enabled"
+    }
+  }
+]

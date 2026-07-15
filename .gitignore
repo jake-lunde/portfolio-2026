@@ -26,3 +26,6 @@ docs/
 
 # raw ride exports (contain precise home GPS) — baked JSON is the public copy
 ref/
+
+# token build intermediates (concatenated into tokens.generated.css)
+/src/styles/generated/

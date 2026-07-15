@@ -1,0 +1,15 @@
+{
+  "paper":     { "$value": "{color.paper.base}", "$type": "color" },
+  "paper-2":   { "$value": "{color.paper.raised}", "$type": "color" },
+  "ink":       { "$value": "{color.ink.base}", "$type": "color" },
+  "ink-soft":  { "$value": "{color.ink.soft}", "$type": "color" },
+  "plate":     { "$value": "{color.plate.base}", "$type": "color" },
+  "plate-ink": { "$value": "{color.paper.base}", "$type": "color" },
+  "line":      { "$value": "rgba(23, 21, 13, 0.18)", "$type": "color" },
+  "blue":      { "$value": "{color.nasa.cobalt}", "$type": "color" },
+  "pink":      { "$value": "{color.doppler.pink}", "$type": "color" },
+  "green":     { "$value": "{color.report.green}", "$type": "color" },
+  "pink-text": { "$value": "{ink}", "$type": "color" },
+  "pink-mark": { "$value": "{pink}", "$type": "color" },
+  "focus":     { "$value": "{blue}", "$type": "color" }
+}

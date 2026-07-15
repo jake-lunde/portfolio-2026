@@ -1,0 +1,9 @@
+{
+  "tokenSetOrder": [
+    "core/color",
+    "core/font",
+    "core/layout",
+    "semantic/classic-light",
+    "semantic/classic-dark"
+  ]
+}

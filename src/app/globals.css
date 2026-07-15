@@ -1,55 +1,12 @@
 /* ============================================================
-   LUNDE OS — design tokens (CLAUDE.md §3, hexes sampled from
-   docs/inspo: NASA EP-1 blue, Doppler 明显的频率 pink)
+   LUNDE OS — design tokens
+   SOURCE OF TRUTH is tokens/ (Tokens Studio JSON) → generated below via
+   `npm run tokens:build` (Style Dictionary). Do NOT hand-edit token values
+   here; edit tokens/ and rebuild. Hand-authored utility classes + base
+   styles remain in this file. Hexes: NASA EP-1 blue, Doppler pink.
    ============================================================ */
 
-:root {
-  /* LIGHT (default) — warm print stock */
-  --paper: #e7e1d2;
-  --paper-2: #ded7c4;
-  --ink: #17150d;
-  --ink-soft: #5a564a;
-  --plate: #131811;
-  --plate-ink: #e7e1d2;
-  --line: rgba(23, 21, 13, 0.18);
-
-  /* ACCENTS */
-  --blue: #2036c8; /* NASA cobalt — system: active chrome, links, focus */
-  --pink: #f2a6c2; /* Doppler pink — expressive: marks, highlights */
-  --green: #2e4a38; /* retained duotone family (old-report green) */
-
-  /* pink is annotation-only on light paper (fails AA as text) */
-  --pink-text: var(--ink);
-  --pink-mark: var(--pink);
-
-  --focus: var(--blue);
-
-  --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-  --mono: var(--font-mono), 'SF Mono', ui-monospace, Menlo, monospace;
-  --cjk: var(--font-cjk), sans-serif;
-  /* display: Geist Pixel — single weight, no negative tracking (pixels shear) */
-  --display: var(--font-pixel), var(--font-mono), monospace;
-
-  --menubar-h: 34px;
-}
-
-[data-theme='dark'] {
-  /* DARK — CRT / terminal night */
-  --paper: #0d100c;
-  --paper-2: #14181a;
-  --ink: #e9e4d5;
-  --ink-soft: #8a9a93;
-  --plate: #090c0a;
-  --plate-ink: #e9e4d5;
-  --line: rgba(233, 228, 213, 0.16);
-
-  --blue: #5c7cff; /* same hue, luminous — reads as a glow */
-  --pink: #f2a6c2;
-
-  /* pink may speak directly on the void */
-  --pink-text: var(--pink);
-  --pink-mark: transparent;
-}
+@import '../styles/tokens.generated.css';
 
 /* ---------- base ---------- */
 
