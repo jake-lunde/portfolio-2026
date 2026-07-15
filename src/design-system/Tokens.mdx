@@ -1,0 +1,21 @@
+import { Meta, Story } from '@storybook/blocks'
+import * as TokensStories from './Tokens.stories'
+
+<Meta of={TokensStories} />
+
+# Design tokens
+
+The source of truth is `tokens/` (Tokens Studio JSON) → `scripts/build-tokens.mjs`
+(Style Dictionary v4) → `src/styles/tokens.generated.css`. This page is the
+**proof of the pipeline**: every swatch and specimen below is read live from
+`getComputedStyle(document.documentElement)`, so it reflects whatever the token
+build emits — not a hand-maintained copy.
+
+Flip the **Theme** control in the toolbar (paintbrush) to preview each skin/mode.
+The board re-reads on every change:
+
+- **Classic — Light / Dark** are the two sub-modes of today's site.
+- **Medieval / Underwater** are wired as selectors but their token sets aren't
+  authored yet, so they currently resolve to the Classic values (expected).
+
+<Story of={TokensStories.Board} />

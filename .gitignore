@@ -6,6 +6,9 @@
 /out/
 next-env.d.ts
 
+# storybook
+storybook-static/
+
 # misc
 .DS_Store
 *.pem
