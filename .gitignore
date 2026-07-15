@@ -32,3 +32,4 @@ ref/
 
 # token build intermediates (concatenated into tokens.generated.css)
 /src/styles/generated/
+build-storybook.log

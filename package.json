@@ -12,7 +12,8 @@
     "predev": "npm run tokens:build",
     "prebuild": "npm run tokens:build",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "chromatic": "chromatic --exit-zero-on-changes"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.0",
@@ -37,6 +38,7 @@
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
+    "chromatic": "^18.0.1",
     "onchange": "^7.1.0",
     "storybook": "^8.6.18",
     "style-dictionary": "^4.4.0",
