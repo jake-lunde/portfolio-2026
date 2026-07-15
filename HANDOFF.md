@@ -348,6 +348,37 @@ token set). Milestone B (in-site skin swap: store widening + subsystem
 refactors) comes after the pipeline is proven. NOT pushed — awaiting Jake's
 go to merge/deploy (A0-A2 is visually a no-op so safe to land anytime).
 
+### 2026-07-15 (Fable, session 7 cont. — A3 Storybook, on branch storybook-catalog)
+NOT on main yet (branch storybook-catalog, commit 0a432d7; A0-A2 already
+merged+deployed to main). Dispatched FOURIER (Opus) for A3, reviewed + fixed.
+SHIPPED A3: @storybook/nextjs 8.6 (Webpack5) catalog.
+- Catalog: primitives/ (Stamp+tone control, UnderConstruction), case/
+  CaseComponents (all 9 presentational components, one story each + full
+  anatomy), design-system/Tokens = LIVE board reading getComputedStyle off
+  the generated tokens (proof-of-pipeline page).
+- .storybook/preview.tsx: 4 next/font faces re-instantiated (+offline
+  fallbacks), imports tokens.generated.css + globals.css, Theme toolbar
+  (classic-light/dark, medieval, underwater) → decorator sets data-skin/
+  data-theme matching the generated selectors EXACTLY.
+- Scripts storybook / build-storybook; storybook-static/ gitignored.
+- FABLE REVIEW FIX: Tokens board didn't react to the toolbar on the MDX
+  docs page (story decorators don't wrap bare MDX). Fixed by rendering it
+  through an embedded <Story> (Tokens.stories.tsx + attached-docs
+  <Meta of>/<Story of>). Verified: docs+canvas both switch light<->dark;
+  build-storybook + tsc green.
+- KNOWN DEBT: .storybook/main.ts has a webpackFinal DefinePlugin-dedupe
+  hack because @storybook/nextjs 8.6 breaks on Next 15.4+ (repo is on
+  15.5.20, NOT the 15.3.3 the plan assumed). Correct fix = Storybook 9 bump
+  (supports Next 15.4+/React 19). Filed as a spawned follow-up task.
+NEXT (Milestone A cont.): A4 (spacing/radius/type-scale/shadow/motion
+tokens + src/lib/motion.ts consolidating 7 spring sites), A5 (Figma loop via
+Tokens Studio + GitHub sync — needs Jake's Tokens Studio Pro seat + point
+sync at repo; the end-to-end demo), A6 (Medieval token set). Then Milestone
+B = in-site skin swap (store widening + subsystem refactors). Storybook
+deploy target = Chromatic (needs Jake's account/token) — deferred.
+OPEN: merge storybook-catalog → main? (safe; SB is dev-only, doesn't touch
+the deployed site). Awaiting Jake.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
