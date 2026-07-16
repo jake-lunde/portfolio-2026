@@ -379,6 +379,31 @@ deploy target = Chromatic (needs Jake's account/token) — deferred.
 OPEN: merge storybook-catalog → main? (safe; SB is dev-only, doesn't touch
 the deployed site). Awaiting Jake.
 
+### 2026-07-15 (Fable, session 8 — plan review + Chromatic finished)
+FABLE (Fable 5) reviewed Opus's executed plan: VERDICT SOUND, four findings,
+all resolved. A3.5 DONE (commit e2a6d0a on main): Chromatic CI green —
+CHROMATIC_PROJECT_TOKEN set as repo secret via gh from .env.local (value
+never echoed); workflow fixed (node 20→22 to match local 22.16; added the
+A2-planned FRESHNESS GUARD: `npm run tokens:build && git diff --exit-code --
+src/styles/tokens.generated.css` fails CI on stale generated CSS — critical
+for future Tokens Studio PRs; onlyChanged/TurboSnap to stretch free 5k
+snapshots). First run: completed/success; catalog PUBLISHED at
+https://6a57efd8ebeed5b15d1ed8a9-hsxdbidcdf.chromatic.com/ (stable per-build
+URL pattern; canonical entry = chromatic.com project page). Vercel deploy
+unaffected, lunde.co 200. A3.6 DONE: seven byte-identical `* 2.*` macOS
+duplicate artifacts deleted (worktree spin-off residue — watch for these
+after background worktree tasks). PLAN AMENDED (lively-sauteeing-snowflake):
+A5 now includes single-file consolidation (tokens/ multi-file →
+tokens/tokens.json set-keyed) for the FREE Tokens Studio plugin tier
+(decision: start free, Pro ~€17/mo only if multi-file/theme UI earns it),
+with parity re-check after. SB 8→9/10 bump in flight in a SEPARATE worktree
+session (task_b46a7142) — do NOT touch .storybook/ on main until it lands;
+webpackFinal hack retires with it. NEXT: A4 (spacing/radius/border/
+type-scale/shadow/motion tokens + src/lib/motion.ts consolidating the 7
+inline spring sites + first consuming CSS slice), then A5 (Figma loop:
+consolidate → plugin sync on design-tokens branch → edit→PR→CSS proof),
+A6 (Medieval tokens). Then Milestone B.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
