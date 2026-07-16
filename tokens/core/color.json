@@ -28,7 +28,7 @@
     },
     "nasa": {
       "cobalt": {
-        "$value": "#8129fb",
+        "$value": "#2adbff",
         "$type": "color"
       },
       "glow": {
