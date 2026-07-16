@@ -1,0 +1,13 @@
+{
+  "name": "TOKEN BRIDGE",
+  "id": "lunde-os-token-bridge",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["https://api.github.com"],
+    "reasoning": "Reads and writes tokens/*.json in the portfolio repo via the GitHub REST API (contents + git data). No other host is contacted."
+  }
+}

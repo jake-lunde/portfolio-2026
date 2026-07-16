@@ -33,3 +33,6 @@ ref/
 # token build intermediates (concatenated into tokens.generated.css)
 /src/styles/generated/
 build-storybook.log
+
+# figma plugin build output (built locally, loaded via manifest)
+/figma-plugin/dist/

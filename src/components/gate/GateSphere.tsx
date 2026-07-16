@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useGate } from '@/store/gate'
+import { SPRINGS } from '@/lib/motion'
 import { gateSfx } from '@/lib/sound'
 import styles from './gate.module.css'
 
@@ -218,7 +219,7 @@ export function GateSphere() {
               data-filled={(s && s !== '·') || undefined}
               animate={
                 phase === 'rising' && !reduced
-                  ? { scale: 1.5, y: 26, transition: { delay: i * 0.07, type: 'spring', stiffness: 300, damping: 20 } }
+                  ? { scale: 1.5, y: 26, transition: { delay: i * 0.07, ...SPRINGS.rise } }
                   : { scale: 1, y: 0 }
               }
             >
@@ -295,7 +296,7 @@ export function GateSphere() {
                 top: -34,
                 scale: 1,
               }}
-              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 260, damping: 26 }}
+              transition={reduced ? { duration: 0 } : SPRINGS.flight}
               onAnimationComplete={() => landFlight(f)}
             >
               {f.char}

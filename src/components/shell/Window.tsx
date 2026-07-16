@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, useDragControls, useReducedMotion } from 'motion/react'
+import { SPRINGS } from '@/lib/motion'
 import type { RefObject } from 'react'
 import type { ResolvedWindow } from '@/programs/resolve'
 import { useWindows } from '@/store/windows'
@@ -84,7 +85,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
       initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 10 }}
       animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
       exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, transition: { duration: 0.14 } }}
-      transition={{ type: 'spring', stiffness: 480, damping: 34, mass: 0.7 }}
+      transition={SPRINGS.window}
       drag={!zoomed}
       dragListener={false}
       dragControls={dragControls}

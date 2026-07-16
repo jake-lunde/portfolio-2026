@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { SPRINGS } from '@/lib/motion'
 import styles from './shell.module.css'
 
 /* Desktop widget: what Jake's playing (Apple Music recent-played), sized
@@ -48,7 +49,7 @@ export function NowPlayingWidget() {
 
   const spring = reduced
     ? { duration: 0 }
-    : { type: 'spring' as const, stiffness: 300, damping: 28 }
+    : SPRINGS.zoom
 
   const card = (big: boolean) => (
     <>

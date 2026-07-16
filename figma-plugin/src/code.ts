@@ -1,0 +1,516 @@
+/* TOKEN BRIDGE — Figma sandbox entry (code.ts).
+ *
+ * Thin adapter between Figma's variable API and the pure rules in tokens.ts /
+ * github.ts. Responsibilities:
+ *   - hold settings (PAT / repo / branch) in figma.clientStorage
+ *   - PULL:  GitHub tokens/*.json -> Figma variables (core + semantic modes)
+ *   - PUSH:  Figma variables -> changed tokens/*.json -> design-tokens PR
+ *
+ * The PAT lives only here (sandbox) + clientStorage; it is never posted to the
+ * UI iframe and never written to the status log.
+ */
+
+import { GitHub, parseRepo } from './github'
+import {
+  buildModel,
+  coreVarName,
+  deepClone,
+  enabledSemanticSet,
+  floatToTokenString,
+  isCoreSet,
+  leafAtPath,
+  refStringForTarget,
+  resolveKind,
+  resolveRef,
+  rgbaToTokenString,
+  semanticToken,
+  toFloat,
+  toRgba,
+  type FlatToken,
+  type Metadata,
+  type PulledModel,
+  type Rgba,
+  type ThemeDef,
+  type TokenKind,
+} from './tokens'
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const CORE_COLLECTION = 'core'
+const SEMANTIC_COLLECTION = 'semantic'
+const PR_BRANCH = 'design-tokens'
+const PR_TITLE = 'tokens: edits from TOKEN BRIDGE (Figma)'
+const COMMIT_MSG =
+  'tokens: edits from TOKEN BRIDGE (Figma)\n\nAuthored via the TOKEN BRIDGE Figma plugin.'
+const TOKENS_DIR = 'tokens'
+const DEFAULT_REPO = 'jake-lunde/portfolio-2026'
+const DEFAULT_BRANCH = 'main'
+
+const SETTINGS_KEYS = { pat: 'tb.pat', repo: 'tb.repo', branch: 'tb.branch' }
+
+// ---------------------------------------------------------------------------
+// UI plumbing
+// ---------------------------------------------------------------------------
+
+type LogLevel = 'info' | 'ok' | 'warn' | 'error'
+
+function log(message: string, level: LogLevel = 'info'): void {
+  figma.ui.postMessage({ type: 'log', level, message })
+}
+
+figma.showUI(__html__, { width: 380, height: 560, themeColors: false })
+
+type UIMessage =
+  | { type: 'ui-ready' }
+  | { type: 'save-settings'; pat: string; repo: string; branch: string }
+  | { type: 'pull' }
+  | { type: 'push' }
+
+figma.ui.onmessage = async (msg: UIMessage) => {
+  try {
+    if (msg.type === 'ui-ready') {
+      await sendSettings()
+    } else if (msg.type === 'save-settings') {
+      await saveSettings(msg.pat, msg.repo, msg.branch)
+    } else if (msg.type === 'pull') {
+      await runGuarded('PULL', pull)
+    } else if (msg.type === 'push') {
+      await runGuarded('PUSH', push)
+    }
+  } catch (e) {
+    log(errorText(e), 'error')
+  }
+}
+
+async function runGuarded(label: string, fn: (gh: GitHub, branch: string) => Promise<void>) {
+  const pat = (await figma.clientStorage.getAsync(SETTINGS_KEYS.pat)) as string | undefined
+  const repo = ((await figma.clientStorage.getAsync(SETTINGS_KEYS.repo)) as string) || DEFAULT_REPO
+  const branch =
+    ((await figma.clientStorage.getAsync(SETTINGS_KEYS.branch)) as string) || DEFAULT_BRANCH
+  if (!pat) {
+    log('No PAT saved. Paste a fine-grained token (Contents r/w) and Save first.', 'error')
+    return
+  }
+  log(`${label} starting…`)
+  const gh = new GitHub(pat, parseRepo(repo))
+  await fn(gh, branch)
+  log(`${label} done.`, 'ok')
+}
+
+function errorText(e: unknown): string {
+  return e instanceof Error ? e.message : String(e)
+}
+
+// ---------------------------------------------------------------------------
+// Settings
+// ---------------------------------------------------------------------------
+
+async function sendSettings(): Promise<void> {
+  const pat = (await figma.clientStorage.getAsync(SETTINGS_KEYS.pat)) as string | undefined
+  const repo = ((await figma.clientStorage.getAsync(SETTINGS_KEYS.repo)) as string) || DEFAULT_REPO
+  const branch =
+    ((await figma.clientStorage.getAsync(SETTINGS_KEYS.branch)) as string) || DEFAULT_BRANCH
+  // NB: the PAT value itself is never sent to the UI — only whether one exists.
+  figma.ui.postMessage({ type: 'settings', repo, branch, hasPat: !!pat })
+}
+
+async function saveSettings(pat: string, repo: string, branch: string): Promise<void> {
+  // Only overwrite the stored PAT when a non-empty value is supplied, so
+  // re-saving repo/branch doesn't wipe an existing token.
+  if (pat && pat.trim()) await figma.clientStorage.setAsync(SETTINGS_KEYS.pat, pat.trim())
+  await figma.clientStorage.setAsync(SETTINGS_KEYS.repo, (repo || DEFAULT_REPO).trim())
+  await figma.clientStorage.setAsync(SETTINGS_KEYS.branch, (branch || DEFAULT_BRANCH).trim())
+  log('Settings saved.', 'ok')
+  await sendSettings()
+}
+
+// ---------------------------------------------------------------------------
+// Fetch + build the model
+// ---------------------------------------------------------------------------
+
+async function fetchModel(gh: GitHub, branch: string): Promise<PulledModel> {
+  const metaText = await gh.getFileRaw(`${TOKENS_DIR}/$metadata.json`, branch)
+  if (!metaText) throw new Error(`tokens/$metadata.json not found on ${branch}.`)
+  const metadata = JSON.parse(metaText) as Metadata
+
+  const themesText = await gh.getFileRaw(`${TOKENS_DIR}/$themes.json`, branch)
+  if (!themesText) throw new Error(`tokens/$themes.json not found on ${branch}.`)
+  const themes = JSON.parse(themesText) as ThemeDef[]
+
+  const files: Record<string, unknown> = {}
+  for (const set of metadata.tokenSetOrder) {
+    const text = await gh.getFileRaw(`${TOKENS_DIR}/${set}.json`, branch)
+    if (!text) {
+      log(`Set "${set}" listed in metadata but file missing — skipping.`, 'warn')
+      continue
+    }
+    files[set] = JSON.parse(text)
+  }
+  return buildModel(metadata, themes, files)
+}
+
+// ---------------------------------------------------------------------------
+// Figma collection / variable helpers
+// ---------------------------------------------------------------------------
+
+async function getOrCreateCollection(name: string): Promise<VariableCollection> {
+  const cols = await figma.variables.getLocalVariableCollectionsAsync()
+  const existing = cols.find((c) => c.name === name)
+  return existing ?? figma.variables.createVariableCollection(name)
+}
+
+/** Ensure the semantic collection has one mode per theme (mode name = theme.id). */
+function ensureModes(col: VariableCollection, themes: ThemeDef[]): Record<string, string> {
+  const byTheme: Record<string, string> = {}
+  // Reuse the default mode for the first theme; add/rename the rest.
+  themes.forEach((theme, i) => {
+    const existing = col.modes.find((m) => m.name === theme.id)
+    if (existing) {
+      byTheme[theme.id] = existing.modeId
+      return
+    }
+    if (i === 0) {
+      col.renameMode(col.modes[0].modeId, theme.id)
+      byTheme[theme.id] = col.modes[0].modeId
+    } else {
+      byTheme[theme.id] = col.addMode(theme.id)
+    }
+  })
+  return byTheme
+}
+
+type VarIndex = Map<string, Variable>
+
+async function buildVarIndex(): Promise<Map<string, VarIndex>> {
+  // collectionId -> (variableName -> Variable)
+  const all = await figma.variables.getLocalVariablesAsync()
+  const byCol = new Map<string, VarIndex>()
+  for (const v of all) {
+    let idx = byCol.get(v.variableCollectionId)
+    if (!idx) {
+      idx = new Map()
+      byCol.set(v.variableCollectionId, idx)
+    }
+    idx.set(v.name, v)
+  }
+  return byCol
+}
+
+function getOrCreateVariable(
+  name: string,
+  col: VariableCollection,
+  kind: TokenKind,
+  index: Map<string, VarIndex>
+): Variable {
+  const colIdx = index.get(col.id) ?? new Map<string, Variable>()
+  const existing = colIdx.get(name)
+  if (existing) {
+    if (existing.resolvedType !== kind) {
+      log(
+        `Variable "${col.name}/${name}" exists as ${existing.resolvedType}, token wants ${kind}; reusing existing type.`,
+        'warn'
+      )
+    }
+    return existing
+  }
+  const created = figma.variables.createVariable(name, col, kind)
+  colIdx.set(name, created)
+  index.set(col.id, colIdx)
+  return created
+}
+
+// ---------------------------------------------------------------------------
+// PULL
+// ---------------------------------------------------------------------------
+
+async function pull(gh: GitHub, branch: string): Promise<void> {
+  const model = await fetchModel(gh, branch)
+  log(
+    `Fetched ${Object.keys(model.files).length} sets, ${model.themes.length} themes from ${branch}.`
+  )
+
+  const coreCol = await getOrCreateCollection(CORE_COLLECTION)
+  const semCol = await getOrCreateCollection(SEMANTIC_COLLECTION)
+  const modeByTheme = ensureModes(semCol, model.themes)
+
+  const index = await buildVarIndex()
+  const coreVars: VarIndex = new Map()
+  const semVars: VarIndex = new Map()
+
+  // Pass 1 — create/find every variable so aliases have targets to point at.
+  for (const t of model.coreTokens) {
+    const name = coreVarName(t.set, t.path)
+    const v = getOrCreateVariable(name, coreCol, resolveKind(t, model), index)
+    coreVars.set(name, v)
+  }
+  for (const name of model.semanticNames) {
+    // Kind is mode-invariant; derive from any occurrence.
+    const repr = representativeSemantic(model, name)
+    const kind = repr ? resolveKind(repr, model) : 'COLOR'
+    const v = getOrCreateVariable(name, semCol, kind, index)
+    semVars.set(name, v)
+  }
+
+  // Pass 2 — assign values / aliases.
+  const coreModeId = coreCol.modes[0].modeId
+  for (const t of model.coreTokens) {
+    const v = coreVars.get(coreVarName(t.set, t.path)) as Variable
+    setValue(v, coreModeId, t, model, coreVars, semVars)
+  }
+  for (const theme of model.themes) {
+    const modeId = modeByTheme[theme.id]
+    for (const name of model.semanticNames) {
+      const tok = semanticToken(model, theme, name)
+      if (!tok) {
+        log(`No value for semantic "${name}" in theme "${theme.id}" — left unset.`, 'warn')
+        continue
+      }
+      const v = semVars.get(name) as Variable
+      setValue(v, modeId, tok, model, coreVars, semVars)
+    }
+  }
+
+  log(
+    `Upserted ${coreVars.size} core + ${semVars.size} semantic variables (${model.themes
+      .map((t) => t.id)
+      .join(', ')}).`,
+    'ok'
+  )
+}
+
+function representativeSemantic(model: PulledModel, name: string): FlatToken | undefined {
+  for (const set of Object.keys(model.semanticSets)) {
+    const hit = model.semanticSets[set].find((t) => t.path === name)
+    if (hit) return hit
+  }
+  return undefined
+}
+
+function setValue(
+  v: Variable,
+  modeId: string,
+  token: FlatToken,
+  model: PulledModel,
+  coreVars: VarIndex,
+  semVars: VarIndex
+): void {
+  if (token.isAlias) {
+    const ref = resolveRef(token.aliasRef as string, model)
+    if (!ref) {
+      log(`Unresolved alias ${token.rawValue} for "${token.path}".`, 'warn')
+      return
+    }
+    const target = ref.collection === 'core' ? coreVars.get(ref.name) : semVars.get(ref.name)
+    if (!target) {
+      log(`Alias target ${ref.collection}/${ref.name} missing for "${token.path}".`, 'warn')
+      return
+    }
+    v.setValueForMode(modeId, figma.variables.createVariableAlias(target))
+    return
+  }
+  const kind = v.resolvedType
+  if (kind === 'COLOR') v.setValueForMode(modeId, toRgba(token.rawValue))
+  else if (kind === 'FLOAT') v.setValueForMode(modeId, toFloat(token.rawValue))
+  else v.setValueForMode(modeId, token.rawValue)
+}
+
+// ---------------------------------------------------------------------------
+// PUSH
+// ---------------------------------------------------------------------------
+
+async function push(gh: GitHub, branch: string): Promise<void> {
+  // Diff Figma against the current repo state (the PR base) so the PR shows the
+  // true delta. We re-fetch rather than trusting a stored memo.
+  const model = await fetchModel(gh, branch)
+
+  const cols = await figma.variables.getLocalVariableCollectionsAsync()
+  const coreCol = cols.find((c) => c.name === CORE_COLLECTION)
+  const semCol = cols.find((c) => c.name === SEMANTIC_COLLECTION)
+  if (!coreCol || !semCol) {
+    throw new Error('Missing "core"/"semantic" collections — run PULL first.')
+  }
+  const index = await buildVarIndex()
+  const coreIdx = index.get(coreCol.id) ?? new Map<string, Variable>()
+  const semIdx = index.get(semCol.id) ?? new Map<string, Variable>()
+  const modeByTheme = modeIndex(semCol)
+  const allVars = await figma.variables.getLocalVariablesAsync()
+  const varById = new Map(allVars.map((v) => [v.id, v]))
+
+  const changed: Array<{ path: string; content: string }> = []
+  let changedTokens = 0
+
+  for (const set of model.metadata.tokenSetOrder) {
+    const original = model.files[set]
+    if (original === undefined) continue
+
+    const clone = deepClone(original)
+    let fileChanged = false
+
+    if (isCoreSet(set)) {
+      const coreMode = coreCol.modes[0].modeId
+      for (const t of model.coreTokens.filter((x) => x.set === set)) {
+        const v = coreIdx.get(coreVarName(t.set, t.path))
+        if (!v) continue // unknown to Figma — leave original untouched
+        const next = serializeVarValue(v, coreMode, t, varById, model)
+        if (next !== null && applyLeaf(clone, t.path, next, t)) {
+          fileChanged = true
+          changedTokens++
+        }
+      }
+    } else {
+      // semantic set — find the theme that emits it, read that theme's mode
+      const theme = model.themes.find((th) => enabledSemanticSet(th) === set)
+      const flat = model.semanticSets[set] ?? []
+      if (theme) {
+        const modeId = modeByTheme[theme.id]
+        for (const t of flat) {
+          const v = semIdx.get(t.path)
+          if (!v || modeId === undefined) continue
+          const next = serializeVarValue(v, modeId, t, varById, model)
+          if (next !== null && applyLeaf(clone, t.path, next, t)) {
+            fileChanged = true
+            changedTokens++
+          }
+        }
+      }
+    }
+
+    if (fileChanged) {
+      changed.push({ path: `${TOKENS_DIR}/${set}.json`, content: JSON.stringify(clone, null, 2) + '\n' })
+    }
+  }
+
+  // Warn about Figma variables that aren't in any pulled set (ignored on push).
+  reportUnknownVars(coreIdx, semIdx, model)
+
+  if (changed.length === 0) {
+    log('No token changes vs repo — nothing to push.', 'ok')
+    return
+  }
+  log(`${changedTokens} token(s) changed across ${changed.length} file(s):`)
+  for (const f of changed) log(`  • ${f.path}`)
+
+  const prUrl = await commitAndPr(gh, branch, changed)
+  log(`PR ready: ${prUrl}`, 'ok')
+}
+
+function modeIndex(col: VariableCollection): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const m of col.modes) out[m.name] = m.modeId
+  return out
+}
+
+/**
+ * Serialize a Figma variable's value for a mode back to a token string, or
+ * null if it should be skipped. Aliases -> "{ref}"; colors -> hex/rgba;
+ * floats -> "NNpx"; strings -> as-is.
+ */
+function serializeVarValue(
+  v: Variable,
+  modeId: string,
+  token: FlatToken,
+  varById: Map<string, Variable>,
+  model: PulledModel
+): string | null {
+  const raw = v.valuesByMode[modeId]
+  if (raw === undefined) return null
+
+  if (isAliasValue(raw)) {
+    const target = varById.get(raw.id)
+    if (!target) {
+      log(`Alias target for "${token.path}" not found; leaving original value.`, 'warn')
+      return null
+    }
+    const refBody = refBodyForVariable(target, model)
+    if (!refBody) {
+      log(`Cannot map alias target "${target.name}" back to a token ref; leaving original.`, 'warn')
+      return null
+    }
+    return refBody
+  }
+
+  const kind = v.resolvedType
+  if (kind === 'COLOR') {
+    const c = raw as Rgba
+    return rgbaToTokenString(c, token.rawValue.trim() === 'transparent')
+  }
+  if (kind === 'FLOAT') return floatToTokenString(raw as number)
+  return String(raw)
+}
+
+function isAliasValue(x: unknown): x is VariableAlias {
+  return (
+    typeof x === 'object' &&
+    x !== null &&
+    (x as { type?: string }).type === 'VARIABLE_ALIAS' &&
+    typeof (x as { id?: unknown }).id === 'string'
+  )
+}
+
+/** Map a Figma variable (alias target) back to a "{ref}" body string. */
+function refBodyForVariable(target: Variable, model: PulledModel): string | null {
+  // core target: reverse the naming rule via the core token whose var name matches
+  const core = model.coreTokens.find((t) => coreVarName(t.set, t.path) === target.name)
+  if (core) return refStringForTarget(core)
+  // semantic target: the variable name IS the token path
+  if (model.semanticNames.includes(target.name)) return `{${target.name}}`
+  return null
+}
+
+/**
+ * Write `next` into the cloned file at `token.path`, but only if it differs
+ * from the original string. Returns true when a change was written.
+ */
+function applyLeaf(
+  clone: unknown,
+  path: string,
+  next: string,
+  token: FlatToken
+): boolean {
+  if (next === token.rawValue) return false
+  const leaf = leafAtPath(clone, path)
+  if (!leaf) return false
+  leaf.$value = next
+  return true
+}
+
+function reportUnknownVars(coreIdx: VarIndex, semIdx: VarIndex, model: PulledModel): void {
+  const coreNames = new Set(model.coreTokens.map((t) => coreVarName(t.set, t.path)))
+  const semNames = new Set(model.semanticNames)
+  const extra: string[] = []
+  for (const name of coreIdx.keys()) if (!coreNames.has(name)) extra.push(`core/${name}`)
+  for (const name of semIdx.keys()) if (!semNames.has(name)) extra.push(`semantic/${name}`)
+  if (extra.length) {
+    log(`Ignoring ${extra.length} Figma variable(s) with no matching token: ${extra.join(', ')}`, 'warn')
+  }
+}
+
+async function commitAndPr(
+  gh: GitHub,
+  base: string,
+  files: Array<{ path: string; content: string }>
+): Promise<string> {
+  const existingBranchSha = await gh.refShaOrNull(PR_BRANCH)
+  const baseSha = existingBranchSha ?? (await gh.refSha(base))
+  const baseTree = await gh.commitTree(baseSha)
+  const treeSha = await gh.createTree(baseTree, files)
+  const commitSha = await gh.createCommit(COMMIT_MSG, treeSha, baseSha)
+
+  if (existingBranchSha) {
+    await gh.updateBranch(PR_BRANCH, commitSha) // fast-forward (parent = branch head)
+    log(`Pushed to existing "${PR_BRANCH}".`)
+  } else {
+    await gh.createBranch(PR_BRANCH, commitSha)
+    log(`Created "${PR_BRANCH}".`)
+  }
+
+  const existingPr = await gh.openPrUrl(PR_BRANCH, base)
+  if (existingPr) return existingPr
+  const body =
+    'Automated by the TOKEN BRIDGE Figma plugin.\n\n' +
+    'Design tokens edited in Figma, serialized back to `tokens/*.json`. ' +
+    'CI regenerates `src/styles/tokens.generated.css`; Chromatic diffs the result.'
+  return gh.createPr(PR_BRANCH, base, PR_TITLE, body)
+}

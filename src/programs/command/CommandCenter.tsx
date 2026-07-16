@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { SPRINGS } from '@/lib/motion'
 import { telemetry } from '@/lib/sound'
 import timeline from './cc-timeline.json'
 import styles from './command.module.css'
@@ -254,7 +255,7 @@ export default function CommandCenter() {
                 initial={reduced ? false : { opacity: 0, y: -14 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 34 }}
+                transition={SPRINGS.deck}
               >
                 <span className={styles.rowT}>{clock(ev.t)}</span>
                 <span className={styles.rowArrow} data-action={ev.action}>

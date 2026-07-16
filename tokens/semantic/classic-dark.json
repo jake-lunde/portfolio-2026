@@ -9,5 +9,8 @@
   "blue":      { "$value": "{color.nasa.glow}", "$type": "color" },
   "pink":      { "$value": "{color.doppler.pink}", "$type": "color" },
   "pink-text": { "$value": "{pink}", "$type": "color" },
-  "pink-mark": { "$value": "transparent", "$type": "color" }
+  "pink-mark": { "$value": "transparent", "$type": "color" },
+
+  "shadow-print":    { "$value": "4px 4px 0 rgba(0, 0, 0, 0.4)" },
+  "shadow-print-lg": { "$value": "5px 5px 0 rgba(0, 0, 0, 0.4)" }
 }

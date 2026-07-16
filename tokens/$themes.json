@@ -7,6 +7,11 @@
       "core/color": "source",
       "core/font": "enabled",
       "core/layout": "enabled",
+      "core/spacing": "enabled",
+      "core/radius": "enabled",
+      "core/border": "enabled",
+      "core/type": "enabled",
+      "core/motion": "enabled",
       "semantic/classic-light": "enabled"
     }
   },

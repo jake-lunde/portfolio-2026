@@ -1,0 +1,119 @@
+<style>
+  :root {
+    --paper: #e7e1d2;
+    --paper-2: #ded7c4;
+    --ink: #17150d;
+    --ink-soft: #5a564a;
+    --blue: #2036c8;
+    --pink: #f2a6c2;
+    --line: rgba(23, 21, 13, 0.18);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  body { padding: 12px; }
+  .wordmark {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+  .wordmark b { letter-spacing: 0.14em; font-size: 12px; }
+  .wordmark span { color: var(--ink-soft); font-size: 9px; letter-spacing: 0.1em; }
+  label {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 9px;
+    color: var(--ink-soft);
+    margin: 10px 0 3px;
+  }
+  input {
+    width: 100%;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font: inherit;
+    padding: 6px 8px;
+    outline: none;
+  }
+  input:focus { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+  .hint { color: var(--ink-soft); font-size: 9px; margin-top: 3px; }
+  .row { display: flex; gap: 8px; }
+  .row > div { flex: 1; }
+  button {
+    font: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    padding: 7px 10px;
+    cursor: pointer;
+  }
+  button:hover { background: var(--ink); color: var(--paper); }
+  button:active { transform: translateY(1px); }
+  button.primary { border-color: var(--blue); color: var(--blue); }
+  button.primary:hover { background: var(--blue); color: var(--paper); }
+  #save { width: 100%; margin-top: 10px; }
+  .actions { display: flex; gap: 8px; margin: 14px 0 10px; }
+  .actions button { flex: 1; }
+  .logwrap {
+    border: 1px solid var(--line);
+    background: #0d100c;
+    color: #e9e4d5;
+    height: 150px;
+    overflow-y: auto;
+    padding: 8px;
+    font-size: 10px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .logwrap .l-ok { color: #9fe6b6; }
+  .logwrap .l-warn { color: var(--pink); }
+  .logwrap .l-error { color: #ff8a9a; }
+  .logwrap .l-info { color: #8a9a93; }
+  .badge { font-size: 9px; color: var(--ink-soft); margin-top: 4px; }
+  .badge b { color: var(--blue); }
+</style>
+
+<div class="wordmark">
+  <b>TOKEN BRIDGE</b>
+  <span>LUNDE&nbsp;OS · 1992年製</span>
+</div>
+
+<label for="pat">GitHub PAT — fine-grained, Contents r/w</label>
+<input id="pat" type="password" placeholder="github_pat_… (stored locally, never shown)" autocomplete="off" />
+<div class="hint">Held in Figma clientStorage only. Never logged, never committed.</div>
+
+<div class="row">
+  <div>
+    <label for="repo">Repo</label>
+    <input id="repo" type="text" placeholder="jake-lunde/portfolio-2026" />
+  </div>
+  <div>
+    <label for="branch">Pull branch</label>
+    <input id="branch" type="text" placeholder="main" />
+  </div>
+</div>
+<button id="save">Save settings</button>
+
+<div class="actions">
+  <button id="pull" class="primary">Pull from repo</button>
+  <button id="push" class="primary">Push as PR</button>
+</div>
+
+<div class="logwrap" id="log"></div>
+<div class="badge">PUSH opens/updates a <b>design-tokens</b> PR → main.</div>
+
+<!--INLINE_SCRIPT-->

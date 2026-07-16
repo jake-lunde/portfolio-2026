@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { SPRINGS } from '@/lib/motion'
 import styles from './shell.module.css'
 
 /* The wall — the last 3 Photo Booth snaps the visitor pinned, taped to
@@ -77,7 +78,7 @@ export function PhotoWall() {
 
   const spring = reduced
     ? { duration: 0 }
-    : { type: 'spring' as const, stiffness: 300, damping: 28 }
+    : SPRINGS.zoom
 
   return (
     <>

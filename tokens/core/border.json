@@ -1,0 +1,7 @@
+{
+  "border": {
+    "hairline": { "$value": "1px", "$type": "dimension" },
+    "rule": { "$value": "1.5px", "$type": "dimension" },
+    "heavy": { "$value": "2px", "$type": "dimension" }
+  }
+}

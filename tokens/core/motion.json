@@ -1,0 +1,39 @@
+{
+  "duration": {
+    "tap": { "$value": "0.16s" },
+    "fade": { "$value": "0.18s" },
+    "theme": { "$value": "0.25s" },
+    "slow": { "$value": "0.7s" }
+  },
+  "spring": {
+    "window": {
+      "stiffness": { "$value": "480" },
+      "damping": { "$value": "34" },
+      "mass": { "$value": "0.7" }
+    },
+    "deck": {
+      "stiffness": { "$value": "500" },
+      "damping": { "$value": "34" }
+    },
+    "mini": {
+      "stiffness": { "$value": "340" },
+      "damping": { "$value": "28" }
+    },
+    "zoom": {
+      "stiffness": { "$value": "300" },
+      "damping": { "$value": "28" }
+    },
+    "widget": {
+      "stiffness": { "$value": "300" },
+      "damping": { "$value": "30" }
+    },
+    "rise": {
+      "stiffness": { "$value": "300" },
+      "damping": { "$value": "20" }
+    },
+    "flight": {
+      "stiffness": { "$value": "260" },
+      "damping": { "$value": "26" }
+    }
+  }
+}

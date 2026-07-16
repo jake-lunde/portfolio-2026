@@ -3,6 +3,11 @@
     "core/color",
     "core/font",
     "core/layout",
+    "core/spacing",
+    "core/radius",
+    "core/border",
+    "core/type",
+    "core/motion",
     "semantic/classic-light",
     "semantic/classic-dark"
   ]

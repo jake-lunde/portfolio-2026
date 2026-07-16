@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
+import { SPRINGS } from '@/lib/motion'
 import { dailyGauges, pacificMinutes, pacificClock } from '@/lib/dailySystems'
 import styles from './shell.module.css'
 
@@ -29,7 +30,7 @@ export function DailyWidget() {
       aria-label="Daily systems — live"
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30, delay: 0.4 }}
+      transition={{ ...SPRINGS.widget, delay: 0.4 }}
     >
       <div className={styles.dailyHead}>
         <span>DAILY.SYS</span>

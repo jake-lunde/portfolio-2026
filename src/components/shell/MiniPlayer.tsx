@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useStudio } from '@/lib/studioPlayer'
+import { SPRINGS } from '@/lib/motion'
 import { useWindows } from '@/store/windows'
 import { sfx } from '@/lib/sound'
 import styles from './shell.module.css'
@@ -62,7 +63,7 @@ export function MiniPlayer() {
           initial={reduced ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={reduced ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.96 }}
-          transition={{ type: 'spring', stiffness: 340, damping: 28 }}
+          transition={SPRINGS.mini}
         >
           {current.art && (
             // eslint-disable-next-line @next/next/no-img-element
