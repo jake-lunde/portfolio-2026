@@ -1,12 +1,76 @@
 {
   "color": {
-    "paper":   { "base": { "$value": "#e7e1d2", "$type": "color" }, "raised": { "$value": "#ded7c4", "$type": "color" } },
-    "ink":     { "base": { "$value": "#17150d", "$type": "color" }, "soft":   { "$value": "#5a564a", "$type": "color" } },
-    "plate":   { "base": { "$value": "#131811", "$type": "color" } },
-    "nasa":    { "cobalt": { "$value": "#2036c8", "$type": "color" }, "glow": { "$value": "#5c7cff", "$type": "color" } },
-    "doppler": { "pink": { "$value": "#f2a6c2", "$type": "color" } },
-    "report":  { "green": { "$value": "#2e4a38", "$type": "color" } },
-    "void":    { "base": { "$value": "#0d100c", "$type": "color" }, "raised": { "$value": "#14181a", "$type": "color" }, "plate": { "$value": "#090c0a", "$type": "color" } },
-    "cream":   { "base": { "$value": "#e9e4d5", "$type": "color" }, "soft": { "$value": "#8a9a93", "$type": "color" } }
+    "paper": {
+      "base": {
+        "$value": "#e7e1d2",
+        "$type": "color"
+      },
+      "raised": {
+        "$value": "#ded7c4",
+        "$type": "color"
+      }
+    },
+    "ink": {
+      "base": {
+        "$value": "#17150d",
+        "$type": "color"
+      },
+      "soft": {
+        "$value": "#5a564a",
+        "$type": "color"
+      }
+    },
+    "plate": {
+      "base": {
+        "$value": "#131811",
+        "$type": "color"
+      }
+    },
+    "nasa": {
+      "cobalt": {
+        "$value": "#2adbff",
+        "$type": "color"
+      },
+      "glow": {
+        "$value": "#5c7cff",
+        "$type": "color"
+      }
+    },
+    "doppler": {
+      "pink": {
+        "$value": "#f2a6c2",
+        "$type": "color"
+      }
+    },
+    "report": {
+      "green": {
+        "$value": "#2e4a38",
+        "$type": "color"
+      }
+    },
+    "void": {
+      "base": {
+        "$value": "#0d100c",
+        "$type": "color"
+      },
+      "raised": {
+        "$value": "#14181a",
+        "$type": "color"
+      },
+      "plate": {
+        "$value": "#090c0a",
+        "$type": "color"
+      }
+    },
+    "cream": {
+      "base": {
+        "$value": "#e9e4d5",
+        "$type": "color"
+      },
+      "soft": {
+        "$value": "#8a9a93",
+        "$type": "color"
+      }
+    }
   }
 }
