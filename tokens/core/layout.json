@@ -1,3 +1,6 @@
 {
-  "menubar-h": { "$value": "34px", "$type": "dimension" }
+  "menubar-h": {
+    "$value": "34px",
+    "$type": "dimension"
+  }
 }

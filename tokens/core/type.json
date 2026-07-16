@@ -1,10 +1,27 @@
 {
   "text": {
-    "chrome-2xs": { "$value": "8px", "$type": "dimension" },
-    "chrome-xs": { "$value": "9px", "$type": "dimension" },
-    "chrome-sm": { "$value": "10px", "$type": "dimension" },
-    "chrome-md": { "$value": "11px", "$type": "dimension" },
-    "body": { "$value": "17px", "$type": "dimension" },
-    "leading-body": { "$value": "1.6" }
+    "chrome-2xs": {
+      "$value": "8px",
+      "$type": "dimension"
+    },
+    "chrome-xs": {
+      "$value": "9px",
+      "$type": "dimension"
+    },
+    "chrome-sm": {
+      "$value": "10px",
+      "$type": "dimension"
+    },
+    "chrome-md": {
+      "$value": "11px",
+      "$type": "dimension"
+    },
+    "body": {
+      "$value": "17px",
+      "$type": "dimension"
+    },
+    "leading-body": {
+      "$value": "1.6"
+    }
   }
 }

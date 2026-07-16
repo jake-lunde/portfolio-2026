@@ -1,7 +1,16 @@
 {
   "radius": {
-    "sm": { "$value": "4px", "$type": "dimension" },
-    "btn": { "$value": "7px", "$type": "dimension" },
-    "full": { "$value": "50%", "$type": "dimension" }
+    "sm": {
+      "$value": "4px",
+      "$type": "dimension"
+    },
+    "btn": {
+      "$value": "7px",
+      "$type": "dimension"
+    },
+    "full": {
+      "$value": "50%",
+      "$type": "dimension"
+    }
   }
 }

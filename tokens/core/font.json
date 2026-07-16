@@ -1,6 +1,14 @@
 {
-  "sans":    { "$value": "var(--font-sans), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" },
-  "mono":    { "$value": "var(--font-mono), 'SF Mono', ui-monospace, Menlo, monospace" },
-  "cjk":     { "$value": "var(--font-cjk), sans-serif" },
-  "display": { "$value": "var(--font-pixel), var(--font-mono), monospace" }
+  "sans": {
+    "$value": "var(--font-sans), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
+  },
+  "mono": {
+    "$value": "var(--font-mono), 'SF Mono', ui-monospace, Menlo, monospace"
+  },
+  "cjk": {
+    "$value": "var(--font-cjk), sans-serif"
+  },
+  "display": {
+    "$value": "var(--font-pixel), var(--font-mono), monospace"
+  }
 }
