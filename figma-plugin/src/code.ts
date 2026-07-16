@@ -496,6 +496,15 @@ async function commitAndPr(
   const baseSha = existingBranchSha ?? (await gh.refSha(base))
   const baseTree = await gh.commitTree(baseSha)
   const treeSha = await gh.createTree(baseTree, files)
+
+  // If the new tree is identical to the parent's (e.g. a re-push whose edits
+  // already live on design-tokens), skip the commit to avoid empty commits.
+  if (treeSha === baseTree) {
+    log('Changes already present on the branch — no new commit.', 'ok')
+    const existing = await gh.openPrUrl(PR_BRANCH, base)
+    return existing ?? '(open a PR for design-tokens on GitHub)'
+  }
+
   const commitSha = await gh.createCommit(COMMIT_MSG, treeSha, baseSha)
 
   if (existingBranchSha) {

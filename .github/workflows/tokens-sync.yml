@@ -36,14 +36,16 @@ jobs:
       - name: Rebuild tokens.generated.css
         run: npm run tokens:build
 
-      - name: Commit regenerated CSS if it changed
+      - name: Commit regenerated artifacts if they changed
+        # tokens:build emits BOTH the CSS and src/lib/motion.generated.ts
+        # (spring/duration tokens consumed by motion/react) — commit both.
         run: |
-          if git diff --quiet -- src/styles/tokens.generated.css; then
-            echo "tokens.generated.css already fresh — nothing to commit."
+          if git diff --quiet -- src/styles/tokens.generated.css src/lib/motion.generated.ts; then
+            echo "generated artifacts already fresh — nothing to commit."
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add src/styles/tokens.generated.css
-            git commit -m "ci: regenerate tokens.generated.css"
+            git add src/styles/tokens.generated.css src/lib/motion.generated.ts
+            git commit -m "ci: regenerate token artifacts"
             git push origin HEAD:${{ github.head_ref }}
           fi

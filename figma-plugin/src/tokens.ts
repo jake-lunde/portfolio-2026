@@ -233,11 +233,17 @@ const HEX_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$
 const RGBA_RE = /^rgba?\(([^)]+)\)$/i
 const PX_RE = /^-?\d+(\.\d+)?px$/
 
-/** Concrete kind of a NON-alias value, or null if it can't be classified. */
-export function kindOfValue(rawValue: string, type?: string): TokenKind | null {
+/**
+ * Concrete kind of a NON-alias value.
+ * FLOAT is reserved for PIXEL dimensions (`NNpx`) only — those round-trip
+ * exactly (pull `34px`->34, push 34->`34px`) and are pleasant to edit as
+ * numbers in Figma. Non-px "dimensions" (`50%`, unitless `1.6`, `0.16s`, spring
+ * constants) and multi-part values (shadows, font stacks) stay STRING so a push
+ * never silently rewrites them (e.g. `50%` must NOT become `50px`).
+ */
+export function kindOfValue(rawValue: string, type?: string): TokenKind {
   const v = rawValue.trim()
   if (type === 'color') return 'COLOR'
-  if (type === 'dimension') return 'FLOAT'
   if (HEX_RE.test(v) || RGBA_RE.test(v) || v === 'transparent') return 'COLOR'
   if (PX_RE.test(v)) return 'FLOAT'
   return 'STRING'
@@ -249,7 +255,7 @@ export function resolveKind(
   model: PulledModel,
   seen: Set<string> = new Set()
 ): TokenKind {
-  if (!token.isAlias) return kindOfValue(token.rawValue, token.type) ?? 'STRING'
+  if (!token.isAlias) return kindOfValue(token.rawValue, token.type)
   const key = `${token.set}::${token.path}`
   if (seen.has(key)) return 'STRING'
   seen.add(key)
