@@ -404,6 +404,46 @@ inline spring sites + first consuming CSS slice), then A5 (Figma loop:
 consolidate → plugin sync on design-tokens branch → edit→PR→CSS proof),
 A6 (Medieval tokens). Then Milestone B.
 
+### 2026-07-16 (Fable, session 9 — A4 + TOKEN BRIDGE merged; Figma loop CLOSED)
+Commit 29cf799 on main. THE ROUND-TRIP IS PRODUCTION-PROVEN: while this
+session was offline Jake installed the plugin and pushed two PRs from Figma
+(#1 changed --blue to #2adbff, #2 reverted); PR #1 merged with stale
+generated CSS and the chromatic freshness guard FAILED main exactly as
+designed — the guard's first real catch. tokens-sync.yml (now on main)
+auto-regenerates artifacts on future token PRs so that failure mode is
+closed end-to-end.
+SHIPPED: A4 (5 new core token sets spacing/radius/border/type/motion, all
+values extracted verbatim; build emits src/lib/motion.generated.ts;
+src/lib/motion.ts SPRINGS/DURATIONS consolidates all 7 spring sites; shadow
+tokens shadow-print/-lg/lift/sticky/-lift/pin/modal consumed by
+shell.module.css, dark overrides absorbed by token flip) + TOKEN BRIDGE
+(figma-plugin/: manifest w/ api.github.com-only networkAccess, tokens.ts
+pure mapping — FLOAT=px-only after the 50% fix, aliases round-trip as
+Figma variable aliases, transparent preserved; github.ts git-data client;
+code.ts PULL/PUSH; lo-fi terminal UI; PAT in clientStorage only).
+GOTCHAS/RESCUES: (1) GitHub Desktop AUTO-STASHES on branch switch —
+FOURIER's final fixes (% corruption, empty-commit guard, tsconfig exclude)
+were stranded in stash@{2}; recovered. Stashes @{0}/@{1} are Jake's, left
+alone. (2) tokens-sync originally committed only the CSS — patched to also
+commit motion.generated.ts. (3) ALL tokens/*.json normalized to the
+plugin's 2-space serialization (generated artifacts verified byte-stable)
+so Figma pushes never carry formatting noise. (4) figma-plugin/dist/ is
+GITIGNORED — after clone/branch switch the Figma dev-plugin entry breaks;
+fix = npm run plugin:build, then Figma > Plugins > Development > Import
+plugin from manifest > figma-plugin/manifest.json. Jake hit this ("cant
+find the plugin").
+BRANCH NOTE: local branches blue-update-test + design-tokens are Jake's
+test artifacts; design-tokens also exists on origin (the plugin's PR
+branch — it accumulates plugin commits by design).
+NOTION: Jake is migrating tracking to Notion and shared a TOKEN BRIDGE
+notes page — NOT REACHABLE from this session (no Notion MCP tools visible;
+page URL is auth-walled). His notes may contain untriaged bug reports.
+Next session: check for Notion MCP again, or ask Jake to paste.
+NEXT: A6 Medieval token set (the pipeline is fully ready for it — author
+semantic/medieval.json + $themes entry, [data-skin='medieval'] emits,
+verify in SB toolbar + Chromatic + a Figma pull showing the new mode).
+Then Milestone B (store widening + subsystem refactors).
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
