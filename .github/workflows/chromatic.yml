@@ -8,15 +8,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Chromatic needs full history for baselines
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # match local (22.16)
 
       - run: npm ci
+
+      # Freshness guard: the committed tokens.generated.css must match what
+      # tokens/ produces — a stale generated file (e.g. a Tokens Studio PR
+      # that skipped the build) fails here instead of shipping silently.
+      - name: Tokens freshness guard
+        run: |
+          npm run tokens:build
+          git diff --exit-code -- src/styles/tokens.generated.css
 
       - uses: chromaui/action@latest
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           exitOnceUploaded: true
+          onlyChanged: true # TurboSnap — stretch the free 5k snapshots
