@@ -541,6 +541,44 @@ component CSS + a token-allowlist lint (var must exist in generated set) +
 Chromatic. A hardcoded-value->token linter is 'the nut' and it's crackable
 in code. Offer to codify into DS-OPS.md.
 
+### 2026-07-17 (Fable, session 12 — plugin 3-tier fix + DS-OPS + FABLE live)
+- PLUGIN BUG FIXED (commit f803599): Jake pulled into a cleared file ->
+  'invalid variable name'. Cause: the 3-tier restructure added NESTED
+  semantic tokens (radius.control, text.label); the plugin used the raw
+  DOTTED path as the Figma variable name and Figma rejects '.' -> crash on
+  first semantic var -> pass-2 never runs -> core shows white. Fixes in
+  figma-plugin/src/{tokens,code}.ts: (a) figmaVarName(path) slashes dots for
+  the Figma NAME, internal keys/refs stay dotted, applied at every create/
+  lookup incl. PUSH + refBodyForVariable (slash->dot reverse) + unknown-var
+  report; (b) resolveRef now checks semanticNames FIRST (dotted semantic is
+  valid now, was assumed core); (c) COMPONENT tier added — component/* sets
+  were silently dropped; now their own single-mode 'component' collection,
+  pass1 create + pass2 alias-assign into semantic. Dry-run vs token files:
+  31 semantic + 4 component, zero dots in Figma names, zero unresolved
+  aliases. tsc+plugin:build green. JAKE ACTION: re-import plugin (new dist,
+  gitignored -> run npm run plugin:build first), DELETE the half-populated
+  core/semantic vars, then PULL -> core(59)+semantic(31)+component(4).
+- DS-OPS.md §3.5 added (Jake's ask): few-designers/many-eng scenarios.
+  A (component in SB not in Figma) -> on-demand mirror publish + Code Connect
+  coverage check as drift detector, NOT live structural sync. B (hardcode/
+  wrong token) -> CODE governance: stylelint disallowed-list + token
+  allowlist rule + value->token linter + Chromatic; Figma is never the
+  enforcement layer, CI is. Includes sample stylelint config.
+- FABLE Notion bot NOW WORKING as a distinct identity: Jake shared the
+  TOKEN BRIDGE page (39fd29ee985480f78889c8ac426cb74c) with the FABLE
+  integration; posting via Notion REST (NOTION_FABLE_TOKEN) with a
+  json.dumps body (shell -d mangles JSON — use python/urllib or --data @file).
+  Left a FABLE comment there re: the plugin fix. To comment on OTHER pages,
+  each must be shared with the FABLE integration (or share the parent DB).
+- Storybook scroll fix shipped earlier this arc (preview.tsx re-enables
+  html/body scroll; globals body{overflow:hidden} had leaked in).
+NEXT: after Jake's clean PULL, re-tier the Figma Button (it was bound to old
+paper/ink vars pre-rename; rebind to surface/content + button/radius from the
+component collection) — or just regenerate the mirror. THEN A6 Medieval:
+author semantic/medieval.json COLOR ROLES only (scale/component stay :root)
++ a 'medieval' entry in $themes; the plugin will create a medieval MODE on
+the semantic collection on next pull.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
