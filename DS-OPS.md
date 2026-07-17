@@ -92,6 +92,73 @@ Sell this sentence to the team early, it prevents every bad roadmap:
   appears in the Figma library, Storybook, Chromatic's diff, and production.
   One value, four surfaces, one review.
 
+## 3.5 The few-designers / many-engineers reality (Jake's two scenarios)
+
+Two failure modes dominate when eng outnumbers design. They feel like the
+same problem ("code and Figma drift") but they are solved by **different
+tools**, and conflating them is the trap.
+
+### Scenario A — eng ships a component to Storybook; Figma never gets it
+The instinct is a live structural sync. Resist it: reverse-syncing structure
+is lossy and destructive (it clobbers designers' in-progress work, detaches
+instances, drops overrides). The durable answer is two moves:
+
+1. **Generate/refresh the Figma mirror from the story on demand** — a
+   *deliberate publish*, not a background sync. The Figma MCP (or a small
+   codegen) reads the Storybook story and builds a variable-bound component
+   in Figma. For **big/nested components**, build bottom-up: mirror the atoms
+   first (they're already variable-bound), then compose molecules from
+   instances — same order you'd build them by hand. Args/props → Figma
+   component properties (TEXT/BOOLEAN/INSTANCE_SWAP); variant axes → variant
+   sets. This is a periodic, reviewed batch job, not a per-commit hook.
+2. **Code Connect** links each Figma component to its code so Dev Mode shows
+   the real snippet, and its CI check **flags components that exist in code
+   but have no Figma mapping** — that's your drift detector. The "connection"
+   is Code Connect metadata, not a structural pipe.
+
+Cadence that works: a weekly/point-release "mirror sync" (agent-assisted),
+plus a Code Connect coverage check that fails CI when a new exported
+component has no `.figma.tsx`. Drift becomes a visible, ticketed gap instead
+of silent rot.
+
+### Scenario B — eng hardcodes a value, or uses a wrong/invented token
+**This is NOT a Figma round-trip problem — it's code governance.** You can't
+reliably reverse-map `#2036c8` to "the token it should have been" (ambiguous:
+is it `--accent`, or a one-off?), and args/props↔variants is exactly why
+"pull the component into Figma to fix it" doesn't work. Solve it where the
+code lives, in CI:
+
+1. **Ban raw values in component styles** (stylelint):
+   ```jsonc
+   // .stylelintrc — fail CI on hardcoded color/size in component CSS
+   "rules": {
+     "declaration-property-value-disallowed-list": {
+       "/color|background|border-color|fill|stroke/": ["/#/", "/rgb/"],
+       "/^(padding|margin|gap|border-radius|border-width|font-size)/": ["/\\d+px/"]
+     }
+   }
+   ```
+   (Scope it to `src/components/**` so bespoke art/illustration is exempt.)
+2. **Token allowlist — catches typo'd/invented tokens.** A tiny custom
+   stylelint rule (or a CI grep) that extracts every `var(--x)` used in
+   component CSS and fails if `--x` is not in the generated token set
+   (`tokens.generated.css`). This is what stops `var(--acccent)` or a
+   renamed-away token from shipping. Pair it with TS: generate a
+   `type TokenName = '--accent' | …` union from the token build so inline
+   `var()` in TSX is type-checked too.
+3. **Chromatic** catches the *visual* consequence of a wrong value even when
+   it's technically a valid token.
+4. **The actual nut — "this hardcoded value IS `var(--accent)`":** a
+   **hardcoded-value → token linter**. Build a reverse map from the generated
+   tokens (value → token name) and a stylelint rule / codemod that flags (or
+   auto-fixes) `#2036c8` → `var(--accent)`. This is genuinely tractable *in
+   code* (stylelint plugins like `stylelint-declaration-strict-value` +
+   a value→token resolver do exactly this). It is not solvable via Figma.
+
+**One-line summary for the team:** structure drift → Code Connect + on-demand
+mirror; value/token drift → stylelint + allowlist + Chromatic. Figma is never
+the enforcement layer; CI is.
+
 ## 4. Governance that scales past one person
 
 - **Token PRs get a design reviewer + an eng reviewer** — the eng reviews
