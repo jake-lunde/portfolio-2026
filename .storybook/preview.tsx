@@ -38,6 +38,10 @@ const fontFallback = `
   --font-cjk: ui-sans-serif, system-ui, sans-serif;
 }
 .sb-show-main { background: var(--paper); color: var(--ink); }
+/* globals.css locks the viewport (body{overflow:hidden}) because the OS shell
+   owns scrolling — but in Storybook that traps every docs/story page. Undo it
+   here so the catalog scrolls normally. Storybook-only; the site is untouched. */
+html, body { height: auto !important; overflow: auto !important; }
 `
 
 /* Map the toolbar theme id → the DOM attributes that MATCH the generated CSS
