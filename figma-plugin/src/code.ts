@@ -17,9 +17,11 @@ import {
   coreVarName,
   deepClone,
   enabledSemanticSet,
+  figmaVarName,
   floatToTokenString,
   formatChangeLine,
   formatChangeMarkdown,
+  isComponentSet,
   isCoreSet,
   leafAtPath,
   refStringForTarget,
@@ -44,6 +46,7 @@ import {
 
 const CORE_COLLECTION = 'core'
 const SEMANTIC_COLLECTION = 'semantic'
+const COMPONENT_COLLECTION = 'component'
 const PR_BRANCH = 'design-tokens'
 const PR_TITLE = 'tokens: edits from TOKEN BRIDGE (Figma)'
 const PR_BODY_INTRO =
@@ -240,13 +243,18 @@ async function pull(gh: GitHub, branch: string): Promise<void> {
 
   const coreCol = await getOrCreateCollection(CORE_COLLECTION)
   const semCol = await getOrCreateCollection(SEMANTIC_COLLECTION)
+  const compCol = model.componentTokens.length
+    ? await getOrCreateCollection(COMPONENT_COLLECTION)
+    : null
   const modeByTheme = ensureModes(semCol, model.themes)
 
   const index = await buildVarIndex()
-  const coreVars: VarIndex = new Map()
-  const semVars: VarIndex = new Map()
+  const coreVars: VarIndex = new Map() // keyed by coreVarName (slashed)
+  const semVars: VarIndex = new Map() // keyed by dotted token name (ref key)
+  const compVars: VarIndex = new Map() // keyed by dotted token path
 
   // Pass 1 — create/find every variable so aliases have targets to point at.
+  // Internal keys stay dotted (matching refs); the Figma NAME is slashed.
   for (const t of model.coreTokens) {
     const name = coreVarName(t.set, t.path)
     const v = getOrCreateVariable(name, coreCol, resolveKind(t, model), index)
@@ -256,8 +264,14 @@ async function pull(gh: GitHub, branch: string): Promise<void> {
     // Kind is mode-invariant; derive from any occurrence.
     const repr = representativeSemantic(model, name)
     const kind = repr ? resolveKind(repr, model) : 'COLOR'
-    const v = getOrCreateVariable(name, semCol, kind, index)
+    const v = getOrCreateVariable(figmaVarName(name), semCol, kind, index)
     semVars.set(name, v)
+  }
+  if (compCol) {
+    for (const t of model.componentTokens) {
+      const v = getOrCreateVariable(figmaVarName(t.path), compCol, resolveKind(t, model), index)
+      compVars.set(t.path, v)
+    }
   }
 
   // Pass 2 — assign values / aliases.
@@ -278,11 +292,18 @@ async function pull(gh: GitHub, branch: string): Promise<void> {
       setValue(v, modeId, tok, model, coreVars, semVars)
     }
   }
+  if (compCol) {
+    const compModeId = compCol.modes[0].modeId
+    for (const t of model.componentTokens) {
+      const v = compVars.get(t.path) as Variable
+      setValue(v, compModeId, t, model, coreVars, semVars)
+    }
+  }
 
   log(
-    `Upserted ${coreVars.size} core + ${semVars.size} semantic variables (${model.themes
-      .map((t) => t.id)
-      .join(', ')}).`,
+    `Upserted ${coreVars.size} core + ${semVars.size} semantic${
+      compVars.size ? ` + ${compVars.size} component` : ''
+    } variables (${model.themes.map((t) => t.id).join(', ')}).`,
     'ok'
   )
 }
@@ -335,12 +356,14 @@ async function push(gh: GitHub, branch: string): Promise<void> {
   const cols = await figma.variables.getLocalVariableCollectionsAsync()
   const coreCol = cols.find((c) => c.name === CORE_COLLECTION)
   const semCol = cols.find((c) => c.name === SEMANTIC_COLLECTION)
+  const compCol = cols.find((c) => c.name === COMPONENT_COLLECTION)
   if (!coreCol || !semCol) {
     throw new Error('Missing "core"/"semantic" collections — run PULL first.')
   }
   const index = await buildVarIndex()
   const coreIdx = index.get(coreCol.id) ?? new Map<string, Variable>()
   const semIdx = index.get(semCol.id) ?? new Map<string, Variable>()
+  const compIdx = compCol ? index.get(compCol.id) ?? new Map<string, Variable>() : new Map()
   const modeByTheme = modeIndex(semCol)
   const allVars = await figma.variables.getLocalVariablesAsync()
   const varById = new Map(allVars.map((v) => [v.id, v]))
@@ -366,14 +389,29 @@ async function push(gh: GitHub, branch: string): Promise<void> {
           changes.push({ path: t.path, oldValue: t.rawValue, newValue: next })
         }
       }
+    } else if (isComponentSet(set)) {
+      // component set — single-mode collection; Figma name is slashed
+      if (compCol) {
+        const compMode = compCol.modes[0].modeId
+        for (const t of model.componentTokens.filter((x) => x.set === set)) {
+          const v = compIdx.get(figmaVarName(t.path))
+          if (!v) continue
+          const next = serializeVarValue(v, compMode, t, varById, model)
+          if (next !== null && applyLeaf(clone, t.path, next, t)) {
+            fileChanged = true
+            changes.push({ path: t.path, oldValue: t.rawValue, newValue: next })
+          }
+        }
+      }
     } else {
-      // semantic set — find the theme that emits it, read that theme's mode
+      // semantic set — find the theme that emits it, read that theme's mode.
+      // Figma name is slashed (radius/control); token path is dotted.
       const theme = model.themes.find((th) => enabledSemanticSet(th) === set)
       const flat = model.semanticSets[set] ?? []
       if (theme) {
         const modeId = modeByTheme[theme.id]
         for (const t of flat) {
-          const v = semIdx.get(t.path)
+          const v = semIdx.get(figmaVarName(t.path))
           if (!v || modeId === undefined) continue
           const next = serializeVarValue(v, modeId, t, varById, model)
           if (next !== null && applyLeaf(clone, t.path, next, t)) {
@@ -461,8 +499,9 @@ function refBodyForVariable(target: Variable, model: PulledModel): string | null
   // core target: reverse the naming rule via the core token whose var name matches
   const core = model.coreTokens.find((t) => coreVarName(t.set, t.path) === target.name)
   if (core) return refStringForTarget(core)
-  // semantic target: the variable name IS the token path
-  if (model.semanticNames.includes(target.name)) return `{${target.name}}`
+  // semantic target: Figma name is slashed (radius/control) → dotted ref path.
+  const dotted = target.name.split('/').join('.')
+  if (model.semanticNames.includes(dotted)) return `{${dotted}}`
   return null
 }
 
@@ -484,8 +523,9 @@ function applyLeaf(
 }
 
 function reportUnknownVars(coreIdx: VarIndex, semIdx: VarIndex, model: PulledModel): void {
+  // Figma-name sets (slashed) to compare against the collections' actual keys.
   const coreNames = new Set(model.coreTokens.map((t) => coreVarName(t.set, t.path)))
-  const semNames = new Set(model.semanticNames)
+  const semNames = new Set(model.semanticNames.map(figmaVarName))
   const extra: string[] = []
   for (const name of coreIdx.keys()) if (!coreNames.has(name)) extra.push(`core/${name}`)
   for (const name of semIdx.keys()) if (!semNames.has(name)) extra.push(`semantic/${name}`)

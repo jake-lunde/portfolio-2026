@@ -57,6 +57,8 @@ export type PulledModel = {
   semanticSets: Record<string, FlatToken[]>
   /** union of semantic token names, first-seen order */
   semanticNames: string[]
+  /** component/* tokens (own single-mode collection; alias into semantic) */
+  componentTokens: FlatToken[]
 }
 
 export type Rgba = { r: number; g: number; b: number; a: number }
@@ -74,6 +76,20 @@ export function isCoreSet(set: string): boolean {
 
 export function isSemanticSet(set: string): boolean {
   return set.startsWith('semantic/')
+}
+
+export function isComponentSet(set: string): boolean {
+  return set.startsWith('component/')
+}
+
+/**
+ * The Figma variable NAME for a semantic/component token. Internal keys and
+ * refs stay dotted ("radius.control"), but Figma rejects "." in names and
+ * treats "/" as a group separator — so nested tokens must slash. Flat names
+ * ("content", "accent-expressive-text") pass through unchanged.
+ */
+export function figmaVarName(path: string): string {
+  return path.split('.').join('/')
 }
 
 /**
@@ -147,6 +163,7 @@ export function buildModel(
   const semanticSets: Record<string, FlatToken[]> = {}
   const semanticNames: string[] = []
   const seenSemantic = new Set<string>()
+  const componentTokens: FlatToken[] = []
 
   for (const set of metadata.tokenSetOrder) {
     const json = files[set]
@@ -162,10 +179,12 @@ export function buildModel(
           semanticNames.push(t.path)
         }
       }
+    } else if (isComponentSet(set)) {
+      componentTokens.push(...flattenSet(set, json))
     }
   }
 
-  return { metadata, themes, files, coreTokens, semanticSets, semanticNames }
+  return { metadata, themes, files, coreTokens, semanticSets, semanticNames, componentTokens }
 }
 
 /** The semantic set a theme emits (its single `enabled` semantic/* set). */
@@ -214,11 +233,9 @@ export function semanticToken(
  */
 export function resolveRef(refBody: string, model: PulledModel): VarRef | null {
   const body = refBody.trim()
-  if (body.includes('.')) {
-    const core = model.coreTokens.find((t) => t.path === body)
-    if (core) return { collection: 'core', name: coreVarName(core.set, core.path) }
-    return null
-  }
+  // Semantic first — names may now be flat ("content") OR dotted
+  // ("radius.control"), so a dot no longer means "core". The internal ref
+  // name stays dotted; the Figma name is slashed at create/lookup time.
   if (model.semanticNames.includes(body)) return { collection: 'semantic', name: body }
   const core = model.coreTokens.find((t) => t.path === body)
   if (core) return { collection: 'core', name: coreVarName(core.set, core.path) }
