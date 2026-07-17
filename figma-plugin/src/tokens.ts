@@ -187,12 +187,18 @@ export function buildModel(
   return { metadata, themes, files, coreTokens, semanticSets, semanticNames, componentTokens }
 }
 
-/** The semantic set a theme emits (its single `enabled` semantic/* set). */
-export function enabledSemanticSet(theme: ThemeDef): string | undefined {
+/**
+ * ALL semantic/* sets a theme emits, in $themes.json order. A theme can layer
+ * more than one — e.g. classic-light enables both `semantic/scale` (mode-
+ * invariant intent aliases: radius.control, text.label, …) and
+ * `semantic/classic-light` (its own color roles). Do not assume exactly one.
+ */
+export function enabledSemanticSets(theme: ThemeDef): string[] {
+  const out: string[] = []
   for (const [set, state] of Object.entries(theme.selectedTokenSets)) {
-    if (isSemanticSet(set) && state === 'enabled') return set
+    if (isSemanticSet(set) && state === 'enabled') out.push(set)
   }
-  return undefined
+  return out
 }
 
 /**
@@ -209,13 +215,16 @@ export function semanticToken(
   theme: ThemeDef,
   name: string
 ): FlatToken | undefined {
-  const set = enabledSemanticSet(theme)
-  const direct = set ? model.semanticSets[set]?.find((t) => t.path === name) : undefined
-  if (direct) return direct
-  for (const fb of model.themes) {
-    const fbSet = enabledSemanticSet(fb)
-    const hit = fbSet ? model.semanticSets[fbSet]?.find((t) => t.path === name) : undefined
+  for (const set of enabledSemanticSets(theme)) {
+    const hit = model.semanticSets[set]?.find((t) => t.path === name)
     if (hit) return hit
+  }
+  for (const fb of model.themes) {
+    if (fb === theme) continue
+    for (const set of enabledSemanticSets(fb)) {
+      const hit = model.semanticSets[set]?.find((t) => t.path === name)
+      if (hit) return hit
+    }
   }
   return undefined
 }

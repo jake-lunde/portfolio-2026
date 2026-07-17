@@ -16,7 +16,7 @@ import {
   capLines,
   coreVarName,
   deepClone,
-  enabledSemanticSet,
+  enabledSemanticSets,
   figmaVarName,
   floatToTokenString,
   formatChangeLine,
@@ -406,7 +406,7 @@ async function push(gh: GitHub, branch: string): Promise<void> {
     } else {
       // semantic set — find the theme that emits it, read that theme's mode.
       // Figma name is slashed (radius/control); token path is dotted.
-      const theme = model.themes.find((th) => enabledSemanticSet(th) === set)
+      const theme = model.themes.find((th) => enabledSemanticSets(th).includes(set))
       const flat = model.semanticSets[set] ?? []
       if (theme) {
         const modeId = modeByTheme[theme.id]

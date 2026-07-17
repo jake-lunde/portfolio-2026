@@ -579,6 +579,63 @@ author semantic/medieval.json COLOR ROLES only (scale/component stay :root)
 + a 'medieval' entry in $themes; the plugin will create a medieval MODE on
 the semantic collection on next pull.
 
+### 2026-07-17 (session 13 — SECOND plugin bug, deeper than session 12's)
+Jake reran PULL after the session-12 fix (rebuilt+reimported per instructions).
+No crash this time, but 7 "No value for semantic X in theme Y — left unset"
+warnings for accent-support/focus/shadow-lift/shadow-sticky/shadow-sticky-lift/
+shadow-pin/shadow-modal, in BOTH classic-light AND classic-dark — even though
+classic-light.json clearly defines all 7.
+- ROOT CAUSE (figma-plugin/src/tokens.ts `enabledSemanticSet`): $themes.json's
+  classic-light entry enables TWO semantic sets — `semantic/scale` (mode-
+  invariant intent aliases: radius.control, text.label, …) AND
+  `semantic/classic-light` (its own color roles) — because A8 introduced the
+  scale.json intent layer. `enabledSemanticSet` (singular) assumed exactly one
+  enabled semantic set per theme and returned on the FIRST match via
+  `Object.entries` order — which is `semantic/scale` (it's listed first in the
+  JSON), so it never even looked at `semantic/classic-light` for direct
+  lookups.
+- Two symptoms, one worse than the other:
+  1. Visible: the 7 tokens ONLY defined in classic-light.json (not in scale.json
+     or classic-dark.json) had nowhere to resolve from → the printed warnings.
+  2. SILENT and worse: classic-light's OWN color roles (surface, content,
+     accent, border, accent-expressive*) were resolving via the function's
+     fallback-to-other-themes path — landing on classic-DARK's definitions —
+     with no warning printed at all, because `semanticToken`'s direct lookup
+     only checked `semantic/scale` (found nothing) before falling back. So the
+     PULL Jake just ran likely populated classic-light's Figma mode with
+     classic-dark's actual color values for most roles.
+- FIX (figma-plugin/src/tokens.ts + code.ts, uncommitted as of this writing —
+  see below): renamed to `enabledSemanticSets` (plural), returns ALL enabled
+  semantic/* sets for a theme in $themes.json order; `semanticToken` now
+  searches every one of the theme's OWN sets before falling back to other
+  themes; PUSH's set→theme lookup in code.ts (`enabledSemanticSets(th)
+  .includes(set)`) updated to match. Hand-traced against the live
+  `$themes.json` + all three semantic/*.json files for every one of the 31
+  semantic names — confirms both bugs are fixed (classic-light now resolves
+  its own values directly; the 7 shadow/focus/accent-support tokens resolve
+  in classic-light directly and classic-dark inherits them via fallback, per
+  the documented fallback contract).
+- **BLOCKED ON A TOOLING OUTAGE, not on the fix itself**: `npm run
+  plugin:build`, `tsc --noEmit`, and even `git add`/`git commit` all failed
+  repeatedly with "claude-sonnet-5 is temporarily unavailable, so auto mode
+  cannot determine the safety of Bash" — the safety classifier for
+  state-changing Bash commands was down for this whole session tail. Read-only
+  commands (`git status`, `ls`, `wc`) worked fine throughout, confirming it's
+  scoped to mutations, not a broader outage. **The fix is NOT yet built, NOT
+  yet committed, and the working tree currently has uncommitted changes to
+  figma-plugin/src/{code,tokens}.ts.**
+- JAKE / NEXT-SESSION ACTION: (1) confirm the outage has cleared (try any
+  `npm`/`git commit` from a normal terminal — if Claude's Bash tool is still
+  refusing state-changing commands, wait and retry); (2) `git diff
+  figma-plugin/src/tokens.ts figma-plugin/src/code.ts` to review the pending
+  fix, run `npx tsc --noEmit -p figma-plugin` then `npm run plugin:build`,
+  commit + push; (3) re-import the plugin (new dist), DELETE the current
+  semantic variables (light mode is currently populated with WRONG — dark's —
+  values per the silent bug above; don't trust what's there), PULL again, and
+  this time confirm zero "no value" warnings AND spot-check that
+  classic-light's `accent`/`surface`/`content` variables show LIGHT values
+  (cobalt blue #2036c8 / paper cream #e7e1d2), not dark's.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
