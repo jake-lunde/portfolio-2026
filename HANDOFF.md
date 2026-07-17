@@ -485,6 +485,62 @@ Jake changes radius/btn in Figma → PUSH → PR (now with readable summary) →
 tokens-sync regen → merge → corners change in Storybook + lunde.co.
 THEN A6 Medieval (Jake is collecting changes).
 
+### 2026-07-17 (Fable, session 11 — TEXTBOOK token restructure A8; commit 6f338c4)
+Jake's DS critique was right: core+semantic were mixed (radius/btn next to
+radius/sm) and paper/ink are brand metaphors that break underwater. RESHIPPED
+as 3-tier + theme-agnostic roles.
+- TIERS: core (primitives + raw scales: color ramp, space, radius none/xs/sm/
+  md/lg/full, border widths, size ramp, motion, fonts) -> semantic (color
+  ROLES mode-aware + scale intents: radius/control, border/default, text/label)
+  -> component (button/radius -> radius/control -> radius/md=8). Full chain
+  emits as var() so one edit flows through all tiers.
+- RENAMES (563 identifiers, 36 files, whole-identifier codemod): paper->
+  surface, paper-2->surface-raised, ink->content, ink-soft->content-muted,
+  plate->surface-inverse, plate-ink->content-inverse, line->border, blue->
+  accent, pink->accent-expressive, green->accent-support, pink-text/mark->
+  accent-expressive-text/mark; radius-btn->button-radius, border-rule/heavy->
+  border-default/strong, text-chrome-*->text-micro/caption/label/ui. Spacing
+  kept NUMERIC (Jake's call). Button radius snapped 7->8 (base-8).
+- PARITY: computed values of all roles identical to old names, light+dark;
+  only button radius changed (intended). Build+tsc+Chromatic green, site
+  visually identical.
+- BUILD GOTCHA (saved to memory): SD v4 outputReferencesFilter CRASHES on
+  multi-hop ref chains (component->semantic->core) with
+  "Cannot read properties of undefined (reading 'join')" in
+  outputReferencesFilter.js. Replaced with a null-safe custom predicate in
+  build-tokens.mjs (emit var() only when every ref target's filePath is an
+  `enabled` set this theme). Also: spacing set file is core/spacing.json but
+  group is "space" -> $themes/$metadata must say "core/spacing".
+- Storybook scroll bug FIXED: globals.css body{overflow:hidden} (OS owns
+  viewport) leaked into Storybook via the globals import; re-enabled
+  html/body scroll in .storybook/preview.tsx (Storybook-only).
+- FABLE Notion bot: NOTION_FABLE_TOKEN in .env.local, integration auth's as
+  bot "FABLE" (users/me confirmed). Posts comments as itself via Notion REST
+  (distinct from the OAuth connector which acts as Jake). BUT pages must be
+  shared with the FABLE integration first (Notion: page/db ... > Connections
+  > add FABLE). Jake to grant at the Portfolio DB level.
+- FIGMA MIRROR (prior turn, still valid): Button component set on page 77:432
+  bound to synced variables; all 77 vars got scopes + WEB codeSyntax
+  (var(--x)). font/* left unbound (CSS stacks, not Figma families).
+CRITICAL NEXT — DO NOT PULL WITH THE PLUGIN YET: the token rename means a
+PULL would create new-named vars (surface/content/...) as NEW variables,
+ORPHAN the old (paper/ink...), and mishandle the new component/button set
+(plugin only knows core/semantic collection prefixes). NEXT CHUNK: (a) update
+figma-plugin PULL/PUSH to handle the component tier (3rd collection) + the
+renamed semantic; (b) re-tier Figma (rename semantic vars, add component
+collection, rebind the Button); (c) THEN Jake can pull. After that: A6
+Medieval (author semantic/medieval.json color roles only — scale/component
+stay :root; the whole point of role names).
+OPEN WORK QUESTIONS Jake raised (his job, few designers/many eng): (1) eng
+makes a component in Storybook, disconnected from Figma -> answer: generate/
+refresh the Figma mirror from the story on demand (deliberate publish, not
+live sync) + Code Connect to link+detect drift; structure is code-
+authoritative. (2) eng hardcodes/uses wrong token -> answer: CODE-side
+governance, NOT Figma round-trip: stylelint rule banning raw hex/px in
+component CSS + a token-allowlist lint (var must exist in generated set) +
+Chromatic. A hardcoded-value->token linter is 'the nut' and it's crackable
+in code. Offer to codify into DS-OPS.md.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
