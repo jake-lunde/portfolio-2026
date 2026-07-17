@@ -1,11 +1,23 @@
 {
   "radius": {
+    "none": {
+      "$value": "0",
+      "$type": "dimension"
+    },
+    "xs": {
+      "$value": "2px",
+      "$type": "dimension"
+    },
     "sm": {
       "$value": "4px",
       "$type": "dimension"
     },
-    "btn": {
-      "$value": "2px",
+    "md": {
+      "$value": "8px",
+      "$type": "dimension"
+    },
+    "lg": {
+      "$value": "16px",
       "$type": "dimension"
     },
     "full": {

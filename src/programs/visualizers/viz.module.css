@@ -1,7 +1,7 @@
 /* Visualizers live on the always-dark CRT plate, so the system blue is
    pinned to its luminous variant regardless of theme. */
 .viz {
-  --blue: #5c7cff;
+  --accent: #5c7cff;
   padding: 16px 18px 22px;
   color: #e7e1d2;
 }
@@ -24,8 +24,8 @@
 }
 
 .vizChip[aria-pressed='true'] {
-  border-color: var(--pink);
-  color: var(--pink);
+  border-color: var(--accent-expressive);
+  color: var(--accent-expressive);
 }
 
 .vizChip:disabled {
@@ -69,7 +69,7 @@
 }
 
 .hudCell {
-  background: var(--plate);
+  background: var(--surface-inverse);
   padding: 8px 10px;
 }
 
@@ -92,7 +92,7 @@
 
 .hudV em {
   font-style: normal;
-  color: var(--pink);
+  color: var(--accent-expressive);
 }
 
 .panel {
@@ -146,7 +146,7 @@
 }
 
 .appleEra span {
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .scrobCols {
@@ -182,7 +182,7 @@
 }
 
 .artistRow[data-active] .artistName {
-  color: var(--pink);
+  color: var(--accent-expressive);
 }
 
 .artistRank {
@@ -220,7 +220,7 @@
 .artistBar {
   display: block;
   height: 100%;
-  background: var(--pink);
+  background: var(--accent-expressive);
   opacity: 0.85;
 }
 
@@ -281,7 +281,7 @@
 
 .gaugeFill {
   height: 100%;
-  background: var(--pink);
+  background: var(--accent-expressive);
   opacity: 0.9;
   transition: width 1s ease;
 }
@@ -331,8 +331,8 @@
 }
 
 .runChip[data-active] {
-  border-color: var(--pink);
-  color: var(--pink);
+  border-color: var(--accent-expressive);
+  color: var(--accent-expressive);
 }
 
 .scrubHint {

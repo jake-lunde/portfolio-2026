@@ -27,7 +27,7 @@ export function FrequencyBars() {
             y={H - h}
             width="6"
             height={h}
-            fill={i === PEAK_INDEX ? 'var(--pink)' : undefined}
+            fill={i === PEAK_INDEX ? 'var(--accent-expressive)' : undefined}
             opacity={i === PEAK_INDEX ? 1 : 0.3}
             style={{ originY: '100%', transformBox: 'fill-box' }}
             initial={reduced ? undefined : { scaleY: 0 }}
@@ -43,12 +43,12 @@ export function FrequencyBars() {
         viewport={{ once: true }}
         transition={{ delay: 0.7 }}
       >
-        <circle cx={PEAK_INDEX * step + 3} cy={H - BARS[PEAK_INDEX] - 8} r="5" fill="var(--pink)" />
+        <circle cx={PEAK_INDEX * step + 3} cy={H - BARS[PEAK_INDEX] - 8} r="5" fill="var(--accent-expressive)" />
         <text
           x={PEAK_INDEX * step + 3}
           y={H - BARS[PEAK_INDEX] - 18}
           textAnchor="middle"
-          fill="var(--pink)"
+          fill="var(--accent-expressive)"
           fontFamily="var(--mono)"
           fontSize="9"
         >

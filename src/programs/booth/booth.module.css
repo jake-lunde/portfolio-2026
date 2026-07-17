@@ -73,7 +73,7 @@
   place-items: center;
   font-family: var(--display);
   font-size: 110px;
-  color: var(--pink);
+  color: var(--accent-expressive);
   text-shadow: 0 0 24px rgba(242, 166, 194, 0.6);
   pointer-events: none;
 }
@@ -95,8 +95,8 @@
 }
 
 .filterChip[aria-pressed='true'] {
-  border-color: var(--pink);
-  color: var(--pink);
+  border-color: var(--accent-expressive);
+  color: var(--accent-expressive);
 }
 
 .bigBtn {
@@ -108,12 +108,12 @@
   border: 1.5px solid rgba(231, 225, 210, 0.5);
   color: #e7e1d2;
   text-decoration: none;
-  background: var(--plate);
+  background: var(--surface-inverse);
 }
 
 .bigBtn:hover:not(:disabled) {
-  border-color: var(--pink);
-  color: var(--pink);
+  border-color: var(--accent-expressive);
+  color: var(--accent-expressive);
 }
 
 .bigBtn:disabled {

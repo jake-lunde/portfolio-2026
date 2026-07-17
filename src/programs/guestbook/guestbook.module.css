@@ -6,12 +6,12 @@
 
 .form {
   padding: 18px 20px 16px;
-  border-bottom: var(--border-rule) solid var(--ink);
-  background: var(--paper);
+  border-bottom: var(--border-default) solid var(--content);
+  background: var(--surface);
 }
 
 [data-theme='dark'] .form {
-  border-bottom-color: var(--line);
+  border-bottom-color: var(--border);
 }
 
 .formHead {
@@ -36,10 +36,10 @@
 .field span {
   display: block;
   font-family: var(--mono);
-  font-size: var(--text-chrome-sm);
+  font-size: var(--text-label);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   margin-bottom: 5px;
 }
 
@@ -49,9 +49,9 @@
   box-sizing: border-box;
   font-family: var(--sans);
   font-size: 14px;
-  color: var(--ink);
-  background: var(--paper-2);
-  border: var(--border-rule) solid var(--ink);
+  color: var(--content);
+  background: var(--surface-raised);
+  border: var(--border-default) solid var(--content);
   border-radius: 0;
   padding: 8px 10px;
   resize: vertical;
@@ -59,12 +59,12 @@
 
 [data-theme='dark'] .field input,
 [data-theme='dark'] .field textarea {
-  border-color: var(--line);
+  border-color: var(--border);
 }
 
 .field input:focus-visible,
 .field textarea:focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
@@ -77,22 +77,22 @@
 
 .signBtn {
   font-family: var(--mono);
-  font-size: var(--text-chrome-md);
+  font-size: var(--text-ui);
   font-weight: 700;
   letter-spacing: 0.16em;
   padding: 8px 18px;
-  background: var(--blue);
-  color: var(--paper);
-  border: var(--border-rule) solid var(--ink);
+  background: var(--accent);
+  color: var(--surface);
+  border: var(--border-default) solid var(--content);
 }
 
 [data-theme='dark'] .signBtn {
   color: #0d100c;
-  border-color: var(--line);
+  border-color: var(--border);
 }
 
 .signBtn:hover:not(:disabled) {
-  background: var(--pink);
+  background: var(--accent-expressive);
   color: #17150d;
 }
 
@@ -105,7 +105,7 @@
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.04em;
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .ledger {
@@ -115,16 +115,16 @@
 
 .empty {
   font-family: var(--mono);
-  font-size: var(--text-chrome-md);
+  font-size: var(--text-ui);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   padding-top: 14px;
 }
 
 .entry {
   padding: 13px 0;
-  border-bottom: var(--border-hairline) solid var(--line);
+  border-bottom: var(--border-hairline) solid var(--border);
 }
 
 .entry:last-child {
@@ -147,7 +147,7 @@
   font-family: var(--mono);
   font-size: 9.5px;
   letter-spacing: 0.1em;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   flex: 0 0 auto;
 }
 

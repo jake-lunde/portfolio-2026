@@ -6,8 +6,8 @@
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--blue);
-  border: 2px solid var(--blue);
+  color: var(--accent);
+  border: 2px solid var(--accent);
   padding: 5px 10px;
   transform: rotate(-3deg);
   opacity: 0.85;
@@ -16,8 +16,8 @@
 }
 
 .stampPink {
-  color: var(--ink);
-  border-color: var(--pink);
+  color: var(--content);
+  border-color: var(--accent-expressive);
 }
 
 /* ---------- Button — token-driven, the component-loop demo target ------- */
@@ -26,41 +26,41 @@
   font-family: var(--mono);
   font-weight: 700;
   text-transform: uppercase;
-  border-radius: var(--radius-btn);
-  background: var(--paper);
-  color: var(--ink);
+  border-radius: var(--button-radius);
+  background: var(--surface);
+  color: var(--content);
   border-style: solid;
-  border-color: var(--ink);
+  border-color: var(--content);
   cursor: pointer;
   transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 [data-theme='dark'] .btn {
-  border-color: var(--line);
+  border-color: var(--border);
 }
 
 .btnSm {
-  font-size: var(--text-chrome-xs);
+  font-size: var(--text-caption);
   letter-spacing: 0.12em;
   padding: 6px var(--space-3);
-  border-width: var(--border-rule);
+  border-width: var(--border-default);
 }
 
 .btnMd {
-  font-size: var(--text-chrome-sm);
+  font-size: var(--text-label);
   letter-spacing: 0.14em;
   padding: 7px 18px;
-  border-width: var(--border-heavy);
+  border-width: var(--border-strong);
 }
 
 .btnExpressive:hover {
-  background: var(--pink);
+  background: var(--accent-expressive);
   color: #17150d;
 }
 
 .btnSystem:hover {
-  background: var(--blue);
-  color: var(--paper);
+  background: var(--accent);
+  color: var(--surface);
 }
 
 /* under-construction plate for stub programs */

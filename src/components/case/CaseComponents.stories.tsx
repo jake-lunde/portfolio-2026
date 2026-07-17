@@ -41,7 +41,7 @@ export const HeroStory: Story = {
       thesis={
         <>
           A savings product that turns a spreadsheet into a{' '}
-          <b style={{ color: 'var(--pink-text)', background: 'var(--pink-mark)' }}>ritual</b>.
+          <b style={{ color: 'var(--accent-expressive-text)', background: 'var(--accent-expressive-mark)' }}>ritual</b>.
         </>
       }
       meta={[
@@ -165,7 +165,7 @@ export const FullAnatomy: Story = {
         thesis={
           <>
             A savings product that turns a spreadsheet into a{' '}
-            <b style={{ color: 'var(--pink-text)', background: 'var(--pink-mark)' }}>ritual</b>.
+            <b style={{ color: 'var(--accent-expressive-text)', background: 'var(--accent-expressive-mark)' }}>ritual</b>.
           </>
         }
         meta={[

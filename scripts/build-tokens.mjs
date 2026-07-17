@@ -8,7 +8,7 @@
  * Output → src/styles/tokens.generated.css (committed; do not hand-edit).
  */
 import StyleDictionary from 'style-dictionary'
-import { outputReferencesFilter } from 'style-dictionary/utils'
+import { usesReferences, getReferences } from 'style-dictionary/utils'
 import { register } from '@tokens-studio/sd-transforms'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
@@ -67,9 +67,31 @@ for (const theme of themes) {
             options: {
               selector: SELECTOR[theme.id],
               usesDtcg: true,
-              // var() only for references whose target is ALSO emitted here;
-              // references to internal primitives resolve to literals
-              outputReferences: outputReferencesFilter,
+              // Emit var() for a token's references only when EVERY referenced
+              // target is itself emitted in THIS theme (i.e. lives in an
+              // `enabled` set) — so semantic→semantic and the tier chains
+              // (component→semantic→core) keep var() and the component-scoped
+              // --accent pins still cascade into --focus, while references to
+              // internal `source` primitives (core/color) resolve to literals.
+              // Custom (not SD's outputReferencesFilter, which crashes on the
+              // deeper multi-hop chains this 3-tier model introduces).
+              outputReferences: (token, opts) => {
+                const val = opts.usesDtcg ? token.original.$value : token.original.value
+                if (!usesReferences(val)) return false
+                let refs
+                try {
+                  refs = getReferences(val, opts.dictionary.tokens, {
+                    usesDtcg: opts.usesDtcg,
+                    warnImmediately: false,
+                  })
+                } catch {
+                  return false
+                }
+                return (
+                  refs.length > 0 &&
+                  refs.every((r) => r && r.filePath && enabled.has(path.resolve(r.filePath)))
+                )
+              },
             },
           },
         ],

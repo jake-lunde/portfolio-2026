@@ -149,7 +149,7 @@ export function TaurusViz() {
                 y1={y1}
                 x2={x2}
                 y2={y2}
-                stroke="var(--blue)"
+                stroke="var(--accent)"
                 strokeWidth={1}
                 opacity={0.22 + lit * 0.5}
                 initial={reduced ? undefined : { pathLength: 0 }}
@@ -176,7 +176,7 @@ export function TaurusViz() {
                   cx={x}
                   cy={y}
                   r={r + g * 1.6}
-                  fill={active ? 'var(--pink)' : '#E7E1D2'}
+                  fill={active ? 'var(--accent-expressive)' : '#E7E1D2'}
                   opacity={0.55 + g * 0.45}
                 />
                 {s.planets && (
@@ -185,7 +185,7 @@ export function TaurusViz() {
                     cy={y}
                     r={r + 6}
                     fill="none"
-                    stroke="var(--pink)"
+                    stroke="var(--accent-expressive)"
                     strokeWidth="0.7"
                     strokeDasharray="2 3"
                     opacity={0.35 + g * 0.65}
@@ -197,7 +197,7 @@ export function TaurusViz() {
                   fontFamily="var(--mono)"
                   fontSize="8.5"
                   letterSpacing="0.8"
-                  fill={active ? 'var(--pink)' : '#E7E1D2'}
+                  fill={active ? 'var(--accent-expressive)' : '#E7E1D2'}
                   opacity={0.35 + g * 0.65}
                 >
                   {s.name.toUpperCase()}

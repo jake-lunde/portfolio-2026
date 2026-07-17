@@ -11,18 +11,18 @@ import { useEffect, useReducer } from 'react'
    Both simply force a re-render; all values are read fresh each render. */
 
 const COLOR_TOKENS = [
-  '--paper',
-  '--paper-2',
-  '--ink',
-  '--ink-soft',
-  '--plate',
-  '--plate-ink',
-  '--line',
-  '--blue',
-  '--pink',
-  '--green',
-  '--pink-text',
-  '--pink-mark',
+  '--surface',
+  '--surface-raised',
+  '--content',
+  '--content-muted',
+  '--surface-inverse',
+  '--content-inverse',
+  '--border',
+  '--accent',
+  '--accent-expressive',
+  '--accent-support',
+  '--accent-expressive-text',
+  '--accent-expressive-mark',
   '--focus',
 ] as const
 
@@ -60,11 +60,11 @@ function resolveLength(name: string): string {
 }
 
 const mono = 'var(--mono)'
-const ink = 'var(--ink)'
-const inkSoft = 'var(--ink-soft)'
+const ink = 'var(--content)'
+const inkSoft = 'var(--content-muted)'
 
 const checker =
-  'repeating-conic-gradient(var(--line) 0% 25%, transparent 0% 50%) 0 / 12px 12px'
+  'repeating-conic-gradient(var(--border) 0% 25%, transparent 0% 50%) 0 / 12px 12px'
 
 export function TokensBoard() {
   const [, force] = useReducer((n: number) => n + 1, 0)
@@ -103,7 +103,7 @@ export function TokensBoard() {
 
   return (
     <div style={{ fontFamily: 'var(--sans)', color: ink }}>
-      <h3 style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--blue)', margin: '28px 0 12px' }}>
+      <h3 style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--accent)', margin: '28px 0 12px' }}>
         Color
       </h3>
       <div
@@ -116,7 +116,7 @@ export function TokensBoard() {
         {COLOR_TOKENS.map((name) => (
           <div
             key={name}
-            style={{ border: '1px solid var(--line)', borderRadius: 4, overflow: 'hidden' }}
+            style={{ border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}
           >
             <div style={{ height: 64, background: checker }}>
               <div style={{ height: '100%', background: `var(${name})` }} />
@@ -134,7 +134,7 @@ export function TokensBoard() {
         ))}
       </div>
 
-      <h3 style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--blue)', margin: '32px 0 12px' }}>
+      <h3 style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--accent)', margin: '32px 0 12px' }}>
         Type
       </h3>
       <div style={{ display: 'grid', gap: 14 }}>
@@ -142,7 +142,7 @@ export function TokensBoard() {
           <div
             key={name}
             style={{
-              border: '1px solid var(--line)',
+              border: '1px solid var(--border)',
               borderRadius: 4,
               padding: '14px 16px',
             }}
@@ -160,12 +160,12 @@ export function TokensBoard() {
         ))}
       </div>
 
-      <h3 style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--blue)', margin: '32px 0 12px' }}>
+      <h3 style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--accent)', margin: '32px 0 12px' }}>
         Metrics
       </h3>
       <div
         style={{
-          border: '1px solid var(--line)',
+          border: '1px solid var(--border)',
           borderRadius: 4,
           padding: '14px 16px',
           display: 'flex',
@@ -184,7 +184,7 @@ export function TokensBoard() {
           style={{
             width: 120,
             height: 'var(--menubar-h)',
-            background: 'var(--blue)',
+            background: 'var(--accent)',
             borderRadius: 3,
           }}
         />

@@ -22,7 +22,7 @@ export default function Trash() {
         <path d="M6 8h20M13 8V5h6v3" />
         <path d="M13 16v10M19 16v10" />
         {/* padlock */}
-        <rect x="20" y="24" width="11" height="9" rx="1.5" fill="var(--paper-2)" />
+        <rect x="20" y="24" width="11" height="9" rx="1.5" fill="var(--surface-raised)" />
         <path d="M22.5 24v-3a3 3 0 0 1 6 0v3" fill="none" />
         <circle cx="25.5" cy="28.5" r="1.2" fill="currentColor" />
       </svg>

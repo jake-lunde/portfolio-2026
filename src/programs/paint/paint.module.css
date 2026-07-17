@@ -14,7 +14,7 @@
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.2em;
-  color: var(--blue);
+  color: var(--accent);
   margin: 4px 0 0;
 }
 
@@ -37,13 +37,13 @@
   align-items: center;
   gap: 5px;
   padding: 12px 8px 10px;
-  border: 1.5px solid var(--ink);
-  background: var(--paper);
-  color: var(--ink);
+  border: 1.5px solid var(--content);
+  background: var(--surface);
+  color: var(--content);
 }
 
 [data-theme='dark'] .flashCard {
-  border-color: var(--line);
+  border-color: var(--border);
 }
 
 .flashCard:hover {
@@ -55,7 +55,7 @@
   width: 84px;
   height: 84px;
   background: #fff;
-  border: 1px solid var(--line);
+  border: 1px solid var(--border);
 }
 
 .flashName {
@@ -67,14 +67,14 @@
   font-family: var(--mono);
   font-size: 8px;
   letter-spacing: 0.12em;
-  color: var(--ink-soft);
+  color: var(--content-muted);
 }
 
 .shopNote {
   font-family: var(--mono);
   font-size: 8.5px;
   letter-spacing: 0.14em;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   margin: 0;
   text-align: center;
 }
@@ -92,7 +92,7 @@
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.14em;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   flex: 1;
 }
 
@@ -103,7 +103,7 @@
 }
 
 .traceClock[data-low] {
-  color: var(--blue);
+  color: var(--accent);
 }
 
 /* (the DONE/AGAIN buttons are now the Button primitive — token-driven) */
@@ -112,12 +112,12 @@
   width: 100%;
   max-width: 460px;
   height: auto;
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--content);
   touch-action: none;
 }
 
 [data-theme='dark'] .skin {
-  border-color: var(--line);
+  border-color: var(--border);
 }
 
 .verdict {
@@ -128,7 +128,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: color-mix(in srgb, var(--paper-2) 82%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 82%, transparent);
   z-index: 5;
 }
 
@@ -142,7 +142,7 @@
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.16em;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   text-transform: uppercase;
 }
 

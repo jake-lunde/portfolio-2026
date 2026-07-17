@@ -45,7 +45,7 @@
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.14em;
-  color: var(--blue);
+  color: var(--accent);
   width: 44px;
   flex: 0 0 auto;
 }
@@ -60,7 +60,7 @@
 .step {
   aspect-ratio: 1;
   border: 1.5px solid rgba(231, 225, 210, 0.35);
-  background: var(--plate);
+  background: var(--surface-inverse);
   min-width: 0;
 }
 
@@ -69,12 +69,12 @@
 }
 
 .step[aria-pressed='true'] {
-  background: var(--pink);
-  border-color: var(--pink);
+  background: var(--accent-expressive);
+  border-color: var(--accent-expressive);
 }
 
 .step[data-head] {
-  box-shadow: 0 0 0 2px var(--blue);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 .controls {
@@ -95,9 +95,9 @@
 }
 
 .play[aria-pressed='true'] {
-  background: var(--pink);
+  background: var(--accent-expressive);
   color: #17150d;
-  border-color: var(--pink);
+  border-color: var(--accent-expressive);
 }
 
 .bpm {
@@ -117,8 +117,8 @@
 }
 
 .bpmBtn:hover {
-  border-color: var(--pink);
-  color: var(--pink);
+  border-color: var(--accent-expressive);
+  color: var(--accent-expressive);
 }
 
 .bpmVal {
@@ -145,8 +145,8 @@
 }
 
 .noteChip[aria-pressed='true'] {
-  border-color: var(--blue);
-  color: var(--blue);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .slotRow {
@@ -165,9 +165,9 @@
 }
 
 .saveBtn[aria-pressed='true'] {
-  background: var(--blue);
+  background: var(--accent);
   color: #0d100c;
-  border-color: var(--blue);
+  border-color: var(--accent);
 }
 
 .slot {
@@ -186,7 +186,7 @@
 }
 
 .slot[data-armed] {
-  border-color: var(--blue);
+  border-color: var(--accent);
 }
 
 .slotDot {
@@ -197,7 +197,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--pink);
+  background: var(--accent-expressive);
 }
 
 .slot[data-full] .slotDot {
@@ -215,8 +215,8 @@
 }
 
 .clear:hover {
-  color: var(--pink);
-  border-color: var(--pink);
+  color: var(--accent-expressive);
+  border-color: var(--accent-expressive);
 }
 
 .hint {

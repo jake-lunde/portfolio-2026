@@ -173,7 +173,7 @@ export function RideViz() {
           <motion.path
             d={routePath}
             fill="none"
-            stroke="var(--blue)"
+            stroke="var(--accent)"
             strokeWidth="1.8"
             strokeLinejoin="round"
             initial={reduced ? undefined : { pathLength: 0 }}
@@ -188,8 +188,8 @@ export function RideViz() {
           </g>
           {curXY && (
             <g>
-              <circle cx={curXY[0]} cy={curXY[1]} r="6" fill="var(--pink)" />
-              <circle cx={curXY[0]} cy={curXY[1]} r="11" fill="none" stroke="var(--pink)" strokeWidth="1" opacity="0.5" />
+              <circle cx={curXY[0]} cy={curXY[1]} r="6" fill="var(--accent-expressive)" />
+              <circle cx={curXY[0]} cy={curXY[1]} r="11" fill="none" stroke="var(--accent-expressive)" strokeWidth="1" opacity="0.5" />
             </g>
           )}
         </svg>
@@ -211,8 +211,8 @@ export function RideViz() {
           <path d={elePath} fill="none" stroke="#E7E1D2" strokeWidth="1.3" opacity="0.85" />
           {cur && (
             <>
-              <line x1={stripX(cur)} y1="0" x2={stripX(cur)} y2={STRIP_H} stroke="var(--pink)" strokeWidth="1.2" />
-              <circle cx={stripX(cur)} cy={eleY(cur)} r="3.5" fill="var(--pink)" />
+              <line x1={stripX(cur)} y1="0" x2={stripX(cur)} y2={STRIP_H} stroke="var(--accent-expressive)" strokeWidth="1.2" />
+              <circle cx={stripX(cur)} cy={eleY(cur)} r="3.5" fill="var(--accent-expressive)" />
             </>
           )}
         </svg>
@@ -230,11 +230,11 @@ export function RideViz() {
           onPointerMove={scrubStrip}
           onPointerLeave={clear}
         >
-          <path d={mphPath} fill="none" stroke="var(--pink)" strokeWidth="1.2" opacity="0.9" />
+          <path d={mphPath} fill="none" stroke="var(--accent-expressive)" strokeWidth="1.2" opacity="0.9" />
           {cur && (
             <>
-              <line x1={stripX(cur)} y1="0" x2={stripX(cur)} y2={STRIP_H} stroke="var(--pink)" strokeWidth="1.2" />
-              <circle cx={stripX(cur)} cy={mphY(cur)} r="3.5" fill="var(--pink)" />
+              <line x1={stripX(cur)} y1="0" x2={stripX(cur)} y2={STRIP_H} stroke="var(--accent-expressive)" strokeWidth="1.2" />
+              <circle cx={stripX(cur)} cy={mphY(cur)} r="3.5" fill="var(--accent-expressive)" />
             </>
           )}
         </svg>

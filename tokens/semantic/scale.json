@@ -1,0 +1,53 @@
+{
+  "radius": {
+    "control": {
+      "$value": "{radius.md}",
+      "$type": "dimension"
+    },
+    "pill": {
+      "$value": "{radius.lg}",
+      "$type": "dimension"
+    },
+    "circle": {
+      "$value": "{radius.full}",
+      "$type": "dimension"
+    }
+  },
+  "border": {
+    "default": {
+      "$value": "{border.thin}",
+      "$type": "dimension"
+    },
+    "strong": {
+      "$value": "{border.thick}",
+      "$type": "dimension"
+    }
+  },
+  "text": {
+    "micro": {
+      "$value": "{size.micro}",
+      "$type": "dimension"
+    },
+    "caption": {
+      "$value": "{size.caption}",
+      "$type": "dimension"
+    },
+    "label": {
+      "$value": "{size.label}",
+      "$type": "dimension"
+    },
+    "ui": {
+      "$value": "{size.ui}",
+      "$type": "dimension"
+    },
+    "body": {
+      "$value": "{size.body}",
+      "$type": "dimension"
+    }
+  },
+  "leading": {
+    "body": {
+      "$value": "1.6"
+    }
+  }
+}

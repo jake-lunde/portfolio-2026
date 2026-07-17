@@ -102,7 +102,7 @@ export function ScrobblesViz() {
                   width={barW - 3}
                   height={bandH}
                   fill="none"
-                  stroke="var(--blue)"
+                  stroke="var(--accent)"
                   strokeWidth="1"
                   strokeDasharray="3 2"
                   opacity={i === week ? 1 : 0.55}
@@ -122,7 +122,7 @@ export function ScrobblesViz() {
                 y={H - 8 - h}
                 width={barW - 3}
                 height={h}
-                fill={hot ? 'var(--pink)' : '#E7E1D2'}
+                fill={hot ? 'var(--accent-expressive)' : '#E7E1D2'}
                 opacity={hot ? 1 : 0.3}
                 style={{ originY: '100%', transformBox: 'fill-box' }}
                 initial={reduced ? undefined : { scaleY: 0 }}

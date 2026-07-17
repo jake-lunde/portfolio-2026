@@ -3,7 +3,7 @@
    specimen scan. Cream + blue(#5c7cff pinned) + one pink accent. */
 
 .ctr {
-  --blue: #5c7cff;
+  --accent: #5c7cff;
   padding: 14px 16px 16px;
   color: #e7e1d2;
   display: flex;
@@ -85,17 +85,17 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--pink);
+  background: var(--accent-expressive);
   animation: ccblink 1.6s steps(2, jump-none) infinite;
 }
 
 .recChip[data-live] {
-  border-color: var(--pink);
-  color: var(--pink);
+  border-color: var(--accent-expressive);
+  color: var(--accent-expressive);
 }
 
 .recChip[data-live] .recDot {
-  background: var(--pink);
+  background: var(--accent-expressive);
   animation-duration: 0.9s;
 }
 
@@ -157,16 +157,16 @@
   gap: 2px;
   padding: 8px 4px 6px;
   border: 1px solid rgba(231, 225, 210, 0.22);
-  background: var(--plate);
+  background: var(--surface-inverse);
   min-width: 0;
 }
 
 .unit[data-mode='busy'] {
-  border-color: var(--blue);
+  border-color: var(--accent);
 }
 
 .unit[data-mode='flash'] {
-  border-color: var(--pink);
+  border-color: var(--accent-expressive);
 }
 
 /* specimen-scan corner tick */
@@ -195,12 +195,12 @@
 }
 
 .avatar[data-mode='busy'] {
-  background-color: var(--blue);
+  background-color: var(--accent);
   animation: ccbob 1.1s ease-in-out infinite;
 }
 
 .avatar[data-mode='flash'] {
-  background-color: var(--pink);
+  background-color: var(--accent-expressive);
   animation: ccjolt 0.5s ease-in-out;
 }
 
@@ -249,7 +249,7 @@
   font-family: var(--mono);
   font-size: 7px;
   letter-spacing: 0.14em;
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .unitStatus {
@@ -268,7 +268,7 @@
 }
 
 .unitStatus[data-mode='flash'] {
-  color: var(--pink);
+  color: var(--accent-expressive);
 }
 
 /* ---- feed / departure board ---- */
@@ -322,15 +322,15 @@
 }
 
 .rowArrow[data-action='dispatch'] {
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .rowArrow[data-action='return'] {
-  color: var(--pink);
+  color: var(--accent-expressive);
 }
 
 .rowArrow[data-action='merge'] {
-  color: var(--pink);
+  color: var(--accent-expressive);
 }
 
 .rowAgent {

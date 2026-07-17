@@ -1,0 +1,20 @@
+{
+  "button": {
+    "radius": {
+      "$value": "{radius.control}",
+      "$type": "dimension"
+    },
+    "border": {
+      "$value": "{border.default}",
+      "$type": "dimension"
+    },
+    "label": {
+      "$value": "{text.label}",
+      "$type": "dimension"
+    },
+    "padding-x": {
+      "$value": "{space.3}",
+      "$type": "dimension"
+    }
+  }
+}

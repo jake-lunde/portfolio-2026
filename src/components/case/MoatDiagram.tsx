@@ -68,7 +68,7 @@ export function MoatDiagram() {
         ))}
 
         {/* center company — the one pink thing on screen */}
-        <circle cx={CX} cy={CY} r="29" fill="var(--pink)" />
+        <circle cx={CX} cy={CY} r="29" fill="var(--accent-expressive)" />
         <text x={CX} y={CY + 4} textAnchor="middle" fill="#131811" fontSize="13" fontWeight="700">
           NFLX
         </text>
@@ -96,14 +96,14 @@ export function MoatDiagram() {
                 cx={n.x}
                 cy={n.y}
                 r={active ? 6 : 4}
-                fill={active ? 'var(--pink)' : '#E7E1D2'}
+                fill={active ? 'var(--accent-expressive)' : '#E7E1D2'}
                 opacity={active ? 1 : dim}
               />
               <text
                 x={n.x}
                 y={n.y - 11}
                 textAnchor="middle"
-                fill={active ? 'var(--pink)' : '#E7E1D2'}
+                fill={active ? 'var(--accent-expressive)' : '#E7E1D2'}
                 fontSize="11"
                 opacity={active ? 1 : dim}
               >

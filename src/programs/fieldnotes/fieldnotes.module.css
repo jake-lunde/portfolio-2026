@@ -8,7 +8,7 @@
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--blue);
+  color: var(--accent);
   margin: 0 0 12px;
 }
 
@@ -41,7 +41,7 @@
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--content-muted);
 }
 
 .methodV {
@@ -58,7 +58,7 @@
 
 .rule {
   border: none;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--border);
   margin: 22px 0;
 }
 
@@ -75,7 +75,7 @@
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.1em;
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .secLabel {
@@ -89,19 +89,19 @@
   font-size: 8px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-soft);
-  border: 1px dashed var(--line);
+  color: var(--content-muted);
+  border: 1px dashed var(--border);
   padding: 2px 6px;
 }
 
 /* ---------- ledger ---------- */
 .ledger {
-  border: 1.5px solid var(--ink);
-  background: var(--paper);
+  border: 1.5px solid var(--content);
+  background: var(--surface);
 }
 
 [data-theme='dark'] .ledger {
-  border-color: var(--line);
+  border-color: var(--border);
 }
 
 .ledgerRow {
@@ -109,7 +109,7 @@
   grid-template-columns: 44px 1.4fr 1.5fr 0.8fr;
   gap: 10px;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--border);
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.02em;
@@ -124,17 +124,17 @@
   font-size: 8.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-soft);
-  background: var(--paper-2);
+  color: var(--content-muted);
+  background: var(--surface-raised);
 }
 
 .ledgerId {
-  color: var(--blue);
+  color: var(--accent);
   font-weight: 700;
 }
 
 .ledgerDim {
-  color: var(--ink-soft);
+  color: var(--content-muted);
 }
 
 /* ---------- verbatim cards ---------- */
@@ -146,8 +146,8 @@
 
 .card {
   position: relative;
-  border: 1.5px solid var(--ink);
-  background: var(--paper);
+  border: 1.5px solid var(--content);
+  background: var(--surface);
   padding: 16px 18px;
   transform: rotate(-0.6deg);
 }
@@ -157,24 +157,24 @@
 }
 
 [data-theme='dark'] .card {
-  border-color: var(--line);
+  border-color: var(--border);
 }
 
 .cardFounding {
-  border-color: var(--blue);
+  border-color: var(--accent);
 }
 
 .cardPending {
   border-style: dashed;
-  border-color: var(--line);
+  border-color: var(--border);
   background: transparent;
   transform: rotate(0.4deg);
 }
 
 .foundingTag {
   display: inline-block;
-  color: var(--blue);
-  border-color: var(--blue);
+  color: var(--accent);
+  border-color: var(--accent);
   margin-bottom: 10px;
 }
 
@@ -191,7 +191,7 @@
   font-size: 9.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--content-muted);
 }
 
 .pendingInner {
@@ -206,17 +206,17 @@
   font-size: 9.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--content-muted);
 }
 
 /* ---------- synthesis ---------- */
 .synth {
-  border: 1.5px solid var(--ink);
-  background: var(--paper);
+  border: 1.5px solid var(--content);
+  background: var(--surface);
 }
 
 [data-theme='dark'] .synth {
-  border-color: var(--line);
+  border-color: var(--border);
 }
 
 .synthRow {
@@ -225,7 +225,7 @@
   gap: 10px;
   align-items: center;
   padding: 12px 14px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--border);
 }
 
 .synthRow:last-child {
@@ -236,13 +236,13 @@
   font-family: var(--mono);
   font-size: 11px;
   line-height: 1.5;
-  color: var(--ink-soft);
+  color: var(--content-muted);
 }
 
 .synthArrow {
   font-family: var(--mono);
   font-size: 14px;
-  color: var(--pink);
+  color: var(--accent-expressive);
   text-align: center;
 }
 
@@ -258,7 +258,7 @@
   font-size: 8.5px;
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   line-height: 1.7;
   margin: 26px 0 0;
 }
@@ -282,6 +282,6 @@
   font-size: 10px;
   letter-spacing: 0.08em;
   line-height: 1.8;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   margin: 0;
 }

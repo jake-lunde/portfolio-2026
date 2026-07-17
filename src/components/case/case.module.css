@@ -13,7 +13,7 @@
 /* hero */
 .hero {
   padding: 44px 0 30px;
-  border-bottom: var(--border-hairline) solid var(--line);
+  border-bottom: var(--border-hairline) solid var(--border);
 }
 
 .eyebrow {
@@ -21,7 +21,7 @@
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .title {
@@ -52,10 +52,10 @@
 }
 
 .meta .k {
-  color: var(--ink-soft);
+  color: var(--content-muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: var(--text-chrome-sm);
+  font-size: var(--text-label);
   display: block;
   margin-bottom: 5px;
 }
@@ -70,7 +70,7 @@
 /* sections */
 .section {
   padding: 42px 0;
-  border-bottom: var(--border-hairline) solid var(--line);
+  border-bottom: var(--border-hairline) solid var(--border);
 }
 
 .section:last-child {
@@ -79,9 +79,9 @@
 
 .secNo {
   font-family: var(--mono);
-  font-size: var(--text-chrome-md);
+  font-size: var(--text-ui);
   letter-spacing: 0.16em;
-  color: var(--blue);
+  color: var(--accent);
   text-transform: uppercase;
 }
 
@@ -116,21 +116,21 @@
 }
 
 .plate {
-  background: var(--plate);
+  background: var(--surface-inverse);
   color: #e7e1d2;
-  border: var(--border-rule) solid var(--ink);
+  border: var(--border-default) solid var(--content);
   position: relative;
   overflow: hidden;
   padding: var(--space-5);
 }
 
 [data-theme='dark'] .plate {
-  border-color: var(--line);
+  border-color: var(--border);
 }
 
 .plateCap {
   font-family: var(--mono);
-  font-size: var(--text-chrome-sm);
+  font-size: var(--text-label);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.6);
@@ -143,13 +143,13 @@
 }
 
 .plateCap .fig {
-  color: var(--pink);
+  color: var(--accent-expressive);
 }
 
 .figcap {
   font-family: var(--mono);
-  font-size: var(--text-chrome-md);
-  color: var(--ink-soft);
+  font-size: var(--text-ui);
+  color: var(--content-muted);
   letter-spacing: 0.02em;
   margin-top: 9px;
 }
@@ -164,7 +164,7 @@
   text-align: center;
   color: rgba(231, 225, 210, 0.5);
   font-family: var(--mono);
-  font-size: var(--text-chrome-md);
+  font-size: var(--text-ui);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 22px;
@@ -193,22 +193,22 @@
 }
 
 .move {
-  border: var(--border-rule) solid var(--ink);
-  background: var(--paper);
+  border: var(--border-default) solid var(--content);
+  background: var(--surface);
   padding: 18px;
 }
 
 [data-theme='dark'] .move {
-  border-color: var(--line);
-  background: var(--paper-2);
+  border-color: var(--border);
+  background: var(--surface-raised);
 }
 
 .move .n {
   font-family: var(--mono);
-  font-size: var(--text-chrome-sm);
+  font-size: var(--text-label);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .move h3 {
@@ -227,23 +227,23 @@
 
 /* decide card */
 .decide {
-  border: var(--border-rule) solid var(--ink);
-  background: var(--paper);
+  border: var(--border-default) solid var(--content);
+  background: var(--surface);
   padding: 22px;
   margin-top: 26px;
 }
 
 [data-theme='dark'] .decide {
-  border-color: var(--line);
-  background: var(--paper-2);
+  border-color: var(--border);
+  background: var(--surface-raised);
 }
 
 .decideCap {
   font-family: var(--mono);
-  font-size: var(--text-chrome-sm);
+  font-size: var(--text-label);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   margin-bottom: 6px;
 }
 
@@ -251,7 +251,7 @@
   display: flex;
   gap: 14px;
   padding: 13px 0;
-  border-bottom: var(--border-hairline) solid var(--line);
+  border-bottom: var(--border-hairline) solid var(--border);
   align-items: baseline;
 }
 
@@ -261,7 +261,7 @@
 
 .qn {
   font-family: var(--mono);
-  color: var(--blue);
+  color: var(--accent);
   font-size: 13px;
   flex: 0 0 auto;
 }
@@ -273,8 +273,8 @@
 
 .qtag {
   font-family: var(--mono);
-  font-size: var(--text-chrome-sm);
-  color: var(--ink-soft);
+  font-size: var(--text-label);
+  color: var(--content-muted);
   letter-spacing: 0.08em;
   margin-left: auto;
   flex: 0 0 auto;
@@ -285,7 +285,7 @@
 .quote {
   margin: 30px 0 0;
   padding: 0 0 0 22px;
-  border-left: 3px solid var(--pink);
+  border-left: 3px solid var(--accent-expressive);
   font-size: 22px;
   line-height: 1.4;
   letter-spacing: -0.01em;
@@ -297,10 +297,10 @@
   display: block;
   font-style: normal;
   font-family: var(--mono);
-  font-size: var(--text-chrome-md);
+  font-size: var(--text-ui);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   margin-top: var(--space-3);
   font-weight: 400;
 }
@@ -335,9 +335,9 @@
 
 .statLab {
   font-family: var(--mono);
-  font-size: var(--text-chrome-md);
+  font-size: var(--text-ui);
   letter-spacing: 0.06em;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   text-transform: uppercase;
   margin-top: var(--space-2);
   max-width: 28ch;
@@ -359,27 +359,27 @@
   font-weight: 400;
   letter-spacing: 0;
   text-decoration: none;
-  color: var(--ink);
+  color: var(--content);
   text-align: left;
 }
 
 .nextlink:hover {
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .nextlink span {
   font-family: var(--mono);
-  font-size: var(--text-chrome-sm);
+  font-size: var(--text-label);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   display: block;
   font-weight: 400;
   margin-bottom: var(--space-1);
 }
 
 .nextlink:disabled {
-  color: var(--ink-soft);
+  color: var(--content-muted);
   cursor: default;
 }
 
@@ -389,7 +389,7 @@
 }
 
 .moatNode:focus-visible {
-  outline: 2px solid var(--pink);
+  outline: 2px solid var(--accent-expressive);
   outline-offset: 2px;
 }
 
@@ -407,5 +407,5 @@
 }
 
 .moatWhy b {
-  color: var(--pink);
+  color: var(--accent-expressive);
 }

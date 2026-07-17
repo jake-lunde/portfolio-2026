@@ -73,9 +73,9 @@ const PATHS: Record<IconName, React.ReactNode> = {
   sliders: (
     <>
       <path d="M6 10h20M6 16h20M6 22h20" />
-      <circle cx="12" cy="10" r="2.5" fill="var(--paper)" />
-      <circle cx="21" cy="16" r="2.5" fill="var(--paper)" />
-      <circle cx="10" cy="22" r="2.5" fill="var(--paper)" />
+      <circle cx="12" cy="10" r="2.5" fill="var(--surface)" />
+      <circle cx="21" cy="16" r="2.5" fill="var(--surface)" />
+      <circle cx="10" cy="22" r="2.5" fill="var(--surface)" />
     </>
   ),
   rings: (
@@ -173,7 +173,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
   clipboard: (
     <>
       <path d="M7 6h4a2 2 0 0 1 10 0h4v22H7z" />
-      <path d="M12 6a2 2 0 0 1 8 0" fill="var(--paper)" />
+      <path d="M12 6a2 2 0 0 1 8 0" fill="var(--surface)" />
       <path d="M11 15h10M11 19h10M11 23h6" />
     </>
   ),

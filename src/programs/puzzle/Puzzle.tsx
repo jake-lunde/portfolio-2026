@@ -365,7 +365,7 @@ export default function Puzzle() {
                   className={styles.confetti}
                   style={{
                     left: `${8 + ((i * 37) % 84)}%`,
-                    background: i % 3 === 0 ? 'var(--pink)' : i % 3 === 1 ? 'var(--blue)' : 'var(--ink)',
+                    background: i % 3 === 0 ? 'var(--accent-expressive)' : i % 3 === 1 ? 'var(--accent)' : 'var(--content)',
                   }}
                   initial={{ y: -30, opacity: 1, rotate: 0 }}
                   animate={{ y: BOARD_H + 40, opacity: [1, 1, 0.6], rotate: 260 + ((i * 53) % 240) }}

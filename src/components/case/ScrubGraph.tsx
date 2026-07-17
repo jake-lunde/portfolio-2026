@@ -80,13 +80,13 @@ export function ScrubGraph() {
       </g>
       {cursor && (
         <g>
-          <line x1={cursor.x} y1="0" x2={cursor.x} y2={H} stroke="var(--pink)" strokeWidth="1.4" />
-          <circle cx={cursor.x} cy={cursor.y} r="6" fill="var(--pink)" />
+          <line x1={cursor.x} y1="0" x2={cursor.x} y2={H} stroke="var(--accent-expressive)" strokeWidth="1.4" />
+          <circle cx={cursor.x} cy={cursor.y} r="6" fill="var(--accent-expressive)" />
           <text
             x={Math.max(34, Math.min(W - 34, cursor.x))}
             y="18"
             textAnchor="middle"
-            fill="var(--pink)"
+            fill="var(--accent-expressive)"
             fontFamily="var(--mono)"
             fontSize="10"
             letterSpacing="1"

@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 9990;
-  background: var(--paper);
+  background: var(--surface);
   padding: 12px;
 }
 

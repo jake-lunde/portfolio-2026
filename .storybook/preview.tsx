@@ -37,7 +37,7 @@ const fontFallback = `
   --font-pixel: 'Courier New', ui-monospace, monospace;
   --font-cjk: ui-sans-serif, system-ui, sans-serif;
 }
-.sb-show-main { background: var(--paper); color: var(--ink); }
+.sb-show-main { background: var(--surface); color: var(--content); }
 /* globals.css locks the viewport (body{overflow:hidden}) because the OS shell
    owns scrolling — but in Storybook that traps every docs/story page. Undo it
    here so the catalog scrolls normally. Storybook-only; the site is untouched. */
@@ -70,7 +70,7 @@ const withTheme: Decorator = (Story, context) => {
   if (typeof document !== 'undefined') applyTheme(theme)
 
   return (
-    <div className={fontVars} style={{ background: 'var(--paper)', color: 'var(--ink)', padding: 24 }}>
+    <div className={fontVars} style={{ background: 'var(--surface)', color: 'var(--content)', padding: 24 }}>
       <style>{fontFallback}</style>
       <Story />
     </div>

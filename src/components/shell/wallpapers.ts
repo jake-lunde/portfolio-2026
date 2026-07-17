@@ -1,6 +1,6 @@
 /* Desktop wallpaper patterns — classic Mac OS desktop patterns by way of
    the print refs (fisheries guilloché waves, De School grid, halftone
-   specks). Each is a small SVG tile used as a CSS mask over var(--ink),
+   specks). Each is a small SVG tile used as a CSS mask over var(--content),
    so patterns are theme-aware for free.
    Adding one: draw a tile, add an entry, done — it appears in Settings. */
 
@@ -76,7 +76,7 @@ export function wallpaperMask(wp: Wallpaper): CSSProperties {
   if (!wp.tile) return {}
   const uri = `url("data:image/svg+xml,${encodeURIComponent(wp.tile)}")`
   return {
-    backgroundColor: 'var(--ink)',
+    backgroundColor: 'var(--content)',
     WebkitMaskImage: uri,
     maskImage: uri,
     WebkitMaskRepeat: 'repeat',

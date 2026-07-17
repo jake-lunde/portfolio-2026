@@ -14,7 +14,7 @@
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--content-muted);
   max-width: 30ch;
   line-height: 1.8;
   margin: 0;

@@ -128,7 +128,7 @@ export function FlightsViz() {
                   key={f.date + f.no + i}
                   d={arcPath(AIRPORTS[f.from], AIRPORTS[f.to])}
                   fill="none"
-                  stroke={hot ? 'var(--pink)' : 'var(--blue)'}
+                  stroke={hot ? 'var(--accent-expressive)' : 'var(--accent)'}
                   strokeWidth={hot ? 1.8 : 1}
                   opacity={hot ? 1 : 0.55}
                   initial={reduced ? undefined : { pathLength: 0 }}
@@ -149,12 +149,12 @@ export function FlightsViz() {
                     cx={pos[0]}
                     cy={pos[1]}
                     r={off ? 4 : 2.2}
-                    fill={active ? 'var(--pink)' : '#E7E1D2'}
+                    fill={active ? 'var(--accent-expressive)' : '#E7E1D2'}
                     strokeDasharray={off ? '2 2' : undefined}
                     stroke={off ? '#E7E1D2' : undefined}
                     fillOpacity={off ? 0 : 1}
                   />
-                  <text x={pos[0] + 5} y={pos[1] + 3} fill={active ? 'var(--pink)' : '#E7E1D2'}>
+                  <text x={pos[0] + 5} y={pos[1] + 3} fill={active ? 'var(--accent-expressive)' : '#E7E1D2'}>
                     {code}
                   </text>
                 </g>
@@ -189,7 +189,7 @@ export function FlightsViz() {
                 y1={hot ? 8 : 14}
                 x2={x}
                 y2={hot ? 36 : 30}
-                stroke={hot ? 'var(--pink)' : '#E7E1D2'}
+                stroke={hot ? 'var(--accent-expressive)' : '#E7E1D2'}
                 strokeWidth={hot ? 2 : 1}
                 opacity={idx === null || i <= idx ? 0.9 : 0.3}
               />

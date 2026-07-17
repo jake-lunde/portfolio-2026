@@ -1,45 +1,45 @@
 {
-  "paper": {
+  "surface": {
     "$value": "{color.void.base}",
     "$type": "color"
   },
-  "paper-2": {
+  "surface-raised": {
     "$value": "{color.void.raised}",
     "$type": "color"
   },
-  "ink": {
-    "$value": "{color.cream.base}",
-    "$type": "color"
-  },
-  "ink-soft": {
-    "$value": "{color.cream.soft}",
-    "$type": "color"
-  },
-  "plate": {
+  "surface-inverse": {
     "$value": "{color.void.plate}",
     "$type": "color"
   },
-  "plate-ink": {
+  "content": {
     "$value": "{color.cream.base}",
     "$type": "color"
   },
-  "line": {
+  "content-muted": {
+    "$value": "{color.cream.soft}",
+    "$type": "color"
+  },
+  "content-inverse": {
+    "$value": "{color.cream.base}",
+    "$type": "color"
+  },
+  "border": {
     "$value": "rgba(233, 228, 213, 0.16)",
     "$type": "color"
   },
-  "blue": {
+  "accent": {
     "$value": "{color.nasa.glow}",
     "$type": "color"
   },
-  "pink": {
+  "accent-expressive": {
     "$value": "{color.doppler.pink}",
     "$type": "color"
   },
-  "pink-text": {
-    "$value": "{pink}",
+  "accent-expressive-text": {
+    "$value": "{accent-expressive}",
     "$type": "color"
   },
-  "pink-mark": {
+  "accent-expressive-mark": {
     "$value": "transparent",
     "$type": "color"
   },

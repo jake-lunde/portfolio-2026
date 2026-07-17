@@ -64,13 +64,13 @@ function resolveVar(el: HTMLElement, name: string): RGB | null {
 }
 
 const COLOR_VARS: Array<{ name: string; label: string; against: 'paper' | 'ink' }> = [
-  { name: '--paper', label: 'Paper', against: 'ink' },
-  { name: '--paper-2', label: 'Paper 2', against: 'ink' },
-  { name: '--ink', label: 'Ink', against: 'paper' },
-  { name: '--ink-soft', label: 'Ink Soft', against: 'paper' },
-  { name: '--blue', label: 'Blue · system', against: 'paper' },
-  { name: '--pink', label: 'Pink · expressive', against: 'ink' },
-  { name: '--plate', label: 'Plate', against: 'paper' },
+  { name: '--surface', label: 'Paper', against: 'ink' },
+  { name: '--surface-raised', label: 'Paper 2', against: 'ink' },
+  { name: '--content', label: 'Ink', against: 'paper' },
+  { name: '--content-muted', label: 'Ink Soft', against: 'paper' },
+  { name: '--accent', label: 'Blue · system', against: 'paper' },
+  { name: '--accent-expressive', label: 'Pink · expressive', against: 'ink' },
+  { name: '--surface-inverse', label: 'Plate', against: 'paper' },
 ]
 
 type Chip = {
@@ -95,8 +95,8 @@ export default function SpecSheet() {
     const root = document.documentElement
 
     const read = () => {
-      const paper = resolveVar(document.body, '--paper')
-      const ink = resolveVar(document.body, '--ink')
+      const paper = resolveVar(document.body, '--surface')
+      const ink = resolveVar(document.body, '--content')
       const next: Chip[] = []
       for (const cv of COLOR_VARS) {
         const rgb = resolveVar(document.body, cv.name)

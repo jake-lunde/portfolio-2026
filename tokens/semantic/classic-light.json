@@ -1,54 +1,54 @@
 {
-  "paper": {
+  "surface": {
     "$value": "{color.paper.base}",
     "$type": "color"
   },
-  "paper-2": {
+  "surface-raised": {
     "$value": "{color.paper.raised}",
     "$type": "color"
   },
-  "ink": {
-    "$value": "{color.ink.base}",
-    "$type": "color"
-  },
-  "ink-soft": {
-    "$value": "{color.ink.soft}",
-    "$type": "color"
-  },
-  "plate": {
+  "surface-inverse": {
     "$value": "{color.plate.base}",
     "$type": "color"
   },
-  "plate-ink": {
+  "content": {
+    "$value": "{color.ink.base}",
+    "$type": "color"
+  },
+  "content-muted": {
+    "$value": "{color.ink.soft}",
+    "$type": "color"
+  },
+  "content-inverse": {
     "$value": "{color.paper.base}",
     "$type": "color"
   },
-  "line": {
+  "border": {
     "$value": "rgba(23, 21, 13, 0.18)",
     "$type": "color"
   },
-  "blue": {
+  "accent": {
     "$value": "{color.nasa.cobalt}",
     "$type": "color"
   },
-  "pink": {
+  "accent-expressive": {
     "$value": "{color.doppler.pink}",
     "$type": "color"
   },
-  "green": {
+  "accent-support": {
     "$value": "{color.report.green}",
     "$type": "color"
   },
-  "pink-text": {
-    "$value": "{ink}",
+  "accent-expressive-text": {
+    "$value": "{content}",
     "$type": "color"
   },
-  "pink-mark": {
-    "$value": "{pink}",
+  "accent-expressive-mark": {
+    "$value": "{accent-expressive}",
     "$type": "color"
   },
   "focus": {
-    "$value": "{blue}",
+    "$value": "{accent}",
     "$type": "color"
   },
   "shadow-print": {

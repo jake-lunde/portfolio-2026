@@ -139,7 +139,7 @@ export function SlopesViz() {
               key={i}
               d={segPath(s, true)}
               fill="none"
-              stroke={s.type === 'run' ? 'var(--blue)' : '#E7E1D2'}
+              stroke={s.type === 'run' ? 'var(--accent)' : '#E7E1D2'}
               strokeWidth={s.type === 'run' ? 1.6 : 0.9}
               strokeDasharray={s.type === 'lift' ? '3 4' : undefined}
               opacity={s.type === 'run' ? 0.9 : s.type === 'lift' ? 0.45 : 0.2}
@@ -147,8 +147,8 @@ export function SlopesViz() {
           ))}
           {idx !== null && (
             <g>
-              <circle cx={proj[idx][0]} cy={proj[idx][1]} r="6" fill="var(--pink)" />
-              <circle cx={proj[idx][0]} cy={proj[idx][1]} r="11" fill="none" stroke="var(--pink)" strokeWidth="1" opacity="0.5" />
+              <circle cx={proj[idx][0]} cy={proj[idx][1]} r="6" fill="var(--accent-expressive)" />
+              <circle cx={proj[idx][0]} cy={proj[idx][1]} r="11" fill="none" stroke="var(--accent-expressive)" strokeWidth="1" opacity="0.5" />
             </g>
           )}
         </svg>
@@ -170,7 +170,7 @@ export function SlopesViz() {
               key={i}
               d={segPath(s, false)}
               fill="none"
-              stroke={s.type === 'run' ? 'var(--blue)' : '#E7E1D2'}
+              stroke={s.type === 'run' ? 'var(--accent)' : '#E7E1D2'}
               strokeWidth={s.type === 'run' ? 1.5 : 0.8}
               strokeDasharray={s.type === 'lift' ? '2 3' : undefined}
               opacity={s.type === 'run' ? 0.95 : 0.4}
@@ -178,8 +178,8 @@ export function SlopesViz() {
           ))}
           {idx !== null && (
             <>
-              <line x1={stripX(idx)} y1="0" x2={stripX(idx)} y2={STRIP_H} stroke="var(--pink)" strokeWidth="1.2" />
-              <circle cx={stripX(idx)} cy={eleY(idx)} r="3.5" fill="var(--pink)" />
+              <line x1={stripX(idx)} y1="0" x2={stripX(idx)} y2={STRIP_H} stroke="var(--accent-expressive)" strokeWidth="1.2" />
+              <circle cx={stripX(idx)} cy={eleY(idx)} r="3.5" fill="var(--accent-expressive)" />
             </>
           )}
         </svg>

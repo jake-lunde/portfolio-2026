@@ -1,27 +1,24 @@
 {
-  "text": {
-    "chrome-2xs": {
+  "size": {
+    "micro": {
       "$value": "8px",
       "$type": "dimension"
     },
-    "chrome-xs": {
+    "caption": {
       "$value": "9px",
       "$type": "dimension"
     },
-    "chrome-sm": {
+    "label": {
       "$value": "10px",
       "$type": "dimension"
     },
-    "chrome-md": {
+    "ui": {
       "$value": "11px",
       "$type": "dimension"
     },
     "body": {
       "$value": "17px",
       "$type": "dimension"
-    },
-    "leading-body": {
-      "$value": "1.6"
     }
   }
 }
