@@ -444,6 +444,47 @@ semantic/medieval.json + $themes entry, [data-skin='medieval'] emits,
 verify in SB toolbar + Chromatic + a Figma pull showing the new mode).
 Then Milestone B (store widening + subsystem refactors).
 
+### 2026-07-16 (Fable, session 10 — A7 component loop; commit bcde312 on main)
+ROOT CAUSE of Jake's two Notion gripes (page 39fd29ee985480f78889c8ac426cb74c
+— Notion MCP works now; both boxes ticked + comment posted):
+1. "chromatic fails" — PR #3's `Tokens sync` run FAILED: `fatal: pathspec
+   'src/lib/motion.generated.ts' did not match any files`. The design-tokens
+   branch was STALE (tree predated A4), so CI checked it out and ran the OLD
+   build script which never emits motion.generated.ts → my `git add` of a
+   missing path hard-failed → no regen → stale CSS merged → freshness guard
+   correctly reddened main. PR #4 passed (branch had caught up).
+   FIXED TWO LAYERS: (a) tokens-sync.yml stages only artifacts that EXIST,
+   then checks `git diff --cached` (also catches new untracked artifacts);
+   (b) plugin resets design-tokens (delete+recreate from base head) whenever
+   no PR is open on it — never stacks on an ancient tree again.
+2. "diffs unreadable" — formatting noise was the one-time normalization
+   (done session 9). NOW the PUSH reports `token.path: old → new` in the
+   commit body, PR body on create, and a PR COMMENT on re-push.
+ALSO: Chromatic URL confusion — the link Jake had is a FROZEN per-build
+permalink; the living catalog is the project's latest build (or
+main--<appid>.chromatic.com).
+SHIPPED A7: Button primitive (src/components/primitives/Button.tsx +
+story; tones system/expressive, sizes sm/md; consumes --radius-btn/
+--border-rule/--border-heavy/--text-chrome-*) adopted in gate verdict +
+Tattoo Gun; per-program button CSS deleted. NYQUIST token sweep across
+shell/case/programs/settings/guestbook CSS (exact-match borders, chrome
+type, spacing → tokens). DS-OPS.md written (Jake's work translation:
+Enterprise Figma + tokens-in-code + React/Storybook → recommends Variables
+REST API sync over a plugin; ports parity gate, freshness guard, regen bot,
+single-writer rule, failure table). .claude/launch.json now has both dev
+servers (lunde-os :3000, storybook :6006).
+GOTCHAS: (1) shell ate backticks in the A7 commit message (two phrases
+missing — cosmetic, left alone; QUOTE COMMIT BODIES OR AVOID BACKTICKS).
+(2) Classifier + GitHub Actions API both had outages this session; use
+`until <cmd>; do sleep N; done` in run_in_background rather than chained
+sleeps (harness blocks those).
+NEXT — A7.4/A7.5 REMAIN (need Jake): Figma library mirror via the Figma MCP
+(skills figma-generate-library + figma-use; needs Jake's file open/URL —
+mirror Button bound to the synced `semantic` variables), then THE DEMO:
+Jake changes radius/btn in Figma → PUSH → PR (now with readable summary) →
+tokens-sync regen → merge → corners change in Storybook + lunde.co.
+THEN A6 Medieval (Jake is collecting changes).
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
