@@ -13,10 +13,13 @@
 import { GitHub, parseRepo } from './github'
 import {
   buildModel,
+  capLines,
   coreVarName,
   deepClone,
   enabledSemanticSet,
   floatToTokenString,
+  formatChangeLine,
+  formatChangeMarkdown,
   isCoreSet,
   leafAtPath,
   refStringForTarget,
@@ -26,6 +29,7 @@ import {
   semanticToken,
   toFloat,
   toRgba,
+  type ChangeEntry,
   type FlatToken,
   type Metadata,
   type PulledModel,
@@ -42,8 +46,11 @@ const CORE_COLLECTION = 'core'
 const SEMANTIC_COLLECTION = 'semantic'
 const PR_BRANCH = 'design-tokens'
 const PR_TITLE = 'tokens: edits from TOKEN BRIDGE (Figma)'
-const COMMIT_MSG =
-  'tokens: edits from TOKEN BRIDGE (Figma)\n\nAuthored via the TOKEN BRIDGE Figma plugin.'
+const PR_BODY_INTRO =
+  'Automated by the TOKEN BRIDGE Figma plugin.\n\n' +
+  'Design tokens edited in Figma, serialized back to `tokens/*.json`. ' +
+  'CI regenerates `src/styles/tokens.generated.css`; Chromatic diffs the result.'
+const CHANGE_LIST_CAP = 20
 const TOKENS_DIR = 'tokens'
 const DEFAULT_REPO = 'jake-lunde/portfolio-2026'
 const DEFAULT_BRANCH = 'main'
@@ -339,7 +346,7 @@ async function push(gh: GitHub, branch: string): Promise<void> {
   const varById = new Map(allVars.map((v) => [v.id, v]))
 
   const changed: Array<{ path: string; content: string }> = []
-  let changedTokens = 0
+  const changes: ChangeEntry[] = []
 
   for (const set of model.metadata.tokenSetOrder) {
     const original = model.files[set]
@@ -356,7 +363,7 @@ async function push(gh: GitHub, branch: string): Promise<void> {
         const next = serializeVarValue(v, coreMode, t, varById, model)
         if (next !== null && applyLeaf(clone, t.path, next, t)) {
           fileChanged = true
-          changedTokens++
+          changes.push({ path: t.path, oldValue: t.rawValue, newValue: next })
         }
       }
     } else {
@@ -371,7 +378,7 @@ async function push(gh: GitHub, branch: string): Promise<void> {
           const next = serializeVarValue(v, modeId, t, varById, model)
           if (next !== null && applyLeaf(clone, t.path, next, t)) {
             fileChanged = true
-            changedTokens++
+            changes.push({ path: t.path, oldValue: t.rawValue, newValue: next })
           }
         }
       }
@@ -389,10 +396,10 @@ async function push(gh: GitHub, branch: string): Promise<void> {
     log('No token changes vs repo — nothing to push.', 'ok')
     return
   }
-  log(`${changedTokens} token(s) changed across ${changed.length} file(s):`)
+  log(`${changes.length} token(s) changed across ${changed.length} file(s):`)
   for (const f of changed) log(`  • ${f.path}`)
 
-  const prUrl = await commitAndPr(gh, branch, changed)
+  const prUrl = await commitAndPr(gh, branch, changed, changes)
   log(`PR ready: ${prUrl}`, 'ok')
 }
 
@@ -487,13 +494,38 @@ function reportUnknownVars(coreIdx: VarIndex, semIdx: VarIndex, model: PulledMod
   }
 }
 
+/** Commit message: title + blank line + change lines (capped), or just the title if none. */
+function commitMessage(changes: ChangeEntry[]): string {
+  const lines = capLines(changes.map(formatChangeLine), CHANGE_LIST_CAP)
+  return lines.length ? `${PR_TITLE}\n\n${lines.join('\n')}` : PR_TITLE
+}
+
+/** Markdown "## Changes" section shared by the PR body (on create) and PR comment (on push). */
+function changesSection(changes: ChangeEntry[]): string {
+  const lines = capLines(changes.map(formatChangeMarkdown), CHANGE_LIST_CAP)
+  return ['## Changes', ...lines].join('\n')
+}
+
 async function commitAndPr(
   gh: GitHub,
   base: string,
-  files: Array<{ path: string; content: string }>
+  files: Array<{ path: string; content: string }>,
+  changes: ChangeEntry[]
 ): Promise<string> {
-  const existingBranchSha = await gh.refShaOrNull(PR_BRANCH)
-  const baseSha = existingBranchSha ?? (await gh.refSha(base))
+  const existingPr = await gh.openPr(PR_BRANCH, base)
+  let branchSha = await gh.refShaOrNull(PR_BRANCH)
+
+  if (branchSha && !existingPr) {
+    // design-tokens is a bot-owned scratch branch — when nothing has it open
+    // as a PR, its tree can predate files main has since added (it's
+    // long-lived), which would poison the next merge if we stacked onto it.
+    // No force-push semantics needed: delete + recreate from base head.
+    await gh.deleteBranch(PR_BRANCH)
+    branchSha = null
+    log(`"${PR_BRANCH}" was stale — reset to ${base} head.`)
+  }
+
+  const baseSha = branchSha ?? (await gh.refSha(base))
   const baseTree = await gh.commitTree(baseSha)
   const treeSha = await gh.createTree(baseTree, files)
 
@@ -501,13 +533,12 @@ async function commitAndPr(
   // already live on design-tokens), skip the commit to avoid empty commits.
   if (treeSha === baseTree) {
     log('Changes already present on the branch — no new commit.', 'ok')
-    const existing = await gh.openPrUrl(PR_BRANCH, base)
-    return existing ?? '(open a PR for design-tokens on GitHub)'
+    return existingPr?.html_url ?? '(open a PR for design-tokens on GitHub)'
   }
 
-  const commitSha = await gh.createCommit(COMMIT_MSG, treeSha, baseSha)
+  const commitSha = await gh.createCommit(commitMessage(changes), treeSha, baseSha)
 
-  if (existingBranchSha) {
+  if (branchSha) {
     await gh.updateBranch(PR_BRANCH, commitSha) // fast-forward (parent = branch head)
     log(`Pushed to existing "${PR_BRANCH}".`)
   } else {
@@ -515,11 +546,11 @@ async function commitAndPr(
     log(`Created "${PR_BRANCH}".`)
   }
 
-  const existingPr = await gh.openPrUrl(PR_BRANCH, base)
-  if (existingPr) return existingPr
-  const body =
-    'Automated by the TOKEN BRIDGE Figma plugin.\n\n' +
-    'Design tokens edited in Figma, serialized back to `tokens/*.json`. ' +
-    'CI regenerates `src/styles/tokens.generated.css`; Chromatic diffs the result.'
+  if (existingPr) {
+    await gh.createPrComment(existingPr.number, changesSection(changes))
+    log(`Commented change summary on PR #${existingPr.number}.`)
+    return existingPr.html_url
+  }
+  const body = `${PR_BODY_INTRO}\n\n${changesSection(changes)}`
   return gh.createPr(PR_BRANCH, base, PR_TITLE, body)
 }

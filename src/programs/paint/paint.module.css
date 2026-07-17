@@ -106,25 +106,7 @@
   color: var(--blue);
 }
 
-.doneBtn {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  padding: 6px 12px;
-  border: 1.5px solid var(--ink);
-  background: var(--paper);
-  color: var(--ink);
-}
-
-[data-theme='dark'] .doneBtn {
-  border-color: var(--line);
-}
-
-.doneBtn:hover {
-  background: var(--pink);
-  color: #17150d;
-}
+/* (the DONE/AGAIN buttons are now the Button primitive — token-driven) */
 
 .skin {
   width: 100%;

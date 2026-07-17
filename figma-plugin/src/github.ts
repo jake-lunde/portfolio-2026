@@ -143,15 +143,20 @@ export class GitHub {
     })
   }
 
-  /** Existing open PR html_url for head branch, or null. */
-  async openPrUrl(headBranch: string, base: string): Promise<string | null> {
+  /** Delete a branch ref outright (used to reset a stale bot-owned scratch branch). */
+  async deleteBranch(branch: string): Promise<void> {
+    await this.req('DELETE', `${this.base()}/git/refs/heads/${encodePath(branch)}`)
+  }
+
+  /** Existing open PR (html_url + number) for head branch, or null. */
+  async openPr(headBranch: string, base: string): Promise<{ html_url: string; number: number } | null> {
     const head = `${this.repo.owner}:${headBranch}`
     const res = await this.req(
       'GET',
       `${this.base()}/pulls?state=open&head=${encodeURIComponent(head)}&base=${encodeURIComponent(base)}`
     )
-    const json = (await res.json()) as Array<{ html_url: string }>
-    return json.length ? json[0].html_url : null
+    const json = (await res.json()) as Array<{ html_url: string; number: number }>
+    return json.length ? { html_url: json[0].html_url, number: json[0].number } : null
   }
 
   async createPr(
@@ -165,5 +170,12 @@ export class GitHub {
     })
     const json = (await res.json()) as { html_url: string }
     return json.html_url
+  }
+
+  /** Post a comment on an issue/PR (POST /repos/{owner}/{repo}/issues/{number}/comments). */
+  async createPrComment(number: number, body: string): Promise<void> {
+    await this.req('POST', `${this.base()}/issues/${number}/comments`, {
+      body: { body },
+    })
   }
 }

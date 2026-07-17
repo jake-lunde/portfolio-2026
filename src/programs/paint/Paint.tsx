@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Stamp } from '@/components/primitives/Stamp'
+import { Button } from '@/components/primitives/Button'
 import { metric } from '@/lib/metrics'
 import { sfx, gateSfx } from '@/lib/sound'
 import { TATTOOS, type Tattoo } from './tattooPaths'
@@ -208,9 +209,9 @@ export default function Paint() {
               {phase === 'tracing' ? `0:${String(secs).padStart(2, '0')}` : `${score}%`}
             </span>
             {phase === 'tracing' && (
-              <button className={styles.doneBtn} onClick={finish}>
+              <Button size="sm" onClick={finish}>
                 ✓ DONE
-              </button>
+              </Button>
             )}
           </div>
           <canvas
@@ -237,12 +238,12 @@ export default function Paint() {
                 <span className={styles.verdictScore}>{score}%</span>
                 <span className={styles.verdictLine}>{grade[2]}</span>
                 <div className={styles.verdictRow}>
-                  <button className={styles.doneBtn} onClick={() => begin(tattooIdx)}>
+                  <Button size="sm" onClick={() => begin(tattooIdx)}>
                     ↻ AGAIN
-                  </button>
-                  <button className={styles.doneBtn} onClick={() => setPhase('pick')}>
+                  </Button>
+                  <Button size="sm" onClick={() => setPhase('pick')}>
                     ← FLASH WALL
-                  </button>
+                  </Button>
                 </div>
               </motion.div>
             )}

@@ -221,19 +221,11 @@
   margin: 0;
 }
 
+/* layout only — appearance now comes from the Button primitive (tokens) */
 .dialogOk {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  padding: 7px 18px;
-  border: 2px solid #17150d;
-  border-radius: 7px;
-  background: var(--paper);
   margin-left: auto;
   align-self: flex-end;
-}
-
-.dialogOk:hover {
-  background: var(--pink);
+  border-color: #17150d; /* dialog sits on paper in both modes */
+  color: #17150d;
+  background: var(--paper);
 }

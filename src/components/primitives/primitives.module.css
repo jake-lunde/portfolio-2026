@@ -20,6 +20,49 @@
   border-color: var(--pink);
 }
 
+/* ---------- Button — token-driven, the component-loop demo target ------- */
+
+.btn {
+  font-family: var(--mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: var(--radius-btn);
+  background: var(--paper);
+  color: var(--ink);
+  border-style: solid;
+  border-color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+[data-theme='dark'] .btn {
+  border-color: var(--line);
+}
+
+.btnSm {
+  font-size: var(--text-chrome-xs);
+  letter-spacing: 0.12em;
+  padding: 6px var(--space-3);
+  border-width: var(--border-rule);
+}
+
+.btnMd {
+  font-size: var(--text-chrome-sm);
+  letter-spacing: 0.14em;
+  padding: 7px 18px;
+  border-width: var(--border-heavy);
+}
+
+.btnExpressive:hover {
+  background: var(--pink);
+  color: #17150d;
+}
+
+.btnSystem:hover {
+  background: var(--blue);
+  color: var(--paper);
+}
+
 /* under-construction plate for stub programs */
 .uc {
   min-height: 100%;

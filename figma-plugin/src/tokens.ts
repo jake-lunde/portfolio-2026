@@ -371,6 +371,29 @@ export function deepClone<T>(x: T): T {
   return JSON.parse(JSON.stringify(x)) as T
 }
 
+// ---------------------------------------------------------------------------
+// Change summaries — used by PUSH to describe the delta in the commit/PR
+// ---------------------------------------------------------------------------
+
+/** One changed token leaf: old/new are already token-string form (aliases keep their {ref}). */
+export type ChangeEntry = { path: string; oldValue: string; newValue: string }
+
+/** Plain-text line for the commit message body: "token.path: old → new". */
+export function formatChangeLine(c: ChangeEntry): string {
+  return `${c.path}: ${c.oldValue} → ${c.newValue}`
+}
+
+/** Markdown bullet for the PR body/comment: "- `token.path`: `old` → `new`". */
+export function formatChangeMarkdown(c: ChangeEntry): string {
+  return `- \`${c.path}\`: \`${c.oldValue}\` → \`${c.newValue}\``
+}
+
+/** Cap a list of lines at `max`, appending a "…and N more" summary line when truncated. */
+export function capLines(lines: string[], max: number): string[] {
+  if (lines.length <= max) return lines
+  return [...lines.slice(0, max), `…and ${lines.length - max} more`]
+}
+
 /**
  * Given a parsed file object and a dotted token path, return the leaf object
  * (the one carrying `$value`), or undefined.

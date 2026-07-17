@@ -6,7 +6,7 @@
 
 .form {
   padding: 18px 20px 16px;
-  border-bottom: 1.5px solid var(--ink);
+  border-bottom: var(--border-rule) solid var(--ink);
   background: var(--paper);
 }
 
@@ -17,7 +17,7 @@
 .formHead {
   font-family: var(--display);
   font-size: 15px;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .hp {
@@ -30,13 +30,13 @@
 
 .field {
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .field span {
   display: block;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--text-chrome-sm);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -51,7 +51,7 @@
   font-size: 14px;
   color: var(--ink);
   background: var(--paper-2);
-  border: 1.5px solid var(--ink);
+  border: var(--border-rule) solid var(--ink);
   border-radius: 0;
   padding: 8px 10px;
   resize: vertical;
@@ -77,13 +77,13 @@
 
 .signBtn {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--text-chrome-md);
   font-weight: 700;
   letter-spacing: 0.16em;
   padding: 8px 18px;
   background: var(--blue);
   color: var(--paper);
-  border: 1.5px solid var(--ink);
+  border: var(--border-rule) solid var(--ink);
 }
 
 [data-theme='dark'] .signBtn {
@@ -115,7 +115,7 @@
 
 .empty {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--text-chrome-md);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -124,7 +124,7 @@
 
 .entry {
   padding: 13px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: var(--border-hairline) solid var(--line);
 }
 
 .entry:last-child {
@@ -135,7 +135,7 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .entryName {

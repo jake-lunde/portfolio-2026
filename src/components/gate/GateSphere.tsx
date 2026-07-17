@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useGate } from '@/store/gate'
+import { Button } from '@/components/primitives/Button'
 import { SPRINGS } from '@/lib/motion'
 import { gateSfx } from '@/lib/sound'
 import styles from './gate.module.css'
@@ -358,9 +359,15 @@ export function GateSphere() {
                     ? 'ACCESS GRANTED. WELCOME TO THE PROJECTS WING, REFINER.'
                     : 'ACCESS DENIED. THE DATA WAS NOT REFINED. THE BOARD IS NOT PLEASED.'}
                 </p>
-                <button className={styles.dialogOk} onClick={dismissVerdict} autoFocus>
+                <Button
+                  tone="expressive"
+                  size="md"
+                  className={styles.dialogOk}
+                  onClick={dismissVerdict}
+                  autoFocus
+                >
                   {verdict === 'granted' ? 'ENTER' : 'RETRY'}
-                </button>
+                </Button>
               </div>
             </motion.div>
           </motion.div>
