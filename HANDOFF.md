@@ -679,6 +679,82 @@ fine (FLOAT), font-family/weight do NOT (Figma binds installed fonts, not
 CSS stacks like `var(--font-mono), 'SF Mono'`) — so those stay
 code-authoritative.
 
+### 2026-07-18 (session 15 — A8 BORDER REGRESSION FOUND + Button tokenized)
+Started as "do the Button cleanup then mirror to Figma." The /mirror-to-figma
+Step 0 pre-flight audit immediately paid for itself by surfacing a LIVE
+VISUAL REGRESSION that had been shipped to lunde.co.
+- **THE REGRESSION (fixed, f14d3da).** A8 (6f338c4) named the semantic color
+  role `border` while border-WIDTH primitives already lived under a `border.*`
+  group (core hairline/thin/thick; semantic/scale default/strong). In the
+  merged Style Dictionary tree `border` cannot be both a leaf and a group —
+  the color leaf won and EVERY width token silently vanished from the output.
+  48 declarations across shell/case/programs/guestbook/primitives consumed
+  `--border-hairline|default|strong`, which were never emitted; an undefined
+  var() invalidates the whole `border` shorthand, so those borders resolved
+  to NONE. Menubar rule, sticky-note frames, window borders, polaroid frame
+  were all absent on the live site. Verified in-browser: menubar
+  border-bottom `0px none` -> `1.5px solid` after the fix.
+  Also leaked `--button-border: {border.default};` (a literal unresolved ref)
+  into shipped CSS.
+  FIX: widths got their own namespace — core group `border` -> `border-width`,
+  semantic `border.default/strong` -> `border-width.default/strong`, 48
+  consumers renamed `--border-*` -> `--border-width-*` (verified 48->48, zero
+  old names left). Color role keeps the clean name `border`.
+  WHY THE A8 PARITY GATE MISSED IT: it diffed computed values for COLOR
+  tokens and never asserted that every consumed var actually RESOLVES. The
+  DS-OPS §3.5.2 token-allowlist lint would have caught this at CI — that is
+  now clearly worth BUILDING here, not just recommending at work. Strong
+  candidate for the next work item.
+  NOTE: Figma tolerated what SD could not — the semantic collection happily
+  held both `border [COLOR]` and `border/default [FLOAT]`, since Figma names
+  are strings with `/` as mere display grouping. So Figma will NOT warn you
+  about this class of collision. Only the build does.
+- **BUTTON TOKENIZED (9fb3742).** New core scales, values extracted verbatim
+  from real usage: core/weight.json (regular 400/semibold 600/bold 700/black
+  800) and core/tracking.json keyed by hundredths of an em (02/06/08/10/12/
+  14/16/18/20 — numeric, NOT semanticized, same call as spacing; deliberately
+  omits the 0.04/0.05/0.13 noise values so a later sweep collapses rather
+  than enshrines them). New semantic role `on-accent-expressive` ->
+  {color.ink.base} replaces the raw #17150d in .btnExpressive:hover (a live
+  §3.5 Scenario B violation); theme-invariant so it is defined once in
+  classic-light and dark inherits via the :root cascade.
+  component/button.json restructured to match what the CSS ACTUALLY does —
+  the old flat shape (radius/border/label/padding-x) described a button that
+  does not exist (sm and md differ in font-size, border-width, tracking AND
+  padding) and border/label/padding-x were consumed by NOTHING. Now
+  button.radius + button.weight (variant-invariant) and
+  button.{sm,md}.{font-size,border,tracking,padding-x,padding-y}.
+  The 3 off-grid paddings (sm-y 6px, md-x 18px, md-y 7px) are carried as
+  component-tier LITERALS with $description flags — spacing is base-4 and
+  none land on it. Verbatim ON PURPOSE (zero-visual-change migration).
+  **OPEN DECISION FOR JAKE: snap them to the grid?** He has said "7 is wacky"
+  and prefers base-8; the snap is a deliberate visual change and belongs in
+  its own PR. Not done unilaterally.
+  PARITY GATE (computed styles on the real hashed CSS classes, dev server):
+  sm 700/9px/1.08px/6px 12px/1.5px/r8 and md 700/10px/1.4px/7px 18px/2px/r8
+  — identical to pre-change. 13/13 token resolutions exact. build passes.
+- **FIGMA MIRROR BLOCKED ON A JAKE-ONLY STEP.** Inspected his file
+  (LQbDBqtpVxCb7QcDgEFQlN): target is section 201012:2 named "components"
+  (5868x4525, empty) on a page alongside "inspo" and "🧬 design system".
+  His variables are from the LAST pull, i.e. PRE-today: core still has
+  border/hairline|thin|thick, semantic still has border/default|strong, and
+  component has only the 4 OLD flat vars (button/border|label|padding-x|
+  radius). Missing entirely: weight/*, tracking/*, on-accent-expressive,
+  border-width/*, and the new button/{sm,md}/* tier.
+  Deliberately did NOT hand-create them — TOKEN BRIDGE is the single writer
+  for token variables (DS-OPS §1.8); hand-creating would make me a second
+  writer and defeat the architecture. JAKE MUST PULL FIRST.
+  That PULL doubles as the live test of BOTH fixes shipped this week: the
+  multi-set semantic resolution fix (f02680a) and the component tier with
+  NESTED names, which exercises figmaVarName slashing `button.sm.padding-x`
+  -> `button/sm/padding-x`.
+  AFTER PULL: the renames leave ORPHANS behind (old border/thin|thick|
+  hairline, border/default|strong, button/border|label|padding-x) — the
+  plugin's reportUnknownVars should list them; delete them.
+  THEN the mirror is unblocked: per /mirror-to-figma the honest Button is
+  ONE variant axis (size sm|md), NOT tone x size — .btnSystem/.btnExpressive
+  define only :hover rules so a tone axis emits two identical frames.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
