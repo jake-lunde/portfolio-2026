@@ -5,7 +5,7 @@
       "$type": "dimension"
     },
     "border": {
-      "$value": "{border.default}",
+      "$value": "{border-width.default}",
       "$type": "dimension"
     },
     "label": {

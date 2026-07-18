@@ -13,13 +13,13 @@
       "$type": "dimension"
     }
   },
-  "border": {
+  "border-width": {
     "default": {
-      "$value": "{border.thin}",
+      "$value": "{border-width.thin}",
       "$type": "dimension"
     },
     "strong": {
-      "$value": "{border.thick}",
+      "$value": "{border-width.thick}",
       "$type": "dimension"
     }
   },

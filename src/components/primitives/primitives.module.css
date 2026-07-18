@@ -43,14 +43,14 @@
   font-size: var(--text-caption);
   letter-spacing: 0.12em;
   padding: 6px var(--space-3);
-  border-width: var(--border-default);
+  border-width: var(--border-width-default);
 }
 
 .btnMd {
   font-size: var(--text-label);
   letter-spacing: 0.14em;
   padding: 7px 18px;
-  border-width: var(--border-strong);
+  border-width: var(--border-width-strong);
 }
 
 .btnExpressive:hover {

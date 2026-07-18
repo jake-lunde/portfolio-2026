@@ -13,7 +13,7 @@
 /* hero */
 .hero {
   padding: 44px 0 30px;
-  border-bottom: var(--border-hairline) solid var(--border);
+  border-bottom: var(--border-width-hairline) solid var(--border);
 }
 
 .eyebrow {
@@ -70,7 +70,7 @@
 /* sections */
 .section {
   padding: 42px 0;
-  border-bottom: var(--border-hairline) solid var(--border);
+  border-bottom: var(--border-width-hairline) solid var(--border);
 }
 
 .section:last-child {
@@ -118,7 +118,7 @@
 .plate {
   background: var(--surface-inverse);
   color: #e7e1d2;
-  border: var(--border-default) solid var(--content);
+  border: var(--border-width-default) solid var(--content);
   position: relative;
   overflow: hidden;
   padding: var(--space-5);
@@ -193,7 +193,7 @@
 }
 
 .move {
-  border: var(--border-default) solid var(--content);
+  border: var(--border-width-default) solid var(--content);
   background: var(--surface);
   padding: 18px;
 }
@@ -227,7 +227,7 @@
 
 /* decide card */
 .decide {
-  border: var(--border-default) solid var(--content);
+  border: var(--border-width-default) solid var(--content);
   background: var(--surface);
   padding: 22px;
   margin-top: 26px;
@@ -251,7 +251,7 @@
   display: flex;
   gap: 14px;
   padding: 13px 0;
-  border-bottom: var(--border-hairline) solid var(--border);
+  border-bottom: var(--border-width-hairline) solid var(--border);
   align-items: baseline;
 }
 

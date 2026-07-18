@@ -20,7 +20,9 @@
   --radius-md: 8px;
   --radius-lg: 16px;
   --radius-full: 50%;
-  --border: rgba(23, 21, 13, 0.18);
+  --border-width-hairline: 1px;
+  --border-width-thin: 1.5px;
+  --border-width-thick: 2px;
   --size-micro: 8px;
   --size-caption: 9px;
   --size-label: 10px;
@@ -51,6 +53,7 @@
   --spring-flight-stiffness: 260;
   --spring-flight-damping: 26;
   --leading-body: 1.6;
+  --border: rgba(23, 21, 13, 0.18);
   --shadow-print: 4px 4px 0 rgba(23, 21, 13, 0.14);
   --shadow-print-lg: 5px 5px 0 rgba(23, 21, 13, 0.12);
   --shadow-lift: 5px 6px 0 rgba(23, 21, 13, 0.18);
@@ -61,6 +64,8 @@
   --radius-control: var(--radius-md);
   --radius-pill: var(--radius-lg);
   --radius-circle: var(--radius-full);
+  --border-width-default: var(--border-width-thin);
+  --border-width-strong: var(--border-width-thick);
   --text-micro: var(--size-micro);
   --text-caption: var(--size-caption);
   --text-label: var(--size-label);
@@ -75,12 +80,12 @@
   --accent: #2036c8;
   --accent-expressive: #f2a6c2;
   --accent-support: #2e4a38;
-  --button-border: {border.default};
   --button-padding-x: var(--space-3);
   --accent-expressive-text: var(--content);
   --accent-expressive-mark: var(--accent-expressive);
   --focus: var(--accent);
   --button-radius: var(--radius-control);
+  --button-border: var(--border-width-default);
   --button-label: var(--text-label);
 }
 

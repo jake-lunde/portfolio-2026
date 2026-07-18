@@ -6,7 +6,7 @@
 
 .form {
   padding: 18px 20px 16px;
-  border-bottom: var(--border-default) solid var(--content);
+  border-bottom: var(--border-width-default) solid var(--content);
   background: var(--surface);
 }
 
@@ -51,7 +51,7 @@
   font-size: 14px;
   color: var(--content);
   background: var(--surface-raised);
-  border: var(--border-default) solid var(--content);
+  border: var(--border-width-default) solid var(--content);
   border-radius: 0;
   padding: 8px 10px;
   resize: vertical;
@@ -83,7 +83,7 @@
   padding: 8px 18px;
   background: var(--accent);
   color: var(--surface);
-  border: var(--border-default) solid var(--content);
+  border: var(--border-width-default) solid var(--content);
 }
 
 [data-theme='dark'] .signBtn {
@@ -124,7 +124,7 @@
 
 .entry {
   padding: 13px 0;
-  border-bottom: var(--border-hairline) solid var(--border);
+  border-bottom: var(--border-width-hairline) solid var(--border);
 }
 
 .entry:last-child {

@@ -157,7 +157,7 @@
   line-height: 2;
   margin: 22px 0 0;
   padding: 16px 0 0;
-  border-top: var(--border-hairline) solid var(--border);
+  border-top: var(--border-width-hairline) solid var(--border);
   list-style: none;
 }
 
@@ -185,7 +185,7 @@
   text-transform: uppercase;
   color: var(--content-muted);
   padding-bottom: var(--space-2);
-  border-bottom: var(--border-default) solid var(--content);
+  border-bottom: var(--border-width-default) solid var(--content);
 }
 
 .projRow {
@@ -196,7 +196,7 @@
   width: 100%;
   text-align: left;
   padding: 14px 2px;
-  border-bottom: var(--border-hairline) solid var(--border);
+  border-bottom: var(--border-width-hairline) solid var(--border);
   color: var(--content);
 }
 
@@ -240,7 +240,7 @@
   font-size: var(--text-caption);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  border: var(--border-default) solid var(--content-muted);
+  border: var(--border-width-default) solid var(--content-muted);
   color: var(--content-muted);
   padding: 2px 6px;
   transform: rotate(-2deg);
@@ -280,7 +280,7 @@
   width: min(240px, 70%);
   aspect-ratio: 1;
   object-fit: cover;
-  border: var(--border-default) solid rgba(231, 225, 210, 0.4);
+  border: var(--border-width-default) solid rgba(231, 225, 210, 0.4);
 }
 
 .npWindowLabel {
@@ -340,7 +340,7 @@
   gap: 6px;
   padding: 12px 4px 10px;
   color: var(--content);
-  border: var(--border-hairline) solid transparent;
+  border: var(--border-width-hairline) solid transparent;
 }
 
 .vizIconBtn:not(:disabled):hover {
@@ -387,7 +387,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  border-bottom: var(--border-hairline) solid var(--border);
+  border-bottom: var(--border-width-hairline) solid var(--border);
   padding-bottom: var(--space-4);
 }
 
@@ -411,7 +411,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  border-bottom: var(--border-hairline) solid var(--border);
+  border-bottom: var(--border-width-hairline) solid var(--border);
   padding-bottom: var(--space-4);
 }
 
@@ -427,7 +427,7 @@
   align-items: center;
   gap: 5px;
   padding: 6px 4px;
-  border: var(--border-default) solid var(--border);
+  border: var(--border-width-default) solid var(--border);
   color: var(--content);
 }
 
@@ -444,7 +444,7 @@
   width: 100%;
   height: 30px;
   opacity: 0.5;
-  border: var(--border-hairline) solid var(--border);
+  border: var(--border-width-hairline) solid var(--border);
 }
 
 .swatchName {
@@ -457,7 +457,7 @@
 
 .segmented {
   display: flex;
-  border: var(--border-default) solid var(--content);
+  border: var(--border-width-default) solid var(--content);
 }
 
 .segBtn {
