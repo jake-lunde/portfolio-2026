@@ -9,6 +9,8 @@
       "core/radius": "enabled",
       "core/border": "enabled",
       "core/size": "enabled",
+      "core/weight": "enabled",
+      "core/tracking": "enabled",
       "core/font": "enabled",
       "core/layout": "enabled",
       "core/motion": "enabled",

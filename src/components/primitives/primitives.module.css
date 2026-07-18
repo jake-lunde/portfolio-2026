@@ -24,7 +24,7 @@
 
 .btn {
   font-family: var(--mono);
-  font-weight: 700;
+  font-weight: var(--button-weight);
   text-transform: uppercase;
   border-radius: var(--button-radius);
   background: var(--surface);
@@ -40,22 +40,22 @@
 }
 
 .btnSm {
-  font-size: var(--text-caption);
-  letter-spacing: 0.12em;
-  padding: 6px var(--space-3);
-  border-width: var(--border-width-default);
+  font-size: var(--button-sm-font-size);
+  letter-spacing: var(--button-sm-tracking);
+  padding: var(--button-sm-padding-y) var(--button-sm-padding-x);
+  border-width: var(--button-sm-border);
 }
 
 .btnMd {
-  font-size: var(--text-label);
-  letter-spacing: 0.14em;
-  padding: 7px 18px;
-  border-width: var(--border-width-strong);
+  font-size: var(--button-md-font-size);
+  letter-spacing: var(--button-md-tracking);
+  padding: var(--button-md-padding-y) var(--button-md-padding-x);
+  border-width: var(--button-md-border);
 }
 
 .btnExpressive:hover {
   background: var(--accent-expressive);
-  color: #17150d;
+  color: var(--on-accent-expressive);
 }
 
 .btnSystem:hover {

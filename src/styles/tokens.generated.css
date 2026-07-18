@@ -28,6 +28,19 @@
   --size-label: 10px;
   --size-ui: 11px;
   --size-body: 17px;
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-black: 800;
+  --tracking-10: 0.1em;
+  --tracking-12: 0.12em;
+  --tracking-14: 0.14em;
+  --tracking-16: 0.16em;
+  --tracking-18: 0.18em;
+  --tracking-20: 0.2em;
+  --tracking-02: 0.02em;
+  --tracking-06: 0.06em;
+  --tracking-08: 0.08em;
   --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   --mono: var(--font-mono), 'SF Mono', ui-monospace, Menlo, monospace;
   --cjk: var(--font-cjk), sans-serif;
@@ -61,6 +74,9 @@
   --shadow-sticky-lift: 3px 5px 0 rgba(23, 21, 13, 0.16);
   --shadow-pin: 0 2px 2px rgba(23, 21, 13, 0.3);
   --shadow-modal: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --button-sm-padding-y: 6px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. Snap to 8px (8px) when a deliberate visual change is approved. */
+  --button-md-padding-x: 18px; /** OFF-GRID literal. Snap to 16px (16px) or 20px (20px) when approved. */
+  --button-md-padding-y: 7px; /** OFF-GRID literal. Snap to 8px (8px) when approved. */
   --radius-control: var(--radius-md);
   --radius-pill: var(--radius-lg);
   --radius-circle: var(--radius-full);
@@ -80,13 +96,19 @@
   --accent: #2036c8;
   --accent-expressive: #f2a6c2;
   --accent-support: #2e4a38;
-  --button-padding-x: var(--space-3);
+  --on-accent-expressive: #17150d;
+  --button-weight: var(--weight-bold);
+  --button-sm-tracking: var(--tracking-12);
+  --button-sm-padding-x: var(--space-3);
+  --button-md-tracking: var(--tracking-14);
   --accent-expressive-text: var(--content);
   --accent-expressive-mark: var(--accent-expressive);
   --focus: var(--accent);
   --button-radius: var(--radius-control);
-  --button-border: var(--border-width-default);
-  --button-label: var(--text-label);
+  --button-sm-font-size: var(--text-caption);
+  --button-sm-border: var(--border-width-default);
+  --button-md-font-size: var(--text-label);
+  --button-md-border: var(--border-width-strong);
 }
 
 /**

@@ -24,9 +24,10 @@ export const System: Story = { args: { tone: 'system', children: 'Open file' } }
 
 export const Small: Story = { args: { size: 'sm', children: '✓ Done' } }
 
-/* Every variant — and every one of them reads --button-radius, --border-width-default/
-   --border-width-strong, and --text-chrome-* from the token pipeline. Edit
-   radius/btn in Figma, push, and this whole board changes shape. */
+/* Every variant — and every one of them reads --button-radius, --button-weight,
+   and the per-size --button-{sm,md}-* tokens (font-size, tracking, padding,
+   border) from the token pipeline. Edit button/radius in Figma, push, and this
+   whole board changes shape. */
 export const TokenBoard: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>

@@ -5,6 +5,8 @@
     "core/radius",
     "core/border",
     "core/size",
+    "core/weight",
+    "core/tracking",
     "core/font",
     "core/layout",
     "core/motion",

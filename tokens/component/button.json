@@ -4,17 +4,53 @@
       "$value": "{radius.control}",
       "$type": "dimension"
     },
-    "border": {
-      "$value": "{border-width.default}",
-      "$type": "dimension"
+    "weight": {
+      "$value": "{weight.bold}"
     },
-    "label": {
-      "$value": "{text.label}",
-      "$type": "dimension"
+    "sm": {
+      "font-size": {
+        "$value": "{text.caption}",
+        "$type": "dimension"
+      },
+      "border": {
+        "$value": "{border-width.default}",
+        "$type": "dimension"
+      },
+      "tracking": {
+        "$value": "{tracking.12}"
+      },
+      "padding-x": {
+        "$value": "{space.3}",
+        "$type": "dimension"
+      },
+      "padding-y": {
+        "$value": "6px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. Snap to {space.2} (8px) when a deliberate visual change is approved."
+      }
     },
-    "padding-x": {
-      "$value": "{space.3}",
-      "$type": "dimension"
+    "md": {
+      "font-size": {
+        "$value": "{text.label}",
+        "$type": "dimension"
+      },
+      "border": {
+        "$value": "{border-width.strong}",
+        "$type": "dimension"
+      },
+      "tracking": {
+        "$value": "{tracking.14}"
+      },
+      "padding-x": {
+        "$value": "18px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal. Snap to {space.4} (16px) or {space.5} (20px) when approved."
+      },
+      "padding-y": {
+        "$value": "7px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal. Snap to {space.2} (8px) when approved."
+      }
     }
   }
 }

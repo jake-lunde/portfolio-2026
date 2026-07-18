@@ -47,6 +47,10 @@
     "$value": "{accent-expressive}",
     "$type": "color"
   },
+  "on-accent-expressive": {
+    "$value": "{color.ink.base}",
+    "$type": "color"
+  },
   "focus": {
     "$value": "{accent}",
     "$type": "color"
