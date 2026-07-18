@@ -755,6 +755,52 @@ VISUAL REGRESSION that had been shipped to lunde.co.
   ONE variant axis (size sm|md), NOT tone x size — .btnSystem/.btnExpressive
   define only :hover rules so a tone axis emits two identical frames.
 
+### 2026-07-18 (session 15b — FIGMA BUTTON MIRROR SHIPPED, A7.4 done)
+Jake pulled + deleted orphans; verified clean (component collection = exactly
+the 12 expected vars, semantic has on-accent-expressive + border-width/*, core
+has weight/* + tracking/*, zero orphans). Then built the mirror per the new
+/mirror-to-figma skill.
+- **BUILT:** component set `Button` (node 201017:7) on page "🧬 design system"
+  inside section 201012:2 "components". Variants `size=sm` (default, matches
+  the TSX default) and `size=md`. TEXT property named `children` — the React
+  prop name EXACTLY, per the skill's naming rule, so Code Connect mapping
+  stays trivial.
+- **ONE variant axis, not two** — the skill's worked example proved out in
+  practice: `tone` is hover-only (.btnSystem/.btnExpressive define only :hover),
+  so a tone axis would have emitted two identical frames. tone is documented
+  in the component description instead, along with the hover token pairs.
+- **PARITY GATE PASSED, allMatch:true on BOTH variants.** Every binding
+  resolves through the full 3-tier chain to exactly the computed CSS value:
+    button/radius -> radius/control -> radius/md = 8
+    button/sm/padding-x -> spacing/space/3 = 12 ; sm/padding-y = 6
+    button/sm/border -> border-width/default -> border/border-width/thin = 1.5
+    button/sm/font-size -> text/caption -> size/caption = 9
+    (md: 18 / 7 / border-width/strong->thick = 2 / text/label->size/label = 10)
+    fill surface->color/paper/base #e7e1d2 ; stroke+text content->ink/base
+- **UNBOUND (expected, documented in the component description):**
+  letter-spacing (token is a STRING em value; set static 12%/14%) and
+  font-weight/family (Figma binds INSTALLED fonts, not CSS stacks; set Geist
+  Mono Bold). These stay code-authoritative — exactly the non-binding cases
+  the skill predicted.
+- **TWO PLUGIN-API GOTCHAS worth remembering** (both cost a retry):
+  1. `combineAsVariants` throws "Grouped nodes must be in the same page as the
+     parent" — newly created components land on the DEFAULT first page, so
+     `page.appendChild(node)` them onto the target page BEFORE combining.
+  2. Verifying bindings: `setBoundVariable('strokeWeight', v)` EXPANDS into
+     `strokeTopWeight/Bottom/Left/Right`, and text `fontSize` binds as an
+     ARRAY `[{VARIABLE_ALIAS}]` (per-segment). Reading `boundVariables
+     .strokeWeight` / `.fontSize.id` returns undefined and makes a correct
+     build look broken. Read the per-side fields and array[0].
+- COSMETIC NIT (not fixed): core emits `border/border-width/thin` — doubled
+  prefix, because coreVarName prefixes with the SET's last segment ("border"
+  from core/border.json) and the group is now "border-width". Renaming the
+  file tokens/core/border.json -> border-width.json would yield a clean
+  `border-width/thin`. Harmless; would require a re-pull + orphan delete.
+NEXT: (a) Jake's call on snapping the 3 off-grid button paddings (6/18/7) to
+the base-8 grid — its own PR, deliberate visual change. (b) The DS-OPS §3.5.2
+token-allowlist CI lint is now clearly worth BUILDING here — it would have
+caught the border regression. (c) A6 Medieval remains the next big phase.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
