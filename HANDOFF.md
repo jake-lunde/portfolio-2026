@@ -801,6 +801,53 @@ the base-8 grid — its own PR, deliberate visual change. (b) The DS-OPS §3.5.2
 token-allowlist CI lint is now clearly worth BUILDING here — it would have
 caught the border regression. (c) A6 Medieval remains the next big phase.
 
+### 2026-07-18 (Fable, session 16 — MEDIEVAL SHIPPED, commit 6eede3e)
+THE SECOND SKIN IS LIVE on lunde.co. Settings → Skin → Medieval (or
+localStorage lunde-skin). Task source was Jake's NOTION board (Medieval
+Theme project — now the task tracker of record; Notion MCP connector is
+available; board statuses updated to Done with summaries). Jake's comment
+granted creative latitude; his TYPE PICKS overrode mine: MedievalSharp
+display / Eagle Lake body / Jacquard 12 mono (pixel blackletter), loaded in
+layout.tsx + preview.tsx as --font-medieval-*; the medieval token set
+points --display/--sans/--mono at them.
+SHIPPED: semantic/medieval.json (parchment #e9dfc5 / gall #241a10 /
+vermilion #9e2b1e accent / gilt #b8860b expressive-marks-only (2.45:1 —
+routed through accent-expressive-text→content, same discipline as pink) /
+lapis #2f4c7e support; brown shadow suite) + core primitives; scribe stamp
+public/mark-medieval.png (binarized alpha, 27KB, per-skin mask swap in
+programs.module.css); illuminated INCIPIT drop cap on README (hits the
+eyebrow p — kept deliberately, reads as rubricated incipit); quill cursor
+(globals.css, nib hotspot 2,22); NYQUIST-1: data-skin wiring (store skin +
+pre-paint + MenuBar toggle classic-only + Settings picker w/ live token
+tiles + underwater SOON), avatars per-skin (crew.ts avatarFor(agent,skin);
+medieval cast: fable=el-16 radiant eye, hertz=el-15, nyquist=el-37,
+fourier=el-52 orbit sun, doppler=el-32 twin crescents; CommandCenter dup
+map DELETED), gateConfig.ts (classic HOWDY byte-identical; medieval QUILL
+'THE SCRIPTORIUM IS SEALED', letters rebuild on skin change), diaper
+wallpaper tile; NYQUIST-2: puzzlesFor(skin) w/ 4 PLATE I-IV cover-fit
+plates (public/puzzle/medieval/), filtersFor(skin) w/ ILLUMINATED
+(5-color posterize + edge ink) + WOODBLOCK (contrast-stretch threshold +
+midtone hatch) both time-static, voicesFor/playersFor(skin) w/ CLAV
+(detuned squares+LP sweep) FLUTE (sine+vibrato+breath) BELL (FM, index
+ramp scaled f*4) MONK (saw through 500/800Hz formants), reshapeGrid guards
+saved slots across kit sizes; window ornament ([data-skin] 2px frame, 3px
+double titlebar rule, ::before/::after vermilion corner Ls).
+GOTCHAS: (1) GitHub combined commit status stays 'pending' while Chromatic
+runs — Vercel can be READY; verify via Vercel MCP (team
+team_mBCpEYQWNE8tOhUxd1Zcjz9b, prj_vG3DsqZlQAugYnFY6uDIV7vJjsgj) + a
+content marker curl, expect ~1min CDN lag. (2) Notion page share ≠ database
+share (board needed the connector). (3) Jacquard 12 at ≤10px mono sizes is
+borderline legible — Jake should eyeball; remedy = medieval text-scale
+overrides via semantic/scale or a less ornate mono fallback for micro
+sizes.
+NEXT (scoped on Notion): dataviz hand-drawn pass (feTurbulence+
+feDisplacementMap roughen filter on viz SVGs under [data-skin='medieval']
+— approach noted on the task page, inspo node 201018-6); language as a
+per-skin string-table modifier (answered YES on the task page); Storybook
+toolbar could add the medieval skin option if not already (preview.tsx has
+it from A3 — verify labels); Chromatic will baseline the medieval
+snapshots on next run.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
