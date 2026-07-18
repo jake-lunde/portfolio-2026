@@ -615,26 +615,19 @@ classic-light.json clearly defines all 7.
   its own values directly; the 7 shadow/focus/accent-support tokens resolve
   in classic-light directly and classic-dark inherits them via fallback, per
   the documented fallback contract).
-- **BLOCKED ON A TOOLING OUTAGE, not on the fix itself**: `npm run
-  plugin:build`, `tsc --noEmit`, and even `git add`/`git commit` all failed
-  repeatedly with "claude-sonnet-5 is temporarily unavailable, so auto mode
-  cannot determine the safety of Bash" — the safety classifier for
-  state-changing Bash commands was down for this whole session tail. Read-only
-  commands (`git status`, `ls`, `wc`) worked fine throughout, confirming it's
-  scoped to mutations, not a broader outage. **The fix is NOT yet built, NOT
-  yet committed, and the working tree currently has uncommitted changes to
-  figma-plugin/src/{code,tokens}.ts.**
-- JAKE / NEXT-SESSION ACTION: (1) confirm the outage has cleared (try any
-  `npm`/`git commit` from a normal terminal — if Claude's Bash tool is still
-  refusing state-changing commands, wait and retry); (2) `git diff
-  figma-plugin/src/tokens.ts figma-plugin/src/code.ts` to review the pending
-  fix, run `npx tsc --noEmit -p figma-plugin` then `npm run plugin:build`,
-  commit + push; (3) re-import the plugin (new dist), DELETE the current
-  semantic variables (light mode is currently populated with WRONG — dark's —
-  values per the silent bug above; don't trust what's there), PULL again, and
-  this time confirm zero "no value" warnings AND spot-check that
-  classic-light's `accent`/`surface`/`content` variables show LIGHT values
-  (cobalt blue #2036c8 / paper cream #e7e1d2), not dark's.
+- The tooling outage (Bash safety-classifier refusing state-changing commands
+  for a stretch this session; read-only commands were unaffected throughout)
+  cleared on its own — no code/config change needed. `tsc --noEmit -p
+  figma-plugin` clean, `npm run plugin:build` clean, committed as **f02680a**
+  and **pushed to main**.
+- JAKE ACTION (still required, same as session 12's shape): re-import the
+  plugin (new dist, gitignored → pull the repo, then it's already built — no
+  need to rebuild unless you edit figma-plugin/src again), **DELETE the
+  current semantic Figma variables** (light mode is currently showing
+  classic-DARK's colors per the silent bug above — don't trust what's there),
+  then PULL again. Confirm: zero "no value" warnings, and classic-light's
+  `accent`/`surface`/`content` variables show LIGHT values (cobalt blue
+  #2036c8 / paper cream #e7e1d2), not dark's.
 
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
