@@ -159,6 +159,45 @@ code lives, in CI:
 mirror; value/token drift → stylelint + allowlist + Chromatic. Figma is never
 the enforcement layer; CI is.
 
+## 3.6 Automating the mirror — the three tiers
+
+"Who pulls the trigger on mirroring a component into Figma?" has three
+answers. Know which tier you're on; most teams over-build straight to 3.
+
+First, the constraint that shapes all of them: **the only write path to the
+Figma canvas is the Plugin API.** The REST API reads document structure and
+(Enterprise) reads/writes *variables*, but it cannot create component nodes.
+And the hard part was never the writing — it's the *translation* (anatomy →
+auto-layout, which props become variant axes, which dimensions bind to which
+variable). That translation is semantic judgment, which is why every tier
+below still has an agent or a human in it. No off-the-shelf tool does this:
+Code Connect only *links* existing components, Figma's Storybook plugin
+embeds a live preview (not native layers), and DOM importers like
+html.to.design produce flat, unbound layers needing full cleanup.
+
+- **Tier 1 — On demand.** A designer/engineer asks an agent (Figma MCP) to
+  mirror a component. Right answer when structure changes monthly. Don't
+  automate a monthly event.
+- **Tier 2 — A codified command.** The friction usually isn't *who* triggers
+  it, it's re-specifying the procedure each time. Encode it as a repo
+  skill/slash command (ours: `.claude/skills/mirror-to-figma`) so any agent
+  runs the identical procedure — pre-flight tokenization audit → prop→variant
+  mapping → atoms-first build → bind → verify parity — from one invocation.
+  The *procedure* is automated; the *judgment* stays with the agent. **This
+  is the sweet spot for most teams and the cheapest big win.**
+- **Tier 3 — CI-triggered agent.** The Code Connect coverage check fails on a
+  newly exported component with no `.figma.tsx`; that failure triggers a
+  headless agent run (Claude Agent SDK + Figma MCP) that **drafts** the
+  mirror on a scratch page and opens it for a designer to accept. Worth it
+  only at real scale — many engineers, weekly component churn, mirroring
+  backlog that a human trigger can't keep up with.
+
+**The Tier 3 guardrail, which is the whole ballgame:** the agent *drafts*;
+a human *accepts*. Never let automation write directly into the published
+library. Auto-merged generated structure is exactly how designers' files get
+clobbered and how the team learns to distrust the pipeline. Draft to a
+staging page, diff it, promote deliberately.
+
 ## 4. Governance that scales past one person
 
 - **Token PRs get a design reviewer + an eng reviewer** — the eng reviews

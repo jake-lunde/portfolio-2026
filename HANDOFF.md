@@ -629,6 +629,56 @@ classic-light.json clearly defines all 7.
   `accent`/`surface`/`content` variables show LIGHT values (cobalt blue
   #2036c8 / paper cream #e7e1d2), not dark's.
 
+### 2026-07-18 (session 14 — /mirror-to-figma skill + DS-OPS tier 3)
+Jake asked how component mirroring gets automated ("plugin? agent? or just
+command you?"). Answer given + codified: the ONLY write path to the Figma
+canvas is the Plugin API (REST can't create nodes — it reads structure and,
+on Enterprise, r/w variables); the hard part is the semantic TRANSLATION
+(props→variant axes, CSS→bindings), which is why an agent stays in the loop
+at every tier. No off-the-shelf tool does it (Code Connect only LINKS;
+Figma's Storybook plugin embeds a preview; html.to.design gives flat unbound
+layers).
+- NEW SKILL `.claude/skills/mirror-to-figma/SKILL.md` (first skill in this
+  repo — `.claude/skills/` created). Encodes: the one-way-structure law;
+  Step 0 pre-flight TOKENIZATION AUDIT (you cannot mirror to parity what
+  isn't tokenized — stop and report rather than fake a binding); Step 1 the
+  props→Figma-property mapping table Jake explicitly asked for (enum→VARIANT,
+  style-changing bool→VARIANT, layer-toggle bool→BOOLEAN, text→TEXT,
+  slot→INSTANCE_SWAP, handlers/aria/rest→never); EXACT case-sensitive name
+  matching (prop `size` → property `size`, values `sm`/`md`) so Code Connect
+  mapping stays trivial and drift is mechanically detectable; defaults come
+  from the TSX destructuring NOT story args (they differ on Button!);
+  pseudo-states are not props; cartesian-product combinatorics budget
+  (~20-30 frames); atoms-first bottom-up build w/ instances not copies;
+  binding table; parity verified by computed-value comparison NOT eyeballing.
+- WORKED EXAMPLE in the skill = Button, chosen because it teaches judgment:
+  naive mapping gives tone×size = 4 frames, but `.btnSystem`/`.btnExpressive`
+  define ONLY `:hover` rules — at rest `tone` is visually identical, so a
+  tone axis would produce two IDENTICAL frames. Correct mirror: `size` is the
+  only real variant axis. "Mirror what the CSS actually does, not what the
+  prop signature implies."
+- DS-OPS.md §3.6 added (brief, per Jake): the three tiers — T1 on-demand,
+  T2 codified command (**the sweet spot**; the friction was never WHO
+  triggers it but re-specifying the procedure), T3 CI-triggered headless
+  agent off a Code Connect coverage-check failure. THE T3 GUARDRAIL: the
+  agent DRAFTS to a staging page, a human ACCEPTS — never auto-write into
+  the published library, that's how designers' files get clobbered.
+- PRE-FLIGHT AUDIT FINDINGS on Button (spawned as task_c35c5b5d, NOT fixed
+  here): `.btnMd` padding hardcoded `7px 18px` (and the component token
+  `button/padding-x` exists but NOTHING consumes it — .btnSm uses --space-3
+  directly); `font-weight: 700` + `letter-spacing` hardcoded (no typography
+  weight/tracking tokens exist at all); `.btnExpressive:hover` has raw hex
+  `#17150d` (a live DS-OPS §3.5 Scenario B violation); Button.stories.tsx
+  comment still says `--text-chrome-*` (stale post-A8-rename).
+NEXT: A7.4 the actual Figma Button mirror is now UNBLOCKED procedurally but
+should wait on task_c35c5b5d, else the mirror bakes in unbound drift. Jake
+also asked about typography tokens — gap confirmed real (sizes exist via
+core/size + semantic/scale text.*; weight/tracking/leading-scale/type-ROLE
+composites do NOT). Figma caveat to remember: font-size + line-height bind
+fine (FLOAT), font-family/weight do NOT (Figma binds installed fonts, not
+CSS stacks like `var(--font-mono), 'SF Mono'`) — so those stay
+code-authoritative.
+
 ### Newly added by Jake in the doc (2026-07-08 diff — not yet scoped)
 - **Gallery Wall** — "record of what people are doing on the site." Pairs with
   "more logging when users use my site." A privacy-respecting activity feed
