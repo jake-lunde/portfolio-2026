@@ -1,6 +1,6 @@
 import type { Preview, Decorator } from '@storybook/react'
 import { useEffect } from 'react'
-import { Geist, Geist_Mono, Noto_Sans_JP } from 'next/font/google'
+import { Geist, Geist_Mono, Eagle_Lake, Jacquard_12, MedievalSharp, Noto_Sans_JP } from 'next/font/google'
 import localFont from 'next/font/local'
 
 /* Mirror src/app/layout.tsx so components in the catalog set in the real
@@ -24,8 +24,29 @@ const cjk = Noto_Sans_JP({
   display: 'swap',
   preload: false,
 })
+const medievalDisplay = MedievalSharp({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-medieval-display',
+  display: 'swap',
+  preload: false,
+})
+const medievalBody = Eagle_Lake({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-medieval-body',
+  display: 'swap',
+  preload: false,
+})
+const medievalMono = Jacquard_12({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-medieval-mono',
+  display: 'swap',
+  preload: false,
+})
 
-const fontVars = `${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable}`
+const fontVars = `${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable} ${medievalDisplay.variable} ${medievalBody.variable} ${medievalMono.variable}`
 
 /* Plain-CSS fallbacks so the catalog still renders if next/font's Google fetch
    is skipped (CI / offline). These feed the generated tokens, which reference
@@ -36,6 +57,9 @@ const fontFallback = `
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --font-pixel: 'Courier New', ui-monospace, monospace;
   --font-cjk: ui-sans-serif, system-ui, sans-serif;
+  --font-medieval-display: 'Luminari', 'Palatino', serif;
+  --font-medieval-body: 'Palatino', Georgia, serif;
+  --font-medieval-mono: 'Courier New', ui-monospace, monospace;
 }
 .sb-show-main { background: var(--surface); color: var(--content); }
 /* globals.css locks the viewport (body{overflow:hidden}) because the OS shell

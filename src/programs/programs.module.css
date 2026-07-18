@@ -118,6 +118,15 @@
   filter: drop-shadow(0 0 6px rgba(242, 166, 194, 0.35));
 }
 
+/* medieval: the scribe engraving replaces the OMNIA·DESIGNA mark — same
+   mask treatment, so it prints in whatever the skin's accent is */
+:global([data-skin='medieval']) .stampMark {
+  aspect-ratio: 472 / 640;
+  -webkit-mask-image: url('/mark-medieval.png');
+  mask-image: url('/mark-medieval.png');
+  filter: none;
+}
+
 @media (max-width: 480px) {
   .stampPlate {
     width: 40%;
@@ -148,6 +157,17 @@
   line-height: 1.62;
   max-width: 56ch;
   margin: 0 0 16px;
+}
+
+/* medieval: the README opens with an illuminated initial — rubricated
+   drop cap in the blackletter, the manuscript's first move */
+:global([data-skin='medieval']) .about > p:first-of-type::first-letter {
+  font-family: var(--display);
+  font-size: 3.4em;
+  line-height: 0.78;
+  float: left;
+  padding: 0.06em 0.12em 0 0;
+  color: var(--accent);
 }
 
 .aboutList {
@@ -437,6 +457,30 @@
 
 .swatch[aria-pressed='true'] .swatchName {
   color: var(--accent);
+}
+
+.swatch:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.skinTile {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  width: 100%;
+  height: 30px;
+  padding: 4px;
+  background: var(--surface);
+  border: var(--border-width-hairline) solid var(--border);
+}
+
+.skinDot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
 }
 
 .swatchTile {

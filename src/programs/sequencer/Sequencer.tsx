@@ -3,16 +3,25 @@
 import { useEffect, useRef, useState } from 'react'
 import { metric } from '@/lib/metrics'
 import { sfx } from '@/lib/sound'
+import { useSettings } from '@/store/settings'
 import styles from './sequencer.module.css'
 
 /* SEQ-16 — a pocket step sequencer in the Teenage Engineering spirit,
-   erring hard on the side of simplicity: 16 steps × 3 voices, all
-   synthesized (kick = sine drop, snare = filtered noise, blip = square
-   wave at a selectable note), BPM stepper, four local save slots.
-   Tunes live in localStorage — your machine, your mixtape. */
+   erring hard on the side of simplicity: 16 steps × N voices, all
+   synthesized. Classic kit: kick = sine drop, snare = filtered noise,
+   blip = square wave at a selectable note. Medieval kit swaps in
+   CLAV/FLUTE/BELL/MONK (see playersFor below). BPM stepper, four local
+   save slots. Tunes live in localStorage — your machine, your mixtape. */
 
 const STEPS = 16
-const VOICES = ['KICK', 'SNARE', 'BLIP'] as const
+const CLASSIC_VOICES = ['KICK', 'SNARE', 'BLIP'] as const
+const MEDIEVAL_VOICES = ['CLAV', 'FLUTE', 'BELL', 'MONK'] as const
+
+function voicesFor(skin: string): readonly string[] {
+  if (skin === 'medieval') return MEDIEVAL_VOICES
+  return CLASSIC_VOICES
+}
+
 const NOTES = [
   { label: 'C4', hz: 261.63 },
   { label: 'E4', hz: 329.63 },
@@ -24,7 +33,13 @@ const SLOTS = ['A', 'B', 'C', 'D'] as const
 const STORE_KEY = 'lunde-seq-slots'
 
 type Grid = boolean[][]
-const emptyGrid = (): Grid => VOICES.map(() => Array(STEPS).fill(false))
+const emptyGrid = (voices: readonly string[]): Grid => voices.map(() => Array(STEPS).fill(false))
+
+// save slots are shared across skins/kits; if a slot was saved under a
+// different-sized voice pack, reshape it to the current kit rather than
+// index out of bounds (a bare `grid[v]` on a missing row would crash)
+const reshapeGrid = (g: Grid, count: number): Grid =>
+  Array.from({ length: count }, (_, i) => g[i] ?? Array(STEPS).fill(false))
 
 let ctx: AudioContext | null = null
 const audio = () => {
@@ -75,6 +90,147 @@ function playBlip(ac: AudioContext, t: number, hz: number) {
   osc.stop(t + 0.14)
 }
 
+/* ---- medieval voice pack ---- */
+
+// CLAV — plucked: two detuned squares through a lowpass sweeping down,
+// instant attack, fast exponential decay
+function playClav(ac: AudioContext, t: number, hz: number) {
+  const dur = 0.15
+  const filt = ac.createBiquadFilter()
+  filt.type = 'lowpass'
+  filt.frequency.setValueAtTime(3000, t)
+  filt.frequency.exponentialRampToValueAtTime(800, t + dur)
+  const g = ac.createGain()
+  g.gain.setValueAtTime(0.3, t)
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur)
+  filt.connect(g).connect(ac.destination)
+  ;[hz, hz * 1.005].forEach((f) => {
+    const osc = ac.createOscillator()
+    osc.type = 'square'
+    osc.frequency.value = f
+    osc.connect(filt)
+    osc.start(t)
+    osc.stop(t + dur + 0.02)
+  })
+}
+
+// FLUTE — sine + 5Hz vibrato (±6 cents via detune), soft attack/decay,
+// plus a breathy bandpassed-noise layer
+function playFlute(ac: AudioContext, t: number, hz: number) {
+  const dur = 0.4
+  const osc = ac.createOscillator()
+  osc.type = 'sine'
+  osc.frequency.value = hz
+  const lfo = ac.createOscillator()
+  lfo.frequency.value = 5
+  const lfoGain = ac.createGain()
+  lfoGain.gain.value = 6 // cents
+  lfo.connect(lfoGain).connect(osc.detune)
+  const g = ac.createGain()
+  g.gain.setValueAtTime(0.0001, t)
+  g.gain.linearRampToValueAtTime(0.22, t + 0.04)
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.04 + dur)
+  osc.connect(g).connect(ac.destination)
+  lfo.start(t)
+  osc.start(t)
+  lfo.stop(t + dur + 0.1)
+  osc.stop(t + dur + 0.1)
+
+  const len = dur + 0.05
+  const buf = ac.createBuffer(1, ac.sampleRate * len, ac.sampleRate)
+  const d = buf.getChannelData(0)
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1
+  const src = ac.createBufferSource()
+  src.buffer = buf
+  const bp = ac.createBiquadFilter()
+  bp.type = 'bandpass'
+  bp.frequency.value = hz * 2
+  bp.Q.value = 1.2
+  const ng = ac.createGain()
+  ng.gain.setValueAtTime(0.08, t)
+  ng.gain.exponentialRampToValueAtTime(0.001, t + len)
+  src.connect(bp).connect(ng).connect(ac.destination)
+  src.start(t)
+}
+
+// BELL — 2-operator FM: modulator at f*2.76 with a decaying index (in Hz
+// deviation, scaled ~f*4) driving the carrier's frequency
+function playBell(ac: AudioContext, t: number, hz: number) {
+  const dur = 1.2
+  const carrier = ac.createOscillator()
+  carrier.type = 'sine'
+  carrier.frequency.value = hz
+  const modulator = ac.createOscillator()
+  modulator.type = 'sine'
+  modulator.frequency.value = hz * 2.76
+  const deviation = hz * 4
+  const modGain = ac.createGain()
+  modGain.gain.setValueAtTime(8 * deviation, t)
+  modGain.gain.exponentialRampToValueAtTime(0.01 * deviation, t + 0.8)
+  modulator.connect(modGain).connect(carrier.frequency)
+  const g = ac.createGain()
+  g.gain.setValueAtTime(0.3, t)
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur)
+  carrier.connect(g).connect(ac.destination)
+  modulator.start(t)
+  carrier.start(t)
+  modulator.stop(t + dur + 0.05)
+  carrier.stop(t + dur + 0.05)
+}
+
+// MONK — bass drone: sawtooth an octave down through two parallel "oo"
+// bandpass formants, sustained for the step length then released
+function playMonk(ac: AudioContext, t: number, hz: number, stepDur: number) {
+  const osc = ac.createOscillator()
+  osc.type = 'sawtooth'
+  osc.frequency.value = hz / 2
+  const bp1 = ac.createBiquadFilter()
+  bp1.type = 'bandpass'
+  bp1.frequency.value = 500
+  bp1.Q.value = 5
+  const bp2 = ac.createBiquadFilter()
+  bp2.type = 'bandpass'
+  bp2.frequency.value = 800
+  bp2.Q.value = 5
+  const g1 = ac.createGain()
+  g1.gain.value = 0.5
+  const g2 = ac.createGain()
+  g2.gain.value = 0.5
+  const g = ac.createGain()
+  const attackEnd = t + 0.1
+  const sustainEnd = Math.max(attackEnd + 0.01, t + stepDur)
+  const releaseEnd = sustainEnd + 0.5
+  g.gain.setValueAtTime(0.0001, t)
+  g.gain.linearRampToValueAtTime(0.22, attackEnd)
+  g.gain.setValueAtTime(0.22, sustainEnd)
+  g.gain.exponentialRampToValueAtTime(0.001, releaseEnd)
+  osc.connect(bp1).connect(g1).connect(g)
+  osc.connect(bp2).connect(g2).connect(g)
+  g.connect(ac.destination)
+  osc.start(t)
+  osc.stop(releaseEnd + 0.05)
+}
+
+type VoicePlayer = (ac: AudioContext, t: number, hz: number, stepDur: number) => void
+
+const CLASSIC_PLAYERS: VoicePlayer[] = [
+  (ac, t) => playKick(ac, t),
+  (ac, t) => playSnare(ac, t),
+  (ac, t, hz) => playBlip(ac, t, hz),
+]
+
+const MEDIEVAL_PLAYERS: VoicePlayer[] = [
+  (ac, t, hz) => playClav(ac, t, hz),
+  (ac, t, hz) => playFlute(ac, t, hz),
+  (ac, t, hz) => playBell(ac, t, hz),
+  (ac, t, hz, stepDur) => playMonk(ac, t, hz, stepDur),
+]
+
+function playersFor(skin: string): VoicePlayer[] {
+  if (skin === 'medieval') return MEDIEVAL_PLAYERS
+  return CLASSIC_PLAYERS
+}
+
 const readSlots = (): Record<string, { bpm: number; grid: Grid; note: number }> => {
   try {
     return JSON.parse(localStorage.getItem(STORE_KEY) ?? '{}')
@@ -84,7 +240,9 @@ const readSlots = (): Record<string, { bpm: number; grid: Grid; note: number }> 
 }
 
 export default function Sequencer() {
-  const [grid, setGrid] = useState<Grid>(emptyGrid)
+  const skin = useSettings((s) => s.skin)
+  const voices = voicesFor(skin)
+  const [grid, setGrid] = useState<Grid>(() => emptyGrid(voicesFor(skin)))
   const [bpm, setBpm] = useState(112)
   const [note, setNote] = useState(4)
   const [playing, setPlaying] = useState(false)
@@ -99,8 +257,21 @@ export default function Sequencer() {
   const bpmRef = useRef(bpm)
   bpmRef.current = bpm
   const stepRef = useRef(0)
+  const playersRef = useRef(playersFor(skin))
+  playersRef.current = playersFor(skin)
+  const prevSkin = useRef(skin)
 
   useEffect(() => setSlots(readSlots()), [])
+
+  // switching skins swaps the whole kit (3 rows ↔ 4 rows) — clear the
+  // pattern rather than orphan rows that no longer have a matching voice
+  useEffect(() => {
+    if (prevSkin.current !== skin) {
+      prevSkin.current = skin
+      setPlaying(false)
+      setGrid(emptyGrid(voicesFor(skin)))
+    }
+  }, [skin])
 
   // the clock: one 16th per tick, scheduled slightly ahead
   useEffect(() => {
@@ -117,12 +288,15 @@ export default function Sequencer() {
       const s = stepRef.current % STEPS
       const t = ac.currentTime + 0.03
       const g = gridRef.current
-      if (g[0][s]) playKick(ac, t)
-      if (g[1][s]) playSnare(ac, t)
-      if (g[2][s]) playBlip(ac, t, NOTES[noteRef.current].hz)
+      const hz = NOTES[noteRef.current].hz
+      const stepDur = 60 / bpmRef.current / 4
+      const players = playersRef.current
+      players.forEach((play, v) => {
+        if (g[v]?.[s]) play(ac, t, hz, stepDur)
+      })
       setStep(s)
       stepRef.current++
-      timer = setTimeout(tick, (60 / bpmRef.current / 4) * 1000)
+      timer = setTimeout(tick, stepDur * 1000)
     }
     let timer = setTimeout(tick, 0)
     return () => {
@@ -147,7 +321,7 @@ export default function Sequencer() {
       sfx.open()
       metric('seq_save')
     } else if (all[slot]) {
-      setGrid(all[slot].grid)
+      setGrid(reshapeGrid(all[slot].grid, voices.length))
       setBpm(all[slot].bpm)
       setNote(all[slot].note ?? 4)
       sfx.tap()
@@ -158,15 +332,15 @@ export default function Sequencer() {
     <div className={styles.seq}>
       <div className={styles.head}>
         <span className={styles.brand}>SEQ-16</span>
-        <span className={styles.brandSub}>POCKET SEQUENCER · 3 VOICES · {STEPS} STEPS</span>
+        <span className={styles.brandSub}>POCKET SEQUENCER · {voices.length} VOICES · {STEPS} STEPS</span>
       </div>
 
       <div className={styles.gridWrap}>
-        {VOICES.map((name, v) => (
+        {voices.map((name, v) => (
           <div key={name} className={styles.rowWrap}>
             <span className={styles.voice}>{name}</span>
             <div className={styles.row} role="group" aria-label={`${name} steps`}>
-              {grid[v].map((on, s) => (
+              {(grid[v] ?? []).map((on, s) => (
                 <button
                   key={s}
                   className={styles.step}
@@ -238,7 +412,7 @@ export default function Sequencer() {
             <span className={styles.slotDot} aria-hidden="true" />
           </button>
         ))}
-        <button className={styles.clear} onClick={() => { setGrid(emptyGrid()); sfx.close() }}>
+        <button className={styles.clear} onClick={() => { setGrid(emptyGrid(voices)); sfx.close() }}>
           ✕ CLEAR
         </button>
       </div>

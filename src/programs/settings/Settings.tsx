@@ -1,20 +1,58 @@
 'use client'
 
+import type { Skin } from '@/store/settings'
 import { useSettings } from '@/store/settings'
 import { WALLPAPERS, wallpaperMask } from '@/components/shell/wallpapers'
 import { sfx } from '@/lib/sound'
 import styles from '../programs.module.css'
 
+const SKINS: Array<{ id: Skin; name: string; disabled?: boolean }> = [
+  { id: 'classic', name: 'Classic' },
+  { id: 'medieval', name: 'Medieval' },
+  { id: 'underwater', name: 'Underwater', disabled: true },
+]
+
 export default function Settings() {
   const theme = useSettings((s) => s.theme)
   const sound = useSettings((s) => s.sound)
   const wallpaper = useSettings((s) => s.wallpaper)
+  const skin = useSettings((s) => s.skin)
   const setTheme = useSettings((s) => s.setTheme)
   const toggleSound = useSettings((s) => s.toggleSound)
   const setWallpaper = useSettings((s) => s.setWallpaper)
+  const setSkin = useSettings((s) => s.setSkin)
 
   return (
     <div className={styles.settings}>
+      <div className={styles.setCol}>
+        <span className={styles.setLabel}>
+          Skin
+          <span className={styles.setHint}>The whole system, re-costumed</span>
+        </span>
+        <div className={styles.swatches} role="group" aria-label="Skin">
+          {SKINS.map((sk) => (
+            <button
+              key={sk.id}
+              className={styles.swatch}
+              aria-pressed={skin === sk.id}
+              aria-label={`${sk.name} skin`}
+              disabled={sk.disabled}
+              onClick={() => {
+                if (sk.disabled) return
+                sfx.tap()
+                setSkin(sk.id)
+              }}
+            >
+              <span className={styles.skinTile} data-skin={sk.id} aria-hidden="true">
+                <span className={styles.skinDot} />
+              </span>
+              <span className={styles.swatchName}>{sk.name}</span>
+              {sk.disabled && <span className={styles.projSoon}>Soon</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className={styles.setRow}>
         <span className={styles.setLabel}>
           Appearance

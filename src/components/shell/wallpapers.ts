@@ -69,6 +69,17 @@ export const WALLPAPERS: Wallpaper[] = [
       '<path d="M2,3l2.4,1.6M12,1.5l2.4,1.6M7,8.5l2.4,1.6M14,12l2.4,1.6M3,14l2.4,1.6" stroke="#000" stroke-width="1.1" stroke-linecap="round"/>'
     ),
   },
+  {
+    id: 'diaper',
+    name: 'Diaper',
+    w: 28,
+    h: 28,
+    tile: svg(
+      28,
+      28,
+      '<path d="M0,0L28,28M0,28L28,0" stroke="#000" stroke-width="1.2"/><rect x="12.5" y="12.5" width="3" height="3" transform="rotate(45 14 14)" fill="#000"/><rect x="-1.5" y="-1.5" width="3" height="3" transform="rotate(45 0 0)" fill="#000"/>'
+    ),
+  },
   { id: 'plain', name: 'Plain', tile: null, w: 0, h: 0 },
 ]
 

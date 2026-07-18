@@ -240,3 +240,14 @@ b {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- medieval skin: the quill cursor ---------- */
+/* ink quill with a parchment outline so it reads on any surface; hotspot
+   at the nib (2,22). Interactive elements keep their pointer affordance. */
+[data-skin='medieval'] body,
+[data-skin='medieval'] .grain {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M3 21c1-5 3-9 6.5-12.5C13 5 17 3 21 2.5c-.5 4-2.5 8-6 11.5C11.5 17.5 8 19.5 3 21z' fill='%23241a10' stroke='%23e9dfc5' stroke-width='1.4'/%3E%3Cpath d='M3 21l7-7' stroke='%23e9dfc5' stroke-width='1.2'/%3E%3C/svg%3E")
+      2 22,
+    default;
+}

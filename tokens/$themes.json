@@ -27,5 +27,14 @@
       "core/color": "source",
       "semantic/classic-dark": "enabled"
     }
+  },
+  {
+    "id": "medieval",
+    "name": "Medieval",
+    "group": "single",
+    "selectedTokenSets": {
+      "core/color": "source",
+      "semantic/medieval": "enabled"
+    }
   }
 ]

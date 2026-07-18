@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useGate } from '@/store/gate'
+import { useSettings } from '@/store/settings'
 import { Button } from '@/components/primitives/Button'
 import { SPRINGS } from '@/lib/motion'
 import { gateSfx } from '@/lib/sound'
+import { GATE } from './gateConfig'
 import styles from './gate.module.css'
 
 /* THE GATE — macrodata-refinement clearance for the Projects wing.
@@ -15,8 +17,6 @@ import styles from './gate.module.css'
    classic dialog delivers the verdict. The work is mysterious and
    important. Passcode: the good boy. */
 
-const CODE = 'HOWDY'
-const HINT = 'THE PASSWORD IS MYSTERIOUS AND IMPORTANT'
 const N = 92
 const PERSPECTIVE = 2.6
 
@@ -24,10 +24,10 @@ type Letter = { char: string; x: number; y: number; z: number }
 type Flight = { key: number; char: string; fromX: number; fromY: number; slot: number }
 type Phase = 'input' | 'rising' | 'verdict'
 
-function buildLetters(): Letter[] {
+function buildLetters(code: string): Letter[] {
   const chars: string[] = []
   // guarantee the code's letters appear generously, fill with alphabet
-  for (let r = 0; r < 3; r++) for (const c of CODE) chars.push(c)
+  for (let r = 0; r < 3; r++) for (const c of code) chars.push(c)
   const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   let i = 0
   while (chars.length < N) {
@@ -47,25 +47,46 @@ function buildLetters(): Letter[] {
 export function GateSphere() {
   const unlock = useGate((s) => s.unlock)
   const hydrate = useGate((s) => s.hydrate)
+  const skin = useSettings((s) => s.skin)
   const reduced = useReducedMotion()
   const wrapRef = useRef<HTMLDivElement>(null)
   const letterEls = useRef<(HTMLButtonElement | null)[]>([])
   const letters = useRef<Letter[]>([])
+  const builtForCode = useRef<string>('')
   const rot = useRef({ yaw: 0, pitch: 0.1 })
   const dragging = useRef<{ x: number; y: number; t: number } | null>(null)
   const dragDist = useRef(0)
   const vel = useRef({ yaw: 0, pitch: 0 })
   const cursor = useRef<{ x: number; y: number } | null>(null)
 
-  const [slots, setSlots] = useState<(string | null)[]>(Array(CODE.length).fill(null))
+  const config = GATE[skin] ?? GATE.classic
+  const CODE = config.code
+
+  const [slots, setSlots] = useState<(string | null)[]>(() => Array(CODE.length).fill(null))
   const [flights, setFlights] = useState<Flight[]>([])
   const [phase, setPhase] = useState<Phase>('input')
   const [verdict, setVerdict] = useState<'granted' | 'denied' | null>(null)
   const [typing, setTyping] = useState(false)
   const flightKey = useRef(0)
+  const prevCodeRef = useRef(CODE)
 
   useEffect(() => hydrate(), [hydrate])
-  if (letters.current.length === 0) letters.current = buildLetters()
+  if (letters.current.length === 0 || builtForCode.current !== CODE) {
+    letters.current = buildLetters(CODE)
+    builtForCode.current = CODE
+  }
+
+  // the sphere rebuilds its letters (above) whenever the skin's code
+  // changes; here we reset the in-progress attempt to match the new code
+  useEffect(() => {
+    if (prevCodeRef.current === CODE) return
+    prevCodeRef.current = CODE
+    setSlots(Array(CODE.length).fill(null))
+    setFlights([])
+    setPhase('input')
+    setVerdict(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [CODE])
 
   // the sphere lives in a rAF loop, DOM transforms only
   useEffect(() => {
@@ -207,9 +228,7 @@ export function GateSphere() {
 
   return (
     <div className={styles.gate}>
-      <p className={styles.gateHead}>
-        RESTRICTED WING · REFINE THE MACRODATA TO ENTER
-      </p>
+      <p className={styles.gateHead}>{config.header}</p>
 
       {/* slots */}
       <div className={styles.slots} role="group" aria-label="Passcode letters">
@@ -306,7 +325,7 @@ export function GateSphere() {
         </AnimatePresence>
       </div>
 
-      <p className={styles.hintLine}>{HINT}</p>
+      <p className={styles.hintLine}>{config.hint}</p>
 
       {/* accessible / mobile fallback */}
       <div className={styles.typeRow}>
@@ -355,9 +374,7 @@ export function GateSphere() {
                   {verdict === 'granted' ? '✓' : '☓'}
                 </span>
                 <p className={styles.dialogText}>
-                  {verdict === 'granted'
-                    ? 'ACCESS GRANTED. WELCOME TO THE PROJECTS WING, REFINER.'
-                    : 'ACCESS DENIED. THE DATA WAS NOT REFINED. THE BOARD IS NOT PLEASED.'}
+                  {verdict === 'granted' ? config.granted : config.denied}
                 </p>
                 <Button
                   tone="expressive"

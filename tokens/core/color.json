@@ -48,6 +48,50 @@
         "$type": "color"
       }
     },
+    "parchment": {
+      "base": {
+        "$value": "#e9dfc5",
+        "$type": "color"
+      },
+      "raised": {
+        "$value": "#ddd0af",
+        "$type": "color"
+      }
+    },
+    "gall": {
+      "base": {
+        "$value": "#241a10",
+        "$type": "color"
+      },
+      "soft": {
+        "$value": "#6b5a44",
+        "$type": "color"
+      }
+    },
+    "walnut": {
+      "base": {
+        "$value": "#17110b",
+        "$type": "color"
+      }
+    },
+    "rubric": {
+      "vermilion": {
+        "$value": "#9e2b1e",
+        "$type": "color"
+      }
+    },
+    "gilt": {
+      "gold": {
+        "$value": "#b8860b",
+        "$type": "color"
+      }
+    },
+    "lapis": {
+      "blue": {
+        "$value": "#2f4c7e",
+        "$type": "color"
+      }
+    },
     "void": {
       "base": {
         "$value": "#0d100c",

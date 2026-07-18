@@ -43,6 +43,7 @@ function Clock() {
 export function MenuBar() {
   const theme = useSettings((s) => s.theme)
   const sound = useSettings((s) => s.sound)
+  const skin = useSettings((s) => s.skin)
   const toggleTheme = useSettings((s) => s.toggleTheme)
   const toggleSound = useSettings((s) => s.toggleSound)
   const hydrate = useSettings((s) => s.hydrate)
@@ -64,13 +65,15 @@ export function MenuBar() {
         >
           SND {sound ? '●' : '○'}
         </button>
-        <button
-          className={styles.menuBtn}
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
-        >
-          {theme === 'light' ? 'LGT' : 'DRK'}
-        </button>
+        {skin === 'classic' && (
+          <button
+            className={styles.menuBtn}
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+          >
+            {theme === 'light' ? 'LGT' : 'DRK'}
+          </button>
+        )}
         <Clock />
       </div>
     </header>

@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useWindows } from '@/store/windows'
+import { useSettings } from '@/store/settings'
 import { resolveWindow } from '@/programs/resolve'
-import { CREW_AVATARS, CREW_IDS, CREW_VERBS, agentForWindow } from './crew'
+import { CREW_IDS, CREW_VERBS, agentForWindow, avatarFor } from './crew'
 import { CREW_DIALOG, FLEE_LINES } from './crewDialog'
 import styles from './shell.module.css'
 
@@ -28,6 +29,7 @@ const line = (agent: string): string => {
 
 export function AmbientAgents() {
   const reduced = useReducedMotion()
+  const skin = useSettings((s) => s.skin)
 
   /* ---- wanderer ---- */
   const walkerRef = useRef<HTMLDivElement>(null)
@@ -202,8 +204,8 @@ export function AmbientAgents() {
             data-fleeing={fleeing || undefined}
             style={{
               transform: `scaleX(${dir.current})`,
-              WebkitMaskImage: `url(${CREW_AVATARS[walkerAgent]})`,
-              maskImage: `url(${CREW_AVATARS[walkerAgent]})`,
+              WebkitMaskImage: `url(${avatarFor(walkerAgent, skin)})`,
+              maskImage: `url(${avatarFor(walkerAgent, skin)})`,
             }}
           />
         </div>
@@ -224,8 +226,8 @@ export function AmbientAgents() {
             <span
               className={styles.flashAvatar}
               style={{
-                WebkitMaskImage: `url(${CREW_AVATARS[f.agent]})`,
-                maskImage: `url(${CREW_AVATARS[f.agent]})`,
+                WebkitMaskImage: `url(${avatarFor(f.agent, skin)})`,
+                maskImage: `url(${avatarFor(f.agent, skin)})`,
               }}
             />
             <span className={styles.flashLabel}>

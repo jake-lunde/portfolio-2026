@@ -5,16 +5,19 @@ import { Stamp } from '@/components/primitives/Stamp'
 import { pinPhoto } from '@/components/shell/PhotoWall'
 import { metric } from '@/lib/metrics'
 import { sfx } from '@/lib/sound'
+import { useSettings } from '@/store/settings'
 import styles from './booth.module.css'
 
 /* Photo Booth — the webcam through a parallel-1992 signal chain.
    Every frame runs a real pixel pipeline (no CSS-filter shortcuts):
    VHS (channel shift + noise + scanlines), DITHER (4×4 Bayer, ink on
-   paper), DUOTONE (plate → pink), CRT (scanline + vignette), CLEAN.
-   Snap = 3-2-1 countdown → polaroid card → download. Camera stops the
-   moment the window closes. */
+   paper), DUOTONE (plate → pink), CRT (scanline + vignette), CLEAN —
+   plus a medieval-only pair: ILLUMINATED (posterize to the manuscript
+   palette + ink edge lines) and WOODBLOCK (contrast-stretched line-cut
+   with midtone hatching). Snap = 3-2-1 countdown → polaroid card →
+   download. Camera stops the moment the window closes. */
 
-type Filter = 'vhs' | 'dither' | 'duotone' | 'crt' | 'clean'
+type Filter = 'vhs' | 'dither' | 'duotone' | 'crt' | 'clean' | 'illum' | 'woodblock'
 type Phase = 'off' | 'starting' | 'live' | 'denied' | 'shot'
 
 const W = 480
@@ -32,6 +35,31 @@ const PAPER = [231, 225, 210]
 const INK = [23, 21, 13]
 const PINK = [242, 166, 194]
 const PLATE = [19, 24, 17]
+
+// medieval palette — exact hexes per CLAUDE.md §3, sampled into canvas RGB
+// (CSS vars can't reach into the per-pixel pipeline)
+const M_PARCHMENT = [0xe9, 0xdf, 0xc5] // #e9dfc5
+const M_INK = [0x24, 0x1a, 0x10] // #241a10
+const M_VERMILION = [0x9e, 0x2b, 0x1e] // #9e2b1e
+const M_GOLD = [0xb8, 0x86, 0x0b] // #b8860b
+const M_LAPIS = [0x2f, 0x4c, 0x7e] // #2f4c7e
+const M_PALETTE = [M_PARCHMENT, M_INK, M_VERMILION, M_GOLD, M_LAPIS]
+
+function nearestPaletteColor(r: number, g: number, b: number): number[] {
+  let best = M_PALETTE[0]
+  let bestD = Infinity
+  for (const c of M_PALETTE) {
+    const dr = r - c[0]
+    const dg = g - c[1]
+    const db = b - c[2]
+    const d = dr * dr + dg * dg + db * db
+    if (d < bestD) {
+      bestD = d
+      best = c
+    }
+  }
+  return best
+}
 
 function processFrame(src: ImageData, mode: Filter, t: number): ImageData {
   const d = src.data
@@ -71,6 +99,28 @@ function processFrame(src: ImageData, mode: Filter, t: number): ImageData {
         const dy = (y - H / 2) / (H / 2)
         const v = 1 - (dx * dx + dy * dy) * 0.35
         r *= v; g *= v * 1.02; b *= v * 0.95
+      } else if (mode === 'woodblock') {
+        const lum = r * 0.299 + g * 0.587 + b * 0.114
+        const stretched = Math.min(255, Math.max(0, (lum - 100) * 1.6 + 128))
+        let c: number[]
+        if (stretched < 128) c = M_INK
+        else if (stretched < 170 && y % 3 === 0) c = M_INK
+        else c = M_PARCHMENT
+        r = c[0]; g = c[1]; b = c[2]
+      } else if (mode === 'illum') {
+        const c = nearestPaletteColor(r, g, b)
+        r = c[0]; g = c[1]; b = c[2]
+        // edge pass from ORIGINAL luminance (src `d`, untouched by this loop)
+        const lum = (xx: number, yy: number) => {
+          const ii = (yy * W + xx) * 4
+          return d[ii] * 0.299 + d[ii + 1] * 0.587 + d[ii + 2] * 0.114
+        }
+        const here = lum(x, y)
+        const left = x >= 2 ? lum(x - 2, y) : here
+        const up = y >= 2 ? lum(x, y - 2) : here
+        if (Math.abs(here - left) > 40 || Math.abs(here - up) > 40) {
+          r = M_INK[0]; g = M_INK[1]; b = M_INK[2]
+        }
       }
 
       o[i] = r; o[i + 1] = g; o[i + 2] = b; o[i + 3] = 255
@@ -79,21 +129,47 @@ function processFrame(src: ImageData, mode: Filter, t: number): ImageData {
   return out
 }
 
-const FILTERS: Filter[] = ['vhs', 'dither', 'duotone', 'crt', 'clean']
+const CLASSIC_FILTERS: Filter[] = ['vhs', 'dither', 'duotone', 'crt', 'clean']
+const MEDIEVAL_FILTERS: Filter[] = ['illum', 'woodblock', 'clean']
+
+// most filter ids read fine as their own uppercase chip label; these two
+// need a friendlier name than the raw mode string
+const FILTER_LABEL: Partial<Record<Filter, string>> = {
+  illum: 'ILLUMINATED',
+  woodblock: 'WOODBLOCK',
+}
+
+// classic + underwater share the signal-chain set; medieval swaps in its
+// own short manuscript-flavored list (keeps `clean` for comparison)
+export function filtersFor(skin: string): Filter[] {
+  if (skin === 'medieval') return MEDIEVAL_FILTERS
+  return CLASSIC_FILTERS
+}
 
 export default function PhotoBooth() {
+  const skin = useSettings((s) => s.skin)
+  const filters = filtersFor(skin)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const workRef = useRef<HTMLCanvasElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const filterRef = useRef<Filter>('vhs')
+  const filterRef = useRef<Filter>(filters[0])
   const [phase, setPhase] = useState<Phase>('off')
-  const [filter, setFilter] = useState<Filter>('vhs')
+  const [filter, setFilter] = useState<Filter>(filters[0])
   const [count, setCount] = useState<number | null>(null)
   const [shotUrl, setShotUrl] = useState<string | null>(null)
   const [pinUrl, setPinUrl] = useState<string | null>(null)
   const [pinned, setPinned] = useState(false)
+  const prevSkin = useRef(skin)
   filterRef.current = filter
+
+  // skin swap changes the whole filter list — reset to its first entry
+  useEffect(() => {
+    if (prevSkin.current !== skin) {
+      prevSkin.current = skin
+      setFilter(filtersFor(skin)[0])
+    }
+  }, [skin])
 
   // draw loop
   useEffect(() => {
@@ -197,7 +273,7 @@ export default function PhotoBooth() {
     g.fillStyle = '#17150D'
     g.font = '13px monospace'
     const date = new Date().toISOString().slice(0, 10)
-    g.fillText(`LUNDE BOOTH · ${date} · ${filterRef.current.toUpperCase()}`, 24, H + 70)
+    g.fillText(`LUNDE BOOTH · ${date} · ${FILTER_LABEL[filterRef.current] ?? filterRef.current.toUpperCase()}`, 24, H + 70)
     g.fillStyle = '#F2A6C2'
     g.fillText('■', W - 4, H + 70)
     metric('booth_snap')
@@ -281,7 +357,7 @@ export default function PhotoBooth() {
           {phase === 'live' && (
             <>
               <div className={styles.filters} role="group" aria-label="Filter">
-                {FILTERS.map((f) => (
+                {filters.map((f) => (
                   <button
                     key={f}
                     className={styles.filterChip}
@@ -291,7 +367,7 @@ export default function PhotoBooth() {
                       setFilter(f)
                     }}
                   >
-                    {f.toUpperCase()}
+                    {FILTER_LABEL[f] ?? f.toUpperCase()}
                   </button>
                 ))}
               </div>

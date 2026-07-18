@@ -5,7 +5,8 @@ import { motion, useReducedMotion } from 'motion/react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { metric } from '@/lib/metrics'
 import { sfx } from '@/lib/sound'
-import { PUZZLES, IMG_W, IMG_H } from './puzzleImages'
+import { useSettings } from '@/store/settings'
+import { puzzlesFor, IMG_W, IMG_H } from './puzzleImages'
 import styles from './puzzle.module.css'
 
 /* Jigsaw — procedurally die-cut pieces (complementary bezier tabs) over
@@ -99,6 +100,8 @@ const fmtSecs = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60
 
 export default function Puzzle() {
   const reduced = useReducedMotion()
+  const skin = useSettings((s) => s.skin)
+  const puzzles = puzzlesFor(skin)
   const [puzzleIdx, setPuzzleIdx] = useState(0)
   const [pieces, setPieces] = useState<Piece[] | null>(null)
   const [done, setDone] = useState(false)
@@ -110,8 +113,18 @@ export default function Puzzle() {
   const posterRef = useRef<HTMLCanvasElement | null>(null)
   const startedAt = useRef<number | null>(null)
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const prevSkin = useRef(skin)
 
-  const puzzle = PUZZLES[puzzleIdx]
+  // switching skins swaps the whole puzzle set — snap back to the first
+  // plate rather than risk an out-of-range index (classic has 5, medieval 4)
+  useEffect(() => {
+    if (prevSkin.current !== skin) {
+      prevSkin.current = skin
+      setPuzzleIdx(0)
+    }
+  }, [skin])
+
+  const puzzle = puzzles[puzzleIdx] ?? puzzles[0]
 
   const scatter = (): Piece[] => {
     let id = 0
@@ -167,7 +180,7 @@ export default function Puzzle() {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [puzzleIdx])
+  }, [puzzleIdx, skin])
 
   // seed the board once: localStorage instantly, then the public
   // "BEST — WORLDWIDE" board (all puzzles at once) once it lands
@@ -304,7 +317,7 @@ export default function Puzzle() {
   return (
     <div className={styles.puzzle}>
       <div className={styles.pickRow} role="group" aria-label="Puzzle">
-        {PUZZLES.map((p, i) => (
+        {puzzles.map((p, i) => (
           <button
             key={p.id}
             className={styles.pick}

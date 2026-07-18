@@ -13,6 +13,7 @@
     "semantic/scale",
     "semantic/classic-light",
     "semantic/classic-dark",
+    "semantic/medieval",
     "component/button"
   ]
 }

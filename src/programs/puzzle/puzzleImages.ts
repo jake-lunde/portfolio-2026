@@ -259,3 +259,45 @@ export const PUZZLES: PuzzleDef[] = [
   { id: 'moat', name: 'The Moat', hint: 'invest, fig. b', draw: drawMoat },
   { id: 'pixellou', name: 'Pixel Lou', hint: 'lou.sys', draw: drawPixelLou },
 ]
+
+/* ---- medieval set — Jake's illustrations, cover-fit onto the canvas ---- */
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((res, rej) => {
+    const im = new Image()
+    im.onload = () => res(im)
+    im.onerror = rej
+    im.src = src
+  })
+}
+
+// center-crop cover-fit: fills IMG_W×IMG_H with no distortion, no letterboxing
+async function drawCover(g: CanvasRenderingContext2D, src: string) {
+  base(g)
+  const im = await loadImage(src)
+  const scale = Math.max(IMG_W / im.width, IMG_H / im.height)
+  const dw = im.width * scale
+  const dh = im.height * scale
+  const dx = (IMG_W - dw) / 2
+  const dy = (IMG_H - dh) / 2
+  g.drawImage(im, dx, dy, dw, dh)
+}
+
+const drawMedieval1 = (g: CanvasRenderingContext2D) => drawCover(g, '/puzzle/medieval/medieval-1.png')
+const drawMedieval2 = (g: CanvasRenderingContext2D) => drawCover(g, '/puzzle/medieval/medieval-2.png')
+const drawMedieval3 = (g: CanvasRenderingContext2D) => drawCover(g, '/puzzle/medieval/medieval-3.png')
+const drawMedieval4 = (g: CanvasRenderingContext2D) => drawCover(g, '/puzzle/medieval/medieval-4.png')
+
+export const MEDIEVAL_PUZZLES: PuzzleDef[] = [
+  { id: 'medieval-1', name: 'Plate I', hint: 'illuminated leaf', draw: drawMedieval1 },
+  { id: 'medieval-2', name: 'Plate II', hint: 'illuminated leaf', draw: drawMedieval2 },
+  { id: 'medieval-3', name: 'Plate III', hint: 'illuminated leaf', draw: drawMedieval3 },
+  { id: 'medieval-4', name: 'Plate IV', hint: 'illuminated leaf', draw: drawMedieval4 },
+]
+
+/* which puzzle set is live for the active skin — classic + underwater
+   share the site-drawn set for now; medieval gets its own four plates */
+export function puzzlesFor(skin: string): PuzzleDef[] {
+  if (skin === 'medieval') return MEDIEVAL_PUZZLES
+  return PUZZLES
+}

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { SPRINGS } from '@/lib/motion'
 import { telemetry } from '@/lib/sound'
+import { useSettings } from '@/store/settings'
+import { avatarFor } from '@/components/shell/crew'
 import timeline from './cc-timeline.json'
 import styles from './command.module.css'
 
@@ -27,14 +29,6 @@ type AgentDef = { id: string; name: string; model: string; role: string }
 
 const AGENTS = timeline.agents as AgentDef[]
 const SEQUENCE = timeline.sequence as Ev[]
-
-const AVATARS: Record<string, string> = {
-  fable: '/cc/avatars/shape-101.svg',
-  hertz: '/cc/avatars/shape-12.svg',
-  nyquist: '/cc/avatars/shape-27.svg',
-  fourier: '/cc/avatars/shape-46.svg',
-  doppler: '/cc/avatars/shape-17.svg',
-}
 
 const ARROW: Record<Ev['action'], string> = {
   dispatch: '↗',
@@ -90,6 +84,7 @@ function Redacted({ seed }: { seed: string }) {
 
 export default function CommandCenter() {
   const reduced = useReducedMotion()
+  const skin = useSettings((s) => s.skin)
   const [mode, setMode] = useState<'replay' | 'live'>('replay')
   const [feed, setFeed] = useState<Array<Ev & { key: number }>>([])
   const [states, setStates] = useState<Record<string, AgentState>>(idleStates)
@@ -223,8 +218,8 @@ export default function CommandCenter() {
                 className={styles.avatar}
                 data-mode={s.mode}
                 style={{
-                  WebkitMaskImage: `url(${AVATARS[a.id]})`,
-                  maskImage: `url(${AVATARS[a.id]})`,
+                  WebkitMaskImage: `url(${avatarFor(a.id, skin)})`,
+                  maskImage: `url(${avatarFor(a.id, skin)})`,
                 }}
                 aria-hidden="true"
               />

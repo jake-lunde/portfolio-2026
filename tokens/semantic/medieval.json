@@ -1,0 +1,88 @@
+{
+  "surface": {
+    "$value": "{color.parchment.base}",
+    "$type": "color"
+  },
+  "surface-raised": {
+    "$value": "{color.parchment.raised}",
+    "$type": "color"
+  },
+  "surface-inverse": {
+    "$value": "{color.walnut.base}",
+    "$type": "color"
+  },
+  "content": {
+    "$value": "{color.gall.base}",
+    "$type": "color"
+  },
+  "content-muted": {
+    "$value": "{color.gall.soft}",
+    "$type": "color"
+  },
+  "content-inverse": {
+    "$value": "{color.parchment.base}",
+    "$type": "color"
+  },
+  "border": {
+    "$value": "rgba(36, 26, 16, 0.22)",
+    "$type": "color"
+  },
+  "accent": {
+    "$value": "{color.rubric.vermilion}",
+    "$type": "color"
+  },
+  "accent-expressive": {
+    "$value": "{color.gilt.gold}",
+    "$type": "color"
+  },
+  "accent-support": {
+    "$value": "{color.lapis.blue}",
+    "$type": "color"
+  },
+  "accent-expressive-text": {
+    "$value": "{content}",
+    "$type": "color"
+  },
+  "accent-expressive-mark": {
+    "$value": "{accent-expressive}",
+    "$type": "color"
+  },
+  "on-accent-expressive": {
+    "$value": "{color.gall.base}",
+    "$type": "color"
+  },
+  "focus": {
+    "$value": "{accent}",
+    "$type": "color"
+  },
+  "display": {
+    "$value": "var(--font-medieval-display), var(--font-pixel), serif"
+  },
+  "sans": {
+    "$value": "var(--font-medieval-body), var(--font-sans), Georgia, serif"
+  },
+  "mono": {
+    "$value": "var(--font-medieval-mono), var(--font-mono), ui-monospace, monospace"
+  },
+  "shadow-print": {
+    "$value": "4px 4px 0 rgba(36, 26, 16, 0.16)"
+  },
+  "shadow-print-lg": {
+    "$value": "5px 5px 0 rgba(36, 26, 16, 0.14)"
+  },
+  "shadow-lift": {
+    "$value": "5px 6px 0 rgba(36, 26, 16, 0.2)"
+  },
+  "shadow-sticky": {
+    "$value": "2px 3px 0 rgba(36, 26, 16, 0.14)"
+  },
+  "shadow-sticky-lift": {
+    "$value": "3px 5px 0 rgba(36, 26, 16, 0.18)"
+  },
+  "shadow-pin": {
+    "$value": "0 2px 2px rgba(36, 26, 16, 0.32)"
+  },
+  "shadow-modal": {
+    "$value": "0 18px 50px rgba(23, 17, 11, 0.5)"
+  }
+}
