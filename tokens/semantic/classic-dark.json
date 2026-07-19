@@ -48,5 +48,60 @@
   },
   "shadow-print-lg": {
     "$value": "5px 5px 0 rgba(0, 0, 0, 0.4)"
+  },
+  "status": {
+    "positive": {
+      "base": {
+        "$value": "{color.verdigris.light}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.void.base}",
+        "$type": "color"
+      }
+    },
+    "warning": {
+      "base": {
+        "$value": "{color.amber.light}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.void.base}",
+        "$type": "color"
+      }
+    },
+    "danger": {
+      "base": {
+        "$value": "{color.blood.light}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.void.base}",
+        "$type": "color"
+      }
+    },
+    "info": {
+      "base": {
+        "$value": "{color.nasa.glow}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.void.base}",
+        "$type": "color"
+      }
+    }
+  },
+  "interactive": {
+    "default": {
+      "hover": {
+        "$value": "rgba(13, 16, 12, 0.55)",
+        "$type": "color",
+        "$description": "baked from color-mix(--surface 55%) on the void"
+      },
+      "active": {
+        "$value": "rgba(13, 16, 12, 0.7)",
+        "$type": "color"
+      }
+    }
   }
 }

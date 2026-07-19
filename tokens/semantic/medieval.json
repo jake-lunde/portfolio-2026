@@ -84,5 +84,61 @@
   },
   "shadow-modal": {
     "$value": "0 18px 50px rgba(23, 17, 11, 0.5)"
+  },
+  "status": {
+    "positive": {
+      "base": {
+        "$value": "{color.verdigris.base}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.parchment.base}",
+        "$type": "color"
+      }
+    },
+    "warning": {
+      "base": {
+        "$value": "{color.amber.base}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.parchment.base}",
+        "$type": "color"
+      }
+    },
+    "danger": {
+      "base": {
+        "$value": "{color.blood.deep}",
+        "$type": "color",
+        "$description": "FABLE: vermilion IS this skin's accent, so danger cannot separate by HUE \u2014 it separates by VALUE (near-black oxblood 12.7:1 on parchment vs the bright rubricated accent), the way manuscripts distinguish correction-ink from display-red. Only 2.26:1 from --accent; never place them adjacent."
+      },
+      "on-base": {
+        "$value": "{color.parchment.base}",
+        "$type": "color"
+      }
+    },
+    "info": {
+      "base": {
+        "$value": "{color.lapis.blue}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.parchment.base}",
+        "$type": "color"
+      }
+    }
+  },
+  "interactive": {
+    "default": {
+      "hover": {
+        "$value": "rgba(233, 223, 197, 0.55)",
+        "$type": "color",
+        "$description": "baked from color-mix(--surface 55%) on parchment"
+      },
+      "active": {
+        "$value": "rgba(233, 223, 197, 0.7)",
+        "$type": "color"
+      }
+    }
   }
 }

@@ -75,5 +75,99 @@
   },
   "shadow-modal": {
     "$value": "0 18px 50px rgba(0, 0, 0, 0.45)"
+  },
+  "status": {
+    "positive": {
+      "base": {
+        "$value": "{color.report.green}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.paper.base}",
+        "$type": "color"
+      }
+    },
+    "warning": {
+      "base": {
+        "$value": "{color.amber.base}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.paper.base}",
+        "$type": "color"
+      }
+    },
+    "danger": {
+      "base": {
+        "$value": "{color.blood.base}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.paper.base}",
+        "$type": "color"
+      }
+    },
+    "info": {
+      "base": {
+        "$value": "{color.nasa.cobalt}",
+        "$type": "color"
+      },
+      "on-base": {
+        "$value": "{color.paper.base}",
+        "$type": "color"
+      }
+    }
+  },
+  "interactive": {
+    "default": {
+      "base": {
+        "$value": "transparent",
+        "$type": "color"
+      },
+      "hover": {
+        "$value": "rgba(231, 225, 210, 0.55)",
+        "$type": "color",
+        "$description": "baked from color-mix(in srgb, var(--surface) 55%, transparent) \u2014 re-derive if --surface changes"
+      },
+      "active": {
+        "$value": "rgba(231, 225, 210, 0.7)",
+        "$type": "color",
+        "$description": "baked from color-mix(in srgb, var(--surface) 70%  [NEW: no :active existed in CSS], transparent) \u2014 re-derive if --surface changes"
+      },
+      "content-hover": {
+        "$value": "{accent}",
+        "$type": "color"
+      }
+    },
+    "accent": {
+      "base": {
+        "$value": "{surface}",
+        "$type": "color"
+      },
+      "hover": {
+        "$value": "{accent}",
+        "$type": "color"
+      },
+      "on-hover": {
+        "$value": "{surface}",
+        "$type": "color"
+      }
+    },
+    "expressive": {
+      "hover": {
+        "$value": "{accent-expressive}",
+        "$type": "color"
+      },
+      "on-hover": {
+        "$value": "{on-accent-expressive}",
+        "$type": "color"
+      }
+    },
+    "disabled": {
+      "opacity": {
+        "$value": "0.55",
+        "$description": "extracted from .projRow:disabled / .swatch:disabled"
+      }
+    }
   }
 }

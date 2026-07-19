@@ -74,6 +74,10 @@
   --shadow-sticky-lift: 3px 5px 0 rgba(23, 21, 13, 0.16);
   --shadow-pin: 0 2px 2px rgba(23, 21, 13, 0.3);
   --shadow-modal: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --interactive-default-base: rgba(0, 0, 0, 0);
+  --interactive-default-hover: rgba(231, 225, 210, 0.55); /** baked from color-mix(in srgb, var(--surface) 55%, transparent) — re-derive if --surface changes */
+  --interactive-default-active: rgba(231, 225, 210, 0.7); /** baked from color-mix(in srgb, var(--surface) 70%  [NEW: no :active existed in CSS], transparent) — re-derive if --surface changes */
+  --interactive-disabled-opacity: 0.55; /** extracted from .projRow:disabled / .swatch:disabled */
   --button-sm-padding-y: 6px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. Snap to 8px (8px) when a deliberate visual change is approved. */
   --button-md-padding-x: 18px; /** OFF-GRID literal. Snap to 16px (16px) or 20px (20px) when approved. */
   --button-md-padding-y: 7px; /** OFF-GRID literal. Snap to 8px (8px) when approved. */
@@ -97,6 +101,14 @@
   --accent-expressive: #f2a6c2;
   --accent-support: #2e4a38;
   --on-accent-expressive: #17150d;
+  --status-positive-base: #2e4a38;
+  --status-positive-on-base: #e7e1d2;
+  --status-warning-base: #5f4a0e;
+  --status-warning-on-base: #e7e1d2;
+  --status-danger-base: #a32b1f;
+  --status-danger-on-base: #e7e1d2;
+  --status-info-base: #2036c8;
+  --status-info-on-base: #e7e1d2;
   --button-weight: var(--weight-bold);
   --button-sm-tracking: var(--tracking-12);
   --button-sm-padding-x: var(--space-3);
@@ -104,6 +116,12 @@
   --accent-expressive-text: var(--content);
   --accent-expressive-mark: var(--accent-expressive);
   --focus: var(--accent);
+  --interactive-default-content-hover: var(--accent);
+  --interactive-accent-base: var(--surface);
+  --interactive-accent-hover: var(--accent);
+  --interactive-accent-on-hover: var(--surface);
+  --interactive-expressive-hover: var(--accent-expressive);
+  --interactive-expressive-on-hover: var(--on-accent-expressive);
   --button-radius: var(--radius-control);
   --button-sm-font-size: var(--text-caption);
   --button-sm-border: var(--border-width-default);
@@ -121,6 +139,8 @@
   --accent-expressive-mark: rgba(0, 0, 0, 0);
   --shadow-print: 4px 4px 0 rgba(0, 0, 0, 0.4);
   --shadow-print-lg: 5px 5px 0 rgba(0, 0, 0, 0.4);
+  --interactive-default-hover: rgba(13, 16, 12, 0.55); /** baked from color-mix(--surface 55%) on the void */
+  --interactive-default-active: rgba(13, 16, 12, 0.7);
   --surface: #0d100c;
   --surface-raised: #14181a;
   --surface-inverse: #090c0a;
@@ -129,6 +149,14 @@
   --content-inverse: #e9e4d5;
   --accent: #5c7cff;
   --accent-expressive: #f2a6c2;
+  --status-positive-base: #5fa87a;
+  --status-positive-on-base: #0d100c;
+  --status-warning-base: #e0b755;
+  --status-warning-on-base: #0d100c;
+  --status-danger-base: #f08a7e;
+  --status-danger-on-base: #0d100c;
+  --status-info-base: #5c7cff;
+  --status-info-on-base: #0d100c;
   --accent-expressive-text: var(--accent-expressive);
 }
 
@@ -148,6 +176,8 @@
   --shadow-sticky-lift: 3px 5px 0 rgba(36, 26, 16, 0.18);
   --shadow-pin: 0 2px 2px rgba(36, 26, 16, 0.32);
   --shadow-modal: 0 18px 50px rgba(23, 17, 11, 0.5);
+  --interactive-default-hover: rgba(233, 223, 197, 0.55); /** baked from color-mix(--surface 55%) on parchment */
+  --interactive-default-active: rgba(233, 223, 197, 0.7);
   --surface: #e9dfc5;
   --surface-raised: #ddd0af;
   --surface-inverse: #17110b;
@@ -158,6 +188,14 @@
   --accent-expressive: #b8860b;
   --accent-support: #2f4c7e;
   --on-accent-expressive: #241a10;
+  --status-positive-base: #3f5c34;
+  --status-positive-on-base: #e9dfc5;
+  --status-warning-base: #5f4a0e;
+  --status-warning-on-base: #e9dfc5;
+  --status-danger-base: #3b0d08; /** FABLE: vermilion IS this skin's accent, so danger cannot separate by HUE — it separates by VALUE (near-black oxblood 12.7:1 on parchment vs the bright rubricated accent), the way manuscripts distinguish correction-ink from display-red. Only 2.26:1 from --accent; never place them adjacent. */
+  --status-danger-on-base: #e9dfc5;
+  --status-info-base: #2f4c7e;
+  --status-info-on-base: #e9dfc5;
   --accent-expressive-text: var(--content);
   --accent-expressive-mark: var(--accent-expressive);
   --focus: var(--accent);

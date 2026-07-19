@@ -115,6 +115,40 @@
         "$value": "#8a9a93",
         "$type": "color"
       }
+    },
+    "blood": {
+      "base": {
+        "$value": "#a32b1f",
+        "$type": "color"
+      },
+      "light": {
+        "$value": "#f08a7e",
+        "$type": "color"
+      },
+      "deep": {
+        "$value": "#3b0d08",
+        "$type": "color"
+      }
+    },
+    "amber": {
+      "base": {
+        "$value": "#5f4a0e",
+        "$type": "color"
+      },
+      "light": {
+        "$value": "#e0b755",
+        "$type": "color"
+      }
+    },
+    "verdigris": {
+      "base": {
+        "$value": "#3f5c34",
+        "$type": "color"
+      },
+      "light": {
+        "$value": "#5fa87a",
+        "$type": "color"
+      }
     }
   }
 }
