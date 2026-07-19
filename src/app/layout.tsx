@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono, Eagle_Lake, Jacquard_12, MedievalSharp, Noto_Sans_JP } from 'next/font/google'
+import { Geist, Geist_Mono, Eagle_Lake, MedievalSharp, Noto_Sans_JP } from 'next/font/google'
 import localFont from 'next/font/local'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
@@ -34,10 +34,11 @@ const cjk = Noto_Sans_JP({
 })
 
 /* Medieval skin faces (Jake's picks, Notion "Typography"): MedievalSharp
-   display · Eagle Lake body · Jacquard 12 mono (a pixel blackletter — the
-   LUNDE OS bridge). next/font requires module-scope instantiation, so they
-   load for every skin; the medieval token set points --display/--sans/--mono
-   at them. */
+   display · Eagle Lake body. Mono ALSO uses MedievalSharp (was Jacquard 12 —
+   swapped 2026-07-19, too illegible at micro sizes like the ticker/icon
+   labels). next/font requires module-scope instantiation, so these load for
+   every skin; the medieval token set points --display/--sans/--mono at
+   them. */
 const medievalDisplay = MedievalSharp({
   weight: '400',
   subsets: ['latin'],
@@ -49,13 +50,6 @@ const medievalBody = Eagle_Lake({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-medieval-body',
-  display: 'swap',
-  preload: false,
-})
-const medievalMono = Jacquard_12({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-medieval-mono',
   display: 'swap',
   preload: false,
 })
@@ -84,7 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable} ${medievalDisplay.variable} ${medievalBody.variable} ${medievalMono.variable}`}
+      className={`${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable} ${medievalDisplay.variable} ${medievalBody.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />

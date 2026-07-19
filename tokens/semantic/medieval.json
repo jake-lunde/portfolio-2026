@@ -62,7 +62,7 @@
     "$value": "var(--font-medieval-body), var(--font-sans), Georgia, serif"
   },
   "mono": {
-    "$value": "var(--font-medieval-mono), var(--font-mono), ui-monospace, monospace"
+    "$value": "var(--font-medieval-display), var(--font-mono), ui-monospace, monospace"
   },
   "shadow-print": {
     "$value": "4px 4px 0 rgba(36, 26, 16, 0.16)"

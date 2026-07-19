@@ -140,7 +140,7 @@
   --border: rgba(36, 26, 16, 0.22);
   --display: var(--font-medieval-display), var(--font-pixel), serif;
   --sans: var(--font-medieval-body), var(--font-sans), Georgia, serif;
-  --mono: var(--font-medieval-mono), var(--font-mono), ui-monospace, monospace;
+  --mono: var(--font-medieval-display), var(--font-mono), ui-monospace, monospace;
   --shadow-print: 4px 4px 0 rgba(36, 26, 16, 0.16);
   --shadow-print-lg: 5px 5px 0 rgba(36, 26, 16, 0.14);
   --shadow-lift: 5px 6px 0 rgba(36, 26, 16, 0.2);
