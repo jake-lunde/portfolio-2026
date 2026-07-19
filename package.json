@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "tokens:build": "node scripts/build-tokens.mjs",
+    "tokens:doctor": "node scripts/doctor-tokens.mjs",
     "tokens:watch": "onchange 'tokens/**/*.json' -- npm run tokens:build",
     "predev": "npm run tokens:build",
     "prebuild": "npm run tokens:build",

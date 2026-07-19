@@ -349,6 +349,13 @@ function setValue(
 // ---------------------------------------------------------------------------
 
 async function push(gh: GitHub, branch: string): Promise<void> {
+  // INTERIM WARNING (removed when step 4 lands override materialization):
+  // push writes only leaves a set-file already defines, so editing an
+  // INHERITED token in a non-base mode (e.g. `focus` in Classic-Dark, or any
+  // scale token in Medieval) is silently dropped. Until then, edit inherited
+  // tokens in Classic-Light, or hand-edit the mode's tokens/*.json.
+  log('Heads-up: edits to INHERITED tokens in Dark/Medieval modes are not yet captured (edit them in Light, or the JSON). See RUNBOOK.', 'warn')
+
   // Diff Figma against the current repo state (the PR base) so the PR shows the
   // true delta. We re-fetch rather than trusting a stored memo.
   const model = await fetchModel(gh, branch)
