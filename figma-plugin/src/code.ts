@@ -21,9 +21,11 @@ import {
   floatToTokenString,
   formatChangeLine,
   formatChangeMarkdown,
+  createLeafAtPath,
   isComponentSet,
   isCoreSet,
   leafAtPath,
+  owningSet,
   refStringForTarget,
   resolveKind,
   resolveRef,
@@ -31,6 +33,7 @@ import {
   semanticToken,
   toFloat,
   toRgba,
+  writeTargetSet,
   type ChangeEntry,
   type FlatToken,
   type Metadata,
@@ -349,13 +352,6 @@ function setValue(
 // ---------------------------------------------------------------------------
 
 async function push(gh: GitHub, branch: string): Promise<void> {
-  // INTERIM WARNING (removed when step 4 lands override materialization):
-  // push writes only leaves a set-file already defines, so editing an
-  // INHERITED token in a non-base mode (e.g. `focus` in Classic-Dark, or any
-  // scale token in Medieval) is silently dropped. Until then, edit inherited
-  // tokens in Classic-Light, or hand-edit the mode's tokens/*.json.
-  log('Heads-up: edits to INHERITED tokens in Dark/Medieval modes are not yet captured (edit them in Light, or the JSON). See RUNBOOK.', 'warn')
-
   // Diff Figma against the current repo state (the PR base) so the PR shows the
   // true delta. We re-fetch rather than trusting a stored memo.
   const model = await fetchModel(gh, branch)
@@ -375,15 +371,23 @@ async function push(gh: GitHub, branch: string): Promise<void> {
   const allVars = await figma.variables.getLocalVariablesAsync()
   const varById = new Map(allVars.map((v) => [v.id, v]))
 
-  const changed: Array<{ path: string; content: string }> = []
   const changes: ChangeEntry[] = []
-
-  for (const set of model.metadata.tokenSetOrder) {
+  // One clone per set, shared by BOTH passes below: a semantic edit can land in
+  // a different file than the set it was read from (materialization), so the
+  // old "clone inside the per-set loop" shape can't work.
+  const clones = new Map<string, unknown>()
+  const dirty = new Set<string>()
+  const cloneOf = (set: string): unknown | undefined => {
     const original = model.files[set]
-    if (original === undefined) continue
+    if (original === undefined) return undefined
+    if (!clones.has(set)) clones.set(set, deepClone(original))
+    return clones.get(set)
+  }
 
-    const clone = deepClone(original)
-    let fileChanged = false
+  // --- core + component: per-set, single-mode collections ---
+  for (const set of model.metadata.tokenSetOrder) {
+    const clone = cloneOf(set)
+    if (clone === undefined) continue
 
     if (isCoreSet(set)) {
       const coreMode = coreCol.modes[0].modeId
@@ -392,46 +396,87 @@ async function push(gh: GitHub, branch: string): Promise<void> {
         if (!v) continue // unknown to Figma — leave original untouched
         const next = serializeVarValue(v, coreMode, t, varById, model)
         if (next !== null && applyLeaf(clone, t.path, next, t)) {
-          fileChanged = true
+          dirty.add(set)
           changes.push({ path: t.path, oldValue: t.rawValue, newValue: next })
         }
       }
-    } else if (isComponentSet(set)) {
+    } else if (isComponentSet(set) && compCol) {
       // component set — single-mode collection; Figma name is slashed
-      if (compCol) {
-        const compMode = compCol.modes[0].modeId
-        for (const t of model.componentTokens.filter((x) => x.set === set)) {
-          const v = compIdx.get(figmaVarName(t.path))
-          if (!v) continue
-          const next = serializeVarValue(v, compMode, t, varById, model)
-          if (next !== null && applyLeaf(clone, t.path, next, t)) {
-            fileChanged = true
-            changes.push({ path: t.path, oldValue: t.rawValue, newValue: next })
-          }
-        }
-      }
-    } else {
-      // semantic set — find the theme that emits it, read that theme's mode.
-      // Figma name is slashed (radius/control); token path is dotted.
-      const theme = model.themes.find((th) => enabledSemanticSets(th).includes(set))
-      const flat = model.semanticSets[set] ?? []
-      if (theme) {
-        const modeId = modeByTheme[theme.id]
-        for (const t of flat) {
-          const v = semIdx.get(figmaVarName(t.path))
-          if (!v || modeId === undefined) continue
-          const next = serializeVarValue(v, modeId, t, varById, model)
-          if (next !== null && applyLeaf(clone, t.path, next, t)) {
-            fileChanged = true
-            changes.push({ path: t.path, oldValue: t.rawValue, newValue: next })
-          }
+      const compMode = compCol.modes[0].modeId
+      for (const t of model.componentTokens.filter((x) => x.set === set)) {
+        const v = compIdx.get(figmaVarName(t.path))
+        if (!v) continue
+        const next = serializeVarValue(v, compMode, t, varById, model)
+        if (next !== null && applyLeaf(clone, t.path, next, t)) {
+          dirty.add(set)
+          changes.push({ path: t.path, oldValue: t.rawValue, newValue: next })
         }
       }
     }
+  }
 
-    if (fileChanged) {
-      changed.push({ path: `${TOKENS_DIR}/${set}.json`, content: JSON.stringify(clone, null, 2) + '\n' })
+  // --- semantic: THEME-major / NAME-major ---
+  // Every theme is a MODE of the semantic collection, so every mode must be
+  // read. The old per-set shape only ever visited the FIRST theme that enabled
+  // a set, which silently dropped edits to tokens a mode merely INHERITS
+  // (e.g. `focus` in Classic-Dark, any scale token in Medieval).
+  //
+  // Comparison is against the token DEFINITION string pull wrote into this mode
+  // (alias vs alias), never a resolved colour — so an untouched inherited
+  // `{accent}` compares equal and never materializes a spurious override.
+  // Reverting an existing override to the base value does NOT delete the leaf;
+  // de-materialization is deliberately manual (doctor flags redundant ones).
+  for (const theme of model.themes) {
+    const modeId = modeByTheme[theme.id]
+    if (modeId === undefined) continue
+    const target = writeTargetSet(model, theme)
+
+    for (const name of model.semanticNames) {
+      const v = semIdx.get(figmaVarName(name))
+      if (!v) continue
+      const baseline = semanticToken(model, theme, name)
+      if (!baseline) continue
+      const next = serializeVarValue(v, modeId, baseline, varById, model)
+      if (next === null || next === baseline.rawValue) continue
+
+      const owner = owningSet(model, theme, name)
+      if (owner !== undefined) {
+        // this theme already defines the token — write in place
+        const clone = cloneOf(owner)
+        if (clone !== undefined && applyLeaf(clone, name, next, baseline)) {
+          dirty.add(owner)
+          changes.push({
+            path: `${theme.id} · ${name}`,
+            oldValue: baseline.rawValue,
+            newValue: next,
+          })
+        }
+        continue
+      }
+
+      // inherited-only → materialize an override in the theme's own file
+      if (target === undefined) continue
+      const clone = cloneOf(target)
+      if (clone === undefined) continue
+      if (createLeafAtPath(clone, name, next, { type: baseline.type })) {
+        dirty.add(target)
+        changes.push({
+          path: `${theme.id} · ${name} (new override)`,
+          oldValue: baseline.rawValue,
+          newValue: next,
+        })
+        log(`Materialized override: ${name} → ${target} (${theme.id})`, 'info')
+      }
     }
+  }
+
+  const changed: Array<{ path: string; content: string }> = []
+  for (const set of model.metadata.tokenSetOrder) {
+    if (!dirty.has(set)) continue
+    changed.push({
+      path: `${TOKENS_DIR}/${set}.json`,
+      content: JSON.stringify(clones.get(set), null, 2) + '\n',
+    })
   }
 
   // Warn about Figma variables that aren't in any pulled set (ignored on push).

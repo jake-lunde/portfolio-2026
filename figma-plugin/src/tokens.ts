@@ -229,6 +229,83 @@ export function semanticToken(
   return undefined
 }
 
+/**
+ * The semantic set a theme OWNS — the file an override MATERIALIZES into when
+ * a designer edits a token that this theme merely inherits (see push()).
+ * It's the enabled semantic set no OTHER theme enables (the theme's private
+ * layer); if several qualify, the last in tokenSetOrder wins (most specific),
+ * so classic-light picks semantic/classic-light over the shared-in-spirit
+ * semantic/scale.
+ */
+export function writeTargetSet(model: PulledModel, theme: ThemeDef): string | undefined {
+  const mine = enabledSemanticSets(theme)
+  const others = new Set<string>()
+  for (const t of model.themes) {
+    if (t === theme) continue
+    for (const s of enabledSemanticSets(t)) others.add(s)
+  }
+  const priv = mine.filter((s) => !others.has(s))
+  const pool = priv.length ? priv : mine
+  let best: string | undefined
+  let bestIdx = -Infinity
+  for (const s of pool) {
+    const i = model.metadata.tokenSetOrder.indexOf(s)
+    if (i >= bestIdx) {
+      bestIdx = i
+      best = s
+    }
+  }
+  return best
+}
+
+/**
+ * The set within a theme's own enabled sets that DEFINES `name` — i.e. where an
+ * edit should be written back. undefined means the theme only inherits the
+ * token (via semanticToken's cross-theme fallback), so the caller materializes.
+ */
+export function owningSet(
+  model: PulledModel,
+  theme: ThemeDef,
+  name: string
+): string | undefined {
+  for (const set of enabledSemanticSets(theme)) {
+    if ((model.semanticSets[set] ?? []).some((t) => t.path === name)) return set
+  }
+  return undefined
+}
+
+/**
+ * Materialize a NEW leaf at a dotted path, creating intermediate groups and
+ * carrying $type/$description over from the inherited token being overridden.
+ * Returns false if anything already occupies the path (never clobbers) or if a
+ * path segment collides with an existing leaf — the A8 failure mode, refused
+ * here rather than silently nested.
+ */
+export function createLeafAtPath(
+  fileObj: unknown,
+  path: string,
+  value: string,
+  proto?: Pick<FlatToken, 'type'> & { description?: string }
+): boolean {
+  if (fileObj === null || typeof fileObj !== 'object') return false
+  const segs = path.split('.')
+  let node = fileObj as Record<string, unknown>
+  for (let i = 0; i < segs.length - 1; i++) {
+    const seg = segs[i]
+    const nxt = node[seg]
+    if (nxt === undefined) node[seg] = {}
+    else if (nxt === null || typeof nxt !== 'object' || '$value' in (nxt as object)) return false
+    node = node[seg] as Record<string, unknown>
+  }
+  const last = segs[segs.length - 1]
+  if (node[last] !== undefined) return false
+  const leaf: Record<string, unknown> = { $value: value }
+  if (proto?.type) leaf.$type = proto.type
+  if (proto?.description) leaf.$description = proto.description
+  node[last] = leaf
+  return true
+}
+
 // ---------------------------------------------------------------------------
 // Reference resolution (ref string -> Figma variable identity)
 // ---------------------------------------------------------------------------
