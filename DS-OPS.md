@@ -242,3 +242,105 @@ staging page, diff it, promote deliberately.
 | Verifying styles through transitions | Computed styles read mid-transition look stale | Disable transitions when probing computed values in CI/headless |
 
 — FABLE 🎛️
+
+## Weavy / Figma Weave — viability scout (HERTZ, 2026-07-19)
+
+**What it is.** Weavy (Tel Aviv, founded 2024) was acquired by Figma in
+October 2025 for ~$200M and rebranded **Figma Weave**. It's a node-based
+generative-media canvas: nodes are typed functions (prompt, generate,
+style-transfer, upscale, background-removal, color-grade, image→video) wired
+together into a branching pipeline, chaining 50+ third-party models (Flux,
+Ideogram, Nano-Banana/Seedream, Veo, Sora, Kling, Seedance). It is explicitly
+**not** a design-token or variables tool — no mention of tokens/CSS
+variables anywhere in Figma's own docs or blog. Ships two surfaces: a
+standalone Weave canvas (weave.figma.com) and a growing set of "Weave tools"
+embedded directly in Figma Design's Tools menu (generate mockup, transfer
+style, replace background, change lighting, text-to-vector, apply color
+palette).
+
+**Access/integration reality.** Separate billing from core Figma seats.
+Free: 150 credits/mo, 5 workflows. Starter/Professional/Team tiers
+$10/1,000–1,200 credits with rollover; Team ~$48/seat/mo incl. 4,500
+credits. In-Figma Weave tools require Professional/Org/Enterprise plan +
+`can edit` access; currently **open beta, free, no credits consumed** — GA
+will meter them. Figma↔Weave integration today: paste a Figma frame onto
+the Weave canvas as a live node (edits in Figma reflect into the workflow);
+outputs paste back into a Figma file as flat image layers. No public
+API/webhook surface found for scripted/headless automation — everything is
+canvas-driven, human-in-the-loop. Workflows (saved node graphs) are
+shareable/publishable to Figma Community as templates.
+
+**Concrete LUNDE OS fits, ranked:**
+1. **Per-skin ASSET generation (best fit).** A workflow — moodboard/base
+   illustration in, style-transfer + palette-apply nodes keyed to a skin's
+   sampled hexes, batch-variation node out — maps well to producing wallpaper
+   tile sets, booth-filter LUT-style looks, and plate/stamp imagery per skin
+   (classic/medieval/underwater). This is squarely what "apply color palette"
+   + "transfer style" + batch variation nodes are built for. Output is flat
+   PNGs/SVGs a human drags into `public/` — no automation hook into our
+   `ref/→public` pipeline exists, so it stays a manual art-production step,
+   not a build-time generator.
+2. **Moodboard → palette exploration feeding token authoring (decent fit,
+   pre-token).** Import-node moodboards + "apply color palette" could
+   usefully rough out a candidate hue direction before Jake hand-samples
+   exact hexes into `core` — but the output is inspiration/reference, not
+   anything that enters the pipeline directly; a human still eyeballs and
+   commits real values.
+3. **Anything token/variable-adjacent — confirmed none.** Verified plainly:
+   Weave has no concept of Figma Variables, modes, or design tokens. It
+   consumes and emits pixels/vectors, not values. It cannot touch our
+   `tokens/` JSON, Style Dictionary, or TOKEN BRIDGE plugin in any way.
+
+**Hard limits (what it is NOT for us).** Not a variables/tokens tool. Not
+scriptable/headless (no API found) — can't be wired into `scripts/
+build-tokens.mjs` or CI. Not free at scale (credits meter fast on
+video/premium models; our use is images/vectors, cheaper tier, but still
+metered post-GA). Output is raster/vector *assets*, always a manual
+production step layered on top of, never inside, the token pipeline.
+
+**Verdict: viable-later, as an art-production accelerant — not a
+design-system tool.** It has zero surface area for the token/variables work
+that's actually in flight (A8, bridge, doctor); its value is purely
+speeding up bespoke per-skin imagery, which is real but orthogonal to
+DS-OPS.
+
+**Cheap next probe (~1hr).** Sign up free tier at weave.figma.com, build one
+workflow: import a medieval-skin plate/photo reference → style-transfer node
+using the medieval parchment/vermilion palette → batch-variation node → export
+3–5 wallpaper-tile candidates. Time-box to 60 min and judge purely on "would
+this beat Jake hand-illustrating/photobashing a tile" — if yes, worth a
+follow-up spend; if the outputs need heavy cleanup, park it.
+
+**Sources — fetched:**
+- [Introducing Figma Weave (Figma Blog)](https://www.figma.com/blog/welcome-weavy-to-figma/)
+- [Connecting Figma and Weave (Figma Blog)](https://www.figma.com/blog/connecting-figma-and-weave/)
+- [Use Weave tools in Figma (Figma Help Center)](https://help.figma.com/hc/en-us/articles/40779260614935-Use-Weave-tools-in-Figma)
+- [Figma Weave (formerly Weavy) review — designtools.fyi](https://designtools.fyi/tools/figma-weave)
+- Web search results on pricing (help.weavy.ai subscription/credit articles) and node model (help.weavy.ai "Understanding Nodes")
+
+**Substituted (transcripts blocked):** The YouTube tutorial playlist
+(`PLu0WpBQHUSql4tPg9BHzvp-7ajhDMRFBE`) and inspiration video
+(`h7i31pJenMg`) returned only page chrome via WebFetch — YouTube transcripts
+aren't reachable over plain HTTP fetch, as expected. The single video
+resolved to a **Config 2026 talk, "From handoffs to upstream ft. Frederick
+Andersen (EDL)"** — a handoff/workflow talk, not confirmed Weave-specific
+content; treat that title with caution, it may be a playlist/ID mismatch
+rather than a true substitute. In place of the playlist I substituted
+written coverage of Weavy tutorials/node fundamentals (Weavy's own "
+Understanding Nodes" doc, Wireflow's "Weavy Workflows" writeup, and a
+Chase Jarvis walkthrough of style-transfer/moodboard use) found via
+WebSearch — directionally consistent with the docs findings above but not a
+1:1 substitute for watching the actual playlist.
+
+— HERTZ 📡
+
+**FABLE verdict (2026-07-19):** Agreed with HERTZ: Weave is an art-production
+accelerant, not a DS tool — park it until the underwater skin's asset pass,
+where the 1-hour style-transfer probe (base illustration + skin palette →
+wallpaper/plate candidates) is exactly the cheap test, and the win condition
+is "beats hand-illustrating," nothing grander. Note: the "inspiration" video
+is Frederick Andersen's Config talk on moving designers upstream of handoff —
+that's not Weave adjacent, it's the thesis of the DS-mirror/autonomy work we
+shipped this session: the designer edits the system of record directly and
+the pipeline (bridge → doctor → CI) replaces the handoff. Our innovation
+budget stays there; Weave joins when assets are the bottleneck.

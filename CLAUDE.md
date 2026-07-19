@@ -1,264 +1,93 @@
-# Portfolio Site — Build Brief
-
-> Single source of truth for what we're building and how it should look, feel, and perform. Claude Code reads this every session. When in doubt, match the references and honor the guardrails (§14).
-> **Also read `HANDOFF.md`** — the living operating manual + prioritized backlog written at the v0.2 handoff (2026-07-07). This file is design law; that file is process + state.
-
----
-
-## 0. What this is
-
-A custom-coded portfolio for **Jake Lunde**, a principal-level product designer repositioning as a **design engineer**. The site is not a container for the work — **the site is the work.** Its craft, motion, and performance are the primary evidence that Jake builds, not just designs. Audience: hiring managers and design leaders at Google-tier tech and fintech.
-
-**The concept has evolved.** This is no longer a linear "scroll through case studies" site. It is a **retro desktop operating system you explore** — a small, beautiful, fictional OS where each part of the portfolio is a *program* you open in a *window*. Think **[poolsuite.net](https://poolsuite.net)** for the interaction model (desktop, icons, windowed apps, a persistent vibe), fused with the **print-archive aesthetic** of the references in §2 (duotone government reports, CRT terminals, redacted dossiers, bold foreign-language type).
-
-**Tone:** simple, concise, beautiful, experimental, a little playful. Restrained but cutting-edge. It should feel like operating a well-made machine from a parallel 1992 that somehow runs on modern web tech. Never a template. Never a deck. **Scale and simplicity above all** — one clear thing at a time, generous space, nothing crowded.
-
-**Non-negotiables**
-- Every interaction is intentional, fast, and tactile. No jank, no gratuitous animation.
-- Content-first: the writing carries the work; the OS shell frames it.
-- The visual system (§3) is fixed. Don't improvise new colors or type scales.
-- Ship accessible (WCAG AA), keyboard-navigable, reduced-motion-aware — even inside the "toy OS" conceit.
-- **Built iteratively.** Jake will grow this over time. Architect for adding new "programs" easily.
-
----
-
-## 1. The metaphor & structure (the model)
-
-A **desktop environment**. On load: a textured desktop, a top **menu bar** (system name, live clock, light/dark toggle, sound toggle), and a set of **program icons** (desktop icons and/or a dock). Opening a program launches a **window** — a titled, chrome-framed container that partitions its content. Windows are the core organizing device (the references are full of boxed panels; lean into that).
-
-**Programs (v1 → later).** Build the shell to register programs declaratively so new ones drop in cleanly:
-
-- **`README` / About** — bio + the design-engineer positioning. First-run window.
-- **`Projects`** — a Finder-like index of case studies; opening one launches a case-study window. **Greenlight Invest is the first and is already written** (§2). Family Hub, Tooling, and the meta "Interview Pipeline" come later.
-- **`Now Playing`** — what Jake's listening to. *Later:* Apple Music (MusicKit JS) or a YouTube player. Stub the UI now, wire the API later.
-- **`Studio`** — an audio player for Jake's **own** music. Persistent playback across windows (see §2 stack rationale).
-- **`Visualizers`** — fun generative / audio-reactive visualizers. Pure play; a place to show craft.
-- **`Guestbook`** — visitors sign it. *Later:* needs a tiny backend (serverless + a store). Stub now, persist later.
-- **`Arcade`** — small games. Later.
-- **`Settings`** — light/dark, accent, sound on/off.
-
-Treat this list as a starting set, not a spec to complete in one pass. **`Projects` (with Invest) + `README` + the desktop shell + light/dark are the v1 core.** Everything else is scaffolded and filled in over time.
-
-**Desktop wallpaper patterns (revised 2026-07-07 — replaced the oversized ambient CJK glyphs, which read as over-used).** The desktop texture layer is a user-selectable tiled **pattern wallpaper** in the spirit of classic Mac OS desktop patterns crossed with the print refs (fisheries guilloché waves, De School grid, halftone specks). Theme-aware (ink-on-paper both modes, low opacity), picked in Settings, persisted. Adding a pattern = one SVG tile + one registry entry. Foreign type survives only in small accents (version strings like `1992年アメリカ製`, stamps) — always `aria-hidden`, never content.
-
----
-
-## 2. Tech stack (decision — changed from the earlier draft, on purpose)
-
-**Recommended now: Next.js (App Router) + Motion + MDX.**
-
-The earlier brief said Astro. That was right for a linear content site. **It's the wrong default now** that the product is an interactive desktop environment with persistent, cross-window state (an audio player that keeps playing as you open/close windows, draggable/stacking windows, a live guestbook, a stateful density slider, games). That is a stateful SPA shell, which is React's home turf.
-
-- **Next.js App Router** for the shell, routing (deep-link each open program, e.g. `/projects/greenlight-invest`), SSG/SSR for SEO on case studies.
-- **MDX** for case studies (`@next/mdx` or `next-mdx-remote`) so prose stays portable and editable, and so custom components (Plate, MoatDiagram, density blocks) embed inline.
-- **Motion** (`motion/react`, formerly Framer Motion) for window physics, open/close, drag, and micro-interactions. **GSAP + ScrollTrigger** only if a specific scrubbed sequence needs it.
-- **State:** a light global store (Zustand) for window manager, audio player, and theme. Persist theme/guestbook-name to `localStorage`.
-- **Styling:** CSS Modules or vanilla-extract with the design tokens (§3) as CSS custom properties. Tailwind optional; if used, map tokens into the theme and never use stock Tailwind colors.
-- **Persistence (later):** guestbook → a serverless route + a small store (Vercel Postgres/KV or Supabase). Note as a follow-up; stub with local state first.
-- **Media (later):** Apple MusicKit JS needs a developer token + user auth (heavier); YouTube IFrame API is lighter. Decide when we get there; build `Now Playing` against a simple interface so the provider is swappable.
-- **Deploy:** Vercel. Static where possible.
-
-_If Jake later decides the content/SEO story outweighs the app interactivity, Astro + React islands remains defensible — but the desktop metaphor tilts clearly to Next/React and I'd only switch back with a reason._
-
----
-
-## 3. Visual system & design tokens (fixed)
-
-The identity is **"a retro OS built out of old printed technical documents."** Two accents now — **NASA blue** and **Doppler pink** — replacing the earlier single orange (retired). Full **light + dark**, user-toggleable.
-
-```css
-:root{
-  /* LIGHT (default) — warm print stock */
-  --paper:      #E7E1D2;   /* cream base / desktop */
-  --paper-2:    #DED7C4;   /* window surface */
-  --ink:        #17150D;   /* near-black text */
-  --ink-soft:   #5A564A;   /* secondary text, mono labels */
-  --plate:      #131811;   /* dark figure panels inside light UI */
-  --line:       rgba(23,21,13,.18);
-
-  /* ACCENTS (both modes) */
-  --blue:       #2440C7;   /* NASA cobalt — PRIMARY: interactive, active window, links, system */
-  --pink:       #F2A6C2;   /* Doppler pink — SECONDARY: highlights, data-viz, playful accents */
-  /* sample exact hexes from the NASA + Doppler reference images when they're in the repo */
-
-  /* duotone tints */
-  --green:      #2E4A38;   /* retained for one duotone family (old-report green) */
-}
-
-[data-theme="dark"]{
-  /* DARK — CRT / terminal night */
-  --paper:      #0D100C;   /* void desktop */
-  --paper-2:    #14181A;   /* window surface, faint blue-black */
-  --ink:        #E9E4D5;   /* warm off-white text */
-  --ink-soft:   #8A9A93;   /* muted CRT gray-green */
-  --plate:      #090C0A;
-  --line:       rgba(233,228,213,.16);
-  /* accents stay blue + pink but read as glows against the dark; allow a subtle bloom */
-}
-```
-
-**Accent discipline.** Blue is the *system* accent — active window chrome, focus, links, primary controls. Pink is the *expressive* accent — data-viz marks, hover delight, the one thing on screen you want the eye to catch. Never introduce a third hue. Use each sparingly; the base is cream/void, not color.
-
-**Texture (identity-critical), layered:**
-- **Paper grain** on light surfaces (fixed SVG `feTurbulence`, ~0.5 opacity, `mix-blend-mode:multiply`).
-- **CRT treatment** available for dark/terminal windows (subtle scanlines + faint bloom on accents + optional slight chromatic edge). Tasteful, and disabled under reduced-motion.
-- **Halftone dots** on dark "plate" figures (`radial-gradient`, `mix-blend-mode:overlay`).
-- **Archival marks** as an accent vocabulary: rubber-stamp blocks, redaction bars, circled-in-pink annotations, paperclip/photo-corner framing, mono "DOCUMENT ID / FIG. 01" labels (see the 3AM Archive + fisheries + NASA refs). Use for section headers, empty states, easter eggs — not everywhere.
-
-**Duotone imagery.** Screenshots/photos render **duotone** as if plated in an old book: ink + blue (NASA family) or ink + green (report family), with grain. Provide a reusable `Duotone` treatment (CSS filter or SVG `feColorMatrix`) so any image dropped in inherits the look. **Jake is adding real images later (§11) — build the treatment now against placeholders so real assets slot in without rework.**
-
-**Layout.** Windows partition everything. Inside a window: content column ~720–820px; full-bleed figures wider. Generous vertical rhythm; hairline rules; mono section numbers (`01 —`). **Restraint and scale over density** — this is the most important layout rule.
-
----
-
-## 4. Typography
-
-- **Type system (decided 2026-07-07): the Geist family.** **Geist Pixel** for display/headings (single 400 weight, letter-spacing 0 — never negative-track a pixel font; it has no CJK glyphs, so CJK never sets in it). **Geist** for body (~17–18px, line-height ~1.6, measure ~64ch). **Geist Mono** for all mono surfaces (labels, captions, window chrome, figure numbers, metadata, terminals). Geist + Geist Mono via `next/font/google`; Geist Pixel self-hosted (`src/app/fonts/`, OFL) until next/font's data includes it.
-- **CJK / foreign display:** a bold sans CJK face for the big decorative frequency-poster moments and ambient glyph texture. Decorative only, `aria-hidden`.
-- Self-host; preload; `font-display:swap`; no CLS.
-
----
-
-## 5. Desktop & window chrome
-
-- **Menu bar (top):** system wordmark (`LUNDE OS`, version string `1992年アメリカ製`), live clock, light/dark toggle, sound toggle. Classic-Mac restraint.
-- **Desktop:** textured field; program icons (and/or a dock). Ambient foreign glyphs behind.
-- **Window:** titled bar (name + mono meta like `SPEC-01`), close/zoom controls, framed body with the archival/CRT texture appropriate to the program. Windows open with tactile spring motion (§9), can stack/focus (blue active chrome), and are responsive — on mobile they go full-bleed and become a stack/tab model rather than free-floating.
-- **Boot/empty states:** lean into the conceit — a brief boot line, a "CALLING…" progress bar (Bell Atlantic ref), a stamped "UNDER CONSTRUCTION" plate for stubs.
-
----
-
-## 6. Data-visualization system
-
-Line-art, single-mark, cream-on-dark or dark-on-cream, blue/pink accents. Each project keeps a signature motif:
-
-- **Invest — frequency bars** ("920.12 FT" ref): vertical hairlines, one pink peak dot. Metrics/adoption.
-- **Invest — Economic Moat:** concentric rings, company at center, rivals → competitors → distant threats outward; nodes tappable for "why ranked here." Interactive React component. (Echoes the Doppler concentric-ring ref beautifully.)
-- **Family Hub — concentric rings** (YOU → … outward): per-member filter model.
-- **Tooling — interlocking circles** (Unit8-style): one per tool.
-- **Meta — orbital ellipses:** the interview→case-study loop.
-- **HUD panels** (REDS Explorer ref) are a good template for dashboard-style stats: boxed mono panels, small pink bar charts, system-info readouts.
-
-Viz animates in on view (draw-on lines, count-up); respects `prefers-reduced-motion`; SVG labeled for a11y.
-
----
-
-## 7. Case studies
-
-Case studies open as windows, authored in **MDX** so prose stays portable and custom components (`Plate`, `MoatDiagram`, `FrequencyBars`) embed inline. Greenlight Invest is written (`case-invest.md`); render it to match the POC.
-
-> **Backlog — not v1 (see the plan's Site-level follow-ups):** a reader-facing "detail" slider that scales a case study from **TL;DR (comically short) → Standard → Deep.** Deliberately deferred so the first pass can focus on the shell + Invest. Don't build it now — just don't architect anything that would block it later (treat reader density as a potential view-state, never a route).
-
-**Case-study window anatomy (from the approved POC, `case-invest-page.html` — re-skin orange → blue/pink):**
-1. Title bar (mono `NN / Project`).
-2. Hero — eyebrow (mono, blue), oversized display title, one-line **thesis** with the key word in **pink**, 4-cell mono meta grid (Role · Partners · Timeline · Shipped).
-3. Numbered sections — `sec-no` (mono, blue) + tight `h2` + prose. Invest order: The gap → The system (three "moves") → Built, not just designed → The call (tradeoff) → What it did (outcome + quote).
-4. Plates/figures — dark panel, mono caption (`Plate NN · label` + `FIG. X`), halftone, dashed placeholders for real assets.
-5. Pull quote — pink left-border, large, mono cite.
-6. Metrics — oversized numerals, pink highlight, mono label, paired with a frequency-bar plate.
-7. Footer — Next project / Index.
-
----
-
-## 8. Component / app inventory (v1)
-
-**Shell:** `Desktop`, `MenuBar` (clock, theme toggle, sound), `Dock`/`DesktopIcons`, `WindowManager`, `Window` (titlebar + controls + chrome), `Boot`.
-**Primitives:** `Plate` + `Placeholder`, `Duotone`, `Stamp`, `Redaction`, `PullQuote`, `MetricStat`, `MovesGrid`, `SectionHeader`, `GlyphField` (ambient foreign type).
-**Case study:** `CaseWindow`. (Reader-density controls are backlog — see the plan.)
-**Islands/interactive:** `MoatDiagram`, `ScrubGraph` (haptic-scrub graph — visual analog on web), `FrequencyBars`, `RingFilter`, `InterlockingCircles`, `OrbitLoop`.
-**Programs:** `About`, `Projects`, `NowPlaying` (stub), `Studio` (audio), `Visualizers`, `Guestbook` (stub), `Arcade` (later), `Settings`.
-
----
-
-## 9. Motion & interactivity
-
-Minor inspiration: **[tol.is](https://tol.is)** — smooth, tactile, spring-based motion; restrained but alive.
-
-- Windows open/close/drag with spring physics; focus transitions are quick and eased (150–350ms, custom cubic-beziers, not linear).
-- One or two "signature" moments max per program (the Moat assembling; a visualizer; a window boot). Everything else is quiet.
-- Micro-interactions on controls (toggles, slider, icons) — tactile feedback, subtle.
-- `prefers-reduced-motion`: replace transforms with instant/opacity; disable CRT flicker and drag inertia.
-- **60fps or it doesn't ship.** Transform/opacity only; avoid layout thrash.
-
----
-
-## 10. Light / dark & settings
-
-- **Manual toggle** in the menu bar; persists to localStorage; respects `prefers-color-scheme` on first visit only.
-- Light = warm print stock; Dark = CRT/terminal night. Both carry blue + pink accents (blue glows in dark).
-- Settings program also exposes: sound on/off, accent emphasis. Keep it minimal.
-
----
-
-## 11. Content & assets
-
-- **Reference content (already produced — read these):** `case-invest.md` (canonical Invest prose → MDX, and the source for the Deep density tier), `case-invest-page.html` (approved art-direction POC — re-skin orange→blue/pink), `portfolio-tracker.md` (facts/metrics/NDA — **honor the ⚠️ accuracy flags**: dates are 2024–2025; Peacock = Comcast/CMCSA), `session-log.md` (raw material for the meta case study).
-- **Inspiration images:** Jake will drop the six references into `/docs/inspo`. They are: (1) Bell Atlantic CRT terminal — teal/blue scanline UI, coin selector, JP text; (2) REDS Explorer HUD — dark dashboard, pink bar charts, boxed panels, foreign glyphs; (3) Fisheries report — green duotone on cream, guilloché border, stamp; (4) NASA Space Bibliography — **royal-blue duotone** satellite on cream, stamps; (5) The 3AM Archive — aged redacted dossier, typewriter mono, red circles, stamps; (6) Doppler poster — bold CJK, pink/black **concentric rings**. Sample the blue and pink from (4) and (6).
-- **⚠️ Images are coming later.** Most figures are placeholders now. Build every image surface (Plate, Duotone, case-study figures, project cards) so real assets slot in **without rework** — fixed aspect ratios, the duotone treatment applied by the component, graceful dashed placeholders until then. Expect a dedicated pass to swap placeholders for real screens, recordings, and photography.
-
----
-
-## 12. Quality bar
-
-- Lighthouse: as high as the interactive shell allows — 95+ on content/case-study routes; keep the desktop shell lean (code-split programs, lazy-load games/visualizers/audio).
-- WCAG AA contrast (verify blue and pink on both cream and void; verify ink-soft). Full keyboard nav for the OS (open/close/focus windows); visible focus; semantic headings; alt text; labeled SVG; `aria-hidden` on all decorative glyph/texture.
-- Responsive from 360px up: windows go full-bleed/stacked on mobile; the desktop degrades to a clean launcher.
-- No CLS from fonts; reduced-motion honored throughout.
-
----
-
-## 13. Build order (iterative — expect Jake to extend)
-
-1. Scaffold Next.js (App Router) + MDX + Motion + Zustand; wire tokens, fonts, grain/halftone/CRT primitives, light/dark toggle.
-2. Build the **Desktop shell**: MenuBar (clock, theme, sound), desktop/icons, `WindowManager` + `Window` with spring motion.
-3. **`Projects` + `CaseWindow`**: render **Greenlight Invest** from MDX to match the POC (re-skinned blue/pink). Static plates/placeholders first.
-4. Islands: `FrequencyBars`, then `MoatDiagram` (interactive), then `ScrubGraph`.
-5. `About` program; project index polish; ambient `GlyphField`.
-6. Motion + a11y + perf pass to hit §12.
-7. Stub `NowPlaying`, `Studio`, `Visualizers`, `Guestbook`, `Arcade`, `Settings` as registered programs with "under construction" plates — fill iteratively.
-
-**v1 ship = desktop shell + Projects/Invest + About + light/dark.** The rest (density slider included) grows over time.
-
----
-
-## 13.5 Agent workflow (Jake's delegation policy, 2026-07-09; hardened 2026-07-11)
-
-**This is session protocol, not a preference — it applies to WHOEVER is
-orchestrating (Fable 5, Opus 4.8, any future model).** Two duties, every
-working session:
-
-1. **Run the deck live.** First action of any build session: report a
-   `dispatch` event via `scripts/cc-report.mjs` (key in `.env.local`); report
-   agent `return`s as they land and a `merge` when you ship. Even a solo
-   session reports its own start/merge — COMMAND.CTR being live IS a feature
-   of the site. Space calls ≥2s.
-2. **Delegate separable work.** Before building, ask: "which of these items
-   could a crew member do from a two-paragraph brief while I build the rest?"
-   If ≥2 such items exist, dispatch (don't fan out — one Sonnet bundle and/or
-   one Opus task, each self-contained with exact file ownership). Only skip
-   delegation when the whole turn is genuinely entangled or trivially small —
-   and say so explicitly in the final reply so Jake can veto the judgment.
-
-Crew roles: **Sonnet 5** (HERTZ research · NYQUIST implementation) for
-well-specified, low-level tasks; **Opus 4.8** (FOURIER synthesis · DOPPLER
-review) for bigger delegated builds and reviews; the orchestrator reviews all
-returns itself (or hands final polish to Fable). Use the crew names in
-dispatch descriptions so the deck narrates truthfully. `CREW.md` holds the
-evolving doctrine on how to split work — read it when planning a dispatch.
-
-## 13.6 End of session — always
-
-Before the final reply of every working session, update `HANDOFF.md`: what
-shipped (files + gotchas), what's in flight, and any new backlog items Jake
-raised. HANDOFF.md is the continuation brief — a session that doesn't write
-itself down didn't happen.
-
-## 14. Guardrails
-
-- Don't add libraries not listed without a reason. Don't invent colors or type scales. Two accents only: blue (system) + pink (expressive).
-- Match the POC and the references before improving on them. Scale and simplicity win over density and cleverness.
-- Keep JS lean; code-split every program; the shell must stay fast.
-- Decorative texture and foreign glyphs are always `aria-hidden` and never carry meaning.
-- Images are placeholders until Jake delivers real assets — never block on them, always make them swappable.
-- When facts are involved, cross-check `portfolio-tracker.md` and honor its ⚠️ flags.
-- Build for extension: adding a new program should be declarative and cheap.
+# LUNDE OS — Law (slim edition, 2026-07-19)
+
+> The binding rules only. Full original brief archived at
+> `docs/BRIEF-ARCHIVE.md` (reference, not law). Process + current state:
+> `HANDOFF.md`. Crew doctrine: `CREW.md`. Token architecture:
+> `tokens/ARCHITECTURE.md`. Read HANDOFF.md at session start — it is ≤80
+> lines by protocol (§4).
+
+## 1. What this is
+
+Jake Lunde's portfolio as a retro desktop OS ("LUNDE OS") — **the site IS
+the work**: its craft, motion, and system-architecture are the evidence
+that Jake builds, not just designs. Audience: design leaders at
+Google-tier tech/fintech. Tone: simple, concise, experimental, a little
+playful; a well-made machine from a parallel 1992. Scale and simplicity
+over density and cleverness. Never a template.
+
+Skins: `classic` (light/dark modes) · `medieval` · `underwater` (future).
+Programs register declaratively (`src/programs/registry.tsx`); adding one
+must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
+
+## 2. Design law
+
+- **Tokens are the single source of truth**: `tokens/` (Tokens Studio
+  JSON) → `npm run tokens:build` → generated CSS/TS. NEVER hand-edit
+  `tokens.generated.css` / `motion.generated.ts`; never hardcode a color
+  that has a token. Semantic roles (`--surface`, `--content`, `--accent`,
+  `--accent-expressive`, `--border`, …) in all product CSS; core
+  primitives never consumed directly.
+- **Two accents per skin**: system (`accent`) + expressive
+  (`accent-expressive`, marks-only where AA fails — enforced by the
+  `accent-expressive-text` indirection). Never a third.
+- Type: display/body/mono via `--display/--sans/--mono` (per-skin values;
+  never negative-track pixel or blackletter faces). Decorative
+  texture/foreign glyphs always `aria-hidden`, never meaning-bearing.
+- Motion: springs from `src/lib/motion.ts` (SPRINGS) — no inline spring
+  literals. 60fps or it doesn't ship; transform/opacity only;
+  `prefers-reduced-motion` honored everywhere.
+- Quality bar: WCAG AA (contrast audited per skin), full keyboard nav,
+  responsive from 360px (windows → full-bleed stack on mobile), no CLS,
+  case-study routes 95+ Lighthouse, shell lean (code-split programs).
+- Images are swappable placeholders until Jake ships assets — fixed
+  ratios, treatments applied by components, never block on them.
+- Facts: cross-check `portfolio-tracker.md`; honor its ⚠️ flags.
+
+## 3. Process rules (hard-won — do not relearn)
+
+1. Dev server and `npm run build` share `.next` and corrupt each other:
+   `preview_stop → build → preview_start`, always. Corruption symptoms →
+   stop server, `rm -rf .next`.
+2. Deploy = push to main (gh authed). GitHub combined status stays
+   "pending" while Chromatic runs — verify deploys via Vercel MCP + a
+   content-marker curl (~1min CDN lag). Never force-push without Jake's
+   explicit OK.
+3. **Never commit:** `ref/`, `portfolio-tracker.md`, `session-log.md`,
+   `invest-pull-quotes.md`, `docs/`, `.env*`. Grep `git status` before
+   every commit. Secrets stay ephemeral; never echo values.
+4. Verify with JS probes over screenshots (hidden preview tab freezes
+   rAF/Motion/CSS transitions — see memory). Filter tool output
+   (grep/head/limits) — never dump unfiltered lists into context.
+5. Blob storage: OIDC `storeId` fallback (no *_READ_WRITE_TOKEN env);
+   versioned blob paths for mutable data (single-path overwrite serves
+   stale CDN).
+6. Task tracking lives in **Notion** (connector available). COMMAND.CTR
+   deck reporting per §4.
+
+## 4. Session protocol (applies to WHOEVER orchestrates)
+
+1. **Run the deck live**: `dispatch` via `scripts/cc-report.mjs` as the
+   first action of a build session; `return`s as they land; `merge` on
+   ship. Solo sessions still report start/merge. Space calls ≥2s.
+2. **Delegate separable work** (doctrine: `CREW.md`): Sonnet (HERTZ
+   research · NYQUIST implementation) for closed tasks; Opus (FOURIER
+   synthesis · DOPPLER review) for open ones; taste/vision never
+   delegated. Going solo requires declaring why in the final reply.
+3. **Budget discipline**: Fable turns = orchestration/taste/review only;
+   execution sessions run Opus-led. New initiative → new session; don't
+   resume epics. Batch asks. (Economics: CREW.md §4.)
+4. **End of session — always**: update `HANDOFF.md` and ROTATE it —
+   HANDOFF.md holds CURRENT STATE (≤60 lines) + the latest session note
+   ONLY; move older notes to `HANDOFF-ARCHIVE.md`. A session that doesn't
+   write itself down didn't happen; a HANDOFF that scrolls burns every
+   future session.
+
+## 5. Guardrails
+
+- No new libraries without a reason. No invented colors or type scales —
+  tokens or nothing.
+- Match the references before improving on them.
+- Build for extension: new program/skin = registry entry + token set, not
+  a rewrite.
+- When a subsystem must hardcode (canvas/audio/SVG), take values from the
+  active skin's token hexes and note the derivation in a comment.

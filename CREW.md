@@ -110,3 +110,20 @@ above suggests what's missing:
   abstraction.
 
 — FABLE
+
+## 7. Session economics (added S17 — the budget doctrine)
+
+Fable is the premium quota; it holds the baton, not the hammer.
+
+- **Fable turns**: orchestration, taste, review, approval. If a turn's
+  work is executable from a written brief, it was the wrong model.
+- **Execution days**: Opus-led sessions dispatching Sonnet; Fable enters
+  for review gates only.
+- **Context is the hidden bill**: new initiative → NEW session (never
+  resume an epic); HANDOFF stays ≤80 lines (rotation is law, CLAUDE.md
+  §4.4); JS probes before screenshots; filtered tool output always
+  (grep/head/limit params); memory files hold durable gotchas so no
+  session re-reads history to relearn them.
+- **Agents**: brief-writing cost < execution cost or don't dispatch
+  (§4); bundle small closed tasks into one dispatch; agents never run
+  builds (single .next owner).
