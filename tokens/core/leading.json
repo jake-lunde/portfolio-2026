@@ -1,0 +1,23 @@
+{
+  "leading": {
+    "$description": "Unitless line-height ramp (primitive). Semantic leading.body=1.6 lives in semantic/scale and is intentionally left untouched.",
+    "none": {
+      "$value": "1"
+    },
+    "tight": {
+      "$value": "1.15"
+    },
+    "snug": {
+      "$value": "1.3"
+    },
+    "normal": {
+      "$value": "1.5"
+    },
+    "relaxed": {
+      "$value": "1.7"
+    },
+    "loose": {
+      "$value": "1.9"
+    }
+  }
+}

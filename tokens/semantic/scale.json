@@ -50,6 +50,166 @@
       "$value": "1.6"
     }
   },
+  "type": {
+    "$description": "Semantic type ramp v1 — role-named groups of plain size/leading/weight/tracking/family sub-tokens referencing core. Fluid roles (display, heading-1) carry clamp() literals to preserve the site's current responsive behavior. The Desktop/Mobile-mode round-trip representation of the fluid sizes, plus DTCG `typography` composites and Figma text-styles, land in the NEXT phase (do not build here).",
+    "display": {
+      "size": {
+        "$value": "clamp(34px, 6vw, 62px)"
+      },
+      "leading": {
+        "$value": "{leading.none}"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
+      "tracking": {
+        "$value": "0"
+      },
+      "family": {
+        "$value": "{display}"
+      }
+    },
+    "heading-1": {
+      "size": {
+        "$value": "clamp(28px, 5.5vw, 38px)"
+      },
+      "leading": {
+        "$value": "{leading.tight}"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
+      "family": {
+        "$value": "{display}"
+      }
+    },
+    "heading-2": {
+      "size": {
+        "$value": "{font-size.4xl}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.snug}"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
+      "family": {
+        "$value": "{display}"
+      }
+    },
+    "heading-3": {
+      "size": {
+        "$value": "{font-size.3xl}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.snug}"
+      },
+      "weight": {
+        "$value": "{weight.bold}"
+      },
+      "family": {
+        "$value": "{sans}"
+      }
+    },
+    "body-lg": {
+      "size": {
+        "$value": "{font-size.2xl}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.relaxed}"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
+      "family": {
+        "$value": "{sans}"
+      }
+    },
+    "body": {
+      "size": {
+        "$value": "{font-size.xl}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "1.62"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
+      "family": {
+        "$value": "{sans}"
+      }
+    },
+    "label": {
+      "size": {
+        "$value": "{font-size.base}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "weight": {
+        "$value": "{weight.bold}"
+      },
+      "tracking": {
+        "$value": "{tracking.14}"
+      },
+      "family": {
+        "$value": "{mono}"
+      }
+    },
+    "caption": {
+      "size": {
+        "$value": "{font-size.xs}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "tracking": {
+        "$value": "{tracking.16}"
+      },
+      "family": {
+        "$value": "{mono}"
+      }
+    },
+    "micro": {
+      "size": {
+        "$value": "{font-size.2xs}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "weight": {
+        "$value": "{weight.bold}"
+      },
+      "tracking": {
+        "$value": "{tracking.20}"
+      },
+      "family": {
+        "$value": "{mono}"
+      }
+    },
+    "mono": {
+      "size": {
+        "$value": "{font-size.base}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "tracking": {
+        "$value": "{tracking.08}"
+      },
+      "family": {
+        "$value": "{mono}"
+      }
+    }
+  },
   "spacing": {
     "component": {
       "xs": {

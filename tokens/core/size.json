@@ -1,5 +1,6 @@
 {
   "size": {
+    "$description": "Superseded by font-size.*; retire in the adoption sweep. Values frozen for parity with 47 existing consumers.",
     "micro": {
       "$value": "8px",
       "$type": "dimension"

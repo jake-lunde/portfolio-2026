@@ -1,0 +1,45 @@
+{
+  "font-size": {
+    "$description": "Clean t-shirt font-size ramp (primitive). Supersedes the role-named core/size.* keys; those stay for parity until the adoption sweep.",
+    "2xs": {
+      "$value": "8px",
+      "$type": "dimension"
+    },
+    "xs": {
+      "$value": "9px",
+      "$type": "dimension"
+    },
+    "sm": {
+      "$value": "10px",
+      "$type": "dimension"
+    },
+    "base": {
+      "$value": "11px",
+      "$type": "dimension"
+    },
+    "md": {
+      "$value": "12px",
+      "$type": "dimension"
+    },
+    "lg": {
+      "$value": "13px",
+      "$type": "dimension"
+    },
+    "xl": {
+      "$value": "15px",
+      "$type": "dimension"
+    },
+    "2xl": {
+      "$value": "16px",
+      "$type": "dimension"
+    },
+    "3xl": {
+      "$value": "18px",
+      "$type": "dimension"
+    },
+    "4xl": {
+      "$value": "22px",
+      "$type": "dimension"
+    }
+  }
+}
