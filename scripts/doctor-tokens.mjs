@@ -321,6 +321,29 @@ function checkRefs(theme, sets, setFlat) {
 }
 
 // ---------------------------------------------------------------------------
+// D7 — type-ramp completeness. Every semantic `type.{role}` group must define
+// at least size + leading + family (a role missing one of these can't render
+// a complete text style). warn-only; the ramp is additive and this is a
+// design-contract guard, not an A8-class safety check.
+// ---------------------------------------------------------------------------
+
+function checkTypeRamp(model) {
+  const REQUIRED = ['size', 'leading', 'family']
+  const scale = model.setRaw['semantic/scale']
+  const typeGroup = scale && scale.type
+  if (!typeGroup || typeof typeGroup !== 'object') return
+  for (const role of Object.keys(typeGroup)) {
+    if (role.startsWith('$')) continue
+    const node = typeGroup[role]
+    if (node === null || typeof node !== 'object') continue
+    const missing = REQUIRED.filter((k) => !(node[k] && '$value' in node[k]))
+    if (missing.length) {
+      warn('D7', `type.${role} is missing required sub-token(s): [${missing.join(', ')}].`)
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Parity harness (--parity [ref]) — regression gate over resolved values.
 //
 // Parses the generated CSS (baseline + current) into selector blocks, layers
@@ -687,6 +710,7 @@ async function main() {
     checkRefs(theme, sets, model.setFlat)
   }
   await checkDeclTripwire(model, OUT_FILE)
+  checkTypeRamp(model)
 
   // D5 + D6 read the generated CSS once (the emitted truth, post-build).
   let currentCss = null
