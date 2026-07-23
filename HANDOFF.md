@@ -25,33 +25,36 @@
   first-load JS perf pass overdue; dataviz hand-drawn medieval pass +
   per-skin language table scoped on Notion; underwater everything.
 
-## Active initiative (session 17 — interrupted by usage limits, resume me)
+## Active initiative — DS-mirror COMPLETE (session 18, 2026-07-19)
 
-**DS-mirror + autonomy** per approved plan
-(`~/.claude/plans/lively-sauteeing-snowflake.md`): FOURIER executing
-steps 0–6 on branch `ds-mirror` — tokens:doctor (collision lint FIRST —
-the A8 bug class), parity harness, interactive matrix + status roles,
-semantic spacing, bridge extended-collections + PUSH materialization
-(**fixes live bug: dark/medieval-mode edits of inherited tokens silently
-dropped**), doctor v2 (contrast/orphans) + CI wiring, RUNBOOK.md.
-STATUS AT INTERRUPTION: **Step 0 LANDED** (doctor-tokens.mjs D1-D4,
-verified: planted dangling ref fires D4+D3, exit codes CI-correct;
-interim push-warn in figma-plugin/src/code.ts ~352). HERTZ Weavy memo
-DONE (DS-OPS.md + FABLE verdict: viable-later, probe at underwater asset
-pass). Budget surgery DONE (CLAUDE.md 264→93, HANDOFF 929→47, CREW §7).
-**STEPS 1–6 REMAIN** — resume as an OPUS-LED session (per CREW §7): read
-the plan file §3 rollout table (~/.claude/plans/lively-sauteeing-
-snowflake.md) — it contains the full design incl. the push
-materialization algorithm (theme-major/name-major, writeTargetSet,
-definition-string comparison), doctor v2 specs (D5 contrast/D6 orphans +
-tokens-sync.yml wiring), interactive/status/spacing token shapes with
-extraction sources, and RUNBOOK outline. FABLE gates: push algorithm
-review + medieval status hues (danger must NOT reuse rubric.vermilion).
-Parity harness (--parity) is step 1 — land before token changes.
+Shipped to main (67d7b30, deploy READY). The token system now mirrors the
+Minimal-DS two-layer reference (our names, their structure) AND the designer
+can update tokens prompt-free:
+- **Bridge PUSH fixed** (e24fb84): dark/medieval-mode edits of INHERITED
+  tokens were silently dropped; now theme-major/name-major with override
+  materialization into the theme's own file. First unit tests in repo
+  (`npm test`, 10 cases on the figma-free tokens.ts logic).
+- **New dimensions** (d007046): interactive state matrix + status roles
+  (positive/warning/danger/info), all 3 skins, every pair AA-audited.
+  Medieval danger = near-black oxblood (vermilion IS the accent, so danger
+  separates by VALUE not hue — documented in-token, "never adjacent").
+- **Semantic spacing** (67d7b30): spacing.component/layout t-shirt scale
+  (reverses old Decision C; --space-N still emits).
+- **tokens:doctor** (c01dd4c + 67d7b30): D1-D2 collision lint (A8 armor),
+  D3 declaration tripwire, D4 refs, D5 AA contrast, D6 orphans, --parity
+  computed-value gate. Wired into tokens-sync.yml (--strict --parity
+  origin/main) — designer PRs self-validate. --strict gates real errors
+  only; not-yet-adopted tokens stay soft warns.
+- **tokens/RUNBOOK.md**: Jake's prompt-free manual (Figma + JSON paths,
+  mode→file landing table, doctor error decode).
 
 ## Next steps
 
-1. Review FOURIER's steps as they land (parity gate each), ship.
-2. Weavy memo → FABLE 3-sentence verdict → Notion.
-3. Later: interactive-token adoption sweep (NYQUIST), responsive type,
-   underwater skin, vocabulary-rename toggle (default off).
+1. **Adoption sweep** (mechanical, delegate): replace ad-hoc hover CSS in
+   primitives.module.css / programs.module.css with the new
+   --interactive-* vars; wire --status-* where states are shown; adopt
+   --spacing-* in new CSS. Clears the 56 D6 "emitted-but-unadopted" warns.
+2. Prove the loop live: edit a Dark-mode inherited token in Figma → PUSH →
+   confirm it materializes in classic-dark.json (the bug that's now fixed).
+3. Later: responsive type composites, underwater skin, vocabulary-rename
+   toggle (off), Weavy probe at underwater asset pass (DS-OPS.md).
