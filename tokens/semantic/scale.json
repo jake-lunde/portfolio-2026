@@ -49,5 +49,47 @@
     "body": {
       "$value": "1.6"
     }
+  },
+  "spacing": {
+    "component": {
+      "xs": {
+        "$value": "{space.1}",
+        "$type": "dimension"
+      },
+      "sm": {
+        "$value": "{space.2}",
+        "$type": "dimension"
+      },
+      "md": {
+        "$value": "{space.3}",
+        "$type": "dimension"
+      },
+      "lg": {
+        "$value": "{space.4}",
+        "$type": "dimension"
+      },
+      "xl": {
+        "$value": "{space.6}",
+        "$type": "dimension"
+      }
+    },
+    "layout": {
+      "sm": {
+        "$value": "{space.4}",
+        "$type": "dimension"
+      },
+      "md": {
+        "$value": "{space.6}",
+        "$type": "dimension"
+      },
+      "lg": {
+        "$value": "{space.8}",
+        "$type": "dimension"
+      },
+      "xl": {
+        "$value": "{space.12}",
+        "$type": "dimension"
+      }
+    }
   }
 }

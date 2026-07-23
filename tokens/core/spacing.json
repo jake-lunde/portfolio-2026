@@ -27,6 +27,10 @@
     "8": {
       "$value": "32px",
       "$type": "dimension"
+    },
+    "12": {
+      "$value": "48px",
+      "$type": "dimension"
     }
   }
 }

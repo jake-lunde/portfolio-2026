@@ -36,6 +36,15 @@ jobs:
       - name: Rebuild tokens.generated.css
         run: npm run tokens:build
 
+      - name: Validate tokens (doctor — collisions, refs, contrast, orphans)
+        # The self-validating gate for designer token PRs. --strict promotes
+        # AA-contrast failures + consumed-but-unemitted vars (the A8 symptom)
+        # to errors; not-yet-adopted new tokens stay soft warnings. --parity
+        # diffs computed values vs main so a stray regression can't slip in
+        # behind an additive PR.
+        run: |
+          npm run tokens:doctor -- --strict --parity origin/main
+
       - name: Commit regenerated artifacts if they changed
         # tokens:build emits the CSS and src/lib/motion.generated.ts (springs
         # consumed by motion/react). Stage only artifacts that EXIST: a PR

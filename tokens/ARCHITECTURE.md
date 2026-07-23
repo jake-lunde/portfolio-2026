@@ -86,3 +86,14 @@ component** vars only — never core. `var(--surface)`, `var(--radius-control)`,
 
 Delegation: FABLE designs + parity gate + Figma; NYQUIST runs the CSS codemod
 sweep (closed, mechanical, grep-verifiable).
+
+## Decision C — REVERSED (2026-07-19, DS-mirror step 3)
+
+Original Decision C kept spacing numeric-only (`--space-1..12`), declining a
+semantic spacing layer. The Minimal-DS reference (Jake's durable target) models
+`Spacing/{Component,Layout}` as a t-shirt dimension, and it reads better in
+Figma than raw numerics. So `semantic/scale.json` now adds
+`spacing.component.{xs..xl}` and `spacing.layout.{sm..xl}` aliasing the `space.N`
+core scale. **Both layers coexist**: `--space-N` still emits unchanged; the
+t-shirt tokens are additive. Adopt `--spacing-component-*` in new CSS; a sweep
+of existing `var(--space-N)` usage is optional and mechanical.

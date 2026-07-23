@@ -14,6 +14,7 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-12: 48px;
   --radius-none: 0;
   --radius-xs: 2px;
   --radius-sm: 4px;
@@ -91,6 +92,15 @@
   --text-label: var(--size-label);
   --text-ui: var(--size-ui);
   --text-body: var(--size-body);
+  --spacing-component-xs: var(--space-1);
+  --spacing-component-sm: var(--space-2);
+  --spacing-component-md: var(--space-3);
+  --spacing-component-lg: var(--space-4);
+  --spacing-component-xl: var(--space-6);
+  --spacing-layout-sm: var(--space-4);
+  --spacing-layout-md: var(--space-6);
+  --spacing-layout-lg: var(--space-8);
+  --spacing-layout-xl: var(--space-12);
   --surface: #e7e1d2;
   --surface-raised: #ded7c4;
   --surface-inverse: #131811;
