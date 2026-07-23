@@ -135,7 +135,7 @@
   --type-body-family: var(--sans);
   --type-label-size: var(--font-size-base);
   --type-label-leading: var(--leading-normal);
-  --type-label-weight: var(--weight-bold);
+  --type-label-weight: var(--weight-regular); /** matches .mono-label (globals.css) which renders at inherited 400; a bolder mono label is a call-site override, not this role */
   --type-label-tracking: var(--tracking-14);
   --type-label-family: var(--mono);
   --type-caption-size: var(--font-size-xs);

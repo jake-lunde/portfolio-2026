@@ -51,7 +51,7 @@
     }
   },
   "type": {
-    "$description": "Semantic type ramp v1 — role-named groups of plain size/leading/weight/tracking/family sub-tokens referencing core. Fluid roles (display, heading-1) carry clamp() literals to preserve the site's current responsive behavior. The Desktop/Mobile-mode round-trip representation of the fluid sizes, plus DTCG `typography` composites and Figma text-styles, land in the NEXT phase (do not build here).",
+    "$description": "Semantic type ramp v1 \u2014 role-named groups of plain size/leading/weight/tracking/family sub-tokens referencing core. Fluid roles (display, heading-1) carry clamp() literals to preserve the site's current responsive behavior. The Desktop/Mobile-mode round-trip representation of the fluid sizes, plus DTCG `typography` composites and Figma text-styles, land in the NEXT phase (do not build here).",
     "display": {
       "size": {
         "$value": "clamp(34px, 6vw, 62px)"
@@ -152,7 +152,8 @@
         "$value": "{leading.normal}"
       },
       "weight": {
-        "$value": "{weight.bold}"
+        "$value": "{weight.regular}",
+        "$description": "matches .mono-label (globals.css) which renders at inherited 400; a bolder mono label is a call-site override, not this role"
       },
       "tracking": {
         "$value": "{tracking.14}"
