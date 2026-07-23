@@ -48,13 +48,26 @@ can update tokens prompt-free:
 - **tokens/RUNBOOK.md**: Jake's prompt-free manual (Figma + JSON paths,
   mode→file landing table, doctor error decode).
 
+**Typography ramp v1 (2026-07-19, 58e655c) — SHIPPED foundation, not yet
+adopted.** core/font-size (2xs..4xl px) + core/leading (none..loose) scales;
+semantic `type.{display,heading-1/2/3,body-lg,body,label,caption,micro,mono}`
+role groups (size/leading/weight/tracking/family, referencing core), grounded
+in the site survey; emits `--type-*` / `--font-size-*` / `--leading-*` vars.
+Parity 0-changed (177 added). doctor gained D7 (type-role completeness). FABLE
+set type.label weight→regular (faithful to .mono-label's inherited 400). The
+new vars are DEFINED-BUT-UNCONSUMED (107 D6 warns — expected).
+
 ## Next steps
 
-1. **Adoption sweep** (mechanical, delegate): replace ad-hoc hover CSS in
-   primitives.module.css / programs.module.css with the new
-   --interactive-* vars; wire --status-* where states are shown; adopt
-   --spacing-* in new CSS. Clears the 56 D6 "emitted-but-unadopted" warns.
-2. Prove the loop live: edit a Dark-mode inherited token in Figma → PUSH →
-   confirm it materializes in classic-dark.json (the bug that's now fixed).
-3. Later: responsive type composites, underwater skin, vocabulary-rename
-   toggle (off), Weavy probe at underwater asset pass (DS-OPS.md).
+1. **Type adoption sweep** (mechanical, delegate): map the 168 raw-px
+   font-sizes + line-heights across src/**.css onto `--type-*` roles
+   (nearest step). Clears the D6 type warns; makes the ramp the real source.
+   Parity here is NOT zero-change (values snap) — Chromatic is the gate.
+2. **Type round-trip finale** (the "next" Jake chose): DTCG `typography`
+   composites ($type:typography) + a custom SD emit (utility classes or
+   grouped props) + NEW bridge capability to create/bind Figma TEXT STYLES
+   from the composites (separate from the variable API) + Desktop/Mobile
+   MODE representation of the fluid display sizes so clamp() is Figma-tunable.
+3. Prior: interactive/status adoption sweep; underwater skin; vocabulary
+   toggle; Weavy probe at underwater asset pass.
+
