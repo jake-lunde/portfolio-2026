@@ -73,9 +73,17 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
    research · NYQUIST implementation) for closed tasks; Opus (FOURIER
    synthesis · DOPPLER review) for open ones; taste/vision never
    delegated. Going solo requires declaring why in the final reply.
-3. **Budget discipline**: Fable turns = orchestration/taste/review only;
-   execution sessions run Opus-led. New initiative → new session; don't
-   resume epics. Batch asks. (Economics: CREW.md §4.)
+3. **Cost discipline — the dominant lever is context SIZE, not model**:
+   window-tokens scale with how big the context is on *every* turn (the
+   whole history re-reads each turn). Measured: ~86% of a marathon
+   session's spend happened on turns already >300k tokens; <100k costs
+   almost nothing. So: **one task = one fresh session** — never resume or
+   reuse a large session for a new task (resuming re-pays the full history
+   from turn 1). Compact or `/clear` when context crosses ~150k; never let
+   a session run to the 1M cap. Keep the orchestrator lean by delegating
+   file-heavy work to subagents (isolation keeps big reads out of the main
+   context). Fable turns = orchestration/taste/review only; execution runs
+   Opus-led. Batch asks. (Economics: CREW.md §4.)
 4. **End of session — always**: update `HANDOFF.md` and ROTATE it —
    HANDOFF.md holds CURRENT STATE (≤60 lines) + the latest session note
    ONLY; move older notes to `HANDOFF-ARCHIVE.md`. A session that doesn't
