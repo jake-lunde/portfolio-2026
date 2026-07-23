@@ -14,9 +14,11 @@
       "core/weight": "enabled",
       "core/tracking": "enabled",
       "core/font": "enabled",
+      "core/font-figma": "disabled",
       "core/layout": "enabled",
       "core/motion": "enabled",
       "semantic/scale": "enabled",
+      "semantic/typography": "disabled",
       "semantic/classic-light": "enabled",
       "component/button": "enabled"
     }

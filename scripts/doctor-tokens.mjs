@@ -344,6 +344,57 @@ function checkTypeRamp(model) {
 }
 
 // ---------------------------------------------------------------------------
+// D8 — typography-composite completeness. Every semantic `type.{role}` needs a
+// matching `typography.{role}` DTCG composite (the Figma text-style manifest
+// the TOKEN BRIDGE expands + binds). Missing composite / member = warn (the
+// contract is additive); a dangling member {ref} = error, since it would break
+// text-style creation on PULL (a D4-class breakage).
+// ---------------------------------------------------------------------------
+
+function checkTypographyComposites(model) {
+  const typoRaw = model.setRaw['semantic/typography']
+  if (!typoRaw || typeof typoRaw.typography !== 'object') return
+  const composites = typoRaw.typography
+  const MEMBERS = ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'fontStyle']
+
+  // every `type.{role}` in the ramp should have a composite
+  const scale = model.setRaw['semantic/scale']
+  const ramp = scale && scale.type && typeof scale.type === 'object' ? scale.type : {}
+  for (const role of Object.keys(ramp)) {
+    if (role.startsWith('$')) continue
+    if (!(role in composites)) {
+      warn('D8', `type.${role} has no matching typography.${role} composite (no text style will be created).`)
+    }
+  }
+
+  // union of every defined token path (for resolving composite member refs)
+  const defined = new Set()
+  for (const set of Object.keys(model.setFlat)) {
+    for (const t of model.setFlat[set]) defined.add(t.path)
+  }
+
+  for (const role of Object.keys(composites)) {
+    if (role.startsWith('$')) continue
+    const node = composites[role]
+    if (!node || node.$type !== 'typography' || node.$value === null || typeof node.$value !== 'object') {
+      warn('D8', `typography.${role} is not a valid $type:typography composite.`)
+      continue
+    }
+    const val = node.$value
+    const missing = MEMBERS.filter((f) => !(f in val))
+    if (missing.length) warn('D8', `typography.${role} is missing member(s): [${missing.join(', ')}].`)
+    for (const [field, raw] of Object.entries(val)) {
+      const m = /^\{([^}]+)\}$/.exec(String(raw).trim())
+      if (!m) continue // literal (e.g. "0", "Regular") — fine
+      const ref = m[1].trim()
+      if (!defined.has(ref)) {
+        err('D8', `typography.${role}.${field} references {${ref}}, defined in no token set.`)
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Parity harness (--parity [ref]) — regression gate over resolved values.
 //
 // Parses the generated CSS (baseline + current) into selector blocks, layers
@@ -711,6 +762,7 @@ async function main() {
   }
   await checkDeclTripwire(model, OUT_FILE)
   checkTypeRamp(model)
+  checkTypographyComposites(model)
 
   // D5 + D6 read the generated CSS once (the emitted truth, post-build).
   let currentCss = null

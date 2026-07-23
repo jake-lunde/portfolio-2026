@@ -9,6 +9,27 @@
 
 ---
 
+## Rotated: DS-mirror COMPLETE + Typography ramp v1 (session 18, 2026-07-19)
+
+Shipped to main (67d7b30, deploy READY). The token system mirrors the Minimal-DS
+two-layer reference AND the designer can update tokens prompt-free:
+- **Bridge PUSH fixed** (e24fb84): dark/medieval-mode edits of INHERITED tokens
+  were silently dropped; now theme-major/name-major with override materialization.
+  First unit tests in repo (`npm test`, 10 cases on figma-free tokens.ts logic).
+- **New dimensions** (d007046): interactive state matrix + status roles, all 3
+  skins, every pair AA-audited. Medieval danger = near-black oxblood (separates
+  by VALUE not hue — "never adjacent").
+- **Semantic spacing** (67d7b30): spacing.component/layout t-shirt scale
+  (reverses old Decision C; --space-N still emits).
+- **tokens:doctor** (c01dd4c + 67d7b30): D1-D6 lint + --parity gate, wired into
+  tokens-sync.yml (--strict --parity origin/main).
+- **tokens/RUNBOOK.md**: prompt-free manual.
+- **Typography ramp v1** (58e655c): core/font-size + core/leading scales;
+  semantic `type.{display…mono}` role groups; D7 (type-role completeness). Vars
+  were DEFINED-BUT-UNCONSUMED (107 D6 warns — expected).
+
+---
+
 ## 1. State of the system (2026-07-08)
 
 **Live at https://lunde.co** (canonical domain; host is Vercel project

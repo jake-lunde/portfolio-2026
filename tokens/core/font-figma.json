@@ -1,0 +1,14 @@
+{
+  "font-figma": {
+    "$description": "Figma-facing font FAMILY NAMES (bridge-only; never emitted to CSS). The core/font.json stacks are CSS var() chains a Figma text style can't consume, so text-style binding reads real installed family names from here. Classic skin only for now; a medieval override (MedievalSharp / Eagle Lake) is a future per-mode STRING variable — TODO with the Desktop/Mobile mode-axis work.",
+    "display": {
+      "$value": "Geist Pixel"
+    },
+    "sans": {
+      "$value": "Geist"
+    },
+    "mono": {
+      "$value": "Geist Mono"
+    }
+  }
+}

@@ -25,49 +25,47 @@
   first-load JS perf pass overdue; dataviz hand-drawn medieval pass +
   per-skin language table scoped on Notion; underwater everything.
 
-## Active initiative — DS-mirror COMPLETE (session 18, 2026-07-19)
+## Active initiative — Typography round-trip (session 19, 2026-07-23)
 
-Shipped to main (67d7b30, deploy READY). The token system now mirrors the
-Minimal-DS two-layer reference (our names, their structure) AND the designer
-can update tokens prompt-free:
-- **Bridge PUSH fixed** (e24fb84): dark/medieval-mode edits of INHERITED
-  tokens were silently dropped; now theme-major/name-major with override
-  materialization into the theme's own file. First unit tests in repo
-  (`npm test`, 10 cases on the figma-free tokens.ts logic).
-- **New dimensions** (d007046): interactive state matrix + status roles
-  (positive/warning/danger/info), all 3 skins, every pair AA-audited.
-  Medieval danger = near-black oxblood (vermilion IS the accent, so danger
-  separates by VALUE not hue — documented in-token, "never adjacent").
-- **Semantic spacing** (67d7b30): spacing.component/layout t-shirt scale
-  (reverses old Decision C; --space-N still emits).
-- **tokens:doctor** (c01dd4c + 67d7b30): D1-D2 collision lint (A8 armor),
-  D3 declaration tripwire, D4 refs, D5 AA contrast, D6 orphans, --parity
-  computed-value gate. Wired into tokens-sync.yml (--strict --parity
-  origin/main) — designer PRs self-validate. --strict gates real errors
-  only; not-yet-adopted tokens stay soft warns.
-- **tokens/RUNBOOK.md**: Jake's prompt-free manual (Figma + JSON paths,
-  mode→file landing table, doctor error decode).
-
-**Typography ramp v1 (2026-07-19, 58e655c) — SHIPPED foundation, not yet
-adopted.** core/font-size (2xs..4xl px) + core/leading (none..loose) scales;
-semantic `type.{display,heading-1/2/3,body-lg,body,label,caption,micro,mono}`
-role groups (size/leading/weight/tracking/family, referencing core), grounded
-in the site survey; emits `--type-*` / `--font-size-*` / `--leading-*` vars.
-Parity 0-changed (177 added). doctor gained D7 (type-role completeness). FABLE
-set type.label weight→regular (faithful to .mono-label's inherited 400). The
-new vars are DEFINED-BUT-UNCONSUMED (107 D6 warns — expected).
+**Figma TEXT STYLES bound to variables — built, NOT yet shipped (awaiting Jake's
+in-Figma PULL check + his OK to push to main).** Edit a variable (e.g. line
+height), PUSH, and it round-trips to the repo; the text style consumes it.
+- **New tokens**: `core/font-figma.json` (Figma family names — Geist / Geist
+  Mono / Geist Pixel) + `semantic/typography.json` (one DTCG `$type:typography`
+  composite per role, referencing the CSS-facing `type.*` sub-tokens + font-figma
+  names). Both are `disabled` in every $theme → SD emits NOTHING to CSS (parity
+  literally 0-added/0-changed). Crux solved: CSS vs Figma want different units
+  (leading `1.6`⇄`160`%, tracking `0.14em`⇄`14`%, weight str⇄FLOAT, family
+  stack⇄real name) → a Figma-native representation, derived by the bridge.
+- **Bridge** (`figma-plugin/src/{tokens,code}.ts`): PULL expands each composite
+  into a `type` collection (6 bindable vars/role, Figma-native units) + creates
+  one TextStyle/role (`Display`, `Heading/1`…), unit-set-then-bound. PUSH
+  serializes edited `type` vars back through composite refs to the `type.*`
+  sub-tokens in `semantic/scale` — guarded by a baseline compare so an untouched
+  pull→push never delinks (same trap the semantic pass solved). 9 new unit tests
+  (19 total pass); tsc clean; bundle builds.
+- **Doctor D8** (composite completeness; dangling member ref = hard error) +
+  RUNBOOK "Typography" section.
+- **Decisions this session** (Jake): scope = Figma round-trip only (no CSS
+  utility emit); fluid sizes (display/heading-1) pinned to desktop MAX + pull-only
+  (font-size PUSH-back skipped for clamps); font-family/style pull-only; all 3
+  Geist fonts confirmed present in the Figma file.
+- **Verify in Figma**: PULL → expect a `type` collection + 10 text styles, each
+  field 🔗 bound; edit a `line-height` var → PUSH → PR edits the role's `leading`
+  sub-token. **Unverified headless**: that a bound lineHeight FLOAT reads as % —
+  we set unit=PERCENT before binding for exactly this; confirm on first PULL.
 
 ## Next steps
 
 1. **Type adoption sweep** (mechanical, delegate): map the 168 raw-px
    font-sizes + line-heights across src/**.css onto `--type-*` roles
    (nearest step). Clears the D6 type warns; makes the ramp the real source.
-   Parity here is NOT zero-change (values snap) — Chromatic is the gate.
-2. **Type round-trip finale** (the "next" Jake chose): DTCG `typography`
-   composites ($type:typography) + a custom SD emit (utility classes or
-   grouped props) + NEW bridge capability to create/bind Figma TEXT STYLES
-   from the composites (separate from the variable API) + Desktop/Mobile
-   MODE representation of the fluid display sizes so clamp() is Figma-tunable.
+   Parity here is NOT zero-change (values snap) — Chromatic is the gate. (This
+   is where the deferred CSS utility-class emit from composites folds in.)
+2. **Fluid round-trip finale**: Desktop/Mobile MODE axis for the two clamp()
+   sizes so both endpoints are Figma-tunable + PUSH-back (today: pull-only,
+   desktop max). Adds a second mode axis to the bridge (today = skin modes only).
+   Then per-skin (medieval) font-family override on text styles.
 3. Prior: interactive/status adoption sweep; underwater skin; vocabulary
    toggle; Weavy probe at underwater asset pass.
 

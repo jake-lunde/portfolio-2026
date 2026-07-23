@@ -1,0 +1,115 @@
+{
+  "typography": {
+    "$description": "DTCG `typography` COMPOSITES — the Figma-facing view of the type ramp. One composite per role; each member references the CSS-facing sub-tokens in semantic/scale (type.*) plus a Figma family name (font-figma.*). The TOKEN BRIDGE expands each composite into individual bindable variables (Figma-native units: line-height/letter-spacing as %, weight/size as FLOAT, family/style as STRING) in a `type` variable collection, then creates one Figma TEXT STYLE per role bound to them. This set is bridge-only: it is `disabled` in every $theme so Style Dictionary never emits it to CSS (scope decision 2026-07-23 — no CSS utility emit this session). fontStyle mirrors fontWeight (Regular/Bold). Fluid sizes (display, heading-1) are pinned to their clamp() DESKTOP MAX by the bridge and are pull-only until the Desktop/Mobile mode axis lands.",
+    "display": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.display}",
+        "fontSize": "{type.display.size}",
+        "fontWeight": "{type.display.weight}",
+        "lineHeight": "{type.display.leading}",
+        "letterSpacing": "{type.display.tracking}",
+        "fontStyle": "Regular"
+      }
+    },
+    "heading-1": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.display}",
+        "fontSize": "{type.heading-1.size}",
+        "fontWeight": "{type.heading-1.weight}",
+        "lineHeight": "{type.heading-1.leading}",
+        "letterSpacing": "0",
+        "fontStyle": "Regular"
+      }
+    },
+    "heading-2": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.display}",
+        "fontSize": "{type.heading-2.size}",
+        "fontWeight": "{type.heading-2.weight}",
+        "lineHeight": "{type.heading-2.leading}",
+        "letterSpacing": "0",
+        "fontStyle": "Regular"
+      }
+    },
+    "heading-3": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.sans}",
+        "fontSize": "{type.heading-3.size}",
+        "fontWeight": "{type.heading-3.weight}",
+        "lineHeight": "{type.heading-3.leading}",
+        "letterSpacing": "0",
+        "fontStyle": "Bold"
+      }
+    },
+    "body-lg": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.sans}",
+        "fontSize": "{type.body-lg.size}",
+        "fontWeight": "{type.body-lg.weight}",
+        "lineHeight": "{type.body-lg.leading}",
+        "letterSpacing": "0",
+        "fontStyle": "Regular"
+      }
+    },
+    "body": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.sans}",
+        "fontSize": "{type.body.size}",
+        "fontWeight": "{type.body.weight}",
+        "lineHeight": "{type.body.leading}",
+        "letterSpacing": "0",
+        "fontStyle": "Regular"
+      }
+    },
+    "label": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.mono}",
+        "fontSize": "{type.label.size}",
+        "fontWeight": "{type.label.weight}",
+        "lineHeight": "{type.label.leading}",
+        "letterSpacing": "{type.label.tracking}",
+        "fontStyle": "Regular"
+      }
+    },
+    "caption": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.mono}",
+        "fontSize": "{type.caption.size}",
+        "fontWeight": "{weight.regular}",
+        "lineHeight": "{type.caption.leading}",
+        "letterSpacing": "{type.caption.tracking}",
+        "fontStyle": "Regular"
+      }
+    },
+    "micro": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.mono}",
+        "fontSize": "{type.micro.size}",
+        "fontWeight": "{type.micro.weight}",
+        "lineHeight": "{type.micro.leading}",
+        "letterSpacing": "{type.micro.tracking}",
+        "fontStyle": "Bold"
+      }
+    },
+    "mono": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.mono}",
+        "fontSize": "{type.mono.size}",
+        "fontWeight": "{weight.regular}",
+        "lineHeight": "{type.mono.leading}",
+        "letterSpacing": "{type.mono.tracking}",
+        "fontStyle": "Regular"
+      }
+    }
+  }
+}

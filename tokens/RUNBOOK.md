@@ -52,6 +52,45 @@ Three tiers: **core** (primitives — raw ramps; never consumed directly),
 
 ---
 
+## Typography — Figma TEXT STYLES bound to variables
+
+The type ramp round-trips as real Figma **text styles**, so you tune type the
+same way you tune color: edit a variable, PUSH, done.
+
+**How it's wired.** `semantic/typography.json` holds one DTCG `$type:typography`
+composite per role (`display`, `heading-1`…`mono`), each referencing the
+CSS-facing `type.*` sub-tokens in `semantic/scale` plus a Figma font name from
+`core/font-figma.json`. On **PULL** the bridge expands every composite into a
+`type` variable collection — six bindable variables per role
+(`type/<role>/font-size | line-height | letter-spacing | font-weight |
+font-family | font-style`) — and creates/updates one **text style** per role
+(`Display`, `Heading/1`, …) with each field 🔗 **bound** to its variable.
+
+**To change type:** PULL → in the `type` collection edit e.g.
+`type/heading-1/line-height` → **PUSH**. The bridge writes the change back to the
+role's sub-token in `semantic/scale.json` (`type.heading-1.leading`). The text
+style updates because it's bound to the variable — you never edit the style's
+fields directly (they show the variable link).
+
+**Units are Figma-native in the `type` collection** (the bridge converts):
+line-height & letter-spacing are **percent** (CSS `1.6` ⇄ `160`; `0.14em` ⇄
+`14`); weight & size are plain numbers. Don't hand-type `em`/unitless here.
+
+**Caveats (this iteration):**
+- **Fluid sizes** (`display`, `heading-1` use `clamp()`) are **pull-only** —
+  bound to the desktop **max**; editing them in Figma won't PUSH back until the
+  Desktop/Mobile mode axis lands. Every non-fluid size, and all line-heights,
+  round-trip fully.
+- **font-family / font-style are pull-only** (a shared/derived concern); edit
+  families in `core/font-figma.json`. `font-weight` binding is honored by
+  variable fonts; for static families (Geist) the weight is carried by
+  font-style, so its variable may not visibly drive the style.
+- Fonts must exist in the Figma file (Geist / Geist Mono / Geist Pixel).
+- `tokens:doctor` **D8** guards this: every `type.*` role needs a composite and
+  every composite ref must resolve (dangling ref = hard error).
+
+---
+
 ## The gate: `tokens:doctor`
 
 Runs in CI on every `tokens/**` PR (`--strict --parity origin/main`) and
@@ -66,6 +105,9 @@ locally anytime. It makes the **A8 silent-death class impossible**.
 | **D5** | An AA contrast pair fails (`content`/`surface`, `status.*` on-base, …) | Adjust the hue's value. Pre-existing fails are allowlisted in the doctor (with a FIXME) so `--strict` stays enableable. |
 | **D6 (error)** | A `var(--x)` is used in `src/` but **never emitted** | The consumer-side A8 symptom — you renamed/removed a token still in use. |
 | **D6 (warn)** | A token is emitted but **consumed nowhere** | Fine for a new token before its adoption sweep; delete if truly dead. |
+| **D7 (warn)** | A `type.{role}` group is missing `size`/`leading`/`family` | Add the sub-token; a role can't render a complete text style without them. |
+| **D8 (warn)** | A `type.{role}` has no `typography.{role}` composite (or a member is missing) | Add/complete the composite in `semantic/typography.json` so the role gets a text style. |
+| **D8 (error)** | A `typography.*` composite member `{ref}` resolves to nothing | Fix the ref — it would break text-style creation on PULL. |
 | **parity** | A computed value **changed/removed** vs `main` | Intended? If not, you regressed an existing token — only *added* is safe. |
 
 ---

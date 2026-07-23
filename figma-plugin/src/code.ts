@@ -14,26 +14,37 @@ import { GitHub, parseRepo } from './github'
 import {
   buildModel,
   capLines,
+  clampMaxPx,
   coreVarName,
   deepClone,
-  enabledSemanticSets,
+  emToPercent,
   figmaVarName,
   floatToTokenString,
+  floatToWeight,
   formatChangeLine,
   formatChangeMarkdown,
   createLeafAtPath,
   isComponentSet,
   isCoreSet,
+  isFluidSize,
+  isTypeRole,
+  leadingToPercent,
   leafAtPath,
+  memberConcrete,
   owningSet,
+  percentToEm,
+  percentToLeading,
   refStringForTarget,
   resolveKind,
   resolveRef,
   rgbaToTokenString,
   semanticToken,
+  setDefiningPath,
   toFloat,
   toRgba,
+  weightToFloat,
   writeTargetSet,
+  TYPO_FIELDS,
   type ChangeEntry,
   type FlatToken,
   type Metadata,
@@ -41,6 +52,8 @@ import {
   type Rgba,
   type ThemeDef,
   type TokenKind,
+  type TypoField,
+  type TypographyComposite,
 } from './tokens'
 
 // ---------------------------------------------------------------------------
@@ -50,6 +63,7 @@ import {
 const CORE_COLLECTION = 'core'
 const SEMANTIC_COLLECTION = 'semantic'
 const COMPONENT_COLLECTION = 'component'
+const TYPE_COLLECTION = 'type'
 const PR_BRANCH = 'design-tokens'
 const PR_TITLE = 'tokens: edits from TOKEN BRIDGE (Figma)'
 const PR_BODY_INTRO =
@@ -309,6 +323,11 @@ async function pull(gh: GitHub, branch: string): Promise<void> {
     } variables (${model.themes.map((t) => t.id).join(', ')}).`,
     'ok'
   )
+
+  // Expand typography composites into a `type` collection of bindable variables
+  // + one Figma TEXT STYLE per role. Runs last so all core/semantic targets the
+  // composites resolve against already exist.
+  await pullTextStyles(model)
 }
 
 function representativeSemantic(model: PulledModel, name: string): FlatToken | undefined {
@@ -345,6 +364,158 @@ function setValue(
   if (kind === 'COLOR') v.setValueForMode(modeId, toRgba(token.rawValue))
   else if (kind === 'FLOAT') v.setValueForMode(modeId, toFloat(token.rawValue))
   else v.setValueForMode(modeId, token.rawValue)
+}
+
+// ---------------------------------------------------------------------------
+// Typography — `type` collection variables + Figma TEXT STYLES
+// ---------------------------------------------------------------------------
+
+/** Figma-native values for one role, resolved + unit-converted from a composite. */
+type FigmaTypo = {
+  fontFamily: string
+  fontStyle: string
+  fontSize: number // px (fluid roles -> desktop max)
+  fontWeight: number
+  lineHeight: number // PERCENT
+  letterSpacing: number // PERCENT
+  fluidSize: boolean
+}
+
+/** field -> `type/<role>/<suffix>` variable name + Figma resolvedType. */
+const TYPE_VAR_SPEC: Record<TypoField, { suffix: string; kind: TokenKind }> = {
+  fontFamily: { suffix: 'font-family', kind: 'STRING' },
+  fontStyle: { suffix: 'font-style', kind: 'STRING' },
+  fontSize: { suffix: 'font-size', kind: 'FLOAT' },
+  fontWeight: { suffix: 'font-weight', kind: 'FLOAT' },
+  lineHeight: { suffix: 'line-height', kind: 'FLOAT' },
+  letterSpacing: { suffix: 'letter-spacing', kind: 'FLOAT' },
+}
+
+/** Human text-style names (Figma groups on "/"). */
+const STYLE_NAME: Record<string, string> = {
+  display: 'Display',
+  'heading-1': 'Heading/1',
+  'heading-2': 'Heading/2',
+  'heading-3': 'Heading/3',
+  'body-lg': 'Body/Large',
+  body: 'Body/Base',
+  label: 'Label',
+  caption: 'Caption',
+  micro: 'Micro',
+  mono: 'Mono',
+}
+
+function styleNameFor(role: string): string {
+  if (STYLE_NAME[role]) return STYLE_NAME[role]
+  return role
+    .split('-')
+    .map((s) => (s ? s[0].toUpperCase() + s.slice(1) : s))
+    .join(' ')
+}
+
+function typeVarName(role: string, field: TypoField): string {
+  return `type/${role}/${TYPE_VAR_SPEC[field].suffix}`
+}
+
+/** Resolve + unit-convert a composite to the Figma-native values pull writes. */
+function figmaTypoFor(c: TypographyComposite, model: PulledModel): FigmaTypo {
+  const sizeRaw = memberConcrete(c.members.fontSize, model)
+  return {
+    fontFamily: memberConcrete(c.members.fontFamily, model),
+    fontStyle: memberConcrete(c.members.fontStyle, model),
+    fontSize: clampMaxPx(sizeRaw),
+    fontWeight: weightToFloat(memberConcrete(c.members.fontWeight, model)),
+    lineHeight: leadingToPercent(memberConcrete(c.members.lineHeight, model)),
+    letterSpacing: emToPercent(memberConcrete(c.members.letterSpacing, model)),
+    fluidSize: isFluidSize(sizeRaw),
+  }
+}
+
+/** The Figma-native value pull assigns to a given field's variable. */
+function figmaValueForField(ft: FigmaTypo, field: TypoField): string | number {
+  switch (field) {
+    case 'fontFamily':
+      return ft.fontFamily
+    case 'fontStyle':
+      return ft.fontStyle
+    case 'fontSize':
+      return ft.fontSize
+    case 'fontWeight':
+      return ft.fontWeight
+    case 'lineHeight':
+      return ft.lineHeight
+    case 'letterSpacing':
+      return ft.letterSpacing
+  }
+}
+
+async function pullTextStyles(model: PulledModel): Promise<void> {
+  if (!model.typographyComposites.length) return
+
+  const typeCol = await getOrCreateCollection(TYPE_COLLECTION)
+  const modeId = typeCol.modes[0].modeId
+  // Rebuild the index AFTER creating the collection so it's present.
+  const index = await buildVarIndex()
+
+  let styleCount = 0
+  for (const c of model.typographyComposites) {
+    const ft = figmaTypoFor(c, model)
+    const vars = {} as Record<TypoField, Variable>
+    for (const field of TYPO_FIELDS) {
+      const v = getOrCreateVariable(typeVarName(c.role, field), typeCol, TYPE_VAR_SPEC[field].kind, index)
+      vars[field] = v
+      v.setValueForMode(modeId, figmaValueForField(ft, field))
+    }
+    try {
+      await upsertTextStyle(c.role, ft, vars)
+      styleCount++
+    } catch (e) {
+      log(`Text style "${styleNameFor(c.role)}" skipped: ${errorText(e)}`, 'warn')
+    }
+  }
+
+  log(
+    `Upserted ${model.typographyComposites.length * TYPO_FIELDS.length} type variables + ${styleCount} text styles.`,
+    'ok'
+  )
+}
+
+/** Create-or-reuse (by name) a TextStyle and bind each field to its variable. */
+async function upsertTextStyle(
+  role: string,
+  ft: FigmaTypo,
+  vars: Record<TypoField, Variable>
+): Promise<void> {
+  const name = styleNameFor(role)
+  const styles = await figma.getLocalTextStylesAsync()
+  const style = styles.find((s) => s.name === name) ?? figma.createTextStyle()
+  style.name = name
+
+  // The font must be loaded before fontName / any font-field binding.
+  await figma.loadFontAsync({ family: ft.fontFamily, style: ft.fontStyle })
+  style.fontName = { family: ft.fontFamily, style: ft.fontStyle }
+  style.fontSize = ft.fontSize
+  // Set PERCENT units BEFORE binding so the bound FLOAT reads as a percentage,
+  // not pixels (our leadings/tracking are unitless/em, i.e. proportional).
+  style.lineHeight = { unit: 'PERCENT', value: ft.lineHeight }
+  style.letterSpacing = { unit: 'PERCENT', value: ft.letterSpacing }
+
+  bindTextField(style, 'fontFamily', vars.fontFamily)
+  bindTextField(style, 'fontStyle', vars.fontStyle)
+  bindTextField(style, 'fontSize', vars.fontSize)
+  bindTextField(style, 'lineHeight', vars.lineHeight)
+  bindTextField(style, 'letterSpacing', vars.letterSpacing)
+  // fontWeight is carried by fontStyle for STATIC families (Geist), so this may
+  // be a no-op/refused — bind opportunistically (variable fonts honor it).
+  bindTextField(style, 'fontWeight', vars.fontWeight)
+}
+
+function bindTextField(style: TextStyle, field: VariableBindableTextField, v: Variable): void {
+  try {
+    style.setBoundVariable(field, v)
+  } catch (e) {
+    log(`  bind ${style.name}.${field} skipped (${errorText(e)}).`, 'warn')
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -466,6 +637,61 @@ async function push(gh: GitHub, branch: string): Promise<void> {
           newValue: next,
         })
         log(`Materialized override: ${name} → ${target} (${theme.id})`, 'info')
+      }
+    }
+  }
+
+  // --- typography: `type` collection -> composite member sub-tokens ---
+  // Only write a field back when the designer actually CHANGED the variable
+  // from the value pull wrote (compare against the baseline), so an untouched
+  // pull→push never delinks a `type.*` sub-token from its core alias. Fluid
+  // sizes and font family/style are pull-only (see plan).
+  const typeCol = cols.find((c) => c.name === TYPE_COLLECTION)
+  if (typeCol && model.typographyComposites.length) {
+    const typeMode = typeCol.modes[0].modeId
+    const typeIdx = index.get(typeCol.id) ?? new Map<string, Variable>()
+    for (const c of model.typographyComposites) {
+      const ft = figmaTypoFor(c, model)
+      for (const field of TYPO_FIELDS) {
+        const member = c.members[field]
+        // round-trips only via a `type.<role>.*` sub-token (not literals,
+        // {weight.regular} defaults, or {font-figma.*} families)
+        if (!member.isAlias || !isTypeRole(member.aliasRef as string)) continue
+        const v = typeIdx.get(typeVarName(c.role, field))
+        if (!v) continue
+        const raw = v.valuesByMode[typeMode]
+        if (raw === undefined || isAliasValue(raw)) continue
+
+        let next: string | null = null
+        if (field === 'fontSize') {
+          if (ft.fluidSize) continue // pull-only
+          if (Math.abs((raw as number) - ft.fontSize) < 1e-6) continue
+          next = floatToTokenString(raw as number)
+        } else if (field === 'lineHeight') {
+          if (Math.abs((raw as number) - ft.lineHeight) < 1e-6) continue
+          next = percentToLeading(raw as number)
+        } else if (field === 'letterSpacing') {
+          if (Math.abs((raw as number) - ft.letterSpacing) < 1e-6) continue
+          next = percentToEm(raw as number)
+        } else if (field === 'fontWeight') {
+          if (Math.abs((raw as number) - ft.fontWeight) < 1e-6) continue
+          next = floatToWeight(raw as number)
+        } else {
+          continue // fontFamily / fontStyle: pull-only
+        }
+
+        const targetPath = member.aliasRef as string
+        const owner = setDefiningPath(model, targetPath)
+        if (owner === undefined) continue
+        const clone = cloneOf(owner)
+        if (clone === undefined) continue
+        const leaf = leafAtPath(clone, targetPath)
+        if (!leaf) continue
+        const old = String(leaf.$value)
+        if (old === next) continue
+        leaf.$value = next
+        dirty.add(owner)
+        changes.push({ path: `${c.role} · ${field}`, oldValue: old, newValue: next })
       }
     }
   }

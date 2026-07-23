@@ -30,6 +30,19 @@ const {
   enabledSemanticSets,
   flattenSet,
   leafAtPath,
+  flattenTypography,
+  clampMaxPx,
+  isFluidSize,
+  leadingToPercent,
+  percentToLeading,
+  emToPercent,
+  percentToEm,
+  weightToFloat,
+  floatToWeight,
+  isTypeRole,
+  memberConcrete,
+  setDefiningPath,
+  lookupToken,
 } = mod
 
 /* A miniature of the real repo: core primitives, a shared scale set, and three
@@ -166,4 +179,159 @@ test('createLeafAtPath refuses a leaf-vs-group collision (the A8 failure mode)',
   // "border" is a LEAF; writing border.width must be refused, not nested
   assert.equal(createLeafAtPath(obj, 'border.width', '1px'), false)
   assert.deepEqual(obj.border, { $value: '#000', $type: 'color' })
+})
+
+// ---------------------------------------------------------------------------
+// Typography — Figma-native unit conversions (the crux) + composite plumbing
+// ---------------------------------------------------------------------------
+
+test('clampMaxPx extracts the desktop (max) px; plain px passes through', () => {
+  assert.equal(clampMaxPx('clamp(34px, 6vw, 62px)'), 62)
+  assert.equal(clampMaxPx('clamp(28px,5.5vw,38px)'), 38)
+  assert.equal(clampMaxPx('15px'), 15)
+})
+
+test('isFluidSize flags clamp() sizes (which are pull-only)', () => {
+  assert.equal(isFluidSize('clamp(34px, 6vw, 62px)'), true)
+  assert.equal(isFluidSize('15px'), false)
+})
+
+test('leading <-> lineHeight% round-trips (unitless multiplier x100)', () => {
+  assert.equal(leadingToPercent('1.6'), 160)
+  assert.equal(leadingToPercent('1'), 100)
+  assert.equal(leadingToPercent('1.62'), 162)
+  assert.equal(percentToLeading(160), '1.6')
+  assert.equal(percentToLeading(100), '1')
+  assert.equal(percentToLeading(162), '1.62')
+  // identity across the round-trip (the property that matters for PUSH)
+  for (const v of ['1', '1.15', '1.3', '1.5', '1.6', '1.62', '1.7', '1.9']) {
+    assert.equal(percentToLeading(leadingToPercent(v)), v)
+  }
+})
+
+test('tracking em <-> letterSpacing% round-trips; 0 stays 0', () => {
+  assert.equal(emToPercent('0.14em'), 14)
+  assert.equal(emToPercent('0.2em'), 20)
+  assert.equal(emToPercent('0'), 0)
+  assert.equal(emToPercent(''), 0)
+  assert.equal(percentToEm(14), '0.14em')
+  assert.equal(percentToEm(0), '0')
+  for (const v of ['0.08em', '0.14em', '0.16em', '0.2em']) {
+    assert.equal(percentToEm(emToPercent(v)), v)
+  }
+})
+
+test('weight <-> fontWeight round-trips as a plain number', () => {
+  assert.equal(weightToFloat('400'), 400)
+  assert.equal(weightToFloat('700'), 700)
+  assert.equal(floatToWeight(400), '400')
+  assert.equal(floatToWeight(700), '700')
+})
+
+test('isTypeRole matches only type.* sub-token paths', () => {
+  assert.equal(isTypeRole('type.display.leading'), true)
+  assert.equal(isTypeRole('type'), true)
+  assert.equal(isTypeRole('leading.none'), false)
+  assert.equal(isTypeRole('accent'), false)
+})
+
+/* A miniature typography model: core scales + a scale set carrying two type
+ * roles (one fluid, one aliased-to-core) + the composites that reference them. */
+const typoMeta = {
+  tokenSetOrder: [
+    'core/font-size',
+    'core/leading',
+    'core/weight',
+    'core/tracking',
+    'core/font-figma',
+    'semantic/scale',
+    'semantic/typography',
+    'semantic/classic-light',
+  ],
+}
+const typoThemes = [
+  { id: 'classic-light', name: 'Light', selectedTokenSets: { 'semantic/scale': 'enabled' } },
+]
+const typoFiles = () => ({
+  'core/font-size': { 'font-size': { xl: { $value: '15px', $type: 'dimension' } } },
+  'core/leading': { leading: { none: { $value: '1' }, normal: { $value: '1.5' } } },
+  'core/weight': { weight: { regular: { $value: '400' } } },
+  'core/tracking': { tracking: { 14: { $value: '0.14em' } } },
+  'core/font-figma': { 'font-figma': { display: { $value: 'Geist Pixel' }, mono: { $value: 'Geist Mono' } } },
+  'semantic/scale': {
+    type: {
+      display: {
+        size: { $value: 'clamp(34px, 6vw, 62px)', $type: 'dimension' },
+        leading: { $value: '{leading.none}' },
+        weight: { $value: '{weight.regular}' },
+        tracking: { $value: '0' },
+      },
+      label: {
+        size: { $value: '{font-size.xl}', $type: 'dimension' },
+        leading: { $value: '{leading.normal}' },
+        weight: { $value: '{weight.regular}' },
+        tracking: { $value: '{tracking.14}' },
+      },
+    },
+  },
+  'semantic/typography': {
+    typography: {
+      display: {
+        $type: 'typography',
+        $value: {
+          fontFamily: '{font-figma.display}',
+          fontSize: '{type.display.size}',
+          fontWeight: '{type.display.weight}',
+          lineHeight: '{type.display.leading}',
+          letterSpacing: '{type.display.tracking}',
+          fontStyle: 'Regular',
+        },
+      },
+      label: {
+        $type: 'typography',
+        $value: {
+          fontFamily: '{font-figma.mono}',
+          fontSize: '{type.label.size}',
+          fontWeight: '{type.label.weight}',
+          lineHeight: '{type.label.leading}',
+          letterSpacing: '{type.label.tracking}',
+          fontStyle: 'Regular',
+        },
+      },
+    },
+  },
+  'semantic/classic-light': {},
+})
+const typoModel = () => buildModel(typoMeta, typoThemes, typoFiles())
+
+test('flattenTypography parses composites; buildModel routes them off semanticNames', () => {
+  const m = typoModel()
+  assert.equal(m.typographyComposites.length, 2)
+  const display = m.typographyComposites.find((c) => c.role === 'display')
+  assert.equal(display.members.fontSize.aliasRef, 'type.display.size')
+  assert.equal(display.members.fontStyle.isAlias, false)
+  assert.equal(display.members.fontStyle.rawValue, 'Regular')
+  // type.* sub-tokens are NOT plain semantic variables (the `type` collection owns them)
+  assert.ok(!m.semanticNames.some((n) => n.startsWith('type.')))
+  // …but they remain resolvable for the composite refs
+  assert.ok(lookupToken(m, 'type.display.leading'))
+})
+
+test('memberConcrete chases refs through scale to core (the pull value source)', () => {
+  const m = typoModel()
+  const label = m.typographyComposites.find((c) => c.role === 'label')
+  assert.equal(memberConcrete(label.members.fontSize, m), '15px') // {type.label.size}->{font-size.xl}
+  assert.equal(memberConcrete(label.members.lineHeight, m), '1.5') // ->{leading.normal}
+  assert.equal(memberConcrete(label.members.letterSpacing, m), '0.14em') // ->{tracking.14}
+  assert.equal(memberConcrete(label.members.fontFamily, m), 'Geist Mono')
+  // and the full Figma-native conversions line up
+  assert.equal(clampMaxPx(memberConcrete(label.members.fontSize, m)), 15)
+  assert.equal(leadingToPercent(memberConcrete(label.members.lineHeight, m)), 150)
+  assert.equal(emToPercent(memberConcrete(label.members.letterSpacing, m)), 14)
+})
+
+test('setDefiningPath locates the scale set that owns a type sub-token (PUSH target)', () => {
+  const m = typoModel()
+  assert.equal(setDefiningPath(m, 'type.label.leading'), 'semantic/scale')
+  assert.equal(setDefiningPath(m, 'nope.nope'), undefined)
 })

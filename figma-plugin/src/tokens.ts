@@ -36,6 +36,31 @@ export type ThemeDef = {
 
 export type TokenKind = 'COLOR' | 'FLOAT' | 'STRING'
 
+/** The six DTCG `typography` composite members the bridge binds to a text style. */
+export const TYPO_FIELDS = [
+  'fontFamily',
+  'fontSize',
+  'fontWeight',
+  'lineHeight',
+  'letterSpacing',
+  'fontStyle',
+] as const
+export type TypoField = (typeof TYPO_FIELDS)[number]
+
+/** One member of a typography composite — a ref ("{type.body.size}") or a literal ("0", "Regular"). */
+export type TypoMember = { rawValue: string; isAlias: boolean; aliasRef?: string }
+
+/**
+ * A parsed `$type: typography` composite (one role). The bridge expands each
+ * into individual Figma-native bindable variables + a TextStyle; it never
+ * becomes a plain semantic variable (its members reference those instead).
+ */
+export type TypographyComposite = {
+  role: string // "display", "heading-1", … (the "typography." root is stripped)
+  set: string // owning set, e.g. "semantic/typography"
+  members: Record<TypoField, TypoMember>
+}
+
 /** A flattened leaf token, tagged with the set it came from. */
 export type FlatToken = {
   set: string // e.g. "core/color"
@@ -59,6 +84,8 @@ export type PulledModel = {
   semanticNames: string[]
   /** component/* tokens (own single-mode collection; alias into semantic) */
   componentTokens: FlatToken[]
+  /** `$type: typography` composites (own `type` collection + Figma text styles) */
+  typographyComposites: TypographyComposite[]
 }
 
 export type Rgba = { r: number; g: number; b: number; a: number }
@@ -80,6 +107,25 @@ export function isSemanticSet(set: string): boolean {
 
 export function isComponentSet(set: string): boolean {
   return set.startsWith('component/')
+}
+
+/**
+ * The typography-composite set (a `semantic/*` set by prefix, but parsed
+ * specially — its object-valued composites would break flattenSet). Checked
+ * BEFORE isSemanticSet in buildModel.
+ */
+export function isTypographySet(set: string): boolean {
+  return set === 'semantic/typography' || set.endsWith('/typography')
+}
+
+/**
+ * A `type.<role>.<field>` sub-token path. These are the CSS-facing type ramp in
+ * semantic/scale; the typography composites reference them and the `type`
+ * collection owns their Figma representation, so they are EXCLUDED from the
+ * plain semantic variables (no ghost STRING `type/*` vars in Figma).
+ */
+export function isTypeRole(path: string): boolean {
+  return path === 'type' || path.startsWith('type.')
 }
 
 /**
@@ -145,6 +191,43 @@ export function flattenSet(set: string, json: unknown): FlatToken[] {
   return out
 }
 
+/**
+ * Parse `$type: typography` composites out of a typography set. A composite leaf
+ * carries an OBJECT `$value` (the member map), which flattenSet can't handle —
+ * hence this dedicated walker. The "typography." root segment is stripped from
+ * the role name.
+ */
+export function flattenTypography(set: string, json: unknown): TypographyComposite[] {
+  const out: TypographyComposite[] = []
+  const walk = (node: unknown, trail: string[]) => {
+    if (node === null || typeof node !== 'object') return
+    const obj = node as Record<string, unknown>
+    if (
+      '$value' in obj &&
+      obj.$type === 'typography' &&
+      obj.$value !== null &&
+      typeof obj.$value === 'object'
+    ) {
+      const role = trail[0] === 'typography' ? trail.slice(1).join('.') : trail.join('.')
+      const val = obj.$value as Record<string, unknown>
+      const members = {} as Record<TypoField, TypoMember>
+      for (const field of TYPO_FIELDS) {
+        const raw = field in val ? coerceValue(val[field]) : ''
+        const m = ALIAS_RE.exec(raw.trim())
+        members[field] = { rawValue: raw, isAlias: !!m, aliasRef: m ? m[1].trim() : undefined }
+      }
+      out.push({ role, set, members })
+      return
+    }
+    for (const key of Object.keys(obj)) {
+      if (key.startsWith('$')) continue
+      walk(obj[key], [...trail, key])
+    }
+  }
+  walk(json, [])
+  return out
+}
+
 // ---------------------------------------------------------------------------
 // Model assembly
 // ---------------------------------------------------------------------------
@@ -164,16 +247,21 @@ export function buildModel(
   const semanticNames: string[] = []
   const seenSemantic = new Set<string>()
   const componentTokens: FlatToken[] = []
+  const typographyComposites: TypographyComposite[] = []
 
   for (const set of metadata.tokenSetOrder) {
     const json = files[set]
     if (json === undefined) continue
     if (isCoreSet(set)) {
       coreTokens.push(...flattenSet(set, json))
+    } else if (isTypographySet(set)) {
+      // MUST precede isSemanticSet — 'semantic/typography' matches both.
+      typographyComposites.push(...flattenTypography(set, json))
     } else if (isSemanticSet(set)) {
       const flat = flattenSet(set, json)
-      semanticSets[set] = flat
+      semanticSets[set] = flat // keep type.* here for composite ref lookup…
       for (const t of flat) {
+        if (isTypeRole(t.path)) continue // …but the `type` collection owns their variables
         if (!seenSemantic.has(t.path)) {
           seenSemantic.add(t.path)
           semanticNames.push(t.path)
@@ -184,7 +272,16 @@ export function buildModel(
     }
   }
 
-  return { metadata, themes, files, coreTokens, semanticSets, semanticNames, componentTokens }
+  return {
+    metadata,
+    themes,
+    files,
+    coreTokens,
+    semanticSets,
+    semanticNames,
+    componentTokens,
+    typographyComposites,
+  }
 }
 
 /**
@@ -464,6 +561,103 @@ export function floatToTokenString(n: number): string {
  */
 export function refStringForTarget(target: FlatToken): string {
   return `{${target.path}}`
+}
+
+// ---------------------------------------------------------------------------
+// Typography — composite member resolution + Figma-native unit conversion
+// ---------------------------------------------------------------------------
+//
+// CSS and Figma want DIFFERENT units for the same concept, so a text style
+// can't bind to the CSS-facing sub-tokens directly:
+//   leading   unitless 1.6   <->  lineHeight   FLOAT 160  (PERCENT)
+//   tracking  0.14em         <->  letterSpacing FLOAT 14  (PERCENT)
+//   weight    "400"          <->  fontWeight   FLOAT 400
+//   size      15px / clamp() <->  fontSize     FLOAT 15   (px; fluid -> desktop max)
+//   family    var(--font-…)  <->  fontFamily   STRING "Geist"  (via font-figma.*)
+// These pure converters (and their inverses, used by PUSH) are the whole reason
+// the typography pass exists. Rounding trims JS float noise (1.6*100 = 160.0000…).
+
+function roundTo(n: number, dp = 4): number {
+  const f = 10 ** dp
+  return Math.round(n * f) / f
+}
+
+/** Desktop (max) px of a size value: last comma-part of a clamp(), else the px itself. */
+export function clampMaxPx(rawValue: string): number {
+  const v = rawValue.trim()
+  const m = /^clamp\((.*)\)$/i.exec(v)
+  if (m) {
+    const parts = m[1].split(',')
+    return toFloat(parts[parts.length - 1])
+  }
+  return toFloat(v)
+}
+
+/** True when a size is fluid (a clamp) — such sizes are pull-only (no PUSH-back). */
+export function isFluidSize(rawValue: string): boolean {
+  return /clamp\(/i.test(rawValue)
+}
+
+export function leadingToPercent(rawValue: string): number {
+  return roundTo(parseFloat(rawValue.trim()) * 100, 3)
+}
+export function percentToLeading(n: number): string {
+  return String(roundTo(n / 100, 6))
+}
+
+export function emToPercent(rawValue: string): number {
+  const v = rawValue.trim()
+  if (!v || v === '0') return 0
+  return roundTo(parseFloat(v.replace(/em$/i, '')) * 100, 3)
+}
+export function percentToEm(n: number): string {
+  if (n === 0) return '0'
+  return `${roundTo(n / 100, 6)}em`
+}
+
+export function weightToFloat(rawValue: string): number {
+  return parseFloat(rawValue.trim())
+}
+export function floatToWeight(n: number): string {
+  return String(Math.round(n))
+}
+
+/** Find a token by dotted path — semantic sets first (type.*, roles), then core. */
+export function lookupToken(model: PulledModel, dottedPath: string): FlatToken | undefined {
+  for (const set of Object.keys(model.semanticSets)) {
+    const hit = model.semanticSets[set].find((t) => t.path === dottedPath)
+    if (hit) return hit
+  }
+  return model.coreTokens.find((t) => t.path === dottedPath)
+}
+
+/** Follow an alias chain to its concrete (non-alias) string value. Cycle-guarded. */
+export function concreteValue(
+  token: FlatToken,
+  model: PulledModel,
+  seen: Set<string> = new Set()
+): string {
+  if (!token.isAlias) return token.rawValue
+  const ref = token.aliasRef as string
+  if (seen.has(ref)) return token.rawValue
+  seen.add(ref)
+  const next = lookupToken(model, ref)
+  return next ? concreteValue(next, model, seen) : token.rawValue
+}
+
+/** Resolve a composite member to its concrete string value (alias -> chased; literal -> itself). */
+export function memberConcrete(member: TypoMember, model: PulledModel): string {
+  if (!member.isAlias) return member.rawValue
+  const t = lookupToken(model, member.aliasRef as string)
+  return t ? concreteValue(t, model) : member.rawValue
+}
+
+/** The set that DEFINES a dotted semantic path (the PUSH write target for a member). */
+export function setDefiningPath(model: PulledModel, dottedPath: string): string | undefined {
+  for (const set of Object.keys(model.semanticSets)) {
+    if (model.semanticSets[set].some((t) => t.path === dottedPath)) return set
+  }
+  return undefined
 }
 
 // ---------------------------------------------------------------------------
