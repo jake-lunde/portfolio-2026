@@ -87,6 +87,32 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
       </main>
       <Boot />
       <Screensaver />
+      {/* Global "roughen" filter for the hand-inked medieval dataviz. Defined
+          once at the shell so the id resolves document-wide (no duplicate ids
+          when several viz windows are open); applied via CSS to `.viz svg`
+          only under [data-skin='medieval'] (see viz.module.css). Gentle,
+          long-wavelength displacement — a quill waver on straight strokes
+          that stays legible on the two text-bearing charts. */}
+      <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
+        <defs>
+          <filter id="lunde-roughen" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.014"
+              numOctaves="1"
+              seed="7"
+              result="noise"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="1.8"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+          </filter>
+        </defs>
+      </svg>
     </>
   )
 }

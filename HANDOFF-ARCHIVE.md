@@ -9,6 +9,29 @@
 
 ---
 
+## Rotated: Skin switcher + per-skin desktop identity (session 20, 2026-07-23)
+
+**Shipped to main (c61bb79, deployed).** Three Notion tasks landed: "put button to
+toggle in toolbar" + "update icons for desktop apps" (Done); "update language" seeded.
+- **Toolbar SkinSwitch** (`src/components/shell/SkinSwitch.tsx`): compact control
+  trailing the wordmark showing the active skin, flying out to CLASSIC/MEDIEVAL/
+  UNDERWATER. Each row wraps in `data-skin={id}` — because the generated token CSS
+  scopes skins by *bare* attribute selector, a nested `data-skin` re-scopes
+  `--surface`/`--accent`/`--mono` for that subtree, so each row is a REAL preview in
+  its own palette + face (medieval row literally renders MedievalSharp on parchment).
+  Underwater has no token scope yet → disabled + dimmed. Spring motion (SPRINGS.deck),
+  reduced-motion + Escape/outside-click close. `menuLeft` wrapper groups wordmark +
+  switch; light/dark toggle stays in `menuRight` (classic only).
+- **Per-skin icon art** (`Icon.tsx` + `Icon.module.css`): Icon renders both a
+  `.glyphClassic <g>` and (where present) a `.glyphMedieval <g>`; swapped purely by
+  CSS off `[data-skin]` — no JS, SSR-safe, instant. 15 woodcut/heraldic medieval
+  glyphs for the desktop programs. Classic-hide gated on `.hasMedieval` so
+  variant-less icons keep classic under every skin.
+- **Per-skin vocabulary** (`src/lib/skinVocab.ts`): `programName(id, canonical, skin)`
+  overrides a program's display name (desktop label + window title + a11y). Medieval
+  lexicon: README→Incipit, Projects→Works, …, Settings→The Workings. Consumed by
+  `DesktopIcons.tsx` + `Window.tsx`. See memory `per-skin-reskin-mechanics`.
+
 ## Rotated: Typography round-trip — Figma text styles bound to variables (session 19, 2026-07-23)
 
 **Built, NOT yet shipped (awaiting Jake's in-Figma PULL check + his OK to push to

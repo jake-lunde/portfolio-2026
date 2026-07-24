@@ -6,6 +6,14 @@
   color: #e7e1d2;
 }
 
+/* Medieval skin: give every chart a hand-inked wobble. The #lunde-roughen
+   filter def lives in the shell (Desktop.tsx); one rule roughens all six
+   visualizers with zero per-viz rework. Filters are visual-only, so scrub
+   hit-testing (getBoundingClientRect) is untouched. */
+:global([data-skin='medieval']) .viz svg {
+  filter: url(#lunde-roughen);
+}
+
 .vizNav {
   display: flex;
   gap: 6px;
