@@ -9,6 +9,30 @@
 
 ---
 
+## Rotated: Type overhaul: adoption sweep + bridge aliases (session 22, 2026-07-24)
+
+**Fable orchestrating; HERTZ(research) + NYQUIST(sweep) + FOURIER(bridge) delegated.
+Shipped 8d8daab.** Jake's three Figma complaints root-caused and fixed: (a)
+"hardcoded labels" = bridge baked typography literals because core leading/tracking/
+weight lacked `$type` → STRING vars can't alias FLOAT fields; now typed + aliased.
+(b) "crazy line-heights" = orphan `1.62` literal + duplicate `leading.body` concept
+rendered as bare %; now ONE concept, every role traces to the named 6-step leading
+ramp. (c) "no weight ramp" = roles only used 400/700; now 400/600/700 visible +
+medium 500 primitive. Value snaps shipped (Chromatic-gated): case prose 17→15px,
+body leading 1.62→1.7, heading-3 700→600, specsheet specimen snaps, sub-8px chrome
+→8px. Deviation from Greenlight ref (deliberate): kept unitless named leading ramp
+over index-paired px line-heights.
+- **⚠️ BEFORE Jake's next Figma PULL:** delete stale STRING `core/leading|tracking|
+  weight` variables (ideally the whole `type` collection) — bridge reuses existing
+  resolvedTypes; STRING can't alias into FLOAT. Fresh files fine. Also unverified
+  until live PULL: alias creation in-Figma, text-style binding, Geist font loading.
+- **EDIT.MODE scoped** (Notion P1, "Scoped"): git-backed in-situ copy editing —
+  `t(key, skin)` copy layer (shared foundation with the language-modifier task) +
+  hidden desktop program, contentEditable on keyed nodes, diff panel, GitHub
+  Contents API commit to main. One session, crew-split. Jake approved the approach.
+- Review note: no DOPPLER pass — mechanical sweep verified by tsc/build/doctor +
+  25 plugin tests; Chromatic gates visuals. NYQUIST's stale value-comments fixed.
+
 ## Rotated: Auto dark mode + hand-drawn medieval dataviz (session 21, 2026-07-23)
 
 **Solo overnight run (Jake asleep, "pick one or two and take care of em").** Two

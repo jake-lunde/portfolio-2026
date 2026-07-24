@@ -1,7 +1,7 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-07-24 (session 22).
+> Last rotation: 2026-07-24 (session 23).
 
 ## Current state
 
@@ -12,58 +12,57 @@
   (parchment/vermilion/gilt, MedievalSharp display+mono, Eagle Lake body,
   hand-inked dataviz). underwater = stub. SkinSwitch flyout in toolbar +
   Settings; `data-skin`/`data-theme` on <html>; per-skin icon art
-  (Icon.tsx CSS swap) + vocabulary (`src/lib/skinVocab.ts`).
-- **Type system (session 22): ADOPTED.** Semantic ramp (display,
-  heading-1/2/3, body-lg/body/**body-sm**, label, caption, micro, mono)
-  is the real source: 166 sites bound to `--type-*`/`--weight-*`/
-  `--leading-*`; only 15 documented decorative/fluid one-offs remain raw
-  (§5 notes in-file). weight.medium=500 exists (Geist variable fonts).
-  TOKEN BRIDGE now creates Figma variable ALIASES to core primitives
-  (3-tier chains); leading/tracking/weight are FLOAT, stored Figma-native
-  (percent); fontStyle derived from weight (single-weight guard for
-  pixel/medieval faces).
-- **DS pipeline:** `tokens/` (3-tier: core/semantic/component, Tokens
-  Studio JSON) → `scripts/build-tokens.mjs` (SD v4) →
-  `tokens.generated.css` + `motion.generated.ts`. TOKEN BRIDGE Figma
-  plugin (`figma-plugin/`) PULL/PUSH ↔ `design-tokens` branch PRs;
-  `tokens-sync.yml` regen bot; Chromatic visual regression; Storybook
-  catalog (SB10+Webpack).
+  (Icon.tsx CSS swap) + vocabulary — now via the copy layer.
+- **Copy layer (session 23): LIVE.** `src/content/copy.json` (82 flat
+  dot-keys; plain string or `{ base, medieval?, underwater? }`) +
+  `copy.ts` (`t()`, `resolveCopy` → displayed slot) + `CopyText.tsx`
+  (stamps `data-copy-id`). skinVocab folded in (`program.<id>.name`);
+  `programName()` is a thin wrapper, same signature. This is the shared
+  foundation for the language-modifier task. NOTE: `Copy.tsx` name is
+  forbidden — collides with `copy.ts` on case-insensitive FS.
+- **EDIT.MODE (SYS-99): SHIPPED, inert until env vars.** Hidden program
+  at `/edit`: key gate (`EDIT_MODE_KEY`, timing-safe, sessionStorage) →
+  armed mode makes `[data-copy-id]` nodes contentEditable (plaintext),
+  accent dirty-highlight, Esc reverts, SAVE.CHANGES panel (portal,
+  SPRINGS.deck) → POST `/api/copy-commit` → GitHub Contents API commits
+  copy.json to main (`GITHUB_COPY_TOKEN`, `GITHUB_COPY_REPO` optional
+  override); baseSha mismatch → 409 rebase + re-approve. Slot targeting
+  is skin-aware via `resolveCopy`. Commit msgs: `COPY: EDIT.MODE — n keys`.
+- **Type system: ADOPTED** (session 22): semantic ramp bound at 166
+  sites; TOKEN BRIDGE aliases to core primitives. ⚠️ before next Figma
+  PULL: delete stale STRING `core/leading|tracking|weight` vars.
+- **DS pipeline:** `tokens/` (3-tier) → `scripts/build-tokens.mjs` →
+  generated CSS/TS; TOKEN BRIDGE plugin PULL/PUSH; Chromatic; Storybook
+  (SB10+Webpack).
 - **Tracking:** Notion (connector live); COMMAND.CTR deck via
-  `scripts/cc-report.mjs` (CC_FEED_KEY in .env.local; args:
-  `<action> <agent> <target|""> <label>`; `source .env.local` first).
-- **Known debts:** SpecSheet motion values hardcoded quote-strings;
-  first-load JS perf pass overdue; underwater everything.
+  `scripts/cc-report.mjs` (`set -a; source .env.local; set +a` first —
+  plain `source` doesn't export).
+- **Known debts:** SpecSheet motion quote-strings; first-load JS perf
+  pass overdue; underwater everything.
 
-## Latest session — Type overhaul: adoption sweep + bridge aliases (session 22, 2026-07-24)
+## Latest session — EDIT.MODE: copy layer + in-situ editor (session 23, 2026-07-24)
 
-**Fable orchestrating; HERTZ(research) + NYQUIST(sweep) + FOURIER(bridge) delegated.
-Shipped 8d8daab.** Jake's three Figma complaints root-caused and fixed: (a)
-"hardcoded labels" = bridge baked typography literals because core leading/tracking/
-weight lacked `$type` → STRING vars can't alias FLOAT fields; now typed + aliased.
-(b) "crazy line-heights" = orphan `1.62` literal + duplicate `leading.body` concept
-rendered as bare %; now ONE concept, every role traces to the named 6-step leading
-ramp. (c) "no weight ramp" = roles only used 400/700; now 400/600/700 visible +
-medium 500 primitive. Value snaps shipped (Chromatic-gated): case prose 17→15px,
-body leading 1.62→1.7, heading-3 700→600, specsheet specimen snaps, sub-8px chrome
-→8px. Deviation from Greenlight ref (deliberate): kept unitless named leading ramp
-over index-paired px line-heights.
-- **⚠️ BEFORE Jake's next Figma PULL:** delete stale STRING `core/leading|tracking|
-  weight` variables (ideally the whole `type` collection) — bridge reuses existing
-  resolvedTypes; STRING can't alias into FLOAT. Fresh files fine. Also unverified
-  until live PULL: alias creation in-Figma, text-style binding, Geist font loading.
-- **EDIT.MODE scoped** (Notion P1, "Scoped"): git-backed in-situ copy editing —
-  `t(key, skin)` copy layer (shared foundation with the language-modifier task) +
-  hidden desktop program, contentEditable on keyed nodes, diff panel, GitHub
-  Contents API commit to main. One session, crew-split. Jake approved the approach.
-- Review note: no DOPPLER pass — mechanical sweep verified by tsc/build/doctor +
-  25 plugin tests; Chromatic gates visuals. NYQUIST's stale value-comments fixed.
+**Fable orchestrating; NYQUIST(sweep) + FOURIER(program+API) parallel, disjoint
+files. Shipped 1f39a8c.** Contract (copy.json/copy.ts/CopyText.tsx) written by
+orchestrator first = the seam; both agents built against it, zero conflicts.
+- Live-verified end-to-end (JS probes): auth matrix (401/200/501), arm, in-place
+  edit, dirty rows, Esc revert (window-close suppressed), medieval slot
+  targeting (`Oubliette → The Pit` wrote slot `medieval`), token-missing SAVE
+  lockout. Fixed live-found bug: stale `data-edit-old` across skin switch.
+- Casing landmine: `Copy.tsx` vs `copy.ts` — bundler resolution tries `.ts`
+  first on case-insensitive FS; component renamed `CopyText.tsx`.
+- **Jake to go live:** Vercel env → `EDIT_MODE_KEY` (pick a key) +
+  `GITHUB_COPY_TOKEN` (fine-grained PAT, contents RW on portfolio-2026).
+  A placeholder local dev key sits in .env.local (read it there; rotate at will).
+- Unverified live: Safari caret on transformed windows; real GitHub commit
+  round-trip (coded + reviewed, token was absent locally by design).
 
 ## Next steps
 
-1. **Jake in Figma:** delete stale STRING vars per ⚠️ above, press PULL, verify
-   alias chains + text styles (incl. new Body/Small); then OK the PUSH round-trip.
-2. **EDIT.MODE build session** (Notion task has full scope) — do the `t(key, skin)`
-   layer first; it unblocks the language modifier too.
-3. **Typography fluid finale:** Desktop/Mobile MODE axis for the two clamp() sizes;
-   per-skin (medieval) font-family override on text styles.
-4. Prior: interactive/status adoption sweep; underwater skin; Weavy probe.
+1. **Jake:** set the two Vercel env vars above → try `/edit` on lunde.co; first
+   real commit round-trip + Safari caret check.
+2. **Figma:** stale STRING vars deletion + PULL verification (carried from s22).
+3. Typography fluid finale: MODE axis for clamp() sizes; per-skin font-family
+   override on text styles.
+4. Language modifier can now build on `t(key, skin)`. Prior: interactive/status
+   sweep; underwater; Weavy probe.
