@@ -67,6 +67,123 @@
   text-align: right;
 }
 
+/* ---- skin switch (flyout trailing the wordmark) ---- */
+
+.menuLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.skinSwitch {
+  position: relative;
+}
+
+.skinTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--content);
+  padding: 3px 8px;
+  background: var(--surface);
+  border: var(--border-width-hairline) solid var(--border);
+  transition: border-color var(--duration-tap) ease;
+}
+
+.skinTrigger:hover {
+  border-color: var(--content);
+}
+
+.skinCaret {
+  font-size: 9px;
+  line-height: 1;
+  color: var(--content-muted);
+  transition: transform var(--duration-tap) ease;
+}
+
+.skinCaret[data-open='true'] {
+  transform: rotate(180deg);
+}
+
+.skinDotSm {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+}
+
+.skinMenu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 5100;
+  min-width: 176px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: var(--shadow-print);
+}
+
+/* each row re-scopes tokens via data-skin → wears its own skin */
+.skinItemWrap {
+  display: block;
+}
+
+.skinItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 11px;
+  text-align: left;
+  background: var(--surface);
+  color: var(--content);
+  border: none;
+  border-bottom: var(--border-width-hairline) solid var(--border);
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--duration-tap) ease;
+}
+
+.skinItemWrap:last-child .skinItem {
+  border-bottom: none;
+}
+
+.skinItem:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+.skinItemName {
+  flex: 1;
+}
+
+.skinCheck {
+  font-size: 8px;
+  color: var(--accent);
+}
+
+.skinSoon {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--content-muted);
+}
+
+.skinItem:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
 /* ================= SKILLS TICKER ================= */
 
 .ticker {

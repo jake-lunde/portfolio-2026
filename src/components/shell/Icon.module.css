@@ -1,0 +1,17 @@
+/* Per-skin icon art. The classic line-art <g> is the default; a skin can
+   ship a variant <g> that swaps in purely via the [data-skin] attribute
+   on <html> — no JS, instant with the skin change, SSR-safe. An icon with
+   no variant keeps its classic glyph under every skin (graceful fallback,
+   which is why we gate the classic-hide on .hasMedieval). */
+
+.glyphMedieval {
+  display: none;
+}
+
+:global([data-skin='medieval']) .hasMedieval .glyphClassic {
+  display: none;
+}
+
+:global([data-skin='medieval']) .glyphMedieval {
+  display: inline;
+}

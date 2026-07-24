@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useSettings } from '@/store/settings'
+import { SkinSwitch } from './SkinSwitch'
 import styles from './shell.module.css'
 
 function Clock() {
@@ -52,9 +53,12 @@ export function MenuBar() {
 
   return (
     <header className={styles.menubar}>
-      <div className={styles.wordmark}>
-        LUNDE&nbsp;OS
-        <span aria-hidden="true">v0.2 · 1992年アメリカ製</span>
+      <div className={styles.menuLeft}>
+        <div className={styles.wordmark}>
+          LUNDE&nbsp;OS
+          <span aria-hidden="true">v0.2 · 1992年アメリカ製</span>
+        </div>
+        <SkinSwitch />
       </div>
       <div className={styles.menuRight}>
         <button

@@ -2,6 +2,8 @@
 
 import { PROGRAMS } from '@/programs/registry'
 import { useWindows } from '@/store/windows'
+import { useSettings } from '@/store/settings'
+import { programName } from '@/lib/skinVocab'
 import { sfx } from '@/lib/sound'
 import { Icon } from './Icon'
 import styles from './shell.module.css'
@@ -35,6 +37,7 @@ const rank = (id: string) => {
 
 export function DesktopIcons() {
   const open = useWindows((s) => s.open)
+  const skin = useSettings((s) => s.skin)
   const desktopPrograms = PROGRAMS.filter((p) => p.onDesktop)
   const trash = desktopPrograms.find((p) => p.id === 'trash')
   const rest = desktopPrograms
@@ -49,7 +52,9 @@ export function DesktopIcons() {
   const iconBtn = (p: (typeof desktopPrograms)[number], extra = '') => (
     <button key={p.id} className={`${styles.iconBtn} ${extra}`} onClick={() => launch(p.id)}>
       <Icon name={p.icon} />
-      <span className={styles.iconLabel}>{p.desktopLabel ?? p.name}</span>
+      <span className={styles.iconLabel}>
+        {programName(p.id, p.desktopLabel ?? p.name, skin)}
+      </span>
     </button>
   )
 

@@ -6,6 +6,8 @@ import { SPRINGS } from '@/lib/motion'
 import type { RefObject } from 'react'
 import type { ResolvedWindow } from '@/programs/resolve'
 import { useWindows } from '@/store/windows'
+import { useSettings } from '@/store/settings'
+import { programName } from '@/lib/skinVocab'
 import { useGate } from '@/store/gate'
 import { GateSphere } from '@/components/gate/GateSphere'
 import { sfx } from '@/lib/sound'
@@ -26,8 +28,12 @@ export function Window({ def, z, active, desktopRef }: Props) {
   const setSize = useWindows((s) => s.setSize)
   const dragControls = useDragControls()
   const reduced = useReducedMotion()
+  const skin = useSettings((s) => s.skin)
   const ref = useRef<HTMLElement>(null)
   const [zoomed, setZoomed] = useState(false)
+
+  // window title + a11y labels follow the active skin's vocabulary
+  const title = programName(def.id, def.name, skin)
 
   // move keyboard focus into a newly opened window
   useEffect(() => {
@@ -73,7 +79,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
     <motion.section
       ref={ref}
       tabIndex={-1}
-      aria-label={def.name}
+      aria-label={title}
       className={`${styles.window} ${active ? styles.windowActive : ''} ${zoomed ? styles.windowZoomed : ''}`}
       style={{
         left: def.pos.x,
@@ -111,7 +117,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
         <div className={styles.titleControls}>
           <button
             className={styles.ctrl}
-            aria-label={`Close ${def.name}`}
+            aria-label={`Close ${title}`}
             onClick={() => {
               sfx.close()
               close(def.id)
@@ -121,13 +127,13 @@ export function Window({ def, z, active, desktopRef }: Props) {
           </button>
           <button
             className={styles.ctrl}
-            aria-label={zoomed ? `Restore ${def.name}` : `Zoom ${def.name}`}
+            aria-label={zoomed ? `Restore ${title}` : `Zoom ${title}`}
             onClick={() => setZoomed((v) => !v)}
           >
             +
           </button>
         </div>
-        <span className={styles.title}>{def.name}</span>
+        <span className={styles.title}>{title}</span>
         <span className={styles.titleMeta} aria-hidden="true">
           {def.meta}
         </span>
@@ -140,7 +146,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
           className={styles.resizeGrip}
           onPointerDown={startResize}
           role="button"
-          aria-label={`Resize ${def.name}`}
+          aria-label={`Resize ${title}`}
         />
       )}
     </motion.section>
