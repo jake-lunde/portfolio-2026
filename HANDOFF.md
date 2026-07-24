@@ -1,82 +1,69 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-07-23 (session 21).
+> Last rotation: 2026-07-24 (session 22).
 
 ## Current state
 
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`;
   push to main = deploy; verify via Vercel MCP + content-marker curl —
   GitHub status stays "pending" while Chromatic runs).
-- **Skins:** classic (light/dark) + **medieval** (shipped 6eede3e —
-  parchment/vermilion/gilt, MedievalSharp display; Jake later swapped
-  Jacquard 12 → MedievalSharp mono for legibility). underwater = stub.
-  Skin picker in Settings **and** a toolbar SkinSwitch flyout trailing the
-  wordmark (c61bb79); `data-skin` + `data-theme` on <html>. Skins now also
-  re-costume desktop **icon art** (per-skin `<g>` swapped by CSS in Icon.tsx)
-  and **words** (`src/lib/skinVocab.ts` — per-skin program names).
+- **Skins:** classic (light/dark, auto-follows OS) + **medieval**
+  (parchment/vermilion/gilt, MedievalSharp display+mono, Eagle Lake body,
+  hand-inked dataviz). underwater = stub. SkinSwitch flyout in toolbar +
+  Settings; `data-skin`/`data-theme` on <html>; per-skin icon art
+  (Icon.tsx CSS swap) + vocabulary (`src/lib/skinVocab.ts`).
+- **Type system (session 22): ADOPTED.** Semantic ramp (display,
+  heading-1/2/3, body-lg/body/**body-sm**, label, caption, micro, mono)
+  is the real source: 166 sites bound to `--type-*`/`--weight-*`/
+  `--leading-*`; only 15 documented decorative/fluid one-offs remain raw
+  (§5 notes in-file). weight.medium=500 exists (Geist variable fonts).
+  TOKEN BRIDGE now creates Figma variable ALIASES to core primitives
+  (3-tier chains); leading/tracking/weight are FLOAT, stored Figma-native
+  (percent); fontStyle derived from weight (single-weight guard for
+  pixel/medieval faces).
 - **DS pipeline:** `tokens/` (3-tier: core/semantic/component, Tokens
   Studio JSON) → `scripts/build-tokens.mjs` (SD v4) →
   `tokens.generated.css` + `motion.generated.ts`. TOKEN BRIDGE Figma
   plugin (`figma-plugin/`) PULL/PUSH ↔ `design-tokens` branch PRs;
   `tokens-sync.yml` regen bot; Chromatic visual regression; Storybook
-  catalog (SB10+Webpack, `.storybook/`).
-- **Tracking:** Notion (connector live) — "Medieval Theme" project Done;
-  COMMAND.CTR deck via `scripts/cc-report.mjs` (CC_FEED_KEY in
-  .env.local).
-- **Known debts:** SpecSheet motion values are hardcoded quote-strings;
-  first-load JS perf pass overdue; per-skin language table (beyond app
-  names) scoped on Notion; underwater everything. (Auto dark mode + dataviz
-  hand-drawn medieval pass shipped session 21.)
+  catalog (SB10+Webpack).
+- **Tracking:** Notion (connector live); COMMAND.CTR deck via
+  `scripts/cc-report.mjs` (CC_FEED_KEY in .env.local; args:
+  `<action> <agent> <target|""> <label>`; `source .env.local` first).
+- **Known debts:** SpecSheet motion values hardcoded quote-strings;
+  first-load JS perf pass overdue; underwater everything.
 
-## Latest session — Auto dark mode + hand-drawn medieval dataviz (session 21, 2026-07-23)
+## Latest session — Type overhaul: adoption sweep + bridge aliases (session 22, 2026-07-24)
 
-**Solo overnight run (Jake asleep, "pick one or two and take care of em").** Two
-self-contained Notion tasks, both now Done. 3 source files, +56 lines, no forbidden
-paths. tsc clean, prod build green.
-- **Automatic dark mode** (`src/store/settings.ts`): the OS was only honored on the
-  *first* visit (pre-paint script in `layout.tsx`) — after any manual toggle the
-  `lunde-theme` pin won forever and live OS flips were ignored. Added a
-  `matchMedia('(prefers-color-scheme: dark)')` `change` listener in `hydrate()`
-  (module-level `systemThemeBound` guard — hydrate runs in both MenuBar + GateSphere,
-  so bind once). On an OS appearance change the site follows AND clears the pin, so the
-  system stays authoritative; the toolbar LGT/DRK toggle still overrides until the next
-  OS change. Pre-paint script untouched → no FOUC. **Caveat:** the browser-preview
-  pane updates `matches` but does NOT dispatch scheme `change` events (verified with a
-  probe listener), so live-follow was proven by logic + tsc + build, not exercised
-  in-pane. Will fire on a real macOS Appearance switch. If Jake prefers a *permanent*
-  manual pin instead of "system change wins", drop the `localStorage.removeItem` line.
-- **Hand-drawn medieval dataviz** (`Desktop.tsx` + `viz.module.css`): implemented
-  Fable's scoped approach exactly — one `feTurbulence`+`feDisplacementMap` roughen
-  filter (`#lunde-roughen`) defined ONCE in the shell (Desktop, so the id resolves
-  document-wide with no duplicate-id risk when multiple viz windows are open), applied
-  via a single CSS rule `:global([data-skin='medieval']) .viz svg { filter: url(...) }`.
-  All 6 visualizers get the inked-quill waver with zero per-viz rework (they all route
-  through `VizShell` = `.viz`). Gentle long-wavelength displacement (baseFreq 0.014,
-  scale 1.8) so the two text-bearing charts (Flights, Taurus) stay legible. Filters are
-  visual-only → scrub hit-testing untouched. Verified in-browser: Ride GPS trace +
-  elevation read hand-inked under medieval; classic computes `filter: none` (no
-  regression). Per-viz tuning still available later per Fable's note.
-
-**Still pending from session 19 (unshipped, in HANDOFF-ARCHIVE):** the Typography
-round-trip (Figma text styles bound to variables) is built but awaits Jake's in-Figma
-PULL check + his OK to push. Untouched this session.
+**Fable orchestrating; HERTZ(research) + NYQUIST(sweep) + FOURIER(bridge) delegated.
+Shipped 8d8daab.** Jake's three Figma complaints root-caused and fixed: (a)
+"hardcoded labels" = bridge baked typography literals because core leading/tracking/
+weight lacked `$type` → STRING vars can't alias FLOAT fields; now typed + aliased.
+(b) "crazy line-heights" = orphan `1.62` literal + duplicate `leading.body` concept
+rendered as bare %; now ONE concept, every role traces to the named 6-step leading
+ramp. (c) "no weight ramp" = roles only used 400/700; now 400/600/700 visible +
+medium 500 primitive. Value snaps shipped (Chromatic-gated): case prose 17→15px,
+body leading 1.62→1.7, heading-3 700→600, specsheet specimen snaps, sub-8px chrome
+→8px. Deviation from Greenlight ref (deliberate): kept unitless named leading ramp
+over index-paired px line-heights.
+- **⚠️ BEFORE Jake's next Figma PULL:** delete stale STRING `core/leading|tracking|
+  weight` variables (ideally the whole `type` collection) — bridge reuses existing
+  resolvedTypes; STRING can't alias into FLOAT. Fresh files fine. Also unverified
+  until live PULL: alias creation in-Figma, text-style binding, Geist font loading.
+- **EDIT.MODE scoped** (Notion P1, "Scoped"): git-backed in-situ copy editing —
+  `t(key, skin)` copy layer (shared foundation with the language-modifier task) +
+  hidden desktop program, contentEditable on keyed nodes, diff panel, GitHub
+  Contents API commit to main. One session, crew-split. Jake approved the approach.
+- Review note: no DOPPLER pass — mechanical sweep verified by tsc/build/doctor +
+  25 plugin tests; Chromatic gates visuals. NYQUIST's stale value-comments fixed.
 
 ## Next steps
 
-1. **Language modifier — extend beyond app names** (Notion: update language). The
-   per-skin vocabulary mechanism now exists (`skinVocab.ts`, desktop labels + window
-   titles). Next: translate the rest of the copy per skin (window body text, hints,
-   dialog voices) — likely a broader `t(key, skin)` layer. Jake framed it as "a
-   modifier that translates the copy, even the app names."
-2. **Type adoption sweep** (mechanical, delegate): map the 168 raw-px font-sizes +
-   line-heights across src/**.css onto `--type-*` roles (nearest step). Clears D6 type
-   warns; makes the ramp the real source. Parity is NOT zero-change (values snap) —
-   Chromatic is the gate.
-3. **Typography fluid round-trip finale** (after Jake verifies session-19 build):
-   Desktop/Mobile MODE axis for the two clamp() sizes so both endpoints are
-   Figma-tunable + PUSH-back; then per-skin (medieval) font-family override on text
-   styles.
-4. Prior: interactive/status adoption sweep; underwater skin (unblocks the switcher's
-   3rd row + icon/vocab variants); Weavy probe at underwater asset pass.
-
+1. **Jake in Figma:** delete stale STRING vars per ⚠️ above, press PULL, verify
+   alias chains + text styles (incl. new Body/Small); then OK the PUSH round-trip.
+2. **EDIT.MODE build session** (Notion task has full scope) — do the `t(key, skin)`
+   layer first; it unblocks the language modifier too.
+3. **Typography fluid finale:** Desktop/Mobile MODE axis for the two clamp() sizes;
+   per-skin (medieval) font-family override on text styles.
+4. Prior: interactive/status adoption sweep; underwater skin; Weavy probe.

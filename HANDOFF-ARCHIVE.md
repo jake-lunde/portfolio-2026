@@ -9,6 +9,35 @@
 
 ---
 
+## Rotated: Auto dark mode + hand-drawn medieval dataviz (session 21, 2026-07-23)
+
+**Solo overnight run (Jake asleep, "pick one or two and take care of em").** Two
+self-contained Notion tasks, both now Done. 3 source files, +56 lines, no forbidden
+paths. tsc clean, prod build green.
+- **Automatic dark mode** (`src/store/settings.ts`): the OS was only honored on the
+  *first* visit (pre-paint script in `layout.tsx`) — after any manual toggle the
+  `lunde-theme` pin won forever and live OS flips were ignored. Added a
+  `matchMedia('(prefers-color-scheme: dark)')` `change` listener in `hydrate()`
+  (module-level `systemThemeBound` guard — hydrate runs in both MenuBar + GateSphere,
+  so bind once). On an OS appearance change the site follows AND clears the pin, so the
+  system stays authoritative; the toolbar LGT/DRK toggle still overrides until the next
+  OS change. Pre-paint script untouched → no FOUC. **Caveat:** the browser-preview
+  pane updates `matches` but does NOT dispatch scheme `change` events (verified with a
+  probe listener), so live-follow was proven by logic + tsc + build, not exercised
+  in-pane. Will fire on a real macOS Appearance switch. If Jake prefers a *permanent*
+  manual pin instead of "system change wins", drop the `localStorage.removeItem` line.
+- **Hand-drawn medieval dataviz** (`Desktop.tsx` + `viz.module.css`): implemented
+  Fable's scoped approach exactly — one `feTurbulence`+`feDisplacementMap` roughen
+  filter (`#lunde-roughen`) defined ONCE in the shell (Desktop, so the id resolves
+  document-wide with no duplicate-id risk when multiple viz windows are open), applied
+  via a single CSS rule `:global([data-skin='medieval']) .viz svg { filter: url(...) }`.
+  All 6 visualizers get the inked-quill waver with zero per-viz rework (they all route
+  through `VizShell` = `.viz`). Gentle long-wavelength displacement (baseFreq 0.014,
+  scale 1.8) so the two text-bearing charts (Flights, Taurus) stay legible. Filters are
+  visual-only → scrub hit-testing untouched. Verified in-browser: Ride GPS trace +
+  elevation read hand-inked under medieval; classic computes `filter: none` (no
+  regression). Per-viz tuning still available later per Fable's note.
+
 ## Rotated: Skin switcher + per-skin desktop identity (session 20, 2026-07-23)
 
 **Shipped to main (c61bb79, deployed).** Three Notion tasks landed: "put button to
