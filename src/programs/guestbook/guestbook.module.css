@@ -16,7 +16,7 @@
 
 .formHead {
   font-family: var(--display);
-  font-size: 15px;
+  font-size: var(--type-body-size); /* 15px exact */
   margin-bottom: var(--space-3);
 }
 
@@ -48,7 +48,7 @@
   width: 100%;
   box-sizing: border-box;
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: var(--type-body-sm-size); /* 14px → 13px */
   color: var(--content);
   background: var(--surface-raised);
   border: var(--border-width-default) solid var(--content);
@@ -78,7 +78,7 @@
 .signBtn {
   font-family: var(--mono);
   font-size: var(--text-ui);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   letter-spacing: 0.16em;
   padding: 8px 18px;
   background: var(--accent);
@@ -102,8 +102,8 @@
 }
 
 .error {
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10.5px → 11px */
   letter-spacing: 0.04em;
   color: var(--accent);
 }
@@ -140,20 +140,20 @@
 
 .entryName {
   font-family: var(--display);
-  font-size: 14px;
+  font-size: var(--type-body-sm-size); /* 14px → 13px */
 }
 
 .entryTime {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.1em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9.5px → 9px */
+  letter-spacing: var(--tracking-10); /* diverges from caption's tracking-16 — exact match to original 0.1em */
   color: var(--content-muted);
   flex: 0 0 auto;
 }
 
 .entryNote {
-  font-size: 14px;
-  line-height: 1.55;
+  font-size: var(--type-body-sm-size); /* 14px → 13px */
+  line-height: var(--leading-normal); /* 1.55 → 1.5 */
   margin: 6px 0 0;
   overflow-wrap: anywhere;
 }

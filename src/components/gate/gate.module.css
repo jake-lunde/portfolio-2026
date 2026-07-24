@@ -16,9 +16,9 @@
 }
 
 .gateHead {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.22em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-20); /* diverges from caption's tracking-16 — matches original 0.22em closely */
   color: var(--accent);
   margin: 0 0 14px;
   text-align: center;
@@ -44,7 +44,7 @@
   display: grid;
   place-items: center;
   font-family: var(--display);
-  font-size: 22px;
+  font-size: var(--type-heading-2-size); /* 22px exact */
   color: var(--accent-expressive);
   background: rgba(242, 166, 194, 0.07);
 }
@@ -56,8 +56,8 @@
 .slotX {
   width: 14px;
   height: 14px;
-  font-size: 10px;
-  line-height: 1;
+  font-size: var(--type-caption-size); /* 10px → 9px, consistent with the window .ctrl glyph pattern */
+  line-height: var(--leading-none); /* 1 exact */
   color: rgba(231, 225, 210, 0.55);
   border: 1px solid rgba(231, 225, 210, 0.3);
 }
@@ -92,8 +92,8 @@
   left: 0;
   top: 0;
   font-family: var(--mono);
-  font-size: 21px;
-  font-weight: 700;
+  font-size: var(--type-heading-2-size); /* 21px → 22px — flag: now matches the slot-box letters (heading-2 role) */
+  font-weight: var(--weight-bold); /* diverges from heading-2's regular weight — bold sphere letters */
   color: var(--accent-expressive);
   text-shadow: 0 0 10px rgba(242, 166, 194, 0.4);
   will-change: transform, opacity;
@@ -108,16 +108,16 @@
 .flying {
   position: absolute;
   font-family: var(--display);
-  font-size: 24px;
+  font-size: var(--type-heading-2-size); /* 24px → 22px — flag: unifies with slotBox/letter size for a consistent flight animation */
   color: var(--accent-expressive);
   z-index: 200;
   pointer-events: none;
 }
 
 .hintLine {
-  font-family: var(--mono);
-  font-size: 8px;
-  letter-spacing: 0.2em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 8px exact */
+  letter-spacing: var(--type-micro-tracking); /* 0.2em exact */
   color: rgba(231, 225, 210, 0.4);
   margin: 8px 0 0;
 }
@@ -128,9 +128,9 @@
 }
 
 .typeToggle {
-  font-family: var(--mono);
-  font-size: 8px;
-  letter-spacing: 0.16em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 8px exact */
+  letter-spacing: var(--tracking-16); /* diverges from micro's tracking-20 — matches original 0.16em */
   color: rgba(231, 225, 210, 0.45);
 }
 
@@ -140,7 +140,7 @@
 
 .typeInput {
   font-family: var(--display);
-  font-size: 16px;
+  font-size: var(--type-body-lg-size); /* 16px exact */
   letter-spacing: 0.4em;
   text-transform: uppercase;
   background: transparent;
@@ -191,10 +191,10 @@
 }
 
 .dialogTitle {
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-18); /* diverges from caption's tracking-16 — exact match to original 0.18em */
 }
 
 .dialogBody {
@@ -206,18 +206,18 @@
 }
 
 .dialogIcon {
-  font-size: 26px;
-  line-height: 1;
+  font-size: 26px; /* decorative — oversized system-dialog icon glyph, no ramp role this large short of heading-1's clamp */
+  line-height: var(--leading-none); /* 1 exact */
   font-family: var(--display);
 }
 
 .dialogText {
   flex: 1;
   min-width: 160px;
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10.5px → 11px */
   letter-spacing: 0.06em;
-  line-height: 1.7;
+  line-height: var(--leading-relaxed); /* 1.7 exact — diverges from label's normal leading, extra room for this dialog copy */
   margin: 0;
 }
 

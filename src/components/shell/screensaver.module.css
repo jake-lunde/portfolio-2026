@@ -41,10 +41,10 @@
 }
 
 .titleText {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10px → 11px */
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-18); /* diverges from label's tracking-14 — exact match to original 0.18em */
   color: #17150d;
   white-space: nowrap;
 }
@@ -89,9 +89,9 @@
   left: 0;
   right: 0;
   text-align: center;
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.2em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-20); /* diverges from caption's tracking-16 — exact match to original 0.2em */
   color: rgba(231, 225, 210, 0.55);
   margin: 0;
   pointer-events: none;

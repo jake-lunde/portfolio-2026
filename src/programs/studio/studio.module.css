@@ -19,13 +19,13 @@
 }
 
 .awaitNote {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10px → 11px */
+  letter-spacing: var(--tracking-10); /* diverges from label's tracking-14 — exact match to original 0.1em */
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.6);
   max-width: 32ch;
-  line-height: 1.8;
+  line-height: var(--leading-relaxed); /* 1.8 → 1.7 */
 }
 
 .vizPanel {
@@ -48,9 +48,9 @@
 }
 
 .modeChip {
-  font-family: var(--mono);
-  font-size: 8px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 8px exact */
+  letter-spacing: var(--tracking-14); /* diverges from micro's tracking-20 — exact match to original 0.14em */
   padding: 3px 6px;
   border: 1px solid rgba(231, 225, 210, 0.3);
   color: rgba(231, 225, 210, 0.7);
@@ -109,14 +109,14 @@
 }
 
 .knobLabel {
-  font-family: var(--mono);
-  font-size: 7px;
-  letter-spacing: 0.18em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 7px → 8px, sub-8 snap-up per ramp rule — flag: dense transport-bar knob label */
+  letter-spacing: var(--tracking-18); /* diverges from micro's tracking-20 — exact match to original 0.18em */
   color: rgba(231, 225, 210, 0.55);
 }
 
 .tBtn {
-  font-size: 12px;
+  font-size: var(--type-body-sm-size); /* 12px → 13px */
   color: #e7e1d2;
   border: 1.5px solid rgba(231, 225, 210, 0.4);
   width: 34px;
@@ -132,7 +132,7 @@
 
 .tTitle {
   font-family: var(--display);
-  font-size: 13px;
+  font-size: var(--type-body-sm-size); /* 13px exact */
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -141,9 +141,9 @@
 }
 
 .tTime {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9.5px → 9px */
+  letter-spacing: var(--tracking-08); /* diverges from caption's tracking-16 — exact match to original 0.08em */
   color: rgba(231, 225, 210, 0.6);
   font-variant-numeric: tabular-nums;
 }
@@ -173,20 +173,20 @@
 }
 
 .trackNo {
-  font-family: var(--mono);
-  font-size: 9px;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
   color: rgba(231, 225, 210, 0.5);
 }
 
 .trackName {
   font-family: var(--display);
-  font-size: 12.5px;
+  font-size: var(--type-body-sm-size); /* 12.5px → 13px */
   flex: 1;
 }
 
 .trackLive {
-  font-family: var(--mono);
-  font-size: 8px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 8px exact */
+  letter-spacing: var(--tracking-14); /* diverges from micro's tracking-20 — exact match to original 0.14em */
   color: var(--accent-expressive);
 }

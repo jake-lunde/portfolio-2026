@@ -10,12 +10,12 @@
 }
 
 .note {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10px → 11px */
+  letter-spacing: var(--tracking-10); /* diverges from label's tracking-14 — exact match to original 0.1em */
   text-transform: uppercase;
   color: var(--content-muted);
   max-width: 30ch;
-  line-height: 1.8;
+  line-height: var(--leading-relaxed); /* 1.8 → 1.7 */
   margin: 0;
 }

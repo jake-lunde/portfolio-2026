@@ -4,9 +4,9 @@
 
 /* ---------- header ---------- */
 .eyebrow {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px exact */
+  letter-spacing: var(--tracking-18); /* diverges from label's tracking-14 — exact match to original 0.18em, consistent with the kicker convention elsewhere */
   text-transform: uppercase;
   color: var(--accent);
   margin: 0 0 12px;
@@ -14,10 +14,10 @@
 
 .question {
   font-family: var(--display);
-  font-size: clamp(20px, 3.4vw, 26px);
-  font-weight: 400;
+  font-size: clamp(20px, 3.4vw, 26px); /* decorative — no ramp role fits this smaller fluid headline (below heading-2's 22px, above body-lg's 16px) */
+  font-weight: var(--weight-regular);
   letter-spacing: 0;
-  line-height: 1.15;
+  line-height: var(--leading-tight); /* 1.15 exact */
   margin: 0 0 18px;
   max-width: 22ch;
 }
@@ -37,18 +37,18 @@
 }
 
 .methodK {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.16em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--type-caption-tracking); /* 0.16em exact */
   text-transform: uppercase;
   color: var(--content-muted);
 }
 
 .methodV {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px exact */
   letter-spacing: 0.02em;
-  line-height: 1.6;
+  line-height: var(--leading-relaxed); /* 1.6 → 1.7 */
 }
 
 .stampSlot {
@@ -72,22 +72,22 @@
 }
 
 .secNo {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px exact */
+  letter-spacing: var(--tracking-10); /* diverges from label's tracking-14 — exact match to original 0.1em */
   color: var(--accent);
 }
 
 .secLabel {
   font-family: var(--display);
-  font-size: 15px;
+  font-size: var(--type-body-size); /* 15px exact */
 }
 
 .sampleStamp,
 .foundingTag {
-  font-family: var(--mono);
-  font-size: 8px;
-  letter-spacing: 0.16em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 8px exact */
+  letter-spacing: var(--tracking-16); /* diverges from micro's tracking-20 — exact match to original 0.16em */
   text-transform: uppercase;
   color: var(--content-muted);
   border: 1px dashed var(--border);
@@ -110,8 +110,8 @@
   gap: 10px;
   padding: 8px 12px;
   border-bottom: 1px solid var(--border);
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10.5px → 11px */
   letter-spacing: 0.02em;
   align-items: center;
 }
@@ -121,8 +121,8 @@
 }
 
 .ledgerHead {
-  font-size: 8.5px;
-  letter-spacing: 0.16em;
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--type-caption-tracking); /* 0.16em exact */
   text-transform: uppercase;
   color: var(--content-muted);
   background: var(--surface-raised);
@@ -130,7 +130,7 @@
 
 .ledgerId {
   color: var(--accent);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
 }
 
 .ledgerDim {
@@ -180,16 +180,16 @@
 
 .quote {
   font-family: var(--mono);
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: var(--type-body-size); /* 15px exact */
+  line-height: var(--leading-normal); /* 1.5 exact — diverges from body's relaxed leading, tighter for this mono verbatim quote */
   margin: 0 0 10px;
   letter-spacing: 0.01em;
 }
 
 .cite {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9.5px → 9px */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   text-transform: uppercase;
   color: var(--content-muted);
 }
@@ -202,9 +202,9 @@
 }
 
 .pendingNote {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.12em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9.5px → 9px */
+  letter-spacing: var(--tracking-12); /* diverges from caption's tracking-16 — exact match to original 0.12em */
   text-transform: uppercase;
   color: var(--content-muted);
 }
@@ -233,33 +233,33 @@
 }
 
 .synthHeard {
-  font-family: var(--mono);
-  font-size: 11px;
-  line-height: 1.5;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px exact */
+  line-height: var(--type-label-leading); /* 1.5 exact */
   color: var(--content-muted);
 }
 
 .synthArrow {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: var(--type-body-sm-size); /* 14px → 13px */
   color: var(--accent-expressive);
   text-align: center;
 }
 
 .synthBuilt {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  line-height: 1.5;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11.5px → 11px */
+  line-height: var(--type-label-leading); /* 1.5 exact */
   letter-spacing: 0.01em;
 }
 
 .foot {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.13em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — closest match to original 0.13em */
   text-transform: uppercase;
   color: var(--content-muted);
-  line-height: 1.7;
+  line-height: var(--leading-relaxed); /* 1.7 exact */
   margin: 26px 0 0;
 }
 
@@ -278,10 +278,10 @@
 
 .sealedNote {
   max-width: 300px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  line-height: 1.8;
+  font-family: var(--type-mono-family);
+  font-size: var(--type-mono-size); /* 10px → 11px */
+  letter-spacing: var(--type-mono-tracking); /* 0.08em exact */
+  line-height: var(--leading-relaxed); /* 1.8 → 1.7 */
   color: var(--content-muted);
   margin: 0;
 }

@@ -25,7 +25,7 @@ body {
   color: var(--content);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
-  line-height: 1.5;
+  line-height: var(--leading-normal);
   overflow: hidden; /* the OS owns the viewport; windows scroll internally */
 }
 
@@ -114,9 +114,9 @@ button {
 /* ---------- shared vocabulary ---------- */
 
 .mono-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
   color: var(--content-muted);
 }
@@ -125,7 +125,7 @@ button {
 strong,
 b {
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: var(--weight-regular);
   letter-spacing: 0;
 }
 
@@ -133,7 +133,7 @@ b {
 .hl-pink {
   color: var(--accent-expressive-text);
   font-family: var(--display);
-  font-weight: 400;
+  font-weight: var(--weight-regular);
   letter-spacing: 0;
   background: linear-gradient(transparent 8%, var(--accent-expressive-mark) 8%, var(--accent-expressive-mark) 94%, transparent 94%);
   padding: 0 0.08em;

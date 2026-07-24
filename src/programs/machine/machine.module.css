@@ -4,7 +4,7 @@
 
 .eyebrow {
   font-family: var(--display);
-  font-size: 18px;
+  font-size: var(--type-heading-3-size); /* 18px exact */
   margin: 0 0 16px;
 }
 
@@ -31,25 +31,25 @@
 }
 
 .specK {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   text-transform: uppercase;
   color: var(--content-muted);
   padding-top: 2px;
 }
 
 .specV {
-  font-family: var(--mono);
-  font-size: 11.5px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11.5px → 11px */
   letter-spacing: 0.02em;
 }
 
 .essayNote {
-  font-family: var(--mono);
-  font-size: 10px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10px → 11px */
   letter-spacing: 0.05em;
-  line-height: 1.7;
+  line-height: var(--leading-relaxed); /* 1.7 exact */
   color: var(--content-muted);
   border: 1px dashed var(--border);
   padding: 10px 12px;
@@ -58,31 +58,31 @@
 
 .essay h2 {
   font-family: var(--display);
-  font-size: 16px;
-  font-weight: 400;
+  font-size: var(--type-body-lg-size); /* 16px exact */
+  font-weight: var(--weight-regular);
   letter-spacing: 0;
   margin: 22px 0 8px;
   color: var(--accent);
 }
 
 .essay p {
-  font-size: 14.5px;
-  line-height: 1.65;
+  font-size: var(--type-body-size); /* 14.5px → 15px */
+  line-height: var(--leading-relaxed); /* 1.65 → 1.7 */
   margin: 0 0 12px;
   max-width: 58ch;
 }
 
 .sig {
   font-family: var(--display);
-  font-size: 14px;
+  font-size: var(--type-body-sm-size); /* 14px → 13px */
   margin-top: 26px;
 }
 
 .sig span {
   display: block;
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.16em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--type-caption-tracking); /* 0.16em exact */
   color: var(--content-muted);
   margin-top: 5px;
 }

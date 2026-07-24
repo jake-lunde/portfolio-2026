@@ -41,8 +41,15 @@ const {
   floatToWeight,
   isTypeRole,
   memberConcrete,
+  memberTerminal,
   setDefiningPath,
   lookupToken,
+  resolveKind,
+  coreNumericFlavor,
+  coreValueToFigmaFloat,
+  figmaFloatToCoreValue,
+  weightToStyleName,
+  familyHasWeights,
 } = mod
 
 /* A miniature of the real repo: core primitives, a shared scale set, and three
@@ -334,4 +341,78 @@ test('setDefiningPath locates the scale set that owns a type sub-token (PUSH tar
   const m = typoModel()
   assert.equal(setDefiningPath(m, 'type.label.leading'), 'semantic/scale')
   assert.equal(setDefiningPath(m, 'nope.nope'), undefined)
+})
+
+// ---------------------------------------------------------------------------
+// Typography aliasing — core FLOAT promotion, percent pre-conversion, terminals
+// ---------------------------------------------------------------------------
+
+test('resolveKind promotes core leading/tracking/weight to FLOAT; other bare numbers stay STRING', () => {
+  const m = typoModel()
+  const byPath = (p) => m.coreTokens.find((t) => t.path === p)
+  assert.equal(resolveKind(byPath('leading.normal'), m), 'FLOAT') // 1.5
+  assert.equal(resolveKind(byPath('weight.regular'), m), 'FLOAT') // 400
+  assert.equal(resolveKind(byPath('tracking.14'), m), 'FLOAT') // 0.14em
+  assert.equal(resolveKind(byPath('font-size.xl'), m), 'FLOAT') // 15px (already)
+  assert.equal(resolveKind(byPath('font-figma.display'), m), 'STRING') // "Geist Pixel"
+  // a bare-number primitive OUTSIDE the three ramps must NOT flip (motion regression guard)
+  const motionLike = { set: 'core/motion', path: 'spring.window.stiffness', rawValue: '480', isAlias: false }
+  assert.equal(resolveKind(motionLike, m), 'STRING')
+})
+
+test('coreNumericFlavor keys off the owning set', () => {
+  assert.equal(coreNumericFlavor('core/leading'), 'leading')
+  assert.equal(coreNumericFlavor('core/tracking'), 'tracking')
+  assert.equal(coreNumericFlavor('core/weight'), 'weight')
+  assert.equal(coreNumericFlavor('core/font-size'), 'px')
+  assert.equal(coreNumericFlavor('semantic/scale'), 'px')
+})
+
+test('coreValueToFigmaFloat pre-converts ramps to Figma-native units; round-trips losslessly', () => {
+  const m = typoModel()
+  const byPath = (p) => m.coreTokens.find((t) => t.path === p)
+  assert.equal(coreValueToFigmaFloat(byPath('leading.normal')), 150) // 1.5 -> 150 (PERCENT)
+  assert.equal(coreValueToFigmaFloat(byPath('tracking.14')), 14) // 0.14em -> 14 (PERCENT)
+  assert.equal(coreValueToFigmaFloat(byPath('weight.regular')), 400) // 400 -> 400
+  assert.equal(coreValueToFigmaFloat(byPath('font-size.xl')), 15) // 15px -> 15
+  // inverse (PUSH) restores the exact token string
+  assert.equal(figmaFloatToCoreValue('core/leading', 150), '1.5')
+  assert.equal(figmaFloatToCoreValue('core/tracking', 14), '0.14em')
+  assert.equal(figmaFloatToCoreValue('core/weight', 400), '400')
+  assert.equal(figmaFloatToCoreValue('core/font-size', 15), '15px')
+})
+
+test('memberTerminal chases to the terminal primitive; undefined for literals + fluid type.* sizes', () => {
+  const m = typoModel()
+  const label = m.typographyComposites.find((c) => c.role === 'label')
+  // {type.label.size} -> {font-size.xl}: terminal is the core px primitive
+  const sizeTerm = memberTerminal(label.members.fontSize, m)
+  assert.equal(sizeTerm.set, 'core/font-size')
+  assert.equal(sizeTerm.path, 'font-size.xl')
+  // {type.label.tracking} -> {tracking.14}: terminal is the core tracking primitive
+  assert.equal(memberTerminal(label.members.letterSpacing, m).path, 'tracking.14')
+  // {font-figma.mono}: terminal is the STRING family primitive (alias target for family)
+  assert.equal(memberTerminal(label.members.fontFamily, m).path, 'font-figma.mono')
+  const display = m.typographyComposites.find((c) => c.role === 'display')
+  // fluid {type.display.size} = clamp() literal — terminal is the type.* sub-token itself
+  // (no core alias), which the plugin recognises as "no plain semantic var -> bake".
+  assert.equal(memberTerminal(display.members.fontSize, m).path, 'type.display.size')
+  // literal member ("Regular") has no terminal token
+  assert.equal(memberTerminal(display.members.fontStyle, m), undefined)
+})
+
+test('weightToStyleName maps the ramp; unknowns fall back to Regular', () => {
+  assert.equal(weightToStyleName(400), 'Regular')
+  assert.equal(weightToStyleName(500), 'Medium')
+  assert.equal(weightToStyleName(600), 'SemiBold')
+  assert.equal(weightToStyleName(700), 'Bold')
+  assert.equal(weightToStyleName(800), 'Black')
+  assert.equal(weightToStyleName(999), 'Regular')
+})
+
+test('familyHasWeights: only the Geist variable fonts carry real weights', () => {
+  assert.equal(familyHasWeights('Geist'), true)
+  assert.equal(familyHasWeights('Geist Mono'), true)
+  assert.equal(familyHasWeights('Geist Pixel'), false) // single-weight pixel display face
+  assert.equal(familyHasWeights('MedievalSharp'), false)
 })

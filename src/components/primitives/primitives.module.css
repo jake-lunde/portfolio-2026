@@ -1,10 +1,10 @@
 /* rubber-stamp block — archival accent vocabulary */
 .stamp {
   display: inline-block;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  font-weight: var(--weight-bold); /* diverges from label's regular weight — stamp reads bolder */
+  letter-spacing: var(--tracking-20); /* diverges from label's tracking-14 — wider track for the stamp */
   text-transform: uppercase;
   color: var(--accent);
   border: 2px solid var(--accent);
@@ -80,18 +80,18 @@
 }
 
 .ucNote {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-10); /* diverges from label's tracking-14 — exact match to original 0.1em */
   text-transform: uppercase;
   opacity: 0.65;
   max-width: 30ch;
-  line-height: 1.7;
+  line-height: var(--leading-relaxed); /* diverges from label's normal leading — extra room for wrapped copy */
 }
 
 .ucGlyph {
   font-family: var(--cjk);
-  font-weight: 800;
-  font-size: 34px;
+  font-weight: var(--weight-black);
+  font-size: 34px; /* decorative background glyph, not a heading-1 element — intentionally fixed, not fluid */
   opacity: 0.14;
 }

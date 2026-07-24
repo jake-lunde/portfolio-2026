@@ -42,7 +42,7 @@
         "fontWeight": "{type.heading-3.weight}",
         "lineHeight": "{type.heading-3.leading}",
         "letterSpacing": "0",
-        "fontStyle": "Bold"
+        "fontStyle": "SemiBold"
       }
     },
     "body-lg": {
@@ -67,6 +67,17 @@
         "fontStyle": "Regular"
       }
     },
+    "body-sm": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.sans}",
+        "fontSize": "{type.body-sm.size}",
+        "fontWeight": "{type.body-sm.weight}",
+        "lineHeight": "{type.body-sm.leading}",
+        "letterSpacing": "0",
+        "fontStyle": "Regular"
+      }
+    },
     "label": {
       "$type": "typography",
       "$value": {
@@ -83,7 +94,7 @@
       "$value": {
         "fontFamily": "{font-figma.mono}",
         "fontSize": "{type.caption.size}",
-        "fontWeight": "{weight.regular}",
+        "fontWeight": "{type.caption.weight}",
         "lineHeight": "{type.caption.leading}",
         "letterSpacing": "{type.caption.tracking}",
         "fontStyle": "Regular"
@@ -105,7 +116,7 @@
       "$value": {
         "fontFamily": "{font-figma.mono}",
         "fontSize": "{type.mono.size}",
-        "fontWeight": "{weight.regular}",
+        "fontWeight": "{type.mono.weight}",
         "lineHeight": "{type.mono.leading}",
         "letterSpacing": "{type.mono.tracking}",
         "fontStyle": "Regular"

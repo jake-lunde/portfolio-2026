@@ -21,8 +21,8 @@
 
 .wordmark {
   font-family: var(--display);
-  font-size: 13px;
-  font-weight: 400;
+  font-size: var(--type-body-sm-size); /* 13px exact — display family is an intentional divergence from body-sm's sans */
+  font-weight: var(--weight-regular);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -31,7 +31,7 @@
   font-family: var(--mono); /* version string has CJK — pixel has no CJK glyphs */
   font-size: var(--text-ui);
   color: var(--content-muted);
-  font-weight: 400;
+  font-weight: var(--weight-regular);
   letter-spacing: 0.12em;
   margin-left: 10px;
 }
@@ -100,8 +100,8 @@
 }
 
 .skinCaret {
-  font-size: 9px;
-  line-height: 1;
+  font-size: var(--type-caption-size); /* 9px exact */
+  line-height: var(--leading-none); /* diverges from caption's normal leading — tight box for the glyph */
   color: var(--content-muted);
   transition: transform var(--duration-tap) ease;
 }
@@ -169,13 +169,13 @@
 }
 
 .skinCheck {
-  font-size: 8px;
+  font-size: var(--type-micro-size); /* 8px exact */
   color: var(--accent);
 }
 
 .skinSoon {
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-10); /* diverges from caption's tracking-16 — exact match to original 0.1em */
   color: var(--content-muted);
 }
 
@@ -198,9 +198,9 @@
   border-bottom: var(--border-width-hairline) solid var(--border);
   display: flex;
   align-items: center;
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.2em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 8.5px → 8px — flag: ticker chrome, Chromatic-sensitive */
+  letter-spacing: var(--type-micro-tracking); /* 0.2em exact */
   color: var(--content-muted);
   white-space: nowrap;
 }
@@ -344,7 +344,7 @@
 }
 
 .npZoomed .npTitle {
-  font-size: 18px;
+  font-size: var(--type-heading-3-size); /* 18px exact */
 }
 
 .npZoomed .npArtist {
@@ -377,8 +377,8 @@
 
 .npLabel {
   font-family: var(--mono);
-  font-size: 7.5px;
-  letter-spacing: 0.16em;
+  font-size: var(--type-micro-size); /* 7.5px → 8px, sub-8 snap-up per ramp rule — flag: dense NP widget label */
+  letter-spacing: var(--tracking-16); /* diverges from micro's tracking-20 — matches original 0.16em */
   text-transform: uppercase;
   color: var(--accent);
 }
@@ -392,7 +392,7 @@
 .npTitle {
   font-family: var(--display);
   font-size: var(--text-ui);
-  line-height: 1.3;
+  line-height: var(--leading-snug); /* 1.3 exact */
 }
 
 .npArtist {
@@ -452,7 +452,7 @@
 
 .dailyPct {
   font-family: var(--display);
-  font-size: 12px;
+  font-size: var(--type-body-sm-size); /* 12px → 13px — display family is an intentional divergence from body-sm's sans */
   color: var(--accent);
 }
 
@@ -476,8 +476,8 @@
 .dailyStatus {
   display: block;
   font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.08em;
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-08); /* diverges from caption's tracking-16 — matches original 0.08em */
   text-transform: uppercase;
   color: var(--content-muted);
   margin-top: var(--space-1);
@@ -649,7 +649,7 @@
   font-size: var(--text-label);
   color: var(--content);
   border: var(--border-width-hairline) solid transparent;
-  line-height: 1;
+  line-height: var(--leading-none); /* 1 exact */
 }
 
 .miniBtn:hover {
@@ -737,16 +737,16 @@
 
 .stickyQuote {
   margin: 0 0 6px;
-  font-size: 10.5px;
+  font-size: 10.5px; /* fixed-width sticky note (168px) — deliberately below body-sm (13px, would overflow the note); no smaller sans role in the ramp */
   font-style: italic;
-  line-height: 1.5;
+  line-height: var(--leading-normal); /* 1.5 exact */
   color: var(--content);
 }
 
 .stickyCite {
   font-family: var(--mono);
-  font-size: 7px;
-  letter-spacing: 0.14em;
+  font-size: var(--type-micro-size); /* 7px → 8px, sub-8 snap-up per ramp rule — flag: dense sticky-note citation */
+  letter-spacing: var(--tracking-14); /* diverges from micro's tracking-20 — matches original 0.14em */
   color: var(--content-muted);
 }
 
@@ -945,7 +945,7 @@
   display: grid;
   place-items: center;
   font-size: var(--text-caption);
-  line-height: 1;
+  line-height: var(--leading-none); /* 1 exact */
   color: inherit;
 }
 
@@ -958,7 +958,7 @@
 .title {
   font-family: var(--mono);
   font-size: var(--text-ui);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   flex: 1;
@@ -1069,9 +1069,9 @@
   background: var(--surface);
   display: grid;
   place-items: center;
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 12px → 11px */
+  letter-spacing: var(--type-label-tracking); /* 0.14em exact */
 }
 
 .bootInner {
@@ -1162,13 +1162,13 @@
   }
 
   .title {
-    font-size: 13px;
+    font-size: var(--type-body-sm-size); /* 13px exact */
   }
 
   .ctrl {
     width: 28px;
     height: 28px;
-    font-size: 15px;
+    font-size: var(--type-body-size); /* 15px exact */
   }
 
   .titleControls {

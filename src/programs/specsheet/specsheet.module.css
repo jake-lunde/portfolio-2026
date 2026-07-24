@@ -3,9 +3,9 @@
 }
 
 .eyebrow {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px exact */
+  letter-spacing: var(--tracking-18); /* diverges from label's tracking-14 — exact match to original 0.18em */
   text-transform: uppercase;
   color: var(--accent);
   margin: 0 0 14px;
@@ -24,15 +24,15 @@
 }
 
 .secNo {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px exact */
+  letter-spacing: var(--tracking-10); /* diverges from label's tracking-14 — exact match to original 0.1em */
   color: var(--accent);
 }
 
 .secLabel {
   font-family: var(--display);
-  font-size: 15px;
+  font-size: var(--type-body-size); /* 15px exact */
 }
 
 /* ---------- color chips ---------- */
@@ -73,21 +73,21 @@
 }
 
 .chipName {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px exact */
   letter-spacing: 0.02em;
 }
 
 .chipVar {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.08em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-08); /* diverges from caption's tracking-16 — exact match to original 0.08em */
   color: var(--content-muted);
 }
 
 .chipHex {
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10.5px → 11px */
   letter-spacing: 0.05em;
   color: var(--content-muted);
 }
@@ -96,8 +96,8 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  font-family: var(--mono);
-  font-size: 10px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10px → 11px */
   letter-spacing: 0.04em;
   text-align: right;
 }
@@ -116,8 +116,8 @@
 }
 
 .chipAgainst {
-  font-size: 8px;
-  letter-spacing: 0.12em;
+  font-size: var(--type-micro-size); /* 8px exact */
+  letter-spacing: var(--tracking-12); /* diverges from micro's tracking-20 — exact match to original 0.12em */
   text-transform: uppercase;
 }
 
@@ -137,28 +137,28 @@
 }
 
 .specDisplay {
-  font-family: var(--display);
-  font-size: 34px;
-  letter-spacing: 0;
-  line-height: 1;
+  font-family: var(--type-display-family);
+  font-size: var(--type-display-size); /* 34px was the clamp's own min — now fluid, flag: type-showcase specimen */
+  letter-spacing: var(--type-display-tracking);
+  line-height: var(--type-display-leading); /* 1 exact */
 }
 
 .specBody {
-  font-family: var(--sans);
-  font-size: 17px;
-  line-height: 1.6;
+  font-family: var(--type-body-family);
+  font-size: var(--type-body-size); /* 17px → 15px — this specimen literally demonstrates the "body" role; flag: notable snap in the type showcase */
+  line-height: var(--type-body-leading); /* 1.6 → 1.7 */
 }
 
 .specMono {
-  font-family: var(--mono);
-  font-size: 15px;
-  letter-spacing: 0.06em;
+  font-family: var(--type-mono-family);
+  font-size: var(--type-mono-size); /* 15px → 11px — flag: large snap, but this specimen literally demonstrates the "mono" ramp role */
+  letter-spacing: var(--type-mono-tracking); /* 0.06em → 0.08em */
 }
 
 .specLine {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   text-transform: uppercase;
   color: var(--content-muted);
 }
@@ -187,16 +187,16 @@
 }
 
 .motionK {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   text-transform: uppercase;
   color: var(--content-muted);
 }
 
 .motionV {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px exact */
   letter-spacing: 0.02em;
 }
 
@@ -222,17 +222,17 @@
 }
 
 .partNo {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   text-transform: uppercase;
   color: var(--content-muted);
 }
 
 .demoBtn {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10px → 11px */
+  letter-spacing: var(--tracking-16); /* diverges from label's tracking-14 — exact match to original 0.16em */
   text-transform: uppercase;
   color: var(--surface);
   background: var(--accent);
@@ -247,11 +247,11 @@
 }
 
 .foot {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.13em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — closest match to original 0.13em */
   text-transform: uppercase;
   color: var(--content-muted);
-  line-height: 1.7;
+  line-height: var(--leading-relaxed); /* 1.7 exact */
   margin: 26px 0 0;
 }

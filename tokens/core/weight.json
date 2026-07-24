@@ -1,16 +1,25 @@
 {
   "weight": {
     "regular": {
-      "$value": "400"
+      "$value": "400",
+      "$type": "fontWeight"
+    },
+    "medium": {
+      "$value": "500",
+      "$type": "fontWeight",
+      "$description": "Geist/Geist Mono are variable fonts — 500 is real, not synthesized. Display faces stay single-weight 400."
     },
     "semibold": {
-      "$value": "600"
+      "$value": "600",
+      "$type": "fontWeight"
     },
     "bold": {
-      "$value": "700"
+      "$value": "700",
+      "$type": "fontWeight"
     },
     "black": {
-      "$value": "800"
+      "$value": "800",
+      "$type": "fontWeight"
     }
   }
 }

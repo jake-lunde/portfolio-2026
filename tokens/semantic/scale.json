@@ -47,7 +47,7 @@
   },
   "leading": {
     "body": {
-      "$value": "1.6"
+      "$value": "{leading.relaxed}"
     }
   },
   "type": {
@@ -107,7 +107,7 @@
         "$value": "{leading.snug}"
       },
       "weight": {
-        "$value": "{weight.bold}"
+        "$value": "{weight.semibold}"
       },
       "family": {
         "$value": "{sans}"
@@ -134,7 +134,23 @@
         "$type": "dimension"
       },
       "leading": {
-        "$value": "1.62"
+        "$value": "{leading.relaxed}"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
+      "family": {
+        "$value": "{sans}"
+      }
+    },
+    "body-sm": {
+      "$description": "Dense UI prose (13px) — the landing role for the 12–14px cluster the adoption sweep snaps; body proper stays 15px.",
+      "size": {
+        "$value": "{font-size.lg}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
       },
       "weight": {
         "$value": "{weight.regular}"
@@ -170,6 +186,9 @@
       "leading": {
         "$value": "{leading.normal}"
       },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
       "tracking": {
         "$value": "{tracking.16}"
       },
@@ -202,6 +221,9 @@
       },
       "leading": {
         "$value": "{leading.normal}"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
       },
       "tracking": {
         "$value": "{tracking.08}"

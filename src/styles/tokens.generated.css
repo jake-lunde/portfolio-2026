@@ -45,8 +45,8 @@
   --leading-normal: 1.5;
   --leading-relaxed: 1.7;
   --leading-loose: 1.9;
-  --leading-body: 1.6;
   --weight-regular: 400;
+  --weight-medium: 500; /** Geist/Geist Mono are variable fonts — 500 is real, not synthesized. Display faces stay single-weight 400. */
   --weight-semibold: 600;
   --weight-bold: 700;
   --weight-black: 800;
@@ -86,7 +86,6 @@
   --type-display-size: clamp(34px, 6vw, 62px);
   --type-display-tracking: 0;
   --type-heading-1-size: clamp(28px, 5.5vw, 38px);
-  --type-body-leading: 1.62;
   --border: rgba(23, 21, 13, 0.18);
   --shadow-print: 4px 4px 0 rgba(23, 21, 13, 0.14);
   --shadow-print-lg: 5px 5px 0 rgba(23, 21, 13, 0.12);
@@ -107,6 +106,7 @@
   --radius-circle: var(--radius-full);
   --border-width-default: var(--border-width-thin);
   --border-width-strong: var(--border-width-thick);
+  --leading-body: var(--leading-relaxed);
   --text-micro: var(--size-micro);
   --text-caption: var(--size-caption);
   --text-label: var(--size-label);
@@ -124,15 +124,20 @@
   --type-heading-2-family: var(--display);
   --type-heading-3-size: var(--font-size-3xl);
   --type-heading-3-leading: var(--leading-snug);
-  --type-heading-3-weight: var(--weight-bold);
+  --type-heading-3-weight: var(--weight-semibold);
   --type-heading-3-family: var(--sans);
   --type-body-lg-size: var(--font-size-2xl);
   --type-body-lg-leading: var(--leading-relaxed);
   --type-body-lg-weight: var(--weight-regular);
   --type-body-lg-family: var(--sans);
   --type-body-size: var(--font-size-xl);
+  --type-body-leading: var(--leading-relaxed);
   --type-body-weight: var(--weight-regular);
   --type-body-family: var(--sans);
+  --type-body-sm-size: var(--font-size-lg);
+  --type-body-sm-leading: var(--leading-normal);
+  --type-body-sm-weight: var(--weight-regular);
+  --type-body-sm-family: var(--sans);
   --type-label-size: var(--font-size-base);
   --type-label-leading: var(--leading-normal);
   --type-label-weight: var(--weight-regular); /** matches .mono-label (globals.css) which renders at inherited 400; a bolder mono label is a call-site override, not this role */
@@ -140,6 +145,7 @@
   --type-label-family: var(--mono);
   --type-caption-size: var(--font-size-xs);
   --type-caption-leading: var(--leading-normal);
+  --type-caption-weight: var(--weight-regular);
   --type-caption-tracking: var(--tracking-16);
   --type-caption-family: var(--mono);
   --type-micro-size: var(--font-size-2xs);
@@ -149,6 +155,7 @@
   --type-micro-family: var(--mono);
   --type-mono-size: var(--font-size-base);
   --type-mono-leading: var(--leading-normal);
+  --type-mono-weight: var(--weight-regular);
   --type-mono-tracking: var(--tracking-08);
   --type-mono-family: var(--mono);
   --spacing-component-xs: var(--space-1);

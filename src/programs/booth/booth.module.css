@@ -28,20 +28,20 @@
 }
 
 .idleNote {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10px → 11px */
+  letter-spacing: var(--tracking-10); /* diverges from label's tracking-14 — exact match to original 0.1em */
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.6);
   max-width: 36ch;
-  line-height: 1.8;
+  line-height: var(--leading-relaxed); /* 1.8 → 1.7 */
   margin: 0;
 }
 
 .status {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10px → 11px */
+  letter-spacing: var(--tracking-16); /* diverges from label's tracking-14 — exact match to original 0.16em */
   color: rgba(231, 225, 210, 0.6);
   padding-top: 60px;
 }
@@ -72,7 +72,7 @@
   display: grid;
   place-items: center;
   font-family: var(--display);
-  font-size: 110px;
+  font-size: 110px; /* decorative — photobooth countdown overlay digit, cited in the ramp's own guidance as a one-off size to leave */
   color: var(--accent-expressive);
   text-shadow: 0 0 24px rgba(242, 166, 194, 0.6);
   pointer-events: none;
@@ -86,9 +86,9 @@
 }
 
 .filterChip {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   padding: 4px 9px;
   border: 1px solid rgba(231, 225, 210, 0.3);
   color: rgba(231, 225, 210, 0.75);
@@ -100,10 +100,10 @@
 }
 
 .bigBtn {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px exact */
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-16); /* diverges from label's tracking-14 — exact match to original 0.16em */
   padding: 10px 22px;
   border: 1.5px solid rgba(231, 225, 210, 0.5);
   color: #e7e1d2;

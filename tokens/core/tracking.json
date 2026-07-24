@@ -1,31 +1,40 @@
 {
   "tracking": {
     "02": {
-      "$value": "0.02em"
+      "$value": "0.02em",
+      "$type": "dimension"
     },
     "06": {
-      "$value": "0.06em"
+      "$value": "0.06em",
+      "$type": "dimension"
     },
     "08": {
-      "$value": "0.08em"
+      "$value": "0.08em",
+      "$type": "dimension"
     },
     "10": {
-      "$value": "0.1em"
+      "$value": "0.1em",
+      "$type": "dimension"
     },
     "12": {
-      "$value": "0.12em"
+      "$value": "0.12em",
+      "$type": "dimension"
     },
     "14": {
-      "$value": "0.14em"
+      "$value": "0.14em",
+      "$type": "dimension"
     },
     "16": {
-      "$value": "0.16em"
+      "$value": "0.16em",
+      "$type": "dimension"
     },
     "18": {
-      "$value": "0.18em"
+      "$value": "0.18em",
+      "$type": "dimension"
     },
     "20": {
-      "$value": "0.2em"
+      "$value": "0.2em",
+      "$type": "dimension"
     }
   }
 }

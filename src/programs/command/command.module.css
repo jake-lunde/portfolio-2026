@@ -47,15 +47,15 @@
 .headTitle {
   display: block;
   font-family: var(--display);
-  font-size: 16px;
-  line-height: 1.1;
+  font-size: var(--type-body-lg-size); /* 16px exact */
+  line-height: var(--leading-tight); /* 1.1 → 1.15 */
 }
 
 .headSub {
   display: block;
-  font-family: var(--mono);
-  font-size: 7.5px;
-  letter-spacing: 0.18em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 7.5px → 8px, sub-8 snap-up per ramp rule — flag: dense telemetry header */
+  letter-spacing: var(--tracking-18); /* diverges from micro's tracking-20 — exact match to original 0.18em */
   color: rgba(231, 225, 210, 0.55);
 }
 
@@ -69,9 +69,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   border: 1px solid rgba(231, 225, 210, 0.5);
   color: rgba(231, 225, 210, 0.75);
   padding: 3px 8px;
@@ -124,7 +124,7 @@
 
 .headClock {
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: var(--type-body-size); /* 15px exact */
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.06em;
 }
@@ -234,29 +234,29 @@
 
 .unitName {
   font-family: var(--display);
-  font-size: 12px;
+  font-size: var(--type-body-sm-size); /* 12px → 13px */
   margin-top: 3px;
 }
 
 .unitModel {
-  font-family: var(--mono);
-  font-size: 7px;
-  letter-spacing: 0.16em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 7px → 8px, sub-8 snap-up per ramp rule — flag: dense crew-bay grid (5 columns) */
+  letter-spacing: var(--tracking-16); /* diverges from micro's tracking-20 — exact match to original 0.16em */
   color: rgba(231, 225, 210, 0.5);
 }
 
 .unitRole {
-  font-family: var(--mono);
-  font-size: 7px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 7px → 8px, sub-8 snap-up per ramp rule — flag: dense crew-bay grid */
+  letter-spacing: var(--tracking-14); /* diverges from micro's tracking-20 — exact match to original 0.14em */
   color: var(--accent);
 }
 
 .unitStatus {
-  font-family: var(--mono);
-  font-size: 7.5px;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 7.5px → 8px, sub-8 snap-up per ramp rule — flag: dense crew-bay status line (min-height 24px, 2-line clamp) */
   letter-spacing: 0.06em;
-  line-height: 1.5;
+  line-height: var(--type-micro-leading); /* 1.5 exact */
   color: rgba(231, 225, 210, 0.75);
   text-align: center;
   min-height: 24px;
@@ -295,9 +295,9 @@
 }
 
 .feedHead {
-  font-family: var(--mono);
-  font-size: 7.5px;
-  letter-spacing: 0.2em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 7.5px → 8px, sub-8 snap-up per ramp rule — flag: dense feed table header */
+  letter-spacing: var(--type-micro-tracking); /* 0.2em exact */
   color: rgba(231, 225, 210, 0.45);
   border-bottom: 1px solid rgba(231, 225, 210, 0.3);
   padding-bottom: 5px;
@@ -311,13 +311,13 @@
 
 .rowT {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--type-body-sm-size); /* 13px exact */
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
 }
 
 .rowArrow {
-  font-size: 11px;
+  font-size: var(--type-label-size); /* 11px exact */
   color: rgba(231, 225, 210, 0.7);
 }
 
@@ -335,13 +335,13 @@
 
 .rowAgent {
   font-family: var(--display);
-  font-size: 10.5px;
+  font-size: var(--type-label-size); /* 10.5px → 11px */
 }
 
 .rowLabel {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-08); /* diverges from caption's tracking-16 — exact match to original 0.08em */
   color: rgba(231, 225, 210, 0.8);
   white-space: nowrap;
   overflow: hidden;
@@ -354,9 +354,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--mono);
-  font-size: 7.5px;
-  letter-spacing: 0.18em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 7.5px → 8px, sub-8 snap-up per ramp rule — flag: dense caution strip */
+  letter-spacing: var(--tracking-18); /* diverges from micro's tracking-20 — exact match to original 0.18em */
   color: rgba(231, 225, 210, 0.55);
   white-space: nowrap;
 }

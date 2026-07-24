@@ -49,22 +49,22 @@
 
 .stampName {
   font-family: var(--display);
-  font-size: clamp(24px, 5vw, 32px);
-  line-height: 0.98;
+  font-size: clamp(24px, 5vw, 32px); /* decorative — business-card name clamp, doesn't match any ramp fluid role */
+  line-height: var(--leading-none); /* 0.98 → 1 */
 }
 
 .stampRole {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 8.5px → 8px */
+  font-weight: var(--type-micro-weight); /* 700 exact */
+  letter-spacing: var(--tracking-18); /* diverges from micro's tracking-20 — exact match to original 0.18em */
   margin-top: 6px;
 }
 
 .stampYear {
   font-family: var(--display);
-  font-size: clamp(26px, 5vw, 34px);
-  line-height: 0.9;
+  font-size: clamp(26px, 5vw, 34px); /* decorative — business-card year clamp, doesn't match any ramp fluid role */
+  line-height: var(--leading-none); /* 0.9 → 1 — larger delta than usual, flag for the stacked year display */
   display: flex;
   flex-direction: column;
   margin: 10px 0 8px;
@@ -74,7 +74,7 @@
   font-family: var(--mono);
   font-size: var(--text-micro);
   letter-spacing: 0.1em;
-  line-height: 1.8;
+  line-height: var(--leading-relaxed); /* 1.8 → 1.7 */
   color: var(--content-muted);
   margin-top: auto;
 }
@@ -145,16 +145,16 @@
 
 .aboutName {
   font-family: var(--display);
-  font-size: clamp(28px, 5.5vw, 38px);
-  font-weight: 400;
+  font-size: var(--type-heading-1-size); /* clamp(28px, 5.5vw, 38px) already matched exactly */
+  font-weight: var(--type-heading-1-weight); /* 400 exact */
   letter-spacing: 0;
-  line-height: 1.05;
+  line-height: var(--leading-none); /* 1.05 → 1 — diverges from heading-1's tight leading, flag: About page hero name */
   margin: 0 0 18px;
 }
 
 .about p {
-  font-size: 16px;
-  line-height: 1.62;
+  font-size: var(--type-body-lg-size); /* 16px exact */
+  line-height: var(--leading-relaxed); /* 1.62 → 1.7 */
   max-width: 56ch;
   margin: 0 0 16px;
 }
@@ -163,8 +163,8 @@
    drop cap in the blackletter, the manuscript's first move */
 :global([data-skin='medieval']) .about > p:first-of-type::first-letter {
   font-family: var(--display);
-  font-size: 3.4em;
-  line-height: 0.78;
+  font-size: 3.4em; /* decorative — medieval illuminated drop-cap, relative unit outside the px ramp */
+  line-height: 0.78; /* decorative — tight leading for the oversized drop-cap glyph, no ramp primitive this tight */
   float: left;
   padding: 0.06em 0.12em 0 0;
   color: var(--accent);
@@ -172,9 +172,9 @@
 
 .aboutList {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--type-body-sm-size); /* 12px → 13px */
   letter-spacing: 0.02em;
-  line-height: 2;
+  line-height: var(--leading-loose); /* 2 → 1.9 */
   margin: 22px 0 0;
   padding: 16px 0 0;
   border-top: var(--border-width-hairline) solid var(--border);
@@ -241,16 +241,16 @@
 
 .projName {
   font-family: var(--display);
-  font-size: 17px;
-  font-weight: 400;
+  font-size: var(--type-body-size); /* 17px → 15px — flag: project index name, notable snap */
+  font-weight: var(--weight-regular);
   letter-spacing: 0;
 }
 
 .projOrg,
 .projYear {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10.5px → 11px */
+  letter-spacing: var(--tracking-08); /* diverges from label's tracking-14 — exact match to original 0.08em */
   text-transform: uppercase;
   color: var(--content-muted);
 }
@@ -314,8 +314,8 @@
 
 .npWindowTitle {
   font-family: var(--display);
-  font-size: 19px;
-  font-weight: 400;
+  font-size: 19px; /* decorative — no ramp role matches this size at display-family + regular weight (heading-3 assumes sans/bold) */
+  font-weight: var(--weight-regular);
   margin: 0 0 6px;
 }
 
@@ -328,9 +328,9 @@
 }
 
 .npWindowLink {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9.5px → 9px */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   color: #5c7cff;
 }
 
@@ -380,7 +380,7 @@
 .vizIconLabel {
   font-family: var(--mono);
   font-size: var(--text-label);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -421,7 +421,7 @@
 .setHint {
   display: block;
   color: var(--content-muted);
-  font-size: 9.5px;
+  font-size: var(--type-caption-size); /* 9.5px → 9px */
   margin-top: var(--space-1);
   text-transform: none;
   letter-spacing: 0.05em;
@@ -492,9 +492,9 @@
 }
 
 .swatchName {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.12em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-12); /* diverges from caption's tracking-16 — exact match to original 0.12em */
   text-transform: uppercase;
   color: var(--content-muted);
 }

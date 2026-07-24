@@ -22,9 +22,9 @@
 }
 
 .vizChip {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9.5px → 9px */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   text-transform: uppercase;
   padding: 4px 8px;
   border: 1px solid rgba(231, 225, 210, 0.3);
@@ -54,15 +54,15 @@
 
 .rideTitle {
   font-family: var(--display);
-  font-size: 18px;
+  font-size: var(--type-heading-3-size); /* 18px exact */
   color: #e7e1d2;
   margin: 0;
 }
 
 .rideSub {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9.5px → 9px */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.55);
 }
@@ -82,9 +82,9 @@
 }
 
 .hudK {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.16em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--type-caption-tracking); /* 0.16em exact */
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.5);
   display: block;
@@ -92,7 +92,7 @@
 
 .hudV {
   font-family: var(--display);
-  font-size: 17px;
+  font-size: var(--type-body-lg-size); /* 17px → 16px */
   color: #e7e1d2;
   margin-top: 3px;
   font-variant-numeric: tabular-nums;
@@ -113,9 +113,9 @@
   position: absolute;
   top: 6px;
   left: 8px;
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.16em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--type-caption-tracking); /* 0.16em exact */
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.5);
   pointer-events: none;
@@ -145,12 +145,12 @@
 /* ---- scrobbles ---- */
 
 .appleEra {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.1em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-10); /* diverges from caption's tracking-16 — exact match to original 0.1em */
   color: rgba(231, 225, 210, 0.6);
   margin: -2px 0 10px;
-  line-height: 1.7;
+  line-height: var(--leading-relaxed); /* 1.7 exact */
 }
 
 .appleEra span {
@@ -194,14 +194,14 @@
 }
 
 .artistRank {
-  font-family: var(--mono);
-  font-size: 9px;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
   color: rgba(231, 225, 210, 0.5);
 }
 
 .artistName {
   font-family: var(--display);
-  font-size: 12.5px;
+  font-size: var(--type-body-sm-size); /* 12.5px → 13px */
   color: #e7e1d2;
   white-space: nowrap;
   overflow: hidden;
@@ -209,9 +209,9 @@
 }
 
 .artistGenre {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.1em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-10); /* diverges from caption's tracking-16 — exact match to original 0.1em */
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.5);
   white-space: nowrap;
@@ -233,8 +233,8 @@
 }
 
 .artistPlays {
-  font-family: var(--mono);
-  font-size: 9px;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
   color: rgba(231, 225, 210, 0.6);
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -263,12 +263,12 @@
 
 .artCap,
 .artIdle {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.12em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-12); /* diverges from caption's tracking-16 — exact match to original 0.12em */
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.55);
-  line-height: 1.7;
+  line-height: var(--leading-relaxed); /* 1.7 exact */
 }
 
 /* ---- daily ---- */
@@ -304,7 +304,7 @@
 
 .gaugePct {
   font-family: var(--display);
-  font-size: 16px;
+  font-size: var(--type-body-lg-size); /* 16px exact */
   color: #e7e1d2;
   min-width: 44px;
   text-align: right;
@@ -312,9 +312,9 @@
 }
 
 .gaugeStatus {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.55);
   margin: 8px 0 0;
@@ -330,9 +330,9 @@
 }
 
 .runChip {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.1em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-10); /* diverges from caption's tracking-16 — exact match to original 0.1em */
   padding: 3px 7px;
   border: 1px solid rgba(231, 225, 210, 0.25);
   color: rgba(231, 225, 210, 0.7);
@@ -344,9 +344,9 @@
 }
 
 .scrubHint {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-12); /* diverges from caption's tracking-16 — exact match to original 0.12em */
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.45);
   text-align: center;

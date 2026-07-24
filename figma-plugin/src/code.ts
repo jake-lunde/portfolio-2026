@@ -15,9 +15,12 @@ import {
   buildModel,
   capLines,
   clampMaxPx,
+  coreValueToFigmaFloat,
   coreVarName,
   deepClone,
   emToPercent,
+  familyHasWeights,
+  figmaFloatToCoreValue,
   figmaVarName,
   floatToTokenString,
   floatToWeight,
@@ -31,6 +34,7 @@ import {
   leadingToPercent,
   leafAtPath,
   memberConcrete,
+  memberTerminal,
   owningSet,
   percentToEm,
   percentToLeading,
@@ -40,9 +44,9 @@ import {
   rgbaToTokenString,
   semanticToken,
   setDefiningPath,
-  toFloat,
   toRgba,
   weightToFloat,
+  weightToStyleName,
   writeTargetSet,
   TYPO_FIELDS,
   type ChangeEntry,
@@ -53,6 +57,7 @@ import {
   type ThemeDef,
   type TokenKind,
   type TypoField,
+  type TypoMember,
   type TypographyComposite,
 } from './tokens'
 
@@ -327,7 +332,7 @@ async function pull(gh: GitHub, branch: string): Promise<void> {
   // Expand typography composites into a `type` collection of bindable variables
   // + one Figma TEXT STYLE per role. Runs last so all core/semantic targets the
   // composites resolve against already exist.
-  await pullTextStyles(model)
+  await pullTextStyles(model, coreVars, semVars)
 }
 
 function representativeSemantic(model: PulledModel, name: string): FlatToken | undefined {
@@ -362,7 +367,10 @@ function setValue(
   }
   const kind = v.resolvedType
   if (kind === 'COLOR') v.setValueForMode(modeId, toRgba(token.rawValue))
-  else if (kind === 'FLOAT') v.setValueForMode(modeId, toFloat(token.rawValue))
+  // coreValueToFigmaFloat is px-identity for everything except the three core
+  // proportional ramps (leading/tracking/weight), which it pre-converts to their
+  // Figma-native unit so text-style role vars can alias them (see tokens.ts).
+  else if (kind === 'FLOAT') v.setValueForMode(modeId, coreValueToFigmaFloat(token))
   else v.setValueForMode(modeId, token.rawValue)
 }
 
@@ -399,6 +407,7 @@ const STYLE_NAME: Record<string, string> = {
   'heading-3': 'Heading/3',
   'body-lg': 'Body/Large',
   body: 'Body/Base',
+  'body-sm': 'Body/Small',
   label: 'Label',
   caption: 'Caption',
   micro: 'Micro',
@@ -420,11 +429,19 @@ function typeVarName(role: string, field: TypoField): string {
 /** Resolve + unit-convert a composite to the Figma-native values pull writes. */
 function figmaTypoFor(c: TypographyComposite, model: PulledModel): FigmaTypo {
   const sizeRaw = memberConcrete(c.members.fontSize, model)
+  const fontFamily = memberConcrete(c.members.fontFamily, model)
+  const fontWeight = weightToFloat(memberConcrete(c.members.fontWeight, model))
+  // fontStyle is DERIVED from the resolved weight (plugin-authoritative), not
+  // the composite's hand-typed literal. Single-weight families (pixel/medieval)
+  // ship only Regular, so a non-400 weight on them is clamped to Regular here so
+  // figma.loadFontAsync can't throw. warnFontStyle() surfaces both cases on pull.
+  const derivedStyle = weightToStyleName(fontWeight)
+  const fontStyle = familyHasWeights(fontFamily) ? derivedStyle : 'Regular'
   return {
-    fontFamily: memberConcrete(c.members.fontFamily, model),
-    fontStyle: memberConcrete(c.members.fontStyle, model),
+    fontFamily,
+    fontStyle,
     fontSize: clampMaxPx(sizeRaw),
-    fontWeight: weightToFloat(memberConcrete(c.members.fontWeight, model)),
+    fontWeight,
     lineHeight: leadingToPercent(memberConcrete(c.members.lineHeight, model)),
     letterSpacing: emToPercent(memberConcrete(c.members.letterSpacing, model)),
     fluidSize: isFluidSize(sizeRaw),
@@ -449,7 +466,56 @@ function figmaValueForField(ft: FigmaTypo, field: TypoField): string | number {
   }
 }
 
-async function pullTextStyles(model: PulledModel): Promise<void> {
+/**
+ * The core/semantic Figma variable a composite member should ALIAS to, or null
+ * when the member must be baked as a literal. Baked cases: fontStyle (a derived
+ * string, never a token), literal members ("0", "Regular"), and members whose
+ * terminal is a `type.*` sub-token with no Figma variable (fluid clamp() sizes —
+ * excluded from the semantic collection, pinned to desktop-max instead).
+ */
+function aliasTargetFor(
+  member: TypoMember,
+  field: TypoField,
+  model: PulledModel,
+  coreVars: VarIndex,
+  semVars: VarIndex
+): Variable | null {
+  if (field === 'fontStyle') return null
+  const terminal = memberTerminal(member, model)
+  if (!terminal) return null
+  if (isCoreSet(terminal.set)) {
+    return coreVars.get(coreVarName(terminal.set, terminal.path)) ?? null
+  }
+  // Semantic terminal — but `type.*` sub-tokens own no plain semantic variable
+  // (the `type` collection does), so a fluid size's terminal has no alias target.
+  if (isTypeRole(terminal.path)) return null
+  return semVars.get(terminal.path) ?? null
+}
+
+/** Warn (doctor-style) when the derived fontStyle is clamped or disagrees with the composite literal. */
+function warnFontStyle(c: TypographyComposite, ft: FigmaTypo, model: PulledModel): void {
+  const derived = weightToStyleName(ft.fontWeight)
+  if (!familyHasWeights(ft.fontFamily) && derived !== 'Regular') {
+    log(
+      `Type "${c.role}": weight ${ft.fontWeight} on single-weight family "${ft.fontFamily}" — falling back to Regular.`,
+      'warn'
+    )
+    return
+  }
+  const literal = memberConcrete(c.members.fontStyle, model)
+  if (literal !== ft.fontStyle) {
+    log(
+      `Type "${c.role}": composite fontStyle "${literal}" disagrees with weight-derived "${ft.fontStyle}" — using derived.`,
+      'warn'
+    )
+  }
+}
+
+async function pullTextStyles(
+  model: PulledModel,
+  coreVars: VarIndex,
+  semVars: VarIndex
+): Promise<void> {
   if (!model.typographyComposites.length) return
 
   const typeCol = await getOrCreateCollection(TYPE_COLLECTION)
@@ -458,13 +524,26 @@ async function pullTextStyles(model: PulledModel): Promise<void> {
   const index = await buildVarIndex()
 
   let styleCount = 0
+  let aliasCount = 0
   for (const c of model.typographyComposites) {
     const ft = figmaTypoFor(c, model)
+    warnFontStyle(c, ft, model)
     const vars = {} as Record<TypoField, Variable>
     for (const field of TYPO_FIELDS) {
       const v = getOrCreateVariable(typeVarName(c.role, field), typeCol, TYPE_VAR_SPEC[field].kind, index)
       vars[field] = v
-      v.setValueForMode(modeId, figmaValueForField(ft, field))
+      // Prefer an ALIAS to the terminal core/semantic primitive (so the role var
+      // is a live reference, not a frozen literal); bake only where no stable
+      // variable exists. Kinds line up by construction (STRING↔STRING for
+      // family; FLOAT↔FLOAT for size/weight/leading/tracking, the last two
+      // pre-converted to percent core-side so the bound value reads correctly).
+      const target = aliasTargetFor(c.members[field], field, model, coreVars, semVars)
+      if (target) {
+        v.setValueForMode(modeId, figma.variables.createVariableAlias(target))
+        aliasCount++
+      } else {
+        v.setValueForMode(modeId, figmaValueForField(ft, field))
+      }
     }
     try {
       await upsertTextStyle(c.role, ft, vars)
@@ -475,7 +554,7 @@ async function pullTextStyles(model: PulledModel): Promise<void> {
   }
 
   log(
-    `Upserted ${model.typographyComposites.length * TYPO_FIELDS.length} type variables + ${styleCount} text styles.`,
+    `Upserted ${model.typographyComposites.length * TYPO_FIELDS.length} type variables (${aliasCount} aliased to core/semantic) + ${styleCount} text styles.`,
     'ok'
   )
 }
@@ -759,7 +838,9 @@ function serializeVarValue(
     const c = raw as Rgba
     return rgbaToTokenString(c, token.rawValue.trim() === 'transparent')
   }
-  if (kind === 'FLOAT') return floatToTokenString(raw as number)
+  // Inverse of coreValueToFigmaFloat: px-identity except the three core ramps,
+  // whose Figma FLOAT (percent/number) maps back to unitless/em/number strings.
+  if (kind === 'FLOAT') return figmaFloatToCoreValue(token.set, raw as number)
   return String(raw)
 }
 

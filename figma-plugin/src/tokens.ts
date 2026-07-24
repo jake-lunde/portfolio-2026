@@ -455,7 +455,16 @@ export function resolveKind(
   model: PulledModel,
   seen: Set<string> = new Set()
 ): TokenKind {
-  if (!token.isAlias) return kindOfValue(token.rawValue, token.type)
+  if (!token.isAlias) {
+    // Core leading/tracking/weight are unitless / em / plain-number primitives
+    // that CSS keeps verbatim but Figma needs as FLOAT — so the `type/<role>/*`
+    // text-style vars can ALIAS them (3-tier chains) instead of baking literals.
+    // kindOfValue only promotes `NNpx`; scope the extra FLOAT promotion to these
+    // three core sets so bare numbers elsewhere (motion spring constants "480",
+    // durations "0.16s") stay STRING and round-trip byte-for-byte on PUSH.
+    if (isCoreSet(token.set) && coreNumericFlavor(token.set) !== 'px') return 'FLOAT'
+    return kindOfValue(token.rawValue, token.type)
+  }
   const key = `${token.set}::${token.path}`
   if (seen.has(key)) return 'STRING'
   seen.add(key)
@@ -622,6 +631,86 @@ export function floatToWeight(n: number): string {
   return String(Math.round(n))
 }
 
+export type CoreNumericFlavor = 'px' | 'leading' | 'tracking' | 'weight'
+
+/**
+ * Which Figma-native unit a core FLOAT primitive uses, keyed by owning set. Only
+ * the three proportional ramps differ from plain px dimensions; everything else
+ * (font-size, radius, spacing, layout, …) is px.
+ */
+export function coreNumericFlavor(set: string): CoreNumericFlavor {
+  if (set === 'core/leading') return 'leading'
+  if (set === 'core/tracking') return 'tracking'
+  if (set === 'core/weight') return 'weight'
+  return 'px'
+}
+
+/**
+ * A core FLOAT primitive's Figma value, stored ALREADY in the field-native unit
+ * so a text-style role var can alias it and surface the right number end-to-end:
+ *   leading  1.7    -> 170  (lineHeight is a PERCENT field)
+ *   tracking 0.14em -> 14   (letterSpacing is a PERCENT field)
+ *   weight   "400"  -> 400
+ *   px       "15px" -> 15
+ * The PERCENT pre-conversion is the crux the alias plan hinges on: the text-
+ * style field owns the unit, the variable owns the bare number, so a bound 170
+ * reads as 170%. `figmaFloatToCoreValue` is the exact inverse (PUSH), keeping
+ * the core-var round-trip lossless.
+ */
+export function coreValueToFigmaFloat(token: FlatToken): number {
+  switch (coreNumericFlavor(token.set)) {
+    case 'leading':
+      return leadingToPercent(token.rawValue)
+    case 'tracking':
+      return emToPercent(token.rawValue)
+    case 'weight':
+      return weightToFloat(token.rawValue)
+    default:
+      return toFloat(token.rawValue)
+  }
+}
+
+/** Inverse of coreValueToFigmaFloat — a Figma FLOAT back to its token string. */
+export function figmaFloatToCoreValue(set: string, n: number): string {
+  switch (coreNumericFlavor(set)) {
+    case 'leading':
+      return percentToLeading(n)
+    case 'tracking':
+      return percentToEm(n)
+    case 'weight':
+      return floatToWeight(n)
+    default:
+      return floatToTokenString(n)
+  }
+}
+
+/**
+ * DTCG fontWeight number -> Figma font STYLE name. The bridge derives a text
+ * style's fontStyle from the resolved weight (authoritative over the composite's
+ * hand-typed `fontStyle` literal). Unknown weights fall back to Regular.
+ */
+const WEIGHT_STYLE_NAME: Record<number, string> = {
+  400: 'Regular',
+  500: 'Medium',
+  600: 'SemiBold',
+  700: 'Bold',
+  800: 'Black',
+}
+export function weightToStyleName(weight: number): string {
+  return WEIGHT_STYLE_NAME[Math.round(weight)] ?? 'Regular'
+}
+
+/**
+ * Families that ship real per-weight styles (the Geist variable fonts). The
+ * display (pixel) face and the medieval faces are single-weight 400, so any
+ * non-400 weight on such a role must fall back to Regular rather than throw in
+ * figma.loadFontAsync.
+ */
+export const VARIABLE_WEIGHT_FAMILIES = new Set<string>(['Geist', 'Geist Mono'])
+export function familyHasWeights(family: string): boolean {
+  return VARIABLE_WEIGHT_FAMILIES.has(family.trim())
+}
+
 /** Find a token by dotted path — semantic sets first (type.*, roles), then core. */
 export function lookupToken(model: PulledModel, dottedPath: string): FlatToken | undefined {
   for (const set of Object.keys(model.semanticSets)) {
@@ -650,6 +739,25 @@ export function memberConcrete(member: TypoMember, model: PulledModel): string {
   if (!member.isAlias) return member.rawValue
   const t = lookupToken(model, member.aliasRef as string)
   return t ? concreteValue(t, model) : member.rawValue
+}
+
+/**
+ * Chase a composite member's alias chain to its TERMINAL FlatToken (the last
+ * non-alias token). Returns undefined for a literal member, a dangling ref, or a
+ * cycle — i.e. "no stable primitive to alias; bake a literal instead". Mirrors
+ * memberConcrete's traversal but yields the TOKEN (which carries its owning
+ * set), so the caller can bind a Figma alias to that token's variable.
+ */
+export function memberTerminal(member: TypoMember, model: PulledModel): FlatToken | undefined {
+  if (!member.isAlias) return undefined
+  const seen = new Set<string>()
+  let cur = lookupToken(model, member.aliasRef as string)
+  while (cur && cur.isAlias) {
+    if (seen.has(cur.path)) return undefined
+    seen.add(cur.path)
+    cur = lookupToken(model, cur.aliasRef as string)
+  }
+  return cur
 }
 
 /** The set that DEFINES a dotted semantic path (the PUSH write target for a member). */

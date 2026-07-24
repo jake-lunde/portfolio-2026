@@ -11,9 +11,9 @@
 }
 
 .shopHead {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 10px → 11px */
+  letter-spacing: var(--tracking-20); /* diverges from label's tracking-14 — exact match to original 0.2em */
   color: var(--accent);
   margin: 4px 0 0;
 }
@@ -60,20 +60,20 @@
 
 .flashName {
   font-family: var(--display);
-  font-size: 11px;
+  font-size: var(--type-label-size); /* 11px exact */
 }
 
 .flashMeta {
-  font-family: var(--mono);
-  font-size: 8px;
-  letter-spacing: 0.12em;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size); /* 8px exact */
+  letter-spacing: var(--tracking-12); /* diverges from micro's tracking-20 — exact match to original 0.12em */
   color: var(--content-muted);
 }
 
 .shopNote {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 8.5px → 9px */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   color: var(--content-muted);
   margin: 0;
   text-align: center;
@@ -89,16 +89,16 @@
 }
 
 .traceName {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — exact match to original 0.14em */
   color: var(--content-muted);
   flex: 1;
 }
 
 .traceClock {
   font-family: var(--display);
-  font-size: 18px;
+  font-size: var(--type-heading-3-size); /* 18px exact */
   font-variant-numeric: tabular-nums;
 }
 
@@ -134,14 +134,14 @@
 
 .verdictScore {
   font-family: var(--display);
-  font-size: 54px;
-  line-height: 1;
+  font-size: 54px; /* decorative — verdict score art, cited in the ramp's own guidance as a one-off size to leave */
+  line-height: var(--leading-none); /* 1 exact */
 }
 
 .verdictLine {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.16em;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--type-caption-tracking); /* 0.16em exact */
   color: var(--content-muted);
   text-transform: uppercase;
 }
