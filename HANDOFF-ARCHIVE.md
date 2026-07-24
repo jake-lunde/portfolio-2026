@@ -9,6 +9,34 @@
 
 ---
 
+## Rotated: Typography round-trip — Figma text styles bound to variables (session 19, 2026-07-23)
+
+**Built, NOT yet shipped (awaiting Jake's in-Figma PULL check + his OK to push to
+main).** Edit a variable (e.g. line height), PUSH, and it round-trips to the repo;
+the text style consumes it.
+- **New tokens**: `core/font-figma.json` (Figma family names — Geist / Geist Mono /
+  Geist Pixel) + `semantic/typography.json` (one DTCG `$type:typography` composite
+  per role, referencing the CSS-facing `type.*` sub-tokens + font-figma names). Both
+  `disabled` in every $theme → SD emits NOTHING to CSS (parity literally
+  0-added/0-changed). Crux solved: CSS vs Figma want different units (leading
+  `1.6`⇄`160`%, tracking `0.14em`⇄`14`%, weight str⇄FLOAT, family stack⇄real name)
+  → a Figma-native representation, derived by the bridge.
+- **Bridge** (`figma-plugin/src/{tokens,code}.ts`): PULL expands each composite into
+  a `type` collection (6 bindable vars/role, Figma-native units) + creates one
+  TextStyle/role (`Display`, `Heading/1`…), unit-set-then-bound. PUSH serializes
+  edited `type` vars back through composite refs to the `type.*` sub-tokens in
+  `semantic/scale` — guarded by a baseline compare so an untouched pull→push never
+  delinks. 9 new unit tests (19 total pass); tsc clean; bundle builds.
+- **Doctor D8** (composite completeness; dangling member ref = hard error) + RUNBOOK
+  "Typography" section.
+- **Decisions** (Jake): scope = Figma round-trip only (no CSS utility emit); fluid
+  sizes (display/heading-1) pinned to desktop MAX + pull-only; font-family/style
+  pull-only; all 3 Geist fonts confirmed present in the Figma file.
+- **Verify in Figma**: PULL → expect a `type` collection + 10 text styles, each field
+  🔗 bound; edit a `line-height` var → PUSH → PR edits the role's `leading` sub-token.
+  **Unverified headless**: that a bound lineHeight FLOAT reads as % — we set
+  unit=PERCENT before binding for exactly this; confirm on first PULL.
+
 ## Rotated: DS-mirror COMPLETE + Typography ramp v1 (session 18, 2026-07-19)
 
 Shipped to main (67d7b30, deploy READY). The token system mirrors the Minimal-DS

@@ -1,7 +1,7 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-07-19 (session 17).
+> Last rotation: 2026-07-23 (session 20).
 
 ## Current state
 
@@ -11,7 +11,10 @@
 - **Skins:** classic (light/dark) + **medieval** (shipped 6eede3e —
   parchment/vermilion/gilt, MedievalSharp display; Jake later swapped
   Jacquard 12 → MedievalSharp mono for legibility). underwater = stub.
-  Skin picker in Settings; `data-skin` + `data-theme` on <html>.
+  Skin picker in Settings **and** a toolbar SkinSwitch flyout trailing the
+  wordmark (c61bb79); `data-skin` + `data-theme` on <html>. Skins now also
+  re-costume desktop **icon art** (per-skin `<g>` swapped by CSS in Icon.tsx)
+  and **words** (`src/lib/skinVocab.ts` — per-skin program names).
 - **DS pipeline:** `tokens/` (3-tier: core/semantic/component, Tokens
   Studio JSON) → `scripts/build-tokens.mjs` (SD v4) →
   `tokens.generated.css` + `motion.generated.ts`. TOKEN BRIDGE Figma
@@ -25,47 +28,56 @@
   first-load JS perf pass overdue; dataviz hand-drawn medieval pass +
   per-skin language table scoped on Notion; underwater everything.
 
-## Active initiative — Typography round-trip (session 19, 2026-07-23)
+## Latest session — Skin switcher + per-skin desktop identity (session 20, 2026-07-23)
 
-**Figma TEXT STYLES bound to variables — built, NOT yet shipped (awaiting Jake's
-in-Figma PULL check + his OK to push to main).** Edit a variable (e.g. line
-height), PUSH, and it round-trips to the repo; the text style consumes it.
-- **New tokens**: `core/font-figma.json` (Figma family names — Geist / Geist
-  Mono / Geist Pixel) + `semantic/typography.json` (one DTCG `$type:typography`
-  composite per role, referencing the CSS-facing `type.*` sub-tokens + font-figma
-  names). Both are `disabled` in every $theme → SD emits NOTHING to CSS (parity
-  literally 0-added/0-changed). Crux solved: CSS vs Figma want different units
-  (leading `1.6`⇄`160`%, tracking `0.14em`⇄`14`%, weight str⇄FLOAT, family
-  stack⇄real name) → a Figma-native representation, derived by the bridge.
-- **Bridge** (`figma-plugin/src/{tokens,code}.ts`): PULL expands each composite
-  into a `type` collection (6 bindable vars/role, Figma-native units) + creates
-  one TextStyle/role (`Display`, `Heading/1`…), unit-set-then-bound. PUSH
-  serializes edited `type` vars back through composite refs to the `type.*`
-  sub-tokens in `semantic/scale` — guarded by a baseline compare so an untouched
-  pull→push never delinks (same trap the semantic pass solved). 9 new unit tests
-  (19 total pass); tsc clean; bundle builds.
-- **Doctor D8** (composite completeness; dangling member ref = hard error) +
-  RUNBOOK "Typography" section.
-- **Decisions this session** (Jake): scope = Figma round-trip only (no CSS
-  utility emit); fluid sizes (display/heading-1) pinned to desktop MAX + pull-only
-  (font-size PUSH-back skipped for clamps); font-family/style pull-only; all 3
-  Geist fonts confirmed present in the Figma file.
-- **Verify in Figma**: PULL → expect a `type` collection + 10 text styles, each
-  field 🔗 bound; edit a `line-height` var → PUSH → PR edits the role's `leading`
-  sub-token. **Unverified headless**: that a bound lineHeight FLOAT reads as % —
-  we set unit=PERCENT before binding for exactly this; confirm on first PULL.
+**Shipped to main (c61bb79, deployed).** Three Notion tasks landed: "put button to
+toggle in toolbar" + "update icons for desktop apps" (Done); "update language" seeded.
+- **Toolbar SkinSwitch** (`src/components/shell/SkinSwitch.tsx`): compact control
+  trailing the wordmark showing the active skin, flying out to CLASSIC/MEDIEVAL/
+  UNDERWATER. Each row wraps in `data-skin={id}` — because the generated token CSS
+  scopes skins by *bare* attribute selector, a nested `data-skin` re-scopes
+  `--surface`/`--accent`/`--mono` for that subtree, so each row is a REAL preview in
+  its own palette + face (medieval row literally renders MedievalSharp on parchment).
+  Underwater has no token scope yet → disabled + dimmed. Spring motion (SPRINGS.deck),
+  reduced-motion + Escape/outside-click close. `menuLeft` wrapper groups wordmark +
+  switch; light/dark toggle stays in `menuRight` (classic only).
+- **Per-skin icon art** (`Icon.tsx` + `Icon.module.css`): Icon renders both a
+  `.glyphClassic <g>` and (where present) a `.glyphMedieval <g>`; swapped purely by
+  CSS off `[data-skin]` — no JS, SSR-safe, instant. 15 woodcut/heraldic medieval
+  glyphs for the desktop programs (scroll, cog, cartwheel, easel, labyrinth, quill,
+  organ pipes, keep, wax seal, shield, balance scale, brazier, …). Classic-hide is
+  gated on `.hasMedieval` so variant-less icons keep classic under every skin.
+- **Per-skin vocabulary** (`src/lib/skinVocab.ts`): `programName(id, canonical, skin)`
+  overrides a program's display name (desktop label + window title + a11y). Medieval
+  lexicon: README→Incipit, Projects→Works, Studio→Workshop, Visualizers→Scrying,
+  Guestbook→The Ledger, Booth→Portraiture, Jigsaw→Labyrinth, Paint→Illuminator,
+  Seq→Psaltery, Command→The Keep, Spec→Colophon, Machine→The Engine, Trash→Oubliette,
+  Settings→The Workings. Consumed by `DesktopIcons.tsx` + `Window.tsx`.
+- Verified: tsc clean, prod build green (19/19), both skins confirmed in-browser
+  (medieval swaps icons+words; classic reverts fully). See memory
+  `per-skin-reskin-mechanics`.
+- **Taste follow-ups Jake may want**: Scrying orb reads slightly lightbulb-ish; Works
+  clasp subtle; the medieval names are a first draft (all editable in one file).
+
+**Still pending from session 19 (unshipped, in HANDOFF-ARCHIVE):** the Typography
+round-trip (Figma text styles bound to variables) is built but awaits Jake's in-Figma
+PULL check + his OK to push. Nothing about session 20 touched it.
 
 ## Next steps
 
-1. **Type adoption sweep** (mechanical, delegate): map the 168 raw-px
-   font-sizes + line-heights across src/**.css onto `--type-*` roles
-   (nearest step). Clears the D6 type warns; makes the ramp the real source.
-   Parity here is NOT zero-change (values snap) — Chromatic is the gate. (This
-   is where the deferred CSS utility-class emit from composites folds in.)
-2. **Fluid round-trip finale**: Desktop/Mobile MODE axis for the two clamp()
-   sizes so both endpoints are Figma-tunable + PUSH-back (today: pull-only,
-   desktop max). Adds a second mode axis to the bridge (today = skin modes only).
-   Then per-skin (medieval) font-family override on text styles.
-3. Prior: interactive/status adoption sweep; underwater skin; vocabulary
-   toggle; Weavy probe at underwater asset pass.
+1. **Language modifier — extend beyond app names** (Notion: update language). The
+   per-skin vocabulary mechanism now exists (`skinVocab.ts`, desktop labels + window
+   titles). Next: translate the rest of the copy per skin (window body text, hints,
+   dialog voices) — likely a broader `t(key, skin)` layer. Jake framed it as "a
+   modifier that translates the copy, even the app names."
+2. **Type adoption sweep** (mechanical, delegate): map the 168 raw-px font-sizes +
+   line-heights across src/**.css onto `--type-*` roles (nearest step). Clears D6 type
+   warns; makes the ramp the real source. Parity is NOT zero-change (values snap) —
+   Chromatic is the gate.
+3. **Typography fluid round-trip finale** (after Jake verifies session-19 build):
+   Desktop/Mobile MODE axis for the two clamp() sizes so both endpoints are
+   Figma-tunable + PUSH-back; then per-skin (medieval) font-family override on text
+   styles.
+4. Prior: interactive/status adoption sweep; underwater skin (unblocks the switcher's
+   3rd row + icon/vocab variants); Weavy probe at underwater asset pass.
 
