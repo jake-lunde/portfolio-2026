@@ -1,4 +1,5 @@
 import { Stamp } from '@/components/primitives/Stamp'
+import { CopyText as Copy } from '@/content/CopyText'
 import styles from './fieldnotes.module.css'
 
 /* RES-13, pre-release. The real dossier (FieldNotes.tsx) stays in the
@@ -25,11 +26,12 @@ export default function Sealed() {
         <circle cx="27" cy="20" r="2.6" />
         <path d="M20.6 20c2 1.6 4 1.6 3.8 0M16 22.5l-4 4" />
       </svg>
-      <Stamp tone="pink">Sealed</Stamp>
+      <Stamp tone="pink">
+        <Copy k="field-notes.sealed" as="span" />
+      </Stamp>
       <p className={styles.sealedNote}>
-        Document <strong>RES-13</strong> is with the review board. Contents:
-        field research, verbatims, and what got built because of them.{' '}
-        <strong>Declassification pending.</strong>
+        Document <strong>RES-13</strong> <Copy k="field-notes.note" as="span" />{' '}
+        <Copy k="field-notes.noteEmphasis" as="strong" />
       </p>
     </div>
   )

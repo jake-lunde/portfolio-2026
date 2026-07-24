@@ -3,6 +3,7 @@
 import { CASES } from './cases'
 import { useWindows } from '@/store/windows'
 import { sfx } from '@/lib/sound'
+import { CopyText as Copy } from '@/content/CopyText'
 import styles from '../programs.module.css'
 
 export default function Projects() {
@@ -11,8 +12,10 @@ export default function Projects() {
   return (
     <div className={styles.projects}>
       <div className={styles.projHead}>
-        <span>Index — Selected work</span>
-        <span>{CASES.length} items</span>
+        <Copy k="projects.indexLabel" as="span" />
+        <span>
+          {CASES.length} <Copy k="projects.itemsSuffix" as="span" />
+        </span>
       </div>
       {CASES.map((c) => (
         <button
@@ -29,7 +32,7 @@ export default function Projects() {
           {c.status === 'live' ? (
             <span className={styles.projOrg}>{c.org}</span>
           ) : (
-            <span className={styles.projSoon}>Soon</span>
+            <Copy k="shared.soon" as="span" className={styles.projSoon} />
           )}
           <span className={styles.projYear}>{c.year}</span>
         </button>

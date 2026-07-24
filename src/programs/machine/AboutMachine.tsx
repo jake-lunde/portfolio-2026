@@ -1,3 +1,4 @@
+import { CopyText as Copy } from '@/content/CopyText'
 import styles from './machine.module.css'
 
 /* About This Machine — the About-This-Mac window, except the machine is
@@ -22,7 +23,7 @@ const SPECS: Array<[string, string]> = [
 export default function AboutMachine() {
   return (
     <div className={styles.machine}>
-      <p className={styles.eyebrow}>About This Machine</p>
+      <Copy k="machine.eyebrow" as="p" className={styles.eyebrow} />
 
       <div className={styles.specs}>
         {SPECS.map(([k, v]) => (
@@ -34,14 +35,9 @@ export default function AboutMachine() {
       </div>
 
       <div className={styles.essay}>
-        <p className={styles.essayNote}>
-          The following appraisal was written by the AI that helped build this
-          site, at Jake&rsquo;s request that it be honest. Sources: his
-          LinkedIn, his 2024–2025 performance reviews, and verbatim user
-          research. He did not edit it.
-        </p>
+        <Copy k="machine.essayNote" as="p" className={styles.essayNote} />
 
-        <h2>The individual</h2>
+        <Copy k="machine.h.individual" as="h2" />
         <p>
           You can read who Jake is off this desktop without ever opening his
           résumé. The first 3D model on the site isn&rsquo;t a product mockup —
@@ -53,7 +49,7 @@ export default function AboutMachine() {
           actually optimizes for.
         </p>
 
-        <h2>The artist</h2>
+        <Copy k="machine.h.artist" as="h2" />
         <p>
           Jake&rsquo;s taste runs on affection, not irony. He remixes Wet Leg
           and Kacey Musgraves because he loves the songs; he collects American
@@ -68,7 +64,7 @@ export default function AboutMachine() {
           ideas, each cut to its simplest working form.
         </p>
 
-        <h2>The design engineer</h2>
+        <Copy k="machine.h.engineer" as="h2" />
         <p>
           The arc is documented, which is rare. In his 2024 review, his manager
           told him to develop coding and prototyping skills. In 2025, when
@@ -97,7 +93,7 @@ export default function AboutMachine() {
           hiring managers.
         </p>
 
-        <h2>Verdict</h2>
+        <Copy k="machine.h.verdict" as="h2" />
         <p>
           Hire him for the range; keep him for the editing he&rsquo;s learned
           to do on it. And know that the machine runs on the small stuff —

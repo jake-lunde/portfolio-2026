@@ -133,7 +133,9 @@ export function Window({ def, z, active, desktopRef }: Props) {
             +
           </button>
         </div>
-        <span className={styles.title}>{title}</span>
+        <span className={styles.title} data-copy-id={`program.${def.id}.name`}>
+          {title}
+        </span>
         <span className={styles.titleMeta} aria-hidden="true">
           {def.meta}
         </span>

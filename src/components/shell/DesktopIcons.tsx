@@ -52,7 +52,7 @@ export function DesktopIcons() {
   const iconBtn = (p: (typeof desktopPrograms)[number], extra = '') => (
     <button key={p.id} className={`${styles.iconBtn} ${extra}`} onClick={() => launch(p.id)}>
       <Icon name={p.icon} />
-      <span className={styles.iconLabel}>
+      <span className={styles.iconLabel} data-copy-id={`program.${p.id}.name`}>
         {programName(p.id, p.desktopLabel ?? p.name, skin)}
       </span>
     </button>

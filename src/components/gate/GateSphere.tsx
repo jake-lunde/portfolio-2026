@@ -8,6 +8,7 @@ import { Button } from '@/components/primitives/Button'
 import { SPRINGS } from '@/lib/motion'
 import { gateSfx } from '@/lib/sound'
 import { GATE } from './gateConfig'
+import { CopyText as Copy } from '@/content/CopyText'
 import styles from './gate.module.css'
 
 /* THE GATE — macrodata-refinement clearance for the Projects wing.
@@ -339,7 +340,7 @@ export function GateSphere() {
           />
         ) : (
           <button className={styles.typeToggle} onClick={() => setTyping(true)}>
-            PREFER TO TYPE? [ KEYBOARD ENTRY ]
+            <Copy k="gate.typeToggle" as="span" />
           </button>
         )}
       </div>
@@ -366,7 +367,7 @@ export function GateSphere() {
             >
               <div className={styles.dialogBar}>
                 <span className={styles.dialogStripes} aria-hidden="true" />
-                <span className={styles.dialogTitle}>SECURITY</span>
+                <Copy k="gate.securityTitle" as="span" className={styles.dialogTitle} />
                 <span className={styles.dialogStripes} aria-hidden="true" />
               </div>
               <div className={styles.dialogBody}>
@@ -383,7 +384,11 @@ export function GateSphere() {
                   onClick={dismissVerdict}
                   autoFocus
                 >
-                  {verdict === 'granted' ? 'ENTER' : 'RETRY'}
+                  {verdict === 'granted' ? (
+                    <Copy k="gate.enter" as="span" />
+                  ) : (
+                    <Copy k="gate.retry" as="span" />
+                  )}
                 </Button>
               </div>
             </motion.div>

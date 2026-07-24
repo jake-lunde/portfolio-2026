@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { SPRINGS } from '@/lib/motion'
+import { CopyText as Copy } from '@/content/CopyText'
 import styles from './shell.module.css'
 
 /* Desktop widget: what Jake's playing (Apple Music recent-played), sized
@@ -62,7 +63,7 @@ export function NowPlayingWidget() {
         />
       )}
       <div className={styles.npMeta}>
-        <span className={styles.npLabel}>Now playing ♪</span>
+        <Copy k="widget.nowPlaying.label" as="span" className={styles.npLabel} />
         <span className={styles.npTitle}>{track.title}</span>
         <span className={styles.npArtist} title={track.artist}>
           {track.artist}

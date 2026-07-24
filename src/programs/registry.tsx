@@ -205,6 +205,19 @@ export const PROGRAMS: ProgramDef[] = [
     pos: { x: 420, y: 170 },
     onDesktop: true,
   },
+  {
+    // EDIT.MODE — hidden dev-tool. No desktop icon; reachable only via /edit.
+    id: 'edit-mode',
+    name: 'EDIT.MODE',
+    meta: 'SYS-99',
+    icon: 'clipboard',
+    component: dynamic(() => import('@/programs/editmode/EditMode')),
+    size: { w: 440, h: 380 },
+    pos: { x: 360, y: 90 },
+    chrome: 'crt',
+    onDesktop: false,
+    path: '/edit',
+  },
 ]
 
 export function getProgram(id: string): ProgramDef | undefined {

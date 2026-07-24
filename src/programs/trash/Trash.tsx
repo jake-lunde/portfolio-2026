@@ -1,4 +1,5 @@
 import { Stamp } from '@/components/primitives/Stamp'
+import { CopyText as Copy } from '@/content/CopyText'
 import styles from './trash.module.css'
 
 /* The Trash — locked. Eventually it holds the killed ideas ("Grows with
@@ -26,10 +27,11 @@ export default function Trash() {
         <path d="M22.5 24v-3a3 3 0 0 1 6 0v3" fill="none" />
         <circle cx="25.5" cy="28.5" r="1.2" fill="currentColor" />
       </svg>
-      <Stamp tone="pink">Locked</Stamp>
+      <Stamp tone="pink">
+        <Copy k="trash.locked" as="span" />
+      </Stamp>
       <p className={styles.note}>
-        The bin holds the ideas that didn&rsquo;t ship — and why. Sorting is in
-        progress. <strong>Trash day is coming soon.</strong>
+        <Copy k="trash.note" as="span" /> <Copy k="trash.noteEmphasis" as="strong" />
       </p>
     </div>
   )

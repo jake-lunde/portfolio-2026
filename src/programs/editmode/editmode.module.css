@@ -1,0 +1,277 @@
+/* EDIT.MODE — SYS-99 dev-tool chrome. Semantic tokens only; the one accent
+   (system --accent) carries every "active / dirty" signal. The floating
+   SAVE.CHANGES panel is portaled to <body>, so it sits above every window. */
+
+.root {
+  padding: 18px 20px 22px;
+  font-family: var(--type-body-family);
+  color: var(--content);
+}
+
+.eyebrow {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-14);
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 16px;
+}
+
+.dim {
+  font-size: var(--type-caption-size);
+  color: var(--content-muted);
+  line-height: 1.5;
+  margin: 8px 0 0;
+}
+
+.notice {
+  font-size: var(--type-caption-size);
+  line-height: 1.5;
+  color: var(--content);
+  border: 1.5px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  padding: 10px 12px;
+  margin: 12px 0 0;
+}
+
+/* ---------- key gate ---------- */
+.gate {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 320px;
+}
+
+.label {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-12);
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+.input {
+  font-family: var(--type-mono-family);
+  font-size: var(--type-mono-size);
+  letter-spacing: var(--tracking-08);
+  padding: 8px 10px;
+  color: var(--content);
+  background: var(--surface);
+  border: 1.5px solid var(--content);
+  border-radius: 0;
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.primary,
+.secondary,
+.commit,
+.revert {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-12);
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.primary,
+.commit {
+  padding: 9px 12px;
+  color: var(--surface);
+  background: var(--accent);
+  border: 1.5px solid var(--accent);
+}
+
+.primary:focus-visible,
+.secondary:focus-visible,
+.commit:focus-visible,
+.revert:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.commit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.secondary {
+  align-self: flex-start;
+  margin-top: 14px;
+  padding: 8px 12px;
+  color: var(--content);
+  background: var(--surface);
+  border: 1.5px solid var(--content);
+}
+
+.error {
+  font-size: var(--type-caption-size);
+  color: var(--accent);
+  margin: 0;
+}
+
+/* ---------- armed state ---------- */
+.armed {
+  font-size: var(--type-body-size);
+}
+
+.armedLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-12);
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* ---------- floating SAVE.CHANGES panel ---------- */
+.panel {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9000;
+  width: min(340px, calc(100vw - 36px));
+  max-height: min(60vh, 520px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  color: var(--content);
+  background: var(--surface);
+  border: 1.5px solid var(--content);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--content) 22%, transparent);
+}
+
+.panelHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1.5px solid var(--content);
+  padding-bottom: 8px;
+}
+
+.panelTitle {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-14);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.panelMeta {
+  font-family: var(--type-mono-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+}
+
+.conflict,
+.status {
+  font-size: var(--type-caption-size);
+  line-height: 1.45;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1.5px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--content);
+}
+
+.empty {
+  font-size: var(--type-caption-size);
+  color: var(--content-muted);
+  margin: 6px 0;
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  border: 1px solid var(--border);
+  padding: 8px 9px;
+}
+
+.rowHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rowKey {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--type-mono-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowSlot {
+  font-family: var(--type-mono-family);
+  font-size: var(--type-micro-size);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.revert {
+  padding: 2px 7px;
+  font-size: var(--type-caption-size);
+  color: var(--content);
+  background: var(--surface);
+  border: 1px solid var(--content);
+  line-height: 1;
+}
+
+.diff {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: var(--type-caption-size);
+  line-height: 1.4;
+}
+
+.old {
+  color: var(--content-muted);
+  text-decoration: line-through;
+}
+
+.arrow {
+  color: var(--content-muted);
+}
+
+.new {
+  color: var(--content);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.commit {
+  margin-top: 2px;
+  width: 100%;
+  padding: 10px 12px;
+}

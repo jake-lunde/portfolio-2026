@@ -4,6 +4,7 @@ import type { Skin } from '@/store/settings'
 import { useSettings } from '@/store/settings'
 import { WALLPAPERS, wallpaperMask } from '@/components/shell/wallpapers'
 import { sfx } from '@/lib/sound'
+import { CopyText as Copy } from '@/content/CopyText'
 import styles from '../programs.module.css'
 
 const SKINS: Array<{ id: Skin; name: string; disabled?: boolean }> = [
@@ -26,8 +27,8 @@ export default function Settings() {
     <div className={styles.settings}>
       <div className={styles.setCol}>
         <span className={styles.setLabel}>
-          Skin
-          <span className={styles.setHint}>The whole system, re-costumed</span>
+          <Copy k="settings.skinLabel" as="span" />
+          <Copy k="settings.skinHint" as="span" className={styles.setHint} />
         </span>
         <div className={styles.swatches} role="group" aria-label="Skin">
           {SKINS.map((sk) => (
@@ -47,7 +48,7 @@ export default function Settings() {
                 <span className={styles.skinDot} />
               </span>
               <span className={styles.swatchName}>{sk.name}</span>
-              {sk.disabled && <span className={styles.projSoon}>Soon</span>}
+              {sk.disabled && <Copy k="shared.soon" as="span" className={styles.projSoon} />}
             </button>
           ))}
         </div>
@@ -55,8 +56,8 @@ export default function Settings() {
 
       <div className={styles.setRow}>
         <span className={styles.setLabel}>
-          Appearance
-          <span className={styles.setHint}>Print stock or terminal night</span>
+          <Copy k="settings.appearanceLabel" as="span" />
+          <Copy k="settings.appearanceHint" as="span" className={styles.setHint} />
         </span>
         <div className={styles.segmented} role="group" aria-label="Theme">
           <button
@@ -64,37 +65,37 @@ export default function Settings() {
             aria-pressed={theme === 'light'}
             onClick={() => setTheme('light')}
           >
-            Light
+            <Copy k="settings.light" as="span" />
           </button>
           <button
             className={styles.segBtn}
             aria-pressed={theme === 'dark'}
             onClick={() => setTheme('dark')}
           >
-            Dark
+            <Copy k="settings.dark" as="span" />
           </button>
         </div>
       </div>
 
       <div className={styles.setRow}>
         <span className={styles.setLabel}>
-          Sound
-          <span className={styles.setHint}>Interface clicks, synthesized</span>
+          <Copy k="settings.soundLabel" as="span" />
+          <Copy k="settings.soundHint" as="span" className={styles.setHint} />
         </span>
         <div className={styles.segmented} role="group" aria-label="Sound">
           <button className={styles.segBtn} aria-pressed={sound} onClick={() => sound || toggleSound()}>
-            On
+            <Copy k="settings.on" as="span" />
           </button>
           <button className={styles.segBtn} aria-pressed={!sound} onClick={() => !sound || toggleSound()}>
-            Off
+            <Copy k="settings.off" as="span" />
           </button>
         </div>
       </div>
 
       <div className={styles.setCol}>
         <span className={styles.setLabel}>
-          Wallpaper
-          <span className={styles.setHint}>Desktop pattern — classic-Mac spirit, print-archive ink</span>
+          <Copy k="settings.wallpaperLabel" as="span" />
+          <Copy k="settings.wallpaperHint" as="span" className={styles.setHint} />
         </span>
         <div className={styles.swatches} role="group" aria-label="Wallpaper pattern">
           {WALLPAPERS.map((wp) => (
@@ -117,10 +118,10 @@ export default function Settings() {
 
       <div className={styles.setRow} style={{ borderBottom: 'none', paddingBottom: 0 }}>
         <span className={styles.setLabel}>
-          Accent emphasis
-          <span className={styles.setHint}>Coming in a later release</span>
+          <Copy k="settings.accentLabel" as="span" />
+          <Copy k="settings.accentHint" as="span" className={styles.setHint} />
         </span>
-        <span className={styles.projSoon}>Soon</span>
+        <Copy k="shared.soon" as="span" className={styles.projSoon} />
       </div>
     </div>
   )

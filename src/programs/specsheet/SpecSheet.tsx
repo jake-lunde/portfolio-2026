@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Stamp } from '@/components/primitives/Stamp'
+import { CopyText as Copy } from '@/content/CopyText'
 import styles from './specsheet.module.css'
 
 /* SPEC.SHEET — a living design-system doc that documents LUNDE OS itself.
@@ -123,15 +124,17 @@ export default function SpecSheet() {
 
   return (
     <div className={styles.spec}>
-      <p className={styles.eyebrow}>System Spec — LUNDE OS</p>
+      <Copy k="spec-sheet.eyebrow" as="p" className={styles.eyebrow} />
       <div className={styles.banner}>
-        <Stamp>Host System Tokens — GL DS Feed Pending</Stamp>
+        <Stamp>
+          <Copy k="spec-sheet.banner" as="span" />
+        </Stamp>
       </div>
 
       {/* ---------- color ---------- */}
       <div className={styles.sectionHead}>
         <span className={styles.secNo}>01 —</span>
-        <span className={styles.secLabel}>Color</span>
+        <Copy k="spec-sheet.section.color" as="span" className={styles.secLabel} />
       </div>
       <div className={styles.chips}>
         {chips.map((c) => {
@@ -162,7 +165,7 @@ export default function SpecSheet() {
       {/* ---------- type ---------- */}
       <div className={styles.sectionHead}>
         <span className={styles.secNo}>02 —</span>
-        <span className={styles.secLabel}>Type</span>
+        <Copy k="spec-sheet.section.type" as="span" className={styles.secLabel} />
       </div>
       <div className={styles.typeStack}>
         <div className={styles.specimen}>
@@ -190,7 +193,7 @@ export default function SpecSheet() {
       {/* ---------- motion ---------- */}
       <div className={styles.sectionHead}>
         <span className={styles.secNo}>03 —</span>
-        <span className={styles.secLabel}>Motion</span>
+        <Copy k="spec-sheet.section.motion" as="span" className={styles.secLabel} />
       </div>
       <div className={styles.motion}>
         {MOTION.map(([k, v]) => (
@@ -204,7 +207,7 @@ export default function SpecSheet() {
       {/* ---------- components ---------- */}
       <div className={styles.sectionHead}>
         <span className={styles.secNo}>04 —</span>
-        <span className={styles.secLabel}>Components</span>
+        <Copy k="spec-sheet.section.components" as="span" className={styles.secLabel} />
       </div>
       <div className={styles.components}>
         <div className={styles.componentCell}>
@@ -223,10 +226,7 @@ export default function SpecSheet() {
         </div>
       </div>
 
-      <p className={styles.foot}>
-        Values read live from computed styles · contrast recomputes on theme
-        flip · motion quoted from shell/Window.tsx
-      </p>
+      <Copy k="spec-sheet.foot" as="p" className={styles.foot} />
     </div>
   )
 }

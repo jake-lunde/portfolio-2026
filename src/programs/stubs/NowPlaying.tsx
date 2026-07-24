@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { UnderConstruction } from '@/components/primitives/UnderConstruction'
+import { useSettings } from '@/store/settings'
+import { t } from '@/content/copy'
+import { CopyText as Copy } from '@/content/CopyText'
 import styles from '../programs.module.css'
 
 /* Now Playing — the last track played on Apple Music (recent-played API;
@@ -19,6 +22,7 @@ type Track = {
 
 export default function NowPlaying() {
   const [track, setTrack] = useState<Track | null | 'loading'>('loading')
+  const skin = useSettings((s) => s.skin)
 
   useEffect(() => {
     fetch('/api/now-playing')
@@ -28,11 +32,11 @@ export default function NowPlaying() {
   }, [])
 
   if (track === 'loading') {
-    return <p className={styles.npLoading}>TUNING…</p>
+    return <Copy k="now-playing.loading" as="p" className={styles.npLoading} />
   }
 
   if (!track?.hasTrack) {
-    return <UnderConstruction note="What Jake's listening to. Signal expected in a future broadcast." />
+    return <UnderConstruction note={t('now-playing.underConstruction', skin)} />
   }
 
   return (
@@ -45,14 +49,14 @@ export default function NowPlaying() {
           className={styles.npWindowArt}
         />
       )}
-      <p className={styles.npWindowLabel}>Last played ♪</p>
+      <Copy k="now-playing.lastPlayed" as="p" className={styles.npWindowLabel} />
       <h2 className={styles.npWindowTitle}>{track.title}</h2>
       <p className={styles.npWindowArtist}>
         {track.artist} — {track.album}
       </p>
       {track.appleMusicUrl && (
         <a href={track.appleMusicUrl} target="_blank" rel="noreferrer" className={styles.npWindowLink}>
-          OPEN IN APPLE MUSIC ↗
+          <Copy k="now-playing.openLink" as="span" />
         </a>
       )}
     </div>

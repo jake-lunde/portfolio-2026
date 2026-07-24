@@ -3,6 +3,7 @@
 import { useWindows } from '@/store/windows'
 import { sfx } from '@/lib/sound'
 import { BASE } from '@/lib/base'
+import { CopyText as Copy } from '@/content/CopyText'
 import styles from '../programs.module.css'
 
 export default function About() {
@@ -37,8 +38,8 @@ export default function About() {
           <span className={styles.stampMark} />
         </div>
       </div>
-      <p className={styles.aboutEyebrow}>README — Start here</p>
-      <h1 className={styles.aboutName}>Jake Lunde</h1>
+      <Copy k="readme.eyebrow" as="p" className={styles.aboutEyebrow} />
+      <Copy k="readme.heading" as="h1" className={styles.aboutName} />
       <p>
         I&rsquo;m a principal-level product designer shipping production code —
         a design engineer. Over ten years of product work in consumer
@@ -68,20 +69,20 @@ export default function About() {
       </p>
       <ul className={styles.aboutList}>
         <li>
-          <span className={styles.k}>Now</span>
-          Staff Product Designer, Greenlight
+          <Copy k="readme.label.now" as="span" className={styles.k} />
+          <Copy k="readme.now" as="span" />
         </li>
         <li>
-          <span className={styles.k}>Focus</span>
-          Design systems · AI-data products · Helping families work better
+          <Copy k="readme.label.focus" as="span" className={styles.k} />
+          <Copy k="readme.focus" as="span" />
         </li>
         <li>
-          <span className={styles.k}>Contact</span>
+          <Copy k="readme.label.contact" as="span" className={styles.k} />
           <a href="mailto:jakelunde@me.com">jakelunde@me.com</a>
         </li>
         <li>
-          <span className={styles.k}>System</span>
-          LUNDE OS v0.1 — Next.js · Motion · MDX
+          <Copy k="readme.label.system" as="span" className={styles.k} />
+          <Copy k="readme.system" as="span" />
         </li>
       </ul>
     </div>
