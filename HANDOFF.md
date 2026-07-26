@@ -28,7 +28,13 @@
   `CopyText.tsx` (stamps `data-copy-id`); `program.<id>.name` carries skin
   vocabulary. NOTE: `Copy.tsx` is a forbidden filename — collides with
   `copy.ts` on a case-insensitive FS.
-- **EDIT.MODE (SYS-99): SHIPPED, inert until env vars.** `/edit`: key gate
+- **EDIT.MODE (SYS-99): LIVE AND PROVEN IN PRODUCTION.** Jake shipped
+  `14f1285 COPY: EDIT.MODE — 3 keys` through it on 2026-07-26, so
+  `EDIT_MODE_KEY` + `GITHUB_COPY_TOKEN` are set on Vercel. Expect copy.json
+  commits to land on main between sessions — **rebase, never force-push, and
+  merge copy.json at the KEY level** (his edits and yours are usually disjoint
+  keys in one alphabetically-sorted file, so git reports textual conflicts that
+  aren't real ones). `/edit`: key gate
   (`EDIT_MODE_KEY`, timing-safe) → `[data-copy-id]` contentEditable, Esc
   reverts, SAVE → `/api/copy-commit` → GitHub Contents API commits copy.json to
   main (`GITHUB_COPY_TOKEN`); 409 → rebase. Skin-aware slot targeting.
@@ -51,7 +57,7 @@
 **Opus orchestrating; four parallel agents on disjoint files (FOURIER=iPod,
 NYQUIST=icons/feedback/viz, DOPPLER=machine, HERTZ=CommandWidget); the seam —
 registry, Folder, Window, copy keys — written by the orchestrator first. Zero
-conflicts. Shipped to main.**
+conflicts. Shipped as `fc37c82`; verified live on lunde.co.**
 
 - **Renames** (registry + copy.json): Studio→Remixes, SEQ-16→Beat Machine,
   Jigsaw→Puzzles, Tattoo Gun→Tattoo Me, In Progress→**Case Studies** (`/cases`),
@@ -94,8 +100,8 @@ conflicts. Shipped to main.**
 
 ## Next steps
 
-1. **Jake — three env vars:** `EDIT_MODE_KEY` + `GITHUB_COPY_TOKEN` (carried
-   from s23, still unset) and the optional `NUDGE_WEBHOOK_URL`.
+1. **Jake — one env var left:** the optional `NUDGE_WEBHOOK_URL` (no ping on
+   ENCOURAGE until it's set). `EDIT_MODE_KEY` + `GITHUB_COPY_TOKEN` are done.
 2. **Eyeball what probes can't judge:** wheel feel at 24°/360° under a thumb,
    haptics on an Android device, three overlapping windows all at 30% (reads a
    little muddy by design), medieval spoke weights, LCD type at 8–13px.
