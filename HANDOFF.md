@@ -58,7 +58,14 @@
 deck, the chip, the sprites, the reporter AND the API, every seam a shared type.
 Round 2 dispatched two: NYQUIST on the avatar strokes, DOPPLER on the WHAT IS
 THIS chrome pattern (disjoint files: shell chrome + registry + copy.json vs. the
-deck). Zero conflicts. NOT SHIPPED YET — build green, nothing pushed.**
+deck). Zero conflicts. SHIPPED as `8ce7cdc`, verified live on lunde.co: the new
+`/cc/avatars/jake.svg` serves 200, and `/api/cc-feed` now returns ZERO
+`--agent`/`--task` rows — the read-filter healed the stored junk with no
+`--reset`, exactly as designed.**
+
+- **⚠️ `cc-report.mjs` keeps its OWN roster** (a node script can't import the TS
+  crew module) and it was stale the moment SHANNON existed — the merge report
+  bounced off my own guard. Add a call sign in BOTH `crew.ts` and that array.
 
 - **The deck is a PYRAMID now, and the shape is the argument.** JAKE (portrait
   plate, `HUMAN · DESIGN ENGINEER`) centred on top with his prompts on a rail

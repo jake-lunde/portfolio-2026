@@ -22,7 +22,7 @@ const key = process.env.CC_FEED_KEY
 if (!key) throw new Error('CC_FEED_KEY required')
 const origin = process.env.CC_ORIGIN ?? 'https://lunde.co'
 
-const AGENTS = ['jake', 'fable', 'hertz', 'nyquist', 'fourier', 'doppler']
+const AGENTS = ['jake', 'fable', 'shannon', 'hertz', 'nyquist', 'fourier', 'doppler']
 const ACTIONS = ['dispatch', 'status', 'return', 'review', 'merge', 'prompt', 'curate']
 
 const args = process.argv.slice(2)
