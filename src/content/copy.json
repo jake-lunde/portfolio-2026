@@ -101,12 +101,12 @@
     "medieval": "Copying manuscripts…"
   },
   "progress.nudge": {
-    "base": "ENCOURAGE",
+    "base": "TELL HIM TO FINISH IT",
     "medieval": "IMPLORE"
   },
-  "progress.nudgeHint": "Press to tell Jake which one you want next. He gets a ping.",
+  "progress.nudgeHint": "Sometimes you need a little push, you know?",
   "progress.nudged": {
-    "base": "SENT",
+    "base": "JAKE HAS BEEN ENCOURAGED",
     "medieval": "HEARD"
   },
   "progress.offline": "The encouragement line isn’t connected to storage yet.",
