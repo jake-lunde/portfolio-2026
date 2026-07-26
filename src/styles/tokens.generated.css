@@ -73,6 +73,9 @@
   --spring-window-mass: 0.7;
   --spring-deck-stiffness: 500;
   --spring-deck-damping: 34;
+  --spring-human-stiffness: 150;
+  --spring-human-damping: 22;
+  --spring-human-mass: 1.1;
   --spring-mini-stiffness: 340;
   --spring-mini-damping: 28;
   --spring-zoom-stiffness: 300;

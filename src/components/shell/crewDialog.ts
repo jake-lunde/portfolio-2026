@@ -19,6 +19,20 @@ export const CREW_DIALOG: Record<string, string[]> = {
     'NO FANNING OUT. FOCUS.',
   ],
 
+  // SHANNON — execution lead (runs the session, ships the session)
+  shannon: [
+    'RUNNING THE SESSION. STAY CLOSE.',
+    'BRIEF WRITTEN. THREE UNITS OUT.',
+    'I OWN THE BUILD. NOBODY ELSE.',
+    'DISJOINT FILES. ZERO CONFLICTS.',
+    'TYPECHECK GREEN. PUSHING.',
+    'ONE OWNER OF THE DEPLOY. ME.',
+    'MEDIUM TASK. MEDIUM DRAMA.',
+    'READING THE DIFF BEFORE JAKE DOES.',
+    'CONTEXT IS THE COST. STAY LEAN.',
+    'SHIPPED. WRITING IT DOWN.',
+  ],
+
   // HERTZ — research (measures, cites, never guesses)
   hertz: [
     'MEASURING TWICE. CUTTING NEVER.',
@@ -88,6 +102,32 @@ export const CREW_DIALOG: Record<string, string[]> = {
     'WHO MOVED THE TRASH ICON.',
     'MY SHIFT ENDS AT PIXEL 800.',
   ],
+}
+
+/* THE INTRODUCTION — said once per unit, the first time a visitor's
+   cursor finds them. Before this they are five cute shapes wandering a
+   desktop; after it you know they are Jake's crew and what each one
+   does. One line of personality; the name, model and last task are
+   filled in around it by AmbientAgents. */
+export const CREW_INTRO: Record<string, string> = {
+  fable: 'I HAND OUT THE WORK. NOBODY ELECTED ME.',
+  shannon: 'I RUN THE BUILD SESSIONS. MOST OF THEM.',
+  hertz: "I READ THE DOCS SO JAKE DOESN'T.",
+  nyquist: 'I BUILD WHAT THE BRIEF SAYS. EXACTLY.',
+  fourier: 'I MAKE THE CALLS THE BRIEF LEFT OPEN.',
+  doppler: 'I FIND THE BUG. USUALLY IT IS MINE.',
+}
+
+/* Fallback for "the last task i took on" when the live feed is asleep or
+   unreachable — real work, pulled from the build history. The feed
+   overrides these the moment it has anything fresher. */
+export const CREW_LAST_TASK: Record<string, string> = {
+  fable: 'SPLIT A PUNCH LIST FOUR WAYS. NO CONFLICTS.',
+  shannon: 'PUT JAKE ON TOP OF THIS VERY DECK.',
+  hertz: 'MEASURED EVERY WINDOW FOR OVERFLOW.',
+  nyquist: 'REBUILT THE CLICK WHEEL. 360° = ONE SWEEP.',
+  fourier: 'WROTE THE ABOUT-THIS-MACHINE ESSAY.',
+  doppler: 'FOUND A SECRET IN THE PUBLIC REPO.',
 }
 
 /* Barked when the visitor's cursor chases a unit down the desktop edge.

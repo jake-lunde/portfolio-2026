@@ -10,6 +10,10 @@ export type ProgramDef = {
   /** overrides the desktop icon label only (window title stays `name`) */
   desktopLabel?: string
   meta: string // mono doc-id in the titlebar, e.g. "SPEC-01"
+  /** copy key for a "what is this" explainer. Set it and the titlebar's
+      meta slot becomes a button that reveals the text instead of printing
+      the doc-id — a program explains itself in chrome, not in its body. */
+  explainer?: string
   icon: IconName
   component: ComponentType
   /** default window geometry (desktop; mobile goes full-bleed) */
@@ -213,9 +217,12 @@ export const PROGRAMS: ProgramDef[] = [
     id: 'command',
     name: 'Command Center',
     meta: 'CTR-11',
+    explainer: 'command.explainer',
     icon: 'nodes',
     component: dynamic(() => import('@/programs/command/CommandCenter')),
-    size: { w: 780, h: 700 },
+    // sized to the deck with its transmission log CLOSED — that is the
+    // default state, and a window should fit what it opens showing
+    size: { w: 800, h: 592 },
     pos: { x: 250, y: 26 },
     chrome: 'crt',
     onDesktop: false,

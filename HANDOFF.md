@@ -52,51 +52,80 @@
   expressive accent (vermilion is 2.5:1 on the ember plate), collapsing the two
   accents there. In Progress + machine chrome strings are still literals.
 
-## Latest session — desktop consolidation · iPod afloat (session 25, 2026-07-26)
+## Latest session — COMMAND.CTR: the human on top (session 26, 2026-07-26)
 
-**Opus orchestrating; four parallel agents on disjoint files (FOURIER=iPod,
-NYQUIST=icons/feedback/viz, DOPPLER=machine, HERTZ=CommandWidget); the seam —
-registry, Folder, Window, copy keys — written by the orchestrator first. Zero
-conflicts. Shipped as `fc37c82`; verified live on lunde.co.**
+**Opus (SHANNON) orchestrating. Round 1 solo — one entangled feature across the
+deck, the chip, the sprites, the reporter AND the API, every seam a shared type.
+Round 2 dispatched two: NYQUIST on the avatar strokes, DOPPLER on the WHAT IS
+THIS chrome pattern (disjoint files: shell chrome + registry + copy.json vs. the
+deck). Zero conflicts. NOT SHIPPED YET — build green, nothing pushed.**
 
-- **Renames** (registry + copy.json): Studio→Remixes, SEQ-16→Beat Machine,
-  Jigsaw→Puzzles, Tattoo Gun→Tattoo Me, In Progress→**Case Studies** (`/cases`),
-  viz Scrobbles→**History** (new `hidden` flag keeps a rehomed viz out of the
-  Visualizers index while its id stays the address of window + deep link).
-  PROJECTS + ??? off the desktop. New icons: `ipod`/`music`/`smiley`/`bubble`.
-- **Click wheel volume — the MODEL was wrong, not the plumbing** (every
-  suspected culprit proven fine, incl. 31 real writes reaching `<audio>`). The
-  accumulator was unclamped: from the default 0.85 you pinned at 100% after
-  81°, then banked every further degree as slack, so a 180° overshoot needed
-  99° of reversal before anything moved. Replaced `rotary`/`onDetent`/`onTurn`
-  with ONE callback — **`onTurn(deg) => consumedDeg`**; the wheel discards what
-  the parent didn't spend, so slack cannot exist and 360° = one full sweep,
-  relative to the grab by construction. Haptics in `lib/haptics.ts` — **iOS
-  Safari has no `navigator.vibrate`, so it is Android-only.**
-- **Recede-when-inactive is on the window's CHILDREN, not the window** — the
-  paper stays opaque so stacked windows occlude instead of turning to soup.
-  `filter`, not `opacity`, because Motion owns the inline `opacity`.
-- **Medieval wheel = turned oak.** Timber is tinted with the gilt accent:
-  parchment-mixed-into-the-plate alone lands on a dead grey. Grain lives in the
-  rotating SVG, lighting on the static `.ring` — swap them and the highlight
-  spins like a lighthouse. ⚠️ ROLES ARE INVERTED inside `.studio` (`--surface`
-  is the dark plate, `--content` is parchment); getting that backwards paints a
-  black "highlight". Zone labels went full `--content` in medieval — muted
-  measured 3.19:1 on wood, fails AA; now 5.49:1.
-- **ABOUT THIS MACHINE** lost the twirl-down and its SSR/CLS workaround; hugs
-  at 600×420 (was 86px of dead space), CTA centred, opens the new `ai-opinion`
-  window (`/ai`). Drawers hug ONE row via fixed 88px tracks — `minmax(88px,
-  1fr)` stretched them and FUN wrapped 3+1.
-- **`OS_VERSION` (`src/lib/version.ts`) is the ONE version literal** — it had
-  drifted four ways (menu bar v0.2, Boot v0.2, README v0.1, machine "1.0").
-- **COMMAND.CTR** back to a floating chip: LIVE (filled dot, raised frame,
-  pulse) vs IDLE (hollow ring, flush, `LAST SESSION →`) — state on text +
-  shape + elevation, never motion or colour alone. Sticky notes → FEEDBACK.
-- **Three traps this session cost real time, now in memory, not repeated here:**
-  `useId()` in a program component breaks hydration (use a constant id); this
-  repo has **no prettier config** so `npx prettier` mangles the house style; the
-  preview pane freezes rAF *and* CSS transitions, so inject
-  `*{transition:none!important}` before trusting any computed style.
+- **The deck is a PYRAMID now, and the shape is the argument.** JAKE (portrait
+  plate, `HUMAN · DESIGN ENGINEER`) centred on top with his prompts on a rail
+  directly beneath him → FABLE (FABLE-5, orchestration) + **SHANNON (OPUS-5,
+  execution — new call sign, same signal-theory family)** → the four
+  delegates. Edges are
+  labelled (`↓ BRIEF`, `RETURNS ↑ JAKE CURATES`, `↓ DISPATCH · ONE WHOLE TASK
+  EACH`) so the loop reads without a caption. Delegate models corrected to
+  OPUS-5.
+- **Jake's own portrait is the avatar** (`ref/stamp/jake-vector.svg` → copied to
+  `public/cc/avatars/jake.svg`, since `ref/` is never committed). Drawn as a
+  full-colour `<img>`, never a CSS mask: the crew are one-ink silhouettes, the
+  human is the only picture of a person. A medieval engraving of the same
+  portrait sits in `ref/stamp/medieval/` for a per-skin variant later.
+- **Prompt fragments are precise DIRECTION, per Jake** ("TWO ACCENTS PER SKIN.
+  NEVER A THIRD.", "DECIMATE THE PHOTOSCAN UNDER 2K FACES") — never "make it
+  cool". The deck must show him steering, not delegating the taste.
+- **Two new event actions: `prompt` and `curate`** (agent `jake`) — his asks
+  and his picks are first-class telemetry, quoted in the feed with ✎/✓. Prompt
+  fragments live on their OWN rail, not read off the feed: the ticker holds 7
+  rows and the human speaks rarely, so he'd scroll away in seconds.
+- **`crew.ts` is now the single source of crew identity** (id/name/model/role/
+  blurb + `isCrewId`); `cc-timeline.json` is just `recorded` + `sequence`. At
+  rest a unit's status line says what it IS, not "STANDING BY" — the explainer
+  lives where a visitor actually looks.
+- **The `--AGENT · --task` bug was the REPORTER, not the deck.** A session
+  called `cc-report.mjs` with flags against a positional parser, so `--agent`
+  became the call sign. It now takes both forms and **refuses unknown call
+  signs**; the API validates ids on write AND filters them on read, so the
+  junk already in the blob heals on the next GET — no `--reset` needed.
+- **The chip is one row, one target:** state · cast (JL + 5 faces, the one
+  named by the leading edge lit) · leading edge inline · ENTER COMMAND CENTER.
+  The expanding feed is gone. Its max-width is derived, not guessed:
+  `calc(100% - 620px)` keeps 310px of clearance from the icon grid.
+- **First contact on the desktop:** the first time your cursor finds a
+  wandering unit it does NOT bolt — it turns and says who it is, its model and
+  its last real task (live feed, else a recorded fallback). Once per unit,
+  remembered in `lunde-crew-met`. The hold uses a REF (`holdUntil`), because
+  the walk loop restarts on every state-dep change and a local would reset.
+- **Round 2 (Jake, live over Notion comments):** the pyramid's middle tier is
+  TWO units (FABLE + SHANNON) because Opus-5 runs most sessions; his prompt
+  fragments must read as **precise direction**, never "make it cool"; his own
+  portrait replaces the monogram, in colour, with no stroke around it.
+- **`WHAT IS THIS` is a new SHELL pattern, not a deck feature** (DOPPLER's
+  dispatch): `ProgramDef.explainer` holds a copy key, and the titlebar's meta
+  slot (`CTR-11`) becomes a tooltip-pattern button — hover AND focus, Esc/blur
+  dismissal sequenced BEFORE the window's own Esc-to-close. Any program opts in
+  with one registry line. The deck's inline thesis band is gone; its text lives
+  at `command.explainer`.
+- **The transmission log is collapsed by default** and the window is sized to
+  that state (800×592). Opening it scrolls the body ~78px — a disclosure the
+  visitor asked for, not a layout failure.
+- **The prompt rail: `AnimatePresence mode="popLayout"` + a reserved 66px +
+  `overflow: hidden`.** Without popLayout the arriving chip stacked on the
+  leaving one and the box grew for a beat; with it, the leaving chip leaves the
+  flow (and needs clipping so it doesn't spill onto the tier below).
+- **New motion token `human`** (150/22/mass 1.1, `tokens/core/motion.json`):
+  Jake's inputs move analog — slower, heavier, allowed to overshoot — while the
+  machines keep `deck`'s digital snap. Springs still come only from tokens.
+- **Edge labels ride the tier grid** so BRIEF sits over FABLE and RETURNS over
+  SHANNON, with the rule running through each label and stopping at it. The
+  labels paint `var(--surface-inverse)` — the same token the CRT body uses — so
+  the routing lines die at the type; `.edge` needs `z-index: 1` because the
+  lines are absolutely positioned in the tier BELOW it.
+- **`height: 100%`, not just `min-height`, on `.ctr`** — a flex column can only
+  shrink a child when its own height is definite; the feed is the one elastic
+  band and absorbs what the pyramid doesn't need. Window is 800×720.
 
 ## Next steps
 

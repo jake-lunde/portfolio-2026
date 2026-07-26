@@ -9,6 +9,10 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* HEIGHT, not just min-height: the deck is a fixed instrument panel
+     whose ticker gives up room to the pyramid, and a flex column can
+     only shrink a child when its own height is definite */
+  height: 100%;
   min-height: 100%;
 }
 
@@ -129,24 +133,229 @@
   letter-spacing: 0.06em;
 }
 
-/* ---- crew bay ---- */
+/* ---- the pyramid ---- */
+/* One human, one orchestrator, four units. The tiers are the argument:
+   briefs descend, returns climb, and the top layer is a person. */
 
-.bay {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+.pyramid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   border: 1.5px solid rgba(231, 225, 210, 0.45);
-  padding: 12px 8px 10px;
+  padding: 10px 8px;
 }
 
-.bayLines {
+.tier {
+  position: relative;
+  display: grid;
+  gap: 6px;
+}
+
+/* The human sits centred on his own row, narrower than the deck, with
+   what he said directly underneath — one column, so the eye reads
+   PERSON then INPUT then the machines, top to bottom. */
+.tier[data-tier='human'] {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+
+.tier[data-tier='lead'] {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.tier[data-tier='crew'] {
+  grid-template-columns: repeat(4, 1fr);
+  padding-top: 4px;
+}
+
+/* routing lines from the orchestrator down to the four units */
+.tierLines {
   position: absolute;
-  inset: 0;
+  top: -22px;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 24px;
   color: #e7e1d2;
   pointer-events: none;
+}
+
+/* ---- the human plate ---- */
+/* Deliberately not a sprite: the one node that isn't a model gets a
+   different construction — monogram, double rule, horizontal id block —
+   so "which one is the person" survives a squint. */
+
+.human {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 10px;
+  border: 1.5px solid rgba(231, 225, 210, 0.55);
+  outline: 1px solid rgba(231, 225, 210, 0.22);
+  outline-offset: 2px;
+  background: var(--surface-inverse);
+  /* centred and hugging its content — a plate, not a banner */
+  width: max-content;
+  max-width: 100%;
+}
+
+.human[data-mode='flash'] {
+  border-color: var(--accent-expressive);
+}
+
+/* Jake's portrait, in colour. Every machine on this deck is a one-ink
+   silhouette; the human is the only thing here that is a picture of
+   somebody. No border: the art is already a circular illustration, and a
+   square rule fights the circle instead of framing it. Sized up 3px from
+   the old 42px to hold the same optical size now the stroke is gone. */
+.portrait {
+  flex: 0 0 auto;
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.humanId {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.humanModel {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-16);
+  color: var(--accent);
+}
+
+.humanBlurb {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: 0.06em;
+  line-height: var(--type-micro-leading);
+  color: rgba(231, 225, 210, 0.7);
+}
+
+/* ---- what the human actually says ---- */
+/* Prompts arrive as fragments, never whole: a departure board can't
+   hold a paragraph, and the pieces make the point better anyway. */
+
+/* Three slots, reserved: the rail holds its height whether it has one
+   fragment or three, so an arriving chip can never shove the pyramid
+   down while the leaving one is still fading. */
+.prompts {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  width: 100%;
+  min-height: 66px;
+  /* popLayout pulls a leaving chip out of flow, which is exactly what
+     stops the shove — but out of flow also means it can spill past the
+     rail on its way out. Clip it to the three slots. */
+  overflow: hidden;
+}
+
+.promptChip {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  max-width: 100%;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-08);
+  color: rgba(231, 225, 210, 0.85);
+  border: 1px solid rgba(231, 225, 210, 0.22);
+  padding: 2px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promptChip[data-kind='curate'] {
+  border-color: var(--accent-expressive);
+}
+
+.promptChip[data-kind='empty'] {
+  color: rgba(231, 225, 210, 0.45);
+}
+
+.promptKind {
+  flex: 0 0 auto;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-14);
+  color: var(--accent);
+}
+
+.promptChip[data-kind='curate'] .promptKind {
+  color: var(--accent-expressive);
+}
+
+/* ---- the labelled edges ---- */
+/* The loop, spelled out: work goes down as briefs and comes back up as
+   returns that a human picks over. */
+
+/* Each label rides the SAME grid as the tier under it, so BRIEF lands
+   over FABLE and RETURNS lands over SHANNON. The alignment is the
+   annotation — no leader lines, no legend. */
+.edge {
+  /* above the routing lines, which are absolutely positioned in the tier
+     BELOW this row and would otherwise paint straight through the type */
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-16);
+  white-space: nowrap;
+  text-align: center;
+}
+
+.edge[data-over='lead'] {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.edge[data-over='crew'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* the rule runs THROUGH the label and stops at it, so the line reads as
+   the wire and the label as what is travelling down it */
+.edgeCell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.edgeRule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: rgba(231, 225, 210, 0.22);
+}
+
+/* the label carries the plate colour with it — the same token the CRT
+   window body paints with — so the routing lines and rules stop dead at
+   the type instead of running under it */
+.edgeDown,
+.edgeUp {
+  flex: 0 0 auto;
+  padding: 1px 8px;
+  background: var(--surface-inverse);
+}
+
+.edgeDown {
+  color: var(--accent);
+}
+
+.edgeUp {
+  color: var(--accent-expressive);
 }
 
 .unit {
@@ -159,6 +368,34 @@
   border: 1px solid rgba(231, 225, 210, 0.22);
   background: var(--surface-inverse);
   min-width: 0;
+}
+
+/* the orchestrator sits alone on its tier, so it lies down: avatar left,
+   identity right, status filling the width it would otherwise waste */
+.unit[data-wide] {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  text-align: left;
+}
+
+.unit[data-wide] .avatar {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+}
+
+.unit[data-wide] .unitName {
+  margin-top: 0;
+}
+
+.unit[data-wide] .unitStatus {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  margin-top: 0;
+  min-height: 0;
 }
 
 .unit[data-mode='busy'] {
@@ -181,8 +418,8 @@
 }
 
 .avatar {
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   background-color: #e7e1d2;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
@@ -273,16 +510,63 @@
 
 /* ---- feed / departure board ---- */
 
+/* Closed by default, so the pyramid is what you meet. Open, it is the
+   ONE elastic band on the deck: every fixed section above gets the
+   height it needs and the ticker absorbs the rest. Closed, the slack
+   goes back to the pyramid instead (see .ctr[data-log='closed']). */
 .feed {
-  flex: 1;
+  flex: 0 0 auto;
   border: 1.5px solid rgba(231, 225, 210, 0.45);
-  padding: 8px 12px 10px;
+  padding: 6px 12px;
   overflow: hidden;
-  min-height: 248px;
+}
+
+.feed[data-open] {
+  flex: 1 1 auto;
+  min-height: 120px;
+  padding: 6px 12px 10px;
+}
+
+.ctr[data-log='closed'] .pyramid {
+  flex: 1 1 auto;
+}
+
+/* the disclosure itself — a full-width instrument label, not a widget */
+.feedToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 2px 0;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-18);
+  color: rgba(231, 225, 210, 0.75);
+  text-align: left;
+}
+
+.feed[data-open] .feedToggle {
+  color: #e7e1d2;
+  border-bottom: 1px solid rgba(231, 225, 210, 0.3);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+}
+
+.feedToggle:hover {
+  color: #e7e1d2;
+}
+
+.feedChevron {
+  color: var(--accent);
+}
+
+.feedCount {
+  margin-left: auto;
+  color: rgba(231, 225, 210, 0.5);
 }
 
 .feedScroll {
-  max-height: 236px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
@@ -333,6 +617,21 @@
   color: var(--accent-expressive);
 }
 
+/* the human's own rows read differently from machine traffic: the call
+   sign takes the expressive accent and the transmission is quoted */
+.rowArrow[data-action='prompt'],
+.rowArrow[data-action='curate'] {
+  color: var(--accent-expressive);
+}
+
+.row[data-human] .rowAgent {
+  color: var(--accent-expressive);
+}
+
+.row[data-human] .rowLabel {
+  color: #e7e1d2;
+}
+
 .rowAgent {
   font-family: var(--display);
   font-size: var(--type-label-size); /* 10.5px → 11px */
@@ -371,4 +670,37 @@
     transparent 4px,
     transparent 10px
   );
+}
+
+/* ---- narrow ---- */
+/* Below ~560px the window is full-bleed on a phone: the pyramid keeps
+   its tiers (that is the whole point) but folds 4-across into 2×2 and
+   drops the human's prompts under his plate rather than beside it. */
+
+@media (max-width: 560px) {
+  .edge[data-over='lead'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tier[data-tier='lead'] {
+    grid-template-columns: 1fr;
+  }
+
+  .tier[data-tier='crew'] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tierLines {
+    display: none;
+  }
+
+  .edge {
+    white-space: normal;
+  }
+
+  .feedHead,
+  .row {
+    grid-template-columns: 62px 18px 62px 1fr;
+    gap: 6px;
+  }
 }

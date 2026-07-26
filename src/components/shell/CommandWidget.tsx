@@ -1,15 +1,24 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { SPRINGS } from '@/lib/motion'
 import { useWindows } from '@/store/windows'
+import { useSettings } from '@/store/settings'
 import { sfx } from '@/lib/sound'
+import { CREW, CREW_BY_ID, HUMAN, HUMAN_PORTRAIT, avatarFor, isCrewId } from './crew'
 import styles from './commandWidget.module.css'
 
 /* COMMAND.CTR, ambient form — the orchestration deck as a permanent
    desktop chip. There is no desktop icon for it any more; this chip and
    the /command deep link are the two ways in.
+
+   One row, one target, four things in it: the state, the CAST (Jake's
+   monogram at the head of the line, then the five units, the one named
+   by the latest event lit), the LEADING EDGE of the feed inline, and
+   the way in — ENTER COMMAND CENTER. The chip used to expand a little
+   feed of its own; the leading edge says the same thing in a quarter of
+   the space and leaves exactly one control on the desktop.
 
    Two states, and the difference is carried by TEXT, DOT SHAPE and
    ELEVATION before it is carried by colour or motion:
@@ -17,13 +26,10 @@ import styles from './commandWidget.module.css'
    LIVE  a real Claude session has reported to /api/cc-feed inside the
          last 15 minutes. The chip lifts onto --surface-raised behind a
          full-weight frame, fills its dot with --accent-expressive (with
-         a pulse where motion is allowed), reads "LIVE", and expands the
-         last few events underneath.
+         a pulse where motion is allowed) and reads "LIVE".
    IDLE  no session running. The chip sits flush on --surface behind a
-         hairline with a hollow dot and reads "IDLE" — a dormant
-         instrument, not a disabled control. It still offers the deck
-         through a labelled "LAST SESSION" control, timestamped when the
-         feed knows when that was.
+         hairline with a hollow dot and reads how long ago the last
+         session was — a dormant instrument, not a disabled control.
 
    The feed only ever ages the chip *downwards*: if it is empty, stale or
    unreachable the chip still renders and still opens the deck. */
@@ -31,7 +37,7 @@ import styles from './commandWidget.module.css'
 type Ev = {
   t: number
   agent: string
-  action: 'dispatch' | 'status' | 'return' | 'review' | 'merge'
+  action: string
   target?: string
   label: string
   redact?: boolean
@@ -39,7 +45,6 @@ type Ev = {
 
 const LIVE_FRESH_MS = 15 * 60_000
 const POLL_MS = 45_000
-const FEED_ROWS = 4
 
 /* `updated` is the feed's last write, so it outlives the session that
    wrote it. On an instrument this small "2H AGO" reads better than a
@@ -60,11 +65,11 @@ function ago(then: number) {
 export function CommandWidget() {
   const open = useWindows((s) => s.open)
   const windows = useWindows((s) => s.windows)
+  const skin = useSettings((s) => s.skin)
   const reduced = useReducedMotion()
-  const [events, setEvents] = useState<Ev[]>([])
+  const [leading, setLeading] = useState<Ev | null>(null)
   const [updated, setUpdated] = useState(0)
   const [live, setLive] = useState(false)
-  const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
     let dead = false
@@ -73,10 +78,11 @@ export function CommandWidget() {
         const res = await fetch('/api/cc-feed')
         const d: { updated: number; events: Ev[] } = await res.json()
         if (dead) return
-        const evs = Array.isArray(d.events) ? d.events : []
+        // a report with a call sign we don't know is dropped, never drawn
+        const evs = (Array.isArray(d.events) ? d.events : []).filter((e) => isCrewId(e?.agent))
         const stamp = typeof d.updated === 'number' ? d.updated : 0
         setUpdated(stamp)
-        setEvents(evs.slice(-FEED_ROWS).reverse())
+        setLeading(evs.length ? evs[evs.length - 1] : null)
         setLive(stamp > 0 && Date.now() - stamp < LIVE_FRESH_MS && evs.length > 0)
       } catch {
         /* feed unreachable — stay idle, still offer the deck */
@@ -90,11 +96,6 @@ export function CommandWidget() {
     }
   }, [])
 
-  // a session that goes cold with the feed open shouldn't leave it open
-  useEffect(() => {
-    if (!live) setExpanded(false)
-  }, [live])
-
   // the full program is open — the ambient chip stands down
   if (windows.some((w) => w.id === 'command')) return null
 
@@ -104,54 +105,83 @@ export function CommandWidget() {
   }
 
   const lastSeen = updated > 0 ? ago(updated) : null
+  const stamp = live ? 'LIVE' : (lastSeen ?? 'IDLE')
+  const onDuty = leading?.agent ?? null
+  const edgeName = onDuty ? (CREW_BY_ID[onDuty]?.name ?? onDuty.toUpperCase()) : null
 
   return (
     <div className={styles.ccWidget} data-state={live ? 'live' : 'idle'}>
-      <motion.div
+      <motion.button
+        type="button"
         className={styles.ccBar}
+        onClick={openDeck}
         initial={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...SPRINGS.widget, delay: 0.5 }}
+        aria-label={
+          live
+            ? `Command Center is live — Jake's agents are orchestrating now${
+                edgeName && !leading?.redact ? `. Latest: ${edgeName}, ${leading?.label}` : ''
+              }. Enter the Command Center.`
+            : `Command Center is idle${
+                lastSeen ? `, last session ${lastSeen.toLowerCase()}` : ''
+              }. Enter the Command Center to see how this site gets built.`
+        }
       >
-        {live ? (
-          <button
-            type="button"
-            className={styles.ccPill}
-            onClick={() => {
-              sfx.tap()
-              setExpanded((e) => !e)
-            }}
-            aria-expanded={expanded}
-            aria-label={`Command Center is live — a session is orchestrating now. ${
-              expanded ? 'Hide' : 'Show'
-            } recent events.`}
-          >
-            <span className={styles.ccDot} aria-hidden="true" />
-            <span className={styles.ccLabel}>COMMAND.CTR · LIVE</span>
-            <span className={styles.ccChevron} aria-hidden="true">
-              {expanded ? '▴' : '▾'}
-            </span>
-          </button>
-        ) : (
-          <>
-            <span className={styles.ccPill}>
-              <span className={styles.ccDot} aria-hidden="true" />
-              <span className={styles.ccLabel}>COMMAND.CTR · IDLE</span>
-            </span>
-            <button
-              type="button"
-              className={styles.ccLast}
-              onClick={openDeck}
-              aria-label={`Command Center is idle. Open the deck to review the last orchestration session${
-                lastSeen ? `, ${lastSeen.toLowerCase()}` : ''
-              }.`}
-            >
-              LAST SESSION{lastSeen ? ` · ${lastSeen}` : ''}
-              <span aria-hidden="true">&nbsp;→</span>
-            </button>
-          </>
-        )}
-      </motion.div>
+        <span className={styles.ccDot} aria-hidden="true" />
+        <span className={styles.ccStamp}>{stamp}</span>
+
+        {/* the cast, in pyramid order: the human first, then the crew.
+            Decorative — every name is spelled out inside the deck. */}
+        <span className={styles.ccCast} aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className={styles.ccMono}
+            data-active={onDuty === HUMAN.id || undefined}
+            src={HUMAN_PORTRAIT}
+            alt=""
+          />
+          <span className={styles.ccCastRule} />
+          {CREW.map((a) => (
+            <span
+              key={a.id}
+              className={styles.ccFace}
+              data-active={onDuty === a.id || undefined}
+              style={{
+                WebkitMaskImage: `url(${avatarFor(a.id, skin)})`,
+                maskImage: `url(${avatarFor(a.id, skin)})`,
+              }}
+            />
+          ))}
+        </span>
+
+        {/* the leading edge of the feed — the single most recent thing
+            that happened, inline */}
+        <span className={styles.ccEdge}>
+          {leading ? (
+            <>
+              <b>{edgeName}</b>
+              {' · '}
+              {leading.redact ? (
+                <span
+                  className={styles.ccRedact}
+                  role="img"
+                  aria-label="Redacted — classified until it ships"
+                />
+              ) : (
+                leading.label
+              )}
+            </>
+          ) : (
+            'NO TRAFFIC — CREW ASLEEP'
+          )}
+        </span>
+
+        <span className={styles.ccCta}>
+          ENTER COMMAND CENTER
+          <span aria-hidden="true">&nbsp;→</span>
+        </span>
+      </motion.button>
 
       {/* only the liveness sentence lives here — never the timestamp, or
           every poll would re-announce as the relative time ticked over */}
@@ -160,41 +190,6 @@ export function CommandWidget() {
           ? 'Command Center: a session is orchestrating live.'
           : 'Command Center: idle, no session running.'}
       </span>
-
-      <AnimatePresence>
-        {live && expanded && (
-          <motion.div
-            className={styles.ccFeed}
-            initial={reduced ? { opacity: 0 } : { opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={SPRINGS.deck}
-          >
-            {events.length === 0 ? (
-              <span className={styles.ccRow}>NO TRAFFIC — CREW ASLEEP</span>
-            ) : (
-              events.map((e, i) => (
-                <span key={`${e.t}-${i}`} className={styles.ccRow}>
-                  <b>{e.agent.toUpperCase()}</b> · {e.action.toUpperCase()} ·{' '}
-                  {e.redact ? (
-                    <span
-                      className={styles.ccRedact}
-                      role="img"
-                      aria-label="Redacted — classified until it ships"
-                    />
-                  ) : (
-                    e.label
-                  )}
-                </span>
-              ))
-            )}
-            <button type="button" className={styles.ccOpen} onClick={openDeck}>
-              OPEN FULL DECK
-              <span aria-hidden="true">&nbsp;→</span>
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

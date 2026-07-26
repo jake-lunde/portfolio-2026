@@ -6,6 +6,8 @@ import { SPRING_TOKENS, DURATION_TOKENS } from './motion.generated'
  * retune how LUNDE OS *moves* the same way it retunes color.
  *
  * Naming: window (open/zoom chrome) · deck (Command Center panels) ·
+ * human (Jake's own inputs on the deck — heavier, slower, allowed to
+ * overshoot; the machines are digital, the human is analog) ·
  * mini (MiniPlayer entrance) · zoom (shared-element photo/NP zooms) ·
  * widget (desktop widget entrances) · rise (gate slots ascending) ·
  * flight (gate letters flying to slots). */
@@ -18,6 +20,7 @@ export const spring = (name: SpringName) =>
 export const SPRINGS = {
   window: spring('window'),
   deck: spring('deck'),
+  human: spring('human'),
   mini: spring('mini'),
   zoom: spring('zoom'),
   widget: spring('widget'),

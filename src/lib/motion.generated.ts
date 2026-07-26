@@ -10,6 +10,11 @@ export const SPRING_TOKENS = {
     "stiffness": 500,
     "damping": 34
   },
+  "human": {
+    "stiffness": 150,
+    "damping": 22,
+    "mass": 1.1
+  },
   "mini": {
     "stiffness": 340,
     "damping": 28

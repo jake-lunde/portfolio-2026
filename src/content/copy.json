@@ -1,4 +1,5 @@
 {
+  "command.explainer": "Jake writes the brief, judges every return and owns the taste. A crew of model agents does the fan-out. This deck is the real telemetry; the site is what came out of it.",
   "feedback.head": {
     "base": "In their words",
     "medieval": "As they attest"
@@ -167,6 +168,10 @@
   "settings.wallpaperHint": "Desktop pattern — classic-Mac spirit, print-archive ink",
   "settings.wallpaperLabel": "Wallpaper",
   "shared.soon": "Soon",
+  "shell.explainer.label": {
+    "base": "WHAT IS THIS",
+    "medieval": "WHAT IS WRIT HERE"
+  },
   "spec-sheet.banner": "Host System Tokens — GL DS Feed Pending",
   "spec-sheet.eyebrow": "System Spec — LUNDE OS",
   "spec-sheet.foot": "Values read live from computed styles · contrast recomputes on theme flip · motion quoted from shell/Window.tsx",

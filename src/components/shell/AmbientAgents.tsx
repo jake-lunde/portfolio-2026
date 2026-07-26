@@ -2,18 +2,29 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { SPRINGS } from '@/lib/motion'
 import { useWindows } from '@/store/windows'
 import { useSettings } from '@/store/settings'
 import { resolveWindow } from '@/programs/resolve'
-import { CREW_IDS, CREW_VERBS, agentForWindow, avatarFor } from './crew'
-import { CREW_DIALOG, FLEE_LINES } from './crewDialog'
+import { CREW_BY_ID, CREW_IDS, CREW_VERBS, agentForWindow, avatarFor, isCrewId } from './crew'
+import { CREW_DIALOG, CREW_INTRO, CREW_LAST_TASK, FLEE_LINES } from './crewDialog'
 import styles from './shell.module.css'
 
 /* The crew, off duty. WANDERER — one unit strolls the desktop's bottom
    edge, pauses to inspect, mutters campy shift-talk in a speech bubble,
    and BOLTS if your cursor gets too close (they are unionized about
    personal space). FLASHES — opening a window summons its responsible
-   unit beside the titlebar for a beat. */
+   unit beside the titlebar for a beat.
+
+   FIRST CONTACT — the first time your cursor finds a given unit they do
+   NOT bolt: they stop, turn, and say who they are, what model they run
+   on and what they last worked on (from the live feed when there is
+   one). Nobody should have to guess what these things are. After the
+   introduction that unit reverts to the startle-then-flee behaviour,
+   and the handshake is remembered across visits.
+
+   All of it is decorative and aria-hidden — the same facts are spelled
+   out, in text, inside COMMAND.CTR. */
 
 type Flash = { key: number; agent: string; x: number; y: number }
 
@@ -21,10 +32,24 @@ const WALK_SPEED = 26 // px/s
 const FLEE_SPEED = 190
 const SIZE = 34
 const FLEE_RADIUS = 64
+const INTRO_RADIUS = 84 // they notice you a little before they'd spook
+const INTRO_MS = 5200
+const MET_KEY = 'lunde-crew-met'
 
 const line = (agent: string): string => {
   const pool = [...(CREW_DIALOG[agent] ?? []), ...(CREW_DIALOG.anybody ?? [])]
   return pool[Math.floor(Math.random() * pool.length)] ?? 'BRB.'
+}
+
+/* who you've already been introduced to — a plain id list in
+   localStorage, guarded because the read can throw in private mode */
+function readMet(): Set<string> {
+  try {
+    const raw = JSON.parse(localStorage.getItem(MET_KEY) ?? '[]')
+    return new Set(Array.isArray(raw) ? raw.filter(isCrewId) : [])
+  } catch {
+    return new Set()
+  }
 }
 
 export function AmbientAgents() {
@@ -39,10 +64,43 @@ export function AmbientAgents() {
   const [fleeing, setFleeing] = useState(false)
   const [jumping, setJumping] = useState(false)
   const [offDuty, setOffDuty] = useState(false)
+  const [intro, setIntro] = useState<{ id: string; align: 'left' | 'center' | 'right' } | null>(null)
   const pos = useRef(40)
   const dir = useRef(1)
   const mouse = useRef<{ x: number; y: number } | null>(null)
   const scaredOnce = useRef(false) // first scare = startle jump; after that they bolt
+  const met = useRef<Set<string>>(new Set())
+  // a ref, not a local: the walk loop restarts whenever a state dep
+  // changes, and an introduction has to outlive that
+  const holdUntil = useRef(0)
+  const lastTask = useRef<Record<string, string>>({ ...CREW_LAST_TASK })
+
+  /* One read of the feed, no polling: the introduction only needs a
+     plausible "last task", and the deck itself is what streams. */
+  useEffect(() => {
+    met.current = readMet()
+    let dead = false
+    void (async () => {
+      try {
+        const res = await fetch('/api/cc-feed')
+        const d: { events?: Array<{ agent: string; label: string; redact?: boolean }> } =
+          await res.json()
+        if (dead || !Array.isArray(d.events)) return
+        const next = { ...CREW_LAST_TASK }
+        for (const e of d.events) {
+          if (isCrewId(e?.agent) && typeof e.label === 'string') {
+            next[e.agent] = e.redact ? 'CLASSIFIED UNTIL IT SHIPS.' : e.label
+          }
+        }
+        lastTask.current = next
+      } catch {
+        /* feed unreachable — the recorded fallbacks are already loaded */
+      }
+    })()
+    return () => {
+      dead = true
+    }
+  }, [])
 
   useEffect(() => {
     if (reduced || offDuty) return
@@ -88,6 +146,38 @@ export function AmbientAgents() {
       const rect = el.getBoundingClientRect()
       const cx = rect.left + rect.width / 2
       const cy = rect.top + rect.height / 2
+
+      // mid-introduction: they hold their ground and finish the sentence
+      if (now < holdUntil.current) return
+
+      /* FIRST CONTACT. Before a unit has ever been met, the cursor
+         getting close buys an introduction instead of a startle — they
+         turn to face you and say what they are. Once each, remembered. */
+      if (
+        mouse.current &&
+        !met.current.has(CREW_IDS[agentIdx]) &&
+        Math.hypot(mouse.current.x - cx, mouse.current.y - cy) < INTRO_RADIUS
+      ) {
+        const id = CREW_IDS[agentIdx]
+        met.current.add(id)
+        try {
+          localStorage.setItem(MET_KEY, JSON.stringify([...met.current]))
+        } catch {
+          /* private mode — they'll re-introduce themselves next visit */
+        }
+        holdUntil.current = now + INTRO_MS
+        scareCooldown = now + INTRO_MS + 1200
+        pauseUntil = now + INTRO_MS
+        dir.current = mouse.current.x > cx ? 1 : -1 // turn toward the cursor
+        setBubble(null)
+        if (inspecting) setInspecting(false)
+        setIntro({
+          id,
+          align: pos.current < 150 ? 'left' : pos.current > window.innerWidth - 150 ? 'right' : 'center',
+        })
+        setTimeout(() => setIntro(null), INTRO_MS)
+        return
+      }
 
       // cursor too close?
       if (
@@ -187,7 +277,30 @@ export function AmbientAgents() {
       {!reduced && !offDuty && (
         <div ref={walkerRef} className={styles.wanderer} aria-hidden="true">
           <AnimatePresence>
-            {bubble && (
+            {intro && (
+              <motion.div
+                className={styles.introCard}
+                data-align={intro.align}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={SPRINGS.deck}
+              >
+                <span className={styles.introHi}>
+                  HI — I&apos;M {CREW_BY_ID[intro.id]?.name}. ONE OF JAKE&apos;S AGENTS.
+                </span>
+                <span className={styles.introJob}>
+                  {CREW_BY_ID[intro.id]?.model} · {CREW_INTRO[intro.id]}
+                </span>
+                <span className={styles.introTask}>
+                  LAST TASK — {lastTask.current[intro.id]}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {bubble && !intro && (
               <motion.span
                 className={styles.bubble}
                 initial={{ opacity: 0, y: 4 }}

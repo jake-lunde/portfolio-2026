@@ -33,6 +33,17 @@
         "$value": "34"
       }
     },
+    "human": {
+      "stiffness": {
+        "$value": "150"
+      },
+      "damping": {
+        "$value": "22"
+      },
+      "mass": {
+        "$value": "1.1"
+      }
+    },
     "mini": {
       "stiffness": {
         "$value": "340"

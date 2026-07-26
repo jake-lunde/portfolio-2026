@@ -26,7 +26,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: min(340px, calc(100% - 40px));
+  /* The chip is centred, so its half-width is what can collide with the
+     icon grid on the left (right edge 20 + 3×88 + 2×10 = 304px). Keeping
+     310px of clearance on a desktop W wide means W − 620 — derived, not
+     guessed, and it lands on the old 280px at the 901px worst case. */
+  max-width: min(560px, calc(100% - 620px));
 
   /* halo stops, derived from the skin's expressive accent rather than
      baked — the 0% stop keeps the fade pink instead of fading to grey */
@@ -43,9 +47,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  max-width: 100%;
   padding: 5px 10px;
   background: var(--surface);
   border: var(--border-width-hairline) solid var(--border);
+  text-align: left;
 }
 
 .ccWidget[data-state='live'] .ccBar {
@@ -60,13 +66,6 @@
    than the idle hairline. Same override the siblings make. */
 [data-theme='dark'] .ccWidget[data-state='live'] .ccBar {
   border-color: var(--content-muted);
-}
-
-.ccPill {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: inherit;
 }
 
 /* ---------- the dot ---------- */
@@ -131,7 +130,8 @@
    skin, while the flush one holds 4.99:1 (medieval), 5.62:1 (classic
    light) and 6.50:1 (dark). Recessed by elevation, never by contrast. */
 
-.ccLabel {
+.ccStamp {
+  flex: 0 0 auto;
   font-family: var(--mono);
   font-size: var(--text-micro);
   font-weight: var(--weight-bold);
@@ -140,76 +140,104 @@
   white-space: nowrap;
 }
 
-.ccWidget[data-state='live'] .ccLabel {
+.ccWidget[data-state='live'] .ccStamp {
   color: var(--content);
 }
 
-.ccChevron {
-  font-family: var(--mono);
-  font-size: var(--text-micro);
-  line-height: 1;
-  color: var(--content);
-}
+/* ---------- the cast ---------- */
+/* Jake's monogram at the head of the line, a rule, then the five units:
+   the pyramid's reading order, compressed to 100px. The unit named by
+   the leading edge lights up, so the chip answers "who is working"
+   without a word of text. */
 
-/* ---------- the idle affordance ---------- */
-/* A real labelled control into the deck, divided off so the chip still
-   reads as one instrument rather than two chips. */
-
-.ccLast {
+.ccCast {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
+  gap: 3px;
+  padding-left: var(--space-2);
+  border-left: var(--border-width-hairline) solid var(--border);
+}
+
+/* the human is the only face in colour — the crew are one-ink masks. No
+   border: the art is already a circular illustration, and a square rule
+   fights it. [data-active] swaps to an outline instead of a border-color
+   change, so the state still reads with no layout shift. */
+.ccMono {
+  display: block;
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+}
+
+.ccMono[data-active] {
+  outline: var(--border-width-hairline) solid var(--accent-expressive);
+  outline-offset: 1px;
+}
+
+.ccCastRule {
+  width: 6px;
+  height: 1px;
+  background: var(--border);
+}
+
+.ccFace {
+  display: block;
+  width: 15px;
+  height: 15px;
+  background-color: var(--content-muted);
+  opacity: 0.55;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.ccFace[data-active] {
+  background-color: var(--accent-expressive);
+  opacity: 1;
+}
+
+/* ---------- the leading edge ---------- */
+/* The single most recent transmission, inline. It is the first thing to
+   give up room when the chip is squeezed. */
+
+.ccEdge {
+  flex: 1 1 auto;
+  min-width: 0;
   padding-left: var(--space-2);
   border-left: var(--border-width-hairline) solid var(--border);
   font-family: var(--mono);
   font-size: var(--text-micro);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-12);
-  color: var(--interactive-default-content-hover);
-  white-space: nowrap;
-}
-
-.ccLast:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-/* ---------- the live feed ---------- */
-
-/* 280px, not wider: centred at the 901px worst case the left edge lands
-   at 310px, clear of the icon grid's right edge (20 + 3×88 + 2×10 = 304) */
-.ccFeed {
-  margin-top: var(--space-1);
-  width: 280px;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: 9px 11px;
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
-  box-shadow: var(--shadow-print);
-}
-
-[data-theme='dark'] .ccFeed {
-  border-color: var(--content-muted);
-}
-
-/* full --content, not muted: the feed sits on --surface-raised, where
-   --content-muted would fail AA in the medieval skin */
-.ccRow {
-  font-family: var(--mono);
-  font-size: var(--text-micro);
   letter-spacing: var(--tracking-08);
-  color: var(--content);
-  line-height: 1.5;
+  color: var(--content-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.ccRow b {
+.ccEdge b {
   color: var(--accent);
   font-weight: var(--weight-bold);
+}
+
+/* ---------- the way in ---------- */
+
+.ccCta {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-14);
+  color: var(--interactive-default-content-hover);
+  white-space: nowrap;
+}
+
+.ccBar:hover .ccCta {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* marker blackout — some event labels stay classified until the work
@@ -221,23 +249,6 @@
   height: 7px;
   background: var(--content);
   vertical-align: middle;
-}
-
-.ccOpen {
-  margin-top: var(--space-1);
-  align-self: flex-start;
-  padding: var(--space-1) var(--space-2);
-  font-family: var(--mono);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-14);
-  color: var(--accent);
-  border: var(--border-width-hairline) solid var(--accent);
-}
-
-.ccOpen:hover {
-  background: var(--interactive-accent-hover);
-  color: var(--interactive-accent-on-hover);
 }
 
 /* the polite announcement of a liveness change — text, not decoration,
@@ -252,6 +263,17 @@
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* ---------- squeezed ---------- */
+/* Between 900px and ~1240px the derived max-width has already taken the
+   chip below the width the leading edge needs to say anything useful —
+   drop it rather than serve two ellipsised words. Cast and CTA stay. */
+
+@media (max-width: 1240px) {
+  .ccEdge {
+    display: none;
+  }
 }
 
 /* ---------- mobile ---------- */

@@ -12,6 +12,8 @@ export type ResolvedWindow = {
   size: { w: number; h: number }
   pos: { x: number; y: number }
   path: string | null
+  /** copy key for the titlebar's "what is this" explainer (see registry) */
+  explainer?: string
   /** requires macrodata refinement (the sphere) before the body shows */
   gated?: boolean
 }
@@ -60,6 +62,7 @@ export function resolveWindow(id: string): ResolvedWindow | null {
     size: p.size,
     pos: p.pos,
     path: p.path ?? null,
+    explainer: p.explainer,
     gated: id === 'projects',
   }
 }

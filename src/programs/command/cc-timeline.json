@@ -1,44 +1,24 @@
 {
   "recorded": "2026-07-09",
-  "agents": [
-    {
-      "id": "fable",
-      "name": "FABLE",
-      "model": "FABLE-5",
-      "role": "ORCHESTRATION"
-    },
-    {
-      "id": "hertz",
-      "name": "HERTZ",
-      "model": "SONNET-5",
-      "role": "RESEARCH"
-    },
-    {
-      "id": "nyquist",
-      "name": "NYQUIST",
-      "model": "SONNET-5",
-      "role": "IMPLEMENTATION"
-    },
-    {
-      "id": "fourier",
-      "name": "FOURIER",
-      "model": "OPUS-4.8",
-      "role": "SYNTHESIS"
-    },
-    {
-      "id": "doppler",
-      "name": "DOPPLER",
-      "model": "OPUS-4.8",
-      "role": "REVIEW"
-    }
-  ],
   "sequence": [
+    {
+      "t": 0,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "BUILD THE SHELL FIRST: WINDOWS, ICONS, TOKENS"
+    },
     {
       "t": 0,
       "agent": "fable",
       "action": "dispatch",
       "target": "nyquist",
       "label": "SCAFFOLD NEXT SHELL · TOKENS · MOTION"
+    },
+    {
+      "t": 2,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "TWO ACCENTS PER SKIN. NEVER A THIRD."
     },
     {
       "t": 3,
@@ -66,6 +46,12 @@
       "label": "V0.1 MERGED · SHIPPED TO PUBLIC WIRE"
     },
     {
+      "t": 10,
+      "agent": "jake",
+      "action": "curate",
+      "label": "KEPT THE CREAM PLATE. CUT THE GREY ONE."
+    },
+    {
       "t": 12,
       "agent": "doppler",
       "action": "review",
@@ -85,6 +71,12 @@
       "label": "PURGE TRACKED FILES · REWRITE HISTORY"
     },
     {
+      "t": 15,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "SCRUB EVERY TRACKED SECRET FROM HISTORY"
+    },
+    {
       "t": 16,
       "agent": "fable",
       "action": "status",
@@ -101,6 +93,12 @@
       "agent": "doppler",
       "action": "return",
       "label": "PUBLIC WIRE SCRUBBED · 0 SECRETS TRACKED"
+    },
+    {
+      "t": 21,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "GUESTBOOK PERSISTS IN BLOB, NOT LOCALSTORAGE"
     },
     {
       "t": 22,
@@ -135,6 +133,12 @@
       "label": "V0.2 MERGED · SHELL DRESSED · YEAR 1992"
     },
     {
+      "t": 36,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "PULL MY REAL RIDE · TRIM 150M FROM THE HOUSE"
+    },
+    {
       "t": 37,
       "agent": "fable",
       "action": "dispatch",
@@ -160,6 +164,12 @@
       "label": "RIDE STREAM DECODED · METERS NORMALIZED"
     },
     {
+      "t": 42,
+      "agent": "jake",
+      "action": "curate",
+      "label": "PICKED THE GARDEN SCAN · MY WIFE'S FLOWERS"
+    },
+    {
       "t": 43,
       "agent": "fable",
       "action": "dispatch",
@@ -177,6 +187,12 @@
       "agent": "nyquist",
       "action": "return",
       "label": "FLOWERS CRYSTALLIZED · WIFE'S GARDEN"
+    },
+    {
+      "t": 47,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "DECIMATE THE PHOTOSCAN UNDER 2K FACES"
     },
     {
       "t": 48,
@@ -224,6 +240,12 @@
       "label": "VISUALIZERS BROKEN OUT TO DESKTOP"
     },
     {
+      "t": 62,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "WEBAUDIO, NOT A GIF. 60FPS OR CUT IT."
+    },
+    {
       "t": 63,
       "agent": "fable",
       "action": "dispatch",
@@ -244,6 +266,12 @@
       "label": "APPLE MUSIC · MINT USER TOKEN"
     },
     {
+      "t": 68,
+      "agent": "jake",
+      "action": "curate",
+      "label": "KEPT 5 REMIXES OF 11 · THE REST ARE OUT"
+    },
+    {
       "t": 69,
       "agent": "hertz",
       "action": "return",
@@ -254,6 +282,12 @@
       "agent": "fable",
       "action": "merge",
       "label": "STUDIO + NOW PLAYING MERGED"
+    },
+    {
+      "t": 73,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "PIN THE LAST 3 BOOTH SNAPS. LOCAL ONLY."
     },
     {
       "t": 74,
@@ -288,8 +322,14 @@
       "label": "THREE TOYS MERGED · ARCADE GROWS"
     },
     {
+      "t": 83,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "LOU WAKES AFTER 5 MINUTES IDLE"
+    },
+    {
       "t": 84,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "dispatch",
       "target": "nyquist",
       "label": "LOU.SYS · PIXEL DOG SCREENSAVER"
@@ -308,13 +348,19 @@
     },
     {
       "t": 88,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "merge",
       "label": "LOU.SYS + ABOUT THIS MACHINE MERGED"
     },
     {
+      "t": 91,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "WINDOWS MUST FIT THEIR CONTENT ON OPEN"
+    },
+    {
       "t": 92,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "dispatch",
       "target": "hertz",
       "label": "MEASURE OVERFLOW · ALL WINDOWS"
@@ -327,7 +373,7 @@
     },
     {
       "t": 95,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "dispatch",
       "target": "nyquist",
       "label": "RESIZABLE WINDOWS · RIBBED GRIP"
@@ -340,13 +386,19 @@
     },
     {
       "t": 98,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "merge",
       "label": "RESIZE + FIT MERGED"
     },
     {
+      "t": 100,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "AMBIENT WIDGETS: TRANSFORM AND OPACITY ONLY"
+    },
+    {
       "t": 101,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "dispatch",
       "target": "nyquist",
       "label": "DAILY WIDGET · AMBIENT GAUGES"
@@ -359,7 +411,7 @@
     },
     {
       "t": 104,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "dispatch",
       "target": "fourier",
       "label": "PHOTO WALL · PINNED BOOTH SNAPS"
@@ -372,13 +424,19 @@
     },
     {
       "t": 108,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "merge",
       "label": "AMBIENT WIDGETS MERGED · LIVE AT LUNDE.CO"
     },
     {
+      "t": 112,
+      "agent": "jake",
+      "action": "prompt",
+      "label": "SHOW THE ORCHESTRATION. REDACT WHAT IS UNSHIPPED."
+    },
+    {
       "t": 113,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "dispatch",
       "target": "hertz",
       "label": "RESEARCH APIS · READ THE DOCS"
@@ -391,7 +449,7 @@
     },
     {
       "t": 116,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "dispatch",
       "target": "fourier",
       "label": "COMPOSE COMMAND CENTER TIMELINE"
@@ -410,9 +468,15 @@
     },
     {
       "t": 120,
-      "agent": "fable",
+      "agent": "shannon",
       "action": "merge",
       "label": "COMMAND CENTER MERGED · REPLAY ARMED"
+    },
+    {
+      "t": 121,
+      "agent": "jake",
+      "action": "curate",
+      "label": "SIGNED OFF · PUSHED TO LUNDE.CO"
     }
   ]
 }

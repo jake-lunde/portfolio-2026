@@ -9,6 +9,52 @@
 
 ---
 
+## Latest session — desktop consolidation · iPod afloat (session 25, 2026-07-26)
+
+**Opus orchestrating; four parallel agents on disjoint files (FOURIER=iPod,
+NYQUIST=icons/feedback/viz, DOPPLER=machine, HERTZ=CommandWidget); the seam —
+registry, Folder, Window, copy keys — written by the orchestrator first. Zero
+conflicts. Shipped as `fc37c82`; verified live on lunde.co.**
+
+- **Renames** (registry + copy.json): Studio→Remixes, SEQ-16→Beat Machine,
+  Jigsaw→Puzzles, Tattoo Gun→Tattoo Me, In Progress→**Case Studies** (`/cases`),
+  viz Scrobbles→**History** (new `hidden` flag keeps a rehomed viz out of the
+  Visualizers index while its id stays the address of window + deep link).
+  PROJECTS + ??? off the desktop. New icons: `ipod`/`music`/`smiley`/`bubble`.
+- **Click wheel volume — the MODEL was wrong, not the plumbing** (every
+  suspected culprit proven fine, incl. 31 real writes reaching `<audio>`). The
+  accumulator was unclamped: from the default 0.85 you pinned at 100% after
+  81°, then banked every further degree as slack, so a 180° overshoot needed
+  99° of reversal before anything moved. Replaced `rotary`/`onDetent`/`onTurn`
+  with ONE callback — **`onTurn(deg) => consumedDeg`**; the wheel discards what
+  the parent didn't spend, so slack cannot exist and 360° = one full sweep,
+  relative to the grab by construction. Haptics in `lib/haptics.ts` — **iOS
+  Safari has no `navigator.vibrate`, so it is Android-only.**
+- **Recede-when-inactive is on the window's CHILDREN, not the window** — the
+  paper stays opaque so stacked windows occlude instead of turning to soup.
+  `filter`, not `opacity`, because Motion owns the inline `opacity`.
+- **Medieval wheel = turned oak.** Timber is tinted with the gilt accent:
+  parchment-mixed-into-the-plate alone lands on a dead grey. Grain lives in the
+  rotating SVG, lighting on the static `.ring` — swap them and the highlight
+  spins like a lighthouse. ⚠️ ROLES ARE INVERTED inside `.studio` (`--surface`
+  is the dark plate, `--content` is parchment); getting that backwards paints a
+  black "highlight". Zone labels went full `--content` in medieval — muted
+  measured 3.19:1 on wood, fails AA; now 5.49:1.
+- **ABOUT THIS MACHINE** lost the twirl-down and its SSR/CLS workaround; hugs
+  at 600×420 (was 86px of dead space), CTA centred, opens the new `ai-opinion`
+  window (`/ai`). Drawers hug ONE row via fixed 88px tracks — `minmax(88px,
+  1fr)` stretched them and FUN wrapped 3+1.
+- **`OS_VERSION` (`src/lib/version.ts`) is the ONE version literal** — it had
+  drifted four ways (menu bar v0.2, Boot v0.2, README v0.1, machine "1.0").
+- **COMMAND.CTR** back to a floating chip: LIVE (filled dot, raised frame,
+  pulse) vs IDLE (hollow ring, flush, `LAST SESSION →`) — state on text +
+  shape + elevation, never motion or colour alone. Sticky notes → FEEDBACK.
+- **Three traps this session cost real time, now in memory, not repeated here:**
+  `useId()` in a program component breaks hydration (use a constant id); this
+  repo has **no prettier config** so `npx prettier` mangles the house style; the
+  preview pane freezes rAF *and* CSS transitions, so inject
+  `*{transition:none!important}` before trusting any computed style.
+
 ## Latest session — iPod STUDIO · ABOUT.MACHINE · IN.PROGRESS (session 24, 2026-07-26)
 
 **Fable orchestrating; three parallel agents on disjoint files (FOURIER=iPod,

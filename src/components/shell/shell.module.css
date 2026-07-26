@@ -746,6 +746,67 @@
   border-color: var(--border);
 }
 
+/* ---- first contact ---- */
+/* A speech bubble can hold a joke; an introduction needs three lines.
+   Same print-shadow housing, wider, and it stays put while the unit
+   finishes talking. Decorative like everything else on the wanderer —
+   the same facts are text inside COMMAND.CTR. */
+
+.introCard {
+  position: absolute;
+  bottom: 42px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: max-content;
+  max-width: 260px;
+  padding: 6px 9px;
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: 3px 3px 0 rgba(23, 21, 13, 0.15);
+}
+
+[data-theme='dark'] .introCard {
+  border-color: var(--border);
+}
+
+/* near a wing there is no room to centre — pin to the edge instead */
+.introCard[data-align='left'] {
+  left: 0;
+  transform: none;
+}
+
+.introCard[data-align='right'] {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.introHi {
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.08em;
+  color: var(--content);
+}
+
+.introJob {
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.introTask {
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  letter-spacing: 0.06em;
+  line-height: 1.45;
+  color: var(--content-muted);
+}
+
 @keyframes wanderBob {
   0%,
   100% {
@@ -912,6 +973,73 @@
   font-size: var(--text-caption);
   letter-spacing: 0.14em;
   opacity: 0.6;
+}
+
+/* ---- WHAT IS THIS — a window explains itself ----
+   The titlebar's right slot prints the doc-id by default; a program that
+   carries an `explainer` copy key (registry.tsx) gets this instead. The
+   explanation is summonable chrome, so it costs the program no space. */
+
+.explainer {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.explainerBtn {
+  font-family: var(--mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-14);
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* rides the titlebar's own ink: content when idle, inverse when active —
+     no opacity dimming here, unlike .titleMeta, because this one is hit */
+  color: inherit;
+  padding: 2px 5px;
+  border: var(--border-width-hairline) solid transparent;
+  transition: border-color var(--duration-tap) ease;
+}
+
+.explainerBtn:hover,
+.explainerBtn[data-open='true'] {
+  border-color: currentColor;
+}
+
+.explainerPanel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 6; /* over the body content and the resize grip (4) */
+  width: max-content;
+  max-width: min(300px, calc(100vw - 32px));
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: var(--shadow-print);
+  color: var(--content); /* the active titlebar's inverse ink stops here */
+  cursor: default; /* the titlebar is a drag handle; the card is not */
+}
+
+/* a full-weight --content edge glares in dark — same climb-down as .window */
+[data-theme='dark'] .explainerPanel {
+  border-color: var(--border);
+}
+
+/* invisible bridge across the 6px gap: the pointer must be able to travel
+   from the button down into the card without tripping pointerleave */
+.explainerPanel::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8px;
+  height: 8px;
+}
+
+.explainerText {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--text-label);
+  line-height: var(--leading-relaxed);
 }
 
 .windowBody {

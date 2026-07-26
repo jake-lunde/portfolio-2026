@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { del, list, put } from '@vercel/blob'
+import { isCrewId } from '@/components/shell/crew'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,14 +18,27 @@ const storeId = () => process.env.guestbook_STORE_ID ?? process.env.BLOB_STORE_I
 const FEED_PREFIX = 'cc/feed-'
 const MAX_EVENTS = 80
 
+const ACTIONS = ['dispatch', 'status', 'return', 'review', 'merge', 'prompt', 'curate'] as const
+
 type FeedEvent = {
   t: number
   agent: string
-  action: 'dispatch' | 'status' | 'return' | 'review' | 'merge'
+  action: (typeof ACTIONS)[number]
   target?: string
   label: string
   redact?: boolean
 }
+
+/* A report naming a unit that doesn't exist is a bug in the reporter,
+   and it used to reach the deck as "--AGENT · --task". Now it is
+   rejected on write AND filtered on read, so a feed that already has
+   junk in it heals itself on the next GET instead of needing a --reset. */
+const wellFormed = (e: FeedEvent) =>
+  typeof e?.t === 'number' &&
+  typeof e?.label === 'string' &&
+  isCrewId(e?.agent) &&
+  (e.target === undefined || isCrewId(e.target)) &&
+  (ACTIONS as readonly string[]).includes(e?.action)
 
 async function readFeed(): Promise<{ updated: number; events: FeedEvent[] }> {
   const { blobs } = await list({ prefix: FEED_PREFIX, limit: 10, storeId: storeId() })
@@ -35,7 +49,7 @@ async function readFeed(): Promise<{ updated: number; events: FeedEvent[] }> {
     const d = await res.json()
     return {
       updated: typeof d.updated === 'number' ? d.updated : 0,
-      events: Array.isArray(d.events) ? d.events.slice(-MAX_EVENTS) : [],
+      events: Array.isArray(d.events) ? d.events.filter(wellFormed).slice(-MAX_EVENTS) : [],
     }
   } catch {
     return { updated: 0, events: [] }
@@ -64,13 +78,7 @@ export async function POST(req: Request) {
   }
 
   const incoming = (body.events ?? [])
-    .filter(
-      (e) =>
-        typeof e?.t === 'number' &&
-        typeof e?.agent === 'string' &&
-        typeof e?.label === 'string' &&
-        ['dispatch', 'status', 'return', 'review', 'merge'].includes(e?.action)
-    )
+    .filter(wellFormed)
     .map((e) => ({ ...e, label: e.label.slice(0, 60) }))
 
   const current = body.reset ? { events: [] as FeedEvent[] } : await readFeed()
