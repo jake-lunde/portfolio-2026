@@ -2,16 +2,234 @@
   padding: 24px 26px 32px;
 }
 
-.eyebrow {
+/* ---- identity block ---- */
+
+.identity {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.identityLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.identityLeft svg {
+  flex: none;
+  color: var(--content);
+}
+
+.machineName {
   font-family: var(--display);
   font-size: var(--type-heading-3-size); /* 18px exact */
-  margin: 0 0 16px;
+  line-height: var(--leading-tight);
+  margin: 0;
 }
+
+.machineRole {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px */
+  letter-spacing: var(--tracking-14);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin: 3px 0 0;
+}
+
+.identityRight {
+  text-align: right;
+}
+
+.sysVersion {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px */
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.copyright {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px */
+  letter-spacing: var(--tracking-14);
+  color: var(--content-muted);
+  margin: 3px 0 0;
+}
+
+/* medieval: the identity block reads as a colophon — ruled above/below,
+   small-capped name, italic imprint line */
+:global([data-skin='medieval']) .identity {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+}
+
+:global([data-skin='medieval']) .machineName {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+:global([data-skin='medieval']) .machineRole,
+:global([data-skin='medieval']) .sysVersion,
+:global([data-skin='medieval']) .copyright {
+  font-style: italic;
+}
+
+/* ---- rule + memory row ---- */
+
+.rule {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0 0 12px;
+}
+
+.memoryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px */
+  letter-spacing: 0.02em;
+  color: var(--content-muted);
+  margin-bottom: 14px;
+}
+
+/* ---- item list (the "simple data viz") ---- */
+
+.itemList {
+  border: 1.5px solid var(--content);
+  background: var(--surface);
+  margin-bottom: 16px;
+}
+
+[data-theme='dark'] .itemList {
+  border-color: var(--border);
+}
+
+/* Collapsed by default in CSS so the server-rendered markup is already
+   closed — see the note on the motion.div in AboutMachine.tsx. */
+.appraisal {
+  overflow: hidden;
+}
+
+.appraisalClosed {
+  height: 0;
+}
+
+/* System 7 gave the bar roughly half the row — it is the dataviz, not a
+   trailing ornament. The label column shrinks (minmax 0) so a long label
+   never steals the bar's width. */
+.itemRow {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto minmax(150px, 1.15fr);
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.itemRow:last-child {
+  border-bottom: none;
+}
+
+.itemIcon {
+  display: flex;
+  color: var(--content-muted);
+}
+
+.itemIcon svg {
+  display: block;
+}
+
+.itemLabel {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px */
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemSize {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px */
+  letter-spacing: var(--tracking-14);
+  color: var(--content-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.barTrack {
+  height: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+}
+
+.barFill {
+  height: 100%;
+  background: var(--accent);
+}
+
+/* the background process — a mark, not text, so it gets the marks-only
+   expressive accent rather than a token meant for AA-checked copy */
+.barFillExpressive {
+  height: 100%;
+  background: var(--accent-expressive);
+}
+
+/* medieval: hand-inked bars — hatched fill instead of a solid one, same
+   diagonal-stroke idiom as the Command Center caution strip, but drawn
+   from tokens instead of a hardcoded rgba */
+:global([data-skin='medieval']) .barFill {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--accent) 0,
+    var(--accent) 2px,
+    transparent 2px,
+    transparent 5px
+  );
+}
+
+:global([data-skin='medieval']) .barFillExpressive {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--accent-expressive) 0,
+    var(--accent-expressive) 2px,
+    transparent 2px,
+    transparent 5px
+  );
+}
+
+/* ---- disclosure ---- */
+
+.disclosureButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px */
+  letter-spacing: 0.02em;
+  color: var(--content-muted);
+}
+
+.disclosureButton:hover {
+  color: var(--content);
+}
+
+.disclosureMark {
+  font-size: 0.85em;
+}
+
+/* ---- the appraisal (specs + essay), collapsed by default ---- */
 
 .specs {
   border: 1.5px solid var(--content);
   background: var(--surface);
-  margin-bottom: 22px;
+  margin: 14px 0 22px;
 }
 
 [data-theme='dark'] .specs {
@@ -85,4 +303,35 @@
   letter-spacing: var(--type-caption-tracking); /* 0.16em exact */
   color: var(--content-muted);
   margin-top: 5px;
+}
+
+/* ---- responsive: stack the two-column rows below 400px ---- */
+
+@media (max-width: 400px) {
+  .identity {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .identityRight {
+    text-align: left;
+  }
+
+  .memoryRow {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* A 64px stub doesn't read as a chart. Below 400px the bar drops to its
+     own full-width row under the label, where it can still be compared
+     across items. */
+  .itemRow {
+    grid-template-columns: 16px 1fr auto;
+    gap: 5px 6px;
+    padding: 8px;
+  }
+
+  .itemRow .barTrack {
+    grid-column: 1 / -1;
+  }
 }

@@ -18,6 +18,7 @@ const ORDER = [
   'guestbook',
   'machine',
   'projects',
+  'progress',
   'studio',
   'visualizers',
   'booth',

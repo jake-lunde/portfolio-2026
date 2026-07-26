@@ -53,6 +53,10 @@
     "base": "Tattoo Gun",
     "medieval": "Illuminator"
   },
+  "program.progress.name": {
+    "base": "In Progress",
+    "medieval": "The Scriptorium"
+  },
   "program.projects.name": {
     "base": "Projects",
     "medieval": "Works"
@@ -89,6 +93,23 @@
     "base": "Visualizers",
     "medieval": "Scrying"
   },
+  "progress.empty": "Nothing on the bench. Suspicious.",
+  "progress.eta": "Unknown — he has a day job",
+  "progress.etaLabel": "Estimated time remaining",
+  "progress.eyebrow": {
+    "base": "Installing case studies…",
+    "medieval": "Copying manuscripts…"
+  },
+  "progress.nudge": {
+    "base": "ENCOURAGE",
+    "medieval": "IMPLORE"
+  },
+  "progress.nudgeHint": "Press to tell Jake which one you want next. He gets a ping.",
+  "progress.nudged": {
+    "base": "SENT",
+    "medieval": "HEARD"
+  },
+  "progress.offline": "The encouragement line isn’t connected to storage yet.",
   "projects.indexLabel": "Index — Selected work",
   "projects.itemsSuffix": "items",
   "readme.eyebrow": "README — Start here",

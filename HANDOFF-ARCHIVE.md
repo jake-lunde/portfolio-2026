@@ -9,6 +9,23 @@
 
 ---
 
+## Latest session — EDIT.MODE: copy layer + in-situ editor (session 23, 2026-07-24)
+
+**Fable orchestrating; NYQUIST(sweep) + FOURIER(program+API) parallel, disjoint
+files. Shipped 1f39a8c.** Contract (copy.json/copy.ts/CopyText.tsx) written by
+orchestrator first = the seam; both agents built against it, zero conflicts.
+- Live-verified end-to-end (JS probes): auth matrix (401/200/501), arm, in-place
+  edit, dirty rows, Esc revert (window-close suppressed), medieval slot
+  targeting (`Oubliette → The Pit` wrote slot `medieval`), token-missing SAVE
+  lockout. Fixed live-found bug: stale `data-edit-old` across skin switch.
+- Casing landmine: `Copy.tsx` vs `copy.ts` — bundler resolution tries `.ts`
+  first on case-insensitive FS; component renamed `CopyText.tsx`.
+- **Jake to go live:** Vercel env → `EDIT_MODE_KEY` (pick a key) +
+  `GITHUB_COPY_TOKEN` (fine-grained PAT, contents RW on portfolio-2026).
+  A placeholder local dev key sits in .env.local (read it there; rotate at will).
+- Unverified live: Safari caret on transformed windows; real GitHub commit
+  round-trip (coded + reviewed, token was absent locally by design).
+
 ## Rotated: Type overhaul: adoption sweep + bridge aliases (session 22, 2026-07-24)
 
 **Fable orchestrating; HERTZ(research) + NYQUIST(sweep) + FOURIER(bridge) delegated.

@@ -186,6 +186,17 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/machine',
   },
   {
+    id: 'progress',
+    name: 'In Progress',
+    meta: 'WIP-15',
+    icon: 'clipboard',
+    component: dynamic(() => import('@/programs/progress/InProgress')),
+    size: { w: 520, h: 460 },
+    pos: { x: 320, y: 150 },
+    onDesktop: true,
+    path: '/progress',
+  },
+  {
     id: 'trash',
     name: 'Trash',
     meta: 'BIN-99',

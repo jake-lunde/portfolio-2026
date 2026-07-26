@@ -1,0 +1,311 @@
+/* WIP-15 · In Progress — a Mac OS 9 installer dialog that never finishes.
+   Bars: full-width fill layer + an opaque shutter scaled from the right
+   (transform-only, keeps stripe width true). */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+/* ---------------- installer head ---------------- */
+
+.head {
+  padding: 18px 20px 16px;
+  background: var(--surface);
+  border-bottom: var(--border-width-default) solid var(--content);
+}
+
+[data-theme='dark'] .head {
+  border-bottom-color: var(--border);
+}
+
+.eyebrow {
+  font-family: var(--display);
+  font-size: var(--type-body-size);
+  margin: 0 0 var(--space-3);
+}
+
+.eta {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-08); /* diverges from caption's tracking-16 — a status line, not a label */
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin: var(--space-2) 0 0;
+}
+
+.etaValue {
+  color: var(--content);
+}
+
+/* ---------------- bars ---------------- */
+
+.track {
+  position: relative;
+  height: 9px;
+  overflow: hidden;
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--content);
+}
+
+/* the aggregate installer bar sits taller, like the OS 9 original */
+.trackLg {
+  height: 15px;
+}
+
+[data-theme='dark'] .track {
+  border-color: var(--border);
+}
+
+/* diagonal installer stripes: accent + a lighter mix of the same accent.
+   Overhangs the track horizontally so the creep never exposes an edge. */
+.stripes {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -32px;
+  right: -32px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--accent) 0 8px,
+    color-mix(in srgb, var(--accent) 58%, var(--surface)) 8px 16px
+  );
+}
+
+.solid {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+}
+
+/* opaque shutter over the unfilled remainder — this is what animates */
+.shutter {
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  transform-origin: right center;
+  will-change: transform;
+}
+
+/* Stripes creep left-to-right. 16px is the gradient period measured along
+   the 135deg axis, so a horizontal step of 16 / cos(45°) = 22.63px lands
+   exactly one period on — a seamless loop. Motion only, never layout. */
+@media (prefers-reduced-motion: no-preference) {
+  .stripes {
+    animation: creep 1.9s linear infinite;
+  }
+}
+
+@keyframes creep {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(22.63px);
+  }
+}
+
+/* ---------------- per-case rows ---------------- */
+
+.list {
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 4px 20px 18px;
+}
+
+.row {
+  padding: 14px 0;
+  border-bottom: var(--border-width-hairline) solid var(--border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.rowHead {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.no {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-10);
+  color: var(--content-muted);
+}
+
+.name {
+  font-family: var(--display);
+  font-size: var(--type-body-sm-size);
+}
+
+.org {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-10);
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+.pct {
+  margin-left: auto;
+  font-family: var(--display);
+  font-size: var(--type-body-sm-size);
+  color: var(--accent);
+}
+
+.phase {
+  font-size: var(--type-label-size); /* 11px */
+  font-family: var(--sans); /* diverges from label's mono — this is prose, not a label */
+  line-height: var(--leading-normal);
+  color: var(--content-muted);
+  margin: 3px 0 var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  min-height: 26px;
+}
+
+.nudgeBtn,
+.openBtn {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px */
+  font-weight: var(--button-weight);
+  letter-spacing: var(--tracking-16); /* diverges from label's tracking-14 — button role's wider set */
+  padding: 5px 12px;
+  background: var(--surface-raised);
+  color: var(--content);
+  border: var(--border-width-default) solid var(--content);
+  transition: transform 0.08s ease;
+}
+
+[data-theme='dark'] .nudgeBtn,
+[data-theme='dark'] .openBtn {
+  border-color: var(--border);
+}
+
+.nudgeBtn:hover:not(:disabled),
+.openBtn:hover {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+/* physical press — transform only */
+.nudgeBtn:active:not(:disabled),
+.openBtn:active {
+  transform: translateY(1px);
+}
+
+.nudgeBtn:focus-visible,
+.openBtn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.nudgeBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.count {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+}
+
+/* ---------------- foot ---------------- */
+
+.foot {
+  padding: 0 20px 18px;
+  min-height: 22px;
+}
+
+.hint,
+.empty {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+  line-height: var(--leading-normal);
+}
+
+.empty {
+  display: block;
+  padding: 20px;
+}
+
+.error {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-02);
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nudgeBtn,
+  .openBtn {
+    transition: none;
+  }
+}
+
+/* ---------------- medieval: the scriptorium ----------------
+   No machine stripes. The bar is a rubricated block laid down in quill
+   hatching, wavered by the shell's #lunde-roughen filter (same treatment
+   as the hand-inked dataviz). Ink doesn't creep, so the animation stops. */
+
+:global([data-skin='medieval']) .track {
+  border-width: var(--border-width-thick);
+  filter: url(#lunde-roughen);
+}
+
+:global([data-skin='medieval']) .stripes,
+:global([data-skin='medieval']) .solid {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent) 0 2px,
+    color-mix(in srgb, var(--accent) 34%, var(--surface)) 2px 5px
+  );
+  animation: none;
+}
+
+:global([data-skin='medieval']) .pct {
+  color: var(--accent-expressive-text);
+}
+
+/* ---------------- narrow ---------------- */
+
+@media (max-width: 420px) {
+  .head {
+    padding: 14px 14px 12px;
+  }
+
+  .list {
+    padding: 4px 14px 14px;
+  }
+
+  .foot {
+    padding: 0 14px 14px;
+  }
+
+  .pct {
+    margin-left: auto;
+  }
+}
