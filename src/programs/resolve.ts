@@ -7,7 +7,7 @@ export type ResolvedWindow = {
   id: string
   name: string
   meta: string
-  chrome: 'paper' | 'crt'
+  chrome: 'paper' | 'crt' | 'bare'
   component: ComponentType | null
   size: { w: number; h: number }
   pos: { x: number; y: number }
@@ -86,6 +86,10 @@ export const ALL_PATHS: string[][] = [
   [],
   ['readme'],
   ['projects'],
+  ['cases'],
+  ['music'],
+  ['fun'],
+  ['feedback'],
   ['guestbook'],
   ['visualizers'],
   ...CASES.filter((c) => c.status === 'live').map((c) => ['projects', c.slug]),

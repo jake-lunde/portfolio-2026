@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useSettings } from '@/store/settings'
+import { OS_VERSION } from '@/lib/version'
 import { SkinSwitch } from './SkinSwitch'
 import styles from './shell.module.css'
 
@@ -56,7 +57,7 @@ export function MenuBar() {
       <div className={styles.menuLeft}>
         <div className={styles.wordmark}>
           LUNDE&nbsp;OS
-          <span aria-hidden="true">v0.2 · 1992年アメリカ製</span>
+          <span aria-hidden="true">{OS_VERSION} · 1992年アメリカ製</span>
         </div>
         <SkinSwitch />
       </div>

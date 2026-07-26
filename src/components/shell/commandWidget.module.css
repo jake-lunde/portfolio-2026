@@ -1,0 +1,265 @@
+/* ================= COMMAND.CTR — AMBIENT CHIP ================= */
+/* Recovered from the pre-33f574b shell.module.css block (.ccWidget etc.)
+   and reworked: the old chip removed itself entirely when nothing was
+   live, so there was nothing to see and nothing to click. It is now
+   permanent, with two states that differ by TEXT + DOT SHAPE + ELEVATION
+   before they differ by colour or motion — so the state survives
+   greyscale, colour-blindness and prefers-reduced-motion.
+
+   Placement follows the sibling ambient widgets (NowPlayingWidget,
+   DailyWidget, MiniPlayer): absolute inside .desktop at z-index 2 —
+   above the wallpaper, under every window (windows start at z 10).
+   Top-centre is the one free lane: desktop icons own top-left, the
+   now-playing card + photo wall own the right column (right: 20px),
+   DAILY.SYS and the mini-player own bottom-right, trash and the ambient
+   agent strip own the bottom edge. Hidden at 900px on the same
+   breakpoint every other ambient widget uses. */
+
+.ccWidget {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  /* transform, not `translate`, matches the house style — nothing here
+     animates this element's transform, so Motion can't clobber it */
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: min(340px, calc(100% - 40px));
+
+  /* halo stops, derived from the skin's expressive accent rather than
+     baked — the 0% stop keeps the fade pink instead of fading to grey */
+  --cc-halo: color-mix(in srgb, var(--accent-expressive) 55%, transparent);
+}
+
+/* ---------- the frame ---------- */
+/* IDLE sits flush on --surface behind a hairline: a dormant instrument,
+   not a disabled control. LIVE lifts onto --surface-raised with a
+   full-weight frame and a print shadow. Elevation carries the state
+   change on its own, with no colour involved. */
+
+.ccBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 5px 10px;
+  background: var(--surface);
+  border: var(--border-width-hairline) solid var(--border);
+}
+
+.ccWidget[data-state='live'] .ccBar {
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: var(--shadow-print);
+}
+
+/* dark: --content is near-white, so a full-weight frame in it glares.
+   --content-muted still clears 6:1 against --surface-raised here, far
+   above the 3:1 a non-text indicator needs, and stays clearly stronger
+   than the idle hairline. Same override the siblings make. */
+[data-theme='dark'] .ccWidget[data-state='live'] .ccBar {
+  border-color: var(--content-muted);
+}
+
+.ccPill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: inherit;
+}
+
+/* ---------- the dot ---------- */
+/* Hollow ring when idle, filled disc when live. The shape difference is
+   the point: it reads without colour and without the pulse. */
+
+.ccDot {
+  position: relative;
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-circle);
+  border: var(--border-width-hairline) solid var(--content-muted);
+  background: transparent;
+}
+
+.ccWidget[data-state='live'] .ccDot {
+  background: var(--accent-expressive);
+  border-color: var(--content);
+}
+
+[data-theme='dark'] .ccWidget[data-state='live'] .ccDot {
+  border-color: var(--accent-expressive);
+}
+
+/* the pulse — a scaling/fading ring, so the animation stays on
+   transform + opacity only (the old version animated box-shadow spread,
+   which repaints every frame) */
+.ccWidget[data-state='live'] .ccDot::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--radius-circle);
+  background: var(--cc-halo);
+  animation: ccPulse 1.6s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ccPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* no pulse when motion is reduced — the word LIVE, the filled dot and
+   the raised frame already carry the state, so nothing is lost */
+@media (prefers-reduced-motion: reduce) {
+  .ccWidget[data-state='live'] .ccDot::after {
+    display: none;
+  }
+}
+
+/* ---------- labels ---------- */
+/* Idle text is --content-muted on --surface, deliberately not on
+   --surface-raised: the raised pairing drops to 4.3:1 in the medieval
+   skin, while the flush one holds 4.99:1 (medieval), 5.62:1 (classic
+   light) and 6.50:1 (dark). Recessed by elevation, never by contrast. */
+
+.ccLabel {
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-16);
+  color: var(--content-muted);
+  white-space: nowrap;
+}
+
+.ccWidget[data-state='live'] .ccLabel {
+  color: var(--content);
+}
+
+.ccChevron {
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  line-height: 1;
+  color: var(--content);
+}
+
+/* ---------- the idle affordance ---------- */
+/* A real labelled control into the deck, divided off so the chip still
+   reads as one instrument rather than two chips. */
+
+.ccLast {
+  display: inline-flex;
+  align-items: center;
+  padding-left: var(--space-2);
+  border-left: var(--border-width-hairline) solid var(--border);
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-12);
+  color: var(--interactive-default-content-hover);
+  white-space: nowrap;
+}
+
+.ccLast:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- the live feed ---------- */
+
+/* 280px, not wider: centred at the 901px worst case the left edge lands
+   at 310px, clear of the icon grid's right edge (20 + 3×88 + 2×10 = 304) */
+.ccFeed {
+  margin-top: var(--space-1);
+  width: 280px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 9px 11px;
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: var(--shadow-print);
+}
+
+[data-theme='dark'] .ccFeed {
+  border-color: var(--content-muted);
+}
+
+/* full --content, not muted: the feed sits on --surface-raised, where
+   --content-muted would fail AA in the medieval skin */
+.ccRow {
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-08);
+  color: var(--content);
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ccRow b {
+  color: var(--accent);
+  font-weight: var(--weight-bold);
+}
+
+/* marker blackout — some event labels stay classified until the work
+   ships; the REPORTER strips the text server-side, this just draws the
+   bar. Named for a screen reader via role="img" on the element. */
+.ccRedact {
+  display: inline-block;
+  width: 64px;
+  height: 7px;
+  background: var(--content);
+  vertical-align: middle;
+}
+
+.ccOpen {
+  margin-top: var(--space-1);
+  align-self: flex-start;
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-14);
+  color: var(--accent);
+  border: var(--border-width-hairline) solid var(--accent);
+}
+
+.ccOpen:hover {
+  background: var(--interactive-accent-hover);
+  color: var(--interactive-accent-on-hover);
+}
+
+/* the polite announcement of a liveness change — text, not decoration,
+   so it is hidden without display:none (which screen readers skip) */
+.ccSr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- mobile ---------- */
+/* Same 900px cut the other ambient widgets take: below it the desktop
+   becomes a scrolling launcher with full-bleed windows, and a
+   top-centred floating chip would sit on top of the icon grid. */
+@media (max-width: 900px) {
+  .ccWidget {
+    display: none;
+  }
+}

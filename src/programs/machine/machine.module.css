@@ -1,5 +1,11 @@
+/* The window is sized to hug this content (see the height note on .ctaRow).
+   Flex column + min-height:100% so the push button can hold the bottom edge
+   and absorb any leftover slack, rather than leaving dead space below it. */
 .machine {
-  padding: 24px 26px 32px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 24px 26px 26px;
 }
 
 /* ---- identity block ---- */
@@ -110,16 +116,6 @@
   border-color: var(--border);
 }
 
-/* Collapsed by default in CSS so the server-rendered markup is already
-   closed — see the note on the motion.div in AboutMachine.tsx. */
-.appraisal {
-  overflow: hidden;
-}
-
-.appraisalClosed {
-  height: 0;
-}
-
 /* System 7 gave the bar roughly half the row — it is the dataviz, not a
    trailing ornament. The label column shrinks (minmax 0) so a long label
    never steals the bar's width. */
@@ -204,32 +200,50 @@
   );
 }
 
-/* ---- disclosure ---- */
+/* ---- the push button (opens WHAT MY AI THINKS) ---- */
 
-.disclosureButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size); /* 11px */
-  letter-spacing: 0.02em;
-  color: var(--content-muted);
+/* Bottom-right, where a System 7 dialog keeps its default button. The auto
+   top margin means the registered window height can be a few px generous
+   without opening a gap under the button. Measured at 600px wide: 349px of
+   content in classic, 373px in medieval (its identity colophon is ruled +
+   padded); window chrome (titlebar + borders) is 33px. So the registered
+   height wants ~420px — 470px leaves ~88px of slack in classic. */
+.ctaRow {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+  padding-top: 8px;
 }
 
-.disclosureButton:hover {
-  color: var(--content);
+/* Weight without volume: the System 7 default-button ring — a second hairline
+   outside the border, in the same ink as the item-list rules, with the window
+   surface showing through the gap. Drawn with box-shadow so it costs no layout
+   (no CLS) and stays concentric with --button-radius. */
+.ctaButton {
+  box-shadow: 0 0 0 2px var(--surface-raised), 0 0 0 3.5px var(--content);
 }
 
-.disclosureMark {
-  font-size: 0.85em;
+[data-theme='dark'] .ctaButton {
+  box-shadow: 0 0 0 2px var(--surface-raised), 0 0 0 3.5px var(--border);
 }
 
-/* ---- the appraisal (specs + essay), collapsed by default ---- */
+/* clear the ring so the global focus outline stays legible */
+.ctaButton:focus-visible {
+  outline-offset: 5px;
+}
+
+/* press = fill, matching the primitive's hover so touch gets the same answer */
+.ctaButton:active {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+/* ---- the appraisal (specs + essay) — WHAT MY AI THINKS ---- */
 
 .specs {
   border: 1.5px solid var(--content);
   background: var(--surface);
-  margin: 14px 0 22px;
+  margin: 0 0 26px;
 }
 
 [data-theme='dark'] .specs {
@@ -305,9 +319,77 @@
   margin-top: 5px;
 }
 
+/* ---- WHAT MY AI THINKS: the document shell ---- */
+
+/* Its own window now, so it can read like a page instead of a twirl-down:
+   a masthead, then specs, then the essay. Measure is held on .essay p. */
+.opinion {
+  padding: 22px 26px 34px;
+}
+
+.opinionHead {
+  border-bottom: 1.5px solid var(--content);
+  padding-bottom: 12px;
+  margin-bottom: 18px;
+}
+
+[data-theme='dark'] .opinionHead {
+  border-bottom-color: var(--border);
+}
+
+.opinionEyebrow {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size); /* 9px */
+  letter-spacing: var(--tracking-14);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin: 0 0 6px;
+}
+
+.opinionTitle {
+  font-family: var(--display);
+  font-size: var(--type-heading-3-size); /* 18px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  letter-spacing: 0;
+  margin: 0;
+}
+
+/* the specs table's own head — .essay h2 is scoped to the essay, and this
+   one sits tighter to the table it labels */
+.specsHeading {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px */
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-14);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin: 0 0 8px;
+}
+
 /* ---- responsive: stack the two-column rows below 400px ---- */
 
 @media (max-width: 400px) {
+  .opinion {
+    padding: 18px 16px 28px;
+  }
+
+  .specRow {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+
+  /* one target, full width — the thumb gets the whole row. 29px is fine for
+     a pointer (and clears the 24px AA target minimum) but not for a thumb. */
+  .ctaRow {
+    justify-content: stretch;
+  }
+
+  .ctaButton {
+    width: 100%;
+    min-height: 44px;
+  }
+
   .identity {
     flex-direction: column;
     align-items: flex-start;

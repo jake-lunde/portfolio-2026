@@ -1,0 +1,121 @@
+/* ---------- FEEDBACK — pinned notes, in a window ----------
+
+   Moved out of shell.module.css when the notes came off the desktop.
+   What changed in the move: `position: fixed` + z-index 0 + per-note
+   coordinates are gone (they were desktop décor), the 900px display:none
+   is gone (a window must work at 360px), and the quote steps up from an
+   off-ramp 10.5px to body-sm 13px / the citation from micro to caption —
+   both now real ramp roles, because the note is no longer locked to a
+   168px width. Tape, tilt, paper/pink split and the lift-on-hover are
+   carried over unchanged. */
+
+.feedback {
+  padding: 20px 22px 24px;
+}
+
+/* The shared program head (.projHead) is a no-wrap flex row. The label is
+   copy-layer text, so it can grow at runtime via EDIT.MODE — let it wrap
+   at 360px rather than squash against the count. Higher specificity than
+   .projHead, so cross-module order can't decide it. */
+.feedback > div:first-child {
+  flex-wrap: wrap;
+  gap: 2px var(--space-3);
+}
+
+/* The board. Each note keeps --surface-raised (the window's own paper) and
+   the surface behind them steps back to --surface — the same figure/ground
+   relationship the notes had against the desktop, so they still read as
+   paper laid ON something rather than printed into the window. */
+.board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 26px 18px;
+  align-items: start;
+  margin-top: var(--space-4);
+  padding: 18px 14px 22px;
+  background: var(--surface);
+  border: var(--border-width-hairline) solid var(--border);
+}
+
+.sticky {
+  position: relative;
+  margin: 0;
+  padding: 16px 13px 11px; /* top clears the tape (−6px, 12px tall) */
+  background: var(--surface-raised);
+  border: var(--border-width-hairline) solid var(--border);
+  box-shadow: var(--shadow-sticky);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* Tilt by position, not by data — so adding a note to NOTES needs no
+   angle, and the wall never looks mechanically aligned. Four buckets =
+   the four angles the desktop notes were hand-set to. */
+.board .sticky:nth-child(4n + 1) {
+  --tilt: -2.2deg;
+}
+.board .sticky:nth-child(4n + 2) {
+  --tilt: 1.6deg;
+}
+.board .sticky:nth-child(4n + 3) {
+  --tilt: -1deg;
+}
+.board .sticky:nth-child(4n) {
+  --tilt: 2deg;
+}
+
+.sticky[data-tone='pink'] {
+  background: color-mix(in srgb, var(--accent-expressive) 26%, var(--surface-raised));
+}
+
+.sticky:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: var(--shadow-sticky-lift);
+}
+
+.stickyTape {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 44px;
+  height: 12px;
+  transform: translateX(-50%) rotate(-1deg);
+  background: color-mix(in srgb, var(--accent-expressive) 45%, transparent);
+}
+
+.board .sticky:nth-child(even) .stickyTape {
+  transform: translateX(-50%) rotate(2deg);
+}
+
+.stickyQuote {
+  margin: 0 0 var(--space-2);
+  font-size: var(--type-body-sm-size); /* 13px exact */
+  font-style: italic;
+  line-height: var(--leading-normal); /* 1.5 exact */
+  color: var(--content);
+}
+
+.stickyCite {
+  font-family: var(--mono);
+  font-size: var(--type-caption-size); /* 9px exact */
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--content-muted);
+}
+
+@media (max-width: 480px) {
+  .feedback {
+    padding: 16px 14px 20px;
+  }
+
+  .board {
+    gap: 22px 14px;
+    padding: 16px 10px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticky,
+  .sticky:hover {
+    transition: none;
+  }
+}

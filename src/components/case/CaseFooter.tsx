@@ -18,7 +18,8 @@ export function CaseFooter({ next }: { next: { name: string; live: boolean } }) 
         style={{ textAlign: 'right' }}
         onClick={() => {
           sfx.open()
-          open('projects')
+          // one door in: CASE STUDIES, not the flat index (session 25)
+          open('progress')
         }}
       >
         <span>Index</span>

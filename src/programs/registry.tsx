@@ -2,6 +2,8 @@ import dynamic from 'next/dynamic'
 import type { ComponentType } from 'react'
 import type { IconName } from '@/components/shell/Icon'
 
+const FolderWindow = dynamic(() => import('@/programs/folder/Folder'))
+
 export type ProgramDef = {
   id: string
   name: string // desktop label + window title
@@ -13,9 +15,13 @@ export type ProgramDef = {
   /** default window geometry (desktop; mobile goes full-bleed) */
   size: { w: number; h: number }
   pos: { x: number; y: number } // offsets from desktop top-left, deterministic for SSR
-  chrome?: 'paper' | 'crt'
+  /** `bare` = no titlebar, no resize grip: the program IS the chrome (see the iPod) */
+  chrome?: 'paper' | 'crt' | 'bare'
   /** show an icon on the desktop */
   onDesktop?: boolean
+  /** a drawer: window ids (program id or `viz:<id>`) this folder holds.
+      Read by src/programs/folder/Folder.tsx via the window's own id. */
+  folder?: string[]
   /** route path that deep-links to this window */
   path?: string
 }
@@ -23,6 +29,12 @@ export type ProgramDef = {
 /* ------------------------------------------------------------------
    Register programs here. One entry = icon + window + deep link.
    Case studies register themselves via src/programs/projects/cases.ts
+
+   The desktop is CONSOLIDATED (session 25): only top-level things get an
+   icon. Everything else lives one storey down in a folder (MUSIC · FUN ·
+   FEEDBACK — see the `folder` field), behind the case-studies gate, or in a
+   floating widget (COMMAND.CTR, the iPod). `onDesktop: false` here does
+   not mean unreachable — the deep link and the folder still open it.
    ------------------------------------------------------------------ */
 
 export const PROGRAMS: ProgramDef[] = [
@@ -38,6 +50,8 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/readme',
   },
   {
+    // the flat index, kept for the /projects deep link. The desktop route
+    // in is CASE STUDIES (`progress`), which keeps the gate a layer down.
     id: 'projects',
     name: 'Projects',
     meta: 'IDX-01',
@@ -45,8 +59,19 @@ export const PROGRAMS: ProgramDef[] = [
     component: dynamic(() => import('@/programs/projects/Projects')),
     size: { w: 640, h: 480 },
     pos: { x: 200, y: 110 },
-    onDesktop: true,
+    onDesktop: false,
     path: '/projects',
+  },
+  {
+    id: 'progress',
+    name: 'Case Studies',
+    meta: 'IDX-16',
+    icon: 'folder',
+    component: dynamic(() => import('@/programs/progress/InProgress')),
+    size: { w: 520, h: 460 },
+    pos: { x: 320, y: 150 },
+    onDesktop: true,
+    path: '/cases',
   },
   {
     id: 'now-playing',
@@ -61,15 +86,20 @@ export const PROGRAMS: ProgramDef[] = [
     onDesktop: false,
   },
   {
+    // the iPod. `bare` chrome: no titlebar — the device is the window, it
+    // floats free and closes from the [x] in its own status bar.
     id: 'studio',
-    name: 'Studio',
+    name: 'Remixes',
     meta: 'AUX-03',
-    icon: 'reel',
+    icon: 'ipod',
     component: dynamic(() => import('@/programs/studio/Studio')),
-    size: { w: 560, h: 560 },
-    pos: { x: 340, y: 70 },
-    chrome: 'crt',
-    onDesktop: true,
+    // measured: the device is ~484px tall incl. padding. Bare chrome has no
+    // visible frame, so any surplus here is invisible window that silently
+    // eats clicks meant for the desktop — keep it hugging.
+    size: { w: 320, h: 484 },
+    pos: { x: 640, y: 60 },
+    chrome: 'bare',
+    onDesktop: false,
     path: '/studio',
   },
   {
@@ -80,7 +110,7 @@ export const PROGRAMS: ProgramDef[] = [
     component: dynamic(() => import('@/programs/visualizers/Visualizers')),
     size: { w: 520, h: 420 },
     pos: { x: 240, y: 80 },
-    onDesktop: true,
+    onDesktop: false,
     path: '/visualizers',
   },
   {
@@ -103,44 +133,83 @@ export const PROGRAMS: ProgramDef[] = [
     size: { w: 540, h: 640 },
     pos: { x: 300, y: 50 },
     chrome: 'crt',
-    onDesktop: true,
+    onDesktop: false,
     path: '/booth',
   },
   {
     id: 'puzzle',
-    name: 'Jigsaw',
+    name: 'Puzzles',
     meta: 'TOY-08',
     icon: 'puzzle',
     component: dynamic(() => import('@/programs/puzzle/Puzzle')),
     size: { w: 660, h: 728 },
     pos: { x: 260, y: 40 },
-    onDesktop: true,
+    onDesktop: false,
     path: '/puzzle',
   },
   {
     id: 'paint',
-    name: 'Tattoo Gun',
+    name: 'Tattoo Me',
     meta: 'TOY-09',
     icon: 'brush',
     component: dynamic(() => import('@/programs/paint/Paint')),
     size: { w: 520, h: 640 },
     pos: { x: 340, y: 30 },
-    onDesktop: true,
+    onDesktop: false,
     path: '/paint',
   },
   {
     id: 'sequencer',
-    name: 'SEQ-16',
+    name: 'Beat Machine',
     meta: 'SND-12',
     icon: 'steps',
     component: dynamic(() => import('@/programs/sequencer/Sequencer')),
     size: { w: 640, h: 470 },
     pos: { x: 310, y: 120 },
     chrome: 'crt',
-    onDesktop: true,
+    onDesktop: false,
     path: '/seq',
   },
   {
+    id: 'music',
+    name: 'Music',
+    meta: 'SND-17',
+    icon: 'music',
+    component: FolderWindow,
+    folder: ['studio', 'viz:scrobbles', 'sequencer'],
+    // drawers hug: 88px icon tracks + 8px gaps + 22px inset either side, so
+    // the contents sit on ONE row and never wrap to a lopsided orphan
+    size: { w: 356, h: 214 },
+    pos: { x: 250, y: 96 },
+    onDesktop: true,
+    path: '/music',
+  },
+  {
+    id: 'fun',
+    name: 'Fun',
+    meta: 'TOY-18',
+    icon: 'smiley',
+    component: FolderWindow,
+    folder: ['booth', 'puzzle', 'paint', 'visualizers'],
+    size: { w: 444, h: 214 },
+    pos: { x: 290, y: 128 },
+    onDesktop: true,
+    path: '/fun',
+  },
+  {
+    id: 'feedback',
+    name: 'Feedback',
+    meta: 'LOG-19',
+    icon: 'bubble',
+    component: dynamic(() => import('@/programs/feedback/Feedback')),
+    size: { w: 560, h: 520 },
+    pos: { x: 210, y: 62 },
+    onDesktop: true,
+    path: '/feedback',
+  },
+  {
+    // COMMAND.CTR lives in the floating deck chip (CommandWidget); the
+    // full program opens from it, not from a desktop icon.
     id: 'command',
     name: 'Command Center',
     meta: 'CTR-11',
@@ -149,18 +218,20 @@ export const PROGRAMS: ProgramDef[] = [
     size: { w: 780, h: 700 },
     pos: { x: 250, y: 26 },
     chrome: 'crt',
-    onDesktop: true,
+    onDesktop: false,
     path: '/command',
   },
   {
+    // sealed AND off the desktop — kept registered so the work isn't lost.
+    // Swap back to 'Field Notes' + FieldNotes.tsx when Jake clears it.
     id: 'field-notes',
-    name: '???', // sealed until Jake clears it — swap back to 'Field Notes' + FieldNotes.tsx
+    name: '???',
     meta: 'RES-13',
     icon: 'mystery',
     component: dynamic(() => import('@/programs/fieldnotes/Sealed')),
     size: { w: 430, h: 380 },
     pos: { x: 220, y: 44 },
-    onDesktop: true,
+    onDesktop: false,
     path: '/field-notes',
   },
   {
@@ -180,21 +251,25 @@ export const PROGRAMS: ProgramDef[] = [
     meta: 'SYS-10',
     icon: 'chip',
     component: dynamic(() => import('@/programs/machine/AboutMachine')),
-    size: { w: 600, h: 720 },
+    // 420 = measured content (medieval's ruled colophon is the tall one at
+    // 406px incl. chrome) + a little slack the CSS absorbs above the CTA
+    size: { w: 600, h: 420 },
     pos: { x: 280, y: 30 },
     onDesktop: true,
     path: '/machine',
   },
   {
-    id: 'progress',
-    name: 'In Progress',
-    meta: 'WIP-15',
-    icon: 'clipboard',
-    component: dynamic(() => import('@/programs/progress/InProgress')),
-    size: { w: 520, h: 460 },
-    pos: { x: 320, y: 150 },
-    onDesktop: true,
-    path: '/progress',
+    // the essay + old SPECS block, promoted out of ABOUT THIS MACHINE's
+    // disclosure into its own window behind a CTA.
+    id: 'ai-opinion',
+    name: 'What My AI Thinks',
+    meta: 'SYS-20',
+    icon: 'chip',
+    component: dynamic(() => import('@/programs/machine/AiOpinion')),
+    size: { w: 560, h: 620 },
+    pos: { x: 330, y: 44 },
+    onDesktop: false,
+    path: '/ai',
   },
   {
     id: 'trash',

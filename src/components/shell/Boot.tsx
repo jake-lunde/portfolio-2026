@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { OS_VERSION } from '@/lib/version'
 import styles from './shell.module.css'
 
 /* A brief boot line on the first visit of the session. ~900ms, skippable,
@@ -34,7 +35,7 @@ export function Boot() {
         >
           <div className={styles.bootInner}>
             <p className={styles.bootLine}>
-              LUNDE OS <em>v0.2</em>
+              LUNDE OS <em>{OS_VERSION}</em>
             </p>
             <p className={styles.bootLine} aria-hidden="true">
               1992年アメリカ製 · MEM OK · CALLING…

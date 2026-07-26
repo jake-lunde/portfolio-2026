@@ -1,4 +1,8 @@
 {
+  "feedback.head": {
+    "base": "In their words",
+    "medieval": "As they attest"
+  },
   "field-notes.note": "is with the review board. Contents: field research, verbatims, and what got built because of them.",
   "field-notes.noteEmphasis": "Declassification pending.",
   "field-notes.sealed": "Sealed",
@@ -18,6 +22,18 @@
   "guestbook.sign": "SIGN",
   "guestbook.signAgain": "SIGN AGAIN",
   "guestbook.storagePending": "Storage pending",
+  "machine.ai.eyebrow": {
+    "base": "An appraisal · SYS-20",
+    "medieval": "An assay · SYS-20"
+  },
+  "machine.ai.specsHeading": {
+    "base": "Specifications",
+    "medieval": "Particulars"
+  },
+  "machine.ai.title": {
+    "base": "What my AI thinks about me",
+    "medieval": "What my familiar makes of me"
+  },
   "machine.essayNote": "The following appraisal was written by the AI that helped build this site, at Jake’s request that it be honest. Sources: his LinkedIn, his 2024–2025 performance reviews, and verbatim user research. He did not edit it.",
   "machine.eyebrow": "About This Machine",
   "machine.h.artist": "The artist",
@@ -28,6 +44,10 @@
   "now-playing.loading": "TUNING…",
   "now-playing.openLink": "OPEN IN APPLE MUSIC ↗",
   "now-playing.underConstruction": "What Jake's listening to. Signal expected in a future broadcast.",
+  "program.ai-opinion.name": {
+    "base": "What My AI Thinks",
+    "medieval": "The Oracle"
+  },
   "program.booth.name": {
     "base": "Photo Booth",
     "medieval": "Portraiture"
@@ -36,7 +56,15 @@
     "base": "Command Center",
     "medieval": "The Keep"
   },
+  "program.feedback.name": {
+    "base": "Feedback",
+    "medieval": "Attestations"
+  },
   "program.field-notes.name": "???",
+  "program.fun.name": {
+    "base": "Fun",
+    "medieval": "Diversions"
+  },
   "program.guestbook.name": {
     "base": "Guestbook",
     "medieval": "The Ledger"
@@ -45,24 +73,28 @@
     "base": "About This Machine",
     "medieval": "The Engine"
   },
+  "program.music.name": {
+    "base": "Music",
+    "medieval": "Consort"
+  },
   "program.now-playing.name": {
     "base": "Now Playing",
     "medieval": "Now Sounding"
   },
   "program.paint.name": {
-    "base": "Tattoo Gun",
+    "base": "Tattoo Me",
     "medieval": "Illuminator"
   },
   "program.progress.name": {
-    "base": "In Progress",
-    "medieval": "The Scriptorium"
+    "base": "Case Studies",
+    "medieval": "Works"
   },
   "program.projects.name": {
     "base": "Projects",
     "medieval": "Works"
   },
   "program.puzzle.name": {
-    "base": "Jigsaw",
+    "base": "Puzzles",
     "medieval": "Labyrinth"
   },
   "program.readme.name": {
@@ -70,7 +102,7 @@
     "medieval": "Incipit"
   },
   "program.sequencer.name": {
-    "base": "SEQ-16",
+    "base": "Beat Machine",
     "medieval": "Psaltery"
   },
   "program.settings.name": {
@@ -82,8 +114,8 @@
     "medieval": "Colophon"
   },
   "program.studio.name": {
-    "base": "Studio",
-    "medieval": "Workshop"
+    "base": "Remixes",
+    "medieval": "Reworkings"
   },
   "program.trash.name": {
     "base": "Trash",
@@ -114,13 +146,12 @@
   "projects.itemsSuffix": "items",
   "readme.eyebrow": "README — Start here",
   "readme.focus": "Design systems · AI-data products · Helping families work better",
-  "readme.heading": "Jake Lunde",
   "readme.label.contact": "Contact",
   "readme.label.focus": "Focus",
   "readme.label.now": "Now",
   "readme.label.system": "System",
   "readme.now": "Staff Product Designer, Greenlight",
-  "readme.system": "LUNDE OS v0.1 — Next.js · Motion · MDX",
+  "readme.system": "Next.js · Motion · MDX",
   "settings.accentHint": "Coming in a later release",
   "settings.accentLabel": "Accent emphasis",
   "settings.appearanceHint": "Print stock or terminal night",

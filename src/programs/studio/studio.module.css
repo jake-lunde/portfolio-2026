@@ -4,10 +4,11 @@
    phone). Medieval re-costumes the same geometry as a wooden spoke wheel;
    the four control zones do not move. */
 
-/* The Studio window is CRT chrome (registry: chrome:'crt'), so its plate is
-   --surface-inverse in every skin and theme. Remap the semantic roles ONCE,
-   here, for that inverted context — every rule below, and the visualizer's
-   getComputedStyle palette read, then consumes the ordinary role names. */
+/* The device carries a dark plate in every skin and theme (registry:
+   chrome:'bare' — there is no window frame around it, so it supplies its own
+   inverted context). Remap the semantic roles ONCE, here — every rule below,
+   and the visualizer's getComputedStyle palette read, then consumes the
+   ordinary role names. */
 .studio {
   --surface: var(--surface-inverse);
   --surface-raised: color-mix(in srgb, var(--content-inverse) 9%, var(--surface-inverse));
@@ -38,7 +39,9 @@
   --wheel-d: calc(var(--pod-w) * 0.68);
 
   min-height: 100%;
-  padding: var(--spacing-component-md);
+  /* the bare window is 320px wide and --pod-w caps at 300px, so the inset has
+     to stay ≤10px or the device overflows its own padding box */
+  padding: var(--spacing-component-sm);
   color: var(--content);
   display: flex;
   justify-content: center;
@@ -76,6 +79,25 @@
     var(--surface-raised);
 }
 
+/* The housing is the drag handle (bare chrome — there is no titlebar). Only
+   advertise it where free-floating drag exists: the shell's startDrag no-ops
+   at 720px and below, where windows are a full-bleed stack. Buttons carry
+   `cursor: pointer` from globals, and the ring sets its own, so the grab
+   cursor lands on the metal and nothing else. */
+@media (min-width: 721px) {
+  .pod {
+    cursor: grab;
+  }
+
+  .pod:active {
+    cursor: grabbing;
+  }
+
+  .screen {
+    cursor: default;
+  }
+}
+
 /* ------------------------------------------------------------- the LCD -- */
 
 .bezel {
@@ -96,14 +118,26 @@
   background: color-mix(in srgb, var(--content) 4%, var(--surface));
 }
 
+/* Three columns with equal 1fr flanks, so the title stays optically centred
+   no matter what the right cluster (battery + [x]) weighs. The bar is 24px so
+   the close control can carry a full 24px hit target without overflowing the
+   LCD's clip. */
 .statusBar {
   flex: none;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: var(--space-1);
-  padding: 4px 6px 3px;
+  min-height: 24px;
+  padding: 0 0 0 6px;
   border-bottom: var(--border-width-hairline) solid var(--border);
+}
+
+.statusRight {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .statusGlyph {
@@ -123,7 +157,7 @@
 }
 
 .battery {
-  justify-self: end;
+  flex: none;
   position: relative;
   width: 15px;
   height: 8px;
@@ -149,6 +183,34 @@
   width: 2px;
   height: 2px;
   background: var(--content-muted);
+}
+
+/* The device's own [x] — LCD chrome, not a Mac window button: a bare mono
+   glyph in the muted status-bar tone, sized to the readout around it. The
+   glyph is tiny; the button is a full 24px square. */
+.close {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: var(--type-caption-size);
+  line-height: 1;
+  color: var(--content-muted);
+}
+
+.close:hover {
+  color: var(--content);
+}
+
+.close:active {
+  color: var(--accent-expressive-text);
+}
+
+.close:focus-visible {
+  outline: var(--border-width-thick) solid var(--focus);
+  outline-offset: -4px;
 }
 
 .screenBody {
@@ -522,12 +584,63 @@
   border: var(--border-width-thin) solid color-mix(in srgb, var(--content) 30%, transparent);
 }
 
-/* The wheel loses its moulded-plastic disc and becomes a cart wheel: rim,
-   eight spokes, hub. The hub reads as the SELECT button, so that disc goes
-   transparent and lets the woodwork show through. */
+/* The wheel loses its moulded-plastic disc and becomes a turned cart wheel:
+   iron-banded felloe, eight carved spokes, a raised hub. The hub reads as the
+   SELECT button, so that disc goes transparent and lets the woodwork show.
+
+   LIGHTING LIVES HERE, GRAIN LIVES IN THE SVG — deliberately. This element
+   never rotates, so the specular highlight stays up-left where the room's
+   light is; the SVG does rotate, so the grain travels with the wheel. Put the
+   highlight in the SVG and it spins like a lighthouse.
+
+   ⚠️ ROLES ARE INVERTED INSIDE .studio (see the remap at the top of this
+   file): `--surface` is the dark ember plate and `--content` is parchment.
+   So timber = parchment mixed INTO the plate, highlights add `--content`,
+   and shadows add `--surface` — the opposite of what these names read like
+   everywhere else. Getting this backwards paints a black "highlight".
+   Deriving the wood from the plate's own roles rather than a hardcoded hex
+   is what keeps it skinnable (CLAUDE.md §5). */
 :global([data-skin='medieval']) .ring {
-  background: none;
-  border-color: transparent;
+  border-width: var(--border-width-thick);
+  border-color: color-mix(in srgb, var(--content) 30%, transparent);
+  background:
+    /* specular — a broad sheen over the upper-left quarter */
+    radial-gradient(
+      circle at 33% 25%,
+      color-mix(in srgb, var(--content) 24%, transparent) 0,
+      color-mix(in srgb, var(--content) 8%, transparent) 36%,
+      transparent 58%
+    ),
+    /* the face domes away toward the felloe */
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 50%,
+      color-mix(in srgb, var(--surface) 42%, transparent) 84%,
+      color-mix(in srgb, var(--surface) 68%, transparent) 100%
+    ),
+    /* THE TIMBER. Parchment mixed into the plate alone lands on a dead warm
+       grey — the plate is near-black, so it desaturates everything. Real oak
+       needs the skin's own warm hue, so the base is tinted with the gilt
+       accent (medieval --accent-expressive #b8860b): the wood is derived
+       from skin tokens, not an invented hex (CLAUDE.md §5). Resulting oak is
+       ~rgb(101,85,48); the zone labels sit on it at 5.5:1 (see .zone below,
+       which is why they go full --content in this skin, not muted). */
+    color-mix(
+      in srgb,
+      var(--accent-expressive) 22%,
+      color-mix(in srgb, var(--content) 26%, var(--surface))
+    );
+  box-shadow:
+    inset 0 2px 2px color-mix(in srgb, var(--content) 16%, transparent),
+    inset 0 -4px 7px color-mix(in srgb, var(--surface) 55%, transparent),
+    0 2px 0 color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+:global([data-skin='medieval']) .zone {
+  /* full parchment, not --content-muted: on the oak wheel muted measures
+     3.19:1 and fails AA, while full --content holds 5.47:1. Reads as painted
+     lettering on the wood, which suits the costume anyway. */
+  color: var(--content);
 }
 
 :global([data-skin='medieval']) .select {
@@ -549,32 +662,83 @@
   pointer-events: none;
 }
 
-.spokeRim {
+/* --- the rotating layer: grain + timber. Same inverted roles as .ring above
+   (--content = parchment, --surface = the dark plate): grain and grooves are
+   built from --surface, lit edges from --content. --- */
+
+/* grain: two weights per band so it reads as timber, not hatching */
+.grainLine {
+  stroke: color-mix(in srgb, var(--surface) 34%, transparent);
+  stroke-width: 0.3;
   fill: none;
-  stroke: color-mix(in srgb, var(--content) 52%, transparent);
-  stroke-width: 3;
 }
 
+.grainLineFaint {
+  stroke: color-mix(in srgb, var(--surface) 18%, transparent);
+  stroke-width: 0.22;
+  fill: none;
+}
+
+/* the pattern-filled discs carry no stroke of their own */
+.grainFill {
+  stroke: none;
+}
+
+/* felloe — the wooden rim band, lit a shade proud of the face so the rim
+   separates instead of merging into one flat disc */
+.spokeRim {
+  fill: color-mix(in srgb, var(--content) 12%, transparent);
+  stroke: color-mix(in srgb, var(--surface) 55%, transparent);
+  stroke-width: 2.4;
+}
+
+/* the iron tyre hooped around it — the one cool note in all that timber */
+.spokeTyre {
+  fill: none;
+  stroke: color-mix(in srgb, var(--content) 42%, transparent);
+  stroke-width: 2.6;
+}
+
+/* the inner edge of the felloe, where the spokes are seated */
 .spokeRimInner {
+  fill: none;
+  stroke: color-mix(in srgb, var(--surface) 48%, transparent);
+  stroke-width: 1.4;
+}
+
+/* spokes: shadow stroke + lit stroke = a carved groove with depth */
+.spoke {
+  stroke: color-mix(in srgb, var(--surface) 62%, transparent);
+  stroke-width: 3;
+  stroke-linecap: butt;
+}
+
+.spokeLit {
+  stroke: color-mix(in srgb, var(--content) 28%, transparent);
+  stroke-width: 1.1;
+  stroke-linecap: butt;
+}
+
+/* hub: proud of the face, so it gets its own dome and a turned lip */
+.spokeHub {
+  fill: color-mix(in srgb, var(--content) 30%, var(--surface));
+  stroke: color-mix(in srgb, var(--surface) 58%, transparent);
+  stroke-width: 2;
+}
+
+.spokeHubLip {
   fill: none;
   stroke: color-mix(in srgb, var(--content) 26%, transparent);
   stroke-width: 1;
 }
 
-.spoke {
-  stroke: color-mix(in srgb, var(--content) 40%, transparent);
-  stroke-width: 2.2;
-  stroke-linecap: round;
-}
-
-.spokeHub {
-  fill: color-mix(in srgb, var(--content) 14%, var(--surface));
-  stroke: color-mix(in srgb, var(--content) 46%, transparent);
-  stroke-width: 2;
-}
-
 .spokePin {
+  /* --accent, not --accent-expressive: the .studio block above already remaps
+     --accent to gilt under medieval for contrast reasons, and reaching past
+     that indirection here would quietly duplicate the decision. */
   fill: var(--accent);
+  stroke: color-mix(in srgb, var(--surface) 50%, transparent);
+  stroke-width: 0.8;
 }
 
 /* ------------------------------------------------------- empty state --- */
@@ -588,6 +752,14 @@
   gap: var(--spacing-component-lg);
   padding: var(--spacing-layout-md);
   text-align: center;
+}
+
+/* bare chrome has no titlebar, so the empty state needs its own way out */
+.awaitBar {
+  align-self: stretch;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(var(--spacing-component-lg) * -1);
 }
 
 .awaitNote {

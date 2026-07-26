@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useDragControls, useReducedMotion } from 'motion/react'
 import { SPRINGS } from '@/lib/motion'
 import type { RefObject } from 'react'
@@ -10,6 +10,7 @@ import { useSettings } from '@/store/settings'
 import { programName } from '@/lib/skinVocab'
 import { useGate } from '@/store/gate'
 import { GateSphere } from '@/components/gate/GateSphere'
+import { WindowChromeProvider } from './windowChrome'
 import { sfx } from '@/lib/sound'
 import styles from './shell.module.css'
 
@@ -34,12 +35,18 @@ export function Window({ def, z, active, desktopRef }: Props) {
 
   // window title + a11y labels follow the active skin's vocabulary
   const title = programName(def.id, def.name, skin)
+  const bare = def.chrome === 'bare'
 
   // move keyboard focus into a newly opened window
   useEffect(() => {
     if (active) ref.current?.focus({ preventScroll: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  /* Recede-when-inactive lives in CSS (`.window:not(.windowActive)`), not
+     here: Motion owns this element's inline `opacity` for the open/close
+     transition, and an inline style always beats a stylesheet. See
+     shell.module.css — it dims with `filter` so the two multiply. */
 
   const size = storedSize ?? def.size
 
@@ -75,12 +82,27 @@ export function Window({ def, z, active, desktopRef }: Props) {
 
   const Body = def.component
 
+  const chromeApi = useMemo(
+    () => ({
+      id: def.id,
+      startDrag: (e: React.PointerEvent) => {
+        // free-floating drag is a desktop affordance only
+        if (window.innerWidth > 720) dragControls.start(e)
+      },
+      close: () => {
+        sfx.close()
+        close(def.id)
+      },
+    }),
+    [def.id, dragControls, close],
+  )
+
   return (
     <motion.section
       ref={ref}
       tabIndex={-1}
       aria-label={title}
-      className={`${styles.window} ${active ? styles.windowActive : ''} ${zoomed ? styles.windowZoomed : ''}`}
+      className={`${styles.window} ${active ? styles.windowActive : ''} ${zoomed ? styles.windowZoomed : ''} ${bare ? styles.windowBare : ''}`}
       style={{
         left: def.pos.x,
         top: def.pos.y,
@@ -106,44 +128,50 @@ export function Window({ def, z, active, desktopRef }: Props) {
         }
       }}
     >
-      <div
-        className={styles.titlebar}
-        onPointerDown={(e) => {
-          // free-floating drag is a desktop affordance only
-          if (window.innerWidth > 720) dragControls.start(e)
-        }}
-        onDoubleClick={() => setZoomed((v) => !v)}
-      >
-        <div className={styles.titleControls}>
-          <button
-            className={styles.ctrl}
-            aria-label={`Close ${title}`}
-            onClick={() => {
-              sfx.close()
-              close(def.id)
-            }}
-          >
-            ×
-          </button>
-          <button
-            className={styles.ctrl}
-            aria-label={zoomed ? `Restore ${title}` : `Zoom ${title}`}
-            onClick={() => setZoomed((v) => !v)}
-          >
-            +
-          </button>
+      {/* bare chrome: the program draws its own frame, its own drag handle
+          and its own close control (see windowChrome.tsx). */}
+      {bare ? null : (
+        <div
+          className={styles.titlebar}
+          onPointerDown={(e) => {
+            // free-floating drag is a desktop affordance only
+            if (window.innerWidth > 720) dragControls.start(e)
+          }}
+          onDoubleClick={() => setZoomed((v) => !v)}
+        >
+          <div className={styles.titleControls}>
+            <button
+              className={styles.ctrl}
+              aria-label={`Close ${title}`}
+              onClick={() => {
+                sfx.close()
+                close(def.id)
+              }}
+            >
+              ×
+            </button>
+            <button
+              className={styles.ctrl}
+              aria-label={zoomed ? `Restore ${title}` : `Zoom ${title}`}
+              onClick={() => setZoomed((v) => !v)}
+            >
+              +
+            </button>
+          </div>
+          <span className={styles.title} data-copy-id={`program.${def.id}.name`}>
+            {title}
+          </span>
+          <span className={styles.titleMeta} aria-hidden="true">
+            {def.meta}
+          </span>
         </div>
-        <span className={styles.title} data-copy-id={`program.${def.id}.name`}>
-          {title}
-        </span>
-        <span className={styles.titleMeta} aria-hidden="true">
-          {def.meta}
-        </span>
-      </div>
-      <div className={`${styles.windowBody} ${def.chrome === 'crt' ? `${styles.crt} crt` : ''}`}>
-        {def.gated && !unlocked ? <GateSphere /> : Body ? <Body /> : null}
-      </div>
-      {!zoomed && (
+      )}
+      <WindowChromeProvider value={chromeApi}>
+        <div className={`${styles.windowBody} ${def.chrome === 'crt' ? `${styles.crt} crt` : ''}`}>
+          {def.gated && !unlocked ? <GateSphere /> : Body ? <Body /> : null}
+        </div>
+      </WindowChromeProvider>
+      {!zoomed && !bare && (
         <div
           className={styles.resizeGrip}
           onPointerDown={startResize}

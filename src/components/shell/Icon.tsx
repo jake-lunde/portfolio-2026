@@ -4,6 +4,8 @@ export type IconName =
   | 'doc'
   | 'folder'
   | 'note'
+  | 'ipod'
+  | 'music'
   | 'reel'
   | 'wave'
   | 'book'
@@ -24,6 +26,8 @@ export type IconName =
   | 'steps'
   | 'clipboard'
   | 'swatch'
+  | 'smiley'
+  | 'bubble'
   | 'mystery'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
@@ -48,6 +52,32 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <circle cx="11" cy="23" r="4" />
       <circle cx="23" cy="20" r="4" />
       <path d="M15 23V8l12-3v15" />
+    </>
+  ),
+  ipod: (
+    // the device itself: screen up top, click wheel below, in the body
+    // outline. 3px+ clear between every stroke pair so the three shapes
+    // stay separable at 32px (the wheel is the recognition cue, so it
+    // gets the larger radius and the centred button).
+    <>
+      <rect x="7" y="3" width="18" height="26" rx="2.5" />
+      <rect x="10.5" y="6" width="11" height="8" />
+      <circle cx="16" cy="21.5" r="5.5" />
+      <circle cx="16" cy="21.5" r="2" />
+    </>
+  ),
+  music: (
+    // beamed pair of eighth notes. Deliberately NOT the `note` icon (Now
+    // Playing): that one is two big open rings on a slanted beam, so its
+    // silhouette is a diagonal; this is a squared gate on two small ones.
+    // Level rather than slanted is the whole differentiator — but it does
+    // that on line-art terms: hollow heads, one beam. Filled heads and a
+    // double beam were both drawn first and both made this the densest
+    // glyph in the set, which it can't be sitting next to README.
+    <>
+      <path d="M14 23V8h10v15" />
+      <ellipse cx="11" cy="23" rx="3.1" ry="2.4" transform="rotate(-16 11 23)" />
+      <ellipse cx="21" cy="23" rx="3.1" ry="2.4" transform="rotate(-16 21 23)" />
     </>
   ),
   reel: (
@@ -189,6 +219,26 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M12 21.5h11M12 25h7" />
     </>
   ),
+  smiley: (
+    // System-7 happy face — the FUN drawer. Eyes are filled dots rather
+    // than 1.5px caps (a round-cap dot reads as a smudge at 32px), and
+    // the smile clears the rim by 6px so the three features never touch.
+    <>
+      <circle cx="16" cy="16" r="12" />
+      <circle cx="11.8" cy="13" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="20.2" cy="13" r="1.4" fill="currentColor" stroke="none" />
+      <path d="M10.5 18.4a6.6 6.6 0 0 0 11 0" />
+    </>
+  ),
+  bubble: (
+    // speech bubble — quotes from real people. The two ruled lines are
+    // what stop it reading as a plain rounded rect at small sizes; the
+    // tail is part of the outline, not a separate mark.
+    <>
+      <path d="M7 6h18a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-11l-4 5v-5H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
+      <path d="M9.5 11.5h13M9.5 15.5h9" />
+    </>
+  ),
   mystery: (
     // sealed / classified — a stamped question over a dashed frame
     <>
@@ -228,6 +278,55 @@ const MEDIEVAL_PATHS: Partial<Record<IconName, React.ReactNode>> = {
       <circle cx="16" cy="16" r="10" />
       <circle cx="16" cy="16" r="2.2" />
       <path d="M16 6.4v6.4M16 19.2v6.4M6.4 16h6.4M19.2 16h6.4M9.6 9.6l3.2 3.2M19.2 19.2l3.2 3.2M22.4 9.6l-3.2 3.2M9.6 22.4l3.2-3.2" />
+    </>
+  ),
+  // MUSIC (the player) → THE LUTE: round soundbox with a rose, fretted
+  // neck raked back to a peg-head. The 1392 device you hold and play.
+  ipod: (
+    <>
+      <circle cx="12.5" cy="21" r="7.5" />
+      <circle cx="12.5" cy="21" r="2" />
+      <path d="M17.8 15.7L25.2 8.8" />
+      <path d="M23.4 7l3.6 3.6" />
+      <path d="M20.4 11.9l1.4 1.5M22.4 10l1.4 1.5" opacity=".55" />
+    </>
+  ),
+  // MUSIC (the note) → THE NEUME: two lozenges on a three-line stave
+  // with one virga — how a tune was written down before the quaver.
+  // Three lines, two notes: four lines and three notes tested mushy at
+  // 32px, this keeps the marks big enough to read as notation.
+  music: (
+    <>
+      <path d="M4 11h24M4 17h24M4 23h24" opacity=".5" />
+      <path d="M11 13.6l3.4 3.4-3.4 3.4-3.4-3.4z" fill="currentColor" stroke="none" />
+      <path d="M21 7.6l3.4 3.4-3.4 3.4-3.4-3.4z" fill="currentColor" stroke="none" />
+      <path d="M24.4 11v8.5" />
+    </>
+  ),
+  // FUN → THE SUN IN SPLENDOUR: the heraldic charge, which is a happy
+  // face already. (A jester's hood was drawn first and read as an insect
+  // at 32px — the rays work because they're symmetric on every side.)
+  smiley: (
+    <>
+      <circle cx="16" cy="16" r="8" />
+      <circle cx="13" cy="14" r="1.3" fill="currentColor" stroke="none" />
+      <circle cx="19" cy="14" r="1.3" fill="currentColor" stroke="none" />
+      <path d="M12.4 18.4a4.6 4.6 0 0 0 7.2 0" />
+      <path d="M27 16h2.6M16 27v2.6M5 16H2.4M16 5V2.4" />
+      <path d="M23.8 23.8l1.8 1.8M8.2 23.8l-1.8 1.8M8.2 8.2L6.4 6.4M23.8 8.2l1.8-1.8" />
+    </>
+  ),
+  // FEEDBACK → THE BANDEROLE: the speech scroll a painted figure holds,
+  // rolled at both ends, ruled with the words. It keeps a hanging lappet
+  // where the classic icon has its tail — that one mark is what makes it
+  // read as speech rather than as a plain banner at 32px.
+  bubble: (
+    <>
+      <path d="M7 9.1c6-2 12-2 18 0v9.5c-6-2-12-2-18 0z" />
+      <path d="M7 9.1C4.6 8.6 3.4 10 3.6 11.8c.8-1 1.8-1.4 3.4-1.2" opacity=".7" />
+      <path d="M25 18.6c2.4.5 3.6-.9 3.4-2.7-.8 1-1.8 1.4-3.4 1.2" opacity=".7" />
+      <path d="M12.6 16.8l-1.4 7.6 5.6-5" />
+      <path d="M11 12h10M11 15h6.5" opacity=".65" />
     </>
   ),
   // VISUALIZERS → SCRYING: a crystal orb on a stand, with rays

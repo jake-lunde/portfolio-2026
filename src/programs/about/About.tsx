@@ -3,6 +3,7 @@
 import { useWindows } from '@/store/windows'
 import { sfx } from '@/lib/sound'
 import { BASE } from '@/lib/base'
+import { OS_VERSION } from '@/lib/version'
 import { CopyText as Copy } from '@/content/CopyText'
 import styles from '../programs.module.css'
 
@@ -15,11 +16,13 @@ export default function About() {
       <div className={styles.stampCard}>
         <span className={styles.stampPerf} aria-hidden="true" />
         <div className={styles.stampType}>
-          <div className={styles.stampName}>
+          {/* the stamp IS the name — the old <h1> line under it was a
+              second, redundant billing, so the heading lives here now */}
+          <h1 className={styles.stampName}>
             JAKE
             <br />
             LUNDE
-          </div>
+          </h1>
           <div className={styles.stampRole}>
             DESIGN ENGINEER <span aria-hidden="true">設計技師</span>
           </div>
@@ -39,7 +42,6 @@ export default function About() {
         </div>
       </div>
       <Copy k="readme.eyebrow" as="p" className={styles.aboutEyebrow} />
-      <Copy k="readme.heading" as="h1" className={styles.aboutName} />
       <p>
         I&rsquo;m a principal-level product designer shipping production code —
         a design engineer. Over ten years of product work in consumer
@@ -56,14 +58,14 @@ export default function About() {
         iteratively. I&rsquo;ve dreaded updating my website for years — new
         tools have truly made it a joy. I hope you like it. Open{' '}
         <a
-          href={`${BASE}/projects`}
+          href={`${BASE}/cases`}
           onClick={(e) => {
             e.preventDefault()
             sfx.open()
-            open('projects')
+            open('progress')
           }}
         >
-          Projects
+          Case Studies
         </a>{' '}
         to read the work.
       </p>
@@ -82,7 +84,11 @@ export default function About() {
         </li>
         <li>
           <Copy k="readme.label.system" as="span" className={styles.k} />
-          <Copy k="readme.system" as="span" />
+          {/* version from the shared constant, stack list still editable —
+              this line used to hardcode v0.1 while the menu bar said v0.2 */}
+          <span>
+            LUNDE OS {OS_VERSION} — <Copy k="readme.system" as="span" />
+          </span>
         </li>
       </ul>
     </div>

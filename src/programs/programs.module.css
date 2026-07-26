@@ -48,6 +48,7 @@
 }
 
 .stampName {
+  margin: 0;
   font-family: var(--display);
   font-size: clamp(24px, 5vw, 32px); /* decorative — business-card name clamp, doesn't match any ramp fluid role */
   line-height: var(--leading-none); /* 0.98 → 1 */
@@ -140,16 +141,7 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--accent);
-  margin: 0 0 12px;
-}
-
-.aboutName {
-  font-family: var(--display);
-  font-size: var(--type-heading-1-size); /* clamp(28px, 5.5vw, 38px) already matched exactly */
-  font-weight: var(--type-heading-1-weight); /* 400 exact */
-  letter-spacing: 0;
-  line-height: var(--leading-none); /* 1.05 → 1 — diverges from heading-1's tight leading, flag: About page hero name */
-  margin: 0 0 18px;
+  margin: 0 0 16px;
 }
 
 .about p {
@@ -520,4 +512,73 @@
 
 [data-theme='dark'] .segBtn[aria-pressed='true'] {
   color: #0d100c;
+}
+
+/* ------------------------------------------------------------------
+   Folder windows (MUSIC · FUN) — the desktop's second storey. Same
+   icon-and-label vocabulary as the launcher (.iconBtn in shell.module.css)
+   so opening a drawer reads as the same surface, one level in.
+   ------------------------------------------------------------------ */
+
+.folder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+  /* matches .projects — a drawer is an index and should be inset like one.
+     Without this the icons sat flush against the window border. */
+  padding: 20px 22px 24px;
+}
+
+.folderHead {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border-width-default) solid var(--content);
+}
+
+.folderGrid {
+  display: grid;
+  grid-auto-flow: row;
+  /* FIXED 88px tracks, not minmax(88px, 1fr): stretching the columns to fill
+     the window pushed the icons apart and read as lopsided padding. Same track
+     width as the desktop grid, so a drawer looks like the desktop. */
+  grid-template-columns: repeat(auto-fill, 88px);
+  justify-content: start;
+  align-content: start;
+  gap: 14px 8px;
+  overflow-y: auto;
+}
+
+.folderItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 4px 8px;
+  color: var(--content);
+  border: var(--border-width-hairline) solid transparent;
+  text-align: center;
+}
+
+.folderItem:hover {
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+.folderItem:active svg {
+  transform: translateY(1px);
+}
+
+.folderLabel {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: var(--leading-snug);
 }

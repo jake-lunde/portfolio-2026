@@ -6,19 +6,30 @@ import { useStudio } from '@/lib/studioPlayer'
 import { Stamp } from '@/components/primitives/Stamp'
 import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
-import ClickWheel from './ClickWheel'
+import { useSettings } from '@/store/settings'
+import { programName } from '@/lib/skinVocab'
+import { useWindowChrome } from '@/components/shell/windowChrome'
+import ClickWheel, { TICK_DEG } from './ClickWheel'
 import Visualizer, { type VizMode } from './Visualizer'
 import styles from './studio.module.css'
 
-/* Studio — Jake's own recordings, played on an iPod video built out of
+/* Remixes — Jake's own recordings, played on an iPod video built out of
    LUNDE OS tokens. Three screens on one linear stack:
        Songs  ←MENU—  Now Playing  —SELECT→  Visualizer
    MENU walks back down it, SELECT walks up (and, from Songs, plays the
    highlighted track). The click wheel turns: volume on Now Playing and
    Visualizer, selection on Songs. Playback persists when the window
-   closes — the engine lives in lib/studioPlayer. */
+   closes — the engine lives in lib/studioPlayer.
+
+   `chrome: 'bare'` in the registry: there is no titlebar, the device IS the
+   window. So this component owns the two things a frame normally provides —
+   the drag handle (the metal housing) and the close control (the [x] in the
+   device's own status bar) — both from useWindowChrome(). */
 
 type Screen = 'songs' | 'now' | 'viz'
+
+/** one full turn of the wheel sweeps a continuous control end to end */
+const TURN_DEG = 360
 
 const TITLES: Record<Screen, string> = {
   songs: 'Songs',
@@ -62,6 +73,9 @@ export default function Studio() {
   const prev = useStudio((s) => s.prev)
   const setVolume = useStudio((s) => s.setVolume)
 
+  const skin = useSettings((s) => s.skin)
+  const { startDrag, close } = useWindowChrome()
+
   const [screen, setScreen] = useState<Screen>('now')
   const [sel, setSel] = useState(0)
   const [mode, setMode] = useState<VizMode>('bars')
@@ -69,8 +83,15 @@ export default function Studio() {
 
   const reduced = useReducedMotion()
   const listRef = useRef<HTMLDivElement>(null)
-  const turnFrom = useRef(volume)
   const cueTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** authoritative during a turn: React state lags several pointermoves */
+  const selRef = useRef(sel)
+  /** sub-detent wheel travel banked on the Songs list, always < TICK_DEG */
+  const listRes = useRef(0)
+
+  useEffect(() => {
+    selRef.current = sel
+  }, [sel])
 
   useEffect(() => {
     void load()
@@ -104,40 +125,89 @@ export default function Studio() {
 
   /* ---- wheel semantics -------------------------------------------------- */
 
+  const highlight = (i: number) => {
+    selRef.current = i
+    setSel(i)
+    listRes.current = 0
+  }
+
   const onMenu = () => {
     if (screen === 'viz') setScreen('now')
     else if (screen === 'now') {
-      setSel(index)
+      highlight(index)
       setScreen('songs')
-    } else setSel(index) // already at the root — snap back to what's playing
+    } else highlight(index) // already at the root — snap back to what's playing
   }
 
   const onSelect = () => {
     if (screen === 'songs') {
-      play(sel)
+      play(selRef.current)
       setScreen('now')
     } else if (screen === 'now') setScreen('viz')
     else setMode(MODES[(MODES.indexOf(mode) + 1) % MODES.length])
   }
 
-  const onDetent = (dir: 1 | -1) => {
-    if (screen === 'songs') {
-      if (!tracks.length) return
-      setSel((s) => Math.max(0, Math.min(tracks.length - 1, s + dir)))
-    } else {
-      setVolume(volume + dir * 0.05)
-      showVolume()
+  /** Songs: one row per detent. Sub-detent travel banks here, not in the wheel. */
+  const stepList = (deg: number) => {
+    if (!tracks.length) return 0
+    listRes.current += deg
+    let used = 0
+    while (Math.abs(listRes.current) >= TICK_DEG) {
+      const dir = listRes.current > 0 ? 1 : -1
+      const at = selRef.current
+      const to = Math.max(0, Math.min(tracks.length - 1, at + dir))
+      if (to === at) {
+        listRes.current = 0 // pinned at an end — drop the travel, don't bank it
+        break
+      }
+      listRes.current -= dir * TICK_DEG
+      selRef.current = to
+      setSel(to)
+      used += dir * TICK_DEG
     }
+    return used
   }
 
-  const onTurn = (frac: number, phase: 'start' | 'move') => {
-    if (phase === 'start') {
-      turnFrom.current = volume
-      return
-    }
-    setVolume(turnFrom.current + frac)
-    showVolume()
+  /** Now Playing / Visualizer: 360° of travel = silent → full, from wherever
+      the thumb landed. Read the store, not the render's `volume`: a fast drag
+      fires several pointermoves per frame and React state would be stale. */
+  const sweepVolume = (deg: number) => {
+    const from = useStudio.getState().volume
+    const to = Math.max(0, Math.min(1, from + deg / TURN_DEG))
+    showVolume() // the readout appears even when you're already pinned at 100%
+    if (to === from) return 0
+    setVolume(to)
+    return (to - from) * TURN_DEG
   }
+
+  /* The one wheel callback. Takes signed degrees of travel, returns the
+     degrees it actually spent — see the contract in ClickWheel.tsx. Anything
+     it declines is thrown away by the wheel, which is what stops a pinned
+     control from banking slack you then have to unwind. */
+  const onTurn = (deg: number) => (screen === 'songs' ? stepList(deg) : sweepVolume(deg))
+
+  /* ---- bare-chrome frame duties ----------------------------------------- */
+
+  /* The device is the window, so the housing is the titlebar. Grabs that
+     start on the LCD or on the click wheel are theirs — the wheel gesture
+     must never fight the window drag. */
+  const onHousingDown = (e: React.PointerEvent) => {
+    const t = e.target as HTMLElement | null
+    if (t?.closest(`.${styles.screen}`) || t?.closest(`.${styles.wheel}`)) return
+    startDrag(e)
+  }
+
+  /* [x], inside the device's own status bar. LCD chrome, not a Mac button. */
+  const closeBtn = (
+    <button
+      type="button"
+      className={styles.close}
+      aria-label={`Close ${programName('studio', 'Remixes', skin)}`}
+      onClick={close}
+    >
+      <span aria-hidden="true">×</span>
+    </button>
+  )
 
   /* ---- empty state ------------------------------------------------------ */
 
@@ -145,6 +215,7 @@ export default function Studio() {
     return (
       <div className={styles.studio}>
         <div className={styles.await}>
+          <div className={styles.awaitBar}>{closeBtn}</div>
           <Stamp>Awaiting masters</Stamp>
           <p className={styles.awaitNote}>
             The player is wired — Jake&rsquo;s recordings are being transferred from the vault.
@@ -170,7 +241,7 @@ export default function Studio() {
 
   return (
     <div className={styles.studio}>
-      <div className={styles.pod}>
+      <div className={styles.pod} onPointerDown={onHousingDown}>
         <div className={styles.bezel}>
           <div className={styles.screen}>
             <div className={styles.statusBar}>
@@ -180,7 +251,10 @@ export default function Studio() {
               <span className={styles.statusTitle} aria-live="polite">
                 {TITLES[screen]}
               </span>
-              <span className={styles.battery} aria-hidden="true" />
+              <span className={styles.statusRight}>
+                <span className={styles.battery} aria-hidden="true" />
+                {closeBtn}
+              </span>
             </div>
 
             <div className={styles.screenBody}>
@@ -253,7 +327,7 @@ export default function Studio() {
                               aria-current={i === index ? 'true' : undefined}
                               onClick={() => {
                                 sfx.tap()
-                                setSel(i)
+                                highlight(i)
                                 play(i)
                                 setScreen('now')
                               }}
@@ -285,8 +359,6 @@ export default function Studio() {
         </div>
 
         <ClickWheel
-          rotary={screen === 'songs' ? 'detent' : 'continuous'}
-          onDetent={onDetent}
           onTurn={onTurn}
           onMenu={onMenu}
           onSelect={onSelect}

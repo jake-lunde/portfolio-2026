@@ -702,67 +702,6 @@
   }
 }
 
-/* ---------- sticky notes (pull quotes) ---------- */
-
-.sticky {
-  position: fixed;
-  z-index: 0; /* décor: must lose to every window, incl. unfocused (opacity) ones */
-  width: 168px;
-  margin: 0;
-  padding: 10px 11px 9px;
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sticky);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.sticky[data-tone='pink'] {
-  background: color-mix(in srgb, var(--accent-expressive) 26%, var(--surface-raised));
-}
-
-.sticky:hover {
-  transform: rotate(0deg) translateY(-2px) !important;
-  box-shadow: var(--shadow-sticky-lift);
-}
-
-.stickyTape {
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-1deg);
-  width: 44px;
-  height: 12px;
-  background: color-mix(in srgb, var(--accent-expressive) 45%, transparent);
-}
-
-.stickyQuote {
-  margin: 0 0 6px;
-  font-size: 10.5px; /* fixed-width sticky note (168px) — deliberately below body-sm (13px, would overflow the note); no smaller sans role in the ramp */
-  font-style: italic;
-  line-height: var(--leading-normal); /* 1.5 exact */
-  color: var(--content);
-}
-
-.stickyCite {
-  font-family: var(--mono);
-  font-size: var(--type-micro-size); /* 7px → 8px, sub-8 snap-up per ramp rule — flag: dense sticky-note citation */
-  letter-spacing: var(--tracking-14); /* diverges from micro's tracking-20 — matches original 0.14em */
-  color: var(--content-muted);
-}
-
-@media (max-width: 900px) {
-  .sticky {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sticky,
-  .sticky:hover {
-    transition: none;
-  }
-}
-
 .wandererAvatar[data-jumping] {
   background-color: var(--accent-expressive);
   animation: wanderJump 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) 1;
@@ -1023,6 +962,74 @@
 
 .windowActive .resizeGrip {
   border-color: var(--accent);
+}
+
+/* Unfocused windows recede so the focused one reads as the subject; hover
+   (or tabbing in) brings one back to full before you commit to clicking it.
+
+   The dim is applied to the window's CHILDREN, not the window — so the paper
+   itself stays fully opaque and stacked windows still occlude each other.
+   Dimming the whole element made every window translucent, and three of them
+   overlapping turned into soup.
+
+   `filter: opacity()` and not `opacity` — deliberately. Motion owns the
+   window's inline `opacity` for the open/close transition, and an inline
+   style always beats a stylesheet; keeping the recede on a different property
+   means the two compose instead of fighting.
+
+   Desktop only: on mobile the windows are a full-bleed stack with nothing
+   behind them and no hover to recover with. The iPod is exempt — it's an
+   appliance sitting on the desk, not a document competing for attention. */
+@media (min-width: 721px) {
+  .window > .titlebar,
+  .window > .windowBody {
+    transition: filter 0.2s ease-out;
+  }
+
+  .window:not(.windowActive):not(.windowBare) > .titlebar,
+  .window:not(.windowActive):not(.windowBare) > .windowBody {
+    filter: opacity(0.3);
+  }
+
+  .window:not(.windowActive):not(.windowBare):hover > .titlebar,
+  .window:not(.windowActive):not(.windowBare):hover > .windowBody,
+  .window:not(.windowActive):not(.windowBare):focus-within > .titlebar,
+  .window:not(.windowActive):not(.windowBare):focus-within > .windowBody {
+    filter: opacity(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window > .titlebar,
+  .window > .windowBody {
+    transition: none;
+  }
+}
+
+/* `chrome: 'bare'` — the iPod. No titlebar, no frame, no resize grip: the
+   program draws its own housing and floats free on the desktop, so the
+   window element itself has to disappear completely. It also keeps full
+   opacity when unfocused (see Window.tsx) — an appliance on the desk, not
+   a document. */
+.windowBare {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  min-width: 0;
+  overflow: visible;
+}
+
+[data-theme='dark'] .windowBare,
+:global([data-skin='medieval']) .windowBare {
+  border: 0;
+  box-shadow: none;
+}
+
+.windowBare .windowBody {
+  padding: 0;
+  background: none;
+  border: 0;
+  overflow: visible;
 }
 
 /* medieval skin: heavier frame + manuscript corner ornaments — scoped

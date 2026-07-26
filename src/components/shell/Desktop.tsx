@@ -11,7 +11,7 @@ import { DesktopIcons } from './DesktopIcons'
 import { Wallpaper } from './Wallpaper'
 import { NowPlayingWidget } from './NowPlayingWidget'
 import { MiniPlayer } from './MiniPlayer'
-import { StickyNotes } from './StickyNotes'
+import { CommandWidget } from './CommandWidget'
 import { DailyWidget } from './DailyWidget'
 import { PhotoWall } from './PhotoWall'
 import { AmbientAgents } from './AmbientAgents'
@@ -66,7 +66,8 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
         <DesktopIcons />
         <DailyWidget />
         <MiniPlayer />
-        <StickyNotes />
+        {/* the sticky notes moved into the FEEDBACK window (session 25) */}
+        <CommandWidget />
         <PhotoWall />
         <AmbientAgents />
         <AnimatePresence>

@@ -9,6 +9,37 @@
 
 ---
 
+## Latest session — iPod STUDIO · ABOUT.MACHINE · IN.PROGRESS (session 24, 2026-07-26)
+
+**Fable orchestrating; three parallel agents on disjoint files (FOURIER=iPod,
+NYQUIST=machine, FOURIER-2=tracker); seam — registry entry + copy keys +
+`cases.ts` progress — written by the orchestrator first. Zero conflicts.**
+- **STUDIO = iPod video.** LCD (status / `n of N` / art / song·artist·album
+  parsed from manifest titles / negative remaining) over a click wheel: four
+  radial `<button>` zones + SELECT, plus rotational drag (24° detents →
+  `sfx.tap()`, 540° volume sweep). Songs ←MENU— Now Playing —SELECT→
+  Visualizer; canvas DSP moved intact to `Visualizer.tsx`, palette now via
+  `getComputedStyle`. Medieval = 8-spoke wooden wheel; zones don't move.
+- **ABOUT.MACHINE** → System 7 "About This Macintosh": identity block,
+  `Total Memory 4,096K / Largest Unused Block 512K`, five bars reconciling
+  exactly (1152+896+768+640+128 = 3,584 = 4,096−512), widths derived from the
+  numbers. Essay + old SPECS behind a disclosure — content 340px, was ~2,000.
+- **IN.PROGRESS (WIP-15)**, `/progress`: an OS 9 installer that never finishes.
+  Aggregate bar (mean pct = 50%), per-case bars, ENCOURAGE → `POST /api/nudge`
+  (blob, guestbook OIDC pattern, one per case per session). **Notification =
+  optional `NUDGE_WEBHOOK_URL`**, Slack/Discord/ntfy `{text}`, silent if unset.
+- **Live-found, fixed:** (1) `--pod-w: min(300px, 100%)` also fed heights — a
+  `%` in a custom property resolves against the *matching axis*, collapsing the
+  device to 72px tall; now `100vw`-based. (2) machine's disclosure collapsed
+  only once Motion ran, so SSR shipped it expanded (CLS); closed height now in
+  CSS. (3) machine bar column 96px → `minmax(150px, 1.15fr)`, own row <400px.
+- Verified: contrast both dark plates (accent 5.41:1 / 5.75:1 medieval), 360px
+  zero overflow ×3, screen nav, `/api/nudge` degraded shape. Preview pane
+  reports a **0×0 viewport** — force `resize_window {w,h}` before believing
+  any measurement (details in the pane memory).
+
+---
+
 ## Latest session — EDIT.MODE: copy layer + in-situ editor (session 23, 2026-07-24)
 
 **Fable orchestrating; NYQUIST(sweep) + FOURIER(program+API) parallel, disjoint
