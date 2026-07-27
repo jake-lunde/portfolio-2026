@@ -157,7 +157,32 @@ AmbientAgents used for sprite intros is gone (recorded fallbacks instead).
 
 ⚠️ **Already-open tabs keep the OLD intervals until reloaded.**
 
-⚠️ **Unresolved: which metric actually hit 100%.** Reads cannot consume
+**CONFIRMED by the usage dashboard (2026-07-27):** the metric is **Blob
+Advanced Operations**, not bytes. **List = 2,370 of 2,485 ops (95.4%)**, Put =
+115; 99.5% on the `guestbook` store, which is the one `/api/cc-feed` shares.
+Jul 26 (~430) and Jul 27 (~860) are the two largest bars in thirty days — the
+days this feature was built. Jul 11 (~630) is the same bug at a lower rate.
+Cap appears to be 2,500/month.
+
+**THE REAL FIX, not yet done — start the next session here.** Everything
+shipped so far only rate-limits a call that should not exist. `list()` is in
+the read path solely to find the newest VERSIONED blob, and versioning exists
+solely because a single overwritten path served stale CDN reads. Blob lets the
+writer set the object's own cache lifetime:
+
+```
+put(path, data, { cacheControlMaxAge: 30, ... })
+```
+
+That kills staleness at the source → a FIXED path becomes safe → the read is a
+plain `fetch` of a known URL → **`list()` leaves the read path entirely**, and
+`put`'s prune-by-list goes with it. ~95% of the account's Blob usage goes to
+roughly zero. Sequence it: prove `cacheControlMaxAge` actually holds on a
+throwaway path FIRST (one put + one del), then migrate `readFeed`, then delete
+the versioning + pruning. Same trap applies as everywhere else in this
+incident — **verify on production, never on localhost.**
+
+~~Unresolved: which metric actually hit 100%.~~ Reads cannot consume
 storage BYTES — the feed blob is a few KB and prunes to 3 versions — so if
 the dashboard's 100% is bytes, the cause is elsewhere (`/api/wall` stores
 booth photos; guestbook and puzzle-times share the store). `vercel blob list`
@@ -174,7 +199,10 @@ production, not localhost.
 
 ## Next steps
 
-1. **Jake — one env var left:** the optional `NUDGE_WEBHOOK_URL` (no ping on
+1. **COMMAND.CTR feed → zero `list()` calls** (fixed path +
+   `cacheControlMaxAge`, see the incident note above). Highest-value item on
+   this list: it is 95% of the account's Blob operations.
+2. **Jake — one env var left:** the optional `NUDGE_WEBHOOK_URL` (no ping on
    ENCOURAGE until it's set). `EDIT_MODE_KEY` + `GITHUB_COPY_TOKEN` are done.
 2. **Eyeball what probes can't judge:** wheel feel at 24°/360° under a thumb,
    haptics on an Android device, three overlapping windows all at 30% (reads a
