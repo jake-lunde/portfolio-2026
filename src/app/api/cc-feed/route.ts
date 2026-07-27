@@ -22,7 +22,7 @@ export const revalidate = 20
    A write invalidates the cache in-process; other instances catch up within
    FEED_TTL_MS. This is a deck of build telemetry — 20 seconds of staleness
    is free, and a billed op per visitor per 20s is not. */
-const FEED_TTL_MS = 20_000
+const FEED_TTL_MS = 60_000
 
 /* COMMAND.CTR live feed. The orchestrating Claude session POSTs event
    batches here (guarded by CC_FEED_KEY); the site GETs them publicly.

@@ -44,11 +44,14 @@ type Ev = {
 }
 
 const LIVE_FRESH_MS = 15 * 60_000
-/* Every poll can cost a billed Blob operation, and this chip lives on the
+/* Every poll can cost a billed Blob `list()`, and this chip lives on the
    desktop for as long as the tab is open — a background tab polling all
    night is real money for zero eyeballs. Two rules: a slow interval, and
-   NEVER poll while the tab is hidden (we catch up on the way back). */
-const POLL_MS = 120_000
+   NEVER poll while the tab is hidden (we catch up on the way back).
+   5 minutes is deliberately far slower than it feels like it should be:
+   LIVE_FRESH_MS is FIFTEEN minutes, so the chip cannot miss a live
+   session at this rate — it just learns about it a little later. */
+const POLL_MS = 300_000
 
 /* `updated` is the feed's last write, so it outlives the session that
    wrote it. On an instrument this small "2H AGO" reads better than a
