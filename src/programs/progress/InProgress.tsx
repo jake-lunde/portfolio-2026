@@ -1,22 +1,22 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
-import { SPRINGS } from '@/lib/motion'
 import { CASES } from '@/programs/projects/cases'
 import { useWindows } from '@/store/windows'
 import { sfx } from '@/lib/sound'
 import { metric } from '@/lib/metrics'
 import { Stamp } from '@/components/primitives/Stamp'
 import { CopyText as Copy } from '@/content/CopyText'
+import { CaterpillarPeek, Leaf, PopIn, StageCritter, stageFor } from './critters'
 import styles from './progress.module.css'
 
-/* WIP-15 · In Progress — a Mac OS 9 installer dialog that never finishes,
-   because the case studies never finish. The aggregate bar is the mean of
-   every case's progress.pct; each case gets its own meter and an ENCOURAGE
-   button that writes a nudge blob (/api/nudge) and pings Jake. One nudge
-   per case per browser session — the pressed set lives in sessionStorage
-   so the button can't be mashed. */
+/* WIP-15 · In Progress — the leaf patch. Every case study is a leaf and a
+   caterpillar is eating it: pct drives how many bites are missing, and the
+   stage the row is at (0 egg · 1–99 caterpillar · 100 butterfly). The
+   aggregate leaf up top is the mean of every case's progress.pct; each case
+   gets its own leaf and a FEED button that writes a nudge blob (/api/nudge)
+   and pings Jake. One nudge per case per browser session — the pressed set
+   lives in sessionStorage so the button can't be mashed. */
 
 const SENT_KEY = 'lunde-nudged'
 
@@ -32,43 +32,31 @@ const readSent = (): string[] => {
   }
 }
 
-/** Shared bar. `striped` = the OS 9 installer fill (aggregate only).
-    The fill layer is full-width and never scaled — what animates is an
-    opaque shutter over the *unfilled* remainder, scaled from the right.
-    Transform-only (no width/layout animation, no CLS) and it keeps the
-    diagonal stripes at their true width instead of squashing them. */
-function Bar({
+/** The meter is a leaf with bites taken out of it. Only the bite circles'
+    opacity changes with pct — no width, no morph, no layout — so the
+    machine-readable part (role + aria-value*) carries the real number. */
+function LeafMeter({
   pct,
-  striped = false,
   role,
   label,
-  delay = 0,
+  large = false,
 }: {
   pct: number
-  striped?: boolean
   role: 'progressbar' | 'meter'
   label: string
-  delay?: number
+  large?: boolean
 }) {
-  const reduced = useReducedMotion()
   const v = Math.max(0, Math.min(100, Math.round(pct)))
   return (
     <div
-      className={striped ? `${styles.track} ${styles.trackLg}` : styles.track}
+      className={large ? `${styles.leafTrack} ${styles.leafTrackLg}` : styles.leafTrack}
       role={role}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={v}
       aria-label={label}
     >
-      <span className={striped ? styles.stripes : styles.solid} aria-hidden="true" />
-      <motion.span
-        className={styles.shutter}
-        aria-hidden="true"
-        initial={{ scaleX: reduced ? 1 - v / 100 : 1 }}
-        animate={{ scaleX: 1 - v / 100 }}
-        transition={reduced ? { duration: 0 } : { ...SPRINGS.rise, delay }}
-      />
+      <Leaf pct={v} className={styles.leafSvg} />
     </div>
   )
 }
@@ -151,9 +139,9 @@ export default function InProgress() {
 
       <header className={styles.head}>
         <Copy k="progress.eyebrow" as="p" className={styles.eyebrow} />
-        <Bar
+        <LeafMeter
           pct={mean}
-          striped
+          large
           role="progressbar"
           label={`Case studies overall: ${mean}% complete`}
         />
@@ -162,12 +150,19 @@ export default function InProgress() {
           {': '}
           <Copy k="progress.eta" as="span" className={styles.etaValue} />
         </p>
+        {/* one caterpillar comes up out of the header's rule on mount */}
+        <div className={styles.peek} aria-hidden="true">
+          <PopIn delay={0.18}>
+            <CaterpillarPeek className={styles.peekSvg} />
+          </PopIn>
+        </div>
       </header>
 
       <ul className={styles.list}>
         {TRACKED.map((c, i) => {
           const pct = c.progress?.pct ?? 0
           const done = pct === 100
+          const stage = stageFor(pct)
           const n = counts[c.slug] ?? 0
           const isSent = sent.includes(c.slug)
           return (
@@ -179,12 +174,19 @@ export default function InProgress() {
                 <span className={styles.pct}>{pct}%</span>
               </div>
               <p className={styles.phase}>{c.progress?.phase}</p>
-              <Bar
-                pct={pct}
-                role="meter"
-                label={`${c.name}: ${pct}% — ${c.progress?.phase ?? ''}`}
-                delay={0.05 * (i + 1)}
-              />
+              <div className={styles.meterRow}>
+                <span className={`${styles.critter} ${styles[stage]}`} aria-hidden="true">
+                  <PopIn delay={0.05 * (i + 1)}>
+                    <StageCritter stage={stage} className={styles.critterSvg} />
+                  </PopIn>
+                </span>
+                <Copy k={`progress.stage.${stage}`} className={styles.sr} />
+                <LeafMeter
+                  pct={pct}
+                  role="meter"
+                  label={`${c.name}: ${pct}% — ${c.progress?.phase ?? ''}`}
+                />
+              </div>
               <div className={styles.actions}>
                 {done ? (
                   <button
@@ -195,7 +197,7 @@ export default function InProgress() {
                       open(`case:${c.slug}`)
                     }}
                   >
-                    READ IT
+                    <Copy k="progress.readIt" as="span" />
                   </button>
                 ) : (
                   <>

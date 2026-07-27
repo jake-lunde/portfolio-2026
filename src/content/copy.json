@@ -126,23 +126,30 @@
     "base": "Visualizers",
     "medieval": "Scrying"
   },
-  "progress.empty": "Nothing on the bench. Suspicious.",
+  "progress.empty": "No leaves on the patch. Suspicious.",
   "progress.eta": "Unknown — he has a day job",
-  "progress.etaLabel": "Estimated time remaining",
+  "progress.etaLabel": "Estimated time to butterfly",
   "progress.eyebrow": {
-    "base": "Installing case studies…",
-    "medieval": "Copying manuscripts…"
+    "base": "THE LEAF PATCH",
+    "medieval": "THE HERBARIUM"
   },
   "progress.nudge": {
-    "base": "TELL HIM TO FINISH IT",
-    "medieval": "IMPLORE"
+    "base": "FEED A LEAF",
+    "medieval": "OFFER A LEAF"
   },
-  "progress.nudgeHint": "Sometimes you need a little push, you know?",
+  "progress.nudgeHint": "Hungry caterpillars write faster.",
   "progress.nudged": {
-    "base": "JAKE HAS BEEN ENCOURAGED",
-    "medieval": "HEARD"
+    "base": "LEAF DELIVERED",
+    "medieval": "LEAF RECEIVED"
   },
-  "progress.offline": "The encouragement line isn’t connected to storage yet.",
+  "progress.offline": "The leaf chute isn’t connected to storage yet.",
+  "progress.readIt": {
+    "base": "READ IT",
+    "medieval": "PERUSE IT"
+  },
+  "progress.stage.butterfly": "Butterfly — finished, it flew",
+  "progress.stage.caterpillar": "Caterpillar — still eating the leaf",
+  "progress.stage.egg": "Egg — not hatched yet",
   "projects.indexLabel": "Index — Selected work",
   "projects.itemsSuffix": "items",
   "readme.eyebrow": "README — Start here",

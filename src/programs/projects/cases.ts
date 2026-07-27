@@ -24,7 +24,7 @@ export const CASES: CaseDef[] = [
     year: '2024–25',
     status: 'live',
     component: dynamic(() => import('@/programs/projects/CaseInvest')),
-    progress: { pct: 100, phase: 'Shipped — read it' },
+    progress: { pct: 100, phase: 'Butterfly — it flew. Read it.' },
   },
   {
     slug: 'family-hub',
@@ -33,7 +33,7 @@ export const CASES: CaseDef[] = [
     org: 'Greenlight',
     year: '2025',
     status: 'soon',
-    progress: { pct: 55, phase: 'Research synthesized · writing the narrative' },
+    progress: { pct: 55, phase: 'Very hungry — halfway through the leaf' },
   },
   {
     slug: 'tooling',
@@ -42,7 +42,7 @@ export const CASES: CaseDef[] = [
     org: 'Personal leverage',
     year: '2024–26',
     status: 'soon',
-    progress: { pct: 30, phase: 'Artifacts gathered · hunting the through-line' },
+    progress: { pct: 30, phase: 'First instar — small bites, big leaf' },
   },
   {
     slug: 'interview-pipeline',
@@ -51,7 +51,7 @@ export const CASES: CaseDef[] = [
     org: 'This site',
     year: '2026',
     status: 'soon',
-    progress: { pct: 15, phase: 'Outline only — the self-referential one' },
+    progress: { pct: 15, phase: 'Just hatched — eyeing the leaf' },
   },
 ]
 

@@ -1,6 +1,7 @@
-/* WIP-15 · In Progress — a Mac OS 9 installer dialog that never finishes.
-   Bars: full-width fill layer + an opaque shutter scaled from the right
-   (transform-only, keeps stripe width true). */
+/* WIP-15 · In Progress — the leaf patch. The meter is a drawn leaf whose
+   bite marks toggle opacity (see critters.tsx); nothing here animates a
+   layout property. Critters live in overflow-hidden slots so PopIn can
+   raise them out from behind an edge. */
 
 .wrap {
   display: flex;
@@ -16,9 +17,23 @@
   opacity: 0;
 }
 
-/* ---------------- installer head ---------------- */
+/* screen-reader-only stage string, sitting beside its (aria-hidden) drawing */
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------- head ---------------- */
 
 .head {
+  position: relative;
   padding: 18px 20px 16px;
   background: var(--surface);
   border-bottom: var(--border-width-default) solid var(--content);
@@ -41,77 +56,50 @@
   text-transform: uppercase;
   color: var(--content-muted);
   margin: var(--space-2) 0 0;
+  /* keeps the status line clear of the caterpillar in the corner */
+  padding-right: 44px;
 }
 
 .etaValue {
   color: var(--content);
 }
 
-/* ---------------- bars ---------------- */
-
-.track {
-  position: relative;
-  height: 9px;
-  overflow: hidden;
-  background: var(--surface);
-  border: var(--border-width-default) solid var(--content);
-}
-
-/* the aggregate installer bar sits taller, like the OS 9 original */
-.trackLg {
-  height: 15px;
-}
-
-[data-theme='dark'] .track {
-  border-color: var(--border);
-}
-
-/* diagonal installer stripes: accent + a lighter mix of the same accent.
-   Overhangs the track horizontally so the creep never exposes an edge. */
-.stripes {
+/* The hole the caterpillar comes out of: a clipped slot sitting flush on
+   the header's bottom rule, so that rule reads as the ground line. */
+.peek {
   position: absolute;
-  top: 0;
+  right: 18px;
   bottom: 0;
-  left: -32px;
-  right: -32px;
-  background: repeating-linear-gradient(
-    135deg,
-    var(--accent) 0 8px,
-    color-mix(in srgb, var(--accent) 58%, var(--surface)) 8px 16px
-  );
+  width: 34px;
+  height: 30px;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.solid {
-  position: absolute;
-  inset: 0;
-  background: var(--accent);
+.peekSvg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-/* opaque shutter over the unfilled remainder — this is what animates */
-.shutter {
-  position: absolute;
-  inset: 0;
-  background: var(--surface);
-  transform-origin: right center;
-  will-change: transform;
+/* ---------------- leaf meters ---------------- */
+
+.leafTrack {
+  flex: 1;
+  min-width: 0;
+  max-width: 210px;
 }
 
-/* Stripes creep left-to-right. 16px is the gradient period measured along
-   the 135deg axis, so a horizontal step of 16 / cos(45°) = 22.63px lands
-   exactly one period on — a seamless loop. Motion only, never layout. */
-@media (prefers-reduced-motion: no-preference) {
-  .stripes {
-    animation: creep 1.9s linear infinite;
-  }
+/* the aggregate leaf is the header's centrepiece — let it run wide */
+.leafTrackLg {
+  max-width: 300px;
+  margin-top: var(--space-1);
 }
 
-@keyframes creep {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(22.63px);
-  }
+.leafSvg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* ---------------- per-case rows ---------------- */
@@ -173,6 +161,40 @@
   color: var(--content-muted);
   margin: 3px 0 var(--space-2);
   overflow-wrap: anywhere;
+}
+
+/* stage portrait + its leaf, on one line */
+.meterRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* the critter's own clipped slot — PopIn raises it out of the bottom */
+.critter {
+  display: block;
+  flex: none;
+  overflow: hidden;
+}
+
+.critterSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* one width per stage, chosen so all three read at the same optical size */
+.egg {
+  width: 20px;
+}
+
+.caterpillar {
+  width: 40px;
+}
+
+.butterfly {
+  width: 32px;
 }
 
 .actions {
@@ -267,23 +289,14 @@
 }
 
 /* ---------------- medieval: the scriptorium ----------------
-   No machine stripes. The bar is a rubricated block laid down in quill
-   hatching, wavered by the shell's #lunde-roughen filter (same treatment
-   as the hand-inked dataviz). Ink doesn't creep, so the animation stops. */
+   A bestiary marginal, not a machine readout. The shell's #lunde-roughen
+   filter gives every drawing the quill wobble the hand-inked dataviz has,
+   and the rubricated accent already recolours the leaf for free. */
 
-:global([data-skin='medieval']) .track {
-  border-width: var(--border-width-thick);
+:global([data-skin='medieval']) .leafSvg,
+:global([data-skin='medieval']) .critterSvg,
+:global([data-skin='medieval']) .peekSvg {
   filter: url(#lunde-roughen);
-}
-
-:global([data-skin='medieval']) .stripes,
-:global([data-skin='medieval']) .solid {
-  background: repeating-linear-gradient(
-    90deg,
-    var(--accent) 0 2px,
-    color-mix(in srgb, var(--accent) 34%, var(--surface)) 2px 5px
-  );
-  animation: none;
 }
 
 :global([data-skin='medieval']) .pct {
@@ -295,6 +308,14 @@
 @media (max-width: 420px) {
   .head {
     padding: 14px 14px 12px;
+  }
+
+  .peek {
+    right: 12px;
+  }
+
+  .leafTrackLg {
+    max-width: none;
   }
 
   .list {
