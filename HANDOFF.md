@@ -134,6 +134,44 @@ deck). Zero conflicts. SHIPPED as `8ce7cdc`, verified live on lunde.co: the new
   shrink a child when its own height is definite; the feed is the one elastic
   band and absorbs what the pyramid doesn't need. Window is 800×720.
 
+## Incident — Blob quota burn on /api/cc-feed (session 26, 2026-07-26)
+
+**Jake's Vercel Blob usage went 75% → 100% in two hours. `/api/cc-feed` took
+264 GETs in four hours, and EVERY GET called Blob `list()` — a billed
+operation. Three compounding causes, only one of which was new:**
+
+1. **No cache anywhere.** `readFeed()` hit `list()` on every single request.
+2. **No visibility gating.** The desktop chip polls for as long as a tab is
+   open — a background tab left overnight billed all night for zero eyeballs.
+   Intervals were 20s (deck) and 45s (chip).
+3. **My own traffic.** Verification browsing on lunde.co plus background
+   `until curl` loops I left running while waiting on deploys — those polled
+   the endpoint every 10–20s for minutes at a time. A real share of the 264
+   was me, not passive visitors. **Kill polling loops when the wait ends.**
+
+**Fixed and deployed:** module-scope cache in the route (one `list()` per 20s
+per warm instance, cleared on write); clients skip polling entirely while
+`document.visibilityState !== 'visible'` and refresh on `visibilitychange`;
+intervals 20s→60s and 45s→120s; and the per-page-load feed read that
+AmbientAgents used for sprite intros is gone (recorded fallbacks instead).
+
+⚠️ **Already-open tabs keep the OLD intervals until reloaded.**
+
+⚠️ **Unresolved: which metric actually hit 100%.** Reads cannot consume
+storage BYTES — the feed blob is a few KB and prunes to 3 versions — so if
+the dashboard's 100% is bytes, the cause is elsewhere (`/api/wall` stores
+booth photos; guestbook and puzzle-times share the store). `vercel blob list`
+answers it. If it is operations, it resets monthly and the fixes above cut
+the ongoing rate.
+
+⚠️ **Do not try again to CDN-cache this route** without new information — see
+the comment in `next.config.mjs`. Handler `Cache-Control`, segment
+`revalidate`, and a next.config `headers()` entry were all tried; all three
+are overwritten by `max-age=0, must-revalidate` on the deployed function
+because the route reads its blob with `no-store`. The next.config one applies
+against a local `next start`, which makes it look fixed — verify on
+production, not localhost.
+
 ## Next steps
 
 1. **Jake — one env var left:** the optional `NUDGE_WEBHOOK_URL` (no ping on
