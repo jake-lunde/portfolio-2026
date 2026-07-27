@@ -3,7 +3,12 @@ import { del, list, put } from '@vercel/blob'
 import { isCrewId } from '@/components/shell/crew'
 
 export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
+/* NOT `force-dynamic`: it makes Next stamp `max-age=0, must-revalidate` over
+   any Cache-Control we set, so every poll reached the function (verified
+   against production — the explicit header simply did not survive). The
+   segment `revalidate` is the supported knob, and it is what actually lets
+   the CDN absorb the polling. */
+export const revalidate = 20
 
 /* COST NOTE — read this before touching the GET path.
    Every readFeed() costs a Blob `list()`, which is a BILLED operation, and
@@ -18,7 +23,6 @@ export const dynamic = 'force-dynamic'
    FEED_TTL_MS. This is a deck of build telemetry — 20 seconds of staleness
    is free, and a billed op per visitor per 20s is not. */
 const FEED_TTL_MS = 20_000
-const EDGE_TTL_S = 20
 
 /* COMMAND.CTR live feed. The orchestrating Claude session POSTs event
    batches here (guarded by CC_FEED_KEY); the site GETs them publicly.
@@ -84,13 +88,9 @@ async function readFeed(): Promise<{ updated: number; events: FeedEvent[] }> {
 
 export async function GET() {
   if (!storeId()) return NextResponse.json({ updated: 0, events: [] })
-  return NextResponse.json(await readFeedCached(), {
-    // the CDN absorbs the polling: N visitors × a poll each collapse to one
-    // origin hit per window, and a stale answer still serves while it refreshes
-    headers: {
-      'Cache-Control': `public, s-maxage=${EDGE_TTL_S}, stale-while-revalidate=60`,
-    },
-  })
+  // the CDN absorbs the polling (see `revalidate` above): N visitors × a poll
+  // each collapse to roughly one origin hit per window
+  return NextResponse.json(await readFeedCached())
 }
 
 export async function POST(req: Request) {
