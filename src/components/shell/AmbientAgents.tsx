@@ -73,33 +73,16 @@ export function AmbientAgents() {
   // a ref, not a local: the walk loop restarts whenever a state dep
   // changes, and an introduction has to outlive that
   const holdUntil = useRef(0)
-  const lastTask = useRef<Record<string, string>>({ ...CREW_LAST_TASK })
 
-  /* One read of the feed, no polling: the introduction only needs a
-     plausible "last task", and the deck itself is what streams. */
+  /* "The last task i took on" comes from CREW_LAST_TASK — recorded, real,
+     and free. It used to read the live feed for a fresher answer; that cost
+     a billed Blob operation on EVERY page load, for one line of flavour in
+     a speech bubble most visitors never trigger. The deck is where live
+     telemetry belongs. */
+  const lastTask = CREW_LAST_TASK
+
   useEffect(() => {
     met.current = readMet()
-    let dead = false
-    void (async () => {
-      try {
-        const res = await fetch('/api/cc-feed')
-        const d: { events?: Array<{ agent: string; label: string; redact?: boolean }> } =
-          await res.json()
-        if (dead || !Array.isArray(d.events)) return
-        const next = { ...CREW_LAST_TASK }
-        for (const e of d.events) {
-          if (isCrewId(e?.agent) && typeof e.label === 'string') {
-            next[e.agent] = e.redact ? 'CLASSIFIED UNTIL IT SHIPS.' : e.label
-          }
-        }
-        lastTask.current = next
-      } catch {
-        /* feed unreachable — the recorded fallbacks are already loaded */
-      }
-    })()
-    return () => {
-      dead = true
-    }
   }, [])
 
   useEffect(() => {
@@ -293,7 +276,7 @@ export function AmbientAgents() {
                   {CREW_BY_ID[intro.id]?.model} · {CREW_INTRO[intro.id]}
                 </span>
                 <span className={styles.introTask}>
-                  LAST TASK — {lastTask.current[intro.id]}
+                  LAST TASK — {lastTask[intro.id]}
                 </span>
               </motion.div>
             )}

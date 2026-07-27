@@ -5,6 +5,21 @@ import { isCrewId } from '@/components/shell/crew'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+/* COST NOTE — read this before touching the GET path.
+   Every readFeed() costs a Blob `list()`, which is a BILLED operation, and
+   this endpoint is polled by a chip that sits on the desktop forever. One
+   browser left open overnight was quietly spending thousands of ops. Three
+   defences, cheapest first:
+     1. the CDN answers most polls (s-maxage below), so they never reach us
+     2. a module-scope cache answers most of the rest — serverless instances
+        are reused, so a burst of misses still costs ONE list()
+     3. the clients don't poll a hidden tab at all (see CommandWidget)
+   A write invalidates the cache in-process; other instances catch up within
+   FEED_TTL_MS. This is a deck of build telemetry — 20 seconds of staleness
+   is free, and a billed op per visitor per 20s is not. */
+const FEED_TTL_MS = 20_000
+const EDGE_TTL_S = 20
+
 /* COMMAND.CTR live feed. The orchestrating Claude session POSTs event
    batches here (guarded by CC_FEED_KEY); the site GETs them publicly.
    Events marked redact:true carry no label at all server-side won't —
@@ -40,6 +55,17 @@ const wellFormed = (e: FeedEvent) =>
   (e.target === undefined || isCrewId(e.target)) &&
   (ACTIONS as readonly string[]).includes(e?.action)
 
+let cache: { at: number; data: { updated: number; events: FeedEvent[] } } | null = null
+
+/** The cached read every GET goes through. Only a cache MISS costs a
+    `list()`; a write clears it so the next read is honest. */
+async function readFeedCached(): Promise<{ updated: number; events: FeedEvent[] }> {
+  if (cache && Date.now() - cache.at < FEED_TTL_MS) return cache.data
+  const data = await readFeed()
+  cache = { at: Date.now(), data }
+  return data
+}
+
 async function readFeed(): Promise<{ updated: number; events: FeedEvent[] }> {
   const { blobs } = await list({ prefix: FEED_PREFIX, limit: 10, storeId: storeId() })
   const blob = blobs.sort((a, b) => b.pathname.localeCompare(a.pathname))[0]
@@ -58,7 +84,13 @@ async function readFeed(): Promise<{ updated: number; events: FeedEvent[] }> {
 
 export async function GET() {
   if (!storeId()) return NextResponse.json({ updated: 0, events: [] })
-  return NextResponse.json(await readFeed())
+  return NextResponse.json(await readFeedCached(), {
+    // the CDN absorbs the polling: N visitors × a poll each collapse to one
+    // origin hit per window, and a stale answer still serves while it refreshes
+    headers: {
+      'Cache-Control': `public, s-maxage=${EDGE_TTL_S}, stale-while-revalidate=60`,
+    },
+  })
 }
 
 export async function POST(req: Request) {
@@ -81,6 +113,8 @@ export async function POST(req: Request) {
     .filter(wellFormed)
     .map((e) => ({ ...e, label: e.label.slice(0, 60) }))
 
+  // a writer must not read its own stale cache
+  cache = null
   const current = body.reset ? { events: [] as FeedEvent[] } : await readFeed()
   const events = [...current.events, ...incoming].slice(-MAX_EVENTS)
   const payload = { updated: Date.now(), events }
@@ -100,5 +134,6 @@ export async function POST(req: Request) {
   } catch {
     /* pruning is best-effort */
   }
+  cache = { at: Date.now(), data: payload }
   return NextResponse.json({ ok: true, count: events.length })
 }

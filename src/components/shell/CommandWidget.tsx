@@ -44,7 +44,11 @@ type Ev = {
 }
 
 const LIVE_FRESH_MS = 15 * 60_000
-const POLL_MS = 45_000
+/* Every poll can cost a billed Blob operation, and this chip lives on the
+   desktop for as long as the tab is open — a background tab polling all
+   night is real money for zero eyeballs. Two rules: a slow interval, and
+   NEVER poll while the tab is hidden (we catch up on the way back). */
+const POLL_MS = 120_000
 
 /* `updated` is the feed's last write, so it outlives the session that
    wrote it. On an instrument this small "2H AGO" reads better than a
@@ -74,6 +78,7 @@ export function CommandWidget() {
   useEffect(() => {
     let dead = false
     const poll = async () => {
+      if (document.visibilityState !== 'visible') return
       try {
         const res = await fetch('/api/cc-feed')
         const d: { updated: number; events: Ev[] } = await res.json()
@@ -90,9 +95,15 @@ export function CommandWidget() {
     }
     void poll()
     const t = setInterval(() => void poll(), POLL_MS)
+    // coming back to the tab is the one moment a fresh read is worth paying for
+    const onVis = () => {
+      if (document.visibilityState === 'visible') void poll()
+    }
+    document.addEventListener('visibilitychange', onVis)
     return () => {
       dead = true
       clearInterval(t)
+      document.removeEventListener('visibilitychange', onVis)
     }
   }, [])
 

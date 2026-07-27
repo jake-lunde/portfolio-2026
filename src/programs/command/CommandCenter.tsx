@@ -59,7 +59,10 @@ const SPEED = 1.6
 const FEED_MAX = 7
 const PROMPT_MAX = 3
 const LIVE_FRESH_MS = 15 * 60 * 1000
-const LIVE_POLL_MS = 20_000
+/* Slower than it feels like it should be, on purpose: each poll can cost a
+   billed Blob operation and the deck can sit open for hours. 60s is well
+   inside the 15-minute window that defines "live" anyway. */
+const LIVE_POLL_MS = 60_000
 /* a constant, not useId(): programs are dynamic imports into a tree that
    reshapes at the SSR handover, and useId disagrees with itself there */
 const LOG_ID = 'cc-transmission-log'
@@ -185,6 +188,8 @@ export default function CommandCenter() {
     let iv: ReturnType<typeof setInterval> | null = null
 
     const pull = async (first: boolean) => {
+      // a deck nobody is looking at doesn't get to spend operations
+      if (!first && document.visibilityState !== 'visible') return
       try {
         const res = await fetch('/api/cc-feed')
         const d: { updated: number; events: Ev[] } = await res.json()
