@@ -3,13 +3,17 @@
 import { useEffect, useState } from 'react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { CopyText as Copy } from '@/content/CopyText'
+import { useSettings, type Skin } from '@/store/settings'
 import styles from './specsheet.module.css'
 
 /* SPEC.SHEET — a living design-system doc that documents LUNDE OS itself.
    Colors, contrast ratios and type read live from the real CSS custom
    properties via getComputedStyle, so the whole sheet re-derives when the
-   theme flips. Motion values are quoted truthfully from
-   src/components/shell/Window.tsx. GL design-system feed is stubbed. */
+   theme OR skin flips. Color names and typeface names can't be read from
+   the DOM (next/font hashes family names), so those are quoted per skin
+   below — keep them in sync with layout.tsx and the skin token sets.
+   Motion values are quoted truthfully from src/components/shell/Window.tsx.
+   GL design-system feed is stubbed. */
 
 // ---- color math (real WCAG relative-luminance) ----
 
@@ -74,6 +78,25 @@ const COLOR_VARS: Array<{ name: string; label: string; against: 'paper' | 'ink' 
   { name: '--surface-inverse', label: 'Plate', against: 'paper' },
 ]
 
+/* Per-skin quoted names — the two accents are the only chips whose NAME is
+   skin-specific (the swatch + hex + ratio always read live regardless).
+   Values from the active skin's token hexes: medieval accent #9E2B1E
+   (vermilion) / expressive #B8860B (gold). Underwater has no tokens yet →
+   classic names stand in, same fallback the gate uses. */
+const ACCENT_NAMES: Record<Skin, { system: string; expressive: string }> = {
+  classic: { system: 'Blue · system', expressive: 'Pink · expressive' },
+  medieval: { system: 'Vermilion · system', expressive: 'Gold · expressive' },
+  underwater: { system: 'Blue · system', expressive: 'Pink · expressive' },
+}
+
+/* Typeface names per skin, quoted from layout.tsx (next/font hashes the
+   computed font-family, so it can't be read truthfully from the DOM). */
+const TYPE_NAMES: Record<Skin, { display: string; body: string; mono: string }> = {
+  classic: { display: 'Geist Pixel', body: 'Geist', mono: 'Geist Mono' },
+  medieval: { display: 'MedievalSharp', body: 'Eagle Lake', mono: 'MedievalSharp' },
+  underwater: { display: 'Geist Pixel', body: 'Geist', mono: 'Geist Mono' },
+}
+
 type Chip = {
   name: string
   label: string
@@ -91,6 +114,9 @@ const MOTION: Array<[string, string]> = [
 
 export default function SpecSheet() {
   const [chips, setChips] = useState<Chip[]>([])
+  const skin = useSettings((s) => s.skin)
+  const accentNames = ACCENT_NAMES[skin] ?? ACCENT_NAMES.classic
+  const typeNames = TYPE_NAMES[skin] ?? TYPE_NAMES.classic
 
   useEffect(() => {
     const root = document.documentElement
@@ -116,9 +142,10 @@ export default function SpecSheet() {
     }
 
     read()
-    // re-derive when the theme attribute flips
+    // re-derive when the theme OR skin attribute flips — a skin swaps the
+    // entire token set, so the sheet must re-read, not just re-render
     const obs = new MutationObserver(read)
-    obs.observe(root, { attributes: true, attributeFilter: ['data-theme'] })
+    obs.observe(root, { attributes: true, attributeFilter: ['data-theme', 'data-skin'] })
     return () => obs.disconnect()
   }, [])
 
@@ -139,6 +166,12 @@ export default function SpecSheet() {
       <div className={styles.chips}>
         {chips.map((c) => {
           const pass = c.ratio >= 4.5
+          const label =
+            c.name === '--accent'
+              ? accentNames.system
+              : c.name === '--accent-expressive'
+                ? accentNames.expressive
+                : c.label
           return (
             <div key={c.name} className={styles.chip}>
               <span
@@ -147,7 +180,7 @@ export default function SpecSheet() {
                 aria-hidden="true"
               />
               <span className={styles.chipMeta}>
-                <span className={styles.chipName}>{c.label}</span>
+                <span className={styles.chipName}>{label}</span>
                 <span className={styles.chipVar}>{c.name}</span>
               </span>
               <span className={styles.chipHex}>{c.hex}</span>
@@ -171,7 +204,7 @@ export default function SpecSheet() {
         <div className={styles.specimen}>
           <span className={styles.specDisplay}>AaBb 0123</span>
           <span className={styles.specLine}>
-            Display · Geist Pixel · 400 · tracking 0
+            Display · {typeNames.display} · 400 · tracking 0
           </span>
         </div>
         <div className={styles.specimen}>
@@ -179,13 +212,13 @@ export default function SpecSheet() {
             The quick brown fox jumps over the lazy dog.
           </span>
           <span className={styles.specLine}>
-            Body · Geist · 17px · leading 1.6
+            Body · {typeNames.body} · 17px · leading 1.6
           </span>
         </div>
         <div className={styles.specimen}>
           <span className={styles.specMono}>DOC-ID · FIG.01 · 920.12 FT</span>
           <span className={styles.specLine}>
-            Mono · Geist Mono · labels · caps · tracking 0.14em
+            Mono · {typeNames.mono} · labels · caps · tracking 0.14em
           </span>
         </div>
       </div>
