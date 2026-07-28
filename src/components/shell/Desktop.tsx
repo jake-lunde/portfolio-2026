@@ -18,6 +18,7 @@ import { AmbientAgents } from './AmbientAgents'
 import { Screensaver } from './Screensaver'
 import { Window } from './Window'
 import { Boot } from './Boot'
+import { KnightSpeakLayer } from '@/content/KnightSpeakLayer'
 import styles from './shell.module.css'
 
 /* The OS. Server pages hand us the windows a deep link opens; after
@@ -58,6 +59,9 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
 
   return (
     <>
+      {/* medieval voice for prose the copy layer doesn't key — mounted at
+          the shell so it covers every program, window and route */}
+      <KnightSpeakLayer />
       <MenuBar />
       <SkillsTicker />
       <main ref={desktopRef} className={styles.desktop}>

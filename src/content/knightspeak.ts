@@ -44,6 +44,51 @@ const RULES: Record<string, string> = {
   very: 'most',
   really: 'truly',
   please: 'prithee',
+
+  /* Second pass — added when the translator moved from copy.json keys to
+     the whole rendered page (README prose, MDX case studies). Same law:
+     no rule may bloat, and a hiring manager must still parse the
+     sentence. Proper nouns, job titles and product names are absent by
+     design — they fall through untouched. */
+  over: "o'er",
+  will: 'shall',
+  made: 'wrought',
+  built: 'wrought',
+  help: 'aid',
+  helps: 'aids',
+  helping: 'aiding',
+  people: 'folk',
+  know: 'ken',
+  knows: 'kenneth',
+  again: 'anew',
+  always: 'ever',
+  perhaps: 'mayhap',
+  maybe: 'mayhap',
+  quickly: 'swiftly',
+  fast: 'swift',
+  think: 'deem',
+  thinks: 'deemeth',
+  want: 'wish',
+  wants: 'wisheth',
+  read: 'peruse',
+  kids: 'younglings',
+  children: 'younglings',
+  money: 'coin',
+  sorry: 'alas',
+  stop: 'halt',
+  best: 'finest',
+  better: 'finer',
+  comes: 'cometh',
+  goes: 'goeth',
+  makes: 'maketh',
+  takes: 'taketh',
+  gives: 'giveth',
+  looks: 'looketh',
+  seems: 'seemeth',
+  /* no rule for "works" — it is a noun as often as a verb here
+     ("Works" is the medieval name for Case Studies). */
+  today: 'this day',
+  tomorrow: 'the morrow',
 }
 
 const PATTERN = new RegExp(
