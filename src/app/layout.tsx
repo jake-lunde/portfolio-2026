@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     template: '%s — Jake Lunde',
   },
   description:
-    'LUNDE OS: the portfolio of Jake Lunde, a principal-level product designer who ships production code. The site is the work.',
+    'LUNDE OS: the portfolio of Jake Lunde, a staff product designer who ships production code. The site is the work.',
 }
 
 export const viewport: Viewport = {

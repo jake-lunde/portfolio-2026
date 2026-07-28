@@ -43,8 +43,8 @@ export default function About() {
       </div>
       <Copy k="readme.eyebrow" as="p" className={styles.aboutEyebrow} />
       <p>
-        I&rsquo;m a principal-level product designer shipping production code —
-        a design engineer. Over ten years of product work in consumer
+        I&rsquo;m a product designer shipping production code — a design
+        engineer. Over ten years of product work in consumer
         products, digital and physical, most recently leading design on
         Greenlight&rsquo;s{' '}
         <a href="https://greenlight.com/family-hub" target="_blank" rel="noreferrer">
