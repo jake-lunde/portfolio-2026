@@ -9,6 +9,34 @@
 
 ---
 
+## CV.EXE: the printer prints (session 30, 2026-07-28)
+
+**Shannon/Opus solo — the session was a content negotiation with Jake (his
+facts, his voice, his risk appetite) plus one tightly-coupled feature. Both
+halves are taste, which §4.2 never delegates. Deck unreported (Blob cap).**
+
+- **Three premises were wrong, and checking beat complying.** Production was
+  never on the leaf patch (its Vercel build is `target: null`, a preview), so
+  nothing needed reverting. Session 29 had already made the Notion project, so
+  nothing needed creating. And `docs/PLAN-CV-EXE.md` §0.3 said to "reuse" the
+  3–4×/355% figures as already published — they are not published anywhere on
+  the site, making them a FIRST disclosure. Rule adopted: **relative deltas on
+  Jake's own work ship; absolute internal volumes never do.**
+- **pdfkit, not @react-pdf/renderer.** A single ATS column needs no reconciler,
+  and built-in Helvetica means zero font embedding: the ATS-safe face and a
+  4.4KB file in one decision.
+- **The reveal is CSS, not Motion, on purpose** — Motion drives from rAF, which
+  a hidden tab freezes, so a visitor who printed then switched tabs would
+  return to a sheet reading "done" and showing nothing.
+- **Verification, worth re-reading:** the preview pane reports
+  `document.hidden`, freezing rAF AND CSS transitions — it can prove state but
+  never appearance. Real renders came from the cached ms-playwright
+  `headless_shell` over raw CDP (Node 22 has global `WebSocket`). Zero drift
+  proven: all 50 exported strings matched in both printout and PDF text layer
+  (via pypdf — `pdftotext` is NOT installed here).
+- Closed a real hole: `portfolio-tracker/` (the directory, holding internal
+  metrics and screenshots) was never gitignored — only the `.md` was.
+
 ## The hiring audit + Trash v1 + SpecSheet fix (session 29, 2026-07-28)
 
 **Fable solo (audit = taste, never delegated; build tasks small + closed —

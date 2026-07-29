@@ -1,83 +1,79 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-07-28 (session 30).
+> Last rotation: 2026-07-28 (session 31).
 
 ## Current state
 
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
-  stays "pending" while Chromatic runs). **Production = `418c8b8`.**
-- **⚠️ Local `main` is 3 commits AHEAD of origin, unpushed, awaiting Jake's
-  read:** `92b615b` SpecSheet skin-reactive · `2040fea` canonical title +
-  gitignore · `7d65965` CV.EXE. Pushing these deploys them.
-- **⚠️ Branch `leaf-patch` is PARKED at Jake's request (s30).** Holds the CASES
-  caterpillar metaphor + Trash v1 (`e85a51c`, `8934b21`; the latter is
-  local-only). Production was never on it — its Vercel build is a PREVIEW
-  (`target: null`). Only the SpecSheet fix was cherry-picked to main.
-- **CV.EXE (DOC-01) is BUILT** — `/cv`, desktop slot 2 after README.
-  `src/content/resume.ts` is the single source of truth; the window renders it
-  and `scripts/build-cv.mjs` renders it to `public/jake-lunde-resume.pdf`
-  (committed, deterministic, 4.4KB) via `predev`/`prebuild`. Never hand-edit
-  the PDF; the build fails on page 2 or >200KB. **The sheet's
-  `data-no-translate` is load-bearing** — KnightSpeakLayer was rewriting
-  "kids"→"younglings" under medieval, falsifying a CV.
-- **Canonical title: Staff Product Designer.** LinkedIn confirms the Jan 2026
-  promotion from Design Lead, so the tracker's "Senior Design Lead" is stale,
-  not conflicting. Site copy reconciled; "principal-level" is gone.
+  stays "pending" while Chromatic runs). **Production = `c776745`; local main
+  IS origin/main — no divergence for the first time in three sessions.**
+- **SHIPPED s31:** SpecSheet skin-reactive (`92b615b`) · canonical title
+  Staff Product Designer (`2040fea`) · **Trash v1 OPEN with TWO records**
+  (`c776745`): Grows With You (pink) + The Assistants. Jake approved the
+  Assistants copy by shipping it. Deploy verified: markers live, Installer
+  absent, spec foot says "theme or skin flip".
+- **⚠️ Branch `cv-exe` = CV.EXE, pulled OFF main (Jake: "still needs some
+  work").** Holds `7d65965` (the whole program: resume.ts, build-cv.mjs,
+  PDF, registry, icon, sfx) + the old s30 HANDOFF rotate. Jake's open calls
+  from s30 still stand: BFA vs BA, and the "came off a dot-matrix printer"
+  summary line. Revise HERE, then merge to main to ship. Branch discipline
+  is now the rule — see below.
+- **⚠️ Branch `leaf-patch` still PARKED** (caterpillar CASES metaphor,
+  `e85a51c` + `8934b21`). The Trash's third record TAG-03 "The Installer"
+  is deliberately NOT live — it spoils/references the unshipped caterpillar.
+  Restore it from `8934b21` when leaf-patch ships (breadcrumb comment in
+  Trash.tsx says exactly this).
+- **NEW RULE from Jake (s31): feature work starts on its OWN branch** — "i
+  need to start doing this sooner." Never build a feature directly on main;
+  main stays shippable so partial work never blocks a cherry-picked ship.
 - **Skins:** classic (light/dark) + medieval; underwater = stub. Knight-speak
-  voice LIVE on prod (derived translation via SKIN_VOICE; explicit slots win).
+  voice LIVE (derived translation via SKIN_VOICE; explicit slots win;
+  KnightSpeakLayer walks the DOM — `data-no-translate` is the escape hatch).
 - **Copy layer + EDIT.MODE LIVE in production** — expect copy.json commits on
   main between sessions; rebase and merge at the KEY level, never force-push.
-- **Jake is preparing to APPLY for roles.** Session-29 audit gaps: resume
-  (→ CV.EXE, now built), collaboration evidence thin (→ Red Pen), gate taxes
-  return visits (unfixed, discuss). Notion projects: CV.EXE (Done) · The Red
-  Pen · Build A Skin · Ask The Machine.
-- **DS pipeline:** tokens/ → build → generated CSS/TS; Chromatic; SB10+
-  Webpack. ⚠️ delete stale STRING `core/leading|tracking|weight` vars before
-  next Figma PULL. No ESLint configured — `next lint` prompts interactively.
-- **Tracking:** Notion (connector live). **⚠️ COMMAND.CTR deck 500s — Blob
-  Advanced Ops capped until ~Aug 1; don't hammer.** Zero-`list()` fix still
-  top infra backlog (spec in archived s26 incident).
+- **Jake is preparing to APPLY.** Remaining audit gaps: CV.EXE (built, on
+  branch, needs revision) · Red Pen (Notion; blocked on critique artifacts —
+  capture checklist lives in portfolio-tracker.md) · gate friction (visible
+  second door + localStorage + `?ref=` — still unactioned, audit's #1 risk).
+- **Tracking:** Notion (connector live; IDs in agent memory). **⚠️ COMMAND.CTR
+  deck 500s — Blob cap until ~Aug 1; don't hammer.** Zero-`list()` fix = top
+  infra backlog (spec in archived s26 incident).
 - **Known debts:** SpecSheet motion quote-strings; first-load JS perf;
-  underwater; `--accent-on-inverse` role.
+  underwater; `--accent-on-inverse` role. Ports 3000/3210 are often owned by
+  concurrent sessions — add a temp launch.json entry, verify, revert it.
 
-## Latest session — CV.EXE: the printer prints (s30, 2026-07-28)
+## Latest session — branch surgery + the bin ships (s31, 2026-07-28)
 
-**Shannon/Opus solo — the session was a content negotiation with Jake (his
-facts, his voice, his risk appetite) plus one tightly-coupled feature. Both
-halves are taste, which §4.2 never delegates. Deck unreported (Blob cap).**
+**Fable solo (pure orchestration: rebase surgery, a two-line content cut,
+deploy verification — nothing delegable). Deck unreported (Blob cap).**
 
-- **Three premises were wrong, and checking beat complying.** Production was
-  never on the leaf patch (its Vercel build is `target: null`, a preview), so
-  nothing needed reverting. Session 29 had already made the Notion project, so
-  nothing needed creating. And `docs/PLAN-CV-EXE.md` §0.3 said to "reuse" the
-  3–4×/355% figures as already published — they are not published anywhere on
-  the site, making them a FIRST disclosure. Rule adopted: **relative deltas on
-  Jake's own work ship; absolute internal volumes never do.**
-- **pdfkit, not @react-pdf/renderer.** A single ATS column needs no reconciler,
-  and built-in Helvetica means zero font embedding: the ATS-safe face and a
-  4.4KB file in one decision.
-- **The reveal is CSS, not Motion, on purpose** — Motion drives from rAF, which
-  a hidden tab freezes, so a visitor who printed then switched tabs would
-  return to a sheet reading "done" and showing nothing.
-- **Verification, worth re-reading:** the preview pane reports
-  `document.hidden`, freezing rAF AND CSS transitions — it can prove state but
-  never appearance. Real renders came from the cached ms-playwright
-  `headless_shell` over raw CDP (Node 22 has global `WebSocket`). Zero drift
-  proven: all 50 exported strings matched in both printout and PDF text layer
-  (via pypdf — `pdftotext` is NOT installed here).
-- Closed a real hole: `portfolio-tracker/` (the directory, holding internal
-  metrics and screenshots) was never gitignored — only the `.md` was.
+- **Surgery, no force-push needed** (nothing was pushed): `git branch cv-exe
+  main` snapshot, then `rebase --onto 2040fea 7d65965 main` dropped CV.EXE
+  from main while keeping spec fix + title + HANDOFF rotate. Autostash
+  carried the concurrent session's dirty `figma-plugin/code.ts` through.
+- **Trash restored from `8934b21` via `checkout <sha> -- <files>`** (cherry-
+  pick would have collided with the already-picked SpecSheet + diverged
+  copy.json), TAG-03 cut per Jake, copy keys + registry applied by hand.
+  Also re-applied the `spec-sheet.foot` copy line the s30 cherry-pick
+  dropped.
+- Verified on a temp `:3333` launch entry (3000 AND 3210 both owned by other
+  sessions' servers; entry reverted). No local `npm run build` — a foreign
+  dev server shares `.next`; Vercel's build was the gate and went READY.
+- Live checks: `Disposal records`=1, `The Assistants`=1, `The Installer`=0,
+  `Grows With You`=1, spec foot updated. Console clean, knight-speak
+  derives on the new copy ("The reasons be the point — peruse the tags").
 
 ## Next steps
 
-1. **Jake:** read the resume in CV.EXE. Two open calls: BFA vs BA on the
-   diploma, and whether the summary's "This PDF came off a dot-matrix printer
-   I built at lunde.co" line stays. Then push the 3 commits = deploy.
-2. **Leaf-patch decision** (parked): merge, revise, or abandon — and Trash v1
-   is trapped behind that call, including the ⚠️ DRAFT Assistants cause/year.
-3. Gate friction (Jake): visible second door + localStorage + `?ref=`
-   auto-unlock — the audit's #1 risk, still unactioned.
-4. COMMAND.CTR zero-`list()` fix after the Blob cap resets (~Aug 1).
-5. Figma stale STRING vars; typography finale; underwater (carried).
+1. **CV.EXE revisions on branch `cv-exe`** — Jake's notes TBD + the two s30
+   open calls (BFA vs BA; the dot-matrix summary line). Merge to main when
+   he signs off. `docs/PLAN-CV-EXE.md` still the reference.
+2. **Leaf-patch decision** (parked): merge/revise/abandon. On ship, restore
+   Trash TAG-03 from `8934b21`.
+3. Gate friction (Jake): the audit's #1 risk, still unactioned.
+4. Red Pen: Jake pulls critique artifacts (Figma comments, Slack, one
+   "I was wrong" receipt) — checklist in portfolio-tracker.md.
+5. COMMAND.CTR zero-`list()` fix after Blob cap resets (~Aug 1).
+6. Figma stale STRING vars; typography finale; underwater (carried).
