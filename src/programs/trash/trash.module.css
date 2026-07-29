@@ -1,21 +1,135 @@
+/* ---------- TRASH — disposal records ----------
+
+   The bin, open. Each killed idea is a toe-tagged record: tag number,
+   name, stamp, then memo → cause of death → what it taught. Records sit
+   on --surface-raised over the window's --surface, same figure/ground as
+   the Feedback board — paper laid ON something, not printed into it.
+   The pink data-tone wash mirrors Feedback's: marks only, one record. */
+
 .trash {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 30px;
-  text-align: center;
+  padding: 22px 22px 26px;
 }
 
-.note {
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: var(--space-4);
+}
+
+.eyebrow {
   font-family: var(--type-label-family);
-  font-size: var(--type-label-size); /* 10px → 11px */
-  letter-spacing: var(--tracking-10); /* diverges from label's tracking-14 — exact match to original 0.1em */
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-14);
   text-transform: uppercase;
   color: var(--content-muted);
-  max-width: 30ch;
-  line-height: var(--leading-relaxed); /* 1.8 → 1.7 */
   margin: 0;
+}
+
+.intro {
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-leading);
+  color: var(--content);
+  max-width: 46ch;
+  margin: 0;
+}
+
+.records {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.record {
+  padding: 16px 16px 18px;
+  background: var(--surface-raised);
+  border: var(--border-width-hairline) solid var(--border);
+  box-shadow: var(--shadow-sticky);
+}
+
+.record[data-tone='pink'] {
+  background: color-mix(in srgb, var(--accent-expressive-mark) 8%, var(--surface-raised));
+}
+
+.recordHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tagNo {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-14);
+  color: var(--content-muted);
+}
+
+.name {
+  font-family: var(--type-heading-3-family);
+  font-size: var(--type-heading-3-size);
+  font-weight: var(--type-heading-3-weight);
+  line-height: var(--type-heading-3-leading);
+  margin: 0;
+  flex: 1;
+}
+
+.origin {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-14);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin: 4px 0 10px;
+}
+
+.memo {
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-leading);
+  color: var(--content);
+  margin: 0 0 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 8px;
+  border-top: var(--border-width-hairline) solid var(--border);
+}
+
+.field + .field {
+  margin-top: 8px;
+}
+
+.fieldLabel {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-14);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.record[data-tone='pink'] .fieldLabel {
+  color: var(--accent-expressive-text);
+}
+
+.fieldText {
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-leading);
+  color: var(--content);
+  margin: 0;
+}
+
+.foot {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-10);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin: var(--space-4) 0 0;
+  text-align: center;
 }

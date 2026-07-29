@@ -284,9 +284,12 @@ export const PROGRAMS: ProgramDef[] = [
     meta: 'BIN-99',
     icon: 'trash',
     component: dynamic(() => import('@/programs/trash/Trash')),
-    size: { w: 380, h: 340 },
-    pos: { x: 440, y: 180 },
+    // sized for the disposal records: wide enough for a 46ch memo measure,
+    // tall enough to show TAG-01 whole plus the start of TAG-02 (scrolls)
+    size: { w: 480, h: 560 },
+    pos: { x: 440, y: 60 },
     onDesktop: true,
+    path: '/trash',
   },
   {
     id: 'settings',
