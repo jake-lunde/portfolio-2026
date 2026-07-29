@@ -9,6 +9,100 @@
 
 ---
 
+## The hiring audit + Trash v1 + SpecSheet fix (session 29, 2026-07-28)
+
+**Fable solo (audit = taste, never delegated; build tasks small + closed —
+delegation overhead > work). Walked lunde.co as a Google hiring manager,
+then executed Jake's follow-ups. Work landed on branch `leaf-patch`, not main.**
+
+- **Audit:** interview-worthy if cases complete; 4 gaps = gate friction,
+  no resume, solo-monument signal, padlocked Trash. Ranked adds: Trash
+  (done), CV.EXE (planned, P1), Red Pen, Build A Skin, DEVLOG, Lou
+  screensaver, Ask The Machine.
+- **Trash v1 OPEN** — disposal records replace the padlock. Three tags:
+  Grows With You (pink, tracker-sourced), The Assistants (Sprout/Dusty/
+  Penny/Buck/Scout, Figma team-library 442:338964 — ⚠️ cause-of-death +
+  year DRAFTED, need Jake), The Installer (site's own kill). Copy via
+  `trash.*` keys; window 480×560, `/trash` deep link.
+- **SpecSheet skin-reactive** — MutationObserver watches `data-skin` too;
+  accent + typeface names quoted per skin (next/font hashes families, so
+  they can't be read from the DOM). Cherry-picked to main in session 30
+  as `92b615b`; the rest of the commit stays parked with the branch.
+- **Notion:** 4 project pages created (CV.EXE dated today, Medium; Red Pen
+  incl. sufficiency verdict: Invest alone NOT enough — zero critique
+  artifacts captured yet; Build A Skin outlined; Ask The Machine parked).
+- **Tracker:** Red Pen capture checklist added (quote pushback, before/
+  after, one "I was wrong" receipt per project, artifact screenshots).
+- Deck unreported (Blob cap).
+
+## MEDIEVAL: knight-speak voice (session 28, 2026-07-28)
+
+**Fable solo (small closed task; Jake on a fixed budget — delegation overhead
+would have exceeded the work). Notion task "update language": translate site
+copy to olde english under medieval WITHOUT verbosity bloat. Built on branch
+`medieval-language-translator` (`9cd65f8`), unmerged — Jake reviews, then
+merge. A concurrent session was editing visual assets in the same tree; only
+`src/content/copy.ts` + `knightspeak.ts` were committed.**
+
+- **Design: deterministic dictionary, not generative.** `knightspeak.ts` =
+  phrase-first, word-boundary, case-preserving rules curated against the
+  actual copy.json corpus (11 keys transform today, max growth +2 chars,
+  one string shrinks). "you"→thee after prepositions; "thy"→thine before
+  vowels; contractions handled ("you're"→"thou art"); facts/tech labels
+  untouched because they're not in the dictionary.
+- **EDIT.MODE seam is the load-bearing decision:** derived values resolve
+  as slot `medieval` (not `base`), so an edit under medieval commits as an
+  explicit override — copy-commit already promotes string entries to
+  variant maps (route.ts). Editing derived text can never clobber base.
+- Extension point: `SKIN_VOICE` map in copy.ts — underwater gets a voice by
+  adding one entry.
+- Verified live (JS probes, own server on :3210 via temp launch.json entry,
+  reverted): medieval renders "Gramercy for coming by!" / "The first page
+  be thine."; classic unchanged; console clean. Desktop icons open on
+  single click — synthetic double_click toggles a window open+closed.
+- **Shipped same session** (Jake approved; Sonnet delegate): cherry-picked
+  onto origin/main as `89550d0` — 95b357c stayed local per Jake's explicit
+  "translator only" call. Vercel READY, `gramercy` marker confirmed in the
+  live chunk (lunde.co 308s to www — curl needs `-L`). Local main rebase
+  blocked by the concurrent session's dirty tree.
+- Deck dispatch/merge unreported (no CC_FEED_KEY in env + Blob cap 500s).
+  Notion task → Done.
+
+---
+
+## FIELD NOTES: the leaf patch (session 27, 2026-07-27)
+
+**Fable orchestrating on a $58 budget. Jake's wife's metaphor: projects are
+leaves a caterpillar eats to become a butterfly — replaces plate development
+on BOTH tracker and site. Two Opus delegates (Surface B: critters + program
+reskin, one leaf revision round; Surface A: tracker single-file rewrite,
+resumed once after a connection drop). Committed `95b357c` locally, NOT
+pushed — copy drafts await Jake.**
+
+- **Taste round that mattered:** first leaf never looked eaten (8 scallop
+  notches; 55% ≈ 100%). Fix = nine pre-authored silhouettes chewed tip→stem,
+  bare-rib skeleton at 8/8, geometry generated once by de Casteljau split
+  (`gen-leaf-states.mjs`, scratchpad-only). One `<g>` visible at a time.
+- **Durable character source = `critters.tsx` + tracker preview HTML.** The
+  scratchpad `critter-svgs.md` handoff doc is ephemeral; if the drawings need
+  editing, edit critters.tsx and re-inline into the tracker by hand (the two
+  surfaces intentionally duplicate paths — drift risk accepted, noted here).
+- **Static-art review trick:** browser-pane `file://` tabs render as
+  snapshots and refuse screenshots; Playwright's cached headless shell
+  (`~/Library/Caches/ms-playwright/chromium_headless_shell-*/…/headless_shell
+  --headless --screenshot=…`) renders them fine. rAF-freeze caveat doesn't
+  apply to static SVG.
+- **Site leaf is blue on classic** — `--accent` is the only legal fill (a
+  green would be an invented third color). Tracker (standalone, not
+  token-bound) got monarch orange instead. Flag to Jake if the blue reads odd.
+- **Chrysalis exists only in the tracker** (ladder rung 80% + drawing);
+  site data has no "drafted" signal — revisit if a `stage` field ever lands
+  on CaseDef.
+- Notion task "update case study tracker vibe" → In Progress + summary
+  comment. Deck dispatch/merge unreported (Blob cap 500s).
+
+---
+
 ## Latest session — desktop consolidation · iPod afloat (session 25, 2026-07-26)
 
 **Opus orchestrating; four parallel agents on disjoint files (FOURIER=iPod,
@@ -1146,3 +1240,149 @@ Current: per-visitor localStorage + Jake's default pin. To go shared-public:
 5. Update §1/§5 here when you ship. Add case-study beats to local
    session-log.md when something story-worthy happens — Jake is collecting
    them for the meta case study.
+
+## Latest session — COMMAND.CTR: the human on top (session 26, 2026-07-26)
+
+**Opus (SHANNON) orchestrating. Round 1 solo — one entangled feature across the
+deck, the chip, the sprites, the reporter AND the API, every seam a shared type.
+Round 2 dispatched two: NYQUIST on the avatar strokes, DOPPLER on the WHAT IS
+THIS chrome pattern (disjoint files: shell chrome + registry + copy.json vs. the
+deck). Zero conflicts. SHIPPED as `8ce7cdc`, verified live on lunde.co: the new
+`/cc/avatars/jake.svg` serves 200, and `/api/cc-feed` now returns ZERO
+`--agent`/`--task` rows — the read-filter healed the stored junk with no
+`--reset`, exactly as designed.**
+
+- **⚠️ `cc-report.mjs` keeps its OWN roster** (a node script can't import the TS
+  crew module) and it was stale the moment SHANNON existed — the merge report
+  bounced off my own guard. Add a call sign in BOTH `crew.ts` and that array.
+
+- **The deck is a PYRAMID now, and the shape is the argument.** JAKE (portrait
+  plate, `HUMAN · DESIGN ENGINEER`) centred on top with his prompts on a rail
+  directly beneath him → FABLE (FABLE-5, orchestration) + **SHANNON (OPUS-5,
+  execution — new call sign, same signal-theory family)** → the four
+  delegates. Edges are
+  labelled (`↓ BRIEF`, `RETURNS ↑ JAKE CURATES`, `↓ DISPATCH · ONE WHOLE TASK
+  EACH`) so the loop reads without a caption. Delegate models corrected to
+  OPUS-5.
+- **Jake's own portrait is the avatar** (`ref/stamp/jake-vector.svg` → copied to
+  `public/cc/avatars/jake.svg`, since `ref/` is never committed). Drawn as a
+  full-colour `<img>`, never a CSS mask: the crew are one-ink silhouettes, the
+  human is the only picture of a person. A medieval engraving of the same
+  portrait sits in `ref/stamp/medieval/` for a per-skin variant later.
+- **Prompt fragments are precise DIRECTION, per Jake** ("TWO ACCENTS PER SKIN.
+  NEVER A THIRD.", "DECIMATE THE PHOTOSCAN UNDER 2K FACES") — never "make it
+  cool". The deck must show him steering, not delegating the taste.
+- **Two new event actions: `prompt` and `curate`** (agent `jake`) — his asks
+  and his picks are first-class telemetry, quoted in the feed with ✎/✓. Prompt
+  fragments live on their OWN rail, not read off the feed: the ticker holds 7
+  rows and the human speaks rarely, so he'd scroll away in seconds.
+- **`crew.ts` is now the single source of crew identity** (id/name/model/role/
+  blurb + `isCrewId`); `cc-timeline.json` is just `recorded` + `sequence`. At
+  rest a unit's status line says what it IS, not "STANDING BY" — the explainer
+  lives where a visitor actually looks.
+- **The `--AGENT · --task` bug was the REPORTER, not the deck.** A session
+  called `cc-report.mjs` with flags against a positional parser, so `--agent`
+  became the call sign. It now takes both forms and **refuses unknown call
+  signs**; the API validates ids on write AND filters them on read, so the
+  junk already in the blob heals on the next GET — no `--reset` needed.
+- **The chip is one row, one target:** state · cast (JL + 5 faces, the one
+  named by the leading edge lit) · leading edge inline · ENTER COMMAND CENTER.
+  The expanding feed is gone. Its max-width is derived, not guessed:
+  `calc(100% - 620px)` keeps 310px of clearance from the icon grid.
+- **First contact on the desktop:** the first time your cursor finds a
+  wandering unit it does NOT bolt — it turns and says who it is, its model and
+  its last real task (live feed, else a recorded fallback). Once per unit,
+  remembered in `lunde-crew-met`. The hold uses a REF (`holdUntil`), because
+  the walk loop restarts on every state-dep change and a local would reset.
+- **Round 2 (Jake, live over Notion comments):** the pyramid's middle tier is
+  TWO units (FABLE + SHANNON) because Opus-5 runs most sessions; his prompt
+  fragments must read as **precise direction**, never "make it cool"; his own
+  portrait replaces the monogram, in colour, with no stroke around it.
+- **`WHAT IS THIS` is a new SHELL pattern, not a deck feature** (DOPPLER's
+  dispatch): `ProgramDef.explainer` holds a copy key, and the titlebar's meta
+  slot (`CTR-11`) becomes a tooltip-pattern button — hover AND focus, Esc/blur
+  dismissal sequenced BEFORE the window's own Esc-to-close. Any program opts in
+  with one registry line. The deck's inline thesis band is gone; its text lives
+  at `command.explainer`.
+- **The transmission log is collapsed by default** and the window is sized to
+  that state (800×592). Opening it scrolls the body ~78px — a disclosure the
+  visitor asked for, not a layout failure.
+- **The prompt rail: `AnimatePresence mode="popLayout"` + a reserved 66px +
+  `overflow: hidden`.** Without popLayout the arriving chip stacked on the
+  leaving one and the box grew for a beat; with it, the leaving chip leaves the
+  flow (and needs clipping so it doesn't spill onto the tier below).
+- **New motion token `human`** (150/22/mass 1.1, `tokens/core/motion.json`):
+  Jake's inputs move analog — slower, heavier, allowed to overshoot — while the
+  machines keep `deck`'s digital snap. Springs still come only from tokens.
+- **Edge labels ride the tier grid** so BRIEF sits over FABLE and RETURNS over
+  SHANNON, with the rule running through each label and stopping at it. The
+  labels paint `var(--surface-inverse)` — the same token the CRT body uses — so
+  the routing lines die at the type; `.edge` needs `z-index: 1` because the
+  lines are absolutely positioned in the tier BELOW it.
+- **`height: 100%`, not just `min-height`, on `.ctr`** — a flex column can only
+  shrink a child when its own height is definite; the feed is the one elastic
+  band and absorbs what the pyramid doesn't need. Window is 800×720.
+
+## Incident — Blob quota burn on /api/cc-feed (session 26, 2026-07-26)
+
+**Jake's Vercel Blob usage went 75% → 100% in two hours. `/api/cc-feed` took
+264 GETs in four hours, and EVERY GET called Blob `list()` — a billed
+operation. Three compounding causes, only one of which was new:**
+
+1. **No cache anywhere.** `readFeed()` hit `list()` on every single request.
+2. **No visibility gating.** The desktop chip polls for as long as a tab is
+   open — a background tab left overnight billed all night for zero eyeballs.
+   Intervals were 20s (deck) and 45s (chip).
+3. **My own traffic.** Verification browsing on lunde.co plus background
+   `until curl` loops I left running while waiting on deploys — those polled
+   the endpoint every 10–20s for minutes at a time. A real share of the 264
+   was me, not passive visitors. **Kill polling loops when the wait ends.**
+
+**Fixed and deployed:** module-scope cache in the route (one `list()` per 20s
+per warm instance, cleared on write); clients skip polling entirely while
+`document.visibilityState !== 'visible'` and refresh on `visibilitychange`;
+intervals 20s→60s and 45s→120s; and the per-page-load feed read that
+AmbientAgents used for sprite intros is gone (recorded fallbacks instead).
+
+⚠️ **Already-open tabs keep the OLD intervals until reloaded.**
+
+**CONFIRMED by the usage dashboard (2026-07-27):** the metric is **Blob
+Advanced Operations**, not bytes. **List = 2,370 of 2,485 ops (95.4%)**, Put =
+115; 99.5% on the `guestbook` store, which is the one `/api/cc-feed` shares.
+Jul 26 (~430) and Jul 27 (~860) are the two largest bars in thirty days — the
+days this feature was built. Jul 11 (~630) is the same bug at a lower rate.
+Cap appears to be 2,500/month.
+
+**THE REAL FIX, not yet done — start the next session here.** Everything
+shipped so far only rate-limits a call that should not exist. `list()` is in
+the read path solely to find the newest VERSIONED blob, and versioning exists
+solely because a single overwritten path served stale CDN reads. Blob lets the
+writer set the object's own cache lifetime:
+
+```
+put(path, data, { cacheControlMaxAge: 30, ... })
+```
+
+That kills staleness at the source → a FIXED path becomes safe → the read is a
+plain `fetch` of a known URL → **`list()` leaves the read path entirely**, and
+`put`'s prune-by-list goes with it. ~95% of the account's Blob usage goes to
+roughly zero. Sequence it: prove `cacheControlMaxAge` actually holds on a
+throwaway path FIRST (one put + one del), then migrate `readFeed`, then delete
+the versioning + pruning. Same trap applies as everywhere else in this
+incident — **verify on production, never on localhost.**
+
+~~Unresolved: which metric actually hit 100%.~~ Reads cannot consume
+storage BYTES — the feed blob is a few KB and prunes to 3 versions — so if
+the dashboard's 100% is bytes, the cause is elsewhere (`/api/wall` stores
+booth photos; guestbook and puzzle-times share the store). `vercel blob list`
+answers it. If it is operations, it resets monthly and the fixes above cut
+the ongoing rate.
+
+⚠️ **Do not try again to CDN-cache this route** without new information — see
+the comment in `next.config.mjs`. Handler `Cache-Control`, segment
+`revalidate`, and a next.config `headers()` entry were all tried; all three
+are overwritten by `max-age=0, must-revalidate` on the deployed function
+because the route reads its blob with `no-store`. The next.config one applies
+against a local `next start`, which makes it look fixed — verify on
+production, not localhost.
+
