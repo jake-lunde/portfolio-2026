@@ -42,6 +42,20 @@ export const sfx = {
 
 /* the gate — macrodata-refinement ritual sounds */
 const PENTA = [392, 440, 523, 587, 659, 784]
+/* CV.EXE's dot-matrix printer. A real one is a row of pins hammering a
+   ribbon, so the chatter is deliberately noisy and low: one short square
+   burst per printed pass, jittered in pitch so a run of them never sounds
+   like a melody. Gated by the SND toggle like everything else (blip bails
+   on its own), and the caller skips it entirely under reduced motion. */
+export const cvSfx = {
+  chatter: () => blip(150 + Math.random() * 70, 0.018, 0.022),
+  // tearing paper: a fast descending pair, more rip than tone
+  tear: () => {
+    blip(420, 0.05, 0.03)
+    setTimeout(() => blip(210, 0.07, 0.025), 45)
+  },
+}
+
 export const gateSfx = {
   pick: (slot: number) => blip(PENTA[slot % PENTA.length], 0.06, 0.03),
   remove: () => blip(294, 0.05, 0.025),

@@ -2,6 +2,7 @@ import styles from './Icon.module.css'
 
 export type IconName =
   | 'doc'
+  | 'printer'
   | 'folder'
   | 'note'
   | 'ipod'
@@ -39,6 +40,18 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M8 4h11l5 5v19H8z" />
       <path d="M19 4v5h5" />
       <path d="M12 14h8M12 18h8M12 22h5" />
+    </>
+  ),
+  // the sheet is ABOVE the body (paper feeds up and out), and the tray below
+  // catches it — the silhouette has to read as a printer at 32px, so the
+  // three shapes never touch.
+  printer: (
+    <>
+      <path d="M10 4h12v9H10z" />
+      <path d="M13 7.5h6M13 10.5h6" />
+      <path d="M5 13h22v10H5z" />
+      <circle cx="23" cy="18" r="1" />
+      <path d="M10 23v5h12v-5" />
     </>
   ),
   folder: (
@@ -262,6 +275,15 @@ const MEDIEVAL_PATHS: Partial<Record<IconName, React.ReactNode>> = {
       <path d="M10 8v16M22 8v16" />
       <path d="M8 8a1.6 1.6 0 0 0 0 3.2M24 24a1.6 1.6 0 0 1 0-3.2" opacity=".55" />
       <path d="M13 13h6M13 17h6M13 20.5h4" />
+    </>
+  ),
+  // CV.EXE → CURRICULUM VITÆ: a charter under wax seal
+  printer: (
+    <>
+      <path d="M7 5h18v18H7z" />
+      <path d="M11 10h10M11 14h7" />
+      <path d="M22 23v-2" />
+      <circle cx="22" cy="26" r="2.6" fill="currentColor" stroke="none" opacity=".85" />
     </>
   ),
   // PROJECTS → WORKS: a clasped codex

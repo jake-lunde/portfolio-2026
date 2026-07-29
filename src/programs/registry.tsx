@@ -54,6 +54,21 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/readme',
   },
   {
+    // second on the desktop by design: a hiring manager reads README, then
+    // wants something to forward. TEAR OFF hands them the PDF.
+    id: 'cv',
+    name: 'CV.EXE',
+    meta: 'DOC-01',
+    explainer: 'cv.explainer',
+    icon: 'printer',
+    component: dynamic(() => import('@/programs/cv/CV')),
+    size: { w: 520, h: 640 },
+    pos: { x: 172, y: 96 },
+    chrome: 'paper',
+    onDesktop: true,
+    path: '/cv',
+  },
+  {
     // the flat index, kept for the /projects deep link. The desktop route
     // in is CASE STUDIES (`progress`), which keeps the gate a layer down.
     id: 'projects',
