@@ -9,6 +9,38 @@
 
 ---
 
+## FIELD NOTES v2: bento blobs (s34, 2026-07-31)
+
+**Fable, art pass done PERSONALLY — Jake asked ("i wonder if you personally
+could take another pass"), and taste is never delegated anyway. Three
+sketch rounds against the "have a nice day" bento reference (Figma node
+201140:9169), self-critiqued via headless-shell renders.**
+
+- **The style law that fixed it: no outlines, no symmetry, eyes do the
+  face.** v1 failed as stroked/mirrored clip-art. v2 = merged uneven
+  circles (the bento proves plain circles read organic when radii and
+  baseline vary), sleepy lidded pupils (flat top, round bottom), everything
+  tilted a few degrees. Bento-proof detail: bumps can be perfect circles —
+  wobble belongs in the ARRANGEMENT, not each shape.
+- **Leaf v2 insight — draw the skeleton once, UNDER nine evenodd blade
+  paths.** Eaten regions expose the rib automatically; holes chewed
+  mid-arc (subpaths, fill-rule evenodd — legal in programs, unlike ids).
+  Margins are lumpy; veins died with the clip-art look.
+- **Tracker retheme carries the metaphor into the FURNITURE:** ledger =
+  meadow (grass blades, eaten = green, next = orange w/ antenna dot),
+  pbar fill = row of caterpillar bumps (repeating radial-gradient),
+  checkbox = blob, tick = rotated bite, borders = uneven radii per card,
+  peek critter clipped behind the footer rule (resting state VISIBLE —
+  animations start at 0%, so a "rises occasionally" loop must idle UP or
+  static/reduced-motion users see nothing).
+- Jake edited DATA concurrently (verbatims, s32/s33); my edits were
+  CSS/art-block-only and coexisted — one mid-stream "modified on disk"
+  warning, no collisions.
+- Notion task commented (still In Progress — Jake reviews); deck skipped
+  (Blob cap); tracker JS `node --check` clean; branch `tsc --noEmit` clean.
+
+---
+
 ## CV.EXE: the printer prints (session 30, 2026-07-28)
 
 **Shannon/Opus solo — the session was a content negotiation with Jake (his
@@ -1413,4 +1445,26 @@ are overwritten by `max-age=0, must-revalidate` on the deployed function
 because the route reads its blob with `no-store`. The next.config one applies
 against a local `next start`, which makes it look fixed — verify on
 production, not localhost.
+
+
+## Latest session — branch surgery + the bin ships (s31, 2026-07-28)
+
+**Fable solo (pure orchestration: rebase surgery, a two-line content cut,
+deploy verification — nothing delegable). Deck unreported (Blob cap).**
+
+- **Surgery, no force-push needed** (nothing was pushed): `git branch cv-exe
+  main` snapshot, then `rebase --onto 2040fea 7d65965 main` dropped CV.EXE
+  from main while keeping spec fix + title + HANDOFF rotate. Autostash
+  carried the concurrent session's dirty `figma-plugin/code.ts` through.
+- **Trash restored from `8934b21` via `checkout <sha> -- <files>`** (cherry-
+  pick would have collided with the already-picked SpecSheet + diverged
+  copy.json), TAG-03 cut per Jake, copy keys + registry applied by hand.
+  Also re-applied the `spec-sheet.foot` copy line the s30 cherry-pick
+  dropped.
+- Verified on a temp `:3333` launch entry (3000 AND 3210 both owned by other
+  sessions' servers; entry reverted). No local `npm run build` — a foreign
+  dev server shares `.next`; Vercel's build was the gate and went READY.
+- Live checks: `Disposal records`=1, `The Assistants`=1, `The Installer`=0,
+  `Grows With You`=1, spec foot updated. Console clean, knight-speak
+  derives on the new copy ("The reasons be the point — peruse the tags").
 
