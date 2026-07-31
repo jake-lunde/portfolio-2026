@@ -1,7 +1,7 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-07-31 (s32–33 interview wrap; s34 note → archive).
+> Last rotation: 2026-07-31 (s35 draft → branch; s32–33 note → archive).
 
 ## Current state
 
@@ -37,13 +37,13 @@
   revision) · Red Pen (UNBLOCKED s33 — exhibit = Ryan avatar-token Slack
   thread; Jake to save screenshots; details in portfolio-tracker.md) ·
   gate friction (audit's #1 risk, unactioned).
-- **Family Hub interview COMPLETE (s32–33): leaf 14/14, took wing.** Full
-  12-beat arc + 4 chapters + Red Pen receipts in `portfolio-tracker.md` §2;
-  research verified (`ref/research/family hub/`, curated quotes in
-  `ref/famhub-pull-quotes.md`); NDA ruling = default PUBLIC (exceptions:
-  internal sales targets, CEO criticism — editorial). Site cases.ts at
-  70% "Story blocked end to end · drafting next" (deployed `938bc39`).
-  **Next task = DRAFT the case study — fresh session per §4.3.**
+- **Family Hub case study DRAFTED (s35) — branch `case-family-hub`**
+  (`087d56b`): `content/family-hub.mdx`, 7 sections on tracker §2's spine,
+  4 new interactive plates (ResearchBars · SurfaceTriad · TandemSetup ·
+  TokenThread), placeholders cite exact Figma nodes for the asset pass.
+  cases.ts 70→85 "Drafted — in review", status LIVE on the branch only.
+  Public-safe filters applied (no targets/CEO/backchannel/team-shrink).
+  **Awaiting Jake's read → merge.** Interview capture: tracker §2 (s32–33).
 - **Tracking:** Notion (connector live). **⚠️ COMMAND.CTR deck 500s — Blob
   ops cap until ~Aug 1** (s26 incident, archive); zero-`list()` fix = top
   infra backlog. s34 skipped deck reporting for this reason.
@@ -52,58 +52,53 @@
   concurrent sessions — temp launch.json entry, verify, revert; never
   `npm run build` while a foreign dev server owns `.next`.
 
-## Latest session — Family Hub interview: the leaf takes wing (s32–33, 2026-07-29→31)
+## Latest session — Family Hub drafted: the leaf becomes a case study (s35, 2026-07-31)
 
-**Fable interviewing Jake directly across three days — the case-study
-capture pipeline working as designed. One HERTZ/Sonnet delegate (Notion
-research fetch — blocked on binary attachments, later resolved by local
-files); solo otherwise: interviewing IS taste work. Deck dark (Blob cap).**
+**Fable drafting solo, declared per §4.2: prose voice + interactive-plate
+design are taste work, and every input was already captured in tracker §2 —
+nothing separable to delegate. Deck dark (Blob cap, same as s34).**
 
-- **Family Hub §2 of portfolio-tracker.md is now the densest capture in
-  the repo:** 12-beat arc (vision team → skeptic-driver → board/all-hands
-  → first web app → Glow DS → sprint → cuts → ship) + ch.2 onboarding
-  (BLE dream cut → QR dual-screen tandem; takeover pattern; 10×9 avatar
-  system) + ch.3 launch (color rein-in, DevTools-loop origin, Plus-plan
-  AI bet, firefighting) + ch.4 hardware (Shenzhen/Ray, Jake's 15" call,
-  RAM-fight-for-animations, keyboard-APK gambit, PNG-folder boot seq).
-- **Hardest problem [Jake]: NOT a screen problem — solo at scale** (20→5
-  designers, ~10x eng). Survival kit = flexibility across disciplines,
-  digital-office instant reviews, "hold nothing preciously," tooling as
-  precision guidance ("remixing"). Second: sustaining his own belief.
-- **Red Pen receipts landed:** Ryan avatar-token thread (weakest→strongest,
-  verbatim Slack, engineer caught it — THE exhibit; Jake saving
-  screenshots) · color rein-in owned as Jake's own "I was wrong" ·
-  accounts dissent + Mother's-Day pace = one advocacy theme, public-safe
-  renderings written. ⚠️ Sales targets + CEO criticism = never public.
-- **Research verified from local files** (`ref/research/family hub/`):
-  n=1,200 Sept-2025 survey; >80% appeal pre-price; calendar 58% top
-  feature, privacy 54% top function; adults-manage/kids-view/PIN model is
-  research-backed. Curated quotes → `ref/famhub-pull-quotes.md` (thesis:
-  "would love one tool instead"). Corrections to Jake's recall logged.
-- **Interaction-models Figma canvas reviewed tile-by-tile** (node
-  453-342132; six mobile integration models w/ pros-cons, Ambient→Active→
-  Focused triad, ecosystem slide w/ CarPlay absorbing Live Drive). Designs
-  index: Notion "Designs" page → 6 nodes, 3 still unreviewed
-  (Initial Prototypes 460-368545 · Presentations 457-473267 ·
-  First Pass 459-473268).
-- Shipped to prod: cases.ts Family Hub 55→70 (`938bc39`, verified via
-  Vercel MCP + content-marker curl). Standalone tracker DATA updated to
-  14/14 (coexisted cleanly with s34's concurrent art retheme).
-- Memory: `jake-next-role-criteria` saved (visionary leadership, not
-  market-chasing; never bitter about GL in public copy).
+- **Branch `case-family-hub` (`087d56b`)** — `content/family-hub.mdx` +
+  CaseFamilyHub program. Spine: bet (3 futures, Moves) → evidence (n=1,200)
+  → system (surface triad) → persuasion-by-artifact → constraints (QR
+  tandem + hardware margins) → ten-to-one (Red Pen ×2) → the ship. Thesis:
+  *"The first skeptic it had to convert was me — then the board, then the
+  factory."* Close: *"We retired the whiteboard."*
+- **4 new interactives** (case/, invest palette: ink #E7E1D2 on inverse
+  plate, one pink): ResearchBars (survey bars w/ overruled-research ledger),
+  SurfaceTriad (ambient/active/focused), TandemSetup (5-step paired
+  onboarding), TokenThread (avatar-token thread replay, weakest→strongest).
+- **CaseFooter now takes `next.slug` and opens the window** — was a dead
+  button; invest's footer → Family Hub, live.
+- **Figma scan for the asset pass:** Presentations `457-473267` = 4 monthly
+  leadership decks Aug–Nov 25 (Gantt, per-platform principles+grids,
+  ambient studies: Magic Mirror/Clock/Weather/Art); Initial Prototypes
+  `460-368545` = LoFi v1 → v2 → HiFi 7/9/25 ladder (hi-fi home
+  `430-269991`). First Pass `459-473268` overflows the MCP transport —
+  still unindexed. Placeholder captions cite exact node ids.
+- Verified on this session's own port-3000 server (foreign session owned
+  3210): gate bypassed via `sessionStorage lunde-gate=1`, 7 sections + all
+  4 interactives probed by JS. **Gotcha for memory: AnimatePresence
+  `mode="wait"` never swaps under the hidden-tab rAF freeze** — replaced
+  with keyed remount + fade-in (also just simpler). tsc clean; stale
+  console buffer replayed dead errors (known).
+- Tracker §2 header → 🟩 DRAFTED. `.next/types/* 2.ts` duplicate-file junk
+  causes tsc noise (pre-existing; filter with `grep -v '^.next'`).
 
 ## Next steps
 
-1. **DRAFT the Family Hub case study — fresh session** (spine = tracker §2
-   arc; voice check vs CaseInvest; thesis candidate: persuasion-by-artifact
-   / one designer, ten engineers). Then cases.ts 70→85 "drafted".
-2. **Jake:** save the Ryan avatar-token Slack screenshots (Red Pen exhibit)
-   + drop the color before/after states into the design file.
+1. **Jake: READ the Family Hub draft** — branch `case-family-hub`,
+   `/projects/family-hub` (behind the gate). Voice + thesis + the
+   public-safe renderings (esp. the accounts-dissent paragraph, §07).
+   Merge = his call; then progress 85→100.
+2. **Jake:** save the Ryan avatar-token Slack screenshots (Red Pen exhibit
+   → drops into Plate 06) + color before/after (Plate 07) + asset pass on
+   the Figma-node placeholders.
 3. **Jake:** eyeball tracker v2 in a real browser (idle animations, peek
    loop, toasts) + `critter-cast-v2.html`. Then revive `leaf-patch`
    (reconcile Family Hub 55→70 phase, slot sizes, Trash TAG-03) or park on.
 4. **CV.EXE revisions on `cv-exe`** (BFA vs BA; dot-matrix line), then merge.
 5. Gate friction (Jake) — audit's #1 risk, still unactioned.
 6. COMMAND.CTR zero-`list()` fix after Blob cap resets (~Aug 1).
-7. Figma stale STRING vars; typography finale; underwater; remaining Figma
-   nodes review (Presentations = board/all-hands material) — carried.
+7. Figma stale STRING vars; typography finale; underwater; First Pass
+   section `459-473268` still unindexed (MCP transport cap) — carried.

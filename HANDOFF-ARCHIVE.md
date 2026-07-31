@@ -9,6 +9,46 @@
 
 ---
 
+## Family Hub interview: the leaf takes wing (s32–33, 2026-07-29→31)
+
+**Fable interviewing Jake directly across three days — the case-study
+capture pipeline working as designed. One HERTZ/Sonnet delegate (Notion
+research fetch — blocked on binary attachments, later resolved by local
+files); solo otherwise: interviewing IS taste work. Deck dark (Blob cap).**
+
+- **Family Hub §2 of portfolio-tracker.md is now the densest capture in
+  the repo:** 12-beat arc (vision team → skeptic-driver → board/all-hands
+  → first web app → Glow DS → sprint → cuts → ship) + ch.2 onboarding
+  (BLE dream cut → QR dual-screen tandem; takeover pattern; 10×9 avatar
+  system) + ch.3 launch (color rein-in, DevTools-loop origin, Plus-plan
+  AI bet, firefighting) + ch.4 hardware (Shenzhen/Ray, Jake's 15" call,
+  RAM-fight-for-animations, keyboard-APK gambit, PNG-folder boot seq).
+- **Hardest problem [Jake]: NOT a screen problem — solo at scale** (20→5
+  designers, ~10x eng). Survival kit = flexibility across disciplines,
+  digital-office instant reviews, "hold nothing preciously," tooling as
+  precision guidance ("remixing"). Second: sustaining his own belief.
+- **Red Pen receipts landed:** Ryan avatar-token thread (weakest→strongest,
+  verbatim Slack, engineer caught it — THE exhibit; Jake saving
+  screenshots) · color rein-in owned as Jake's own "I was wrong" ·
+  accounts dissent + Mother's-Day pace = one advocacy theme, public-safe
+  renderings written. ⚠️ Sales targets + CEO criticism = never public.
+- **Research verified from local files** (`ref/research/family hub/`):
+  n=1,200 Sept-2025 survey; >80% appeal pre-price; calendar 58% top
+  feature, privacy 54% top function; adults-manage/kids-view/PIN model is
+  research-backed. Curated quotes → `ref/famhub-pull-quotes.md` (thesis:
+  "would love one tool instead"). Corrections to Jake's recall logged.
+- **Interaction-models Figma canvas reviewed tile-by-tile** (node
+  453-342132; six mobile integration models w/ pros-cons, Ambient→Active→
+  Focused triad, ecosystem slide w/ CarPlay absorbing Live Drive). Designs
+  index: Notion "Designs" page → 6 nodes, 3 still unreviewed
+  (Initial Prototypes 460-368545 · Presentations 457-473267 ·
+  First Pass 459-473268).
+- Shipped to prod: cases.ts Family Hub 55→70 (`938bc39`, verified via
+  Vercel MCP + content-marker curl). Standalone tracker DATA updated to
+  14/14 (coexisted cleanly with s34's concurrent art retheme).
+- Memory: `jake-next-role-criteria` saved (visionary leadership, not
+  market-chasing; never bitter about GL in public copy).
+
 ## FIELD NOTES v2: bento blobs (s34, 2026-07-31)
 
 **Fable, art pass done PERSONALLY — Jake asked ("i wonder if you personally
