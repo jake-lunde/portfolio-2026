@@ -31,9 +31,10 @@ export const CASES: CaseDef[] = [
     no: '02',
     name: 'Family Hub',
     org: 'Greenlight',
-    year: '2025',
-    status: 'soon',
-    progress: { pct: 70, phase: 'Story blocked end to end · drafting next' },
+    year: '2025–26',
+    status: 'live',
+    component: dynamic(() => import('@/programs/projects/CaseFamilyHub')),
+    progress: { pct: 85, phase: 'Drafted — in review' },
   },
   {
     slug: 'tooling',
