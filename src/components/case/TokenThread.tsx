@@ -18,9 +18,9 @@ type Tier = {
 }
 
 const TIERS: Tier[] = [
-  { id: 'weakest', fill: 0.14, line: '“Doesn’t look as good on our background color. Weakest blends too much, IMO.”', who: 'the engineer, unprompted — my spec' },
+  { id: 'weakest', fill: 0.14, line: '“Doesn’t look as good on our background color. Weakest blends too much, IMO.”', who: 'the engineer, unprompted. It was my spec.' },
   { id: 'weak', fill: 0.3, line: '“Try weak?” …Still not it.', who: 'me, wrong again' },
-  { id: 'strongest', fill: 0.95, line: '“Yes. So much better. I love it. You legend.”', who: 'me — his call shipped' },
+  { id: 'strongest', fill: 0.95, line: '“Yes. So much better. I love it. You legend.”', who: 'me. His call shipped.' },
 ]
 
 const INK = '#E7E1D2'
@@ -98,7 +98,7 @@ export function TokenThread() {
       </div>
 
       <div className={styles.moatWhy} aria-live="polite">
-        <b>{tier.id}</b> — {tier.line}
+        <b>{tier.id}</b> · {tier.line}
         <br />
         <span style={{ opacity: 0.6 }}>{tier.who}</span>
       </div>

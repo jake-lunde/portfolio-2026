@@ -21,9 +21,9 @@ import { CaseFooter } from '@/components/case/CaseFooter'
 <Hero
   eyebrow="Greenlight · Family Hub · First-party hardware"
   title="Family Hub"
-  thesis={<>The all-in-one family organizer, on Greenlight&rsquo;s first device. Its first skeptic — <span className="hl-pink">me</span> — became its design team.</>}
+  thesis={<>The all-in-one family organizer, on Greenlight&rsquo;s first device. I was its <span className="hl-pink">first skeptic</span>. I ended up being its design team.</>}
   meta={[
-    ['Role', 'Product designer — effectively the design team'],
+    ['Role', 'Product designer (effectively the design team)'],
     ['Partners', '~10 engineers · PM · hardware'],
     ['Timeline', '2025 – 2026'],
     ['Shipped', '15.6″ + 10.1″ devices · GL&rsquo;s first web app · Glow DS'],
@@ -32,134 +32,144 @@ import { CaseFooter } from '@/components/case/CaseFooter'
 
 <Section no="01" label="The bet" title="Three futures. The family organizer won.">
   <Lead>
-    Three of us were asked what Greenlight becomes in five years, beyond the
-    debit card. We brought back three futures.
+    Three of us got asked a pretty fun question: what does Greenlight look
+    like in five years, past the debit card? We came back with three answers.
   </Lead>
 
   <Moves>
     <Move n="01" title="Live Drive">
-      CarPlay for new drivers — drive score on the dash, a family
-      leaderboard. The smaller bet. I still think it happens.
+      CarPlay for new drivers. A drive score on the dash, a family
+      leaderboard. The smaller bet, and I still think it happens at some
+      point.
     </Move>
     <Move n="02" title="Tutor">
-      An AI tutor that reshapes any lesson into the format a kid actually
-      absorbs. Too far ahead for the room.
+      An AI tutor that reshapes a lesson into whatever format actually works
+      for your kid. A podcast, a quiz, a conversation. Too far ahead for the
+      room.
     </Move>
     <Move n="03" title="Family Hub">
-      One home base for running a family — calendar, chores, location,
-      money. The lateral move from family finance to family operating
-      system. It won.
+      One home base for running a family. Calendar, chores, location, money.
+      A lateral move from family finance to family operating system, and the
+      one everyone could see. It won.
     </Move>
   </Moves>
 
-  The honest part: I didn&rsquo;t believe in it at first. I drove the concept
-  while convincing myself — until I watched families filter a
-  household&rsquo;s whole picture down to one member in a couple of taps.
-  A skeptic makes a decent lead designer; every claim got tested on me first.
+  Honestly, I didn&rsquo;t believe in it at first. I drove the concept while
+  kind of convincing myself along the way, right up until I watched families
+  filter a whole household down to one person in a couple of taps. Being the
+  skeptic turned out to be useful. Everything in the pitch had to get past
+  me first.
 
-  <Plate cap="Plate 01 · the pitch" fig="FIG. A" caption="Drop: vision-deck hero + thesis slide — the frame that sold the room (Figma · High Level POC · 453-342130).">
+  <Plate cap="Plate 01 · the pitch" fig="FIG. A" caption="Drop: vision-deck hero + thesis slide, the frame that sold the room (Figma · High Level POC · 453-342130).">
     <Placeholder>Vision-deck hero</Placeholder>
   </Plate>
 </Section>
 
 <Section no="02" label="The evidence" title="The mental load is real. It's also a brief.">
   <Lead>
-    We put the concept in front of 1,200 US parents. Top pains: coordinating
-    schedules, remembering everyone&rsquo;s everything — and open-ends that
-    read like one person running a household off a whiteboard.
+    We put the concept in front of 1,200 US parents. The top pains were
+    coordinating schedules and remembering everyone&rsquo;s everything, and
+    the open-ended answers read like one person running a household off a
+    whiteboard.
   </Lead>
 
   <PullQuote cite="Parent, exploration survey (n = 1,200)">&ldquo;A whiteboard chore chart for the kids, group texts, and a shared Google calendar — would love one tool instead.&rdquo;</PullQuote>
 
-  Appeal cleared 80% before we showed a price — Greenlight&rsquo;s strongest
-  concept test ever. Where we overruled the data, the chart admits it.
+  Appeal cleared 80% before we showed a price, the strongest concept test
+  Greenlight had run. We didn&rsquo;t follow the data everywhere, though.
+  The chart is honest about where we overruled it.
 
-  <Plate cap="Plate 02 · what parents ranked essential" fig="FIG. B — SEPT 2025" caption="Real survey data. Tap the bars — the dashed ones are where strategy overruled research, on purpose.">
+  <Plate cap="Plate 02 · what parents ranked essential" fig="FIG. B — SEPT 2025" caption="Real survey data. Tap a bar. The dashed ones are where we overruled the research, on purpose.">
     <ResearchBars />
   </Plate>
 
   And the counter-voice we kept taped up: *&ldquo;It just looks like an
-  iPad?&rdquo;* The whole design problem lives between those two quotes.
+  iPad?&rdquo;* Fair point. The whole design problem lives between those
+  two quotes.
 </Section>
 
 <Section no="03" label="The system" title="A screensaver with a job. A dashboard with a gate.">
-  Two modes, really. **Ambient** is the heads-up layer — a screensaver that
-  earns its place by telling the household what&rsquo;s next and who&rsquo;s
-  where, unasked. **Active** is walk-up use: the full dashboard, modal
-  drill-downs, the whole surface filterable to one family member.
+  Two modes, really. **Ambient** is the screensaver with a job. It tells the
+  house what&rsquo;s next and who&rsquo;s where without anyone asking.
+  **Active** is when you walk up and use it. Full dashboard, modal views,
+  and you can filter the whole thing down to one family member.
 
-  The third layer is the gate. Privacy topped the survey&rsquo;s function
-  list, so adults manage, kids view, and a PIN stands between glanceable and
-  consequential — approvals, money, calendar edits.
+  Then there&rsquo;s the gate. Privacy was the top-ranked function in our
+  research, so adults manage, kids view, and a PIN sits between glancing at
+  the thing and actually doing something on it. Approving chores, moving
+  money, editing the calendar.
 
-  <Plate cap="Plate 03 · the interaction model" fig="FIG. C" caption="Switch modes — this is the spec the whole product hangs off (ix-models canvas: 453-342132).">
+  <Plate cap="Plate 03 · the interaction model" fig="FIG. C" caption="Switch modes. This is the spec the whole product hangs off (ix-models canvas: 453-342132).">
     <HubModes />
   </Plate>
 
-  My first pass chased radical simplicity — internally, *big dumb buttons.*
-  Leadership asked for more capability per screen, and the shipped hybrid is
-  denser than that first dream. Some of that tension is still live; the best
-  of both is where the product is heading.
+  My first pass chased radical simplicity. Internally we called it *big dumb
+  buttons.* To be fair, we kind of had to punt on that one. Leadership asked
+  for more capability per screen, and what shipped is a hybrid, somewhere
+  between the glanceable dream and a desktop app. That tension is still
+  live, and I&rsquo;m okay with that.
 
-  <Plate cap="Plate 04 · shipped surfaces" fig="FIG. D" caption="Drop: ambient state beside the active dashboard — the two modes as shipped (First Pass section · 459-473268).">
-    <Placeholder>Ambient / active — real screens</Placeholder>
+  <Plate cap="Plate 04 · shipped surfaces" fig="FIG. D" caption="Drop: ambient state beside the active dashboard, the two modes as shipped (First Pass section · 459-473268).">
+    <Placeholder>Ambient / active · real screens</Placeholder>
   </Plate>
 </Section>
 
 <Section no="04" label="The artifact" title="Persuasion is a deliverable.">
   <Lead>
-    The load-bearing skill: taking an idea people can&rsquo;t picture yet and
-    building the artifact that lets them. Family Hub was funded, staffed, and
-    rallied around on a ladder of prototypes — each rung more real than the
-    argument it replaced.
+    This is probably the core of how I work: taking an idea people
+    can&rsquo;t picture yet and building the thing that lets them picture
+    it. Family Hub got funded, staffed, and rallied around on a ladder of
+    prototypes, each one a little more real than the argument it replaced.
   </Lead>
 
   <Claim>The prototype made the case so I didn&rsquo;t have&nbsp;to.</Claim>
 
-  The hi-fi build went to the board with the CEO in fall 2025; at the spring
-  all-hands, I demoed the near-launch product to the whole company. Underneath,
-  the same ladder settled the architecture: Greenlight&rsquo;s first web app,
-  plus Glow — the web design system I spearheaded — shipping improvements
-  over the air, *&ldquo;a thousand percent&rdquo;* faster than native releases.
+  The hi-fi build is the one the CEO took to a board meeting in fall 2025.
+  By the spring all-hands it was my turn, demoing the near-launch product to
+  the whole company. Underneath, the same ladder settled our architecture:
+  Greenlight&rsquo;s first real web app, plus Glow, the web design system I
+  spearheaded. Over-the-air updates made iteration, by my very scientific
+  estimate at the time, *&ldquo;a thousand percent&rdquo;* faster.
 
-  <Plate cap="Plate 05 · the ladder" fig="FIG. E" caption="Drop: lo-fi shell beside the hi-fi board build — same screen, four months apart (430-269385 → 430-269991).">
+  <Plate cap="Plate 05 · the ladder" fig="FIG. E" caption="Drop: lo-fi shell beside the hi-fi board build. Same screen, four months apart (430-269385 → 430-269991).">
     <Placeholder>Lo-fi → hi-fi, side by side</Placeholder>
   </Plate>
 
-  <Plate cap="Plate 06 · the cadence" fig="FIG. F" caption="Drop: a spread from the monthly leadership decks — Gantt, per-platform principles, ambient studies (Presentations · 457-473267).">
+  <Plate cap="Plate 06 · the cadence" fig="FIG. F" caption="Drop: a spread from the monthly leadership decks. Gantt, per-platform principles, ambient studies (Presentations · 457-473267).">
     <Placeholder>Leadership-deck spread</Placeholder>
   </Plate>
 </Section>
 
 <Section no="05" label="The constraints" title="Design with the grain of the hardware.">
   <Lead>
-    First-generation hardware sets an honest budget — and the phone in your
-    pocket is the strongest computer in the house. So onboarding pairs them:
-    the hub asks for one QR scan, the phone does the heavy lifting, and
-    progress reads back on both screens.
+    First-gen hardware keeps you honest, and the phone in your pocket is the
+    strongest computer in the house. So onboarding pairs the two. The hub
+    asks for one QR scan, your phone does the heavy lifting, and progress
+    shows up on both screens the whole way.
   </Lead>
 
-  <Plate cap="Plate 07 · paired onboarding" fig="FIG. G" caption="Step through it — two screens, one flow.">
+  <Plate cap="Plate 07 · paired onboarding" fig="FIG. G" caption="Step through it. Two screens, one flow.">
     <TandemSetup />
   </Plate>
 
-  The QR-handoff pattern outlived setup — it now carries every complex action
-  in the product — and these flows birthed the avatar system: ten characters
-  by nine colors, animating in as the family assembles.
+  That QR handoff outlived onboarding. It carries every complex action in
+  the product now. These flows also gave us the avatar system, ten
+  characters in nine colors, animating in as the family gets set up. Still
+  one of my favorite things in the product.
 
   <Plate cap="Plate 08 · the avatar system" fig="FIG. H" caption="Drop: the 10×9 avatar grid, plus one mid-animation frame from onboarding.">
-    <Placeholder>Avatars — 10 characters × 9 colors</Placeholder>
+    <Placeholder>Avatars · 10 characters × 9 colors</Placeholder>
   </Plate>
 
   <Ledger
     cap="Where design touched the hardware"
     rows={[
-      ['15.6″', <>Killed the 27″; called the size a family actually lives with. Shipped 15.6″ and 10.1″.</>],
-      ['Mics', <>Moved from a corner to dead center — an assistant should look like it&rsquo;s listening.</>],
-      ['RAM', <>Argued the spec up to protect the animation budget. A designer negotiating bill-of-materials.</>],
-      ['BLE', <>Pushed onto the board for the paired future onboarding wanted from day one.</>],
-      ['Keyboard', <>The stock Android keyboard risked the feel — I built a themed APK as a working example. The factory matched it.</>],
-      ['Boot', <>The boot animation went to the factory as a folder of numbered PNGs. Still funny. Still true.</>],
+      ['15.6″', <>Killed the 27″ and called the size a family actually lives with. We shipped 15.6″ and 10.1″.</>],
+      ['Mics', <>Moved from a corner to dead center. An assistant should look like it&rsquo;s listening.</>],
+      ['RAM', <>Argued the spec up to protect the animation budget. A designer negotiating bill of materials.</>],
+      ['BLE', <>Pushed onto the board for the paired future we&rsquo;d wanted since day one.</>],
+      ['Keyboard', <>The stock Android keyboard would have given the whole thing away, so I built a themed APK as a working example. The factory matched it.</>],
+      ['Boot', <>The boot animation went to the factory as a folder of numbered PNGs. Which is kinda funny, but it worked.</>],
     ]}
   />
 
@@ -168,40 +178,42 @@ import { CaseFooter } from '@/components/case/CaseFooter'
 
 <Section no="06" label="Ten to one" title="One designer, ten engineers.">
   <Lead>
-    Family Hub&rsquo;s design team was, functionally, me — one designer to
-    roughly ten engineers, on a new platform, new framework, and new design
-    system at once. The hardest problem wasn&rsquo;t a screen. It was staying
-    ahead of the build.
+    Functionally, the Family Hub design team was me. One designer, roughly
+    ten engineers, on a new platform, a new framework, and a new design
+    system all at once. The hardest problem wasn&rsquo;t any single screen.
+    It was staying ahead of the build.
   </Lead>
 
-  The call: let engineering run on happy paths while I backfilled states and
-  polish behind them — answering with redrawn Figma, motion files, or live
-  DevTools edits on a staging mirror that turned straight into tickets. I
-  kept a hub on my desk that I could debug, test, and mirror.
+  The call we made: let engineering run on happy paths while I backfilled
+  states and polish behind them. That was scary, but it worked because the
+  feedback stayed precise. Redrawn Figma, motion files, live edits in
+  DevTools on a staging mirror that went straight into tickets. And I kept a
+  hub on my desk that I could debug, test on, and mirror.
 
   <Claim>That&rsquo;s when <em>design engineer</em> stopped being a title I was trying&nbsp;on.</Claim>
 
-  It ran both directions — my favorite review came from an engineer, about
-  one token:
+  It went both directions, too. My favorite review on the whole project came
+  from an engineer, about one token:
 
   <Plate cap="Plate 09 · the red pen, live" fig="FIG. I — AVATAR TOKEN" caption="Replay the thread: my spec said weakest, his eye said otherwise, strongest shipped. (Real Slack captures land here.)">
     <TokenThread />
   </Plate>
 
-  The receipt against me: my early visual pass ran too loud, and the team
-  said so. I stripped it back; the shipped product spends color only where it
-  means something. They were right. It got better.
+  And the receipt against me: my early visual pass ran too loud. The team
+  told me so. I stripped it back, and the shipped product spends color where
+  it actually means something. They were right, and the design got better.
 
-  <Plate cap="Plate 10 · the rein-in" fig="FIG. J" caption="Drop: color before/after, early 2026 — the pass where the team was right.">
-    <Placeholder>Before / after — the color pullback</Placeholder>
+  <Plate cap="Plate 10 · the rein-in" fig="FIG. J" caption="Drop: color before/after, early 2026. The pass where the team was right.">
+    <Placeholder>Before / after · the color pullback</Placeholder>
   </Plate>
 </Section>
 
 <Section no="07" label="The ship" title="Zero code in January. Nationwide by July.">
   <Lead>
-    When accounts was cut from launch scope I argued, hard, for a more
+    When accounts got cut from launch scope, I argued hard for a more
     complete first impression. We shipped fast instead. I&rsquo;m proud of
-    what shipped, and the jury&rsquo;s still out on the trade — both are true.
+    what we put out, and the jury&rsquo;s still out on the trade. Both of
+    those are true.
   </Lead>
 
   <Metrics>
@@ -209,14 +221,15 @@ import { CaseFooter } from '@/components/case/CaseFooter'
       <Stat big={<><span className="hl-pink">7</span> months</>} label="from zero lines of code to a device shipping nationwide" />
       <Stat secondary big={<>1 : <span className="hl-pink">10</span></>} label="designer-to-engineer ratio on the build. I was the one." />
     </div>
-    <Plate cap="Plate 11 · in a home" fig="FIG. K" caption="Drop: launch photography — the shoot rendered my Figma prototypes on the physical device, live.">
+    <Plate cap="Plate 11 · in a home" fig="FIG. K" caption="Drop: launch photography. The shoot rendered my Figma prototypes on the physical device, live.">
       <Placeholder>Family Hub, installed<br />(hero photo)</Placeholder>
     </Plate>
   </Metrics>
 
-  This is for the keeper of the whiteboard — the parent from the open-ends,
-  transcribing the family calendar every month for people who never look at
-  it. Out of one person&rsquo;s head; onto the family&rsquo;s home base.
+  This one&rsquo;s for the keeper of the whiteboard, the parent from our
+  open-ends who transcribes the family calendar every month for people who
+  never look at it. Out of one person&rsquo;s head, onto the family&rsquo;s
+  home base.
 
   We didn&rsquo;t ship another smart display. We retired the whiteboard.
 </Section>

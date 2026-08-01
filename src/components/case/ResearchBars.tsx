@@ -18,11 +18,11 @@ type Row = {
 }
 
 const ROWS: Row[] = [
-  { id: 'cal', label: 'Calendar', pct: 58, verdict: 'SHIPPED — CORE', why: 'The #1 ask, and the feature I owned end to end. Month, week, day, and the syncing that makes it real.' },
-  { id: 'chores', label: 'Chores', pct: 48, verdict: 'SHIPPED — CORE', why: 'Chores wired to allowance — the fintech DNA the category can’t copy.' },
-  { id: 'loc', label: 'Location', pct: 46, verdict: 'SHIPPED — CORE', why: '“Everyone but Tanya is at home. She’s at work.” Glanceable, not surveillant.' },
-  { id: 'lists', label: 'Grocery lists', pct: 44, verdict: 'SHIPPED — CORE', why: 'The humble one. Nobody demos lists; everybody uses them.' },
-  { id: 'ai', label: 'AI assistant', pct: 34, verdict: 'THE PAID BET', why: 'Mid-pack in research — and the paid tier anyway. A strategic bet, not a research-led one. I’m telling you because you’d notice.' },
+  { id: 'cal', label: 'Calendar', pct: 58, verdict: 'SHIPPED · CORE', why: 'The #1 ask, and the feature I owned end to end. Month, week, day, and the syncing that makes it real.' },
+  { id: 'chores', label: 'Chores', pct: 48, verdict: 'SHIPPED · CORE', why: 'Chores wired straight into allowance. That is the fintech DNA the category can’t copy.' },
+  { id: 'loc', label: 'Location', pct: 46, verdict: 'SHIPPED · CORE', why: '“Everyone but Tanya is at home. She’s at work.” Glanceable, not creepy.' },
+  { id: 'lists', label: 'Grocery lists', pct: 44, verdict: 'SHIPPED · CORE', why: 'The humble one. Nobody demos lists; everybody uses them.' },
+  { id: 'ai', label: 'AI assistant', pct: 34, verdict: 'THE PAID BET', why: 'Mid-pack in the research, and it became the paid tier anyway. A strategic bet, not a research-led one. I’m telling you because you’d notice.' },
   { id: 'photos', label: 'Photo album', pct: 15, verdict: 'SHIPPED ANYWAY', why: 'Dead last with parents, table stakes in the category. Sometimes the market outvotes the survey.' },
 ]
 
@@ -114,7 +114,7 @@ export function ResearchBars() {
             {sel.why}
           </>
         ) : (
-          <>Tap a bar — the dashed ones are where we overruled the research, on purpose.</>
+          <>Tap a bar. The dashed ones are where we overruled the research, on purpose.</>
         )}
       </div>
     </div>

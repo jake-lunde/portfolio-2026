@@ -37,7 +37,7 @@ const STEPS: Step[] = [
     hubSub: 'TANYA ✓ · OLIVIA ✓ · MATEO…',
     phoneTitle: 'Add family',
     phoneSub: 'members, roles, PINs',
-    note: 'Each member added on the phone lands on the hub live — avatars animate in as the family assembles.',
+    note: 'Each member added on the phone lands on the hub live. Avatars animate in as the family assembles.',
   },
   {
     hubTitle: 'Calendars',
@@ -48,7 +48,7 @@ const STEPS: Step[] = [
   },
   {
     hubTitle: '7:42',
-    hubSub: 'SOCCER 4:30 — OLIVIA',
+    hubSub: 'SOCCER 4:30 · OLIVIA',
     phoneTitle: 'All set',
     phoneSub: 'it’s already working',
     note: 'The pattern stuck: QR deep-links still carry every complex action in the shipped product.',

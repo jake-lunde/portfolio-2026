@@ -13,9 +13,9 @@ import styles from './case.module.css'
 type Mode = 'ambient' | 'active' | 'auth'
 
 const MODES: Array<{ id: Mode; label: string; blurb: string }> = [
-  { id: 'ambient', label: 'Ambient', blurb: 'The heads-up layer. From across the room: the time, what’s next, who’s where, the photo stream. It asks nothing.' },
-  { id: 'active', label: 'Active', blurb: 'Walk up and it’s a full dashboard — drill into any feature, open modal views, filter the whole surface to one family member.' },
-  { id: 'auth', label: 'Authenticated', blurb: 'The gate. Adults manage, kids view: a PIN stands between glanceable and consequential — approvals, money, calendar edits.' },
+  { id: 'ambient', label: 'Ambient', blurb: 'The screensaver with a job. From across the room you get the time, what’s next, who’s where, the photo stream. It asks nothing of you.' },
+  { id: 'active', label: 'Active', blurb: 'Walk up and it’s a full dashboard. Drill into any feature, open modal views, filter the whole surface down to one family member.' },
+  { id: 'auth', label: 'Authenticated', blurb: 'The gate. Adults manage, kids view. A PIN sits between glancing and doing: approvals, money, calendar edits.' },
 ]
 
 const INK = '#E7E1D2'
@@ -29,7 +29,7 @@ function Ambient() {
         7:42
       </text>
       <text x={42} y={156} fill={INK} fontSize="12" opacity="0.6" fontFamily="var(--mono)">
-        THU · SOCCER 4:30 — OLIVIA
+        THU · SOCCER 4:30 · OLIVIA
       </text>
       {/* photo memory */}
       <rect x={368} y={48} width={152} height={108} fill="none" stroke={INK} strokeWidth="1" opacity="0.5" />
@@ -158,7 +158,7 @@ export function HubModes() {
       </svg>
 
       <div className={styles.moatWhy} aria-live="polite">
-        <b>{current.label}</b> — {current.blurb}
+        <b>{current.label}</b> · {current.blurb}
       </div>
     </div>
   )
