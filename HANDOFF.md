@@ -103,6 +103,13 @@ nothing separable to delegate. Deck dark (Blob cap, same as s34).**
   runs leaves a stale webpack module → 500 until server restart.
 - **Blob cap lifted:** Vercel Pro upgrade; deck resumed (54/55 events).
   Jake wants a cost read on steady-state usage before we lean on it.
+- **PASS 3 (`8a8ff27`) — the voice pass:** Jake flagged em dashes +
+  "load-bearing" as AI tells; prose rewritten in his spoken cadence
+  (verbatims from tracker §2 as the reference: "kind of convincing myself
+  along the way", "to be fair, we kind of had to punt", "which is kinda
+  funny"). Em dashes purged from prose + component strings; survivors are
+  verbatim quotes and house label typography (secNo/FIG/cite). Rules saved
+  to memory `case-study-voice-calibration` — applies to ALL future drafts.
 
 ## Next steps
 
@@ -110,8 +117,22 @@ nothing separable to delegate. Deck dark (Blob cap, same as s34).**
    `/projects/family-hub` (behind the gate). Check: organizer framing,
    HubModes model, Claim/Ledger hierarchy, accounts-dissent line (§07).
    Merge = his call; then progress 85→100.
-2. **Jake:** save the Ryan avatar-token Slack screenshots (Red Pen exhibit
-   → drops into Plate 06) + color before/after (Plate 07) + asset pass on
+2. **NEW FEATURE, FRESH SESSION — the "evolution rail":** Jake's idea, he
+   is providing assets. A floating element outside/barely overlapping the
+   case text column that IS the Family Hub, evolving as you scroll:
+   idea sketch → lo-fi wireframe → mid-fi → hi-fi prototype → production
+   build (photo). Build notes for the next session: lives in
+   CaseFamilyHub/case layout, right margin on desktop, hidden or inline on
+   mobile (360px law); the case scrolls inside the WINDOW's scroll
+   container, so sticky/position must anchor to that scroller, not the
+   viewport; stage-switching driven by IntersectionObserver on sections
+   (NOT rAF/scroll-linked springs — hidden-tab + reduced-motion safe;
+   crossfade like HubModes' keyed remount). Five asset slots, swappable
+   placeholders until Jake ships them (§2 law). Wants: playful, not a
+   parlor trick; it should read as the persuasion-ladder thesis made
+   literal.
+3. **Jake:** save the Ryan avatar-token Slack screenshots (Red Pen exhibit
+   → drops into Plate 09) + color before/after (Plate 10) + asset pass on
    the Figma-node placeholders.
 3. **Jake:** eyeball tracker v2 in a real browser (idle animations, peek
    loop, toasts) + `critter-cast-v2.html`. Then revive `leaf-patch`
