@@ -43,10 +43,17 @@
   TokenThread), placeholders cite exact Figma nodes for the asset pass.
   cases.ts 70→85 "Drafted — in review", status LIVE on the branch only.
   Public-safe filters applied (no targets/CEO/backchannel/team-shrink).
-  **Awaiting Jake's read → merge.** Interview capture: tracker §2 (s32–33).
-- **Tracking:** Notion (connector live). **⚠️ COMMAND.CTR deck 500s — Blob
-  ops cap until ~Aug 1** (s26 incident, archive); zero-`list()` fix = top
-  infra backlog. s34 skipped deck reporting for this reason.
+  **PASS 2 landed (`6fb4567`) after Jake's review:** organizer/home-base
+  framing (zero "kitchen wall"), prose ~halved, HubModes = Ambient/Active/
+  Authenticated (no "focused" tier; big-dumb-buttons → shipped-hybrid
+  honesty), Claim + Ledger type-hierarchy components, 11 plates.
+  **Awaiting Jake's second read → merge.** Capture: tracker §2 (s32–33).
+- **Tracking:** Notion (connector live). **Blob cap LIFTED (2026-08-01):**
+  Jake upgraded Vercel to Pro w/ advanced Blob ops — NOT a monthly cap.
+  Deck reporting RESUMED s35 (dispatch/return/merge all 200). Jake wants a
+  COST read on normal deck usage — watch the Vercel bill, don't go crazy;
+  zero-`list()` fix still worth doing. Script needs `.env.local` sourced
+  (`CC_FEED_KEY`); usage = positional: `cc-report.mjs dispatch fable "" "label"`.
 - **Known debts:** SpecSheet motion quote-strings; first-load JS perf;
   underwater; `--accent-on-inverse` role. Ports 3000/3210 often owned by
   concurrent sessions — temp launch.json entry, verify, revert; never
@@ -84,12 +91,24 @@ nothing separable to delegate. Deck dark (Blob cap, same as s34).**
   console buffer replayed dead errors (known).
 - Tracker §2 header → 🟩 DRAFTED. `.next/types/* 2.ts` duplicate-file junk
   causes tsc noise (pre-existing; filter with `grep -v '^.next'`).
+- **PASS 2 (same session, 2026-08-01, `6fb4567`) — Jake's live review:**
+  "kitchen wall" purged (product = all-in-one family organizer / home base;
+  positioning verified against greenlight.com/family-hub + shop + WiFiHiFi
+  press). Interaction model corrected to Ambient/Active + Authenticated
+  gate (assistant mode exists, deliberately unlisted; big dumb buttons =
+  punted-to-hybrid, said honestly). Prose ~halved; new Claim (display
+  interstitial) + Ledger (mono spec-sheet) in case vocabulary; 6 new
+  hiring-manager placeholders. "Weakest hardware" → "design with the grain
+  of the hardware." Gotcha: `git mv` on a client component while dev server
+  runs leaves a stale webpack module → 500 until server restart.
+- **Blob cap lifted:** Vercel Pro upgrade; deck resumed (54/55 events).
+  Jake wants a cost read on steady-state usage before we lean on it.
 
 ## Next steps
 
-1. **Jake: READ the Family Hub draft** — branch `case-family-hub`,
-   `/projects/family-hub` (behind the gate). Voice + thesis + the
-   public-safe renderings (esp. the accounts-dissent paragraph, §07).
+1. **Jake: READ Family Hub pass 2** — branch `case-family-hub`,
+   `/projects/family-hub` (behind the gate). Check: organizer framing,
+   HubModes model, Claim/Ledger hierarchy, accounts-dissent line (§07).
    Merge = his call; then progress 85→100.
 2. **Jake:** save the Ryan avatar-token Slack screenshots (Red Pen exhibit
    → drops into Plate 06) + color before/after (Plate 07) + asset pass on
