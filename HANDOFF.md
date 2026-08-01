@@ -134,11 +134,11 @@ nothing separable to delegate. Deck dark (Blob cap, same as s34).**
 3. **Jake:** save the Ryan avatar-token Slack screenshots (Red Pen exhibit
    → drops into Plate 09) + color before/after (Plate 10) + asset pass on
    the Figma-node placeholders.
-3. **Jake:** eyeball tracker v2 in a real browser (idle animations, peek
+4. **Jake:** eyeball tracker v2 in a real browser (idle animations, peek
    loop, toasts) + `critter-cast-v2.html`. Then revive `leaf-patch`
    (reconcile Family Hub 55→70 phase, slot sizes, Trash TAG-03) or park on.
-4. **CV.EXE revisions on `cv-exe`** (BFA vs BA; dot-matrix line), then merge.
-5. Gate friction (Jake) — audit's #1 risk, still unactioned.
-6. COMMAND.CTR zero-`list()` fix after Blob cap resets (~Aug 1).
-7. Figma stale STRING vars; typography finale; underwater; First Pass
+5. **CV.EXE revisions on `cv-exe`** (BFA vs BA; dot-matrix line), then merge.
+6. Gate friction (Jake) — audit's #1 risk, still unactioned.
+7. COMMAND.CTR zero-`list()` fix after Blob cap resets (~Aug 1).
+8. Figma stale STRING vars; typography finale; underwater; First Pass
    section `459-473268` still unindexed (MCP transport cap) — carried.
