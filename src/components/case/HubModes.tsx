@@ -5,16 +5,17 @@ import { motion, useReducedMotion } from 'motion/react'
 import { sfx } from '@/lib/sound'
 import styles from './case.module.css'
 
-/* The hub's whole interaction model in one dial: Ambient (bulletin board)
-   → Active (dashboard) → Focused (task takeover). Modes per the
-   interaction-models canvas (Figma team-library 453-342132). */
+/* The shipped interaction model: Ambient (the heads-up screensaver) →
+   Active (walk up, full dashboard, filter per member) → Authenticated
+   (PIN gate before anything consequential). Two modes plus the auth
+   layer — per Jake's s35 correction; no "focused" tier. */
 
-type Mode = 'ambient' | 'active' | 'focused'
+type Mode = 'ambient' | 'active' | 'auth'
 
 const MODES: Array<{ id: Mode; label: string; blurb: string }> = [
-  { id: 'ambient', label: 'Ambient', blurb: 'The bulletin board. Glanceable from across the kitchen — time, the next event, a photo, a savings goal. Asks nothing.' },
-  { id: 'active', label: 'Active', blurb: 'The dashboard. Someone walked up: widgets per feature, laid out per family member. Private things stay behind a PIN.' },
-  { id: 'focused', label: 'Focused', blurb: 'The takeover. One task, full screen, a clear start and end — add the chore, approve the request, get out.' },
+  { id: 'ambient', label: 'Ambient', blurb: 'The heads-up layer. From across the room: the time, what’s next, who’s where, the photo stream. It asks nothing.' },
+  { id: 'active', label: 'Active', blurb: 'Walk up and it’s a full dashboard — drill into any feature, open modal views, filter the whole surface to one family member.' },
+  { id: 'auth', label: 'Authenticated', blurb: 'The gate. Adults manage, kids view: a PIN stands between glanceable and consequential — approvals, money, calendar edits.' },
 ]
 
 const INK = '#E7E1D2'
@@ -30,18 +31,17 @@ function Ambient() {
       <text x={42} y={156} fill={INK} fontSize="12" opacity="0.6" fontFamily="var(--mono)">
         THU · SOCCER 4:30 — OLIVIA
       </text>
-      {/* photo frame */}
+      {/* photo memory */}
       <rect x={368} y={48} width={152} height={108} fill="none" stroke={INK} strokeWidth="1" opacity="0.5" />
       <circle cx={404} cy={84} r={12} fill={INK} opacity="0.35" />
       <path d="M376 140 L420 100 L448 122 L478 96 L512 128 L512 148 L376 148 Z" fill={INK} opacity="0.35" />
       <text x={368} y={172} fill={INK} fontSize="9" opacity="0.45" fontFamily="var(--mono)" letterSpacing="1">
         GRANDMA &amp; CHI CHI, 1974
       </text>
-      {/* savings strip */}
+      {/* who's-where strip */}
       <rect x={40} y={216} width={480} height={36} fill="none" stroke={INK} strokeWidth="1" opacity="0.4" />
-      <rect x={40} y={216} width={302} height={36} fill={INK} opacity="0.18" />
       <text x={52} y={238} fill={INK} fontSize="11" opacity="0.8" fontFamily="var(--mono)">
-        CAMP FUND · 63%
+        EVERYONE BUT TANYA IS HOME · SHE&rsquo;S AT WORK
       </text>
     </g>
   )
@@ -49,7 +49,7 @@ function Ambient() {
 
 function Active() {
   const tiles = [
-    ['CALENDAR', 40, 48], ['CHORES', 208, 48], ['SAFETY', 376, 48],
+    ['CALENDAR', 40, 48], ['CHORES', 208, 48], ['LOCATION', 376, 48],
     ['LISTS', 40, 156], ['MONEY', 208, 156], ['PHOTOS', 376, 156],
   ] as const
   return (
@@ -64,7 +64,7 @@ function Active() {
           <rect x={x + 12} y={y + 58} width={label === 'CHORES' ? 108 : 72} height={8} fill={INK} opacity="0.18" />
         </g>
       ))}
-      {/* member chips — layout is per-person */}
+      {/* member filter — the whole surface re-scopes per person */}
       {['T', 'O', 'M'].map((m, i) => (
         <g key={m}>
           <circle cx={56 + i * 40} cy={272} r={13} fill={i === 1 ? 'var(--accent-expressive)' : INK} opacity={i === 1 ? 1 : 0.4} />
@@ -74,34 +74,39 @@ function Active() {
         </g>
       ))}
       <text x={132} y={276} fill={INK} fontSize="9" opacity="0.5" fontFamily="var(--mono)" letterSpacing="1">
-        ← OLIVIA&rsquo;S VIEW
+        ← FILTERED TO OLIVIA
       </text>
     </g>
   )
 }
 
-function Focused() {
+function Auth() {
   return (
     <g>
-      <text x={W / 2} y={96} textAnchor="middle" fill={INK} fontSize="22" fontFamily="var(--mono)">
-        Add a chore
+      {/* the dashboard, held behind the gate */}
+      <g opacity="0.18">
+        {[[40, 48], [208, 48], [376, 48], [40, 156], [208, 156], [376, 156]].map(([x, y]) => (
+          <rect key={`${x}-${y}`} x={x} y={y} width={144} height={92} fill="none" stroke={INK} strokeWidth="1" />
+        ))}
+      </g>
+      <rect x={165} y={78} width={230} height={140} fill="#131811" stroke={INK} strokeWidth="1" opacity="0.97" />
+      <text x={W / 2} y={112} textAnchor="middle" fill={INK} fontSize="10" letterSpacing="1.5" fontFamily="var(--mono)">
+        PARENT PIN
       </text>
-      <rect x={140} y={124} width={280} height={44} fill="none" stroke={INK} strokeWidth="1" opacity="0.6" />
-      <text x={156} y={151} fill={INK} fontSize="12" opacity="0.55" fontFamily="var(--mono)">
-        Walk the dog · 5:00 PM
-      </text>
-      <rect x={140} y={184} width={280} height={48} fill="var(--accent-expressive)" />
-      <text x={W / 2} y={213} textAnchor="middle" fill="#131811" fontSize="13" fontWeight="700" fontFamily="var(--mono)">
-        DONE
+      {[0, 1, 2, 3].map((d) => (
+        <circle key={d} cx={238 + d * 28} cy={140} r={6} fill={d < 3 ? 'var(--accent-expressive)' : 'none'} stroke={INK} strokeWidth="1" opacity={d < 3 ? 1 : 0.5} />
+      ))}
+      <text x={W / 2} y={186} textAnchor="middle" fill={INK} fontSize="10" opacity="0.6" fontFamily="var(--mono)">
+        Approve Olivia&rsquo;s chore · $5.00
       </text>
       <text x={W / 2} y={262} textAnchor="middle" fill={INK} fontSize="9" opacity="0.5" fontFamily="var(--mono)" letterSpacing="1">
-        ONE BIG DUMB BUTTON. THAT&rsquo;S THE POINT.
+        ADULTS MANAGE · KIDS VIEW · STRAIGHT FROM THE RESEARCH
       </text>
     </g>
   )
 }
 
-export function SurfaceTriad() {
+export function HubModes() {
   const [mode, setMode] = useState<Mode>('ambient')
   const reduced = useReducedMotion()
   const current = MODES.find((m) => m.id === mode)!
@@ -148,7 +153,7 @@ export function SurfaceTriad() {
         >
           {mode === 'ambient' && <Ambient />}
           {mode === 'active' && <Active />}
-          {mode === 'focused' && <Focused />}
+          {mode === 'auth' && <Auth />}
         </motion.g>
       </svg>
 

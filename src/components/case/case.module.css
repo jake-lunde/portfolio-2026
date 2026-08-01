@@ -281,6 +281,73 @@
   text-transform: uppercase;
 }
 
+/* claim — interstitial display statement, between pull-quote and h2 in the
+   hierarchy; carries one beat of the argument in display type */
+.claim {
+  font-family: var(--display);
+  font-size: clamp(26px, 4vw, 38px); /* decorative fluid clamp — sits between section h2 (23–30) and the hero title; no exact ramp role */
+  line-height: var(--leading-tight);
+  letter-spacing: 0;
+  font-weight: var(--weight-regular);
+  max-width: 22ch;
+  margin: 34px 0 8px;
+}
+
+/* ledger — mono spec-sheet rows; terse facts instead of paragraphs */
+.ledger {
+  border: var(--border-width-default) solid var(--content);
+  background: var(--surface);
+  padding: 22px;
+  margin-top: 26px;
+}
+
+[data-theme='dark'] .ledger {
+  border-color: var(--border);
+  background: var(--surface-raised);
+}
+
+.ledgerCap {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin-bottom: 6px;
+}
+
+.ledgerRow {
+  display: flex;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: var(--border-width-hairline) solid var(--border);
+  align-items: baseline;
+}
+
+.ledgerRow:last-child {
+  border-bottom: none;
+}
+
+.ledgerKey {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex: 0 0 118px;
+}
+
+.ledgerVal {
+  font-size: var(--type-body-sm-size);
+  line-height: var(--leading-normal);
+}
+
+@media (max-width: 640px) {
+  .ledgerRow {
+    flex-direction: column;
+    gap: 3px;
+  }
+}
+
 /* pull quote */
 .quote {
   margin: 30px 0 0;

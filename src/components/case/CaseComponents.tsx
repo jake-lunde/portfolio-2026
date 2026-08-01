@@ -132,6 +132,32 @@ export function Decide({
   )
 }
 
+/* interstitial display statement — one beat of the argument, oversized */
+export function Claim({ children }: { children: React.ReactNode }) {
+  return <p className={styles.claim}>{children}</p>
+}
+
+/* mono spec-sheet — terse facts instead of paragraphs */
+export function Ledger({
+  cap,
+  rows,
+}: {
+  cap: string
+  rows: Array<[string, React.ReactNode]>
+}) {
+  return (
+    <div className={styles.ledger}>
+      <p className={styles.ledgerCap}>{cap}</p>
+      {rows.map(([k, v]) => (
+        <div key={k} className={styles.ledgerRow}>
+          <span className={styles.ledgerKey}>{k}</span>
+          <span className={styles.ledgerVal}>{v}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function PullQuote({ children, cite }: { children: React.ReactNode; cite: string }) {
   return (
     <blockquote className={styles.quote}>

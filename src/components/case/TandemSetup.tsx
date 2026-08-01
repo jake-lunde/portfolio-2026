@@ -22,36 +22,36 @@ const STEPS: Step[] = [
     hubTitle: '[QR]',
     hubSub: 'SCAN TO SET ME UP',
     phoneTitle: 'Camera',
-    phoneSub: 'pointed at the wall',
-    note: 'The hub asks for exactly one thing: a scan. No clunky on-screen keyboard, ever.',
+    phoneSub: 'one scan, that’s it',
+    note: 'The hub asks for exactly one thing: a scan. Never the on-screen keyboard.',
   },
   {
     hubTitle: 'Waiting…',
     hubSub: 'PHONE CONNECTED ✓',
     phoneTitle: 'Sign in',
     phoneSub: 'Greenlight app · real keyboard',
-    note: 'Auth happens where the good keyboard lives. The demographic’s phone out-powers the hub — so the phone does the computing.',
+    note: 'Typing happens on the good keyboard; computing on the good computer.',
   },
   {
     hubTitle: 'The Millers',
     hubSub: 'TANYA ✓ · OLIVIA ✓ · MATEO…',
     phoneTitle: 'Add family',
     phoneSub: 'members, roles, PINs',
-    note: 'Every member added on the phone lands on the wall in real time — avatars animate in as the family assembles.',
+    note: 'Each member added on the phone lands on the hub live — avatars animate in as the family assembles.',
   },
   {
     hubTitle: 'Calendars',
     hubSub: '2 OF 3 CONNECTED',
     phoneTitle: 'Sync calendars',
     phoneSub: 'Google · Apple · Outlook',
-    note: 'You act on the phone and feel the result immediately on the hub. Feedback on both screens, the whole way.',
+    note: 'Act on the phone, feel it on the hub. Feedback on both screens, the whole way.',
   },
   {
     hubTitle: '7:42',
     hubSub: 'SOCCER 4:30 — OLIVIA',
     phoneTitle: 'All set',
-    phoneSub: 'see you on the wall',
-    note: 'Done: the hub is already being a hub. The pattern stuck — QR deep-links still handle every complex action in the shipped product.',
+    phoneSub: 'it’s already working',
+    note: 'The pattern stuck: QR deep-links still carry every complex action in the shipped product.',
   },
 ]
 
@@ -79,7 +79,7 @@ export function TandemSetup() {
         aria-label={`Paired onboarding, step ${i + 1} of ${STEPS.length}. Hub: ${step.hubTitle} ${step.hubSub}. Phone: ${step.phoneTitle}, ${step.phoneSub}.`}
         fontFamily="var(--mono)"
       >
-        {/* hub — 15", landscape, on the wall */}
+        {/* hub — 15.6", landscape */}
         <rect x={20} y={30} width={360} height={210} fill="none" stroke={INK} strokeWidth="1.5" opacity="0.7" />
         <text x={20} y={20} fill={INK} fontSize="9" opacity="0.5" letterSpacing="1.5">
           FAMILY HUB · 15&Prime;
