@@ -9,6 +9,98 @@
 
 ---
 
+## Family Hub drafted: the leaf becomes a case study (s35, 2026-07-31)
+
+**Fable drafting solo, declared per §4.2: prose voice + interactive-plate
+design are taste work, and every input was already captured in tracker §2 —
+nothing separable to delegate. Deck dark (Blob cap, same as s34).**
+
+- **Branch `case-family-hub` (`087d56b`)** — `content/family-hub.mdx` +
+  CaseFamilyHub program. Spine: bet (3 futures, Moves) → evidence (n=1,200)
+  → system (surface triad) → persuasion-by-artifact → constraints (QR
+  tandem + hardware margins) → ten-to-one (Red Pen ×2) → the ship. Thesis:
+  *"The first skeptic it had to convert was me — then the board, then the
+  factory."* Close: *"We retired the whiteboard."*
+- **4 new interactives** (case/, invest palette: ink #E7E1D2 on inverse
+  plate, one pink): ResearchBars (survey bars w/ overruled-research ledger),
+  SurfaceTriad (ambient/active/focused), TandemSetup (5-step paired
+  onboarding), TokenThread (avatar-token thread replay, weakest→strongest).
+- **CaseFooter now takes `next.slug` and opens the window** — was a dead
+  button; invest's footer → Family Hub, live.
+- **Figma scan for the asset pass:** Presentations `457-473267` = 4 monthly
+  leadership decks Aug–Nov 25 (Gantt, per-platform principles+grids,
+  ambient studies: Magic Mirror/Clock/Weather/Art); Initial Prototypes
+  `460-368545` = LoFi v1 → v2 → HiFi 7/9/25 ladder (hi-fi home
+  `430-269991`). First Pass `459-473268` overflows the MCP transport —
+  still unindexed. Placeholder captions cite exact node ids.
+- Verified on this session's own port-3000 server (foreign session owned
+  3210): gate bypassed via `sessionStorage lunde-gate=1`, 7 sections + all
+  4 interactives probed by JS. **Gotcha for memory: AnimatePresence
+  `mode="wait"` never swaps under the hidden-tab rAF freeze** — replaced
+  with keyed remount + fade-in (also just simpler). tsc clean; stale
+  console buffer replayed dead errors (known).
+- Tracker §2 header → 🟩 DRAFTED. `.next/types/* 2.ts` duplicate-file junk
+  causes tsc noise (pre-existing; filter with `grep -v '^.next'`).
+- **PASS 2 (same session, 2026-08-01, `6fb4567`) — Jake's live review:**
+  "kitchen wall" purged (product = all-in-one family organizer / home base;
+  positioning verified against greenlight.com/family-hub + shop + WiFiHiFi
+  press). Interaction model corrected to Ambient/Active + Authenticated
+  gate (assistant mode exists, deliberately unlisted; big dumb buttons =
+  punted-to-hybrid, said honestly). Prose ~halved; new Claim (display
+  interstitial) + Ledger (mono spec-sheet) in case vocabulary; 6 new
+  hiring-manager placeholders. "Weakest hardware" → "design with the grain
+  of the hardware." Gotcha: `git mv` on a client component while dev server
+  runs leaves a stale webpack module → 500 until server restart.
+- **Blob cap lifted:** Vercel Pro upgrade; deck resumed (54/55 events).
+  Jake wants a cost read on steady-state usage before we lean on it.
+- **PASS 3 (`8a8ff27`) — the voice pass:** Jake flagged em dashes +
+  "load-bearing" as AI tells; prose rewritten in his spoken cadence
+  (verbatims from tracker §2 as the reference: "kind of convincing myself
+  along the way", "to be fair, we kind of had to punt", "which is kinda
+  funny"). Em dashes purged from prose + component strings; survivors are
+  verbatim quotes and house label typography (secNo/FIG/cite). Rules saved
+  to memory `case-study-voice-calibration` — applies to ALL future drafts.
+
+## Family Hub interview: the leaf takes wing (s32–33, 2026-07-29→31)
+
+**Fable interviewing Jake directly across three days — the case-study
+capture pipeline working as designed. One HERTZ/Sonnet delegate (Notion
+research fetch — blocked on binary attachments, later resolved by local
+files); solo otherwise: interviewing IS taste work. Deck dark (Blob cap).**
+
+- **Family Hub §2 of portfolio-tracker.md is now the densest capture in
+  the repo:** 12-beat arc (vision team → skeptic-driver → board/all-hands
+  → first web app → Glow DS → sprint → cuts → ship) + ch.2 onboarding
+  (BLE dream cut → QR dual-screen tandem; takeover pattern; 10×9 avatar
+  system) + ch.3 launch (color rein-in, DevTools-loop origin, Plus-plan
+  AI bet, firefighting) + ch.4 hardware (Shenzhen/Ray, Jake's 15" call,
+  RAM-fight-for-animations, keyboard-APK gambit, PNG-folder boot seq).
+- **Hardest problem [Jake]: NOT a screen problem — solo at scale** (20→5
+  designers, ~10x eng). Survival kit = flexibility across disciplines,
+  digital-office instant reviews, "hold nothing preciously," tooling as
+  precision guidance ("remixing"). Second: sustaining his own belief.
+- **Red Pen receipts landed:** Ryan avatar-token thread (weakest→strongest,
+  verbatim Slack, engineer caught it — THE exhibit; Jake saving
+  screenshots) · color rein-in owned as Jake's own "I was wrong" ·
+  accounts dissent + Mother's-Day pace = one advocacy theme, public-safe
+  renderings written. ⚠️ Sales targets + CEO criticism = never public.
+- **Research verified from local files** (`ref/research/family hub/`):
+  n=1,200 Sept-2025 survey; >80% appeal pre-price; calendar 58% top
+  feature, privacy 54% top function; adults-manage/kids-view/PIN model is
+  research-backed. Curated quotes → `ref/famhub-pull-quotes.md` (thesis:
+  "would love one tool instead"). Corrections to Jake's recall logged.
+- **Interaction-models Figma canvas reviewed tile-by-tile** (node
+  453-342132; six mobile integration models w/ pros-cons, Ambient→Active→
+  Focused triad, ecosystem slide w/ CarPlay absorbing Live Drive). Designs
+  index: Notion "Designs" page → 6 nodes, 3 still unreviewed
+  (Initial Prototypes 460-368545 · Presentations 457-473267 ·
+  First Pass 459-473268).
+- Shipped to prod: cases.ts Family Hub 55→70 (`938bc39`, verified via
+  Vercel MCP + content-marker curl). Standalone tracker DATA updated to
+  14/14 (coexisted cleanly with s34's concurrent art retheme).
+- Memory: `jake-next-role-criteria` saved (visionary leadership, not
+  market-chasing; never bitter about GL in public copy).
+
 ## FIELD NOTES v2: bento blobs (s34, 2026-07-31)
 
 **Fable, art pass done PERSONALLY — Jake asked ("i wonder if you personally
