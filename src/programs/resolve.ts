@@ -45,8 +45,10 @@ export function resolveWindow(id: string): ResolvedWindow | null {
       meta: `${c.no} / SPEC`,
       chrome: 'paper',
       component: c.component ?? null,
-      size: { w: 860, h: 640 },
-      pos: { x: 170, y: 40 },
+      /* wide enough that the evolution rail earns a margin (≥1100
+         container); clamps to the desktop on smaller screens */
+      size: { w: 1150, h: 680 },
+      pos: { x: 100, y: 40 },
       path: `/projects/${c.slug}`,
       gated: true,
     }

@@ -3,6 +3,10 @@
 
 .case {
   padding: 10px 30px 70px;
+  /* the evolution rail positions and container-queries against the
+     article — the window is resizable, so viewport queries can't know */
+  position: relative;
+  container-type: inline-size;
 }
 
 .wrap {
@@ -448,6 +452,171 @@
 .nextlink:disabled {
   color: var(--content-muted);
   cursor: default;
+}
+
+/* evolution rail — the Family Hub as a nested mini-window riding the
+   right margin (EvolutionRail.tsx). Shown only when the window is wide
+   enough to grant it a margin; the column cedes the room and slides
+   left. Below the threshold the plates carry the imagery instead. */
+.railSlot {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 16px;
+  width: 240px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* container queries measure the CONTENT box — 1040 here ≈ an 1104px
+   window once .case's 60px side padding comes off */
+@container (min-width: 1040px) {
+  .railSlot {
+    display: block;
+  }
+
+  .hasRail .wrap {
+    margin-right: 290px;
+  }
+}
+
+.rail {
+  position: sticky;
+  top: 16px;
+  pointer-events: auto;
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: 6px 6px 0 rgba(23, 21, 13, 0.14);
+}
+
+[data-theme='dark'] .rail {
+  border-color: var(--border);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
+}
+
+.railBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-bottom: var(--border-width-default) solid var(--content);
+  background: var(--surface);
+}
+
+[data-theme='dark'] .railBar {
+  border-bottom-color: var(--border);
+}
+
+.railTitle {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.railVer {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.railCtrl {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
+  border: var(--border-width-default) solid currentColor;
+  display: grid;
+  place-items: center;
+  font-size: var(--text-caption);
+  line-height: var(--leading-none);
+  color: inherit;
+  cursor: pointer;
+}
+
+.railCtrl:hover {
+  background: var(--accent-expressive);
+  color: #17150d;
+  border-color: #17150d;
+}
+
+.railCtrl:focus-visible,
+.railTick:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+.railView {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  /* the artwork's own paper — every export sits on white (sampled from
+     the Figma frames), so the letterbox disappears into the image */
+  background: #fff;
+  overflow: hidden;
+}
+
+.railView img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.28s ease-out;
+}
+
+.railView img[data-on] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .railView img {
+    transition: none;
+  }
+}
+
+.railFoot {
+  display: flex;
+  gap: 3px;
+  padding: 7px 8px 5px;
+  border-top: var(--border-width-hairline) solid var(--border);
+}
+
+.railTick {
+  flex: 1;
+  height: 5px;
+  padding: 0;
+  border: none;
+  background: var(--border);
+  cursor: pointer;
+}
+
+.railTick:hover {
+  background: var(--content-muted);
+}
+
+.railTick[data-done] {
+  background: var(--accent);
+}
+
+.railTick[data-on] {
+  background: var(--accent-expressive);
+}
+
+.railLabel {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+  padding: 0 8px 7px;
 }
 
 /* moat interactivity */
