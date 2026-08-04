@@ -81,6 +81,18 @@ cost more context than it saved. Deck reported (58 events, 200s).**
   owned `.next` — the §3.1 law, relearned): both servers sick, `rm -rf
   .next` fixed mine; **the other session's :3000 server needs its own
   restart.** Hero meta `&rsquo;` literal fixed in passing.
+- **PASS 3 (`c6f5d0a`), Jake's review:** rail 150% (360px, clamp 280–360),
+  shows from 640cqw with overlap blessed (column cedes spare width via one
+  clamp()); frames re-exported after Jake normalized all to 1440-wide;
+  FINALE: last two stages break out — paper→0, device hangs on an SVG
+  wall (v0.9 plain / v1.0 kitchen w/ counter+plant, swaps for launch
+  photography per §2). Case window 1280×720 @ x24 (fits 1280 laptops —
+  x100 hung the rail offscreen). Gotchas: playwright-core `newPage` wants
+  `viewport:` not `viewportSize:` (silently ignored → 1280×720 default);
+  preview_stop can leave the process alive — `lsof :3210` before ANY
+  build (ate .next corruption twice this session).
+  **OPEN: clickable-prototypes question answered in chat — awaiting
+  Jake's pick (tap-through frames vs PROTO.VIEWER embed) + flow list.**
 
 ## Next steps
 
