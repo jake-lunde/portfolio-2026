@@ -464,20 +464,22 @@
   top: 0;
   bottom: 0;
   right: 16px;
-  width: 240px;
+  width: clamp(280px, 34cqw, 360px);
   pointer-events: none;
   z-index: 5;
 }
 
-/* container queries measure the CONTENT box — 1040 here ≈ an 1104px
-   window once .case's 60px side padding comes off */
-@container (min-width: 1040px) {
+/* container queries measure the CONTENT box (≈ window minus .case's
+   60px side padding). The rail shows from 640 up — Jake's call: better
+   overlapping the plates than absent. The column cedes whatever spare
+   width it has (up to a full clear berth) and eats the rest as overlap. */
+@container (min-width: 640px) {
   .railSlot {
     display: block;
   }
 
   .hasRail .wrap {
-    margin-right: 290px;
+    margin-right: clamp(0px, calc(100cqw - 780px), 410px);
   }
 }
 
@@ -560,6 +562,12 @@
   padding: 10px;
   background: #fff;
   overflow: hidden;
+  transition: padding 0.3s ease;
+}
+
+/* the break-out: the room runs edge to edge, no paper left */
+.railView[data-scene] {
+  padding: 0;
 }
 
 .railStack {
@@ -606,6 +614,53 @@
 @keyframes railDrift {
   to {
     transform: translate(var(--dx), var(--dy)) rotate(var(--dr));
+  }
+}
+
+/* the finale rooms — wall for on-device testing, kitchen for the ship */
+.railWallScene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.28s ease-out;
+}
+
+.railWallScene[data-on] {
+  opacity: 1;
+}
+
+.railWallScene svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.railDevice {
+  position: absolute;
+  left: 12%;
+  top: 8%;
+  width: 76%;
+  border-radius: 6px;
+  box-shadow:
+    0 12px 26px rgba(23, 21, 13, 0.32),
+    0 3px 8px rgba(23, 21, 13, 0.18);
+  transform: scale(1.04);
+  transition: transform 0.45s ease-out;
+}
+
+.railWallScene[data-on] .railDevice {
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .railWallScene,
+  .railDevice {
+    transition: none;
+  }
+
+  .railDevice {
+    transform: none;
   }
 }
 

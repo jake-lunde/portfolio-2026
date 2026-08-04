@@ -45,10 +45,13 @@ export function resolveWindow(id: string): ResolvedWindow | null {
       meta: `${c.no} / SPEC`,
       chrome: 'paper',
       component: c.component ?? null,
-      /* wide enough that the evolution rail earns a margin (≥1100
-         container); clamps to the desktop on smaller screens */
-      size: { w: 1150, h: 680 },
-      pos: { x: 100, y: 40 },
+      /* wide enough that the evolution rail (360px + berth) sits clear
+         of the column; clamps to the desktop on smaller screens, where
+         the rail overlaps the plates instead (Jake-approved) */
+      size: { w: 1280, h: 720 },
+      /* x hugs left so width + x fits a 1280 laptop exactly — the rail
+         lives on the window's right edge and must never hang offscreen */
+      pos: { x: 24, y: 40 },
       path: `/projects/${c.slug}`,
       gated: true,
     }

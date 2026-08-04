@@ -28,18 +28,20 @@ type Stage = {
   alt: string
   /** stage image; the sketch stage renders the living scene instead */
   file?: string
+  /** the last two beats break out of the artboard and hang in a room */
+  scene?: 'wall' | 'kitchen'
 }
 
 const STAGES: Stage[] = [
   { v: 'v0.1', label: 'Sketch', ratio: '1089 / 490', alt: 'Concept collage: a big pink clock, weather, calendar and home glyphs, family portrait avatars, one checked-off chore — all gently afloat.' },
   { file: 'stage-01.webp', v: 'v0.2', label: 'Proof of Concept', ratio: '1420 / 789', alt: 'First clickable dashboard: dark shell, the family agenda blocked in as bright color bars.' },
   { file: 'stage-02.webp', v: 'v0.3', label: 'Proof of Concept', ratio: '1420 / 789', alt: 'Proof-of-concept month calendar: the whole household on one grid.' },
-  { file: 'stage-03.webp', v: 'v0.4', label: 'Wireframes', ratio: '1440 / 808', alt: 'Wireframe pass in Greenlight green: the morning brief with a school-run map.' },
+  { file: 'stage-03.webp', v: 'v0.4', label: 'Wireframes', ratio: '1440 / 800', alt: 'Wireframe pass in Greenlight green: the morning brief with a school-run map.' },
   { file: 'stage-04.webp', v: 'v0.5', label: 'Wireframes', ratio: '1420 / 789', alt: 'Wireframe ambient screen: good morning, 8:32 AM.' },
-  { file: 'stage-05.webp', v: 'v0.6', label: 'Hi-Fi Prototype', ratio: '1420 / 789', alt: 'Hi-fi prototype: the light dashboard taking its shipped shape.' },
-  { file: 'stage-06.webp', v: 'v0.7', label: 'Color Explorations', ratio: '1280 / 800', alt: 'Color exploration: chats, chores and calendar as calm cards, color only where it means something.' },
-  { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', ratio: '1164 / 705', alt: 'The launch UI under test on the 15.6-inch device frame.' },
-  { file: 'stage-08.webp', v: 'v1.0', label: 'Ship', ratio: '1164 / 705', alt: 'Family Hub as shipped: the today view on the physical device.' },
+  { file: 'stage-05.webp', v: 'v0.6', label: 'Hi-Fi Prototype', ratio: '1440 / 800', alt: 'Hi-fi prototype: the light dashboard taking its shipped shape.' },
+  { file: 'stage-06.webp', v: 'v0.7', label: 'Color Explorations', ratio: '1440 / 800', alt: 'Color exploration: chats, chores and calendar as calm cards, color only where it means something.' },
+  { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', ratio: '10 / 7', scene: 'wall', alt: 'The launch build under test: the device hung on a plain wall.', },
+  { file: 'stage-08.webp', v: 'v1.0', label: 'Ship', ratio: '10 / 7', scene: 'kitchen', alt: 'Family Hub live in situ: the device on a kitchen wall, plant on the counter.' },
 ]
 
 /* The living sketch — Jake's concept collage as cutouts on a virtual
@@ -77,6 +79,58 @@ const BITS: Bit[] = [
   { f: 'check', x: 726, y: 343, w: 70, dx: -2, dy: -2, dr: -1.5, dur: 8, delay: -1 },
   { f: 'task', x: 826, y: 364, w: 263, dx: 3, dy: 2, dr: 0.5, dur: 10, delay: -5 },
 ]
+
+/* The break-out finale: the artwork leaves the artboard. Paper becomes a
+   room — a plain wall for on-device testing, a kitchen for the ship —
+   and the device hangs on it with a real shadow. Scene colors are
+   hardcoded warm neutrals from the classic-skin family (like plate ink):
+   the scene reads as a photograph, constant across themes. Swaps for
+   Jake's launch photography when it lands (§2 law). */
+
+function WallScene({
+  kitchen,
+  on,
+  src,
+}: {
+  kitchen: boolean
+  on: boolean
+  src: string
+}) {
+  const p = kitchen ? 'k' : 'w'
+  return (
+    <div className={styles.railWallScene} data-on={on ? 'true' : undefined} aria-hidden="true">
+      <svg viewBox="0 0 144 100" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id={`${p}-wall`} x1="0" y1="0" x2="0.9" y2="1">
+            <stop offset="0" stopColor={kitchen ? '#f7f0e1' : '#f2ede3'} />
+            <stop offset="1" stopColor={kitchen ? '#e8ddc8' : '#e1dbcc'} />
+          </linearGradient>
+          <radialGradient id={`${p}-light`} cx="0.12" cy="0.05" r="0.9">
+            <stop offset="0" stopColor="#fffaee" stopOpacity="0.6" />
+            <stop offset="1" stopColor="#fffaee" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="144" height="100" fill={`url(#${p}-wall)`} />
+        <rect width="144" height="100" fill={`url(#${p}-light)`} />
+        {kitchen && (
+          <g>
+            {/* counter */}
+            <rect x="0" y="82" width="144" height="18" fill="#d9cdb6" />
+            <rect x="0" y="82" width="144" height="1.4" fill="#c2b394" />
+            {/* the counter plant — blob rules apply: no outlines, nothing mirrored */}
+            <g>
+              <path d="M124.5 83 L133.5 83 L132.2 74.5 L125.6 74.5 Z" fill="#c98d52" />
+              <ellipse cx="126.2" cy="70" rx="4.2" ry="5.6" fill="#6b8a5c" transform="rotate(-14 126.2 70)" />
+              <ellipse cx="131.8" cy="68.6" rx="3.4" ry="5.9" fill="#57744a" transform="rotate(11 131.8 68.6)" />
+              <ellipse cx="128.7" cy="65.4" rx="2.7" ry="4.6" fill="#7d9a6c" transform="rotate(-3 128.7 65.4)" />
+            </g>
+          </g>
+        )}
+      </svg>
+      <img className={styles.railDevice} src={src} alt="" draggable={false} />
+    </div>
+  )
+}
 
 function SketchScene({ on }: { on: boolean }) {
   return (
@@ -175,12 +229,18 @@ export function EvolutionRail() {
           <span className={styles.railTitle}>Family.Hub</span>
           <span className={styles.railVer}>{cur.v}</span>
         </div>
-        <div className={styles.railView} role="img" aria-label={`${cur.v} · ${cur.label}. ${cur.alt}`}>
+        <div
+          className={styles.railView}
+          role="img"
+          aria-label={`${cur.v} · ${cur.label}. ${cur.alt}`}
+          data-scene={cur.scene ? 'true' : undefined}
+        >
           <div className={styles.railStack} style={{ aspectRatio: cur.ratio }}>
             <SketchScene on={stage === 0} />
             {STAGES.map(
               (s, i) =>
-                s.file && (
+                s.file &&
+                !s.scene && (
                   <img
                     key={s.file}
                     src={`${DIR}/${s.file}`}
@@ -188,6 +248,18 @@ export function EvolutionRail() {
                     aria-hidden="true"
                     draggable={false}
                     data-on={i === stage ? 'true' : undefined}
+                  />
+                ),
+            )}
+            {STAGES.map(
+              (s, i) =>
+                s.file &&
+                s.scene && (
+                  <WallScene
+                    key={s.file}
+                    kitchen={s.scene === 'kitchen'}
+                    on={i === stage}
+                    src={`${DIR}/${s.file}`}
                   />
                 ),
             )}
