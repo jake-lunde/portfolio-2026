@@ -48,9 +48,11 @@ export const CONTACT = {
 
 /* The one line that has to do the most work: positioning, tenure, and proof
    the design-engineer claim isn't aspirational — the reader is holding the
-   artifact it describes. */
+   artifact it describes. Written for the 2026 double gate: an ATS parses it,
+   then an LLM summarizes it for the recruiter, so it must survive being
+   paraphrased. */
 export const SUMMARY =
-  'Product designer who ships production code. Ten years in consumer products, most recently teaching kids to invest at Greenlight, and before that putting a cruise ship in a guest’s pocket at Disney. This PDF came off a dot-matrix printer I built at lunde.co.'
+  'Product designer who ships production code. Ten years in consumer products, currently leading design across Greenlight’s family finance ecosystem: investing for kids, AI-guided decision tools, and Family Hub, the company’s first hardware product, now live nationwide. This PDF came off a dot-matrix printer I built at lunde.co.'
 
 export const ROLES: Role[] = [
   {
@@ -59,11 +61,16 @@ export const ROLES: Role[] = [
     priorTitle: 'Design Lead',
     dates: 'Oct 2023 – Present',
     location: 'Seattle, WA',
+    /* The 2026 screening gate is an LLM summarizing this block for a
+       recruiter, so each bullet is one narratable claim: scope first, then
+       outcome. Arc: hardware 0→1, product redesign with numbers, production
+       code, AI infrastructure. Confidential internals (survey n, user
+       counts, funnel volumes) stay off a forwardable document. */
     bullets: [
-      'Led design on Invest, Greenlight’s investing product for kids and families. Customers exposed to the redesigned experience made a first trade at 3–4× the rate of those who weren’t, and detail-page views rose 355%.',
-      'Shipped production SwiftUI: a press-and-hold performance graph that scrubs across time horizons with a haptic detent per segment. Engineering had scoped the interaction as too expensive to build, so I prototyped it in the real repo. Most of that code shipped, giving the app its first haptics.',
-      'Turned the research finding into the product’s spine. Kids could read the redesigned financials but still couldn’t say what a company actually did: “just numbers on a screen.” That gap became Analyze, a guided decision framework, plus AI-generated company overviews spanning the S&P 500.',
-      'Designed the Economic Moat component, a concentric-ring competitive model ranked from filings data, and built AI workflows into the team’s day-to-day product development process.',
+      'Led end-to-end design of Family Hub, Greenlight’s first hardware product: a shared home display for family calendars, chores, lists, and location. Took it from vision-team concept through interaction, visual, motion, and sound design to nationwide launch in 2026 as the product’s sole designer.',
+      'Redesigned Invest, Greenlight’s investing product for kids and families. Customers exposed to the new experience made a first trade at 3–4× the rate of those who weren’t, and detail views rose 355%, driven by AI-guided decision tools that explain what a company is before a kid buys it.',
+      'Shipped production SwiftUI, including the app’s first haptics: a press-and-hold performance graph engineering had scoped as too expensive, which I prototyped in the production repo. Most of that code shipped.',
+      'Built the design team’s design-to-code pipeline: components mirrored from Storybook into Figma, plus a self-built Figma plugin that captures design edits as diffs and hands them to Claude to open production pull requests, keeping the design system and shipped code in parity.',
     ],
   },
   {

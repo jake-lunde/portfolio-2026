@@ -303,6 +303,13 @@
   display: none;
 }
 
+/* the CV icon is mobile-only: on desktop the printer itself is furniture
+   (open by default, chrome: bare), so an icon would be a second front door
+   to a machine already sitting on the desk */
+.cvGrid {
+  display: none;
+}
+
 /* ================= NOW-PLAYING WIDGET ================= */
 
 .npWidget {
@@ -1139,6 +1146,15 @@
    window element itself has to disappear completely. It also keeps full
    opacity when unfocused (see Window.tsx) — an appliance on the desk, not
    a document. */
+/* The furniture printer (cv) is mostly empty air while its paper is parked —
+   the box must not eat desktop clicks or steal focus from what's under it.
+   The program's visible objects opt back in (see cv.module.css). Scoped to
+   cv only: the iPod hugs its content, so its box IS its hit area. */
+.window[data-window-id='cv'],
+.window[data-window-id='cv'] > * {
+  pointer-events: none;
+}
+
 .windowBare {
   background: none;
   border: 0;
@@ -1270,6 +1286,11 @@
   /* on mobile every icon lives in the one scrolling grid — including
      trash; the desktop bottom-left corner trash steps aside */
   .trashGrid {
+    display: flex;
+  }
+
+  /* mobile has no furniture printer, so the CV icon is the front door */
+  .cvGrid {
     display: flex;
   }
 

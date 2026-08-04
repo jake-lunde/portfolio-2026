@@ -61,7 +61,7 @@ export function DesktopIcons() {
   return (
     <>
       <nav className={styles.icons} aria-label="Programs">
-        {rest.map((p) => iconBtn(p))}
+        {rest.map((p) => iconBtn(p, p.id === 'cv' ? styles.cvGrid : ''))}
         {/* trash joins the grid on mobile only (see .trashGrid) */}
         {trash && iconBtn(trash, styles.trashGrid)}
       </nav>

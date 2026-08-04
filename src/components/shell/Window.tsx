@@ -108,6 +108,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
       ref={ref}
       tabIndex={-1}
       aria-label={title}
+      data-window-id={def.id}
       className={`${styles.window} ${active ? styles.windowActive : ''} ${zoomed ? styles.windowZoomed : ''} ${bare ? styles.windowBare : ''}`}
       style={{
         left: def.pos.x,
