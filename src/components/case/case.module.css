@@ -554,15 +554,20 @@
 }
 
 .railView {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  /* the artwork's own paper — every export sits on white (sampled from
-     the Figma frames), so the letterbox disappears into the image */
+  /* the artwork's own paper (every export sits on white) — a uniform
+     10px of it on all sides; the stack below matches each stage's
+     exact export ratio so no letterbox ever spoils the margin */
+  padding: 10px;
   background: #fff;
   overflow: hidden;
 }
 
-.railView img {
+.railStack {
+  position: relative;
+  transition: aspect-ratio 0.3s ease;
+}
+
+.railStack > img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -572,13 +577,46 @@
   transition: opacity 0.28s ease-out;
 }
 
-.railView img[data-on] {
+.railStack > img[data-on] {
   opacity: 1;
 }
 
+/* the living sketch — cutouts adrift on slow, staggered loops */
+.railScene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.28s ease-out;
+}
+
+.railScene[data-on] {
+  opacity: 1;
+}
+
+.railBit {
+  position: absolute;
+  animation: railDrift var(--dur) ease-in-out var(--delay) infinite alternate;
+}
+
+/* faded out ≠ free: don't run 14 composited loops behind other stages */
+.railScene:not([data-on]) .railBit {
+  animation-play-state: paused;
+}
+
+@keyframes railDrift {
+  to {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--dr));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .railView img {
+  .railStack > img,
+  .railScene {
     transition: none;
+  }
+
+  .railBit {
+    animation: none;
   }
 }
 
