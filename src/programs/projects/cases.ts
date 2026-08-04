@@ -33,7 +33,7 @@ export const CASES: CaseDef[] = [
     org: 'Greenlight',
     year: '2025',
     status: 'soon',
-    progress: { pct: 55, phase: 'Research synthesized · writing the narrative' },
+    progress: { pct: 70, phase: 'Story blocked end to end · drafting next' },
   },
   {
     slug: 'tooling',

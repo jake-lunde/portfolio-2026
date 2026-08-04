@@ -9,27 +9,142 @@
 
 ---
 
-## CV.EXE v1: the printer prints (session 30, 2026-08-04)
+## Family Hub drafted: the leaf becomes a case study (s35, 2026-07-31→08-01)
 
-**Shannon/Opus solo — content negotiation with Jake (canonical title, roles,
-metrics policy) plus one tightly-coupled feature; both taste, never delegated.**
+**Fable drafting solo, declared per §4.2: prose voice + interactive-plate
+design are taste work, and every input was already captured in tracker §2 —
+nothing separable to delegate. Deck dark (Blob cap, same as s34).**
 
-- Three wrong premises caught by checking: production was never on the leaf
-  patch (its Vercel build was a preview); the Notion project already existed
-  (s29); the plan's claim that 3–4×/355% were "already published" was false —
-  nothing on the site carried them. Rule: relative deltas ship, absolute
-  internal volumes never do.
-- Built: `src/content/resume.ts` single source → `scripts/build-cv.mjs` →
-  committed deterministic PDF via predev/prebuild; window program at /cv
-  (paper chrome, v1); title reconciled to Staff Product Designer (LinkedIn
-  confirms Jan 2026 promotion from Design Lead — tracker's title was stale).
-- Bugs the build caught: KnightSpeakLayer rewrote resume prose under medieval
-  ("kids"→"younglings") → `data-no-translate`; Motion-driven reveal froze in
-  hidden tabs → CSS `data-printed` reveal. `portfolio-tracker/` (directory)
-  was never gitignored — closed.
-- Verification: preview pane freezes rAF AND CSS transitions — state via
-  probes, appearance via headless_shell over raw CDP (Node 22 global
-  WebSocket). pypdf drift check: all 50 exported strings in both surfaces.
+- **Branch `case-family-hub` (`087d56b`)** — `content/family-hub.mdx` +
+  CaseFamilyHub program. Spine: bet (3 futures, Moves) → evidence (n=1,200)
+  → system (surface triad) → persuasion-by-artifact → constraints (QR
+  tandem + hardware margins) → ten-to-one (Red Pen ×2) → the ship. Thesis:
+  *"The first skeptic it had to convert was me — then the board, then the
+  factory."* Close: *"We retired the whiteboard."*
+- **4 new interactives** (case/, invest palette): ResearchBars ·
+  SurfaceTriad · TandemSetup · TokenThread. CaseFooter now takes
+  `next.slug` and opens the window — invest's footer → Family Hub, live.
+- **Figma scan for the asset pass:** Presentations `457-473267`; Initial
+  Prototypes `460-368545` (LoFi v1 → v2 → HiFi 7/9/25, hi-fi home
+  `430-269991`). First Pass `459-473268` overflows MCP transport.
+- Verified on this session's own port-3000 server; gate bypassed via
+  `sessionStorage lunde-gate=1`. **Gotcha: AnimatePresence `mode="wait"`
+  never swaps under the hidden-tab rAF freeze** — keyed remount + fade.
+- **PASS 2 (2026-08-01, `6fb4567`) — Jake's live review:** "kitchen wall"
+  purged (product = all-in-one family organizer / home base, verified
+  against greenlight.com/family-hub + press). HubModes = Ambient/Active +
+  Authenticated gate. Prose ~halved; Claim (display interstitial) + Ledger
+  (mono spec-sheet) join the case vocabulary; 6 new hiring-manager
+  placeholders. Gotcha: `git mv` on a client component under a running dev
+  server leaves a stale webpack module → 500 until restart.
+- **Blob cap lifted:** Vercel Pro upgrade; deck resumed. Jake wants a cost
+  read on steady-state usage.
+- **PASS 3 (`8a8ff27`) — the voice pass:** Jake flagged em dashes +
+  "load-bearing" as AI tells; prose rewritten in his spoken cadence
+  (tracker §2 verbatims as reference). Em dashes purged from prose +
+  component strings; survivors are verbatim quotes and house label
+  typography. Rules saved to memory `case-study-voice-calibration` —
+  applies to ALL future drafts.
+
+## Family Hub interview: the leaf takes wing (s32–33, 2026-07-29→31)
+
+**Fable interviewing Jake directly across three days — the case-study
+capture pipeline working as designed. One HERTZ/Sonnet delegate (Notion
+research fetch — blocked on binary attachments, later resolved by local
+files); solo otherwise: interviewing IS taste work. Deck dark (Blob cap).**
+
+- **Family Hub §2 of portfolio-tracker.md is now the densest capture in
+  the repo:** 12-beat arc (vision team → skeptic-driver → board/all-hands
+  → first web app → Glow DS → sprint → cuts → ship) + ch.2 onboarding
+  (BLE dream cut → QR dual-screen tandem; takeover pattern; 10×9 avatar
+  system) + ch.3 launch (color rein-in, DevTools-loop origin, Plus-plan
+  AI bet, firefighting) + ch.4 hardware (Shenzhen/Ray, Jake's 15" call,
+  RAM-fight-for-animations, keyboard-APK gambit, PNG-folder boot seq).
+- **Hardest problem [Jake]: NOT a screen problem — solo at scale** (20→5
+  designers, ~10x eng). Survival kit = flexibility across disciplines,
+  digital-office instant reviews, "hold nothing preciously," tooling as
+  precision guidance ("remixing"). Second: sustaining his own belief.
+- **Red Pen receipts landed:** Ryan avatar-token thread (weakest→strongest,
+  verbatim Slack, engineer caught it — THE exhibit; Jake saving
+  screenshots) · color rein-in owned as Jake's own "I was wrong" ·
+  accounts dissent + Mother's-Day pace = one advocacy theme, public-safe
+  renderings written. ⚠️ Sales targets + CEO criticism = never public.
+- **Research verified from local files** (`ref/research/family hub/`):
+  n=1,200 Sept-2025 survey; >80% appeal pre-price; calendar 58% top
+  feature, privacy 54% top function; adults-manage/kids-view/PIN model is
+  research-backed. Curated quotes → `ref/famhub-pull-quotes.md` (thesis:
+  "would love one tool instead"). Corrections to Jake's recall logged.
+- **Interaction-models Figma canvas reviewed tile-by-tile** (node
+  453-342132; six mobile integration models w/ pros-cons, Ambient→Active→
+  Focused triad, ecosystem slide w/ CarPlay absorbing Live Drive). Designs
+  index: Notion "Designs" page → 6 nodes, 3 still unreviewed
+  (Initial Prototypes 460-368545 · Presentations 457-473267 ·
+  First Pass 459-473268).
+- Shipped to prod: cases.ts Family Hub 55→70 (`938bc39`, verified via
+  Vercel MCP + content-marker curl). Standalone tracker DATA updated to
+  14/14 (coexisted cleanly with s34's concurrent art retheme).
+- Memory: `jake-next-role-criteria` saved (visionary leadership, not
+  market-chasing; never bitter about GL in public copy).
+
+## FIELD NOTES v2: bento blobs (s34, 2026-07-31)
+
+**Fable, art pass done PERSONALLY — Jake asked ("i wonder if you personally
+could take another pass"), and taste is never delegated anyway. Three
+sketch rounds against the "have a nice day" bento reference (Figma node
+201140:9169), self-critiqued via headless-shell renders.**
+
+- **The style law that fixed it: no outlines, no symmetry, eyes do the
+  face.** v1 failed as stroked/mirrored clip-art. v2 = merged uneven
+  circles (the bento proves plain circles read organic when radii and
+  baseline vary), sleepy lidded pupils (flat top, round bottom), everything
+  tilted a few degrees. Bento-proof detail: bumps can be perfect circles —
+  wobble belongs in the ARRANGEMENT, not each shape.
+- **Leaf v2 insight — draw the skeleton once, UNDER nine evenodd blade
+  paths.** Eaten regions expose the rib automatically; holes chewed
+  mid-arc (subpaths, fill-rule evenodd — legal in programs, unlike ids).
+  Margins are lumpy; veins died with the clip-art look.
+- **Tracker retheme carries the metaphor into the FURNITURE:** ledger =
+  meadow (grass blades, eaten = green, next = orange w/ antenna dot),
+  pbar fill = row of caterpillar bumps (repeating radial-gradient),
+  checkbox = blob, tick = rotated bite, borders = uneven radii per card,
+  peek critter clipped behind the footer rule (resting state VISIBLE —
+  animations start at 0%, so a "rises occasionally" loop must idle UP or
+  static/reduced-motion users see nothing).
+- Jake edited DATA concurrently (verbatims, s32/s33); my edits were
+  CSS/art-block-only and coexisted — one mid-stream "modified on disk"
+  warning, no collisions.
+- Notion task commented (still In Progress — Jake reviews); deck skipped
+  (Blob cap); tracker JS `node --check` clean; branch `tsc --noEmit` clean.
+
+---
+
+## CV.EXE: the printer prints (session 30, 2026-07-28)
+
+**Shannon/Opus solo — the session was a content negotiation with Jake (his
+facts, his voice, his risk appetite) plus one tightly-coupled feature. Both
+halves are taste, which §4.2 never delegates. Deck unreported (Blob cap).**
+
+- **Three premises were wrong, and checking beat complying.** Production was
+  never on the leaf patch (its Vercel build is `target: null`, a preview), so
+  nothing needed reverting. Session 29 had already made the Notion project, so
+  nothing needed creating. And `docs/PLAN-CV-EXE.md` §0.3 said to "reuse" the
+  3–4×/355% figures as already published — they are not published anywhere on
+  the site, making them a FIRST disclosure. Rule adopted: **relative deltas on
+  Jake's own work ship; absolute internal volumes never do.**
+- **pdfkit, not @react-pdf/renderer.** A single ATS column needs no reconciler,
+  and built-in Helvetica means zero font embedding: the ATS-safe face and a
+  4.4KB file in one decision.
+- **The reveal is CSS, not Motion, on purpose** — Motion drives from rAF, which
+  a hidden tab freezes, so a visitor who printed then switched tabs would
+  return to a sheet reading "done" and showing nothing.
+- **Verification, worth re-reading:** the preview pane reports
+  `document.hidden`, freezing rAF AND CSS transitions — it can prove state but
+  never appearance. Real renders came from the cached ms-playwright
+  `headless_shell` over raw CDP (Node 22 has global `WebSocket`). Zero drift
+  proven: all 50 exported strings matched in both printout and PDF text layer
+  (via pypdf — `pdftotext` is NOT installed here).
+- Closed a real hole: `portfolio-tracker/` (the directory, holding internal
+  metrics and screenshots) was never gitignored — only the `.md` was.
 
 ## The hiring audit + Trash v1 + SpecSheet fix (session 29, 2026-07-28)
 
@@ -1407,4 +1522,26 @@ are overwritten by `max-age=0, must-revalidate` on the deployed function
 because the route reads its blob with `no-store`. The next.config one applies
 against a local `next start`, which makes it look fixed — verify on
 production, not localhost.
+
+
+## Latest session — branch surgery + the bin ships (s31, 2026-07-28)
+
+**Fable solo (pure orchestration: rebase surgery, a two-line content cut,
+deploy verification — nothing delegable). Deck unreported (Blob cap).**
+
+- **Surgery, no force-push needed** (nothing was pushed): `git branch cv-exe
+  main` snapshot, then `rebase --onto 2040fea 7d65965 main` dropped CV.EXE
+  from main while keeping spec fix + title + HANDOFF rotate. Autostash
+  carried the concurrent session's dirty `figma-plugin/code.ts` through.
+- **Trash restored from `8934b21` via `checkout <sha> -- <files>`** (cherry-
+  pick would have collided with the already-picked SpecSheet + diverged
+  copy.json), TAG-03 cut per Jake, copy keys + registry applied by hand.
+  Also re-applied the `spec-sheet.foot` copy line the s30 cherry-pick
+  dropped.
+- Verified on a temp `:3333` launch entry (3000 AND 3210 both owned by other
+  sessions' servers; entry reverted). No local `npm run build` — a foreign
+  dev server shares `.next`; Vercel's build was the gate and went READY.
+- Live checks: `Disposal records`=1, `The Assistants`=1, `The Installer`=0,
+  `Grows With You`=1, spec foot updated. Console clean, knight-speak
+  derives on the new copy ("The reasons be the point — peruse the tags").
 

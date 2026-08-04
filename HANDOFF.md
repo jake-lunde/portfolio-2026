@@ -1,89 +1,101 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-04 (session 31).
+> Last rotation: 2026-08-04 (s37 CV.EXE v2 → branch; s35 note → archive).
 
 ## Current state
 
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
-  stays "pending" while Chromatic runs). **Production = `418c8b8`.**
-- **⚠️ Branch `cv-exe` carries ALL CV work, unpushed, awaiting Jake's read:**
-  `92b615b` SpecSheet fix · `2040fea` canonical title + gitignore · `7d65965`
-  CV.EXE v1 · `9c050f8` HANDOFF · `5356da8` **CV.EXE v2 (current)**. Local
-  `main` = origin. Merging cv-exe to main deploys it all.
-- **⚠️ Branch `leaf-patch` PARKED at Jake's request (s30).** CASES caterpillar
-  metaphor + Trash v1 (`e85a51c`, `8934b21`; latter local-only). Production
-  was never on it (preview build only). SpecSheet fix already cherry-picked.
-- **CV.EXE v2 = desktop FURNITURE.** Bare chrome (like the iPod); the machine
-  sits on the desk, open by default under every desktop deep link
-  (`windowsForPath` prepends `cv`; mobile strips it — Desktop.tsx). No desktop
-  icon on desktop (`.cvGrid` hides it; the device is its own icon); mobile
-  launcher keeps the icon, gets no machine — page arrives printed, sticky
-  download bar. `src/content/resume.ts` → `scripts/build-cv.mjs` →
-  `public/jake-lunde-resume.pdf` (committed, deterministic; build FAILS on
-  page 2 or >200KB; never hand-edit). Resume rewritten for the 2026 double
-  gate (ATS parse → LLM summarize): Greenlight block spans Family Hub 0→1 →
-  Invest deltas → production SwiftUI → Storybook↔Figma→Claude-PR pipeline.
-  Relative deltas only; absolute internals (survey n, user counts) never.
-  Sheet carries `data-no-translate` (knight-speak must not rewrite facts).
-  Windows now carry `data-window-id`; the cv window + wrappers are
-  pointer-events none, visible objects opt in — parked-paper air must not
-  eat desktop clicks.
-- **Canonical title: Staff Product Designer** (LinkedIn confirms Jan 2026
-  promotion). Site copy reconciled; "principal-level" gone.
-- **Skins:** classic (light/dark) + medieval; underwater = stub. Knight-speak
-  LIVE on prod. **Copy layer + EDIT.MODE LIVE** — rebase, merge copy.json at
-  the KEY level, never force-push.
-- **Jake is APPLYING for roles.** Audit gaps: resume (CV.EXE ✓ built), Red Pen
-  (collab evidence), gate friction (unfixed). Family Hub is LIVE nationwide,
-  Amazon launch ~Aug 2026 (tracker s32–35 is rich; case study drafted on
-  branch `case-family-hub`).
-- **DS pipeline:** tokens/ → build → generated CSS/TS; Chromatic; SB10 +
-  Webpack. ⚠️ stale STRING `core/leading|tracking|weight` vars before next
-  Figma PULL. No ESLint configured (`next lint` prompts interactively).
-- **Tracking:** Notion (connector live). Blob cap RESET — deck reporting
-  works again (s31 reported dispatch/return/merge fine). Zero-`list()` fix
-  still top infra backlog.
+  stays "pending" while Chromatic runs). Production = `938bc39`-era main;
+  local main = origin/main.
+- **⚠️ Branch `cv-exe` = CV.EXE v2, BUILT, awaiting Jake's walk-through**
+  (`5356da8` + merge of main). s30's open calls are CLOSED: BFA confirmed,
+  dot-matrix summary line kept, title = Staff Product Designer. The printer
+  is desktop FURNITURE: bare chrome, open by default under every desktop
+  deep link (`windowsForPath` prepends `cv`; Desktop.tsx strips on mobile),
+  no desktop icon (`.cvGrid`; the device is its own icon), mobile = printed
+  page + sticky download bar, launcher keeps the icon. `resume.ts` →
+  `build-cv.mjs` → committed deterministic PDF (build FAILS on page 2 or
+  >200KB; never hand-edit). Resume rewritten for 2026 screening (ATS parse
+  → LLM summarize): Greenlight spans Family Hub 0→1 → Invest deltas →
+  production SwiftUI → Storybook↔Figma→Claude-PR pipeline. Relative deltas
+  only; absolute internals never. Sheet carries `data-no-translate`.
+  Windows carry `data-window-id`; cv window + wrappers are pointer-events
+  none, visible objects opt in. Merge cv-exe → main = ship.
+- **Branch `leaf-patch` (parked) got CRITTERS v2 in s34** (`89970d8`):
+  bento-sticker cast (no outlines, sleepy eyes, asymmetric), nine ragged
+  leaf states. ⚠️ progress.module.css slot sizes may need a nudge at
+  revive; branch says Family Hub 55 vs main's 85 — reconcile at merge.
+  Trash TAG-03 "The Installer" restores from `8934b21` when this ships.
+- **Standalone tracker REBUILT s34** (git-ignored): v2 cast, whimsy retheme,
+  Jake's DATA edits + localStorage preserved. Cast sheet:
+  `portfolio-tracker/critter-cast-v2.html`.
+- **Jake's s31 rule: feature work starts on its OWN branch;** main stays
+  shippable.
+- **Skins:** classic (light/dark) + medieval (knight-speak LIVE); underwater
+  = stub. Copy layer + EDIT.MODE LIVE — rebase, merge copy.json at the KEY
+  level, never force-push.
+- **Jake is preparing to APPLY.** Audit gaps: CV.EXE (v2 built, this branch)
+  · Red Pen (UNBLOCKED s33 — exhibit = Ryan avatar-token Slack thread; Jake
+  to save screenshots) · gate friction (audit's #1 risk, unactioned).
+- **Family Hub case study DRAFTED through PASS 3 — branch `case-family-hub`**
+  (voice pass `8a8ff27`; s36 evolution-rail work continues there). Facts:
+  LIVE nationwide, Amazon launch ~Aug 2026; tracker §2 (s32–35) is the
+  richest source in the repo — read it before touching career facts.
+- **Voice law (s35, memory `case-study-voice-calibration`):** em dashes +
+  "load-bearing" are AI tells in Jake's prose — write in his spoken cadence
+  for ALL user-facing drafts (resume already complies).
+- **Tracking:** Notion (connector live). **Blob cap LIFTED (Vercel Pro).**
+  Deck reporting works (s37: dispatch/return/merge all 200). Jake wants a
+  COST read on steady-state deck usage; zero-`list()` fix still worth it.
+  Script: source `.env.local` first; positional args.
 - **Known debts:** SpecSheet motion quote-strings; first-load JS perf;
-  underwater; `--accent-on-inverse`; reduced-motion path still unverified by
-  emulation (code paths in place, both CV versions).
+  underwater; `--accent-on-inverse`; reduced-motion unverified by emulation
+  (paths in place). Ports 3000/3210 often owned by concurrent sessions —
+  never `npm run build` while a foreign dev server owns `.next`.
 
-## Latest session — CV.EXE v2: furniture + the AI-pass resume (s31, 2026-08-04)
+## Latest session — CV.EXE v2: the printer is furniture (s37, 2026-08-04)
 
-**Fable solo (Jake tapped Fable in to redo Shannon's v1). Solo because both
-halves were taste: the resume rewrite is Jake's voice at staff scope, and the
-device is skin craft — nothing separable to delegate. Deck reported.**
+**Fable solo (Jake tapped Fable in to redo s30's v1). Solo declared per
+§4.2: the resume rewrite is Jake's voice at staff scope and the device is
+skin craft — nothing separable. Deck reported (dispatch/return/merge).**
 
-- **Resume for the 2026 double gate** (researched: ATS parse THEN an LLM
-  summarizes for the recruiter): bullets became one narratable claim each,
-  scope-first. Greenlight now leads with Family Hub (first hardware product,
-  vision → nationwide, sole designer) sourced from tracker s32–35 — which
-  moved a LOT since s29; read it before touching career facts again.
-- **Parser trap worth remembering:** pdfkit wrapped "3–4×" at the en dash
-  ("3–\n4×"), mangling the headline metric for dumb parsers. Fixed by
-  restructuring the sentence so the metric sits mid-line; the pypdf
-  string-presence check catches this class — run it after ANY resume edit.
-- **Bare-chrome lessons v1 never hit:** (1) bare windows don't impose height —
-  `height: 100%` resolves against auto and shoves the device off-screen; the
-  program must size itself like the iPod. (2) A mostly-empty bare box eats
-  desktop clicks — pointer-events none on window + wrappers, opt back in on
-  visible objects. (3) The paper parks via `paperLift` (translateY on a
-  100%-height wrapper; Motion owns the inner element's transform for tear).
-- **Dev-server watcher can silently die:** server served stale modules with
-  no compile lines; SSR grep for a new classname (`cv_paperLift__`) is the
-  cheap tell; restart via preview_stop/start fixed it. Also: the pane's
-  NATIVE width is <720 — it renders the mobile launcher; force
-  resize_window 1280 before desktop probes.
-- Notion CV.EXE page updated (v2 note appended); deck dispatch/return/merge
-  all 200 — Blob cap confirmed reset.
+- **Resume, researched then rewritten:** 2026 screening = ATS parse THEN an
+  LLM that summarizes for the recruiter, so each bullet is one narratable
+  claim, scope first. Greenlight leads with Family Hub (first hardware
+  product, vision → nationwide, sole designer) from tracker s32–35.
+  **Parser trap:** pdfkit wrapped "3–4×" at the en dash, mangling the
+  headline metric; fixed by re-flowing the sentence. The pypdf
+  string-presence check catches this class — run after ANY resume edit.
+- **Bare-chrome lessons the iPod never taught:** (1) bare windows don't
+  impose height — the program must size itself; (2) a mostly-empty bare box
+  eats desktop clicks — pointer-events none up the wrapper chain, visible
+  objects opt in (probe: `elementFromPoint` over parked-paper air lands on
+  the desktop widget behind); (3) paper parks via `paperLift` translateY on
+  a 100%-height wrapper — Motion owns the inner element's transform.
+- **Dev-server watcher can die silently** (serves stale modules, no compile
+  lines): SSR-grep for a new CSS-module classname is the cheap tell;
+  preview_stop/start fixes. The pane's NATIVE width is <720 → it renders
+  the mobile launcher; force resize_window 1280 before desktop probes.
+- **Merged main into cv-exe** (Trash on main, s32–35 HANDOFF history) and
+  resolved HANDOFF conflicts here so Jake's merge is clean. My earlier
+  rotation had renumbered this session s31 against stale history — main
+  had already spent s31–35; corrected to s37.
+- Notion CV.EXE page updated; deck confirmed healthy post-Pro.
 
 ## Next steps
 
-1. **Jake:** walk the desk — press PRINT, TEAR OFF, drag the machine, both
-   skins, phone. Then merge `cv-exe` → main = deploy.
-2. **Leaf-patch decision** (parked): merge, revise, or abandon — Trash v1 is
-   trapped behind it, incl. the ⚠️ DRAFT Assistants cause/year.
-3. Gate friction (audit's #1 risk, still unactioned).
-4. COMMAND.CTR zero-`list()` fix (cap has reset; backlog spec in s26 archive).
-5. Figma stale STRING vars; typography finale; underwater (carried).
+1. **Jake: walk the desk** — press PRINT, TEAR OFF, drag the machine, both
+   skins, phone (launcher icon → printed page). Then merge `cv-exe` → main
+   = the resume ships.
+2. **Jake: READ Family Hub pass 3** on `case-family-hub` (+ s36 evolution
+   rail in progress there). Merge = his call; then progress 85→100.
+3. **Jake:** save the Ryan avatar-token Slack screenshots (Red Pen exhibit)
+   + color before/after + asset pass on the Figma-node placeholders.
+4. **Jake:** eyeball tracker v2 + `critter-cast-v2.html`; then revive
+   `leaf-patch` (reconcile phases, slot sizes, Trash TAG-03) or park on.
+5. Gate friction (Jake) — audit's #1 risk, still unactioned.
+6. COMMAND.CTR zero-`list()` fix (cost hygiene now, not quota emergency).
+7. Figma stale STRING vars; typography finale; underwater; First Pass
+   section `459-473268` still unindexed (MCP transport cap) — carried.
