@@ -70,6 +70,17 @@ cost more context than it saved. Deck reported (58 events, 200s).**
   total webp (sharp from node_modules).
 - Case window default 860×640 → 1150×680, pos x 100 (all cases; Invest
   unaffected visually — rail gated behind `.hasRail` on the article).
+- **PASS 2 (`b4dc078`), Jake's review:** labels verbatim from his renamed
+  Figma sections (Sketch → PoC → Wireframes → Hi-Fi Prototype → Color
+  Explorations → On-Device Testing → Ship); per-stage exact export
+  ratios + recropped halos = uniform 10px paper all round (aspect-ratio
+  transition animates the window resize); sketch stage rebuilt LIVING —
+  14 transparent cutouts on Figma coords, slow CSS drift loops, paused
+  when faded out, stilled under reduced-motion. ⚠️ Ate a shared-`.next`
+  corruption mid-verify (my s36 build ran while a foreign dev server
+  owned `.next` — the §3.1 law, relearned): both servers sick, `rm -rf
+  .next` fixed mine; **the other session's :3000 server needs its own
+  restart.** Hero meta `&rsquo;` literal fixed in passing.
 
 ## Next steps
 
