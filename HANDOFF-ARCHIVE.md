@@ -9,6 +9,28 @@
 
 ---
 
+## CV.EXE v1: the printer prints (session 30, 2026-08-04)
+
+**Shannon/Opus solo — content negotiation with Jake (canonical title, roles,
+metrics policy) plus one tightly-coupled feature; both taste, never delegated.**
+
+- Three wrong premises caught by checking: production was never on the leaf
+  patch (its Vercel build was a preview); the Notion project already existed
+  (s29); the plan's claim that 3–4×/355% were "already published" was false —
+  nothing on the site carried them. Rule: relative deltas ship, absolute
+  internal volumes never do.
+- Built: `src/content/resume.ts` single source → `scripts/build-cv.mjs` →
+  committed deterministic PDF via predev/prebuild; window program at /cv
+  (paper chrome, v1); title reconciled to Staff Product Designer (LinkedIn
+  confirms Jan 2026 promotion from Design Lead — tracker's title was stale).
+- Bugs the build caught: KnightSpeakLayer rewrote resume prose under medieval
+  ("kids"→"younglings") → `data-no-translate`; Motion-driven reveal froze in
+  hidden tabs → CSS `data-printed` reveal. `portfolio-tracker/` (directory)
+  was never gitignored — closed.
+- Verification: preview pane freezes rAF AND CSS transitions — state via
+  probes, appearance via headless_shell over raw CDP (Node 22 global
+  WebSocket). pypdf drift check: all 50 exported strings in both surfaces.
+
 ## The hiring audit + Trash v1 + SpecSheet fix (session 29, 2026-07-28)
 
 **Fable solo (audit = taste, never delegated; build tasks small + closed —
