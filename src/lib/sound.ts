@@ -23,6 +23,12 @@ function blip(freq: number, dur = 0.045, gain = 0.04) {
   const ac = audio()
   if (!ac) return
   if (ac.state === 'suspended') void ac.resume()
+  if (useSettings.getState().skin === 'medieval') pluck(ac, freq, dur, gain)
+  else beep(ac, freq, dur, gain)
+}
+
+/* classic — the original chip beep. Square wave, hard stop. */
+function beep(ac: AudioContext, freq: number, dur: number, gain: number) {
   const osc = ac.createOscillator()
   const g = ac.createGain()
   osc.type = 'square'
@@ -32,6 +38,37 @@ function blip(freq: number, dur = 0.045, gain = 0.04) {
   osc.connect(g).connect(ac.destination)
   osc.start()
   osc.stop(ac.currentTime + dur)
+}
+
+/* medieval — same tunes, different instrument: a lute-course pluck.
+   Two saws a hair detuned (lute courses are doubled strings, never quite
+   in tune), dropped an octave for wood, through a lowpass that sweeps
+   shut like a damped string. Q lends the faint clav "wah". Rings a bit
+   past the classic dur — strings do — but attack stays instant so the
+   UI rhythm is untouched. */
+function pluck(ac: AudioContext, freq: number, dur: number, gain: number) {
+  const t = ac.currentTime
+  const f = freq * 0.5
+  const ring = Math.max(dur * 2.5, 0.09)
+  const g = ac.createGain()
+  // 0.75 level-matches the beep by RMS (two saws sum hotter than one
+  // square; measured offline, not guessed)
+  g.gain.setValueAtTime(gain * 0.75, t)
+  g.gain.exponentialRampToValueAtTime(0.0001, t + ring)
+  const lp = ac.createBiquadFilter()
+  lp.type = 'lowpass'
+  lp.Q.value = 1.5
+  lp.frequency.setValueAtTime(f * 6, t)
+  lp.frequency.exponentialRampToValueAtTime(f * 1.25, t + ring)
+  for (const detune of [1, 1.006]) {
+    const osc = ac.createOscillator()
+    osc.type = 'sawtooth'
+    osc.frequency.value = f * detune
+    osc.connect(lp)
+    osc.start(t)
+    osc.stop(t + ring)
+  }
+  lp.connect(g).connect(ac.destination)
 }
 
 export const sfx = {
