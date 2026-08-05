@@ -79,8 +79,12 @@ reported. Jake's ask: spend remaining usage on Notion board picks.**
   Both paper; sidecar dictation says "I want to use it" — pink candidate
   if he wants to move the wash (ONE pink max). Verified headless: 4
   records render, stamps + fields correct.
-- **`minors-random-wallpaper` (`5417070` + `968e467`, NYQUIST):**
-  wallpaper default now `'random'` — resolved in `hydrate()` client-side
+- **`minors-random-wallpaper` SHIPPED (merge `3be2035`, Jake's call,
+  2026-08-05).** Live-verified: five fresh headless visits to lunde.co
+  drew five different patterns (old build = always waves). Chunk-grep
+  verify fails here — wallpapers.ts rides a lazy chunk the homepage HTML
+  never names; probe behavior, not bundles. Branch can be deleted.
+  What shipped: wallpaper default now `'random'` — resolved in `hydrate()` client-side
   only (no hydration mismatch; saved picks still pin; die-face Random
   swatch in Settings; 'plain' excluded from pool). Louie she/her: 3 fixes
   (ModelsViz comment, make-louie.mjs, AiOpinion "gets her pills");
@@ -100,9 +104,9 @@ reported. Jake's ask: spend remaining usage on Notion board picks.**
    branches `cv-exe` + `suggestion-box`; audition `medieval-sfx`.
 2. **Jake: READ Family Hub pass 3** on `case-family-hub` (+ s36 evolution
    rail in progress there). Merge = his call; then progress 85→100.
-   **Also read s38's two branches:** `trash-good-ideas` (TAG-03/04 — fact
-   pass the cause/origin lines) + `minors-random-wallpaper` (random
-   default + Louie she/her). Merge = his call.
+   **Also read s38's `trash-good-ideas`** (TAG-03/04 — fact pass the
+   cause/origin lines); Jake said he'll circle back. Wallpaper branch
+   already shipped on his word.
 3. **Jake:** save the Ryan avatar-token Slack screenshots (Red Pen exhibit)
    + color before/after + asset pass on the Figma-node placeholders.
 4. **Jake:** eyeball tracker v2 + `critter-cast-v2.html`; then revive
