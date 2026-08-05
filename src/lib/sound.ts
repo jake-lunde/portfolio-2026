@@ -2,7 +2,11 @@
 
 import { useSettings } from '@/store/settings'
 
-/* Tiny synthesized UI clicks — no assets, gated by the sound toggle. */
+/* Tiny synthesized UI clicks, gated by the sound toggle. Classic is
+   all synthesis; medieval's feature moments (open/close/enter-mode)
+   play Jake's recorded samples from public/sfx (AAC'd from
+   ref/assets-medieval/sounds), with the synth pluck kept for
+   rapid-fire taps and melodic runs where a fixed sample would smear. */
 
 let ctx: AudioContext | null = null
 
@@ -23,6 +27,12 @@ function blip(freq: number, dur = 0.045, gain = 0.04) {
   const ac = audio()
   if (!ac) return
   if (ac.state === 'suspended') void ac.resume()
+  if (useSettings.getState().skin === 'medieval') pluck(ac, freq, dur, gain)
+  else beep(ac, freq, dur, gain)
+}
+
+/* classic — the original chip beep. Square wave, hard stop. */
+function beep(ac: AudioContext, freq: number, dur: number, gain: number) {
   const osc = ac.createOscillator()
   const g = ac.createGain()
   osc.type = 'square'
@@ -34,10 +44,97 @@ function blip(freq: number, dur = 0.045, gain = 0.04) {
   osc.stop(ac.currentTime + dur)
 }
 
+/* medieval — same tunes, different instrument: a lute-course pluck.
+   Two saws a hair detuned (lute courses are doubled strings, never quite
+   in tune), dropped an octave for wood, through a lowpass that sweeps
+   shut like a damped string. Q lends the faint clav "wah". Rings a bit
+   past the classic dur — strings do — but attack stays instant so the
+   UI rhythm is untouched. */
+function pluck(ac: AudioContext, freq: number, dur: number, gain: number) {
+  const t = ac.currentTime
+  const f = freq * 0.5
+  const ring = Math.max(dur * 2.5, 0.09)
+  const g = ac.createGain()
+  // 0.75 level-matches the beep by RMS (two saws sum hotter than one
+  // square; measured offline, not guessed)
+  g.gain.setValueAtTime(gain * 0.75, t)
+  g.gain.exponentialRampToValueAtTime(0.0001, t + ring)
+  const lp = ac.createBiquadFilter()
+  lp.type = 'lowpass'
+  lp.Q.value = 1.5
+  lp.frequency.setValueAtTime(f * 6, t)
+  lp.frequency.exponentialRampToValueAtTime(f * 1.25, t + ring)
+  for (const detune of [1, 1.006]) {
+    const osc = ac.createOscillator()
+    osc.type = 'sawtooth'
+    osc.frequency.value = f * detune
+    osc.connect(lp)
+    osc.start(t)
+    osc.stop(t + ring)
+  }
+  lp.connect(g).connect(ac.destination)
+}
+
+/* Jake's medieval one-shots. Gains measured against the classic beep
+   (peak 0.04): affirm/close ship at his mastered levels — they already
+   sit in polite ratio — and the enter fanfare (peak 0.91 raw) is pulled
+   to 0.4 so a mode switch is ceremony, not a jump scare. */
+const SAMPLES = {
+  affirm: '/sfx/medieval-affirm.m4a',
+  close: '/sfx/medieval-close.m4a',
+  enter: '/sfx/enter-medieval-mode.m4a',
+} as const
+const SAMPLE_GAIN: Record<keyof typeof SAMPLES, number> = {
+  affirm: 1,
+  close: 1,
+  enter: 0.4,
+}
+
+const sampleCache = new Map<string, Promise<AudioBuffer | null>>()
+
+function loadSample(name: keyof typeof SAMPLES): Promise<AudioBuffer | null> {
+  const ac = audio()
+  if (!ac) return Promise.resolve(null)
+  let p = sampleCache.get(name)
+  if (!p) {
+    p = fetch(SAMPLES[name])
+      .then((r) => r.arrayBuffer())
+      .then((b) => ac.decodeAudioData(b))
+      .catch(() => null)
+    sampleCache.set(name, p)
+  }
+  return p
+}
+
+async function playSample(name: keyof typeof SAMPLES) {
+  if (!useSettings.getState().sound) return
+  const ac = audio()
+  if (!ac) return
+  if (ac.state === 'suspended') void ac.resume()
+  const buf = await loadSample(name)
+  if (!buf) return
+  const src = ac.createBufferSource()
+  src.buffer = buf
+  const g = ac.createGain()
+  g.gain.value = SAMPLE_GAIN[name]
+  src.connect(g).connect(ac.destination)
+  src.start()
+}
+
+const medieval = () => useSettings.getState().skin === 'medieval'
+
 export const sfx = {
-  open: () => blip(660, 0.05),
-  close: () => blip(330, 0.045),
+  open: () => (medieval() ? void playSample('affirm') : blip(660, 0.05)),
+  close: () => (medieval() ? void playSample('close') : blip(330, 0.045)),
+  // taps fire too often for a 2s sample — the pluck holds this chair
   tap: () => blip(880, 0.03, 0.025),
+  /* the mode-switch ceremony — call on entering medieval, any skin.
+     Also warms the open/close buffers so the first window is on time. */
+  enterMedieval: () => {
+    void playSample('enter')
+    void loadSample('affirm')
+    void loadSample('close')
+  },
 }
 
 /* the gate — macrodata-refinement ritual sounds */
