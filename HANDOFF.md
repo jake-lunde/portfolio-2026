@@ -79,8 +79,8 @@ detail in the s36 commits (`f21fb5a`→`322ce21`).**
   non-interactive layers) · a body-portal is required for fixed
   overlays inside transformed windows · preview_stop can leave the
   process alive (lsof before build; .next corruption twice).
-- **Live-verify pending Chromatic/CDN at session close:** demo-poc.mp4
-  content-marker + Vercel READY — see next steps if unconfirmed.
+- **Live-verified at close:** all three demo mp4s + sketch cutouts 200
+  on lunde.co, /projects/family-hub renders; prod deploy `2a009f0`.
 
 ## Next steps
 
