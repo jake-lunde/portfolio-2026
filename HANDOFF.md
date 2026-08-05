@@ -7,25 +7,23 @@
 
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
-  stays "pending" while Chromatic runs). Production = `938bc39`-era main;
-  local main = origin/main.
-- **⚠️ Branch `cv-exe` = RESUME.EXE v4, BUILT (`e2c8719`), awaiting Jake's
-  walk-through.** Open the window and it prints itself: System 7 job card
-  (striped bar, scaleX thermometer, dot-matrix chatter, ~2.1s; medieval
-  "Scribing…"), page fades in, one button: DOWNLOAD PDF. v3's dialog
-  (Draft/NLQ, Cancel/Print) retired after Jake used it — nobody presses
-  Print on a resume. Renamed CV.EXE → RESUME.EXE (id stays `cv`), icon =
-  tractor-feed sheet (medieval charter+seal; printer icon reserved for
-  the desk scene), path `/resume` (in ALL_PATHS; old `/cv` soft-falls to
-  readme). Resume content = JAKE'S OWN pruning pass (2026-08-04 MD):
-  hook line cut, code bullets merged, "primary designer", Code
-  Generation label, his colophon. `resume.ts` → `build-cv.mjs` →
-  committed deterministic PDF (one page, 84pt slack; build FAILS on page
-  2 or >200KB; never hand-edit); relative deltas only; sheet carries
-  `data-no-translate`; full text in DOM from first paint (opacity-only
-  conceal). ⚠️ BOX-86 (`f4b1ccf`) is baked into this branch's history —
-  merging cv-exe ships the suggestion box too. Merge cv-exe → main =
-  ship.
+  stays "pending" while Chromatic runs; NOTE the apex 308s to www — curl
+  with -L or grep finds nothing). **Production = `4305f19` (s37 ship).**
+- **RESUME.EXE v4 + BOX-86 SHIPPED to production 2026-08-04** (cv-exe
+  merged, fast-forward; verified live: `/resume` serves, PDF 200
+  `application/pdf` 4.4KB, desktop shows RESUME.EXE). Open the window and
+  it prints itself: System 7 job card (striped bar, scaleX thermometer,
+  dot-matrix chatter, ~2.1s; medieval "Scribing…"), page fades in, one
+  button: DOWNLOAD PDF. Icon = tractor-feed sheet (medieval charter+seal;
+  printer icon reserved for the desk scene); id stays `cv`; path
+  `/resume` (old `/cv` soft-falls to readme). Resume content = JAKE'S OWN
+  pruning pass (2026-08-04 MD). `resume.ts` → `build-cv.mjs` → committed
+  deterministic PDF (one page, 84pt slack; build FAILS on page 2 or
+  >200KB; never hand-edit); relative deltas only; sheet carries
+  `data-no-translate`; full text in DOM from first paint. BOX-86 shipped
+  in the same merge after Jake's review + fixes (outlined bubble tail,
+  radius-md corners — chat, not chrome). Branches `cv-exe` and
+  `suggestion-box` are now merged content — safe to delete.
 - **NEW FLAGSHIP SPEC'D — "The Desk"** (Notion, dated 2026-08-04): zoom out
   of the shell into the room the OS runs in — CRT, physical printer (the
   v2 object retires there), iPod dock, lava lamp, MIDI keys. Art direction
@@ -139,9 +137,9 @@ voice + platform-idiom craft. Deck reported.**
 
 ## Next steps
 
-1. **Jake: open RESUME.EXE** — watch it print, download the PDF, both
-   skins, phone. Then merge `cv-exe` → main = the resume ships. (BOX-86
-   rides along — review DOPPLER's suggestion box in the same pass.)
+1. ~~RESUME.EXE~~ **SHIPPED (s37).** Sanity-walk it live on lunde.co when
+   convenient (both skins, phone). Cleanup when idle: delete merged
+   branches `cv-exe` + `suggestion-box`; audition `medieval-sfx`.
 2. **Jake: READ Family Hub pass 3** on `case-family-hub` (+ s36 evolution
    rail in progress there). Merge = his call; then progress 85→100.
 3. **Jake:** save the Ryan avatar-token Slack screenshots (Red Pen exhibit)
