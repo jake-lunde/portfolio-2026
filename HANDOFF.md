@@ -91,8 +91,16 @@ cost more context than it saved. Deck reported (58 events, 200s).**
   `viewport:` not `viewportSize:` (silently ignored → 1280×720 default);
   preview_stop can leave the process alive — `lsof :3210` before ANY
   build (ate .next corruption twice this session).
-  **OPEN: clickable-prototypes question answered in chat — awaiting
-  Jake's pick (tap-through frames vs PROTO.VIEWER embed) + flow list.**
+- **PASS 4 (`ca7c299`):** Jake answered the prototype question with SCREEN
+  RECORDINGS (`ref/assets-casestudies/family hub/prototype-window/`, never
+  commit ref/) — v0.2 + v0.6 stages now play his real PoC/hi-fi demos as
+  muted loops in the mini-window. Pipeline: scratchpad `ffmpeg-static`
+  (playwright's ffmpeg = vp8-only) → h264 mp4 crf27 + vp9 webm crf36,
+  preload=none, play-only-while-up, poster still under reduced-motion.
+  Gotcha: headless_shell has NO h264 — webm <source> fallback is what
+  makes playback verifiable (and is good hygiene anyway). More recordings
+  welcome: drop in same ref/ dir, same names → stage mapping in
+  EvolutionRail STAGES.
 
 ## Next steps
 
