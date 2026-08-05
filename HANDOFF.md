@@ -107,6 +107,12 @@ cost more context than it saved. Deck reported (58 events, 200s).**
   (rolls through, never resets); posters = recordings' first frames
   (white Figma stills retired for demo stages); mini-window gained the
   main window's + control — zoom to 720px / restore, width transition.
+- **PASS 6 (`8edfa42`):** wireframes.mp4 landed (1440×800, green bg —
+  NOT black; exact-ratio stack keeps the mat to the 10px chrome) →
+  spans v0.4+v0.5 like PoC's pair; break-out auto-zooms — boundary
+  crossings set/clear zoom, manual toggle respected mid-scene. Only
+  live rail stills left: stage-06/07/08 + sketch cutouts. 5 of 9 beats
+  are now video.
 
 ## Next steps
 
