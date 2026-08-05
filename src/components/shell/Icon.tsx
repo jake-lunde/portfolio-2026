@@ -30,6 +30,7 @@ export type IconName =
   | 'smiley'
   | 'bubble'
   | 'mystery'
+  | 'suggest'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -260,6 +261,15 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M16 23h.02" />
     </>
   ),
+  suggest: (
+    // suggestion box — a note mid-drop over the slot. The slot stroke
+    // sits 3.5px clear of the lid edge so it survives 32px.
+    <>
+      <path d="M14 3l6.5 2-2 6-6.5-2z" />
+      <path d="M5 14h22v13H5z" />
+      <path d="M11 17.5h10" />
+    </>
+  ),
 }
 
 /* Medieval variants — the same objects re-cut as woodcut/heraldic figures
@@ -452,6 +462,16 @@ const MEDIEVAL_PATHS: Partial<Record<IconName, React.ReactNode>> = {
       <path d="M10 11l-3.2 6a3.2 3.2 0 0 0 6.4 0z" />
       <path d="M22 11l-3.2 6a3.2 3.2 0 0 0 6.4 0z" />
       <path d="M12 23h8" />
+    </>
+  ),
+  // SUGGESTION BOX → PETITIONS: a banded chest, petition at the seam.
+  // The hasp is filled like the codex clasp above.
+  suggest: (
+    <>
+      <path d="M14 3.5l6 1.8-1.7 5.9-6-1.8z" />
+      <path d="M6 15h20v12H6z" />
+      <path d="M6 19.5h20" />
+      <path d="M14.6 18h2.8v3h-2.8z" fill="currentColor" stroke="none" />
     </>
   ),
 }

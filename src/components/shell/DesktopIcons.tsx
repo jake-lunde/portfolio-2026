@@ -26,6 +26,7 @@ const ORDER = [
   'music',
   'fun',
   'feedback',
+  'suggest',
   'spec-sheet',
 ]
 
@@ -61,7 +62,7 @@ export function DesktopIcons() {
   return (
     <>
       <nav className={styles.icons} aria-label="Programs">
-        {rest.map((p) => iconBtn(p, p.id === 'cv' ? styles.cvGrid : ''))}
+        {rest.map((p) => iconBtn(p))}
         {/* trash joins the grid on mobile only (see .trashGrid) */}
         {trash && iconBtn(trash, styles.trashGrid)}
       </nav>

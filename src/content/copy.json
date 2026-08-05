@@ -1,29 +1,31 @@
 {
   "command.explainer": "Jake writes the brief, judges every return and owns the taste. A crew of model agents does the fan-out. This deck is the real telemetry; the site is what came out of it.",
+  "cv.dialogCancel": "Cancel",
+  "cv.dialogDone": "Done.",
+  "cv.dialogDraft": "Draft",
+  "cv.dialogGo": {
+    "base": "Print",
+    "medieval": "Scribe"
+  },
+  "cv.dialogNlq": "NLQ",
+  "cv.dialogPages": "Pages:",
+  "cv.dialogPrinter": "Printer:",
+  "cv.dialogPrinting": {
+    "base": "Printing…",
+    "medieval": "Scribing…"
+  },
+  "cv.dialogQuality": "Quality:",
+  "cv.dialogSent": "Sent to printer.",
+  "cv.dialogTitle": {
+    "base": "Print",
+    "medieval": "Scribe"
+  },
   "cv.download": "Download PDF",
-  "cv.explainer": "A dot-matrix printer. Press PRINT and it runs the page; TEAR OFF hands you a real PDF, built from the same data you just watched print.",
-  "cv.feed": {
-    "base": "FEED",
-    "medieval": "HASTEN"
-  },
+  "cv.explainer": "The resume, typeset as a document. Press PRINT and the OS does the rest: a real, forwardable PDF built from the same data this page renders.",
   "cv.print": {
-    "base": "PRINT",
-    "medieval": "SCRIBE"
+    "base": "PRINT…",
+    "medieval": "SCRIBE…"
   },
-  "cv.statusDone": {
-    "base": "Done. Tear off to keep it.",
-    "medieval": "Done. Rend it to keep it."
-  },
-  "cv.statusIdle": {
-    "base": "Ready. Paper loaded.",
-    "medieval": "Ready. Vellum loaded."
-  },
-  "cv.statusPrinting": "Printing…",
-  "cv.tearOff": {
-    "base": "TEAR OFF",
-    "medieval": "REND"
-  },
-  "cv.torn": "Torn off. Reloading paper…",
   "feedback.head": {
     "base": "In their words",
     "medieval": "As they attest"
@@ -146,6 +148,10 @@
     "base": "Remixes",
     "medieval": "Reworkings"
   },
+  "program.suggest.name": {
+    "base": "Suggestion Box",
+    "medieval": "Petitions"
+  },
   "program.trash.name": {
     "base": "Trash",
     "medieval": "Oubliette"
@@ -207,6 +213,15 @@
   "spec-sheet.section.components": "Components",
   "spec-sheet.section.motion": "Motion",
   "spec-sheet.section.type": "Type",
+  "suggest.again": "ANOTHER ONE",
+  "suggest.error": "The box jammed. Try again.",
+  "suggest.filed": "Filed",
+  "suggest.judging": "JUDGING…",
+  "suggest.label": "The idea",
+  "suggest.notFiled": "Scored, not filed",
+  "suggest.placeholder": "A feature. A fix. A dream.",
+  "suggest.reviewerRole": "Review unit · on loan",
+  "suggest.submit": "SUBMIT FOR JUDGMENT",
   "trash.eyebrow": "Disposal records · kept on file",
   "trash.field.cause": "Cause of death",
   "trash.field.lesson": "What it taught",

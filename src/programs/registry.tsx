@@ -54,24 +54,20 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/readme',
   },
   {
-    // Not a window — furniture. The printer sits on the desk with bare
-    // chrome (it draws its own housing, like the iPod) and is open by
-    // default on desktop (see windowsForPath). A hiring manager reads
-    // README and the resume machine is already next to it; TEAR OFF hands
-    // them the PDF. onDesktop keeps the icon for the MOBILE launcher only —
-    // the desktop grid hides it (.cvGrid), since the device is its own icon.
+    // Second on the desktop by design: a hiring manager reads README, then
+    // wants something to forward. The document prints through a System 7
+    // print dialog — the OS delivers documents the way 1992 actually did.
+    // (The physical printer OBJECT retires to the future desk scene; see
+    // the Notion project "The Desk".)
     id: 'cv',
     name: 'CV.EXE',
     meta: 'DOC-01',
+    explainer: 'cv.explainer',
     icon: 'printer',
     component: dynamic(() => import('@/programs/cv/CV')),
-    // Geometry is placed around the desk ornaments on a 1280 viewport: right
-    // edge stays left of the photo wall and DAILY.SYS, bottom clears the
-    // DAILY.SYS top. The paper zone is click-transparent (pointer-events),
-    // so the tall box doesn't eat desktop clicks while the paper is parked.
-    size: { w: 410, h: 580 },
-    pos: { x: 656, y: 20 },
-    chrome: 'bare',
+    size: { w: 520, h: 640 },
+    pos: { x: 172, y: 96 },
+    chrome: 'paper',
     onDesktop: true,
     path: '/cv',
   },
@@ -149,6 +145,17 @@ export const PROGRAMS: ProgramDef[] = [
     pos: { x: 380, y: 80 },
     onDesktop: true,
     path: '/guestbook',
+  },
+  {
+    id: 'suggest',
+    name: 'Suggestion Box',
+    meta: 'BOX-86',
+    icon: 'suggest',
+    component: dynamic(() => import('@/programs/suggest/SuggestBox')),
+    size: { w: 430, h: 468 },
+    pos: { x: 402, y: 92 },
+    onDesktop: true,
+    path: '/suggest',
   },
   {
     id: 'booth',
