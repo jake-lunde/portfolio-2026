@@ -575,7 +575,8 @@
   transition: aspect-ratio 0.3s ease;
 }
 
-.railStack > img {
+.railStack > img,
+.railStack > video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -585,7 +586,8 @@
   transition: opacity 0.28s ease-out;
 }
 
-.railStack > img[data-on] {
+.railStack > img[data-on],
+.railStack > video[data-on] {
   opacity: 1;
 }
 
@@ -666,6 +668,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .railStack > img,
+  .railStack > video,
   .railScene {
     transition: none;
   }

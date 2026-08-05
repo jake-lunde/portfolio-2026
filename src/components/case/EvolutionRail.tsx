@@ -30,15 +30,18 @@ type Stage = {
   file?: string
   /** the last two beats break out of the artboard and hang in a room */
   scene?: 'wall' | 'kitchen'
+  /** Jake's screen recording of the real prototype — plays while the
+      stage is up, still frame (poster) under reduced motion */
+  video?: string
 }
 
 const STAGES: Stage[] = [
   { v: 'v0.1', label: 'Sketch', ratio: '1089 / 490', alt: 'Concept collage: a big pink clock, weather, calendar and home glyphs, family portrait avatars, one checked-off chore — all gently afloat.' },
-  { file: 'stage-01.webp', v: 'v0.2', label: 'Proof of Concept', ratio: '1420 / 789', alt: 'First clickable dashboard: dark shell, the family agenda blocked in as bright color bars.' },
+  { file: 'stage-01.webp', video: 'demo-poc', v: 'v0.2', label: 'Proof of Concept', ratio: '16 / 9', alt: 'Screen recording of the first clickable prototype: clicking through the dark dashboard, the family agenda blocked in as bright color bars.' },
   { file: 'stage-02.webp', v: 'v0.3', label: 'Proof of Concept', ratio: '1420 / 789', alt: 'Proof-of-concept month calendar: the whole household on one grid.' },
   { file: 'stage-03.webp', v: 'v0.4', label: 'Wireframes', ratio: '1440 / 800', alt: 'Wireframe pass in Greenlight green: the morning brief with a school-run map.' },
   { file: 'stage-04.webp', v: 'v0.5', label: 'Wireframes', ratio: '1420 / 789', alt: 'Wireframe ambient screen: good morning, 8:32 AM.' },
-  { file: 'stage-05.webp', v: 'v0.6', label: 'Hi-Fi Prototype', ratio: '1440 / 800', alt: 'Hi-fi prototype: the light dashboard taking its shipped shape.' },
+  { file: 'stage-05.webp', video: 'demo-hifi', v: 'v0.6', label: 'Hi-Fi Prototype', ratio: '16 / 9', alt: 'Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape.' },
   { file: 'stage-06.webp', v: 'v0.7', label: 'Color Explorations', ratio: '1440 / 800', alt: 'Color exploration: chats, chores and calendar as calm cards, color only where it means something.' },
   { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', ratio: '10 / 7', scene: 'wall', alt: 'The launch build under test: the device hung on a plain wall.', },
   { file: 'stage-08.webp', v: 'v1.0', label: 'Ship', ratio: '10 / 7', scene: 'kitchen', alt: 'Family Hub live in situ: the device on a kitchen wall, plant on the counter.' },
@@ -164,6 +167,18 @@ export function EvolutionRail() {
   const [stage, setStage] = useState(0)
   const [closed, setClosed] = useState(false)
   const marksRef = useRef<Element[]>([])
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
+
+  // demos run only while their stage is up; reduced motion gets the
+  // poster still. preload="none" means nothing downloads until here.
+  useEffect(() => {
+    const active = STAGES[stage]?.video
+    for (const [key, el] of Object.entries(videoRefs.current)) {
+      if (!el) continue
+      if (key === active && !reduced && !closed) el.play().catch(() => {})
+      else el.pause()
+    }
+  }, [stage, reduced, closed])
 
   useEffect(() => {
     if (closed) return
@@ -240,7 +255,8 @@ export function EvolutionRail() {
             {STAGES.map(
               (s, i) =>
                 s.file &&
-                !s.scene && (
+                !s.scene &&
+                !s.video && (
                   <img
                     key={s.file}
                     src={`${DIR}/${s.file}`}
@@ -249,6 +265,28 @@ export function EvolutionRail() {
                     draggable={false}
                     data-on={i === stage ? 'true' : undefined}
                   />
+                ),
+            )}
+            {STAGES.map(
+              (s, i) =>
+                s.video && (
+                  <video
+                    key={s.video}
+                    ref={(el) => {
+                      videoRefs.current[s.video!] = el
+                    }}
+                    poster={`${DIR}/${s.file}`}
+                    muted
+                    loop
+                    playsInline
+                    preload="none"
+                    aria-hidden="true"
+                    data-on={i === stage ? 'true' : undefined}
+                  >
+                    {/* h264 for the world, vp9 for open-codec builds */}
+                    <source src={`${DIR}/${s.video}.mp4`} type="video/mp4" />
+                    <source src={`${DIR}/${s.video}.webm`} type="video/webm" />
+                  </video>
                 ),
             )}
             {STAGES.map(
@@ -280,6 +318,7 @@ export function EvolutionRail() {
         </div>
         <div className={styles.railLabel} aria-hidden="true">
           {cur.v} · {cur.label}
+          {cur.video && !reduced ? ' · demo' : ''}
         </div>
       </aside>
     </div>
