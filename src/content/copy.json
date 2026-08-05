@@ -1,30 +1,14 @@
 {
   "command.explainer": "Jake writes the brief, judges every return and owns the taste. A crew of model agents does the fan-out. This deck is the real telemetry; the site is what came out of it.",
-  "cv.dialogCancel": "Cancel",
-  "cv.dialogDone": "Done.",
-  "cv.dialogDraft": "Draft",
-  "cv.dialogGo": {
+  "cv.download": "DOWNLOAD PDF",
+  "cv.explainer": "It prints itself. What you are reading is typeset live from the same data as the PDF, so the download can never drift from the page.",
+  "cv.printTitle": {
     "base": "Print",
     "medieval": "Scribe"
   },
-  "cv.dialogNlq": "NLQ",
-  "cv.dialogPages": "Pages:",
-  "cv.dialogPrinter": "Printer:",
-  "cv.dialogPrinting": {
+  "cv.printing": {
     "base": "Printing…",
     "medieval": "Scribing…"
-  },
-  "cv.dialogQuality": "Quality:",
-  "cv.dialogSent": "Sent to printer.",
-  "cv.dialogTitle": {
-    "base": "Print",
-    "medieval": "Scribe"
-  },
-  "cv.download": "Download PDF",
-  "cv.explainer": "The resume, typeset as a document. Press PRINT and the OS does the rest: a real, forwardable PDF built from the same data this page renders.",
-  "cv.print": {
-    "base": "PRINT…",
-    "medieval": "SCRIBE…"
   },
   "feedback.head": {
     "base": "In their words",
@@ -84,7 +68,7 @@
     "medieval": "The Keep"
   },
   "program.cv.name": {
-    "base": "CV.EXE",
+    "base": "RESUME.EXE",
     "medieval": "Curriculum Vitæ"
   },
   "program.feedback.name": {

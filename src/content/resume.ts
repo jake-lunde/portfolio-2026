@@ -46,13 +46,13 @@ export const CONTACT = {
   location: 'Seattle, WA',
 } as const
 
-/* The one line that has to do the most work: positioning, tenure, and proof
-   the design-engineer claim isn't aspirational — the reader is holding the
-   artifact it describes. Written for the 2026 double gate: an ATS parses it,
-   then an LLM summarizes it for the recruiter, so it must survive being
-   paraphrased. */
+/* The one line that has to do the most work: positioning, tenure, and
+   scope. Written for the 2026 double gate: an ATS parses it, then an LLM
+   summarizes it for the recruiter, so it must survive being paraphrased.
+   Copy is Jake's own pruning pass (2026-08-04 MD) — he cut the printer
+   hook line; his voice, his call. */
 export const SUMMARY =
-  'Product designer who ships production code. Ten years in consumer products, currently leading design across Greenlight’s family finance ecosystem: investing for kids, AI-guided decision tools, and Family Hub, the company’s first hardware product, now live nationwide. This PDF came off a dot-matrix printer I built at lunde.co.'
+  'Product designer who ships production code. Ten years in consumer products, currently leading design across Greenlight’s family finance ecosystem: investing for kids, AI-guided decision tools, and Family Hub, the company’s first hardware product, now live nationwide.'
 
 export const ROLES: Role[] = [
   {
@@ -67,10 +67,9 @@ export const ROLES: Role[] = [
        code, AI infrastructure. Confidential internals (survey n, user
        counts, funnel volumes) stay off a forwardable document. */
     bullets: [
-      'Led end-to-end design of Family Hub, Greenlight’s first hardware product: a shared home display for family calendars, chores, lists, and location. Took it from vision-team concept through interaction, visual, motion, and sound design to nationwide launch in 2026 as the product’s sole designer.',
+      'Led end-to-end design of Family Hub, Greenlight’s first hardware product: a shared home display for family calendars, chores, lists, and location. Took it from vision to concept through interaction, visual, and motion design to nationwide launch in 2026 as the product’s primary designer.',
       'Redesigned Invest, Greenlight’s investing product for kids and families. Customers exposed to the new experience made a first trade at 3–4× the rate of those who weren’t, and detail views rose 355%, driven by AI-guided decision tools that explain what a company is before a kid buys it.',
-      'Shipped production SwiftUI, including the app’s first haptics: a press-and-hold performance graph engineering had scoped as too expensive, which I prototyped in the production repo. Most of that code shipped.',
-      'Built the design team’s design-to-code pipeline: components mirrored from Storybook into Figma, plus a self-built Figma plugin that captures design edits as diffs and hands them to Claude to open production pull requests, keeping the design system and shipped code in parity.',
+      'Shipped production code, including the app’s first haptics. Built the design team’s design-to-code pipeline: components mirrored from Storybook into Figma, plus a self-built Figma plugin that captures design edits as diffs and hands them to Claude to open production pull requests, keeping the design system and shipped code in parity.',
     ],
   },
   {
@@ -80,8 +79,8 @@ export const ROLES: Role[] = [
     location: 'Los Angeles, CA (Remote)',
     bullets: [
       'Owned product design and creative strategy for the Disney Cruise Line Navigator app, the onboard companion guests use to plan every day of a sailing.',
-      'Built and maintained the design system for Disney Cruise Line’s digital products, and drove the organization’s Sketch to Figma migration, including running training sessions for executives and partner teams.',
-      'Ran the full research loop (session guides, testing, synthesis) and presented strategy and new solutions up to VP level.',
+      'Built and maintained the design system for Disney Cruise Line’s digital products, and drove the organization’s Sketch to Figma migration, including leading training sessions and design workshops for executives and partner teams.',
+      'Ran the full research loop (session guides, testing, synthesis) and presented strategy and design up to VP level.',
     ],
   },
   {
@@ -90,7 +89,7 @@ export const ROLES: Role[] = [
     dates: 'Oct 2018 – Aug 2021',
     location: 'Seattle, WA',
     bullets: [
-      'Strategy and interaction design on 2–6 month engagements for Google, Amazon, Microsoft, Dell, eBay, Oculus, and REI.',
+      'Strategy and interaction design on 2–6 month engagements for Google, Amazon, Microsoft, Dell, eBay, Oculus, REI and more.',
       'Specialized in complex enterprise problems across platforms and devices: stakeholder alignment, research synthesis into process and experience maps, prototypes for usability testing, and full design-system documentation.',
     ],
   },
@@ -105,11 +104,11 @@ export const SKILLS: SkillGroup[] = [
       'Interaction design',
       'Prototyping',
       'Design research',
-      'Accessibility (WCAG 2.2 AA)',
+      'Accessibility',
     ],
   },
   {
-    label: 'Code',
+    label: 'Code Generation',
     items: ['TypeScript', 'React', 'Next.js', 'CSS', 'SwiftUI'],
   },
   {
@@ -126,9 +125,6 @@ export const EDUCATION: Education[] = [
   },
 ]
 
-/* The old resume carried a joke list (punctuality, bike riding, dog social
-   media management, moral support, coffee brewing). At staff level a list
-   like that reads as filler — but deleting the personality entirely would
-   cost more than it saves. Distilled to one line, last thing on the page. */
+/* One line of personality, last thing on the page. Jake's own wording. */
 export const COLOPHON =
-  'Also: competent bike mechanic, better baker, and staff to a dog with a larger following than mine.'
+  'Also: amateur musician, baker, and dance mom to a dog with more followers than most.'

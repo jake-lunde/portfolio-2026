@@ -152,10 +152,11 @@ async function main() {
   // ---- skills ----
   section(doc, 'Skills')
   doc.fontSize(T.bullet)
+  // label column sized to the widest label, "Code Generation"
   for (const g of R.SKILLS) {
     const y = doc.y
-    doc.font('Helvetica-Bold').text(`${g.label}`, PAGE.margin, y, { width: 54, continued: false })
-    doc.font('Helvetica').text(g.items.join(' · '), PAGE.margin + 54, y, { width: W - 54 })
+    doc.font('Helvetica-Bold').text(`${g.label}`, PAGE.margin, y, { width: 88, continued: false })
+    doc.font('Helvetica').text(g.items.join(' · '), PAGE.margin + 88, y, { width: W - 88 })
     doc.moveDown(0.3)
   }
 

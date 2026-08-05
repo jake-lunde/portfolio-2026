@@ -24,18 +24,6 @@
   background: var(--surface-raised);
 }
 
-.quietLink {
-  font-family: var(--mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-08);
-  color: var(--content);
-  text-underline-offset: 3px;
-}
-
-.quietLink:hover {
-  color: var(--accent);
-}
-
 /* ---- the paper ---- */
 
 .feed {
@@ -68,6 +56,14 @@
   font-size: var(--text-caption);
   line-height: var(--leading-relaxed);
   color: var(--content);
+  /* pre-print the page is blank — opacity only, so screen readers get the
+     full document from first paint regardless of the theater */
+  opacity: 0;
+  transition: opacity var(--duration-slow) ease-out;
+}
+
+.cv[data-phase='done'] .sheet {
+  opacity: 1;
 }
 
 /* ---- printout typography ---- */
@@ -153,7 +149,8 @@
 
 .skill {
   display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr);
+  /* sized to the widest label, "Code Generation" */
+  grid-template-columns: 7.5rem minmax(0, 1fr);
   gap: var(--space-2);
   margin: var(--space-1) 0 0;
 }
@@ -249,59 +246,6 @@
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-4);
-}
-
-.dRow {
-  display: grid;
-  grid-template-columns: 5.2rem minmax(0, 1fr);
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.dLabel {
-  font-family: var(--mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-08);
-  color: var(--content-muted);
-}
-
-.dValue {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: var(--tracking-08);
-  font-weight: 700;
-}
-
-.dSegmented {
-  display: inline-flex;
-  border: var(--border-width-default) solid var(--content);
-  width: fit-content;
-}
-
-.dSegBtn {
-  font-family: var(--mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-10);
-  text-transform: uppercase;
-  padding: 4px 10px;
-  color: var(--content);
-  background: var(--surface);
-}
-
-.dSegBtn + .dSegBtn {
-  border-left: var(--border-width-default) solid var(--content);
-}
-
-.dSegBtn[aria-pressed='true'] {
-  background: var(--content);
-  color: var(--surface);
-}
-
-.dialogBtns {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-2);
-  margin-top: var(--space-1);
 }
 
 /* progress: a classic thermometer. Fill is a scaleX transform so nothing

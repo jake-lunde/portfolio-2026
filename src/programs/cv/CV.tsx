@@ -1,71 +1,82 @@
 'use client'
 
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/primitives/Button'
 import { t } from '@/content/copy'
+import { SPRINGS } from '@/lib/motion'
 import { cvSfx, sfx } from '@/lib/sound'
 import { useSettings } from '@/store/settings'
 import { buildPasses } from './passes'
-import { PrintDialog } from './PrintDialog'
 import styles from './cv.module.css'
 
-/* CV.EXE — the resume as a document, delivered the way 1992 delivered
- * documents: through the print dialog (PrintDialog.tsx).
+/* RESUME.EXE — open it and the page prints itself.
  *
- * The window shows the full typeset resume from first paint — no reveal
- * theater, the document just IS (screen readers and reduced-motion get
- * everything for free). The page is a RENDER of src/content/resume.ts;
- * what PRINT hands over is public/jake-lunde-resume.pdf, built from the
- * same file by scripts/build-cv.mjs, so the two can't drift.
+ * Jake's read on v3: nobody in 2026 wants to PRESS print on a resume; they
+ * want to watch it arrive, then download it. So the ritual runs on open —
+ * a System 7 job card (striped bar, thermometer, dot-matrix chatter) over
+ * the sheet for ~2 seconds, then the document is just there with one
+ * button: DOWNLOAD PDF.
  *
- * The sheet keeps its tractor-feed rails — the stock remembers what kind
- * of printer this OS owns. The physical machine itself retires to the
- * future desk scene (Notion: "The Desk").
+ * The page is a RENDER of src/content/resume.ts; the download is
+ * public/jake-lunde-resume.pdf, built from the same file by
+ * scripts/build-cv.mjs, so the two can't drift. Content is Jake's own
+ * pruning pass — encourage more of those; he is the person.
  *
- * data-no-translate on the sheet is load-bearing: KnightSpeakLayer rewrites
- * untranslated DOM text under the medieval skin, and a CV is fact, not
- * costume. The chrome around it (toolbar, dialog) translates via copy keys.
- *
- * No useId (programs are dynamic imports; generated ids mismatch at SSR
- * handover — see memory). Constant ids only. */
+ * A11y invariants: the full resume is in the DOM from first paint (the
+ * pre-print state hides it with opacity only, which screen readers ignore);
+ * reduced motion skips the theater entirely; reveal is CSS driven by
+ * data-phase, never Motion (rAF freezes in hidden tabs). data-no-translate
+ * keeps knight-speak off the facts. No useId (dynamic-import programs
+ * mismatch at SSR handover); constant ids only.
+ */
 
 const PDF = '/jake-lunde-resume.pdf'
-const PRINT_BTN_ID = 'cv-print-btn'
+const TICKS = 14
+const TICK_MS = 150
+
+type Phase = 'printing' | 'done'
 
 export default function CV() {
   const skin = useSettings((s) => s.skin)
+  const reduced = useReducedMotion()
   const passes = useMemo(buildPasses, [])
 
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [phase, setPhase] = useState<Phase>('printing')
+  const [tick, setTick] = useState(0)
   const linkRef = useRef<HTMLAnchorElement>(null)
 
-  const openDialog = useCallback(() => {
-    sfx.open()
-    setDialogOpen(true)
-  }, [])
+  // reduced motion: the document simply arrives
+  useEffect(() => {
+    if (reduced) setPhase('done')
+  }, [reduced])
 
-  const closeDialog = useCallback(() => {
-    setDialogOpen(false)
-    // hand focus back to the control that opened the dialog
-    document.getElementById(PRINT_BTN_ID)?.focus()
-  }, [])
+  // the job: chatter per head pass, tear when the page is out
+  useEffect(() => {
+    if (phase !== 'printing' || reduced) return
+    if (tick >= TICKS) {
+      cvSfx.tear()
+      setPhase('done')
+      return
+    }
+    const id = setTimeout(() => {
+      setTick((n) => n + 1)
+      cvSfx.chatter()
+    }, TICK_MS)
+    return () => clearTimeout(id)
+  }, [phase, tick, reduced])
 
-  const deliver = useCallback(() => {
-    cvSfx.tear()
+  const download = useCallback(() => {
+    sfx.tap()
     linkRef.current?.click()
   }, [])
 
   return (
-    <div className={styles.cv}>
+    <div className={styles.cv} data-phase={phase}>
       <div className={styles.toolbar}>
-        <Button id={PRINT_BTN_ID} size="md" tone="expressive" onClick={openDialog}>
-          {t('cv.print', skin)}
-        </Button>
-        {/* the artifact without the ritual, for anyone in a hurry —
-            and next in tab order for keyboard users */}
-        <a className={styles.quietLink} href={PDF} download>
+        <Button size="md" tone="expressive" onClick={download}>
           {t('cv.download', skin)}
-        </a>
+        </Button>
       </div>
 
       <div className={styles.feed}>
@@ -76,9 +87,45 @@ export default function CV() {
         </div>
       </div>
 
-      <PrintDialog open={dialogOpen} onClose={closeDialog} onDeliver={deliver} />
+      {/* the job card: System 7 chrome over the arriving page */}
+      <AnimatePresence>
+        {phase === 'printing' ? (
+          <motion.div
+            className={styles.dialogWrap}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.16 } }}
+          >
+            <motion.div
+              role="status"
+              aria-label={t('cv.printTitle', skin)}
+              className={styles.dialog}
+              initial={{ opacity: 0, scale: 0.95, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={SPRINGS.deck}
+            >
+              <div className={styles.dialogBar}>
+                <span className={styles.dialogStripes} aria-hidden="true" />
+                <span className={styles.dialogTitle}>{t('cv.printTitle', skin)}</span>
+                <span className={styles.dialogStripes} aria-hidden="true" />
+              </div>
+              <div className={styles.dialogBody}>
+                <div className={styles.dProgressTrack} aria-hidden="true">
+                  <span
+                    className={styles.dProgressFill}
+                    style={{ transform: `scaleX(${tick / TICKS})` }}
+                  />
+                </div>
+                <p className={styles.dStatus} aria-live="polite">
+                  {t('cv.printing', skin)}
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
-      {/* the actual artifact; the dialog just clicks it */}
+      {/* the actual artifact; the button just clicks it */}
       <a ref={linkRef} href={PDF} download hidden aria-hidden="true" tabIndex={-1}>
         {t('cv.download', skin)}
       </a>

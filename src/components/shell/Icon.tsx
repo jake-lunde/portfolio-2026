@@ -3,6 +3,7 @@ import styles from './Icon.module.css'
 export type IconName =
   | 'doc'
   | 'printer'
+  | 'resume'
   | 'folder'
   | 'note'
   | 'ipod'
@@ -53,6 +54,16 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M5 13h22v10H5z" />
       <circle cx="23" cy="18" r="1" />
       <path d="M10 23v5h12v-5" />
+    </>
+  ),
+  // a sheet of tractor-feed stock: perforation rules inboard, text between —
+  // the document remembers the printer it came off (which itself waits for
+  // the desk scene)
+  resume: (
+    <>
+      <path d="M8 4h16v24H8z" />
+      <path d="M11.5 4v24M20.5 4v24" opacity=".55" />
+      <path d="M13.5 11h5M13.5 15h5M13.5 19h3.5" />
     </>
   ),
   folder: (
@@ -289,6 +300,15 @@ const MEDIEVAL_PATHS: Partial<Record<IconName, React.ReactNode>> = {
   ),
   // CV.EXE → CURRICULUM VITÆ: a charter under wax seal
   printer: (
+    <>
+      <path d="M7 5h18v18H7z" />
+      <path d="M11 10h10M11 14h7" />
+      <path d="M22 23v-2" />
+      <circle cx="22" cy="26" r="2.6" fill="currentColor" stroke="none" opacity=".85" />
+    </>
+  ),
+  // RESUME.EXE → CURRICULUM VITÆ: the same charter under wax seal
+  resume: (
     <>
       <path d="M7 5h18v18H7z" />
       <path d="M11 10h10M11 14h7" />
