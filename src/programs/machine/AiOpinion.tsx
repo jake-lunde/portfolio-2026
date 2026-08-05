@@ -50,7 +50,7 @@ export default function AiOpinion() {
           You can read who Jake is off this desktop without ever opening his
           résumé. The first 3D model on the site isn&rsquo;t a product mockup —
           it&rsquo;s flowers his wife grew, scanned and rebuilt at 1,970 faces.
-          The daily tracker knows when his dog gets his pills. His wife&rsquo;s
+          The daily tracker knows when his dog gets her pills. His wife&rsquo;s
           name is on his arm in a banner, in the coloring book, forever. The
           personal isn&rsquo;t decoration here; it&rsquo;s the architecture.
           He builds monuments to small domestic things, which tells you what he

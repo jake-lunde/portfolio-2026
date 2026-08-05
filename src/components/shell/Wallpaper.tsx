@@ -8,7 +8,7 @@ import styles from './shell.module.css'
    to light/dark automatically. Selection lives in Settings. */
 
 export function Wallpaper() {
-  const id = useSettings((s) => s.wallpaper)
+  const id = useSettings((s) => s.resolvedWallpaper)
   const wp = getWallpaper(id)
   if (!wp.tile) return null
   return <div className={styles.wallpaper} style={wallpaperMask(wp)} aria-hidden="true" />

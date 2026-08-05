@@ -1,6 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
+import { pickRandomWallpaper } from '@/components/shell/wallpapers'
 
 type Theme = 'light' | 'dark'
 export type Skin = 'classic' | 'medieval' | 'underwater'
@@ -12,7 +13,12 @@ let systemThemeBound = false
 type SettingsState = {
   theme: Theme
   sound: boolean
+  /** Saved preference: a pinned pattern id, or 'random' (default — see
+      resolvedWallpaper). Drives which Settings swatch shows pressed. */
   wallpaper: string
+  /** The pattern actually rendered by <Wallpaper>. Equals wallpaper unless
+      wallpaper is 'random', in which case it's a fresh pick per hydrate. */
+  resolvedWallpaper: string
   skin: Skin
   setTheme: (t: Theme) => void
   toggleTheme: () => void
@@ -23,19 +29,24 @@ type SettingsState = {
 }
 
 export const useSettings = create<SettingsState>((set, get) => ({
-  // SSR defaults; hydrate() reads the real values on mount
+  // SSR defaults; hydrate() reads the real values on mount. wallpaper
+  // defaults to 'random' (the resolved pick happens client-side in
+  // hydrate(), never during render — resolvedWallpaper stays a fixed
+  // fallback here so SSR and the first client paint match).
   theme: 'light',
   sound: true,
-  wallpaper: 'waves',
+  wallpaper: 'random',
+  resolvedWallpaper: 'waves',
   skin: 'classic',
 
   hydrate: () => {
     try {
       const theme = (document.documentElement.dataset.theme as Theme) || 'light'
       const sound = localStorage.getItem('lunde-sound') !== 'off'
-      const wallpaper = localStorage.getItem('lunde-wallpaper') ?? 'waves'
+      const wallpaper = localStorage.getItem('lunde-wallpaper') ?? 'random'
+      const resolvedWallpaper = wallpaper === 'random' ? pickRandomWallpaper() : wallpaper
       const skin = (document.documentElement.dataset.skin as Skin) || 'classic'
-      set({ theme, sound, wallpaper, skin })
+      set({ theme, sound, wallpaper, resolvedWallpaper, skin })
     } catch {
       /* no-op */
     }
@@ -63,7 +74,10 @@ export const useSettings = create<SettingsState>((set, get) => ({
     try {
       localStorage.setItem('lunde-wallpaper', wallpaper)
     } catch {}
-    set({ wallpaper })
+    // Picking 'random' explicitly re-rolls immediately, so the swatch reads
+    // as "give me one now", not just "opt back in for next visit".
+    const resolvedWallpaper = wallpaper === 'random' ? pickRandomWallpaper() : wallpaper
+    set({ wallpaper, resolvedWallpaper })
   },
 
   setSkin: (skin) => {

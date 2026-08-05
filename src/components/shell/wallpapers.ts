@@ -83,6 +83,35 @@ export const WALLPAPERS: Wallpaper[] = [
   { id: 'plain', name: 'Plain', tile: null, w: 0, h: 0 },
 ]
 
+/* Sentinel "Random" option — shown first in the Settings picker. Not a real
+   pattern; picking it (or leaving wallpaper unset) means "choose one for me
+   per visit". Its tile is a die face so it reads at a glance next to the
+   real patterns, same black-on-transparent mask idiom. */
+export const RANDOM_WALLPAPER_ID = 'random'
+
+export const RANDOM_WALLPAPER: Wallpaper = {
+  id: RANDOM_WALLPAPER_ID,
+  name: 'Random',
+  w: 16,
+  h: 16,
+  tile: svg(
+    16,
+    16,
+    '<rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="#000" stroke-width="1" fill="none"/><circle cx="5" cy="5" r="1" fill="#000"/><circle cx="8" cy="8" r="1" fill="#000"/><circle cx="11" cy="11" r="1" fill="#000"/>'
+  ),
+}
+
+/** Full picker list for Settings: Random first, then the real patterns. */
+export const WALLPAPER_OPTIONS: Wallpaper[] = [RANDOM_WALLPAPER, ...WALLPAPERS]
+
+/** Random pattern pick for a visit/session. Excludes 'plain' (reads as "no
+    wallpaper", not a pattern) and the 'random' sentinel itself. Client-side
+    only — call from an effect, never during render (SSR-safe). */
+export function pickRandomWallpaper(): string {
+  const pool = WALLPAPERS.filter((w) => w.id !== 'plain')
+  return pool[Math.floor(Math.random() * pool.length)].id
+}
+
 export function wallpaperMask(wp: Wallpaper): CSSProperties {
   if (!wp.tile) return {}
   const uri = `url("data:image/svg+xml,${encodeURIComponent(wp.tile)}")`
