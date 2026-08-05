@@ -1,264 +1,29 @@
-/* CV.EXE — a dot-matrix printer as desktop furniture (chrome: bare).
-   The component draws the whole machine: paper rising out of the platen,
-   putty-colored housing, tractor knobs, control panel. Semantic tokens
-   only, so both skins re-costume the device for free. Moving parts are
-   transform/opacity only. */
+/* CV.EXE — the resume as a paper document + a System 7 print dialog.
+   Semantic roles only; both skins re-costume the page and the dialog for
+   free. Progress and reveals are transform/opacity, nothing rides on rAF. */
 
 .cv {
+  position: relative;
   display: flex;
   flex-direction: column;
-  /* Bare chrome doesn't impose a height — the program IS the frame (the
-     iPod self-sizes the same way), so 100% would resolve against auto and
-     the sheet's full length would shove the machine off-screen. Fixed
-     height, clamped for short viewports; registry size matches. */
-  height: min(578px, calc(100dvh - 132px));
-  min-height: 0;
-  /* no window surface — the desktop shows through around the paper and
-     the device silhouette */
-  background: none;
-  /* the whole program opts out of pointer events; only the visible
-     objects (device, paper, mobile bar) opt back in. Anything else in
-     this box is empty air over the desktop. */
-  pointer-events: none;
-}
-
-.device,
-.paper,
-.mobileBar {
-  pointer-events: auto;
-}
-
-/* ================= the paper ================= */
-
-/* The zone above the machine. Tucks behind the device top edge so the
-   sheet visually enters the platen slot. pointer-events off: at idle most
-   of this box is empty air over the desktop, and an invisible window that
-   eats clicks is the bare-chrome cardinal sin. The visible paper opts back
-   in. Scrolls only once the page is printed. */
-.paperZone {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  scrollbar-width: none;
-  position: relative;
-  z-index: 0;
-  margin-bottom: -14px;
-  pointer-events: none;
-  /* the sheet is narrower than the machine — real printers swallow the
-     tractor edges inside the housing */
-  padding: 0 var(--space-6);
-}
-
-.cv[data-phase='done'] .paperZone {
-  overflow-y: auto;
-}
-
-.paperZone::-webkit-scrollbar {
-  display: none;
-}
-
-/* The feed mechanic. At rest the page hides inside the machine with only a
-   blank leading edge above the platen; PRINT raises it. Sized to the zone
-   (height 100%) so the translate percentage means "all but the edge".
-   Transform-only, compositor-driven. */
-.paperLift {
   height: 100%;
-  transform: translateY(calc(100% - 56px));
-  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.cv[data-phase='printing'] .paperLift,
-.cv[data-phase='done'] .paperLift,
-.cv[data-phase='tearing'] .paperLift {
-  transform: none;
-}
-
-.paper {
-  pointer-events: auto;
-  display: grid;
-  grid-template-columns: 14px minmax(0, 1fr) 14px;
+  min-height: 0;
   background: var(--surface);
-  border: var(--border-width-hairline) solid var(--border);
-  border-bottom: none;
-  box-shadow: var(--shadow-print);
-  min-height: 100%;
-}
-
-/* tractor-feed strips: punched holes at fixed pitch, perforation inboard */
-.sprocket {
-  background-image: radial-gradient(circle at 7px 7px, var(--surface) 0 2.4px, transparent 2.5px);
-  background-size: 14px 14px;
-  background-repeat: repeat-y;
-  background-color: color-mix(in srgb, var(--content) 7%, transparent);
-  border-inline: var(--border-width-hairline) dashed var(--border);
-}
-
-.sheet {
-  padding: var(--space-4) var(--space-3) var(--space-8);
-  font-family: var(--mono);
-  font-size: var(--text-micro);
-  line-height: var(--leading-relaxed);
   color: var(--content);
 }
 
-/* Every pass holds its box whether or not it has printed — the paper never
-   reflows mid-feed. Reveal is CSS (not Motion): correct even when a hidden
-   tab has frozen every rAF. */
-.pass {
-  opacity: 0;
-  transform: translateY(-5px);
-  transition:
-    opacity var(--duration-fade) ease-out,
-    transform var(--duration-fade) ease-out;
-}
+/* ---- toolbar: PRINT… + the quiet escape hatch ---- */
 
-.pass[data-printed='true'] {
-  opacity: 1;
-  transform: none;
-}
-
-/* ================= the machine ================= */
-
-.device {
+.toolbar {
   flex: none;
-  position: relative;
-  z-index: 1;
-  cursor: grab;
-}
-
-.device:active {
-  cursor: grabbing;
-}
-
-/* -- top deck: knob · platen slot · knob -- */
-
-.deck {
-  display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) 26px;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  background: var(--surface-raised);
-  border: var(--border-width-strong) solid var(--border);
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  box-shadow: var(--shadow-lift);
-}
-
-/* tractor knob: a ridged disc, one index line so rotation reads */
-.knob {
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-circle);
-  border: var(--border-width-default) solid var(--border);
-  background:
-    linear-gradient(var(--border), var(--border)) 50% 0 / 1.5px 7px no-repeat,
-    radial-gradient(
-      circle,
-      var(--surface-raised) 0 6px,
-      color-mix(in srgb, var(--content) 12%, var(--surface-raised)) 6.5px 100%
-    );
-}
-
-/* the slot the paper disappears into */
-.platen {
-  position: relative;
-  display: block;
-  height: 12px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-inverse);
-  overflow: hidden;
-}
-
-/* the pin block: percentage translate resolves against the rail width, so
-   `100% - 22px` is exactly "travel to the far edge", no JS measuring */
-.printHead {
-  position: absolute;
-  inset: 2px 2px;
-  display: block;
-}
-
-.printHead::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 22px;
-  border-radius: var(--radius-xs);
-  background: var(--accent);
-  opacity: 0;
-}
-
-.cv[data-phase='printing'] .printHead::before {
-  opacity: 1;
-  animation: travel 0.62s linear infinite;
-}
-
-@keyframes travel {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(calc(100% - 22px));
-  }
-}
-
-/* -- body: brand plate, controls, LCD -- */
-
-.body {
-  padding: var(--space-2) var(--space-4) var(--space-3);
-  background: var(--surface-raised);
-  border: var(--border-width-strong) solid var(--border);
-  border-top: none;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  box-shadow: var(--shadow-lift);
-}
-
-.brandRow {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  padding-bottom: var(--space-2);
-}
-
-.brand {
-  font-family: var(--mono);
-  font-size: var(--text-micro);
-  font-weight: 700;
-  letter-spacing: var(--tracking-14);
-  color: var(--content);
-}
-
-.brandSub {
-  font-family: var(--mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-08);
-  color: var(--content-muted);
-}
-
-/* cooling vents: engraved slats filling the rest of the plate */
-.vents {
-  flex: 1;
-  align-self: center;
-  height: 8px;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent 0 5px,
-    color-mix(in srgb, var(--content) 16%, transparent) 5px 6.5px
-  );
-}
-
-.controls {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  flex-wrap: wrap;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width-default) solid var(--border);
+  background: var(--surface-raised);
 }
 
-/* full-ink, not muted: it sits on the raised device body, where muted ink
-   fails AA under medieval (4.33:1) — and it's the one functional text link
-   on the machine */
 .quietLink {
   font-family: var(--mono);
   font-size: var(--text-micro);
@@ -271,55 +36,41 @@
   color: var(--accent);
 }
 
-.leds {
-  display: flex;
-  gap: var(--space-2);
-  margin-left: auto;
+/* ---- the paper ---- */
+
+.feed {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--surface);
 }
 
-.ledPower,
-.ledBusy {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-circle);
-  border: var(--border-width-hairline) solid var(--border);
+.paper {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 16px;
+  min-height: 100%;
 }
 
-.ledPower {
-  background: var(--status-positive-base);
+/* tractor-feed edge strips: the stock remembers what kind of printer this
+   OS owns, even though the machine itself now lives in the (future) desk
+   scene. Holes at fixed pitch, perforation line inboard. */
+.sprocket {
+  background-image: radial-gradient(circle at 8px 7px, var(--surface) 0 2.6px, transparent 2.7px);
+  background-size: 16px 14px;
+  background-repeat: repeat-y;
+  background-color: color-mix(in srgb, var(--content) 7%, transparent);
+  border-inline: var(--border-width-hairline) dashed var(--border);
 }
 
-.ledBusy {
-  background: var(--accent);
-  opacity: 0.15;
-}
-
-.cv[data-phase='printing'] .ledBusy {
-  animation: blink 0.62s steps(2, jump-none) infinite;
-}
-
-@keyframes blink {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0.15;
-  }
-}
-
-/* status readout: a small LCD strip */
-.lcd {
-  margin: var(--space-2) 0 0;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-xs);
-  background: var(--surface-inverse);
-  color: var(--content-inverse);
+.sheet {
+  padding: var(--space-4) var(--space-4) var(--space-6);
   font-family: var(--mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-08);
+  font-size: var(--text-caption);
+  line-height: var(--leading-relaxed);
+  color: var(--content);
 }
 
-/* ================= printout typography ================= */
+/* ---- printout typography ---- */
 
 .head {
   margin-bottom: var(--space-3);
@@ -328,7 +79,7 @@
 .name {
   margin: 0;
   font-family: var(--mono);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-lg);
   font-weight: 700;
   letter-spacing: var(--tracking-10);
   text-transform: uppercase;
@@ -337,6 +88,7 @@
 .contact {
   margin: var(--space-1) 0 0;
   color: var(--content-muted);
+  font-size: var(--text-micro);
 }
 
 .summary {
@@ -366,7 +118,7 @@
 }
 
 /* own line: at paper width the title + right-aligned dates can't share a
-   row with the promotion note without stranding "Lead)" mid-wrap */
+   row with the promotion note without stranding a fragment mid-wrap */
 .promoted {
   display: block;
   font-weight: 400;
@@ -377,12 +129,14 @@
   grid-column: 2;
   grid-row: 1;
   color: var(--content-muted);
+  font-size: var(--text-micro);
   white-space: nowrap;
 }
 
 .roleOrg {
   grid-column: 1 / -1;
   color: var(--content-muted);
+  font-size: var(--text-micro);
 }
 
 .bullet {
@@ -399,7 +153,7 @@
 
 .skill {
   display: grid;
-  grid-template-columns: 4rem minmax(0, 1fr);
+  grid-template-columns: 4.5rem minmax(0, 1fr);
   gap: var(--space-2);
   margin: var(--space-1) 0 0;
 }
@@ -420,12 +174,14 @@
 
 .eduYear {
   color: var(--content-muted);
+  font-size: var(--text-micro);
   white-space: nowrap;
 }
 
 .eduDegree {
   grid-column: 1 / -1;
   color: var(--content-muted);
+  font-size: var(--text-micro);
 }
 
 .colophon {
@@ -433,82 +189,175 @@
   padding-top: var(--space-2);
   border-top: var(--border-width-hairline) dashed var(--border);
   color: var(--content-muted);
+  font-size: var(--text-micro);
   font-style: italic;
 }
 
-/* ================= mobile: the document, not the machine ================= */
+/* ---- the print dialog (System 7, faithfully) ---- */
 
-.mobileBar {
-  display: none;
+/* scoped to the window like the gate's verdict dialog — the OS prints the
+   frontmost document, it doesn't dim the whole desk */
+.dialogWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--surface-inverse) 45%, transparent);
 }
 
-@media (max-width: 720px) {
-  /* no device, no ritual: the page arrives printed with a download bar.
-     The mobile window is full-bleed and DOES size its body, so fill it. */
-  .cv {
-    height: 100%;
-  }
+.dialog {
+  width: min(340px, 100%);
+  background: var(--surface);
+  border: var(--border-width-strong) solid var(--content);
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--content) 40%, transparent);
+}
 
-  .device {
-    display: none;
-  }
+.dialogBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  border-bottom: var(--border-width-strong) solid var(--content);
+}
 
-  /* sticky: mobile windows scroll as documents, and the one thing a phone
-     visitor needs must not live below a full page of resume */
-  .mobileBar {
-    display: flex;
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
-    justify-content: center;
-    padding: var(--space-3);
-    background: var(--surface-raised);
-    border-top: var(--border-width-default) solid var(--border);
-  }
+/* the racing stripes every System 7 title bar wore */
+.dialogStripes {
+  flex: 1;
+  height: 9px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--content) 0,
+    var(--content) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity: 0.7;
+}
 
-  .mobileDownload {
-    font-family: var(--mono);
-    font-size: var(--text-label);
-    font-weight: 700;
-    letter-spacing: var(--tracking-10);
-    color: var(--accent);
-    text-underline-offset: 3px;
-  }
+.dialogTitle {
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: var(--tracking-18);
+  text-transform: uppercase;
+}
 
-  .paperZone {
-    margin-bottom: 0;
-    padding: 0;
-    scrollbar-width: auto;
-    overflow-y: auto;
-    pointer-events: auto;
-  }
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
 
-  /* no feed mechanic on mobile — the page arrives printed */
-  .paperLift {
-    transform: none;
-    transition: none;
-  }
+.dRow {
+  display: grid;
+  grid-template-columns: 5.2rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+}
 
+.dLabel {
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+}
+
+.dValue {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-08);
+  font-weight: 700;
+}
+
+.dSegmented {
+  display: inline-flex;
+  border: var(--border-width-default) solid var(--content);
+  width: fit-content;
+}
+
+.dSegBtn {
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-10);
+  text-transform: uppercase;
+  padding: 4px 10px;
+  color: var(--content);
+  background: var(--surface);
+}
+
+.dSegBtn + .dSegBtn {
+  border-left: var(--border-width-default) solid var(--content);
+}
+
+.dSegBtn[aria-pressed='true'] {
+  background: var(--content);
+  color: var(--surface);
+}
+
+.dialogBtns {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+/* progress: a classic thermometer. Fill is a scaleX transform so nothing
+   rides on rAF; even if a hidden tab freezes the transition, the target
+   state is correct the moment the tab is visible again. */
+.dProgressTrack {
+  height: 12px;
+  border: var(--border-width-default) solid var(--content);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.dProgressFill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 160ms linear;
+}
+
+.dStatus {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+  min-height: 1.2em;
+}
+
+/* ---- small screens: tighter rails, same everything else ---- */
+
+@media (max-width: 420px) {
   .paper {
-    border: none;
-    box-shadow: none;
+    grid-template-columns: 10px minmax(0, 1fr) 10px;
+  }
+
+  .sprocket {
+    background-image: radial-gradient(circle at 5px 7px, var(--surface) 0 2px, transparent 2.1px);
+    background-size: 10px 14px;
+  }
+
+  .sheet {
+    padding: var(--space-3) var(--space-2) var(--space-5);
+  }
+
+  .skill {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
   }
 }
 
-/* ================= reduced motion: simply printed ================= */
+/* ---- reduced motion: the dialog appears, the document arrives ---- */
 
 @media (prefers-reduced-motion: reduce) {
-  .cv[data-phase='printing'] .printHead::before {
-    animation: none;
-  }
-
-  .cv[data-phase='printing'] .ledBusy {
-    animation: none;
-    opacity: 1;
-  }
-
-  .pass,
-  .paperLift {
+  .dProgressFill {
     transition: none;
   }
 }

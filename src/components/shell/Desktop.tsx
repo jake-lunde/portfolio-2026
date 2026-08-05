@@ -32,17 +32,10 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    // Mobile lands on the launcher for root sets, and never stacks the
-    // furniture printer under a deep-linked window — the machine is a
-    // desktop object; a phone gets the CV icon + /cv directly instead.
-    const mobile = window.innerWidth <= 720
-    const mobileRoot = mobile && initialWindows[initialWindows.length - 1] === 'readme'
-    const ids = mobileRoot
-      ? []
-      : mobile && initialWindows.length > 1
-        ? initialWindows.filter((id) => id !== 'cv')
-        : initialWindows
-    useWindows.getState().setInitial(ids)
+    // mobile lands on the launcher, not a full-bleed README
+    const mobileRoot =
+      window.innerWidth <= 720 && initialWindows.length === 1 && initialWindows[0] === 'readme'
+    useWindows.getState().setInitial(mobileRoot ? [] : initialWindows)
     setHydrated(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
