@@ -1,4 +1,4 @@
-/* Louie, hand-modeled — no scan yet, so build him from primitives the way
+/* Louie, hand-modeled — no scan yet, so build her from primitives the way
    the pixel sprite was built from squares: overlapping low-res UV spheres
    (flat-shaded shells read as one fluffy poodle). Same JSON contract as
    obj-to-model.mjs output. Usage: node scripts/make-louie.mjs */
