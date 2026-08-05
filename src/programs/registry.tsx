@@ -129,6 +129,17 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/guestbook',
   },
   {
+    id: 'suggest',
+    name: 'Suggestion Box',
+    meta: 'BOX-86',
+    icon: 'suggest',
+    component: dynamic(() => import('@/programs/suggest/SuggestBox')),
+    size: { w: 430, h: 468 },
+    pos: { x: 402, y: 92 },
+    onDesktop: true,
+    path: '/suggest',
+  },
+  {
     id: 'booth',
     name: 'Photo Booth',
     meta: 'CAM-07',

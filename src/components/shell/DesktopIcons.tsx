@@ -25,6 +25,7 @@ const ORDER = [
   'music',
   'fun',
   'feedback',
+  'suggest',
   'spec-sheet',
 ]
 

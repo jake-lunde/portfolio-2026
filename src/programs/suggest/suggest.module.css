@@ -1,0 +1,230 @@
+.box {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 18px 20px 20px;
+  background: var(--surface);
+}
+
+/* ---- the resident reviewer ---- */
+
+.reviewer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  background: var(--content); /* one-ink rule — crew never gets color */
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.whoName {
+  font-family: var(--display);
+  font-size: var(--type-body-size);
+}
+
+.whoRole {
+  font-family: var(--mono);
+  font-size: var(--type-caption-size);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+/* ---- the running commentary ---- */
+
+.bubble {
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  color: var(--content);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  padding: 10px 12px;
+  margin: 14px 0 16px;
+  min-height: 3.2em; /* two lines — longest jab wraps without reflow */
+  position: relative;
+  animation: bubbleIn 140ms ease-out;
+}
+
+[data-theme='dark'] .bubble {
+  border-color: var(--border);
+}
+
+/* speech-bubble tail pointing up at DOPPLER */
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 16px;
+  width: 12px;
+  height: 7px;
+  background: var(--content);
+  clip-path: polygon(0 100%, 100% 100%, 40% 0);
+}
+
+[data-theme='dark'] .bubble::before {
+  background: var(--border);
+}
+
+@keyframes bubbleIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble {
+    animation: none;
+  }
+}
+
+/* ---- the form (guestbook idiom) ---- */
+
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.field {
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.field span {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin-bottom: 5px;
+}
+
+.field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--sans);
+  font-size: var(--type-body-sm-size);
+  color: var(--content);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: 0;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+[data-theme='dark'] .field textarea {
+  border-color: var(--border);
+}
+
+.field textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.submitBtn {
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.16em;
+  padding: 8px 18px;
+  background: var(--accent);
+  color: var(--surface);
+  border: var(--border-width-default) solid var(--content);
+}
+
+[data-theme='dark'] .submitBtn {
+  color: #0d100c;
+  border-color: var(--border);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--accent-expressive);
+  color: #17150d;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.error {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+/* ---- the verdict ---- */
+
+.result {
+  display: flex;
+  flex-direction: column;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 4px 0 2px;
+}
+
+.scoreNum {
+  font-family: var(--display);
+  font-size: 56px;
+  line-height: 1;
+  color: var(--content);
+}
+
+.scoreDen {
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  letter-spacing: 0.1em;
+  color: var(--content-muted);
+}
+
+.method {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin: 6px 0 16px;
+}
+
+.resultFoot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}

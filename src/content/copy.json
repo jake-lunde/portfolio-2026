@@ -118,6 +118,10 @@
     "base": "Remixes",
     "medieval": "Reworkings"
   },
+  "program.suggest.name": {
+    "base": "Suggestion Box",
+    "medieval": "Petitions"
+  },
   "program.trash.name": {
     "base": "Trash",
     "medieval": "Oubliette"
@@ -179,6 +183,15 @@
   "spec-sheet.section.components": "Components",
   "spec-sheet.section.motion": "Motion",
   "spec-sheet.section.type": "Type",
+  "suggest.again": "ANOTHER ONE",
+  "suggest.error": "The box jammed. Try again.",
+  "suggest.filed": "Filed",
+  "suggest.judging": "JUDGING…",
+  "suggest.label": "The idea",
+  "suggest.notFiled": "Scored, not filed",
+  "suggest.placeholder": "A feature. A fix. A dream.",
+  "suggest.reviewerRole": "Review unit · on loan",
+  "suggest.submit": "SUBMIT FOR JUDGMENT",
   "trash.eyebrow": "Disposal records · kept on file",
   "trash.field.cause": "Cause of death",
   "trash.field.lesson": "What it taught",
