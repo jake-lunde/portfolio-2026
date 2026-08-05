@@ -113,6 +113,16 @@ cost more context than it saved. Deck reported (58 events, 200s).**
   crossings set/clear zoom, manual toggle respected mid-scene. Only
   live rail stills left: stage-06/07/08 + sketch cutouts. 5 of 9 beats
   are now video.
+- **PASS 7 (`52afa29`):** rail rechristened PROGRESS.VWR; Wireframes →
+  "Lo-Fi Explorations"; beat map hand-tuned (BEAT_TO_STAGE: §04 = hi-fi,
+  lo-fi folds into §03; proportional fallback survives section edits);
+  × → − window-shade (bar-click reopens, demos pause/resume across it);
+  sketch on var(--surface) with cursor-repel cutouts (SPRINGS.widget
+  shove atop CSS drift); Plate 11 = LaunchFilm.tsx — official GL launch
+  film (YT nocookie, G-tWcCCMdGE), muted pointer-inert inline loop,
+  lightbox w/ sound PORTAL'D TO BODY (fixed inside the window anchors
+  to its transform — gotcha). Transient `/_document PageNotFoundError`
+  on build = stale .next, rm -rf fixes.
 
 ## Next steps
 
