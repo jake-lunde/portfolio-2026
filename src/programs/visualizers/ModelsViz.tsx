@@ -11,7 +11,7 @@ import styles from './viz.module.css'
    hand-rolled canvas engine (rotate, project, painter-sort, flat-shade;
    no 3D library — the renderer is part of the exhibit).
    FLOWERS: photoscan of blooms his wife grew, decimated 50k→2k faces.
-   LOUIE: no scan yet, so he's hand-modeled from overlapping low-res
+   LOUIE: no scan yet, so she's hand-modeled from overlapping low-res
    spheres — a 3D cousin of the pixel sprite. JAKE: scan pending. */
 
 const CREAM = [231, 225, 210] as const
