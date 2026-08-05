@@ -9,6 +9,33 @@
 
 ---
 
+## The rail ships: idea to kitchen wall (s36, 2026-08-02→05)
+
+**Fable solo by declaration through EIGHT passes of Jake's live review:
+one tightly-coupled taste feature; splitting it would have cost more
+context than it saved. Deck reported throughout. Full pass-by-pass
+detail in the s36 commits (`f21fb5a`→`322ce21`).**
+
+- **The arc:** floating evolution rail (5 spec'd stages) → Jake's Figma
+  had NINE → living sketch + his real screen recordings replaced stills
+  → PROGRESS.VWR with window-shade, zoom, story-synced beats → launch
+  film plate → merged to main with RESUME.EXE/sfx work absorbed.
+- **Gotchas earned this session (memories updated):** container queries
+  measure the CONTENT box · the pane freezes IntersectionObserver
+  delivery entirely (verify via playwright-core + ms-playwright
+  headless_shell; `viewport:` not `viewportSize:`) · headless_shell has
+  no h264 (ship webm <source> fallback) · Figma get_screenshot WHITE-
+  MATTES image-fill/text nodes (circle/rounded masks + min-channel
+  unmixing in sharp; invisible until the bg isn't white) · stacked
+  crossfade layers eat pointer events (pointer-events: none on all
+  non-interactive layers) · a body-portal is required for fixed
+  overlays inside transformed windows · preview_stop can leave the
+  process alive (lsof before build; .next corruption twice).
+- **Live-verified at close:** all three demo mp4s + sketch cutouts 200
+  on lunde.co, /projects/family-hub renders; prod deploy `2a009f0`.
+
+---
+
 ## RESUME.EXE v4: it prints itself (s37, 2026-08-04)
 
 **Fable solo through FOUR passes in one long session: v2 (furniture
