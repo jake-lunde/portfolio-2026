@@ -56,6 +56,8 @@
   color: var(--content);
   background: var(--surface-raised);
   border: var(--border-width-default) solid var(--content);
+  /* chat, not chrome — rounded like a message from a coworker */
+  border-radius: var(--radius-md);
   padding: 10px 12px;
   margin: 14px 0 16px;
   min-height: 3.2em; /* two lines — longest jab wraps without reflow */
@@ -67,20 +69,25 @@
   border-color: var(--border);
 }
 
-/* speech-bubble tail pointing up at DOPPLER */
+/* Speech-bubble tail pointing up at DOPPLER. A rotated square wearing only
+   its top and left borders, filled with the bubble's own surface — the
+   outline reads as one continuous stroke with the bubble, instead of the
+   filled wedge that sat like a spot of solid ink on a line-art window. */
 .bubble::before {
   content: '';
   position: absolute;
-  top: -7px;
-  left: 16px;
-  width: 12px;
-  height: 7px;
-  background: var(--content);
-  clip-path: polygon(0 100%, 100% 100%, 40% 0);
+  top: -6px;
+  left: 18px;
+  width: 10px;
+  height: 10px;
+  background: var(--surface-raised);
+  border-top: var(--border-width-default) solid var(--content);
+  border-left: var(--border-width-default) solid var(--content);
+  transform: rotate(45deg);
 }
 
 [data-theme='dark'] .bubble::before {
-  background: var(--border);
+  border-color: var(--border);
 }
 
 @keyframes bubbleIn {
