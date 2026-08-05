@@ -1,5 +1,30 @@
+/* No padding on the sheet itself: the sticky title row must run edge to
+   edge of the scroll container, or content scrolling past would show in
+   the gutters beside it. The padding lives on .sheetBody instead. */
 .spec {
-  padding: 22px 24px 30px;
+  padding: 0;
+}
+
+/* Sticky against .windowBody (shell.module.css — `overflow-y: auto` makes
+   it the scrollport). It is the first thing in flow and its height never
+   changes, so nothing shifts on load. Opaque --surface + a rule underneath
+   so the rows pass BEHIND it rather than ghost through. */
+.titleRow {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 13px 20px;
+  background: var(--surface);
+  border-bottom: 1.5px solid var(--content);
+}
+
+[data-theme='dark'] .titleRow {
+  border-bottom-color: var(--border);
 }
 
 .eyebrow {
@@ -8,7 +33,42 @@
   letter-spacing: var(--tracking-18); /* diverges from label's tracking-14 — exact match to original 0.18em */
   text-transform: uppercase;
   color: var(--accent);
-  margin: 0 0 14px;
+  margin: 0;
+}
+
+/* the sheet's one control — same idiom as the picker's RESET button:
+   mono caps, hairline box, inverts on hover */
+.customize {
+  flex: none;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-16);
+  text-transform: uppercase;
+  color: var(--content);
+  background: none;
+  border: 1.5px solid var(--content);
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.customize:hover {
+  background: var(--content);
+  color: var(--surface);
+}
+
+.customize:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.sheetBody {
+  padding: 18px 20px 30px;
+}
+
+/* the first section head sits right under the rule — it does not need the
+   26px of air the ones between sections do */
+.sheetBody > .sectionHead:first-child {
+  margin-top: 0;
 }
 
 /* ---------- section heads ---------- */
@@ -109,7 +169,7 @@
 
 /* the failure ratio is TEXT, so it takes the audited danger role, not the
    expressive accent — which is marks-only on light paper (1.4:1 there),
-   and which a visitor can now re-cast in section 02 */
+   and which a visitor can re-cast in SKIN BUILDER */
 .fail {
   color: var(--status-danger-base);
 }
@@ -120,165 +180,15 @@
   text-transform: uppercase;
 }
 
-/* ---------- build a skin ---------- */
-.buildIntro {
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  letter-spacing: 0.02em;
-  line-height: var(--leading-relaxed);
-  color: var(--content-muted);
-  margin: 0 0 14px;
-}
-
-.build {
-  border: 1.5px solid var(--content);
-  background: var(--surface);
-}
-
-[data-theme='dark'] .build {
-  border-color: var(--border);
-}
-
-/* 132px is measured, not chosen: the widest role hint sits on one line at
-   it, and the 12 swatches still make a single row inside the 600px
-   window — one row per role is the whole point of the picker */
-.buildRow {
-  display: grid;
-  grid-template-columns: 132px 1fr;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.buildRole {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.buildRoleName {
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  letter-spacing: var(--tracking-12);
-  text-transform: uppercase;
-}
-
-.buildRoleHint {
-  font-family: var(--type-caption-family);
-  font-size: var(--type-caption-size);
-  letter-spacing: var(--tracking-08);
-  color: var(--content-muted);
-}
-
-.buildSwatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-/* same hairline as .swatch above — an inset rule so a pale candidate
-   still reads as a tile, not as a hole in the paper */
-.buildSwatch {
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border: 1px solid var(--border);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-}
-
-.buildSwatch[aria-pressed='true'] {
-  box-shadow:
-    inset 0 0 0 2px var(--surface),
-    0 0 0 2px var(--content);
-}
-
-.buildSwatch:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.buildFoot {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 10px 12px;
-}
-
-.buildReset {
-  flex: none;
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  letter-spacing: var(--tracking-16);
-  text-transform: uppercase;
-  color: var(--content);
-  background: none;
-  border: 1.5px solid var(--content);
-  padding: 5px 14px;
-  cursor: pointer;
-}
-
-.buildReset:hover:not(:disabled) {
-  background: var(--content);
-  color: var(--surface);
-}
-
-.buildReset:disabled {
-  opacity: var(--interactive-disabled-opacity);
-  cursor: default;
-}
-
-.buildReset:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.buildStatus {
-  flex: 1 1 220px;
-  min-width: 0;
-  margin: 0;
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  letter-spacing: 0.02em;
-  line-height: var(--leading-relaxed);
-  color: var(--content-muted);
-}
-
-.verdictOk,
-.verdictNo {
-  font-size: var(--type-micro-size);
-  letter-spacing: var(--tracking-12);
-  text-transform: uppercase;
-}
-
-.verdictOk {
-  color: var(--content);
-}
-
-/* refusals are text, so they take the audited danger role */
-.verdictNo {
-  color: var(--status-danger-base);
-}
-
-.statusName {
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-08);
-  color: var(--content);
-}
-
-.statusRatio {
-  color: var(--content);
-}
-
-/* the window goes full-bleed on a phone — stack the role above its row
-   of swatches rather than squeeze both into 336px */
+/* full-bleed on a phone: tighten the gutters, and let the title row's two
+   halves stack rather than crush the button */
 @media (max-width: 440px) {
-  .buildRow {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  .titleRow {
+    padding: 11px 14px;
+  }
+
+  .sheetBody {
+    padding: 16px 14px 24px;
   }
 }
 

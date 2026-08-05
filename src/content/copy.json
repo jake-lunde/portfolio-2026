@@ -124,6 +124,10 @@
     "base": "Settings",
     "medieval": "The Workings"
   },
+  "program.skinbuilder.name": {
+    "base": "Skin Builder",
+    "medieval": "The Pigments"
+  },
   "program.spec-sheet.name": {
     "base": "Spec Sheet",
     "medieval": "Colophon"
@@ -195,6 +199,7 @@
   "spec-sheet.build.applied": "Applied",
   "spec-sheet.build.idle": "Pick one color per role. Every pick is measured before it is allowed through.",
   "spec-sheet.build.intro": "Two accents per skin — one system, one expressive, never a third. Pick them here; the sheet refuses anything that fails AA and shows you the ratio.",
+  "spec-sheet.build.open": "Customize LUNDE OS",
   "spec-sheet.build.reason.demoted": "marks-only where AA fails — enforced · --accent-expressive-text → ink",
   "spec-sheet.build.reason.marks": "marks need 3.0:1 against paper or ink",
   "spec-sheet.build.reason.reset": "the skin's own two accents are back",
@@ -209,7 +214,6 @@
   "spec-sheet.build.roleSystemHint": "Text · 4.5:1 vs paper",
   "spec-sheet.eyebrow": "System Spec — LUNDE OS",
   "spec-sheet.foot": "Values read live from computed styles · contrast recomputes on theme or skin flip · motion quoted from shell/Window.tsx",
-  "spec-sheet.section.build": "Build a skin",
   "spec-sheet.section.color": "Color",
   "spec-sheet.section.components": "Components",
   "spec-sheet.section.motion": "Motion",

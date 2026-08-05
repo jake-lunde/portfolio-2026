@@ -25,6 +25,28 @@ import { contrast, hexToRgb, resolveVar, type RGB } from './contrast'
 export type Role = 'accent' | 'expressive'
 export type Picks = { accent?: string; expressive?: string }
 
+/* ---- the 12 candidates ----
+   Every one is already a CORE token primitive (tokens/core/color.json) —
+   the visitor is re-casting the roles, never inventing a color. The hexes
+   are literal here because these are the values being CHOSEN FROM: they
+   have to exist before they can become a var. Source path per entry.
+   Shared: SKIN BUILDER paints the swatches from this list, and SPEC.SHEET
+   reads it to name a chip after the pick that re-cast it. */
+export const PALETTE: Array<{ name: string; hex: string; token: string }> = [
+  { name: 'NASA Cobalt', hex: '#2036C8', token: 'color/nasa/cobalt' },
+  { name: 'NASA Glow', hex: '#5C7CFF', token: 'color/nasa/glow' },
+  { name: 'Lapis', hex: '#2F4C7E', token: 'color/lapis/blue' },
+  { name: 'Vermilion', hex: '#9E2B1E', token: 'color/rubric/vermilion' },
+  { name: 'Blood', hex: '#A32B1F', token: 'color/blood/base' },
+  { name: 'Blood Light', hex: '#F08A7E', token: 'color/blood/light' },
+  { name: 'Doppler Pink', hex: '#F2A6C2', token: 'color/doppler/pink' },
+  { name: 'Gilt Gold', hex: '#B8860B', token: 'color/gilt/gold' },
+  { name: 'Amber Light', hex: '#E0B755', token: 'color/amber/light' },
+  { name: 'Amber', hex: '#5F4A0E', token: 'color/amber/base' },
+  { name: 'Report Green', hex: '#2E4A38', token: 'color/report/green' },
+  { name: 'Verdigris Light', hex: '#5FA87A', token: 'color/verdigris/light' },
+]
+
 const STORE_KEY = 'lunde-build-a-skin'
 
 /** WCAG 1.4.3 — normal text. The system accent IS text (links, labels). */
