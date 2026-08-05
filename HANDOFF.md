@@ -80,16 +80,17 @@
   medieval chest variant, name voices to "Petitions". Verified both
   skins by JS probe; storage-down degrades to pink "Scored, not filed".
   Jake reads → merge. V2 (comment mode) unstarted.
-- **⚠️ CROSS-SESSION GIT RACE (resolved-ish, one step left):** a CV.EXE
-  session switched this shared working tree to `cv-exe` 33s after this
-  session branched; BOX-86 briefly landed on `cv-exe`, and this
-  session's `reset HEAD~1` then popped the CV session's fresh
-  "CV.EXE v3" (`dffaea6`, safe in reflog). Box work was transplanted
-  cleanly to `suggestion-box` via a scratch worktree and reversed out
-  of the shared tree. **cv-exe still needs:** `git reset 30442a8 &&
-  git add -A && git commit` (reuse the v3 message) — classifier blocked
-  the reset. Working tree already holds the correct union (their v3 +
-  their CV copy/registry edits, box removed).
+- **⚠️ CROSS-SESSION GIT RACE (settled; one optional cleanup):** a
+  CV.EXE session (s37) switched this shared working tree to `cv-exe`
+  33s after this session branched, so BOX-86 (`f4b1ccf`) landed on
+  `cv-exe`; an attempted un-do popped s37's fresh "CV.EXE v3"
+  (`dffaea6`) — s37 then recommitted it (`ae57f39`) plus its HANDOFF
+  (`e5c794e`) ON TOP of the box, baking BOX-86 into cv-exe history.
+  s36 stopped fighting: tree restored clean to `ae57f39`, box ALSO
+  standalone on `suggestion-box` (same content). Net effect: additive
+  and harmless — merging cv-exe ships the box too (audition both).
+  If Jake wants it out of cv-exe history: `git rebase --onto 30442a8
+  f4b1ccf cv-exe` — ONLY when no other session is active.
 - **New law for CREW/CLAUDE.md consideration:** before EVERY commit,
   check `git branch --show-current` — concurrent sessions switch
   branches under you in this single shared checkout.
