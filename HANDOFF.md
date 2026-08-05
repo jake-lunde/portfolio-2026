@@ -106,10 +106,16 @@ voice + platform-idiom craft. Deck reported.**
 - **Notion P0 "agents explain themselves on hover" CLOSED** — already
   shipped 2026-07-26 (`8ce7cdc`, first-contact intro card); task was
   never marked Done.
-- **Branch `medieval-sfx` (`f5ac7b6`, pushed):** medieval skin gets a
-  lute-course pluck (detuned saw pair, octave down, lowpass damped,
-  RMS level-matched via OfflineAudioContext probes). Same tunes, all
-  call sites untouched; classic unchanged. Jake auditions → merge.
+- **MEDIEVAL SFX SHIPPED (s36 pt 2, `1ac2a58` via `medieval-sfx-2`
+  → merged to main):** Jake auditioned the pluck, liked it, then
+  supplied recorded samples (`ref/assets-medieval/sounds`, ref/ never
+  committed → converted to 96k AAC in `public/sfx/`, 2.6MB→127KB via
+  afconvert). Medieval open→affirm, close→close, plus an enter-mode
+  fanfare in both skin switchers (0.4 gain — his master peaks 0.91;
+  affirm/close ship at his levels, already in polite ratio). Synth
+  pluck stays for taps + gate pentatonic + telemetry (samples would
+  smear at that rate). Classic untouched. Branches `medieval-sfx` /
+  `medieval-sfx-2` can be deleted once Jake confirms live.
 - **Branch `suggestion-box` (`40d80bf`, pushed):** BOX-86, the Notion
   P1 brief. 140-char idea slot; DOPPLER (one-ink mask) roasts the draft
   live (roasts.ts: keyword jabs > milestones, once each), deterministic
