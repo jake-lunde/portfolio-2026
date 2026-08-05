@@ -9,20 +9,29 @@
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
   stays "pending" while Chromatic runs). Production = `938bc39`-era main;
   local main = origin/main.
-- **⚠️ Branch `cv-exe` = CV.EXE v2, BUILT, awaiting Jake's walk-through**
-  (`5356da8` + merge of main). s30's open calls are CLOSED: BFA confirmed,
-  dot-matrix summary line kept, title = Staff Product Designer. The printer
-  is desktop FURNITURE: bare chrome, open by default under every desktop
-  deep link (`windowsForPath` prepends `cv`; Desktop.tsx strips on mobile),
-  no desktop icon (`.cvGrid`; the device is its own icon), mobile = printed
-  page + sticky download bar, launcher keeps the icon. `resume.ts` →
-  `build-cv.mjs` → committed deterministic PDF (build FAILS on page 2 or
-  >200KB; never hand-edit). Resume rewritten for 2026 screening (ATS parse
-  → LLM summarize): Greenlight spans Family Hub 0→1 → Invest deltas →
-  production SwiftUI → Storybook↔Figma→Claude-PR pipeline. Relative deltas
-  only; absolute internals never. Sheet carries `data-no-translate`.
-  Windows carry `data-window-id`; cv window + wrappers are pointer-events
-  none, visible objects opt in. Merge cv-exe → main = ship.
+- **⚠️ Branch `cv-exe` = CV.EXE v3, BUILT (`dffaea6`), awaiting Jake's
+  walk-through.** Jake killed v2's furniture printer same-day (page never
+  truly printed out of anything; placement funky) — v3 delivers through a
+  **System 7 print dialog**: CV.EXE is a paper-chrome document window
+  (icon back, slot 2), PRINT… opens the dialog (striped bar · Printer:
+  LUNDE 1200·D · Quality Draft/NLQ, a real toy that changes job speed +
+  chatter density · Cancel/Print · scaleX thermometer), Done fires the
+  PDF, dialog puts itself away, focus returns. Escape closes the DIALOG
+  only (capture-phase listener, EditMode precedent). Medieval = SCRIBE,
+  sheet untranslated. `buildPasses()` lifted to `passes.tsx` for reuse by
+  the future desk scene. Furniture plumbing fully retired (no
+  withFurniture, no cvGrid, no pointer-events chain; `data-window-id`
+  kept). Resume content unchanged from the s37 AI-screening rewrite:
+  `resume.ts` → `build-cv.mjs` → committed deterministic PDF (build FAILS
+  on page 2 or >200KB; never hand-edit); relative deltas only; sheet
+  carries `data-no-translate`. ⚠️ `f4b1ccf` (BOX-86, concurrent DOPPLER
+  session) swept up v3's registry/DesktopIcons/copy.json halves — the two
+  commits ship together. Merge cv-exe → main = ship.
+- **NEW FLAGSHIP SPEC'D — "The Desk"** (Notion, dated 2026-08-04): zoom out
+  of the shell into the room the OS runs in — CRT, physical printer (the
+  v2 object retires there), iPod dock, lava lamp, MIDI keys. Art direction
+  OPEN: Jake's leading candidate = cute 3D room, his references incoming;
+  fallback = flat illustrated; photo ruled out. AFTER CV + Family Hub.
 - **Branch `leaf-patch` (parked) got CRITTERS v2 in s34** (`89970d8`):
   bento-sticker cast (no outlines, sleepy eyes, asymmetric), nine ragged
   leaf states. ⚠️ progress.module.css slot sizes may need a nudge at
@@ -55,40 +64,48 @@
   (paths in place). Ports 3000/3210 often owned by concurrent sessions —
   never `npm run build` while a foreign dev server owns `.next`.
 
-## Latest session — CV.EXE v2: the printer is furniture (s37, 2026-08-04)
+## Latest session — CV.EXE v3: the OS prints the resume (s37, 2026-08-04)
 
-**Fable solo (Jake tapped Fable in to redo s30's v1). Solo declared per
-§4.2: the resume rewrite is Jake's voice at staff scope and the device is
-skin craft — nothing separable. Deck reported (dispatch/return/merge).**
+**Fable solo through THREE passes in one long session: v2 (furniture
+printer), Jake's live review killing it, then v3 (print dialog) planned in
+plan mode and shipped. Solo per §4.2 — resume voice + platform-idiom craft,
+nothing separable. Deck reported. A concurrent DOPPLER session shipped
+BOX-86 (suggestion box) into the same branch mid-flight.**
 
-- **Resume, researched then rewritten:** 2026 screening = ATS parse THEN an
-  LLM that summarizes for the recruiter, so each bullet is one narratable
-  claim, scope first. Greenlight leads with Family Hub (first hardware
-  product, vision → nationwide, sole designer) from tracker s32–35.
-  **Parser trap:** pdfkit wrapped "3–4×" at the en dash, mangling the
-  headline metric; fixed by re-flowing the sentence. The pypdf
-  string-presence check catches this class — run after ANY resume edit.
-- **Bare-chrome lessons the iPod never taught:** (1) bare windows don't
-  impose height — the program must size itself; (2) a mostly-empty bare box
-  eats desktop clicks — pointer-events none up the wrapper chain, visible
-  objects opt in (probe: `elementFromPoint` over parked-paper air lands on
-  the desktop widget behind); (3) paper parks via `paperLift` translateY on
-  a 100%-height wrapper — Motion owns the inner element's transform.
-- **Dev-server watcher can die silently** (serves stale modules, no compile
-  lines): SSR-grep for a new CSS-module classname is the cheap tell;
-  preview_stop/start fixes. The pane's NATIVE width is <720 → it renders
-  the mobile launcher; force resize_window 1280 before desktop probes.
-- **Merged main into cv-exe** (Trash on main, s32–35 HANDOFF history) and
-  resolved HANDOFF conflicts here so Jake's merge is clean. My earlier
-  rotation had renumbered this session s31 against stale history — main
-  had already spent s31–35; corrected to s37.
-- Notion CV.EXE page updated; deck confirmed healthy post-Pro.
+- **The v2→v3 lesson, worth keeping: physical objects want a physical
+  layer.** The furniture printer failed because paper can't convincingly
+  exit a machine that's really a scrolling window box. Jake's zoom-out
+  instinct became The Desk (Notion); the resume delivery moved to where
+  1992 actually delivered documents — the print dialog. The gag being
+  ACCURATE is the site's whole voice.
+- **Resume (from the v2 pass, unchanged in v3):** rewritten for 2026
+  screening (ATS parse THEN an LLM summarizes for the recruiter — one
+  narratable claim per bullet, scope first; Greenlight leads with Family
+  Hub 0→1). **Parser trap:** pdfkit wrapped "3–4×" at the en dash; re-flow
+  the sentence and re-run the pypdf string-presence check after ANY
+  resume edit.
+- **Dialog craft:** gate dialog's striped bar + Button primitive +
+  InProgress-style thermometer, all re-cut in cv.module.css with semantic
+  tokens; Escape = capture-phase + stopPropagation (EditMode precedent);
+  progress = CSS scaleX, nothing on rAF; reduced-motion = instant
+  delivery, "Sent to printer."
+- **Verified in a real renderer** (pane freezes AnimatePresence exits —
+  close behaviors CANNOT be probed in the pane): Escape/Cancel unmount,
+  window survives, self-close after Done, focus restore, both skins +
+  390px. AA floor 4.99. Zero drift 50/50 strings.
+- Session breadcrumbs that cost real time: dev-server watcher died
+  silently (SSR-grep a new classname = the tell); the pane's NATIVE width
+  is <720 so it renders the mobile launcher (force resize_window 1280);
+  an earlier HANDOFF rotation was written against pre-s31 history and had
+  to be reconciled via merge (this session = s37).
+- Notion: CV.EXE page carries v1→v2→v3 history; The Desk spec'd.
 
 ## Next steps
 
-1. **Jake: walk the desk** — press PRINT, TEAR OFF, drag the machine, both
-   skins, phone (launcher icon → printed page). Then merge `cv-exe` → main
-   = the resume ships.
+1. **Jake: walk the document** — open CV.EXE, PRINT…, try Draft AND NLQ,
+   Escape mid-job, both skins, phone. Then merge `cv-exe` → main = the
+   resume ships. (BOX-86 rides along — review DOPPLER's suggestion box in
+   the same pass.)
 2. **Jake: READ Family Hub pass 3** on `case-family-hub` (+ s36 evolution
    rail in progress there). Merge = his call; then progress 85→100.
 3. **Jake:** save the Ryan avatar-token Slack screenshots (Red Pen exhibit)
