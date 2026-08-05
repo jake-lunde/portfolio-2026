@@ -2,7 +2,7 @@
 
 import type { Skin } from '@/store/settings'
 import { useSettings } from '@/store/settings'
-import { WALLPAPERS, wallpaperMask } from '@/components/shell/wallpapers'
+import { WALLPAPER_OPTIONS, wallpaperMask } from '@/components/shell/wallpapers'
 import { sfx } from '@/lib/sound'
 import { CopyText as Copy } from '@/content/CopyText'
 import styles from '../programs.module.css'
@@ -99,7 +99,7 @@ export default function Settings() {
           <Copy k="settings.wallpaperHint" as="span" className={styles.setHint} />
         </span>
         <div className={styles.swatches} role="group" aria-label="Wallpaper pattern">
-          {WALLPAPERS.map((wp) => (
+          {WALLPAPER_OPTIONS.map((wp) => (
             <button
               key={wp.id}
               className={styles.swatch}
