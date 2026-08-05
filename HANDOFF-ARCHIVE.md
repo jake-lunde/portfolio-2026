@@ -7,6 +7,87 @@
 > source for new asks — re-read it at session start; he edits it silently and
 > his freshest edits are his real priorities.
 
+## RESUME.EXE v4: it prints itself (s37, 2026-08-04)
+
+**Fable solo through FOUR passes in one long session: v2 (furniture
+printer) → Jake's live review killed it → v3 (System 7 print dialog,
+planned in plan mode) → v4 after Jake USED v3: rename to RESUME.EXE,
+auto-print on open, his own copy pass applied. Solo per §4.2 — resume
+voice + platform-idiom craft. Deck reported.**
+
+- **The arc, worth keeping:** physical objects want a physical layer (the
+  furniture printer died there; The Desk in Notion inherits it) — and
+  even good chrome loses to observed behavior: Jake used v3 and called
+  that nobody presses Print on a resume. v4: open RESUME.EXE and the job
+  card runs itself (~2.1s thermometer + chatter, medieval "Scribing…"),
+  the page fades in, one button remains: DOWNLOAD PDF. Draft/NLQ,
+  Cancel/Print and PrintDialog.tsx retired. Icon = tractor-feed sheet
+  (medieval keeps the charter+seal; the printer icon stays drawn for the
+  desk scene). Path `/cv` → `/resume` (old path soft-falls to readme).
+- **Content is Jake's own pruning pass, applied verbatim** (his edited
+  MD): printer hook line cut, code bullets merged, "primary designer",
+  Code Generation skills label (wider label column in BOTH renderers),
+  his colophon. One page, 84pt slack, 49/49 strings, 3–4× intact. THE
+  DIVISION OF LABOR TO ENCOURAGE: the machine typesets, Jake prunes — he
+  asked to be pushed toward more of exactly this.
+- **Parser trap (recurring):** pdfkit wraps mid-metric at en dashes;
+  re-flow the sentence and re-run the pypdf string-presence check after
+  ANY resume edit.
+- **Verified in a real renderer** (pane freezes AnimatePresence exits):
+  mid-job scaleX(0.43)/sheet opacity 0 → done/sheet 1, RESUME.EXE title,
+  Jake's colophon, both skins, 390px. AA floor 4.99 (v3 measurements;
+  v4 reuses the same tokens/chrome).
+- Breadcrumbs: dev-server watcher can die silently (SSR-grep a fresh
+  classname = the tell); pane NATIVE width <720 renders the launcher
+  (force resize_window 1280); two HANDOFF merge-reconciles this session
+  because main kept moving underneath.
+
+## s36 — Notion small-batch: the lute and the box (2026-08-04)
+
+**Fable solo, declared per §4.2: closed small tasks, taste-dominant
+(sound design, roast copy, icon drawing); briefing overhead > execution.**
+
+- **Notion P0 "agents explain themselves on hover" CLOSED** — already
+  shipped 2026-07-26 (`8ce7cdc`, first-contact intro card); task was
+  never marked Done.
+- **MEDIEVAL SFX SHIPPED (s36 pt 2, `1ac2a58` via `medieval-sfx-2`
+  → merged to main):** Jake auditioned the pluck, liked it, then
+  supplied recorded samples (`ref/assets-medieval/sounds`, ref/ never
+  committed → converted to 96k AAC in `public/sfx/`, 2.6MB→127KB via
+  afconvert). Medieval open→affirm, close→close, plus an enter-mode
+  fanfare in both skin switchers (0.4 gain — his master peaks 0.91;
+  affirm/close ship at his levels, already in polite ratio). Synth
+  pluck stays for taps + gate pentatonic + telemetry (samples would
+  smear at that rate). Branches `medieval-sfx` / `medieval-sfx-2` can
+  be deleted once Jake confirms live. **Pt 3 (2026-08-05): classic got
+  its own re-enter fanfare** (`enter-classic.m4a`, same 0.4 gain — raw
+  RMS matches the medieval fanfare); sfx.enterMedieval generalized to
+  sfx.enterSkin(target), both switchers updated.
+- **Branch `suggestion-box` (`40d80bf`, pushed):** BOX-86, the Notion
+  P1 brief. 140-char idea slot; DOPPLER (one-ink mask) roasts the draft
+  live (roasts.ts: keyword jabs > milestones, once each), deterministic
+  score + verdict ("APPROVED WITH SUSPICION." at 75+). Write-only Blob
+  ledger `/api/suggestions` (guestbook store, honeypot + cooldown, no
+  GET — ideas go to Jake's dashboard only). New ballot-box icon,
+  medieval chest variant, name voices to "Petitions". Verified both
+  skins by JS probe; storage-down degrades to pink "Scored, not filed".
+  Jake reads → merge. V2 (comment mode) unstarted.
+- **⚠️ CROSS-SESSION GIT RACE (settled; one optional cleanup):** a
+  CV.EXE session (s37) switched this shared working tree to `cv-exe`
+  33s after this session branched, so BOX-86 (`f4b1ccf`) landed on
+  `cv-exe`; an attempted un-do popped s37's fresh "CV.EXE v3"
+  (`dffaea6`) — s37 then recommitted it (`ae57f39`) plus its HANDOFF
+  (`e5c794e`) ON TOP of the box, baking BOX-86 into cv-exe history.
+  s36 stopped fighting: tree restored clean to `ae57f39`, box ALSO
+  standalone on `suggestion-box` (same content). Net effect: additive
+  and harmless — merging cv-exe ships the box too (audition both).
+  If Jake wants it out of cv-exe history: `git rebase --onto 30442a8
+  f4b1ccf cv-exe` — ONLY when no other session is active. **Jake has
+  since ruled: no more concurrent sessions on one working tree.**
+- **New law for CREW/CLAUDE.md consideration:** before EVERY commit,
+  check `git branch --show-current` — concurrent sessions switch
+  branches under you in this single shared checkout.
+
 ---
 
 ## Family Hub drafted: the leaf becomes a case study (s35, 2026-07-31→08-01)
