@@ -690,6 +690,10 @@
   .railBit {
     animation: none;
   }
+
+  .railSlot {
+    transition: none;
+  }
 }
 
 .railFoot {

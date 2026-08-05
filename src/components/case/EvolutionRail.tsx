@@ -39,8 +39,8 @@ const STAGES: Stage[] = [
   { v: 'v0.1', label: 'Sketch', ratio: '1089 / 490', alt: 'Concept collage: a big pink clock, weather, calendar and home glyphs, family portrait avatars, one checked-off chore — all gently afloat.' },
   { file: 'poster-poc.webp', video: 'demo-poc', v: 'v0.2', label: 'Proof of Concept', ratio: '16 / 9', alt: 'Screen recording of the first clickable prototype: clicking through the dark dashboard, the family agenda blocked in as bright color bars.' },
   { file: 'poster-poc.webp', video: 'demo-poc', v: 'v0.3', label: 'Proof of Concept', ratio: '16 / 9', alt: 'The proof-of-concept demo rolls on: into the month calendar, the whole household on one grid.' },
-  { file: 'stage-03.webp', v: 'v0.4', label: 'Wireframes', ratio: '1440 / 800', alt: 'Wireframe pass in Greenlight green: the morning brief with a school-run map.' },
-  { file: 'stage-04.webp', v: 'v0.5', label: 'Wireframes', ratio: '1420 / 789', alt: 'Wireframe ambient screen: good morning, 8:32 AM.' },
+  { file: 'poster-wireframes.webp', video: 'demo-wireframes', v: 'v0.4', label: 'Wireframes', ratio: '1280 / 712', alt: 'Screen recording of the wireframe build in Greenlight green: the morning brief and school-run map in motion.' },
+  { file: 'poster-wireframes.webp', video: 'demo-wireframes', v: 'v0.5', label: 'Wireframes', ratio: '1280 / 712', alt: 'The wireframe demo rolls on: the ambient morning screen, 8:32 AM.' },
   { file: 'poster-hifi.webp', video: 'demo-hifi', v: 'v0.6', label: 'Hi-Fi Prototype', ratio: '16 / 9', alt: 'Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape.' },
   { file: 'stage-06.webp', v: 'v0.7', label: 'Color Explorations', ratio: '1440 / 800', alt: 'Color exploration: chats, chores and calendar as calm cards, color only where it means something.' },
   { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', ratio: '10 / 7', scene: 'wall', alt: 'The launch build under test: the device hung on a plain wall.', },
@@ -167,6 +167,19 @@ export function EvolutionRail() {
   const [stage, setStage] = useState(0)
   const [closed, setClosed] = useState(false)
   const [zoomed, setZoomed] = useState(false)
+  const wasInSceneRef = useRef(false)
+
+  // the break-out auto-zooms: crossing INTO the wall/kitchen beats
+  // doubles the window for the closing shot, crossing back OUT
+  // restores it. Only boundary crossings touch the state, so a manual
+  // +/restore mid-scene is respected until the next crossing.
+  useEffect(() => {
+    const inScene = !!STAGES[stage].scene
+    if (inScene !== wasInSceneRef.current) {
+      wasInSceneRef.current = inScene
+      setZoomed(inScene)
+    }
+  }, [stage])
   const marksRef = useRef<Element[]>([])
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
