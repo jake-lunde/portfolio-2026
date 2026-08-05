@@ -28,8 +28,10 @@ export function LaunchFilm() {
   useEffect(() => {
     const el = ref.current
     if (!el) return
+    // the film starts only once the plate is genuinely on screen —
+    // not on approach (Jake's call: no silent playback out of view)
     const io = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), {
-      rootMargin: '300px',
+      threshold: 0.35,
     })
     io.observe(el)
     return () => io.disconnect()

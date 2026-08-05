@@ -105,7 +105,7 @@ function SketchScene({ on }: { on: boolean }) {
   // cutouts shy away from the pointer: a gentle radial shove, spring-
   // settled, on top of (not instead of) their idle drift
   const onMove = (e: React.PointerEvent) => {
-    if (reduced || !sceneRef.current) return
+    if (!on || reduced || !sceneRef.current) return
     const r = sceneRef.current.getBoundingClientRect()
     const cx = e.clientX - r.left
     const cy = e.clientY - r.top
@@ -225,19 +225,8 @@ export function EvolutionRail() {
   const [zoomed, setZoomed] = useState(false)
   const marksRef = useRef<Element[]>([])
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
-  const wasInSceneRef = useRef(false)
-
-  // the break-out auto-zooms: crossing INTO the wall/kitchen beats
-  // doubles the window for the closing shot, crossing back OUT
-  // restores it. Only boundary crossings touch the state, so a manual
-  // +/restore mid-scene is respected until the next crossing.
-  useEffect(() => {
-    const inScene = !!STAGES[stage].scene
-    if (inScene !== wasInSceneRef.current) {
-      wasInSceneRef.current = inScene
-      setZoomed(inScene)
-    }
-  }, [stage])
+  /* Auto-zoom on the break-out is OFF for now (Jake: tune later) —
+     the + control still zooms manually. */
 
   // demos run only while their stage is up and the window is open;
   // reduced motion gets the poster still. preload="none" means nothing
