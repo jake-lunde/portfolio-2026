@@ -114,8 +114,11 @@ voice + platform-idiom craft. Deck reported.**
   fanfare in both skin switchers (0.4 gain — his master peaks 0.91;
   affirm/close ship at his levels, already in polite ratio). Synth
   pluck stays for taps + gate pentatonic + telemetry (samples would
-  smear at that rate). Classic untouched. Branches `medieval-sfx` /
-  `medieval-sfx-2` can be deleted once Jake confirms live.
+  smear at that rate). Branches `medieval-sfx` / `medieval-sfx-2` can
+  be deleted once Jake confirms live. **Pt 3 (2026-08-05): classic got
+  its own re-enter fanfare** (`enter-classic.m4a`, same 0.4 gain — raw
+  RMS matches the medieval fanfare); sfx.enterMedieval generalized to
+  sfx.enterSkin(target), both switchers updated.
 - **Branch `suggestion-box` (`40d80bf`, pushed):** BOX-86, the Notion
   P1 brief. 140-char idea slot; DOPPLER (one-ink mask) roasts the draft
   live (roasts.ts: keyword jabs > milestones, once each), deterministic

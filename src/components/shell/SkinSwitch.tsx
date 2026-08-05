@@ -49,8 +49,8 @@ export function SkinSwitch() {
 
   const choose = (sk: (typeof SKINS)[number]) => {
     if (sk.soon) return
-    // entering medieval gets its fanfare; every other pick just taps
-    if (sk.id === 'medieval' && skin !== 'medieval') sfx.enterMedieval()
+    // entering a different skin gets that skin's fanfare; re-picking taps
+    if (sk.id !== skin) sfx.enterSkin(sk.id)
     else sfx.tap()
     if (sk.id !== skin) setSkin(sk.id)
     setOpen(false)
