@@ -1,6 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
+import { revalidate as revalidateSkinBuild } from '@/lib/buildASkin'
 
 type Theme = 'light' | 'dark'
 export type Skin = 'classic' | 'medieval' | 'underwater'
@@ -40,6 +41,10 @@ export const useSettings = create<SettingsState>((set, get) => ({
       /* no-op */
     }
 
+    // Visitor-built accents (SPEC.SHEET) survive a reload within the tab —
+    // re-judged against this skin/theme before they are re-applied.
+    revalidateSkinBuild()
+
     // Follow the OS appearance live. The pre-paint script (layout.tsx) seeds
     // the theme on load — localStorage pin wins, else prefers-color-scheme.
     // Here we keep tracking: when the OS flips (e.g. sunset), the site follows
@@ -54,6 +59,7 @@ export const useSettings = create<SettingsState>((set, get) => ({
       try {
         localStorage.removeItem('lunde-theme')
       } catch {}
+      revalidateSkinBuild()
       set({ theme })
     }
     mq.addEventListener('change', onChange)
@@ -71,6 +77,7 @@ export const useSettings = create<SettingsState>((set, get) => ({
     try {
       localStorage.setItem('lunde-skin', skin)
     } catch {}
+    revalidateSkinBuild()
     set({ skin })
   },
 
@@ -79,6 +86,7 @@ export const useSettings = create<SettingsState>((set, get) => ({
     try {
       localStorage.setItem('lunde-theme', theme)
     } catch {}
+    revalidateSkinBuild()
     set({ theme })
   },
 
