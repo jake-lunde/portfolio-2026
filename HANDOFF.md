@@ -59,11 +59,11 @@
 
 ## Latest session — BUILD A SKIN: the two-accent law, playable (s38, 2026-08-05)
 
-**Fable orchestrated, NYQUIST (Opus) executed in two passes — clean
-delegation: taste/spec/review stayed in the lean session, both builds +
+**Fable orchestrated, NYQUIST (Opus) executed in three passes — clean
+delegation: taste/spec/review stayed in the lean session, builds +
 live probes ran in subagents. Deck reported. Branch
-`spec-sheet-build-a-skin`, commit `1c24cb4` — BUILT + VERIFIED, NOT
-MERGED (awaiting Jake's taste pass).**
+`spec-sheet-build-a-skin` → merged to main + SHIPPED after Jake's live
+taste pass ("really like it") drove pass 3.**
 
 - **The feature (Notion brief, now In Progress):** SPEC.SHEET section 02
   hands visitors both accent roles. 12 candidates = core token
@@ -83,17 +83,22 @@ MERGED (awaiting Jake's taste pass).**
   contrast ≥12.9:1 ⇒ max-vs-either ≥ ~3.6) — refusal branch is a guard
   for future low-contrast skins. `--accent-expressive-mark` is
   transparent in classic-dark (pre-existing, untouched).
+- **Pass 3 (Jake's nesting call): builder = its OWN window.** Sheet got
+  a sticky title row (System Spec — LUNDE OS + CUSTOMIZE LUNDE OS
+  button); button opens code-split program `skinbuilder` (SYS-15,
+  584×309 measured, no desktop icon/path, medieval title "The
+  Pigments") via `useWindows.open` — idempotent, re-click refocuses.
+  Sheet back to 01–04; chip table renames on pick cross-window.
 - Also: `::selection` hardcoded ink → `--on-accent-expressive`;
   `.fail` chips → `--status-danger-base`; `LaunchFilm 2.tsx` dup deleted.
-- Verified: build + tsc + 25/25 tests, live probes (refuse/apply/demote/
-  reset/reload/flip-drop), 360px, keyboard. No animation added.
+- Verified: build + tsc + 25/25 tests, live probes ×3 (refuse/apply/
+  demote/reset/reload/flip-drop/cross-window/refocus), 360px, keyboard.
+  NYQUIST built pass 3 in a throwaway worktree to dodge the shared-
+  `.next` trap while the orchestrator's dev server ran — good pattern.
 
 ## Next steps
 
-1. **Jake: play BUILD A SKIN** (branch `spec-sheet-build-a-skin`, dev
-   server) — taste pass on swatch sizing, status-line copy, token-path
-   names (NASA COBALT · DOPPLER PINK…). Then merge → main ships it.
-2. **Jake: sanity-walk Family Hub LIVE on lunde.co** — rail through all
+1. **Jake: sanity-walk Family Hub LIVE on lunde.co** — rail through all
    nine beats, demos, launch film sound, phone (rail hidden <640cqw),
    medieval skin. Report anything off; auto-zoom tuning parked.
 2. **Jake asset pass:** Ryan avatar-token Slack screenshots → Plate 09 ·
