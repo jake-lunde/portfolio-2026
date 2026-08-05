@@ -101,6 +101,12 @@ cost more context than it saved. Deck reported (58 events, 200s).**
   makes playback verifiable (and is good hygiene anyway). More recordings
   welcome: drop in same ref/ dir, same names → stage mapping in
   EvolutionRail STAGES.
+- **PASS 5 (`72f38c2`):** demo stages on pure-black mat (sampled #000 —
+  seamless with the recordings; Jake's rounding idea mooted as he
+  predicted); PoC demo spans v0.2+v0.3 via deduped video elements
+  (rolls through, never resets); posters = recordings' first frames
+  (white Figma stills retired for demo stages); mini-window gained the
+  main window's + control — zoom to 720px / restore, width transition.
 
 ## Next steps
 
