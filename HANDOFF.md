@@ -59,6 +59,41 @@
   concurrent sessions — temp launch.json entry, verify, revert; never
   `npm run build` while a foreign dev server owns `.next`.
 
+## Session s36 — Notion small-batch: the lute and the box (2026-08-04)
+
+**Fable solo, declared per §4.2: closed small tasks, taste-dominant
+(sound design, roast copy, icon drawing); briefing overhead > execution.**
+
+- **Notion P0 "agents explain themselves on hover" CLOSED** — already
+  shipped 2026-07-26 (`8ce7cdc`, first-contact intro card); task was
+  never marked Done.
+- **Branch `medieval-sfx` (`f5ac7b6`, pushed):** medieval skin gets a
+  lute-course pluck (detuned saw pair, octave down, lowpass damped,
+  RMS level-matched via OfflineAudioContext probes). Same tunes, all
+  call sites untouched; classic unchanged. Jake auditions → merge.
+- **Branch `suggestion-box` (`40d80bf`, pushed):** BOX-86, the Notion
+  P1 brief. 140-char idea slot; DOPPLER (one-ink mask) roasts the draft
+  live (roasts.ts: keyword jabs > milestones, once each), deterministic
+  score + verdict ("APPROVED WITH SUSPICION." at 75+). Write-only Blob
+  ledger `/api/suggestions` (guestbook store, honeypot + cooldown, no
+  GET — ideas go to Jake's dashboard only). New ballot-box icon,
+  medieval chest variant, name voices to "Petitions". Verified both
+  skins by JS probe; storage-down degrades to pink "Scored, not filed".
+  Jake reads → merge. V2 (comment mode) unstarted.
+- **⚠️ CROSS-SESSION GIT RACE (resolved-ish, one step left):** a CV.EXE
+  session switched this shared working tree to `cv-exe` 33s after this
+  session branched; BOX-86 briefly landed on `cv-exe`, and this
+  session's `reset HEAD~1` then popped the CV session's fresh
+  "CV.EXE v3" (`dffaea6`, safe in reflog). Box work was transplanted
+  cleanly to `suggestion-box` via a scratch worktree and reversed out
+  of the shared tree. **cv-exe still needs:** `git reset 30442a8 &&
+  git add -A && git commit` (reuse the v3 message) — classifier blocked
+  the reset. Working tree already holds the correct union (their v3 +
+  their CV copy/registry edits, box removed).
+- **New law for CREW/CLAUDE.md consideration:** before EVERY commit,
+  check `git branch --show-current` — concurrent sessions switch
+  branches under you in this single shared checkout.
+
 ## Latest session — Family Hub drafted: the leaf becomes a case study (s35, 2026-07-31)
 
 **Fable drafting solo, declared per §4.2: prose voice + interactive-plate
