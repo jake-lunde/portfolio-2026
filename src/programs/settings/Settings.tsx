@@ -40,7 +40,8 @@ export default function Settings() {
               disabled={sk.disabled}
               onClick={() => {
                 if (sk.disabled) return
-                sfx.tap()
+                if (sk.id === 'medieval' && skin !== 'medieval') sfx.enterMedieval()
+                else sfx.tap()
                 setSkin(sk.id)
               }}
             >
