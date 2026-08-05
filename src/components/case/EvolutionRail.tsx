@@ -37,11 +37,11 @@ type Stage = {
 
 const STAGES: Stage[] = [
   { v: 'v0.1', label: 'Sketch', ratio: '1089 / 490', alt: 'Concept collage: a big pink clock, weather, calendar and home glyphs, family portrait avatars, one checked-off chore — all gently afloat.' },
-  { file: 'stage-01.webp', video: 'demo-poc', v: 'v0.2', label: 'Proof of Concept', ratio: '16 / 9', alt: 'Screen recording of the first clickable prototype: clicking through the dark dashboard, the family agenda blocked in as bright color bars.' },
-  { file: 'stage-02.webp', v: 'v0.3', label: 'Proof of Concept', ratio: '1420 / 789', alt: 'Proof-of-concept month calendar: the whole household on one grid.' },
+  { file: 'poster-poc.webp', video: 'demo-poc', v: 'v0.2', label: 'Proof of Concept', ratio: '16 / 9', alt: 'Screen recording of the first clickable prototype: clicking through the dark dashboard, the family agenda blocked in as bright color bars.' },
+  { file: 'poster-poc.webp', video: 'demo-poc', v: 'v0.3', label: 'Proof of Concept', ratio: '16 / 9', alt: 'The proof-of-concept demo rolls on: into the month calendar, the whole household on one grid.' },
   { file: 'stage-03.webp', v: 'v0.4', label: 'Wireframes', ratio: '1440 / 800', alt: 'Wireframe pass in Greenlight green: the morning brief with a school-run map.' },
   { file: 'stage-04.webp', v: 'v0.5', label: 'Wireframes', ratio: '1420 / 789', alt: 'Wireframe ambient screen: good morning, 8:32 AM.' },
-  { file: 'stage-05.webp', video: 'demo-hifi', v: 'v0.6', label: 'Hi-Fi Prototype', ratio: '16 / 9', alt: 'Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape.' },
+  { file: 'poster-hifi.webp', video: 'demo-hifi', v: 'v0.6', label: 'Hi-Fi Prototype', ratio: '16 / 9', alt: 'Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape.' },
   { file: 'stage-06.webp', v: 'v0.7', label: 'Color Explorations', ratio: '1440 / 800', alt: 'Color exploration: chats, chores and calendar as calm cards, color only where it means something.' },
   { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', ratio: '10 / 7', scene: 'wall', alt: 'The launch build under test: the device hung on a plain wall.', },
   { file: 'stage-08.webp', v: 'v1.0', label: 'Ship', ratio: '10 / 7', scene: 'kitchen', alt: 'Family Hub live in situ: the device on a kitchen wall, plant on the counter.' },
@@ -166,6 +166,7 @@ export function EvolutionRail() {
   const reduced = useReducedMotion()
   const [stage, setStage] = useState(0)
   const [closed, setClosed] = useState(false)
+  const [zoomed, setZoomed] = useState(false)
   const marksRef = useRef<Element[]>([])
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
@@ -228,7 +229,7 @@ export function EvolutionRail() {
   }
 
   return (
-    <div className={styles.railSlot} ref={ref}>
+    <div className={styles.railSlot} ref={ref} data-zoom={zoomed ? 'true' : undefined}>
       <aside className={styles.rail} aria-label="Family Hub, evolving alongside the story">
         <div className={styles.railBar}>
           <button
@@ -241,6 +242,17 @@ export function EvolutionRail() {
           >
             ×
           </button>
+          <button
+            className={styles.railCtrl}
+            aria-label={zoomed ? 'Restore the Family Hub mini-window' : 'Zoom the Family Hub mini-window'}
+            aria-pressed={zoomed}
+            onClick={() => {
+              sfx.tap()
+              setZoomed((z) => !z)
+            }}
+          >
+            +
+          </button>
           <span className={styles.railTitle}>Family.Hub</span>
           <span className={styles.railVer}>{cur.v}</span>
         </div>
@@ -249,6 +261,7 @@ export function EvolutionRail() {
           role="img"
           aria-label={`${cur.v} · ${cur.label}. ${cur.alt}`}
           data-scene={cur.scene ? 'true' : undefined}
+          data-video={cur.video ? 'true' : undefined}
         >
           <div className={styles.railStack} style={{ aspectRatio: cur.ratio }}>
             <SketchScene on={stage === 0} />
@@ -267,28 +280,29 @@ export function EvolutionRail() {
                   />
                 ),
             )}
-            {STAGES.map(
-              (s, i) =>
-                s.video && (
-                  <video
-                    key={s.video}
-                    ref={(el) => {
-                      videoRefs.current[s.video!] = el
-                    }}
-                    poster={`${DIR}/${s.file}`}
-                    muted
-                    loop
-                    playsInline
-                    preload="none"
-                    aria-hidden="true"
-                    data-on={i === stage ? 'true' : undefined}
-                  >
-                    {/* h264 for the world, vp9 for open-codec builds */}
-                    <source src={`${DIR}/${s.video}.mp4`} type="video/mp4" />
-                    <source src={`${DIR}/${s.video}.webm`} type="video/webm" />
-                  </video>
-                ),
-            )}
+            {/* one element per recording — a demo spanning several beats
+                (PoC covers v0.2 AND v0.3) keeps rolling across them */}
+            {STAGES.filter(
+              (s, i, all) => s.video && all.findIndex((x) => x.video === s.video) === i,
+            ).map((s) => (
+              <video
+                key={s.video}
+                ref={(el) => {
+                  videoRefs.current[s.video!] = el
+                }}
+                poster={`${DIR}/${s.file}`}
+                muted
+                loop
+                playsInline
+                preload="none"
+                aria-hidden="true"
+                data-on={STAGES[stage].video === s.video ? 'true' : undefined}
+              >
+                {/* h264 for the world, vp9 for open-codec builds */}
+                <source src={`${DIR}/${s.video}.mp4`} type="video/mp4" />
+                <source src={`${DIR}/${s.video}.webm`} type="video/webm" />
+              </video>
+            ))}
             {STAGES.map(
               (s, i) =>
                 s.file &&

@@ -467,6 +467,12 @@
   width: clamp(280px, 34cqw, 360px);
   pointer-events: none;
   z-index: 5;
+  transition: width 0.35s ease;
+}
+
+/* the mini-window's own zoom: roughly double, never the whole window */
+.railSlot[data-zoom] {
+  width: min(720px, calc(100cqw - 48px));
 }
 
 /* container queries measure the CONTENT box (≈ window minus .case's
@@ -562,12 +568,20 @@
   padding: 10px;
   background: #fff;
   overflow: hidden;
-  transition: padding 0.3s ease;
+  transition:
+    padding 0.3s ease,
+    background 0.3s ease;
 }
 
 /* the break-out: the room runs edge to edge, no paper left */
 .railView[data-scene] {
   padding: 0;
+}
+
+/* demo stages: the recordings sit on their own pure-black surround
+   (sampled #000 corners) — the mat matches so the loop is seamless */
+.railView[data-video] {
+  background: #000;
 }
 
 .railStack {
