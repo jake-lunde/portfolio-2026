@@ -1,0 +1,307 @@
+/* CV.EXE — the resume as a paper document + a System 7 print dialog.
+   Semantic roles only; both skins re-costume the page and the dialog for
+   free. Progress and reveals are transform/opacity, nothing rides on rAF. */
+
+.cv {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--surface);
+  color: var(--content);
+}
+
+/* ---- toolbar: PRINT… + the quiet escape hatch ---- */
+
+.toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width-default) solid var(--border);
+  background: var(--surface-raised);
+}
+
+/* ---- the paper ---- */
+
+.feed {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--surface);
+}
+
+.paper {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 16px;
+  min-height: 100%;
+}
+
+/* tractor-feed edge strips: the stock remembers what kind of printer this
+   OS owns, even though the machine itself now lives in the (future) desk
+   scene. Holes at fixed pitch, perforation line inboard. */
+.sprocket {
+  background-image: radial-gradient(circle at 8px 7px, var(--surface) 0 2.6px, transparent 2.7px);
+  background-size: 16px 14px;
+  background-repeat: repeat-y;
+  background-color: color-mix(in srgb, var(--content) 7%, transparent);
+  border-inline: var(--border-width-hairline) dashed var(--border);
+}
+
+.sheet {
+  padding: var(--space-4) var(--space-4) var(--space-6);
+  font-family: var(--mono);
+  font-size: var(--text-caption);
+  line-height: var(--leading-relaxed);
+  color: var(--content);
+  /* pre-print the page is blank — opacity only, so screen readers get the
+     full document from first paint regardless of the theater */
+  opacity: 0;
+  transition: opacity var(--duration-slow) ease-out;
+}
+
+.cv[data-phase='done'] .sheet {
+  opacity: 1;
+}
+
+/* ---- printout typography ---- */
+
+.head {
+  margin-bottom: var(--space-3);
+}
+
+.name {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  letter-spacing: var(--tracking-10);
+  text-transform: uppercase;
+}
+
+.contact {
+  margin: var(--space-1) 0 0;
+  color: var(--content-muted);
+  font-size: var(--text-micro);
+}
+
+.summary {
+  margin: 0 0 var(--space-2);
+}
+
+.section {
+  margin: var(--space-4) 0 var(--space-2);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--border-width-default) solid var(--border);
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: var(--tracking-16);
+  text-transform: uppercase;
+}
+
+.roleHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.roleTitle {
+  font-weight: 700;
+}
+
+/* own line: at paper width the title + right-aligned dates can't share a
+   row with the promotion note without stranding a fragment mid-wrap */
+.promoted {
+  display: block;
+  font-weight: 400;
+  color: var(--content-muted);
+}
+
+.roleDates {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--content-muted);
+  font-size: var(--text-micro);
+  white-space: nowrap;
+}
+
+.roleOrg {
+  grid-column: 1 / -1;
+  color: var(--content-muted);
+  font-size: var(--text-micro);
+}
+
+.bullet {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-3);
+  text-indent: calc(var(--space-3) * -1);
+}
+
+.bullet::before {
+  content: '· ';
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.skill {
+  display: grid;
+  /* sized to the widest label, "Code Generation" */
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: var(--space-2);
+  margin: var(--space-1) 0 0;
+}
+
+.skillLabel {
+  font-weight: 700;
+}
+
+.edu {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 var(--space-2);
+}
+
+.eduSchool {
+  font-weight: 700;
+}
+
+.eduYear {
+  color: var(--content-muted);
+  font-size: var(--text-micro);
+  white-space: nowrap;
+}
+
+.eduDegree {
+  grid-column: 1 / -1;
+  color: var(--content-muted);
+  font-size: var(--text-micro);
+}
+
+.colophon {
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-2);
+  border-top: var(--border-width-hairline) dashed var(--border);
+  color: var(--content-muted);
+  font-size: var(--text-micro);
+  font-style: italic;
+}
+
+/* ---- the print dialog (System 7, faithfully) ---- */
+
+/* scoped to the window like the gate's verdict dialog — the OS prints the
+   frontmost document, it doesn't dim the whole desk */
+.dialogWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--surface-inverse) 45%, transparent);
+}
+
+.dialog {
+  width: min(340px, 100%);
+  background: var(--surface);
+  border: var(--border-width-strong) solid var(--content);
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--content) 40%, transparent);
+}
+
+.dialogBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  border-bottom: var(--border-width-strong) solid var(--content);
+}
+
+/* the racing stripes every System 7 title bar wore */
+.dialogStripes {
+  flex: 1;
+  height: 9px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--content) 0,
+    var(--content) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity: 0.7;
+}
+
+.dialogTitle {
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: var(--tracking-18);
+  text-transform: uppercase;
+}
+
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+/* progress: a classic thermometer. Fill is a scaleX transform so nothing
+   rides on rAF; even if a hidden tab freezes the transition, the target
+   state is correct the moment the tab is visible again. */
+.dProgressTrack {
+  height: 12px;
+  border: var(--border-width-default) solid var(--content);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.dProgressFill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 160ms linear;
+}
+
+.dStatus {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+  min-height: 1.2em;
+}
+
+/* ---- small screens: tighter rails, same everything else ---- */
+
+@media (max-width: 420px) {
+  .paper {
+    grid-template-columns: 10px minmax(0, 1fr) 10px;
+  }
+
+  .sprocket {
+    background-image: radial-gradient(circle at 5px 7px, var(--surface) 0 2px, transparent 2.1px);
+    background-size: 10px 14px;
+  }
+
+  .sheet {
+    padding: var(--space-3) var(--space-2) var(--space-5);
+  }
+
+  .skill {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+/* ---- reduced motion: the dialog appears, the document arrives ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .dProgressFill {
+    transition: none;
+  }
+}

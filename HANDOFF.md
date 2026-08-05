@@ -1,140 +1,100 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-02 (s36 evolution rail; s35 note → archive).
+> Last rotation: 2026-08-05 (s36 Family Hub + rail SHIPPED; s37 + s36-pt2
+> notes → archive).
 
 ## Current state
 
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
-  stays "pending" while Chromatic runs). Production = `938bc39`-era main;
-  local main = origin/main.
-- **⚠️ Branch `cv-exe` = CV.EXE, pulled OFF main** (Jake: "still needs some
-  work"). Open calls from s30: BFA vs BA; the dot-matrix summary line.
-  Revise there, merge to ship. `docs/PLAN-CV-EXE.md` is the reference.
-- **Branch `leaf-patch` (parked) got CRITTERS v2 in s34** (`89970d8`):
-  bento-sticker cast redrawn (solid lumpy blobs, no outlines, sleepy
-  half-moon eyes); leaf = nine ragged evenodd blade states. ⚠️ At revive:
-  slot sizes in progress.module.css, branch phases say Family Hub 55 vs
-  main's 70, Trash TAG-03 restores from `8934b21`. Standalone tracker
-  rebuilt s34 (`portfolio-tracker/`, git-ignored, cast sheet
-  `critter-cast-v2.html`).
+  stays "pending" while Chromatic runs; NOTE the apex 308s to www — curl
+  with -L or grep finds nothing). **Production = Family Hub ship (s36).**
+- **⚠️ Jake's rulings on the shared checkout: no more concurrent sessions
+  on one working tree, and check `git branch --show-current` before EVERY
+  commit** (s36/s37 race, archive).
+- **FAMILY HUB CASE SHIPPED 2026-08-05** (`case-family-hub` merged to
+  main): 7 sections, 11 plates, 4 interactives, Jake's spoken cadence,
+  progress 100 "Shipped — read it". PROGRESS.VWR rides the right margin —
+  the product evolving v0.1→v1.0 as you scroll: living sketch (cursor-
+  repel cutouts on the surface token), Jake's real prototype recordings
+  as demos (PoC spans v0.2–0.3, lo-fi v0.4–0.5, hi-fi v0.6; black mat,
+  posters from first frames, preload=none), break-out finale (device on
+  SVG wall/kitchen; auto-zoom OFF for now — tune later), − window-shade,
+  + manual zoom, hand-tuned BEAT_TO_STAGE map (§04 = hi-fi). Plate 11 =
+  LaunchFilm (official GL YouTube nocookie embed: muted pointer-inert
+  loop, mounts at 0.35 visibility; lightbox w/ sound PORTALS TO BODY —
+  fixed inside the window anchors to its transform). Case windows open
+  1280×720 @ x24. Assets `public/case/family-hub/evo/` (~7MB, mostly
+  demo video); masters in `ref/assets-casestudies/` (never commit ref/).
+- **RESUME.EXE v4 + BOX-86 live since 2026-08-04** (s37): open RESUME.EXE
+  and it prints itself; DOWNLOAD PDF (deterministic `build-cv.mjs`, one
+  page, never hand-edit the PDF). BOX-86 = petitions box w/ DOPPLER
+  roasts. Branches `cv-exe` + `suggestion-box` merged — safe to delete;
+  `medieval-sfx`* branches deletable once Jake confirms sfx live.
+- **NEW FLAGSHIP SPEC'D — "The Desk"** (Notion, 2026-08-04): zoom out to
+  the room the OS runs in. Art direction OPEN (Jake leans cute 3D; refs
+  incoming). Next big build now that CV + Family Hub are done.
+- **Branch `leaf-patch` (parked) got CRITTERS v2 in s34** (`89970d8`).
+  ⚠️ At revive: progress.module.css slot sizes; branch says Family Hub 55
+  vs main's 100 — reconcile; Trash TAG-03 restores from `8934b21`.
 - **Jake's s31 rule: feature work starts on its OWN branch;** main stays
   shippable.
-- **Skins:** classic (light/dark) + medieval (knight-speak voice LIVE);
-  underwater = stub. Copy layer + EDIT.MODE LIVE — expect copy.json commits
-  on main between sessions; rebase, merge at the KEY level.
-- **Jake is preparing to APPLY.** Audit gaps: CV.EXE (branch, needs
-  revision) · Red Pen (exhibit = Ryan avatar-token Slack thread; Jake to
-  save screenshots; details in portfolio-tracker.md) · gate friction
-  (audit's #1 risk, unactioned).
-- **Family Hub case on branch `case-family-hub`, through pass 3 + the
-  EVOLUTION RAIL (s36, `f21fb5a`):** 7 sections, 11 plates, 4 interactives,
-  Jake's spoken cadence (voice rules: memory `case-study-voice-calibration`).
-  NEW: `EvolutionRail` — the Family Hub as a nested FAMILY.HUB mini-window
-  riding the case's right margin, climbing sketch→proto→board-build→
-  rein-in→ship (9 real Figma exports, v0.1→v1.0) as you scroll. Case
-  windows now open 1150×680 so it earns its margin; hides below 1040px
-  container (content-box!). **Awaiting Jake's read → merge.** cases.ts 85.
-- **Tracking:** Notion (connector live). Blob cap LIFTED (Vercel Pro,
-  2026-08-01); deck reporting live again — Jake wants a COST read on
-  steady-state deck usage before we lean on it hard.
+- **Skins:** classic (light/dark) + medieval (knight-speak + Jake's sfx
+  LIVE); underwater = stub. Copy layer + EDIT.MODE LIVE — rebase, merge
+  copy.json at the KEY level, never force-push.
+- **Jake is preparing to APPLY.** Remaining audit gaps: Red Pen exhibit
+  (Jake to save the Ryan avatar-token Slack screenshots → TokenThread) ·
+  gate friction (audit's #1 risk, unactioned). **Standing ask: push HIM
+  to prune and polish copy.**
+- **Voice law (s35, memory `case-study-voice-calibration`):** write ALL
+  user-facing drafts in Jake's spoken cadence; em dashes are an AI tell.
+- **Tracking:** Notion (connector live). Blob cap lifted (Vercel Pro).
+  Deck reporting works; Jake wants a COST read on steady-state usage;
+  zero-`list()` fix still worth it. Source `.env.local`; positional args.
 - **Known debts:** SpecSheet motion quote-strings; first-load JS perf;
-  underwater; `--accent-on-inverse` role. Ports 3000/3210 often owned by
-  concurrent sessions — check `lsof` first; never `npm run build` while a
-  foreign dev server owns `.next`.
+  underwater; `--accent-on-inverse`; reduced-motion unverified by
+  emulation. Never `npm run build` while any dev server owns `.next`
+  (`lsof :3000 :3210` first — bit s36 twice).
 
-## Latest session — the evolution rail: persuasion ladder, literal (s36, 2026-08-02)
+## Latest session — the rail ships: idea to kitchen wall (s36, 2026-08-02→05)
 
-**Fable solo by declaration: one tightly-coupled taste feature (nested
-window chrome + case CSS + live Figma exports) — splitting it would have
-cost more context than it saved. Deck reported (58 events, 200s).**
+**Fable solo by declaration through EIGHT passes of Jake's live review:
+one tightly-coupled taste feature; splitting it would have cost more
+context than it saved. Deck reported throughout. Full pass-by-pass
+detail in the s36 commits (`f21fb5a`→`322ce21`).**
 
-- **`EvolutionRail` shipped to `case-family-hub` (`f21fb5a`):** Jake's
-  idea, his Figma assets (scroller-viz `201161-12` — NINE stages, not the
-  spec'd five). Mini-window mimics `.window` chrome (titlebar, ×-close,
-  6px shadow); sticky inside `.windowBody` via absolute full-height slot;
-  IntersectionObserver over hero+7 sections+footer, proportional map to
-  stages; stacked `<img>`s crossfade by CSS opacity (reduced-motion
-  guarded); ticks jump between beats (accent done / expressive current).
-- **Traps hit, for the record:** container queries measure the CONTENT
-  box (1147px article failed a 1100px query — 60px padding); the pane
-  tab freezes IntersectionObserver delivery entirely (not just rAF), so
-  end-to-end proof ran in Playwright headless_shell via scratchpad
-  `playwright-core` + the ms-playwright cache; the footer can never reach
-  a -55% tripline band, so v1.0 rides its own gentler observer.
-- Verified headless: full v0.1→v1.0 sweep both directions, sticky at
-  16px throughout, tick-jump lands its section, close unmounts, light +
-  dark screenshots clean, narrow window hides rail + recenters column.
-  tsc + prod build clean. Assets: `public/case/family-hub/evo/` ~315KB
-  total webp (sharp from node_modules).
-- Case window default 860×640 → 1150×680, pos x 100 (all cases; Invest
-  unaffected visually — rail gated behind `.hasRail` on the article).
-- **PASS 2 (`b4dc078`), Jake's review:** labels verbatim from his renamed
-  Figma sections (Sketch → PoC → Wireframes → Hi-Fi Prototype → Color
-  Explorations → On-Device Testing → Ship); per-stage exact export
-  ratios + recropped halos = uniform 10px paper all round (aspect-ratio
-  transition animates the window resize); sketch stage rebuilt LIVING —
-  14 transparent cutouts on Figma coords, slow CSS drift loops, paused
-  when faded out, stilled under reduced-motion. ⚠️ Ate a shared-`.next`
-  corruption mid-verify (my s36 build ran while a foreign dev server
-  owned `.next` — the §3.1 law, relearned): both servers sick, `rm -rf
-  .next` fixed mine; **the other session's :3000 server needs its own
-  restart.** Hero meta `&rsquo;` literal fixed in passing.
-- **PASS 3 (`c6f5d0a`), Jake's review:** rail 150% (360px, clamp 280–360),
-  shows from 640cqw with overlap blessed (column cedes spare width via one
-  clamp()); frames re-exported after Jake normalized all to 1440-wide;
-  FINALE: last two stages break out — paper→0, device hangs on an SVG
-  wall (v0.9 plain / v1.0 kitchen w/ counter+plant, swaps for launch
-  photography per §2). Case window 1280×720 @ x24 (fits 1280 laptops —
-  x100 hung the rail offscreen). Gotchas: playwright-core `newPage` wants
-  `viewport:` not `viewportSize:` (silently ignored → 1280×720 default);
-  preview_stop can leave the process alive — `lsof :3210` before ANY
-  build (ate .next corruption twice this session).
-- **PASS 4 (`ca7c299`):** Jake answered the prototype question with SCREEN
-  RECORDINGS (`ref/assets-casestudies/family hub/prototype-window/`, never
-  commit ref/) — v0.2 + v0.6 stages now play his real PoC/hi-fi demos as
-  muted loops in the mini-window. Pipeline: scratchpad `ffmpeg-static`
-  (playwright's ffmpeg = vp8-only) → h264 mp4 crf27 + vp9 webm crf36,
-  preload=none, play-only-while-up, poster still under reduced-motion.
-  Gotcha: headless_shell has NO h264 — webm <source> fallback is what
-  makes playback verifiable (and is good hygiene anyway). More recordings
-  welcome: drop in same ref/ dir, same names → stage mapping in
-  EvolutionRail STAGES.
-- **PASS 5 (`72f38c2`):** demo stages on pure-black mat (sampled #000 —
-  seamless with the recordings; Jake's rounding idea mooted as he
-  predicted); PoC demo spans v0.2+v0.3 via deduped video elements
-  (rolls through, never resets); posters = recordings' first frames
-  (white Figma stills retired for demo stages); mini-window gained the
-  main window's + control — zoom to 720px / restore, width transition.
-- **PASS 6 (`8edfa42`):** wireframes.mp4 landed (1440×800, green bg —
-  NOT black; exact-ratio stack keeps the mat to the 10px chrome) →
-  spans v0.4+v0.5 like PoC's pair; break-out auto-zooms — boundary
-  crossings set/clear zoom, manual toggle respected mid-scene. Only
-  live rail stills left: stage-06/07/08 + sketch cutouts. 5 of 9 beats
-  are now video.
-- **PASS 7 (`52afa29`):** rail rechristened PROGRESS.VWR; Wireframes →
-  "Lo-Fi Explorations"; beat map hand-tuned (BEAT_TO_STAGE: §04 = hi-fi,
-  lo-fi folds into §03; proportional fallback survives section edits);
-  × → − window-shade (bar-click reopens, demos pause/resume across it);
-  sketch on var(--surface) with cursor-repel cutouts (SPRINGS.widget
-  shove atop CSS drift); Plate 11 = LaunchFilm.tsx — official GL launch
-  film (YT nocookie, G-tWcCCMdGE), muted pointer-inert inline loop,
-  lightbox w/ sound PORTAL'D TO BODY (fixed inside the window anchors
-  to its transform — gotcha). Transient `/_document PageNotFoundError`
-  on build = stale .next, rm -rf fixes.
+- **The arc:** floating evolution rail (5 spec'd stages) → Jake's Figma
+  had NINE → living sketch + his real screen recordings replaced stills
+  → PROGRESS.VWR with window-shade, zoom, story-synced beats → launch
+  film plate → merged to main with RESUME.EXE/sfx work absorbed.
+- **Gotchas earned this session (memories updated):** container queries
+  measure the CONTENT box · the pane freezes IntersectionObserver
+  delivery entirely (verify via playwright-core + ms-playwright
+  headless_shell; `viewport:` not `viewportSize:`) · headless_shell has
+  no h264 (ship webm <source> fallback) · Figma get_screenshot WHITE-
+  MATTES image-fill/text nodes (circle/rounded masks + min-channel
+  unmixing in sharp; invisible until the bg isn't white) · stacked
+  crossfade layers eat pointer events (pointer-events: none on all
+  non-interactive layers) · a body-portal is required for fixed
+  overlays inside transformed windows · preview_stop can leave the
+  process alive (lsof before build; .next corruption twice).
+- **Live-verify pending Chromatic/CDN at session close:** demo-poc.mp4
+  content-marker + Vercel READY — see next steps if unconfirmed.
 
 ## Next steps
 
-1. **Jake: READ pass 3 + ride the rail** — branch `case-family-hub`,
-   `/projects/family-hub` (gate). Rail taste calls to confirm: stage
-   labels/versions (v0.1 SKETCH → v1.0 SHIP), 240px width, close-and-
-   it's-gone-for-the-session. Merge = his call; then progress 85→100.
-2. **Jake asset pass** (swappable slots, §2 law): Ryan avatar-token Slack
-   screenshots → Plate 09 · color before/after → Plate 10 · remaining
-   Drop plates (01, 04–06, 08, 11) · rail stages if he re-exports.
-3. **CV.EXE revisions on `cv-exe`** (BFA vs BA; dot-matrix line), then merge.
-4. Gate friction (Jake) — audit's #1 risk, still unactioned.
-5. COMMAND.CTR zero-`list()` fix (Blob cap gone; cost read first).
-6. Figma stale STRING vars; typography finale; underwater; First Pass
-   section `459-473268` still unindexed (MCP transport cap) — carried.
+1. **Jake: sanity-walk Family Hub LIVE on lunde.co** — rail through all
+   nine beats, demos, launch film sound, phone (rail hidden <640cqw),
+   medieval skin. Report anything off; auto-zoom tuning parked.
+2. **Jake asset pass:** Ryan avatar-token Slack screenshots → Plate 09 ·
+   color before/after → Plate 10 · remaining Drop plates (01, 04–06, 08).
+3. **The Desk** — next flagship; Jake's 3D-room references incoming.
+4. Cleanup when idle: delete merged branches (`cv-exe`, `suggestion-box`,
+   `case-family-hub`, `medieval-sfx*` once confirmed).
+5. **Jake:** eyeball tracker v2 + revive `leaf-patch` (reconcile Family
+   Hub 55→100, slot sizes, TAG-03) or park on.
+6. Gate friction (Jake) — audit's #1 risk, still unactioned.
+7. COMMAND.CTR zero-`list()` fix · deck cost read · Figma stale STRING
+   vars · typography finale · underwater · First Pass `459-473268`
+   unindexed — carried.

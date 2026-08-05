@@ -9,7 +9,88 @@
 
 ---
 
-## Family Hub drafted: the leaf becomes a case study (s35, 2026-07-31)
+## RESUME.EXE v4: it prints itself (s37, 2026-08-04)
+
+**Fable solo through FOUR passes in one long session: v2 (furniture
+printer) → Jake's live review killed it → v3 (System 7 print dialog,
+planned in plan mode) → v4 after Jake USED v3: rename to RESUME.EXE,
+auto-print on open, his own copy pass applied. Solo per §4.2 — resume
+voice + platform-idiom craft. Deck reported.**
+
+- **The arc, worth keeping:** physical objects want a physical layer (the
+  furniture printer died there; The Desk in Notion inherits it) — and
+  even good chrome loses to observed behavior: Jake used v3 and called
+  that nobody presses Print on a resume. v4: open RESUME.EXE and the job
+  card runs itself (~2.1s thermometer + chatter, medieval "Scribing…"),
+  the page fades in, one button remains: DOWNLOAD PDF. Draft/NLQ,
+  Cancel/Print and PrintDialog.tsx retired. Icon = tractor-feed sheet
+  (medieval keeps the charter+seal; the printer icon stays drawn for the
+  desk scene). Path `/cv` → `/resume` (old path soft-falls to readme).
+- **Content is Jake's own pruning pass, applied verbatim** (his edited
+  MD): printer hook line cut, code bullets merged, "primary designer",
+  Code Generation skills label (wider label column in BOTH renderers),
+  his colophon. One page, 84pt slack, 49/49 strings, 3–4× intact. THE
+  DIVISION OF LABOR TO ENCOURAGE: the machine typesets, Jake prunes — he
+  asked to be pushed toward more of exactly this.
+- **Parser trap (recurring):** pdfkit wraps mid-metric at en dashes;
+  re-flow the sentence and re-run the pypdf string-presence check after
+  ANY resume edit.
+- **Verified in a real renderer** (pane freezes AnimatePresence exits):
+  mid-job scaleX(0.43)/sheet opacity 0 → done/sheet 1, RESUME.EXE title,
+  Jake's colophon, both skins, 390px. AA floor 4.99 (v3 measurements;
+  v4 reuses the same tokens/chrome).
+- Breadcrumbs: dev-server watcher can die silently (SSR-grep a fresh
+  classname = the tell); pane NATIVE width <720 renders the launcher
+  (force resize_window 1280); two HANDOFF merge-reconciles this session
+  because main kept moving underneath.
+
+## Notion small-batch: the lute and the box (2026-08-04)
+
+**Fable solo, declared per §4.2: closed small tasks, taste-dominant
+(sound design, roast copy, icon drawing); briefing overhead > execution.**
+
+- **Notion P0 "agents explain themselves on hover" CLOSED** — already
+  shipped 2026-07-26 (`8ce7cdc`, first-contact intro card); task was
+  never marked Done.
+- **MEDIEVAL SFX SHIPPED (s36 pt 2, `1ac2a58` via `medieval-sfx-2`
+  → merged to main):** Jake auditioned the pluck, liked it, then
+  supplied recorded samples (`ref/assets-medieval/sounds`, ref/ never
+  committed → converted to 96k AAC in `public/sfx/`, 2.6MB→127KB via
+  afconvert). Medieval open→affirm, close→close, plus an enter-mode
+  fanfare in both skin switchers (0.4 gain — his master peaks 0.91;
+  affirm/close ship at his levels, already in polite ratio). Synth
+  pluck stays for taps + gate pentatonic + telemetry (samples would
+  smear at that rate). Branches `medieval-sfx` / `medieval-sfx-2` can
+  be deleted once Jake confirms live. **Pt 3 (2026-08-05): classic got
+  its own re-enter fanfare** (`enter-classic.m4a`, same 0.4 gain — raw
+  RMS matches the medieval fanfare); sfx.enterMedieval generalized to
+  sfx.enterSkin(target), both switchers updated.
+- **Branch `suggestion-box` (`40d80bf`, pushed):** BOX-86, the Notion
+  P1 brief. 140-char idea slot; DOPPLER (one-ink mask) roasts the draft
+  live (roasts.ts: keyword jabs > milestones, once each), deterministic
+  score + verdict ("APPROVED WITH SUSPICION." at 75+). Write-only Blob
+  ledger `/api/suggestions` (guestbook store, honeypot + cooldown, no
+  GET — ideas go to Jake's dashboard only). New ballot-box icon,
+  medieval chest variant, name voices to "Petitions". Verified both
+  skins by JS probe; storage-down degrades to pink "Scored, not filed".
+  Jake reads → merge. V2 (comment mode) unstarted.
+- **⚠️ CROSS-SESSION GIT RACE (settled; one optional cleanup):** a
+  CV.EXE session (s37) switched this shared working tree to `cv-exe`
+  33s after this session branched, so BOX-86 (`f4b1ccf`) landed on
+  `cv-exe`; an attempted un-do popped s37's fresh "CV.EXE v3"
+  (`dffaea6`) — s37 then recommitted it (`ae57f39`) plus its HANDOFF
+  (`e5c794e`) ON TOP of the box, baking BOX-86 into cv-exe history.
+  s36 stopped fighting: tree restored clean to `ae57f39`, box ALSO
+  standalone on `suggestion-box` (same content). Net effect: additive
+  and harmless — merging cv-exe ships the box too (audition both).
+  If Jake wants it out of cv-exe history: `git rebase --onto 30442a8
+  f4b1ccf cv-exe` — ONLY when no other session is active. **Jake has
+  since ruled: no more concurrent sessions on one working tree.**
+- **New law for CREW/CLAUDE.md consideration:** before EVERY commit,
+  check `git branch --show-current` — concurrent sessions switch
+  branches under you in this single shared checkout.
+
+## Family Hub drafted: the leaf becomes a case study (s35, 2026-07-31→08-01)
 
 **Fable drafting solo, declared per §4.2: prose voice + interactive-plate
 design are taste work, and every input was already captured in tracker §2 —
@@ -21,45 +102,30 @@ nothing separable to delegate. Deck dark (Blob cap, same as s34).**
   tandem + hardware margins) → ten-to-one (Red Pen ×2) → the ship. Thesis:
   *"The first skeptic it had to convert was me — then the board, then the
   factory."* Close: *"We retired the whiteboard."*
-- **4 new interactives** (case/, invest palette: ink #E7E1D2 on inverse
-  plate, one pink): ResearchBars (survey bars w/ overruled-research ledger),
-  SurfaceTriad (ambient/active/focused), TandemSetup (5-step paired
-  onboarding), TokenThread (avatar-token thread replay, weakest→strongest).
-- **CaseFooter now takes `next.slug` and opens the window** — was a dead
-  button; invest's footer → Family Hub, live.
-- **Figma scan for the asset pass:** Presentations `457-473267` = 4 monthly
-  leadership decks Aug–Nov 25 (Gantt, per-platform principles+grids,
-  ambient studies: Magic Mirror/Clock/Weather/Art); Initial Prototypes
-  `460-368545` = LoFi v1 → v2 → HiFi 7/9/25 ladder (hi-fi home
-  `430-269991`). First Pass `459-473268` overflows the MCP transport —
-  still unindexed. Placeholder captions cite exact node ids.
-- Verified on this session's own port-3000 server (foreign session owned
-  3210): gate bypassed via `sessionStorage lunde-gate=1`, 7 sections + all
-  4 interactives probed by JS. **Gotcha for memory: AnimatePresence
-  `mode="wait"` never swaps under the hidden-tab rAF freeze** — replaced
-  with keyed remount + fade-in (also just simpler). tsc clean; stale
-  console buffer replayed dead errors (known).
-- Tracker §2 header → 🟩 DRAFTED. `.next/types/* 2.ts` duplicate-file junk
-  causes tsc noise (pre-existing; filter with `grep -v '^.next'`).
-- **PASS 2 (same session, 2026-08-01, `6fb4567`) — Jake's live review:**
-  "kitchen wall" purged (product = all-in-one family organizer / home base;
-  positioning verified against greenlight.com/family-hub + shop + WiFiHiFi
-  press). Interaction model corrected to Ambient/Active + Authenticated
-  gate (assistant mode exists, deliberately unlisted; big dumb buttons =
-  punted-to-hybrid, said honestly). Prose ~halved; new Claim (display
-  interstitial) + Ledger (mono spec-sheet) in case vocabulary; 6 new
-  hiring-manager placeholders. "Weakest hardware" → "design with the grain
-  of the hardware." Gotcha: `git mv` on a client component while dev server
-  runs leaves a stale webpack module → 500 until server restart.
-- **Blob cap lifted:** Vercel Pro upgrade; deck resumed (54/55 events).
-  Jake wants a cost read on steady-state usage before we lean on it.
+- **4 new interactives** (case/, invest palette): ResearchBars ·
+  SurfaceTriad · TandemSetup · TokenThread. CaseFooter now takes
+  `next.slug` and opens the window — invest's footer → Family Hub, live.
+- **Figma scan for the asset pass:** Presentations `457-473267`; Initial
+  Prototypes `460-368545` (LoFi v1 → v2 → HiFi 7/9/25, hi-fi home
+  `430-269991`). First Pass `459-473268` overflows MCP transport.
+- Verified on this session's own port-3000 server; gate bypassed via
+  `sessionStorage lunde-gate=1`. **Gotcha: AnimatePresence `mode="wait"`
+  never swaps under the hidden-tab rAF freeze** — keyed remount + fade.
+- **PASS 2 (2026-08-01, `6fb4567`) — Jake's live review:** "kitchen wall"
+  purged (product = all-in-one family organizer / home base, verified
+  against greenlight.com/family-hub + press). HubModes = Ambient/Active +
+  Authenticated gate. Prose ~halved; Claim (display interstitial) + Ledger
+  (mono spec-sheet) join the case vocabulary; 6 new hiring-manager
+  placeholders. Gotcha: `git mv` on a client component under a running dev
+  server leaves a stale webpack module → 500 until restart.
+- **Blob cap lifted:** Vercel Pro upgrade; deck resumed. Jake wants a cost
+  read on steady-state usage.
 - **PASS 3 (`8a8ff27`) — the voice pass:** Jake flagged em dashes +
   "load-bearing" as AI tells; prose rewritten in his spoken cadence
-  (verbatims from tracker §2 as the reference: "kind of convincing myself
-  along the way", "to be fair, we kind of had to punt", "which is kinda
-  funny"). Em dashes purged from prose + component strings; survivors are
-  verbatim quotes and house label typography (secNo/FIG/cite). Rules saved
-  to memory `case-study-voice-calibration` — applies to ALL future drafts.
+  (tracker §2 verbatims as reference). Em dashes purged from prose +
+  component strings; survivors are verbatim quotes and house label
+  typography. Rules saved to memory `case-study-voice-calibration` —
+  applies to ALL future drafts.
 
 ## Family Hub interview: the leaf takes wing (s32–33, 2026-07-29→31)
 

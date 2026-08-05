@@ -1,5 +1,15 @@
 {
   "command.explainer": "Jake writes the brief, judges every return and owns the taste. A crew of model agents does the fan-out. This deck is the real telemetry; the site is what came out of it.",
+  "cv.download": "DOWNLOAD PDF",
+  "cv.explainer": "It prints itself. What you are reading is typeset live from the same data as the PDF, so the download can never drift from the page.",
+  "cv.printTitle": {
+    "base": "Print",
+    "medieval": "Scribe"
+  },
+  "cv.printing": {
+    "base": "Printing…",
+    "medieval": "Scribing…"
+  },
   "feedback.head": {
     "base": "In their words",
     "medieval": "As they attest"
@@ -56,6 +66,10 @@
   "program.command.name": {
     "base": "Command Center",
     "medieval": "The Keep"
+  },
+  "program.cv.name": {
+    "base": "RESUME.EXE",
+    "medieval": "Curriculum Vitæ"
   },
   "program.feedback.name": {
     "base": "Feedback",
@@ -118,6 +132,10 @@
     "base": "Remixes",
     "medieval": "Reworkings"
   },
+  "program.suggest.name": {
+    "base": "Suggestion Box",
+    "medieval": "Petitions"
+  },
   "program.trash.name": {
     "base": "Trash",
     "medieval": "Oubliette"
@@ -179,6 +197,15 @@
   "spec-sheet.section.components": "Components",
   "spec-sheet.section.motion": "Motion",
   "spec-sheet.section.type": "Type",
+  "suggest.again": "ANOTHER ONE",
+  "suggest.error": "The box jammed. Try again.",
+  "suggest.filed": "Filed",
+  "suggest.judging": "JUDGING…",
+  "suggest.label": "The idea",
+  "suggest.notFiled": "Scored, not filed",
+  "suggest.placeholder": "A feature. A fix. A dream.",
+  "suggest.reviewerRole": "Review unit · on loan",
+  "suggest.submit": "SUBMIT FOR JUDGMENT",
   "trash.eyebrow": "Disposal records · kept on file",
   "trash.field.cause": "Cause of death",
   "trash.field.lesson": "What it taught",

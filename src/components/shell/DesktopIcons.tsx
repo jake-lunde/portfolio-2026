@@ -19,12 +19,14 @@ import styles from './shell.module.css'
 
 const ORDER = [
   'readme',
+  'cv',
   'progress',
   'machine',
   'guestbook',
   'music',
   'fun',
   'feedback',
+  'suggest',
   'spec-sheet',
 ]
 

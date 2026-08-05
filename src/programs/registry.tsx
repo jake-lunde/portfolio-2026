@@ -54,6 +54,26 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/readme',
   },
   {
+    // Second on the desktop by design: a hiring manager reads README, then
+    // wants something to forward. Open it and the page prints itself
+    // (nobody 2026 wants to PRINT a resume; they want to watch it arrive,
+    // then download it). The physical printer OBJECT waits for the desk
+    // scene; see the Notion project "The Desk". id stays 'cv' — it names
+    // the code, the copy keys and the window store, not the user-facing
+    // program.
+    id: 'cv',
+    name: 'RESUME.EXE',
+    meta: 'DOC-01',
+    explainer: 'cv.explainer',
+    icon: 'resume',
+    component: dynamic(() => import('@/programs/cv/CV')),
+    size: { w: 520, h: 640 },
+    pos: { x: 172, y: 96 },
+    chrome: 'paper',
+    onDesktop: true,
+    path: '/resume',
+  },
+  {
     // the flat index, kept for the /projects deep link. The desktop route
     // in is CASE STUDIES (`progress`), which keeps the gate a layer down.
     id: 'projects',
@@ -127,6 +147,17 @@ export const PROGRAMS: ProgramDef[] = [
     pos: { x: 380, y: 80 },
     onDesktop: true,
     path: '/guestbook',
+  },
+  {
+    id: 'suggest',
+    name: 'Suggestion Box',
+    meta: 'BOX-86',
+    icon: 'suggest',
+    component: dynamic(() => import('@/programs/suggest/SuggestBox')),
+    size: { w: 430, h: 468 },
+    pos: { x: 402, y: 92 },
+    onDesktop: true,
+    path: '/suggest',
   },
   {
     id: 'booth',

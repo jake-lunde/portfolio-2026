@@ -2,6 +2,8 @@ import styles from './Icon.module.css'
 
 export type IconName =
   | 'doc'
+  | 'printer'
+  | 'resume'
   | 'folder'
   | 'note'
   | 'ipod'
@@ -29,6 +31,7 @@ export type IconName =
   | 'smiley'
   | 'bubble'
   | 'mystery'
+  | 'suggest'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -39,6 +42,28 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M8 4h11l5 5v19H8z" />
       <path d="M19 4v5h5" />
       <path d="M12 14h8M12 18h8M12 22h5" />
+    </>
+  ),
+  // the sheet is ABOVE the body (paper feeds up and out), and the tray below
+  // catches it — the silhouette has to read as a printer at 32px, so the
+  // three shapes never touch.
+  printer: (
+    <>
+      <path d="M10 4h12v9H10z" />
+      <path d="M13 7.5h6M13 10.5h6" />
+      <path d="M5 13h22v10H5z" />
+      <circle cx="23" cy="18" r="1" />
+      <path d="M10 23v5h12v-5" />
+    </>
+  ),
+  // a sheet of tractor-feed stock: perforation rules inboard, text between —
+  // the document remembers the printer it came off (which itself waits for
+  // the desk scene)
+  resume: (
+    <>
+      <path d="M8 4h16v24H8z" />
+      <path d="M11.5 4v24M20.5 4v24" opacity=".55" />
+      <path d="M13.5 11h5M13.5 15h5M13.5 19h3.5" />
     </>
   ),
   folder: (
@@ -247,6 +272,15 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M16 23h.02" />
     </>
   ),
+  suggest: (
+    // suggestion box — a note mid-drop over the slot. The slot stroke
+    // sits 3.5px clear of the lid edge so it survives 32px.
+    <>
+      <path d="M14 3l6.5 2-2 6-6.5-2z" />
+      <path d="M5 14h22v13H5z" />
+      <path d="M11 17.5h10" />
+    </>
+  ),
 }
 
 /* Medieval variants — the same objects re-cut as woodcut/heraldic figures
@@ -262,6 +296,24 @@ const MEDIEVAL_PATHS: Partial<Record<IconName, React.ReactNode>> = {
       <path d="M10 8v16M22 8v16" />
       <path d="M8 8a1.6 1.6 0 0 0 0 3.2M24 24a1.6 1.6 0 0 1 0-3.2" opacity=".55" />
       <path d="M13 13h6M13 17h6M13 20.5h4" />
+    </>
+  ),
+  // CV.EXE → CURRICULUM VITÆ: a charter under wax seal
+  printer: (
+    <>
+      <path d="M7 5h18v18H7z" />
+      <path d="M11 10h10M11 14h7" />
+      <path d="M22 23v-2" />
+      <circle cx="22" cy="26" r="2.6" fill="currentColor" stroke="none" opacity=".85" />
+    </>
+  ),
+  // RESUME.EXE → CURRICULUM VITÆ: the same charter under wax seal
+  resume: (
+    <>
+      <path d="M7 5h18v18H7z" />
+      <path d="M11 10h10M11 14h7" />
+      <path d="M22 23v-2" />
+      <circle cx="22" cy="26" r="2.6" fill="currentColor" stroke="none" opacity=".85" />
     </>
   ),
   // PROJECTS → WORKS: a clasped codex
@@ -430,6 +482,16 @@ const MEDIEVAL_PATHS: Partial<Record<IconName, React.ReactNode>> = {
       <path d="M10 11l-3.2 6a3.2 3.2 0 0 0 6.4 0z" />
       <path d="M22 11l-3.2 6a3.2 3.2 0 0 0 6.4 0z" />
       <path d="M12 23h8" />
+    </>
+  ),
+  // SUGGESTION BOX → PETITIONS: a banded chest, petition at the seam.
+  // The hasp is filled like the codex clasp above.
+  suggest: (
+    <>
+      <path d="M14 3.5l6 1.8-1.7 5.9-6-1.8z" />
+      <path d="M6 15h20v12H6z" />
+      <path d="M6 19.5h20" />
+      <path d="M14.6 18h2.8v3h-2.8z" fill="currentColor" stroke="none" />
     </>
   ),
 }

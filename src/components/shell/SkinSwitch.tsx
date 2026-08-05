@@ -49,7 +49,9 @@ export function SkinSwitch() {
 
   const choose = (sk: (typeof SKINS)[number]) => {
     if (sk.soon) return
-    sfx.tap()
+    // entering a different skin gets that skin's fanfare; re-picking taps
+    if (sk.id !== skin) sfx.enterSkin(sk.id)
+    else sfx.tap()
     if (sk.id !== skin) setSkin(sk.id)
     setOpen(false)
   }
