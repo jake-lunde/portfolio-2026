@@ -584,6 +584,17 @@
   background: #000;
 }
 
+/* the sketch floats on the screen's own surface, not artboard paper */
+.railView[data-sketch] {
+  background: var(--surface);
+}
+
+/* window-shade: the collapsed bar is one big reopen target */
+.rail[data-min] .railBar {
+  cursor: pointer;
+  border-bottom: none;
+}
+
 .railStack {
   position: relative;
   transition: aspect-ratio 0.3s ease;
@@ -617,8 +628,13 @@
   opacity: 1;
 }
 
-.railBit {
+.railBitWrap {
   position: absolute;
+}
+
+.railBit {
+  display: block;
+  width: 100%;
   animation: railDrift var(--dur) ease-in-out var(--delay) infinite alternate;
 }
 
@@ -731,6 +747,94 @@
   text-transform: uppercase;
   color: var(--content-muted);
   padding: 0 8px 7px;
+}
+
+/* plate 11 — the launch film. Inline: muted, chromeless, pointer-inert.
+   Lightbox: sound on, controls on, portal'd past the window transform. */
+.film {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.film iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  pointer-events: none;
+}
+
+.filmExpand {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  background: var(--accent-expressive);
+  color: #17150d;
+  border: var(--border-width-default) solid #17150d;
+  cursor: pointer;
+}
+
+.filmExpand:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.filmModal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(10, 9, 6, 0.82);
+  display: grid;
+  place-items: center;
+  padding: 4vmin;
+}
+
+.filmFrame {
+  width: min(1100px, 100%);
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
+}
+
+.filmFrame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.filmClose {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  background: transparent;
+  color: #f4f1e6;
+  border: var(--border-width-default) solid #f4f1e6;
+  cursor: pointer;
+}
+
+.filmClose:hover {
+  background: var(--accent-expressive);
+  color: #17150d;
+  border-color: #17150d;
+}
+
+.filmClose:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
 }
 
 /* moat interactivity */

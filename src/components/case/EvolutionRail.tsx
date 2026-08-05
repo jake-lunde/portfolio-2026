@@ -1,23 +1,26 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useReducedMotion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
+import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
 import styles from './case.module.css'
 
-/* The rail IS the Family Hub: a nested mini-window riding the case's
-   right margin, climbing the fidelity ladder as the story scrolls —
-   sketch, clickable proto, the board build, the color rein-in, the
-   shipped device. The persuasion-ladder thesis made literal.
+/* PROGRESS.VWR — a window into watching the Family Hub get built. A
+   nested mini-window rides the case's right margin and climbs the
+   fidelity ladder as the story scrolls: living sketch, real prototype
+   recordings, and a break-out finale where the device hangs in a
+   kitchen. The persuasion-ladder thesis made literal.
 
    Stage switching rides IntersectionObserver on the case's own beats
    (hero → sections → footer), never scroll-linked animation: safe in a
    hidden tab and under prefers-reduced-motion. The scroller is the
    WINDOW body, not the viewport — sticky anchors to it on its own.
-   Assets export from Figma "scroller viz" (201161-12); labels are
-   Jake's own section names there; each slot is swappable when he
-   revises (§2 law). Every stage declares its exact export ratio so the
-   frame hugs the artwork with the same 10px of paper on all sides. */
+   Stage art exports from Figma "scroller viz" (201161-12); labels are
+   Jake's section names there; demos are his screen recordings
+   (ref/assets-casestudies, transcoded); each slot swappable (§2 law).
+   Every stage declares its exact asset ratio so the mat stays a
+   uniform 10px on all sides. */
 
 const DIR = '/case/family-hub/evo'
 
@@ -39,18 +42,25 @@ const STAGES: Stage[] = [
   { v: 'v0.1', label: 'Sketch', ratio: '1089 / 490', alt: 'Concept collage: a big pink clock, weather, calendar and home glyphs, family portrait avatars, one checked-off chore — all gently afloat.' },
   { file: 'poster-poc.webp', video: 'demo-poc', v: 'v0.2', label: 'Proof of Concept', ratio: '16 / 9', alt: 'Screen recording of the first clickable prototype: clicking through the dark dashboard, the family agenda blocked in as bright color bars.' },
   { file: 'poster-poc.webp', video: 'demo-poc', v: 'v0.3', label: 'Proof of Concept', ratio: '16 / 9', alt: 'The proof-of-concept demo rolls on: into the month calendar, the whole household on one grid.' },
-  { file: 'poster-wireframes.webp', video: 'demo-wireframes', v: 'v0.4', label: 'Wireframes', ratio: '1280 / 712', alt: 'Screen recording of the wireframe build in Greenlight green: the morning brief and school-run map in motion.' },
-  { file: 'poster-wireframes.webp', video: 'demo-wireframes', v: 'v0.5', label: 'Wireframes', ratio: '1280 / 712', alt: 'The wireframe demo rolls on: the ambient morning screen, 8:32 AM.' },
+  { file: 'poster-wireframes.webp', video: 'demo-wireframes', v: 'v0.4', label: 'Lo-Fi Explorations', ratio: '1280 / 712', alt: 'Screen recording of the lo-fi build in Greenlight green: the morning brief and school-run map in motion.' },
+  { file: 'poster-wireframes.webp', video: 'demo-wireframes', v: 'v0.5', label: 'Lo-Fi Explorations', ratio: '1280 / 712', alt: 'The lo-fi demo rolls on: the ambient morning screen, 8:32 AM.' },
   { file: 'poster-hifi.webp', video: 'demo-hifi', v: 'v0.6', label: 'Hi-Fi Prototype', ratio: '16 / 9', alt: 'Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape.' },
   { file: 'stage-06.webp', v: 'v0.7', label: 'Color Explorations', ratio: '1440 / 800', alt: 'Color exploration: chats, chores and calendar as calm cards, color only where it means something.' },
   { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', ratio: '10 / 7', scene: 'wall', alt: 'The launch build under test: the device hung on a plain wall.', },
   { file: 'stage-08.webp', v: 'v1.0', label: 'Ship', ratio: '10 / 7', scene: 'kitchen', alt: 'Family Hub live in situ: the device on a kitchen wall, plant on the counter.' },
 ]
 
+/* The story's beats don't map 1:1 onto the ladder — Jake's cut: the
+   hi-fi prototype must arrive with §04 "the artifact" (the persuasion
+   section IS the hi-fi build), which folds both lo-fi beats into §03.
+   v0.5 stays reachable from the ticks; its demo spans v0.4 anyway.
+   Index = [hero, §01..§07, footer] → stage. */
+const BEAT_TO_STAGE = [0, 1, 2, 3, 5, 6, 6, 7, 8]
+
 /* The living sketch — Jake's concept collage as cutouts on a virtual
    1089×490 canvas (coords straight from the Figma group), each adrift
-   on its own slow loop. Deltas are screen-px and small on purpose:
-   ambient, not a parlor trick. */
+   on its own slow loop, shying away from the cursor. Deltas are
+   screen-px and small on purpose: ambient, not a parlor trick. */
 
 const SK = { w: 1089, h: 490 }
 
@@ -59,6 +69,8 @@ type Bit = {
   x: number
   y: number
   w: number
+  /** natural export height — for the repel math's center points */
+  h: number
   dx: number
   dy: number
   dr: number
@@ -67,21 +79,91 @@ type Bit = {
 }
 
 const BITS: Bit[] = [
-  { f: 'head', x: 0, y: 21, w: 351, dx: 1, dy: 3, dr: 0, dur: 11, delay: -4 },
-  { f: 'week', x: 182, y: 178, w: 105, dx: -3, dy: 2, dr: -1, dur: 9, delay: -2 },
-  { f: 'cal', x: 516, y: 92, w: 86, dx: 2, dy: -4, dr: 1.5, dur: 8, delay: -6 },
-  { f: 'house', x: 361, y: 153, w: 64, dx: -2, dy: -3, dr: -1.5, dur: 10, delay: -1 },
-  { f: 'bell', x: 709, y: 223, w: 37, dx: 3, dy: -2, dr: 2, dur: 7, delay: -3 },
-  { f: 'mom', x: 273, y: 255, w: 162, dx: 3, dy: 4, dr: 0.8, dur: 12, delay: -7 },
-  { f: 'dad', x: 456, y: 214, w: 92, dx: -3, dy: 3, dr: -1, dur: 9.5, delay: -5 },
-  { f: 'girl', x: 456, y: 336, w: 125, dx: 2, dy: -3, dr: 1, dur: 11.5, delay: -9 },
-  { f: 'boy', x: 587, y: 255, w: 100, dx: -2, dy: -4, dr: -0.8, dur: 10.5, delay: -2 },
-  { f: 'temp', x: 100, y: 316, w: 135, dx: 3, dy: -2, dr: 1, dur: 9, delay: -8 },
-  { f: 'checklist', x: 386, y: 432, w: 58, dx: -3, dy: 2, dr: -2, dur: 8.5, delay: -4 },
-  { f: 'pin', x: 602, y: 389, w: 49, dx: 2, dy: 3, dr: 2, dur: 7.5, delay: -6 },
-  { f: 'check', x: 726, y: 343, w: 70, dx: -2, dy: -2, dr: -1.5, dur: 8, delay: -1 },
-  { f: 'task', x: 826, y: 364, w: 263, dx: 3, dy: 2, dr: 0.5, dur: 10, delay: -5 },
+  { f: 'head', x: 0, y: 21, w: 351, h: 72, dx: 1, dy: 3, dr: 0, dur: 11, delay: -4 },
+  { f: 'week', x: 182, y: 178, w: 105, h: 45, dx: -3, dy: 2, dr: -1, dur: 9, delay: -2 },
+  { f: 'cal', x: 516, y: 92, w: 86, h: 87, dx: 2, dy: -4, dr: 1.5, dur: 8, delay: -6 },
+  { f: 'house', x: 361, y: 153, w: 64, h: 64, dx: -2, dy: -3, dr: -1.5, dur: 10, delay: -1 },
+  { f: 'bell', x: 709, y: 223, w: 37, h: 37, dx: 3, dy: -2, dr: 2, dur: 7, delay: -3 },
+  { f: 'mom', x: 273, y: 255, w: 162, h: 163, dx: 3, dy: 4, dr: 0.8, dur: 12, delay: -7 },
+  { f: 'dad', x: 456, y: 214, w: 92, h: 92, dx: -3, dy: 3, dr: -1, dur: 9.5, delay: -5 },
+  { f: 'girl', x: 456, y: 336, w: 125, h: 125, dx: 2, dy: -3, dr: 1, dur: 11.5, delay: -9 },
+  { f: 'boy', x: 587, y: 255, w: 100, h: 100, dx: -2, dy: -4, dr: -0.8, dur: 10.5, delay: -2 },
+  { f: 'temp', x: 100, y: 316, w: 135, h: 44, dx: 3, dy: -2, dr: 1, dur: 9, delay: -8 },
+  { f: 'checklist', x: 386, y: 432, w: 58, h: 58, dx: -3, dy: 2, dr: -2, dur: 8.5, delay: -4 },
+  { f: 'pin', x: 602, y: 389, w: 49, h: 50, dx: 2, dy: 3, dr: 2, dur: 7.5, delay: -6 },
+  { f: 'check', x: 726, y: 343, w: 70, h: 70, dx: -2, dy: -2, dr: -1.5, dur: 8, delay: -1 },
+  { f: 'task', x: 826, y: 364, w: 263, h: 26, dx: 3, dy: 2, dr: 0.5, dur: 10, delay: -5 },
 ]
+
+const NO_PUSH = BITS.map(() => ({ x: 0, y: 0 }))
+
+function SketchScene({ on }: { on: boolean }) {
+  const sceneRef = useRef<HTMLDivElement>(null)
+  const reduced = useReducedMotion()
+  const [push, setPush] = useState(NO_PUSH)
+
+  // cutouts shy away from the pointer: a gentle radial shove, spring-
+  // settled, on top of (not instead of) their idle drift
+  const onMove = (e: React.PointerEvent) => {
+    if (reduced || !sceneRef.current) return
+    const r = sceneRef.current.getBoundingClientRect()
+    const cx = e.clientX - r.left
+    const cy = e.clientY - r.top
+    const radius = r.width * 0.2
+    const shove = r.width * 0.045
+    setPush(
+      BITS.map((b) => {
+        const bx = ((b.x + b.w / 2) / SK.w) * r.width
+        const by = ((b.y + b.h / 2) / SK.h) * r.height
+        const dx = bx - cx
+        const dy = by - cy
+        const d = Math.hypot(dx, dy)
+        if (d >= radius || d === 0) return { x: 0, y: 0 }
+        const f = ((radius - d) / radius) * shove
+        return { x: (dx / d) * f, y: (dy / d) * f }
+      }),
+    )
+  }
+
+  return (
+    <div
+      className={styles.railScene}
+      data-on={on ? 'true' : undefined}
+      aria-hidden="true"
+      ref={sceneRef}
+      onPointerMove={onMove}
+      onPointerLeave={() => setPush(NO_PUSH)}
+    >
+      {BITS.map((b, i) => (
+        <motion.div
+          key={b.f}
+          className={styles.railBitWrap}
+          style={{
+            left: `${(b.x / SK.w) * 100}%`,
+            top: `${(b.y / SK.h) * 100}%`,
+            width: `${(b.w / SK.w) * 100}%`,
+          }}
+          animate={{ x: push[i].x, y: push[i].y }}
+          transition={SPRINGS.widget}
+        >
+          <img
+            src={`${DIR}/sketch/${b.f}.webp`}
+            alt=""
+            draggable={false}
+            className={styles.railBit}
+            style={{
+              ['--dx' as string]: `${b.dx}px`,
+              ['--dy' as string]: `${b.dy}px`,
+              ['--dr' as string]: `${b.dr}deg`,
+              ['--dur' as string]: `${b.dur}s`,
+              ['--delay' as string]: `${b.delay}s`,
+            }}
+          />
+        </motion.div>
+      ))}
+    </div>
+  )
+}
 
 /* The break-out finale: the artwork leaves the artboard. Paper becomes a
    room — a plain wall for on-device testing, a kitchen for the ship —
@@ -135,38 +217,14 @@ function WallScene({
   )
 }
 
-function SketchScene({ on }: { on: boolean }) {
-  return (
-    <div className={styles.railScene} data-on={on ? 'true' : undefined} aria-hidden="true">
-      {BITS.map((b) => (
-        <img
-          key={b.f}
-          src={`${DIR}/sketch/${b.f}.webp`}
-          alt=""
-          draggable={false}
-          className={styles.railBit}
-          style={{
-            left: `${(b.x / SK.w) * 100}%`,
-            top: `${(b.y / SK.h) * 100}%`,
-            width: `${(b.w / SK.w) * 100}%`,
-            ['--dx' as string]: `${b.dx}px`,
-            ['--dy' as string]: `${b.dy}px`,
-            ['--dr' as string]: `${b.dr}deg`,
-            ['--dur' as string]: `${b.dur}s`,
-            ['--delay' as string]: `${b.delay}s`,
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
 export function EvolutionRail() {
   const ref = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion()
   const [stage, setStage] = useState(0)
-  const [closed, setClosed] = useState(false)
+  const [minimized, setMinimized] = useState(false)
   const [zoomed, setZoomed] = useState(false)
+  const marksRef = useRef<Element[]>([])
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const wasInSceneRef = useRef(false)
 
   // the break-out auto-zooms: crossing INTO the wall/kitchen beats
@@ -180,22 +238,20 @@ export function EvolutionRail() {
       setZoomed(inScene)
     }
   }, [stage])
-  const marksRef = useRef<Element[]>([])
-  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
-  // demos run only while their stage is up; reduced motion gets the
-  // poster still. preload="none" means nothing downloads until here.
+  // demos run only while their stage is up and the window is open;
+  // reduced motion gets the poster still. preload="none" means nothing
+  // downloads until here.
   useEffect(() => {
     const active = STAGES[stage]?.video
     for (const [key, el] of Object.entries(videoRefs.current)) {
       if (!el) continue
-      if (key === active && !reduced && !closed) el.play().catch(() => {})
+      if (key === active && !reduced && !minimized) el.play().catch(() => {})
       else el.pause()
     }
-  }, [stage, reduced, closed])
+  }, [stage, reduced, minimized])
 
   useEffect(() => {
-    if (closed) return
     const article = ref.current?.closest('article')
     if (!article) return
     const marks = Array.from(
@@ -204,9 +260,12 @@ export function EvolutionRail() {
     marksRef.current = marks
     if (marks.length < 2) return
 
-    // beats map onto stages proportionally, so an added or cut section
-    // reflows the ladder instead of orphaning the tail
-    const toStage = (i: number) => Math.round((i / (marks.length - 1)) * (STAGES.length - 1))
+    // the hand-tuned beat map when the case has its expected shape;
+    // proportional fallback if a section is ever added or cut
+    const toStage = (i: number) =>
+      marks.length === BEAT_TO_STAGE.length
+        ? BEAT_TO_STAGE[i]
+        : Math.round((i / (marks.length - 1)) * (STAGES.length - 1))
     const live = new Set<number>()
     const onEntries = (entries: IntersectionObserverEntry[]) => {
       for (const e of entries) {
@@ -228,125 +287,155 @@ export function EvolutionRail() {
       io.disconnect()
       ioLast.disconnect()
     }
-  }, [closed])
+  }, [])
 
-  if (closed) return null
   const cur = STAGES[stage]
 
   const jumpTo = (i: number) => {
     const marks = marksRef.current
     if (!marks.length) return
-    const mark = marks[Math.round((i / (STAGES.length - 1)) * (marks.length - 1))]
+    let beat: number
+    if (marks.length === BEAT_TO_STAGE.length) {
+      // first beat carrying this stage — or the nearest one after it
+      // for a stage the scroll path skips (v0.5 rides v0.4's beat)
+      beat = BEAT_TO_STAGE.indexOf(i)
+      if (beat === -1) beat = BEAT_TO_STAGE.findIndex((s) => s >= i)
+      if (beat === -1) beat = marks.length - 1
+    } else {
+      beat = Math.round((i / (STAGES.length - 1)) * (marks.length - 1))
+    }
     sfx.tap()
-    mark?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
+    marks[beat]?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
   }
 
   return (
-    <div className={styles.railSlot} ref={ref} data-zoom={zoomed ? 'true' : undefined}>
-      <aside className={styles.rail} aria-label="Family Hub, evolving alongside the story">
-        <div className={styles.railBar}>
-          <button
-            className={styles.railCtrl}
-            aria-label="Close the Family Hub mini-window"
-            onClick={() => {
-              sfx.close()
-              setClosed(true)
-            }}
-          >
-            ×
-          </button>
-          <button
-            className={styles.railCtrl}
-            aria-label={zoomed ? 'Restore the Family Hub mini-window' : 'Zoom the Family Hub mini-window'}
-            aria-pressed={zoomed}
-            onClick={() => {
+    <div className={styles.railSlot} ref={ref} data-zoom={zoomed && !minimized ? 'true' : undefined}>
+      <aside
+        className={styles.rail}
+        aria-label="Progress viewer: the Family Hub being built, stage by stage"
+        data-min={minimized ? 'true' : undefined}
+      >
+        <div
+          className={styles.railBar}
+          onClick={() => {
+            // window-shade: a click anywhere on the collapsed bar reopens
+            if (minimized) {
               sfx.tap()
-              setZoomed((z) => !z)
+              setMinimized(false)
+            }
+          }}
+        >
+          <button
+            className={styles.railCtrl}
+            aria-label={minimized ? 'Restore the progress viewer' : 'Minimize the progress viewer'}
+            aria-pressed={minimized}
+            onClick={(e) => {
+              e.stopPropagation()
+              sfx.tap()
+              setMinimized((m) => !m)
             }}
           >
-            +
+            −
           </button>
-          <span className={styles.railTitle}>Family.Hub</span>
+          {!minimized && (
+            <button
+              className={styles.railCtrl}
+              aria-label={zoomed ? 'Restore the progress viewer size' : 'Zoom the progress viewer'}
+              aria-pressed={zoomed}
+              onClick={() => {
+                sfx.tap()
+                setZoomed((z) => !z)
+              }}
+            >
+              +
+            </button>
+          )}
+          <span className={styles.railTitle}>Progress.Vwr</span>
           <span className={styles.railVer}>{cur.v}</span>
         </div>
-        <div
-          className={styles.railView}
-          role="img"
-          aria-label={`${cur.v} · ${cur.label}. ${cur.alt}`}
-          data-scene={cur.scene ? 'true' : undefined}
-          data-video={cur.video ? 'true' : undefined}
-        >
-          <div className={styles.railStack} style={{ aspectRatio: cur.ratio }}>
-            <SketchScene on={stage === 0} />
-            {STAGES.map(
-              (s, i) =>
-                s.file &&
-                !s.scene &&
-                !s.video && (
-                  <img
-                    key={s.file}
-                    src={`${DIR}/${s.file}`}
-                    alt=""
+        {!minimized && (
+          <>
+            <div
+              className={styles.railView}
+              role="img"
+              aria-label={`${cur.v} · ${cur.label}. ${cur.alt}`}
+              data-scene={cur.scene ? 'true' : undefined}
+              data-video={cur.video ? 'true' : undefined}
+              data-sketch={stage === 0 ? 'true' : undefined}
+            >
+              <div className={styles.railStack} style={{ aspectRatio: cur.ratio }}>
+                <SketchScene on={stage === 0} />
+                {STAGES.map(
+                  (s, i) =>
+                    s.file &&
+                    !s.scene &&
+                    !s.video && (
+                      <img
+                        key={s.file}
+                        src={`${DIR}/${s.file}`}
+                        alt=""
+                        aria-hidden="true"
+                        draggable={false}
+                        data-on={i === stage ? 'true' : undefined}
+                      />
+                    ),
+                )}
+                {/* one element per recording — a demo spanning several beats
+                    (PoC covers v0.2 AND v0.3) keeps rolling across them */}
+                {STAGES.filter(
+                  (s, i, all) => s.video && all.findIndex((x) => x.video === s.video) === i,
+                ).map((s) => (
+                  <video
+                    key={s.video}
+                    ref={(el) => {
+                      videoRefs.current[s.video!] = el
+                    }}
+                    poster={`${DIR}/${s.file}`}
+                    muted
+                    loop
+                    playsInline
+                    preload="none"
                     aria-hidden="true"
-                    draggable={false}
-                    data-on={i === stage ? 'true' : undefined}
-                  />
-                ),
-            )}
-            {/* one element per recording — a demo spanning several beats
-                (PoC covers v0.2 AND v0.3) keeps rolling across them */}
-            {STAGES.filter(
-              (s, i, all) => s.video && all.findIndex((x) => x.video === s.video) === i,
-            ).map((s) => (
-              <video
-                key={s.video}
-                ref={(el) => {
-                  videoRefs.current[s.video!] = el
-                }}
-                poster={`${DIR}/${s.file}`}
-                muted
-                loop
-                playsInline
-                preload="none"
-                aria-hidden="true"
-                data-on={STAGES[stage].video === s.video ? 'true' : undefined}
-              >
-                {/* h264 for the world, vp9 for open-codec builds */}
-                <source src={`${DIR}/${s.video}.mp4`} type="video/mp4" />
-                <source src={`${DIR}/${s.video}.webm`} type="video/webm" />
-              </video>
-            ))}
-            {STAGES.map(
-              (s, i) =>
-                s.file &&
-                s.scene && (
-                  <WallScene
-                    key={s.file}
-                    kitchen={s.scene === 'kitchen'}
-                    on={i === stage}
-                    src={`${DIR}/${s.file}`}
-                  />
-                ),
-            )}
-          </div>
-        </div>
-        <div className={styles.railFoot}>
-          {STAGES.map((s, i) => (
-            <button
-              key={s.v}
-              className={styles.railTick}
-              aria-label={`${s.v} · ${s.label}`}
-              aria-current={i === stage ? 'step' : undefined}
-              data-on={i === stage ? 'true' : undefined}
-              data-done={i < stage ? 'true' : undefined}
-              onClick={() => jumpTo(i)}
-            />
-          ))}
-        </div>
-        <div className={styles.railLabel} aria-hidden="true">
-          {cur.v} · {cur.label}
-          {cur.video && !reduced ? ' · demo' : ''}
-        </div>
+                    data-on={STAGES[stage].video === s.video ? 'true' : undefined}
+                  >
+                    {/* h264 for the world, vp9 for open-codec builds */}
+                    <source src={`${DIR}/${s.video}.mp4`} type="video/mp4" />
+                    <source src={`${DIR}/${s.video}.webm`} type="video/webm" />
+                  </video>
+                ))}
+                {STAGES.map(
+                  (s, i) =>
+                    s.file &&
+                    s.scene && (
+                      <WallScene
+                        key={s.file}
+                        kitchen={s.scene === 'kitchen'}
+                        on={i === stage}
+                        src={`${DIR}/${s.file}`}
+                      />
+                    ),
+                )}
+              </div>
+            </div>
+            <div className={styles.railFoot}>
+              {STAGES.map((s, i) => (
+                <button
+                  key={s.v}
+                  className={styles.railTick}
+                  aria-label={`${s.v} · ${s.label}`}
+                  aria-current={i === stage ? 'step' : undefined}
+                  data-on={i === stage ? 'true' : undefined}
+                  data-done={i < stage ? 'true' : undefined}
+                  onClick={() => jumpTo(i)}
+                />
+              ))}
+            </div>
+            <div className={styles.railLabel} aria-hidden="true">
+              {cur.v} · {cur.label}
+              {cur.video && !reduced ? ' · demo' : ''}
+            </div>
+          </>
+        )}
       </aside>
     </div>
   )
