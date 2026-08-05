@@ -284,6 +284,25 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/spec',
   },
   {
+    // SPEC.SHEET's playable half, in its own window. No desktop icon and no
+    // deep link by design: it opens from the sheet's title row (the sheet
+    // is what explains the two-accent law it lets you break).
+    id: 'skinbuilder',
+    name: 'Skin Builder',
+    meta: 'SYS-15',
+    icon: 'swatch',
+    component: dynamic(() => import('@/programs/skinbuilder/SkinBuilder')),
+    // measured, not chosen: at 584 the 12 swatches stay on ONE row per role
+    // (the row needs 367px of track and gets 372), and 309 = the picker's
+    // own 274px + 35px of chrome — the window ends under the status line
+    // with no dead paper below it, in every verdict state
+    size: { w: 584, h: 309 },
+    // offset down-right of the sheet's own (290, 56) so it lands ON the
+    // sheet without covering the chip table it re-prints
+    pos: { x: 330, y: 300 },
+    onDesktop: false,
+  },
+  {
     id: 'machine',
     name: 'About This Machine',
     meta: 'SYS-10',

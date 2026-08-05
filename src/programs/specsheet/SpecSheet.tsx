@@ -3,7 +3,11 @@
 import { useEffect, useState } from 'react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { CopyText as Copy } from '@/content/CopyText'
+import { contrast, grade, resolveVar, toHex } from '@/lib/contrast'
+import { PALETTE, readPicks, type Picks } from '@/lib/buildASkin'
+import { sfx } from '@/lib/sound'
 import { useSettings, type Skin } from '@/store/settings'
+import { useWindows } from '@/store/windows'
 import styles from './specsheet.module.css'
 
 /* SPEC.SHEET — a living design-system doc that documents LUNDE OS itself.
@@ -13,60 +17,11 @@ import styles from './specsheet.module.css'
    the DOM (next/font hashes family names), so those are quoted per skin
    below — keep them in sync with layout.tsx and the skin token sets.
    Motion values are quoted truthfully from src/components/shell/Window.tsx.
-   GL design-system feed is stubbed. */
-
-// ---- color math (real WCAG relative-luminance) ----
-
-type RGB = [number, number, number]
-
-function parseColor(input: string): RGB | null {
-  // resolved computed colors come back as "rgb(r, g, b)" / "rgba(...)"
-  const m = input.match(/rgba?\(([^)]+)\)/)
-  if (!m) return null
-  const parts = m[1].split(',').map((s) => parseFloat(s.trim()))
-  if (parts.length < 3 || parts.some((n) => Number.isNaN(n))) return null
-  return [parts[0], parts[1], parts[2]]
-}
-
-function toHex([r, g, b]: RGB): string {
-  const h = (n: number) =>
-    Math.round(n).toString(16).padStart(2, '0').toUpperCase()
-  return `#${h(r)}${h(g)}${h(b)}`
-}
-
-function channelLum(c: number): number {
-  const s = c / 255
-  return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
-}
-
-function luminance([r, g, b]: RGB): number {
-  return 0.2126 * channelLum(r) + 0.7152 * channelLum(g) + 0.0722 * channelLum(b)
-}
-
-function contrast(a: RGB, b: RGB): number {
-  const la = luminance(a)
-  const lb = luminance(b)
-  const [hi, lo] = la > lb ? [la, lb] : [lb, la]
-  return (hi + 0.05) / (lo + 0.05)
-}
-
-function grade(ratio: number): string {
-  if (ratio >= 7) return 'AAA'
-  if (ratio >= 4.5) return 'AA'
-  if (ratio >= 3) return 'AA·LG'
-  return 'FAIL'
-}
-
-// resolve a CSS var to a concrete rgb() by letting the browser compute it
-function resolveVar(el: HTMLElement, name: string): RGB | null {
-  const probe = document.createElement('span')
-  probe.style.color = `var(${name})`
-  probe.style.display = 'none'
-  el.appendChild(probe)
-  const computed = getComputedStyle(probe).color
-  el.removeChild(probe)
-  return parseColor(computed)
-}
+   The playable half — SKIN BUILDER, where a visitor re-casts the two accent
+   roles — is its own window (src/programs/skinbuilder/SkinBuilder.tsx),
+   opened from this sheet's sticky title row. The sheet stays live while it
+   is open: the observer below watches the <html> style attribute the
+   builder's overrides are written to, so both windows agree on every tick. */
 
 const COLOR_VARS: Array<{ name: string; label: string; against: 'paper' | 'ink' }> = [
   { name: '--surface', label: 'Paper', against: 'ink' },
@@ -114,7 +69,11 @@ const MOTION: Array<[string, string]> = [
 
 export default function SpecSheet() {
   const [chips, setChips] = useState<Chip[]>([])
+  const [picks, setPicks] = useState<Picks>({})
   const skin = useSettings((s) => s.skin)
+  /* one API for both jobs: open() raises + focuses an already-open window
+     instead of adding a second one (src/store/windows.ts) */
+  const openWindow = useWindows((s) => s.open)
   const accentNames = ACCENT_NAMES[skin] ?? ACCENT_NAMES.classic
   const typeNames = TYPE_NAMES[skin] ?? TYPE_NAMES.classic
 
@@ -139,127 +98,166 @@ export default function SpecSheet() {
         })
       }
       setChips(next)
+      // the picker reads from the same source as the applied overrides, so
+      // the swatch rings and the live tokens can never disagree
+      setPicks(readPicks())
     }
 
     read()
     // re-derive when the theme OR skin attribute flips — a skin swaps the
-    // entire token set, so the sheet must re-read, not just re-render
+    // entire token set, so the sheet must re-read, not just re-render.
+    // 'style' catches SKIN BUILDER's inline overrides, including the ones
+    // revalidate() drops when a flip invalidates them: with both windows
+    // open side by side, a pick over there re-prints this table here.
     const obs = new MutationObserver(read)
-    obs.observe(root, { attributes: true, attributeFilter: ['data-theme', 'data-skin'] })
+    obs.observe(root, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'data-skin', 'style'],
+    })
     return () => obs.disconnect()
   }, [])
 
   return (
     <div className={styles.spec}>
-      <Copy k="spec-sheet.eyebrow" as="p" className={styles.eyebrow} />
-      <div className={styles.banner}>
-        <Stamp>
-          <Copy k="spec-sheet.banner" as="span" />
-        </Stamp>
+      {/* The masthead stays put while the sheet scrolls under it: a spec
+          sheet you can hand back to is one whose title is always on the
+          page. Sticky against .windowBody (the window's scroll container),
+          full-bleed so nothing ghosts through a side gutter, and opaque
+          --surface so the rows pass BEHIND it. */}
+      <div className={styles.titleRow}>
+        <Copy k="spec-sheet.eyebrow" as="p" className={styles.eyebrow} />
+        <button
+          type="button"
+          className={styles.customize}
+          onClick={() => {
+            sfx.open()
+            openWindow('skinbuilder')
+          }}
+        >
+          <Copy k="spec-sheet.build.open" as="span" />
+        </button>
       </div>
 
-      {/* ---------- color ---------- */}
-      <div className={styles.sectionHead}>
-        <span className={styles.secNo}>01 —</span>
-        <Copy k="spec-sheet.section.color" as="span" className={styles.secLabel} />
-      </div>
-      <div className={styles.chips}>
-        {chips.map((c) => {
-          const pass = c.ratio >= 4.5
-          const label =
-            c.name === '--accent'
-              ? accentNames.system
-              : c.name === '--accent-expressive'
-                ? accentNames.expressive
-                : c.label
-          return (
-            <div key={c.name} className={styles.chip}>
-              <span
-                className={styles.swatch}
-                style={{ background: `var(${c.name})` }}
-                aria-hidden="true"
-              />
-              <span className={styles.chipMeta}>
-                <span className={styles.chipName}>{label}</span>
-                <span className={styles.chipVar}>{c.name}</span>
-              </span>
-              <span className={styles.chipHex}>{c.hex}</span>
-              <span
-                className={`${styles.chipRatio} ${pass ? styles.pass : styles.fail}`}
-              >
-                {c.ratio.toFixed(1)}:1 {grade(c.ratio)} {pass ? '✓' : '✗'}
-                <span className={styles.chipAgainst}>{c.againstLabel}</span>
-              </span>
+      <div className={styles.sheetBody}>
+        {/* ---------- color ---------- */}
+        <div className={styles.sectionHead}>
+          <span className={styles.secNo}>01 —</span>
+          <Copy k="spec-sheet.section.color" as="span" className={styles.secLabel} />
+        </div>
+        <div className={styles.chips}>
+          {chips.map((c) => {
+            const pass = c.ratio >= 4.5
+            /* the quoted per-skin accent name stops being true the moment a
+               visitor re-casts the role in SKIN BUILDER — name the pick */
+            const built =
+              c.name === '--accent'
+                ? picks.accent
+                : c.name === '--accent-expressive'
+                  ? picks.expressive
+                  : undefined
+            const builtName = built
+              ? PALETTE.find((p) => p.hex === built)?.name
+              : undefined
+            const quoted =
+              c.name === '--accent' ? accentNames.system : accentNames.expressive
+            const label = builtName
+              ? // keep the skin's own role word ("· system" / "· expressive"),
+                // swap only the color name for the one the visitor picked
+                `${builtName}${quoted.slice(quoted.indexOf(' · '))}`
+              : c.name === '--accent'
+                ? accentNames.system
+                : c.name === '--accent-expressive'
+                  ? accentNames.expressive
+                  : c.label
+            return (
+              <div key={c.name} className={styles.chip}>
+                <span
+                  className={styles.swatch}
+                  style={{ background: `var(${c.name})` }}
+                  aria-hidden="true"
+                />
+                <span className={styles.chipMeta}>
+                  <span className={styles.chipName}>{label}</span>
+                  <span className={styles.chipVar}>{c.name}</span>
+                </span>
+                <span className={styles.chipHex}>{c.hex}</span>
+                <span
+                  className={`${styles.chipRatio} ${pass ? styles.pass : styles.fail}`}
+                >
+                  {c.ratio.toFixed(1)}:1 {grade(c.ratio)} {pass ? '✓' : '✗'}
+                  <span className={styles.chipAgainst}>{c.againstLabel}</span>
+                </span>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* ---------- type ---------- */}
+        <div className={styles.sectionHead}>
+          <span className={styles.secNo}>02 —</span>
+          <Copy k="spec-sheet.section.type" as="span" className={styles.secLabel} />
+        </div>
+        <div className={styles.typeStack}>
+          <div className={styles.specimen}>
+            <span className={styles.specDisplay}>AaBb 0123</span>
+            <span className={styles.specLine}>
+              Display · {typeNames.display} · 400 · tracking 0
+            </span>
+          </div>
+          <div className={styles.specimen}>
+            <span className={styles.specBody}>
+              The quick brown fox jumps over the lazy dog.
+            </span>
+            <span className={styles.specLine}>
+              Body · {typeNames.body} · 17px · leading 1.6
+            </span>
+          </div>
+          <div className={styles.specimen}>
+            <span className={styles.specMono}>DOC-ID · FIG.01 · 920.12 FT</span>
+            <span className={styles.specLine}>
+              Mono · {typeNames.mono} · labels · caps · tracking 0.14em
+            </span>
+          </div>
+        </div>
+
+        {/* ---------- motion ---------- */}
+        <div className={styles.sectionHead}>
+          <span className={styles.secNo}>03 —</span>
+          <Copy k="spec-sheet.section.motion" as="span" className={styles.secLabel} />
+        </div>
+        <div className={styles.motion}>
+          {MOTION.map(([k, v]) => (
+            <div key={k} className={styles.motionRow}>
+              <span className={styles.motionK}>{k}</span>
+              <span className={styles.motionV}>{v}</span>
             </div>
-          )
-        })}
-      </div>
+          ))}
+        </div>
 
-      {/* ---------- type ---------- */}
-      <div className={styles.sectionHead}>
-        <span className={styles.secNo}>02 —</span>
-        <Copy k="spec-sheet.section.type" as="span" className={styles.secLabel} />
-      </div>
-      <div className={styles.typeStack}>
-        <div className={styles.specimen}>
-          <span className={styles.specDisplay}>AaBb 0123</span>
-          <span className={styles.specLine}>
-            Display · {typeNames.display} · 400 · tracking 0
-          </span>
+        {/* ---------- components ---------- */}
+        <div className={styles.sectionHead}>
+          <span className={styles.secNo}>04 —</span>
+          <Copy k="spec-sheet.section.components" as="span" className={styles.secLabel} />
         </div>
-        <div className={styles.specimen}>
-          <span className={styles.specBody}>
-            The quick brown fox jumps over the lazy dog.
-          </span>
-          <span className={styles.specLine}>
-            Body · {typeNames.body} · 17px · leading 1.6
-          </span>
-        </div>
-        <div className={styles.specimen}>
-          <span className={styles.specMono}>DOC-ID · FIG.01 · 920.12 FT</span>
-          <span className={styles.specLine}>
-            Mono · {typeNames.mono} · labels · caps · tracking 0.14em
-          </span>
-        </div>
-      </div>
-
-      {/* ---------- motion ---------- */}
-      <div className={styles.sectionHead}>
-        <span className={styles.secNo}>03 —</span>
-        <Copy k="spec-sheet.section.motion" as="span" className={styles.secLabel} />
-      </div>
-      <div className={styles.motion}>
-        {MOTION.map(([k, v]) => (
-          <div key={k} className={styles.motionRow}>
-            <span className={styles.motionK}>{k}</span>
-            <span className={styles.motionV}>{v}</span>
+        <div className={styles.components}>
+          <div className={styles.componentCell}>
+            <div className={styles.componentStage}>
+              <Stamp>Approved</Stamp>
+            </div>
+            <span className={styles.partNo}>CMP-01 · Stamp</span>
           </div>
-        ))}
-      </div>
-
-      {/* ---------- components ---------- */}
-      <div className={styles.sectionHead}>
-        <span className={styles.secNo}>04 —</span>
-        <Copy k="spec-sheet.section.components" as="span" className={styles.secLabel} />
-      </div>
-      <div className={styles.components}>
-        <div className={styles.componentCell}>
-          <div className={styles.componentStage}>
-            <Stamp>Approved</Stamp>
+          <div className={styles.componentCell}>
+            <div className={styles.componentStage}>
+              <button type="button" className={styles.demoBtn}>
+                Open
+              </button>
+            </div>
+            <span className={styles.partNo}>CMP-02 · Button · primary</span>
           </div>
-          <span className={styles.partNo}>CMP-01 · Stamp</span>
         </div>
-        <div className={styles.componentCell}>
-          <div className={styles.componentStage}>
-            <button type="button" className={styles.demoBtn}>
-              Open
-            </button>
-          </div>
-          <span className={styles.partNo}>CMP-02 · Button · primary</span>
-        </div>
-      </div>
 
-      <Copy k="spec-sheet.foot" as="p" className={styles.foot} />
+        <Copy k="spec-sheet.foot" as="p" className={styles.foot} />
+      </div>
     </div>
   )
 }

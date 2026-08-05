@@ -124,6 +124,10 @@
     "base": "Settings",
     "medieval": "The Workings"
   },
+  "program.skinbuilder.name": {
+    "base": "Skin Builder",
+    "medieval": "The Pigments"
+  },
   "program.spec-sheet.name": {
     "base": "Spec Sheet",
     "medieval": "Colophon"
@@ -190,7 +194,24 @@
     "base": "WHAT IS THIS",
     "medieval": "WHAT IS WRIT HERE"
   },
-  "spec-sheet.banner": "Host System Tokens — GL DS Feed Pending",
+  "spec-sheet.build.againstInk": "on ink",
+  "spec-sheet.build.againstPaper": "on paper",
+  "spec-sheet.build.applied": "Applied",
+  "spec-sheet.build.idle": "Pick one color per role. Every pick is measured before it is allowed through.",
+  "spec-sheet.build.intro": "Two accents per skin — one system, one expressive, never a third. Pick them here; the sheet refuses anything that fails AA and shows you the ratio.",
+  "spec-sheet.build.open": "Customize LUNDE OS",
+  "spec-sheet.build.reason.demoted": "marks-only where AA fails — enforced · --accent-expressive-text → ink",
+  "spec-sheet.build.reason.marks": "marks need 3.0:1 against paper or ink",
+  "spec-sheet.build.reason.reset": "the skin's own two accents are back",
+  "spec-sheet.build.reason.system": "system accent is text · AA needs 4.5:1",
+  "spec-sheet.build.reason.systemLive": "system accent live · focus rings and links follow it",
+  "spec-sheet.build.reason.textRights": "text rights granted at 4.5:1 · --accent-expressive-text → the pick",
+  "spec-sheet.build.refused": "Refused",
+  "spec-sheet.build.reset": "Reset",
+  "spec-sheet.build.roleExpressive": "Expressive",
+  "spec-sheet.build.roleExpressiveHint": "Marks · 3.0:1 vs ink or paper",
+  "spec-sheet.build.roleSystem": "System",
+  "spec-sheet.build.roleSystemHint": "Text · 4.5:1 vs paper",
   "spec-sheet.eyebrow": "System Spec — LUNDE OS",
   "spec-sheet.foot": "Values read live from computed styles · contrast recomputes on theme or skin flip · motion quoted from shell/Window.tsx",
   "spec-sheet.section.color": "Color",

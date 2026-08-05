@@ -41,7 +41,10 @@ a {
 
 ::selection {
   background: var(--accent-expressive);
-  color: #17150d;
+  /* was a literal #17150d (classic ink) — the token exists and it is
+     per-skin, and SPEC.SHEET's BUILD A SKIN can now re-cast the fill
+     under it, so the paired foreground has to be derived, not fixed */
+  color: var(--on-accent-expressive);
 }
 
 :focus-visible {

@@ -1,8 +1,8 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-05 (s36 Family Hub + rail SHIPPED; s37 + s36-pt2
-> notes → archive).
+> Last rotation: 2026-08-05 (s38 BUILD A SKIN built; s36 rail note →
+> archive).
 
 ## Current state
 
@@ -57,30 +57,44 @@
   emulation. Never `npm run build` while any dev server owns `.next`
   (`lsof :3000 :3210` first — bit s36 twice).
 
-## Latest session — the rail ships: idea to kitchen wall (s36, 2026-08-02→05)
+## Latest session — BUILD A SKIN: the two-accent law, playable (s38, 2026-08-05)
 
-**Fable solo by declaration through EIGHT passes of Jake's live review:
-one tightly-coupled taste feature; splitting it would have cost more
-context than it saved. Deck reported throughout. Full pass-by-pass
-detail in the s36 commits (`f21fb5a`→`322ce21`).**
+**Fable orchestrated, NYQUIST (Opus) executed in three passes — clean
+delegation: taste/spec/review stayed in the lean session, builds +
+live probes ran in subagents. Deck reported. Branch
+`spec-sheet-build-a-skin` → merged to main + SHIPPED after Jake's live
+taste pass ("really like it") drove pass 3.**
 
-- **The arc:** floating evolution rail (5 spec'd stages) → Jake's Figma
-  had NINE → living sketch + his real screen recordings replaced stills
-  → PROGRESS.VWR with window-shade, zoom, story-synced beats → launch
-  film plate → merged to main with RESUME.EXE/sfx work absorbed.
-- **Gotchas earned this session (memories updated):** container queries
-  measure the CONTENT box · the pane freezes IntersectionObserver
-  delivery entirely (verify via playwright-core + ms-playwright
-  headless_shell; `viewport:` not `viewportSize:`) · headless_shell has
-  no h264 (ship webm <source> fallback) · Figma get_screenshot WHITE-
-  MATTES image-fill/text nodes (circle/rounded masks + min-channel
-  unmixing in sharp; invisible until the bg isn't white) · stacked
-  crossfade layers eat pointer events (pointer-events: none on all
-  non-interactive layers) · a body-portal is required for fixed
-  overlays inside transformed windows · preview_stop can leave the
-  process alive (lsof before build; .next corruption twice).
-- **Live-verified at close:** all three demo mp4s + sketch cutouts 200
-  on lunde.co, /projects/family-hub renders; prod deploy `2a009f0`.
+- **The feature (Notion brief, now In Progress):** SPEC.SHEET section 02
+  hands visitors both accent roles. 12 candidates = core token
+  primitives verbatim (nasa/cobalt … verdigris/light). Gates live vs
+  computed grounds: system 4.5:1 on paper; expressive 3:1 vs EITHER
+  ground (ink-only would refuse shipped classic-dark pink — NYQUIST
+  caught it). Refusals quote the ratio; expressive keeps the marks-only
+  indirection (`--accent-expressive-text` → ink below 4.5:1, text
+  rights above — reproduces shipped token behavior exactly). Engine:
+  `src/lib/buildASkin.ts`, 4 inline props on `<html>`, sessionStorage
+  per skin, revalidate() on every skin/theme flip from settings.ts —
+  invalidated picks silently drop. WCAG math shared via new
+  `src/lib/contrast.ts`. GL DS Feed Pending stamp REMOVED (key + CSS).
+- **Found truths:** the 12 split exactly 6/6 text-rights/marks-only per
+  context and the split INVERTS light↔dark (cobalt↔glow is the lesson);
+  expressive can never be hard-refused on shipped skins (ground
+  contrast ≥12.9:1 ⇒ max-vs-either ≥ ~3.6) — refusal branch is a guard
+  for future low-contrast skins. `--accent-expressive-mark` is
+  transparent in classic-dark (pre-existing, untouched).
+- **Pass 3 (Jake's nesting call): builder = its OWN window.** Sheet got
+  a sticky title row (System Spec — LUNDE OS + CUSTOMIZE LUNDE OS
+  button); button opens code-split program `skinbuilder` (SYS-15,
+  584×309 measured, no desktop icon/path, medieval title "The
+  Pigments") via `useWindows.open` — idempotent, re-click refocuses.
+  Sheet back to 01–04; chip table renames on pick cross-window.
+- Also: `::selection` hardcoded ink → `--on-accent-expressive`;
+  `.fail` chips → `--status-danger-base`; `LaunchFilm 2.tsx` dup deleted.
+- Verified: build + tsc + 25/25 tests, live probes ×3 (refuse/apply/
+  demote/reset/reload/flip-drop/cross-window/refocus), 360px, keyboard.
+  NYQUIST built pass 3 in a throwaway worktree to dodge the shared-
+  `.next` trap while the orchestrator's dev server ran — good pattern.
 
 ## Next steps
 

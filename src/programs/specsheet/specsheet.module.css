@@ -1,5 +1,30 @@
+/* No padding on the sheet itself: the sticky title row must run edge to
+   edge of the scroll container, or content scrolling past would show in
+   the gutters beside it. The padding lives on .sheetBody instead. */
 .spec {
-  padding: 22px 24px 30px;
+  padding: 0;
+}
+
+/* Sticky against .windowBody (shell.module.css — `overflow-y: auto` makes
+   it the scrollport). It is the first thing in flow and its height never
+   changes, so nothing shifts on load. Opaque --surface + a rule underneath
+   so the rows pass BEHIND it rather than ghost through. */
+.titleRow {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 13px 20px;
+  background: var(--surface);
+  border-bottom: 1.5px solid var(--content);
+}
+
+[data-theme='dark'] .titleRow {
+  border-bottom-color: var(--border);
 }
 
 .eyebrow {
@@ -8,11 +33,42 @@
   letter-spacing: var(--tracking-18); /* diverges from label's tracking-14 — exact match to original 0.18em */
   text-transform: uppercase;
   color: var(--accent);
-  margin: 0 0 14px;
+  margin: 0;
 }
 
-.banner {
-  margin-bottom: 24px;
+/* the sheet's one control — same idiom as the picker's RESET button:
+   mono caps, hairline box, inverts on hover */
+.customize {
+  flex: none;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-16);
+  text-transform: uppercase;
+  color: var(--content);
+  background: none;
+  border: 1.5px solid var(--content);
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.customize:hover {
+  background: var(--content);
+  color: var(--surface);
+}
+
+.customize:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.sheetBody {
+  padding: 18px 20px 30px;
+}
+
+/* the first section head sits right under the rule — it does not need the
+   26px of air the ones between sections do */
+.sheetBody > .sectionHead:first-child {
+  margin-top: 0;
 }
 
 /* ---------- section heads ---------- */
@@ -111,14 +167,29 @@
   color: var(--content-muted);
 }
 
+/* the failure ratio is TEXT, so it takes the audited danger role, not the
+   expressive accent — which is marks-only on light paper (1.4:1 there),
+   and which a visitor can re-cast in SKIN BUILDER */
 .fail {
-  color: var(--accent-expressive);
+  color: var(--status-danger-base);
 }
 
 .chipAgainst {
   font-size: var(--type-micro-size); /* 8px exact */
   letter-spacing: var(--tracking-12); /* diverges from micro's tracking-20 — exact match to original 0.12em */
   text-transform: uppercase;
+}
+
+/* full-bleed on a phone: tighten the gutters, and let the title row's two
+   halves stack rather than crush the button */
+@media (max-width: 440px) {
+  .titleRow {
+    padding: 11px 14px;
+  }
+
+  .sheetBody {
+    padding: 16px 14px 24px;
+  }
 }
 
 /* ---------- type ---------- */
