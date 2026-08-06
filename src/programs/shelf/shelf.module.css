@@ -666,6 +666,11 @@
   border-right: var(--border-width-default) solid var(--content);
 }
 
+/* the meta strip clears the spine — 12px binding + the usual 10px */
+:global([data-skin='medieval']) .frontMeta {
+  padding-left: 22px;
+}
+
 /* vellum is not shrink-wrapped: uncut pages, not plastic */
 :global([data-skin='medieval']) .sheen {
   background: repeating-linear-gradient(
