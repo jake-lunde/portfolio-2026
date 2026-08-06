@@ -3,14 +3,22 @@
    specimen scan. Cream + blue(#5c7cff pinned) + one pink accent. */
 
 .ctr {
+  /* The deck always paints on the inverse (dark) plate, whatever the
+     theme, so it pins the dark skin's accent AND takes the expressive
+     accent as text — the indirection exists to stop pink type on cream,
+     and there is no cream here. */
   --accent: #5c7cff;
+  --accent-expressive-text: var(--accent-expressive);
+  /* the log rail flips to the right-hand edge on a wide deck — a window,
+     not a viewport, decides that (precedent: case.module.css) */
+  container-type: inline-size;
   padding: 14px 16px 16px;
   color: #e7e1d2;
   display: flex;
   flex-direction: column;
   gap: 10px;
   /* HEIGHT, not just min-height: the deck is a fixed instrument panel
-     whose ticker gives up room to the pyramid, and a flex column can
+     whose log gives up room to the schematic, and a flex column can
      only shrink a child when its own height is definite */
   height: 100%;
   min-height: 100%;
@@ -25,6 +33,7 @@
   gap: 12px;
   border: 1.5px solid rgba(231, 225, 210, 0.45);
   padding: 9px 12px;
+  flex: 0 0 auto;
 }
 
 .headL {
@@ -95,7 +104,7 @@
 
 .recChip[data-live] {
   border-color: var(--accent-expressive);
-  color: var(--accent-expressive);
+  color: var(--accent-expressive-text);
 }
 
 .recChip[data-live] .recDot {
@@ -104,6 +113,20 @@
 }
 
 /* marker blackouts */
+/* said, not shown: the arrow glyphs are meaning-bearing, so each ships a
+   word beside it that only a screen reader ever reaches */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
 .redacted {
   display: inline-flex;
   gap: 5px;
@@ -126,284 +149,224 @@
   }
 }
 
-.headClock {
-  font-family: var(--mono);
-  font-size: var(--type-body-size); /* 15px exact */
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.06em;
-}
+/* ---- body: schematic + receipt ---- */
 
-/* ---- the pyramid ---- */
-/* One human, one orchestrator, four units. The tiers are the argument:
-   briefs descend, returns climb, and the top layer is a person. */
-
-.pyramid {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  border: 1.5px solid rgba(231, 225, 210, 0.45);
-  padding: 10px 8px;
-}
-
-.tier {
-  position: relative;
-  display: grid;
-  gap: 6px;
-}
-
-/* The human sits centred on his own row, narrower than the deck, with
-   what he said directly underneath — one column, so the eye reads
-   PERSON then INPUT then the machines, top to bottom. */
-.tier[data-tier='human'] {
-  grid-template-columns: minmax(0, 1fr);
-  justify-items: center;
-}
-
-.tier[data-tier='lead'] {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.tier[data-tier='crew'] {
-  grid-template-columns: repeat(4, 1fr);
-  padding-top: 4px;
-}
-
-/* routing lines from the orchestrator down to the four units */
-.tierLines {
-  position: absolute;
-  top: -22px;
-  left: 0;
-  width: 100%;
-  height: 24px;
-  color: #e7e1d2;
-  pointer-events: none;
-}
-
-/* ---- the human plate ---- */
-/* Deliberately not a sprite: the one node that isn't a model gets a
-   different construction — monogram, double rule, horizontal id block —
-   so "which one is the person" survives a squint. */
-
-.human {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 14px 8px 10px;
-  border: 1.5px solid rgba(231, 225, 210, 0.55);
-  outline: 1px solid rgba(231, 225, 210, 0.22);
-  outline-offset: 2px;
-  background: var(--surface-inverse);
-  /* centred and hugging its content — a plate, not a banner */
-  width: max-content;
-  max-width: 100%;
-}
-
-.human[data-mode='flash'] {
-  border-color: var(--accent-expressive);
-}
-
-/* Jake's portrait, in colour. Every machine on this deck is a one-ink
-   silhouette; the human is the only thing here that is a picture of
-   somebody. No border: the art is already a circular illustration, and a
-   square rule fights the circle instead of framing it. Sized up 3px from
-   the old 42px to hold the same optical size now the stroke is gone. */
-.portrait {
-  flex: 0 0 auto;
-  width: 45px;
-  height: 45px;
-  object-fit: contain;
-}
-
-.humanId {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-.humanModel {
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  letter-spacing: var(--tracking-16);
-  color: var(--accent);
-}
-
-.humanBlurb {
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  letter-spacing: 0.06em;
-  line-height: var(--type-micro-leading);
-  color: rgba(231, 225, 210, 0.7);
-}
-
-/* ---- what the human actually says ---- */
-/* Prompts arrive as fragments, never whole: a departure board can't
-   hold a paragraph, and the pieces make the point better anyway. */
-
-/* Three slots, reserved: the rail holds its height whether it has one
-   fragment or three, so an arriving chip can never shove the pyramid
-   down while the leaving one is still fading. */
-.prompts {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 3px;
-  width: 100%;
-  min-height: 66px;
-  /* popLayout pulls a leaving chip out of flow, which is exactly what
-     stops the shove — but out of flow also means it can spill past the
-     rail on its way out. Clip it to the three slots. */
-  overflow: hidden;
-}
-
-.promptChip {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  max-width: 100%;
-  font-family: var(--type-caption-family);
-  font-size: var(--type-caption-size);
-  letter-spacing: var(--tracking-08);
-  color: rgba(231, 225, 210, 0.85);
-  border: 1px solid rgba(231, 225, 210, 0.22);
-  padding: 2px 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.promptChip[data-kind='curate'] {
-  border-color: var(--accent-expressive);
-}
-
-.promptChip[data-kind='empty'] {
-  color: rgba(231, 225, 210, 0.45);
-}
-
-.promptKind {
-  flex: 0 0 auto;
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  letter-spacing: var(--tracking-14);
-  color: var(--accent);
-}
-
-.promptChip[data-kind='curate'] .promptKind {
-  color: var(--accent-expressive);
-}
-
-/* ---- the labelled edges ---- */
-/* The loop, spelled out: work goes down as briefs and comes back up as
-   returns that a human picks over. */
-
-/* Each label rides the SAME grid as the tier under it, so BRIEF lands
-   over FABLE and RETURNS lands over SHANNON. The alignment is the
-   annotation — no leader lines, no legend. */
-.edge {
-  /* above the routing lines, which are absolutely positioned in the tier
-     BELOW this row and would otherwise paint straight through the type */
-  position: relative;
-  z-index: 1;
-  display: grid;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  letter-spacing: var(--tracking-16);
-  white-space: nowrap;
-  text-align: center;
-}
-
-.edge[data-over='lead'] {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.edge[data-over='crew'] {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-/* the rule runs THROUGH the label and stops at it, so the line reads as
-   the wire and the label as what is travelling down it */
-.edgeCell {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-}
-
-.edgeRule {
+.body {
   flex: 1 1 auto;
-  height: 1px;
-  background: rgba(231, 225, 210, 0.22);
-}
-
-/* the label carries the plate colour with it — the same token the CRT
-   window body paints with — so the routing lines and rules stop dead at
-   the type instead of running under it */
-.edgeDown,
-.edgeUp {
-  flex: 0 0 auto;
-  padding: 1px 8px;
-  background: var(--surface-inverse);
-}
-
-.edgeDown {
-  color: var(--accent);
-}
-
-.edgeUp {
-  color: var(--accent-expressive);
-}
-
-.unit {
-  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 8px 4px 6px;
-  border: 1px solid rgba(231, 225, 210, 0.22);
-  background: var(--surface-inverse);
-  min-width: 0;
-}
-
-/* the orchestrator sits alone on its tier, so it lies down: avatar left,
-   identity right, status filling the width it would otherwise waste */
-.unit[data-wide] {
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
-  text-align: left;
-}
-
-.unit[data-wide] .avatar {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 auto;
-}
-
-.unit[data-wide] .unitName {
-  margin-top: 0;
-}
-
-.unit[data-wide] .unitStatus {
-  flex: 1;
-  min-width: 0;
-  text-align: right;
-  margin-top: 0;
+  gap: 8px;
   min-height: 0;
 }
 
-.unit[data-mode='busy'] {
+/* ---- the pipeline ---- */
+/* An idea enters from off the frame, lands on the human, and only then
+   splits. Pipes are measured from the real node boxes at runtime — see
+   CommandCenter.tsx — so the schematic stays true when the window is
+   dragged narrow or the stack folds for a phone. */
+
+.stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 296px;
+  min-width: 0;
+  border: 1.5px solid rgba(231, 225, 210, 0.45);
+  padding: 0 10px 12px;
+  /* the inlet pipe starts ABOVE y=0 — the clip is what makes an idea
+     look like it arrived from somewhere else */
+  overflow: hidden;
+}
+
+/* Sits under everything and catches the taps that land on empty plate.
+   Without it "click away to dismiss" has no surface: .rows and the pipe
+   layers cover the stage edge to edge. */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.pipes,
+.hits {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Pushed back with ink weight, not perspective: the pipes are the
+   lightest thing on the plate and every node covers them. */
+/* 0.40, not the 0.15 this started at: the pipes ARE the diagram, so they
+   clear 3:1 as graphical objects (SC 1.4.11). Measured on cream ink over
+   the three inverse plates, 0.39 is the floor for 3:1 and 0.52 the floor
+   for 4.5:1 text — alpha is not linear in contrast, so these are computed
+   values, not eyeballed ones. Hot state and node borders moved up in step
+   so the layering (pipes behind, plates in front) still reads. */
+.pipe {
+  fill: none;
+  stroke: rgba(231, 225, 210, 0.4);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.3s;
+}
+
+.pipe[data-hot] {
+  stroke: rgba(231, 225, 210, 0.68);
+}
+
+/* The hit target is the PIPE, not the capsule inside it — nobody should
+   have to catch a moving thing to read it. */
+.hits {
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 16;
+  pointer-events: stroke;
+  cursor: crosshair;
+}
+
+.flight {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* one event in transit. Downstream work is expressive; a return climbing
+   the same pipe is the SYSTEM accent, so completion reads as a different
+   kind of traffic without inventing a third colour. */
+.packet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 7px;
+  height: 11px;
+  border-radius: 4px;
+  background: var(--accent-expressive);
+  box-shadow: 0 0 0 2px var(--surface-inverse);
+  will-change: transform;
+}
+
+.packet[data-up] {
+  background: var(--accent);
+}
+
+.packet[data-slow] {
+  box-shadow:
+    0 0 0 2px var(--surface-inverse),
+    0 0 0 4px rgba(231, 225, 210, 0.28);
+}
+
+/* ---- the node stack ---- */
+
+.rows {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  align-content: space-between;
+  gap: 12px;
+  height: 100%;
+}
+
+/* The one label the schematic gets to keep, because "these did not come
+   from in here" is not drawable. No port glyph: the pipe running off the
+   top edge already says it, and a bracket only crowded the type. */
+.inlet {
+  position: relative;
+  height: 32px;
+}
+
+.inletLabel {
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  margin-left: 14px;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-18);
+  color: rgba(231, 225, 210, 0.62);
+  white-space: nowrap;
+}
+
+.rowHuman {
+  display: grid;
+  justify-items: center;
+}
+
+.rowLeads {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  justify-items: center;
+  gap: 6px;
+}
+
+.rowCrew {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  justify-items: center;
+  gap: 6px;
+}
+
+/* ---- a node ---- */
+/* Avatar and call sign. Model, job and telemetry live in the card, which
+   is one hover or one tab-stop away — that budget is why seven of these
+   fit without the deck turning into a spec sheet. */
+
+.node,
+.nodeHuman {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  max-width: 100%;
+  padding: 7px 10px 6px;
+  border: 1px solid rgba(231, 225, 210, 0.55);
+  background: var(--surface-inverse);
+  /* sits ON the pipes: a hard offset plate shadow, no blur, no gradient */
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+  cursor: default;
+  transition: border-color 0.2s;
+}
+
+.node:hover,
+.nodeHuman:hover {
+  border-color: rgba(231, 225, 210, 0.65);
+}
+
+.node:focus-visible,
+.nodeHuman:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: rgba(231, 225, 210, 0.65);
+}
+
+.node[data-mode='busy'] {
   border-color: var(--accent);
 }
 
-.unit[data-mode='flash'] {
+.node[data-hot],
+.nodeHuman[data-hot] {
   border-color: var(--accent-expressive);
+}
+
+/* The one node that isn't a model is built differently — portrait beside
+   the name, a double rule around it — so "which one is the person"
+   survives a squint at any size. */
+.nodeHuman {
+  flex-direction: row;
+  gap: 9px;
+  padding: 6px 13px 6px 8px;
+  border-width: 1.5px;
+  border-color: rgba(231, 225, 210, 0.75);
+  outline: 1px solid rgba(231, 225, 210, 0.22);
+  outline-offset: 2px;
 }
 
 /* specimen-scan corner tick */
@@ -417,9 +380,21 @@
   border-right: 1.5px solid rgba(231, 225, 210, 0.5);
 }
 
+/* Jake's portrait, in colour. Every machine on this deck is a one-ink
+   silhouette; the human is the only thing here that is a picture of
+   somebody. No border: the art is already a circular illustration, and a
+   square rule fights the circle instead of framing it. */
+.portrait {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
 .avatar {
-  width: 40px;
-  height: 40px;
+  display: block;
+  width: 36px;
+  height: 36px;
   background-color: #e7e1d2;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
@@ -438,7 +413,6 @@
 
 .avatar[data-mode='flash'] {
   background-color: var(--accent-expressive);
-  animation: ccjolt 0.5s ease-in-out;
 }
 
 @keyframes ccbob {
@@ -451,88 +425,266 @@
   }
 }
 
-@keyframes ccjolt {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(1.18) rotate(4deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .avatar,
-  .avatar[data-mode='busy'],
-  .recDot {
-    animation: none;
-  }
-}
-
-.unitName {
+.nodeName {
   font-family: var(--display);
   font-size: var(--type-body-sm-size); /* 12px → 13px */
-  margin-top: 3px;
+  white-space: nowrap;
 }
 
-.unitModel {
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size); /* 7px → 8px, sub-8 snap-up per ramp rule — flag: dense crew-bay grid (5 columns) */
-  letter-spacing: var(--tracking-16); /* diverges from micro's tracking-20 — exact match to original 0.16em */
-  color: rgba(231, 225, 210, 0.5);
+/* ---- transient layer ---- */
+/* Everything in here is decorative and aria-hidden: the node buttons
+   carry the identity, the log carries the record. Positioned with the
+   `translate` property, never `transform` — Motion owns transform. */
+
+.over {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
 }
 
-.unitRole {
+.pulse {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+  border: 1.5px solid var(--accent-expressive);
+  border-radius: 50%;
+}
+
+/* status / return / merge, said out loud for a beat and then gone — the
+   same manners as the desktop crew's chat bubbles. It always ends up in
+   the log; watch the count tick when one of these expires. */
+.toast {
+  position: absolute;
+  translate: var(--cx, -50%) -100%;
+  max-width: 180px;
+  padding: 2px 6px;
+  background: var(--surface-inverse);
+  border: 1px solid rgba(231, 225, 210, 0.4);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
   font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size); /* 7px → 8px, sub-8 snap-up per ramp rule — flag: dense crew-bay grid */
-  letter-spacing: var(--tracking-14); /* diverges from micro's tracking-20 — exact match to original 0.14em */
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-08);
+  color: rgba(231, 225, 210, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toast[data-kind='return'],
+.toast[data-kind='merge'] {
+  border-color: var(--accent);
+  color: #e7e1d2;
+}
+
+/* The human's last input. It outlives the machine chatter on purpose —
+   his words are the tell that a person is steering — and it moves on
+   SPRINGS.human, which is allowed to overshoot. */
+/* every floating thing on the stage carries the same edge manners: pin to
+   the wall rather than centre off the side of the plate (--cx is set by
+   the [data-align] rules below) */
+.saidChip {
+  position: absolute;
+  translate: var(--cx, -50%) 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  max-width: min(320px, 92%);
+  padding: 2px 7px;
+  background: var(--surface-inverse);
+  border: 1px solid rgba(231, 225, 210, 0.3);
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-08);
+  color: rgba(231, 225, 210, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.saidChip[data-kind='curate'] {
+  border-color: var(--accent-expressive);
+}
+
+/* the chip is a flex row, so the quote needs its own box to truncate in —
+   text-overflow has nothing to bite on at the flex container */
+.saidText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Every transmission slot prints the case the wire sent. The machines
+   report in caps; Jake types like a person, and the lowercase human
+   among the shouting machines IS the tell that somebody is on the keys —
+   so no global utility gets to shout over him later. */
+.saidText,
+.rowLabel,
+.pipeCardLabel,
+.cardStatus {
+  text-transform: none;
+}
+
+.saidKind {
+  flex: 0 0 auto;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-14);
   color: var(--accent);
 }
 
-.unitStatus {
+.saidChip[data-kind='curate'] .saidKind {
+  color: var(--accent-expressive-text);
+}
+
+/* the spec sheet a node no longer prints at rest */
+.card {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 9px;
+  background: var(--surface-inverse);
+  border: 1.5px solid rgba(231, 225, 210, 0.6);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+  text-align: left;
+}
+
+.card[data-side='below'] {
+  translate: var(--cx, -50%) 6px;
+}
+
+.card[data-side='above'] {
+  translate: var(--cx, -50%) calc(-100% - 6px);
+}
+
+/* shared edge manners */
+.toast[data-align='left'],
+.saidChip[data-align='left'],
+.card[data-align='left'],
+.pipeCard[data-align='left'] {
+  --cx: 0%;
+}
+
+.toast[data-align='right'],
+.saidChip[data-align='right'],
+.card[data-align='right'],
+.pipeCard[data-align='right'] {
+  --cx: -100%;
+}
+
+.cardName {
+  font-family: var(--display);
+  font-size: var(--type-label-size);
+}
+
+.cardJob {
   font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size); /* 7.5px → 8px, sub-8 snap-up per ramp rule — flag: dense crew-bay status line (min-height 24px, 2-line clamp) */
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-16);
+  color: var(--accent);
+}
+
+.cardStatus {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
   letter-spacing: 0.06em;
-  line-height: var(--type-micro-leading); /* 1.5 exact */
+  line-height: var(--type-micro-leading);
   color: rgba(231, 225, 210, 0.75);
-  text-align: center;
-  min-height: 24px;
-  margin-top: 4px;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: normal;
 }
 
-.unitStatus[data-mode='flash'] {
-  color: var(--accent-expressive);
+.cardStatus[data-mode='flash'] {
+  color: var(--accent-expressive-text);
 }
 
-/* ---- feed / departure board ---- */
+/* what is in this pipe — the whole reason the capsule can move fast */
+.pipeCard {
+  position: absolute;
+  translate: var(--cx, -50%) -118%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: max-content;
+  max-width: 240px;
+  padding: 5px 8px;
+  background: var(--surface-inverse);
+  border: 1.5px solid var(--accent);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+}
 
-/* Closed by default, so the pyramid is what you meet. Open, it is the
-   ONE elastic band on the deck: every fixed section above gets the
-   height it needs and the ticker absorbs the rest. Closed, the slack
-   goes back to the pyramid instead (see .ctr[data-log='closed']). */
-.feed {
+.pipeCardHead {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.pipeCardT {
+  font-family: var(--mono);
+  font-size: var(--type-caption-size);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: rgba(231, 225, 210, 0.7);
+}
+
+.pipeCardSig {
+  font-size: var(--type-label-size);
+  color: var(--accent);
+}
+
+.pipeCardSig[data-action='return'],
+.pipeCardSig[data-action='merge'],
+.pipeCardSig[data-action='prompt'],
+.pipeCardSig[data-action='curate'] {
+  color: var(--accent-expressive-text);
+}
+
+.pipeCardUnit {
+  font-family: var(--display);
+  font-size: var(--type-label-size);
+  white-space: nowrap;
+}
+
+.pipeCardLabel[data-idle] {
+  color: rgba(231, 225, 210, 0.6);
+  letter-spacing: var(--tracking-14);
+}
+
+.pipeCardLabel {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-08);
+  line-height: var(--leading-normal);
+  color: rgba(231, 225, 210, 0.85);
+}
+
+/* ---- the receipt ---- */
+/* Collapsed by default, so the schematic is what you meet. The tab keeps
+   carrying the count, and the count pulses every time a toast expires:
+   the claim is that nothing here is only ephemeral. */
+
+.rail {
   flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
   border: 1.5px solid rgba(231, 225, 210, 0.45);
   padding: 6px 12px;
   overflow: hidden;
 }
 
-.feed[data-open] {
-  flex: 1 1 auto;
+/* stacked, the drawer takes what it needs and no more — the schematic
+   keeps the growth, the same bargain the old ticker struck */
+.rail[data-open] {
+  flex: 0 1 auto;
   min-height: 120px;
+  max-height: 46%;
   padding: 6px 12px 10px;
 }
 
-.ctr[data-log='closed'] .pyramid {
-  flex: 1 1 auto;
-}
-
-/* the disclosure itself — a full-width instrument label, not a widget */
-.feedToggle {
+.railTab {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -545,28 +697,41 @@
   text-align: left;
 }
 
-.feed[data-open] .feedToggle {
+.railTab:hover {
+  color: #e7e1d2;
+}
+
+.railTab:disabled {
+  cursor: default;
+}
+
+.rail[data-open] .railTab {
   color: #e7e1d2;
   border-bottom: 1px solid rgba(231, 225, 210, 0.3);
   padding-bottom: 6px;
   margin-bottom: 4px;
+  flex: 0 0 auto;
 }
 
-.feedToggle:hover {
-  color: #e7e1d2;
-}
-
-.feedChevron {
+.railChevron {
   color: var(--accent);
 }
 
-.feedCount {
+.railCount {
   margin-left: auto;
-  color: rgba(231, 225, 210, 0.5);
+  color: var(--accent-expressive-text);
+}
+
+.railBody {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
 .feedScroll {
-  max-height: 200px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -582,15 +747,32 @@
   font-family: var(--type-micro-family);
   font-size: var(--type-micro-size); /* 7.5px → 8px, sub-8 snap-up per ramp rule — flag: dense feed table header */
   letter-spacing: var(--type-micro-tracking); /* 0.2em exact */
-  color: rgba(231, 225, 210, 0.45);
+  color: rgba(231, 225, 210, 0.6);
   border-bottom: 1px solid rgba(231, 225, 210, 0.3);
   padding-bottom: 5px;
   margin-bottom: 4px;
+  flex: 0 0 auto;
 }
 
 .row {
   padding: 4.5px 0;
   border-bottom: 1px solid rgba(231, 225, 210, 0.1);
+}
+
+/* the row a toast just turned into — a highlight that fades, so the
+   hand-off from the stage to the receipt is visible without anything
+   flying across the deck */
+.row[data-fresh] {
+  animation: cclanded 0.9s ease-out;
+}
+
+@keyframes cclanded {
+  from {
+    background: rgba(92, 124, 255, 0.28);
+  }
+  to {
+    background: transparent;
+  }
 }
 
 .rowT {
@@ -609,23 +791,20 @@
   color: var(--accent);
 }
 
-.rowArrow[data-action='return'] {
-  color: var(--accent-expressive);
-}
-
+.rowArrow[data-action='return'],
 .rowArrow[data-action='merge'] {
-  color: var(--accent-expressive);
+  color: var(--accent-expressive-text);
 }
 
 /* the human's own rows read differently from machine traffic: the call
    sign takes the expressive accent and the transmission is quoted */
 .rowArrow[data-action='prompt'],
 .rowArrow[data-action='curate'] {
-  color: var(--accent-expressive);
+  color: var(--accent-expressive-text);
 }
 
 .row[data-human] .rowAgent {
-  color: var(--accent-expressive);
+  color: var(--accent-expressive-text);
 }
 
 .row[data-human] .rowLabel {
@@ -653,9 +832,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 0 0 auto;
   font-family: var(--type-micro-family);
   font-size: var(--type-micro-size); /* 7.5px → 8px, sub-8 snap-up per ramp rule — flag: dense caution strip */
-  letter-spacing: var(--tracking-18); /* diverges from micro's tracking-20 — exact match to original 0.18em */
+  letter-spacing: var(--tracking-18); /* diverges from micro's tracking-18 — exact match to original 0.18em */
   color: rgba(231, 225, 210, 0.55);
   white-space: nowrap;
 }
@@ -672,35 +852,118 @@
   );
 }
 
+/* ---- wide: the log becomes a side rail ---- */
+/* Container, not viewport: this is a draggable window, and a deck docked
+   narrow next to a wide screen still has to fold. */
+
+@container (min-width: 700px) {
+  .body {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .rail,
+  .rail[data-open] {
+    flex: 0 0 auto;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+  }
+
+  /* collapsed: a slim vertical tab on the right edge, still counting */
+  .rail {
+    width: 30px;
+    padding: 8px 5px;
+  }
+
+  .rail:not([data-open]) .railTab {
+    writing-mode: vertical-rl;
+    height: 100%;
+    width: auto;
+    gap: 10px;
+    padding: 0;
+  }
+
+  .rail:not([data-open]) .railCount {
+    margin-left: 0;
+    margin-top: auto;
+  }
+
+  .rail[data-open] {
+    width: 288px;
+    padding: 6px 10px 10px;
+  }
+
+  /* SIG holds one glyph but its header holds three letters — the column
+     is sized for the label, not the payload */
+  .rail[data-open] .feedHead,
+  .rail[data-open] .row {
+    grid-template-columns: 48px 20px 52px 1fr;
+    gap: 6px;
+  }
+
+  .rail[data-open] .rowT {
+    font-size: var(--type-caption-size);
+  }
+}
+
 /* ---- narrow ---- */
-/* Below ~560px the window is full-bleed on a phone: the pyramid keeps
-   its tiers (that is the whole point) but folds 4-across into 2×2 and
-   drops the human's prompts under his plate rather than beside it. */
+/* Below ~520px the window is full-bleed on a phone: the tiers survive
+   (that is the whole point) but the fan-out folds 4-across into 2×2 and
+   the curves flatten to short connectors (tension is set in the TSX). */
 
-@media (max-width: 560px) {
-  .edge[data-over='lead'] {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .tier[data-tier='lead'] {
-    grid-template-columns: 1fr;
-  }
-
-  .tier[data-tier='crew'] {
+@container (max-width: 519px) {
+  /* folded 2×2, the second pair still has to be reachable: a deeper row
+     gap leaves visible pipe between the sub-rows instead of a plate
+     sitting directly on the run below it */
+  .rowCrew {
     grid-template-columns: repeat(2, 1fr);
+    gap: 26px 6px;
   }
 
-  .tierLines {
-    display: none;
+  .stage {
+    min-height: 340px;
   }
 
-  .edge {
-    white-space: normal;
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .portrait {
+    width: 36px;
+    height: 36px;
+  }
+
+  .toast,
+  .saidChip {
+    max-width: 150px;
   }
 
   .feedHead,
   .row {
     grid-template-columns: 62px 18px 62px 1fr;
     gap: 6px;
+  }
+
+  .caution {
+    white-space: normal;
+  }
+}
+
+/* ---- no motion ---- */
+/* TRANSCRIPT mode: the TSX stops issuing packets and toasts entirely and
+   opens the log on the full recorded sequence. What is left here is the
+   idle fidgeting. */
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar,
+  .avatar[data-mode='busy'],
+  .recDot {
+    animation: none;
+  }
+
+  .row[data-fresh] {
+    animation: none;
   }
 }

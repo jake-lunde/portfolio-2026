@@ -45,13 +45,25 @@
 
 .ccBar {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-1);
   max-width: 100%;
   padding: 5px 10px;
   background: var(--surface);
   border: var(--border-width-hairline) solid var(--border);
   text-align: left;
+}
+
+/* the two stacked rows share a left edge (the button's own padding) —
+   each is just a plain flex row, same gap the single row used to keep
+   between its parts. */
+.ccRowGlance,
+.ccRowAction {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
 }
 
 .ccWidget[data-state='live'] .ccBar {
@@ -201,14 +213,13 @@
 }
 
 /* ---------- the leading edge ---------- */
-/* The single most recent transmission, inline. It is the first thing to
-   give up room when the chip is squeezed. */
+/* The single most recent transmission, now the first thing in the action
+   row rather than trailing the cast — no divider needed, it opens the
+   row. Still the first thing to give up room when the chip is squeezed. */
 
 .ccEdge {
   flex: 1 1 auto;
   min-width: 0;
-  padding-left: var(--space-2);
-  border-left: var(--border-width-hairline) solid var(--border);
   font-family: var(--mono);
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-08);
@@ -268,11 +279,18 @@
 /* ---------- squeezed ---------- */
 /* Between 900px and ~1240px the derived max-width has already taken the
    chip below the width the leading edge needs to say anything useful —
-   drop it rather than serve two ellipsised words. Cast and CTA stay. */
+   drop it rather than serve an ellipsised label. The glance row (dot,
+   stamp, cast) is unaffected; the action row falls back to just the CTA. */
 
 @media (max-width: 1240px) {
   .ccEdge {
     display: none;
+  }
+
+  /* with the edge gone the CTA is the row's only occupant — centred, so
+     the action row reads as a deliberate button line, not a leftover */
+  .ccRowAction {
+    justify-content: center;
   }
 }
 
