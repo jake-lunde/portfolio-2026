@@ -1,7 +1,7 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-05 (s38 BUILD A SKIN built; s36 rail note →
+> Last rotation: 2026-08-06 (s39 SHIPPED.SW built; s38 skin-builder note →
 > archive).
 
 ## Current state
@@ -12,103 +12,93 @@
   with -L or grep finds nothing). **Production = Family Hub ship (s36).**
 - **⚠️ Jake's rulings on the shared checkout: no more concurrent sessions
   on one working tree, and check `git branch --show-current` before EVERY
-  commit** (s36/s37 race, archive).
-- **FAMILY HUB CASE SHIPPED 2026-08-05** (`case-family-hub` merged to
-  main): 7 sections, 11 plates, 4 interactives, Jake's spoken cadence,
-  progress 100 "Shipped — read it". PROGRESS.VWR rides the right margin —
-  the product evolving v0.1→v1.0 as you scroll: living sketch (cursor-
-  repel cutouts on the surface token), Jake's real prototype recordings
-  as demos (PoC spans v0.2–0.3, lo-fi v0.4–0.5, hi-fi v0.6; black mat,
-  posters from first frames, preload=none), break-out finale (device on
-  SVG wall/kitchen; auto-zoom OFF for now — tune later), − window-shade,
-  + manual zoom, hand-tuned BEAT_TO_STAGE map (§04 = hi-fi). Plate 11 =
-  LaunchFilm (official GL YouTube nocookie embed: muted pointer-inert
-  loop, mounts at 0.35 visibility; lightbox w/ sound PORTALS TO BODY —
-  fixed inside the window anchors to its transform). Case windows open
-  1280×720 @ x24. Assets `public/case/family-hub/evo/` (~7MB, mostly
-  demo video); masters in `ref/assets-casestudies/` (never commit ref/).
-- **RESUME.EXE v4 + BOX-86 live since 2026-08-04** (s37): open RESUME.EXE
-  and it prints itself; DOWNLOAD PDF (deterministic `build-cv.mjs`, one
-  page, never hand-edit the PDF). BOX-86 = petitions box w/ DOPPLER
-  roasts. Branches `cv-exe` + `suggestion-box` merged — safe to delete;
-  `medieval-sfx`* branches deletable once Jake confirms sfx live.
-- **NEW FLAGSHIP SPEC'D — "The Desk"** (Notion, 2026-08-04): zoom out to
-  the room the OS runs in. Art direction OPEN (Jake leans cute 3D; refs
-  incoming). Next big build now that CV + Family Hub are done.
-- **Branch `leaf-patch` (parked) got CRITTERS v2 in s34** (`89970d8`).
-  ⚠️ At revive: progress.module.css slot sizes; branch says Family Hub 55
-  vs main's 100 — reconcile; Trash TAG-03 restores from `8934b21`.
+  commit** (s36/s37 race, archive). Bit again in s39: another chat's dev
+  server owned :3000 while s39 switched the checkout to its branch.
+- **SHIPPED.SW BUILT, AWAITING JAKE'S TASTE PASS** (branch
+  `feat/shipped-sw-shelf`, NOT merged): the Case Studies window is now a
+  shelf of boxed 1992 software replacing the never-finishing installer.
+  Details in the session note below. Taste checkpoints open: flip feel,
+  install pacing, back-panel density (3 cols vs 2), box-art placeholders.
+- **FAMILY HUB CASE SHIPPED 2026-08-05** (s36): 7 sections, 11 plates,
+  4 interactives, PROGRESS.VWR evolution rail, LaunchFilm. Case windows
+  1280×720 @ x24. Assets `public/case/family-hub/evo/`; masters in
+  `ref/assets-casestudies/` (never commit ref/). Jake's live sanity-walk
+  still pending.
+- **RESUME.EXE v4 + BOX-86 live since 2026-08-04** (s37). Merged branches
+  `cv-exe`, `suggestion-box`, `case-family-hub` safe to delete;
+  `medieval-sfx`* once Jake confirms sfx live.
+- **NEW FLAGSHIP SPEC'D — "The Desk"** (Notion): zoom out to the room the
+  OS runs in; art direction OPEN, Jake's 3D refs incoming.
+- **Branch `leaf-patch` (parked, CRITTERS v2 in s34, `89970d8`).** At
+  revive: slot sizes; Family Hub 55 vs main 100; Trash TAG-03 `8934b21`.
 - **Jake's s31 rule: feature work starts on its OWN branch;** main stays
   shippable.
-- **Skins:** classic (light/dark) + medieval (knight-speak + Jake's sfx
-  LIVE); underwater = stub. Copy layer + EDIT.MODE LIVE — rebase, merge
-  copy.json at the KEY level, never force-push.
-- **Jake is preparing to APPLY.** Remaining audit gaps: Red Pen exhibit
-  (Jake to save the Ryan avatar-token Slack screenshots → TokenThread) ·
-  gate friction (audit's #1 risk, unactioned). **Standing ask: push HIM
-  to prune and polish copy.**
-- **Voice law (s35, memory `case-study-voice-calibration`):** write ALL
-  user-facing drafts in Jake's spoken cadence; em dashes are an AI tell.
-- **Tracking:** Notion (connector live). Blob cap lifted (Vercel Pro).
-  Deck reporting works; Jake wants a COST read on steady-state usage;
-  zero-`list()` fix still worth it. Source `.env.local`; positional args.
+- **Skins:** classic (light/dark) + medieval (knight-speak + sfx LIVE);
+  underwater = stub. Copy layer + EDIT.MODE LIVE — rebase, merge copy.json
+  at the KEY level, never force-push.
+- **Jake is preparing to APPLY.** Audit gaps: Red Pen exhibit (Ryan
+  avatar-token screenshots) · gate friction — s39's install-absorbed
+  license check addresses the case-studies door once merged. **Standing
+  ask: push HIM to prune and polish copy.**
+- **Voice law (s35):** all user-facing drafts in Jake's spoken cadence;
+  em dashes are an AI tell. s39 shelf copy is DRAFT — Jake rewrites.
+- **Tracking:** Notion (connector live). Deck reporting works; cost read
+  on steady-state usage wanted; zero-`list()` fix still worth it.
 - **Known debts:** SpecSheet motion quote-strings; first-load JS perf;
   underwater; `--accent-on-inverse`; reduced-motion unverified by
   emulation. Never `npm run build` while any dev server owns `.next`
-  (`lsof :3000 :3210` first — bit s36 twice).
+  (`lsof :3000 :3210` first).
 
-## Latest session — BUILD A SKIN: the two-accent law, playable (s38, 2026-08-05)
+## Latest session — SHIPPED.SW: the shelf sells what's here (s39, 2026-08-06)
 
-**Fable orchestrated, NYQUIST (Opus) executed in three passes — clean
-delegation: taste/spec/review stayed in the lean session, builds +
-live probes ran in subagents. Deck reported. Branch
-`spec-sheet-build-a-skin` → merged to main + SHIPPED after Jake's live
-taste pass ("really like it") drove pass 3.**
+**Fable planned + reviewed, NYQUIST (Opus) built, Fable landed one layout
+fix solo (20-line scope — not worth a dispatch). Deck reported. Branch
+`feat/shipped-sw-shelf`, 3 commits, NOT merged — Jake's taste pass next.**
 
-- **The feature (Notion brief, now In Progress):** SPEC.SHEET section 02
-  hands visitors both accent roles. 12 candidates = core token
-  primitives verbatim (nasa/cobalt … verdigris/light). Gates live vs
-  computed grounds: system 4.5:1 on paper; expressive 3:1 vs EITHER
-  ground (ink-only would refuse shipped classic-dark pink — NYQUIST
-  caught it). Refusals quote the ratio; expressive keeps the marks-only
-  indirection (`--accent-expressive-text` → ink below 4.5:1, text
-  rights above — reproduces shipped token behavior exactly). Engine:
-  `src/lib/buildASkin.ts`, 4 inline props on `<html>`, sessionStorage
-  per skin, revalidate() on every skin/theme flip from settings.ts —
-  invalidated picks silently drop. WCAG math shared via new
-  `src/lib/contrast.ts`. GL DS Feed Pending stamp REMOVED (key + CSS).
-- **Found truths:** the 12 split exactly 6/6 text-rights/marks-only per
-  context and the split INVERTS light↔dark (cobalt↔glow is the lesson);
-  expressive can never be hard-refused on shipped skins (ground
-  contrast ≥12.9:1 ⇒ max-vs-either ≥ ~3.6) — refusal branch is a guard
-  for future low-contrast skins. `--accent-expressive-mark` is
-  transparent in classic-dark (pre-existing, untouched).
-- **Pass 3 (Jake's nesting call): builder = its OWN window.** Sheet got
-  a sticky title row (System Spec — LUNDE OS + CUSTOMIZE LUNDE OS
-  button); button opens code-split program `skinbuilder` (SYS-15,
-  584×309 measured, no desktop icon/path, medieval title "The
-  Pigments") via `useWindows.open` — idempotent, re-click refocuses.
-  Sheet back to 01–04; chip table renames on pick cross-window.
-- Also: `::selection` hardcoded ink → `--on-accent-expressive`;
-  `.fail` chips → `--status-danger-base`; `LaunchFilm 2.tsx` dup deleted.
-- Verified: build + tsc + 25/25 tests, live probes ×3 (refuse/apply/
-  demote/reset/reload/flip-drop/cross-window/refocus), 360px, keyboard.
-  NYQUIST built pass 3 in a throwaway worktree to dodge the shared-
-  `.next` trap while the orchestrator's dev server ran — good pattern.
+- **The reframe (Jake's call):** the installer parody geared to progress
+  became a shelf of boxed retail software from the parallel 1992 — the
+  door sells the shipped work. Jake also ruled: browse free, gate the
+  open (audit's #1 friction risk absorbed into the bit).
+- **The build:** `src/programs/shelf/` (Shelf/ShelfBox/InstallOverlay/
+  InstallBar). Boxes = fixed 3:4 slots, composed token-only placeholder
+  fronts (art convention `/case/<slug>/box.webp`, none shipped yet),
+  3D flip WITHOUT preserve-3d (per-face `perspective() rotateY()` —
+  recede/roughen filters flatten 3D contexts), `inert` face swap, focus
+  choreography, Escape ladder (overlay → unflip → window). Shipped boxes
+  INSTALL: bar steps to 90, stalls for the license check (unchanged
+  GateSphere, reframed by one copy line), 100 on unlock, case window
+  opens. In-dev boxes stay shrink-wrapped (sheen + pink Stamp) with the
+  verbatim nudge wiring. Registry: `progress` → shelf, 720×600 @
+  (250,48); `/projects/<slug>` deep-link parent now `progress`;
+  `projects` flat index kept registered+gated for bare `/projects`.
+  InProgress.tsx + progress.module.css deleted; `progress.eyebrow/eta/
+  etaLabel` pruned; nudge/offline/empty keys reused. Medieval: tomes
+  (accent spine, hatched bar, TRANSCRIBE/EDITION/STILL BEING ILLUMINATED).
+- **The fix (Fable):** install layer anchored to scroll content hung the
+  license sphere 57px past the window bottom. Wrap pins to body height,
+  grid scrolls internally, bar yields its rows during license. Probed
+  headless (real viewports — the pane tab was hidden, layout degenerate):
+  sphere + cancel fully visible at 1280×800 and 360×740.
+- **Verified:** tsc, 25/25 tests, isolated prod build (28/28 pages —
+  main `.next` never touched; another chat's dev server owned :3000).
+  Probes: 4 boxes, 3 cols desktop / 2 @ 360px, no overflow, zero CLS
+  (252×336 slot pre/post), flip a11y, license geometry, unlocked install
+  opens `case:` window, medieval copy live. Reduced-motion + Lighthouse
+  unverified by emulation (standing debt).
+- **Flags:** family-hub back panel scrolls from the start (3-col density
+  is a taste call) · `public/case/family-hub 2/` untracked dup dir —
+  Jake to delete · box art all placeholder until Jake ships assets.
 
 ## Next steps
 
-1. **Jake: sanity-walk Family Hub LIVE on lunde.co** — rail through all
-   nine beats, demos, launch film sound, phone (rail hidden <640cqw),
-   medieval skin. Report anything off; auto-zoom tuning parked.
-2. **Jake asset pass:** Ryan avatar-token Slack screenshots → Plate 09 ·
-   color before/after → Plate 10 · remaining Drop plates (01, 04–06, 08).
-3. **The Desk** — next flagship; Jake's 3D-room references incoming.
-4. Cleanup when idle: delete merged branches (`cv-exe`, `suggestion-box`,
-   `case-family-hub`, `medieval-sfx*` once confirmed).
-5. **Jake:** eyeball tracker v2 + revive `leaf-patch` (reconcile Family
-   Hub 55→100, slot sizes, TAG-03) or park on.
-6. Gate friction (Jake) — audit's #1 risk, still unactioned.
-7. COMMAND.CTR zero-`list()` fix · deck cost read · Figma stale STRING
-   vars · typography finale · underwater · First Pass `459-473268`
-   unindexed — carried.
+1. **Jake taste pass on SHIPPED.SW** (dev server on :3000 serves the
+   branch): flip feel, install pacing, license beat, 3-col vs 2-col
+   back-panel density, medieval tomes. Then merge `feat/shipped-sw-shelf`.
+2. **Jake: sanity-walk Family Hub LIVE on lunde.co** (carried from s38).
+3. **Jake asset pass:** box art for the two shipped cases now joins the
+   list (Ryan avatar-token screenshots · Plate 10 · Drop plates · box.webp).
+4. **The Desk** — next flagship; 3D-room refs incoming.
+5. Cleanup when idle: delete merged branches; `family-hub 2/` dup dir.
+6. Carried: eyeball tracker v2 / `leaf-patch` revive-or-park · COMMAND.CTR
+   zero-`list()` + deck cost read · Figma stale STRING vars · typography
+   finale · underwater · First Pass `459-473268` unindexed.
