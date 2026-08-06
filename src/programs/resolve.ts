@@ -78,7 +78,10 @@ export function windowsForPath(path: string[]): string[] {
   if (path.length === 0) return ['readme'] // first-run window
   if (path[0] === 'readme') return ['readme']
   if (path[0] === 'projects') {
-    if (path[1] && getCase(path[1])) return ['projects', `case:${path[1]}`]
+    // a case deep-link opens the SHELF behind the case window — that is the
+    // room this work lives in now. The flat `projects` index stays
+    // registered for the bare /projects path only.
+    if (path[1] && getCase(path[1])) return ['progress', `case:${path[1]}`]
     return ['projects']
   }
   if (path[0] === 'visualizers') {

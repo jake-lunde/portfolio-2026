@@ -1,0 +1,700 @@
+/* SHIPPED.SW — the case-studies shelf. Boxed software from a parallel
+   1992: a fixed 3:4 slot per case, a front that flips to the back panel,
+   and an install layer that actually finishes.
+
+   The bar CSS (track · stripes · shutter · creep) is carried whole from
+   the retired IN PROGRESS window: a full-width fill layer with an opaque
+   shutter scaled from the right, so nothing about a bar is ever laid out
+   twice. */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  position: relative;
+}
+
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+/* ---------------- masthead ----------------
+   The window title stays "Case Studies" (program.progress.name drives both
+   the icon and the titlebar); SHIPPED.SW is the masthead inside. */
+
+.head {
+  padding: 16px 20px 14px;
+  background: var(--surface);
+  border-bottom: var(--border-width-default) solid var(--content);
+}
+
+[data-theme='dark'] .head {
+  border-bottom-color: var(--border);
+}
+
+.eyebrow {
+  font-family: var(--display);
+  font-size: var(--type-body-size);
+  margin: 0;
+}
+
+/* ---------------- the shelf ----------------
+   200px minimum holds THREE boxes across the 676px of content a 720px
+   window leaves after padding; the narrow query below drops the minimum
+   so 360px still gets two. */
+
+.grid {
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 16px 20px 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.box {
+  position: relative;
+}
+
+/* the slot. Fixed ratio: the box occupies exactly this much room before
+   any art has loaded, and exactly this much after. */
+.frame {
+  position: relative;
+  aspect-ratio: 3 / 4;
+}
+
+/* Two stacked faces, each carrying its OWN perspective + rotateY (set by
+   Motion) and its own backface-visibility. No `transform-style:
+   preserve-3d` anywhere: the shell's recede filter and medieval's
+   #lunde-roughen both flatten a 3D context, and this survives both. */
+.face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+}
+
+[data-theme='dark'] .face {
+  border-color: var(--border);
+}
+
+.face[inert] {
+  pointer-events: none;
+}
+
+/* ---------------- front of box ---------------- */
+
+.frontFace {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  color: var(--content);
+  cursor: pointer;
+}
+
+.frontFace:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* key art, duotoned in CSS: grayscale under an accent multiply (screen in
+   dark). Tokens-driven, so it re-skins with everything else. */
+.art {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+}
+
+.art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.1);
+}
+
+.art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  mix-blend-mode: multiply;
+}
+
+[data-theme='dark'] .art::after {
+  mix-blend-mode: screen;
+}
+
+/* no art yet → the front composes itself from tokens. Same geometry, so a
+   case with assets and a case without sit on the shelf as equals. */
+.composed {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 12%, transparent) 0 6px,
+    transparent 6px 18px
+  );
+}
+
+.bigNo {
+  font-family: var(--display);
+  font-size: var(--type-display-size);
+  line-height: var(--leading-none);
+  color: var(--accent-expressive-text);
+}
+
+/* shrink-wrap: a sheen across the plastic, and the stamp under it */
+.sheen {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    115deg,
+    color-mix(in srgb, var(--content) 8%, transparent) 0 14px,
+    transparent 14px 34px
+  );
+}
+
+.stampWrap {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-11deg);
+}
+
+.frontMeta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: var(--surface-raised);
+  border-top: var(--border-width-default) solid var(--content);
+}
+
+[data-theme='dark'] .frontMeta {
+  border-top-color: var(--border);
+}
+
+.boxName {
+  font-family: var(--display);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--leading-tight);
+}
+
+.badge {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-10);
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+.version {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--type-micro-tracking);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.frontHint {
+  position: relative;
+  padding: 5px 10px;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  font-weight: var(--button-weight);
+  letter-spacing: var(--tracking-16);
+  text-align: center;
+  background: var(--accent);
+  color: var(--surface);
+}
+
+/* ---------------- back of box ---------------- */
+
+.backFace {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+}
+
+.backFace:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.backInner {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 10px 8px;
+}
+
+.backTitle {
+  font-family: var(--display);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--leading-tight);
+  margin: 0 0 6px;
+}
+
+.backNo {
+  color: var(--accent-expressive-text);
+}
+
+.thesis {
+  font-family: var(--sans);
+  font-size: var(--type-label-size); /* 11px — prose at box scale */
+  line-height: var(--leading-normal);
+  color: var(--content);
+  margin: 0 0 8px;
+}
+
+.backHead {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-16);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin: 0 0 4px;
+}
+
+.reqs {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px var(--space-2);
+  margin: 0 0 8px;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  line-height: var(--leading-normal);
+}
+
+.reqs dt {
+  color: var(--content-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-08);
+}
+
+.reqs dd {
+  margin: 0;
+  text-align: right;
+  color: var(--content);
+}
+
+.blurb {
+  margin: 0 0 8px;
+  padding-left: 7px;
+  border-left: var(--border-width-thick) solid var(--accent);
+}
+
+.blurb p {
+  font-family: var(--sans);
+  font-size: var(--type-label-size);
+  line-height: var(--leading-normal);
+  margin: 0;
+}
+
+.blurb footer {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-08);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  margin-top: 3px;
+}
+
+.shots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.shots li {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: var(--border-width-hairline) solid var(--border);
+}
+
+.shots img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(1) contrast(1.05);
+}
+
+.meter {
+  margin-top: 6px;
+}
+
+.phase {
+  font-family: var(--sans); /* prose, not a label */
+  font-size: var(--type-micro-size);
+  line-height: var(--leading-normal);
+  color: var(--content-muted);
+  margin: 0 0 5px;
+  overflow-wrap: anywhere;
+}
+
+.wrappedHint {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+  margin: 5px 0 0;
+}
+
+.backActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 10px;
+  border-top: var(--border-width-hairline) solid var(--border);
+}
+
+/* ---------------- buttons ---------------- */
+
+.installBtn,
+.nudgeBtn,
+.flipBackBtn,
+.cancelBtn {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size); /* 11px */
+  font-weight: var(--button-weight);
+  letter-spacing: var(--tracking-16); /* the button role's wider set */
+  padding: 5px 10px;
+  background: var(--surface-raised);
+  color: var(--content);
+  border: var(--border-width-default) solid var(--content);
+  transition: transform 0.08s ease;
+}
+
+[data-theme='dark'] .installBtn,
+[data-theme='dark'] .nudgeBtn,
+[data-theme='dark'] .flipBackBtn,
+[data-theme='dark'] .cancelBtn {
+  border-color: var(--border);
+}
+
+/* INSTALL is the primary act of this window */
+.installBtn {
+  background: var(--accent);
+  color: var(--surface);
+  flex: 1;
+}
+
+.flipBackBtn {
+  margin-left: auto;
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-10);
+  padding: 5px 8px;
+  background: transparent;
+  border-color: var(--border);
+  color: var(--content-muted);
+}
+
+.installBtn:hover,
+.nudgeBtn:hover:not(:disabled),
+.flipBackBtn:hover,
+.cancelBtn:hover {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+/* physical press — transform only */
+.installBtn:active,
+.nudgeBtn:active:not(:disabled),
+.flipBackBtn:active,
+.cancelBtn:active {
+  transform: translateY(1px);
+}
+
+.installBtn:focus-visible,
+.nudgeBtn:focus-visible,
+.flipBackBtn:focus-visible,
+.cancelBtn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.nudgeBtn:disabled {
+  opacity: var(--interactive-disabled-opacity);
+  cursor: default;
+}
+
+.count {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+}
+
+/* ---------------- bars (carried from IN PROGRESS) ---------------- */
+
+.track {
+  position: relative;
+  height: 9px;
+  overflow: hidden;
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--content);
+}
+
+/* the installer bar sits taller, like the OS 9 original */
+.trackLg {
+  height: 15px;
+}
+
+[data-theme='dark'] .track {
+  border-color: var(--border);
+}
+
+/* diagonal installer stripes: accent + a lighter mix of the same accent.
+   Overhangs the track horizontally so the creep never exposes an edge. */
+.stripes {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -32px;
+  right: -32px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--accent) 0 8px,
+    color-mix(in srgb, var(--accent) 58%, var(--surface)) 8px 16px
+  );
+}
+
+.solid {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+}
+
+/* opaque shutter over the unfilled remainder — this is what animates */
+.shutter {
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  transform-origin: right center;
+  will-change: transform;
+}
+
+/* Stripes creep left-to-right. 16px is the gradient period measured along
+   the 135deg axis, so a horizontal step of 16 / cos(45°) = 22.63px lands
+   exactly one period on — a seamless loop. Motion only, never layout. */
+@media (prefers-reduced-motion: no-preference) {
+  .stripes {
+    animation: creep 1.9s linear infinite;
+  }
+}
+
+@keyframes creep {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(22.63px);
+  }
+}
+
+/* ---------------- the install layer ----------------
+   An absolute layer inside the shelf, not a new window: an install belongs
+   to the thing being installed. */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.overlay:focus-visible {
+  outline: none;
+}
+
+.installPanel {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.installName {
+  font-family: var(--display);
+  font-size: var(--type-body-size);
+  margin: 0;
+  text-align: center;
+}
+
+.installStep {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-08);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  text-align: center;
+  margin: 0;
+  min-height: 14px;
+}
+
+/* the license check — an unchanged GateSphere, reframed by the line above
+   it. The sphere sizes its radius off this box's rect. */
+.sphereWrap {
+  display: flex;
+  min-height: 420px;
+}
+
+.sphereWrap > div {
+  flex: 1;
+}
+
+.cancelBtn {
+  align-self: center;
+  background: transparent;
+  border-color: var(--border);
+  color: var(--content-muted);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-10);
+}
+
+/* ---------------- foot ---------------- */
+
+.foot {
+  padding: 0 20px 18px;
+  min-height: 22px;
+}
+
+.hint,
+.empty {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+  line-height: var(--leading-normal);
+}
+
+.empty {
+  display: block;
+  padding: 20px;
+}
+
+.error {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-02);
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .installBtn,
+  .nudgeBtn,
+  .flipBackBtn,
+  .cancelBtn {
+    transition: none;
+  }
+}
+
+/* ---------------- medieval: the scriptorium ----------------
+   Boxes are tomes: thick boards, no plastic sheen, and no machine stripes.
+   The bar becomes a rubricated block laid down in quill hatching, wavered
+   by the shell's #lunde-roughen filter (the hand-inked treatment). Ink
+   doesn't creep, so the animation stops. The filter sits on the TRACK, a
+   descendant of a face — never on a face's ancestor. */
+
+:global([data-skin='medieval']) .track {
+  border-width: var(--border-width-thick);
+  filter: url(#lunde-roughen);
+}
+
+:global([data-skin='medieval']) .stripes,
+:global([data-skin='medieval']) .solid {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent) 0 2px,
+    color-mix(in srgb, var(--accent) 34%, var(--surface)) 2px 5px
+  );
+  animation: none;
+}
+
+:global([data-skin='medieval']) .face {
+  border-width: var(--border-width-thick);
+}
+
+/* the tome's spine, on the binding edge */
+:global([data-skin='medieval']) .frontFace::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 12px;
+  z-index: 1;
+  background: var(--accent);
+  border-right: var(--border-width-default) solid var(--content);
+}
+
+/* vellum is not shrink-wrapped: uncut pages, not plastic */
+:global([data-skin='medieval']) .sheen {
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--content) 10%, transparent) 0 1px,
+    transparent 1px 9px
+  );
+}
+
+:global([data-skin='medieval']) .version {
+  color: var(--accent-expressive-text);
+}
+
+/* ---------------- narrow ---------------- */
+
+@media (max-width: 420px) {
+  .head {
+    padding: 14px 14px 12px;
+  }
+
+  .grid {
+    padding: 14px;
+    /* 140px minimum keeps TWO boxes across a 360px viewport */
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-3);
+  }
+
+  .foot {
+    padding: 0 14px 14px;
+  }
+
+  .overlay {
+    padding: 14px;
+  }
+
+  .sphereWrap {
+    min-height: 380px;
+  }
+}

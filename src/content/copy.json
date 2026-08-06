@@ -149,12 +149,6 @@
     "medieval": "Scrying"
   },
   "progress.empty": "Nothing on the bench. Suspicious.",
-  "progress.eta": "Unknown — he has a day job",
-  "progress.etaLabel": "Estimated time remaining",
-  "progress.eyebrow": {
-    "base": "Installing case studies…",
-    "medieval": "Copying manuscripts…"
-  },
   "progress.nudge": {
     "base": "TELL HIM TO FINISH IT",
     "medieval": "IMPLORE"
@@ -190,6 +184,66 @@
   "settings.wallpaperHint": "Desktop pattern — classic-Mac spirit, print-archive ink",
   "settings.wallpaperLabel": "Wallpaper",
   "shared.soon": "Soon",
+  "shelf.eyebrow": {
+    "base": "SHIPPED.SW · parallel 1992",
+    "medieval": "Tomes copied in this house"
+  },
+  "shelf.flip": {
+    "base": "SEE BACK OF BOX",
+    "medieval": "TURN THE TOME"
+  },
+  "shelf.flipBack": {
+    "base": "FRONT OF BOX",
+    "medieval": "CLOSE THE TOME"
+  },
+  "shelf.indev": {
+    "base": "IN DEVELOPMENT",
+    "medieval": "STILL BEING ILLUMINATED"
+  },
+  "shelf.install": {
+    "base": "INSTALL",
+    "medieval": "TRANSCRIBE"
+  },
+  "shelf.install.cancel": {
+    "base": "CANCEL",
+    "medieval": "STAY THE HAND"
+  },
+  "shelf.install.done": {
+    "base": "Installation complete.",
+    "medieval": "The copy is made."
+  },
+  "shelf.install.license": {
+    "base": "One more thing, a license check.",
+    "medieval": "The abbot requires the word."
+  },
+  "shelf.install.step1": {
+    "base": "Verifying media…",
+    "medieval": "Preparing the vellum…"
+  },
+  "shelf.install.step2": {
+    "base": "Writing files…",
+    "medieval": "Ruling the lines…"
+  },
+  "shelf.install.step3": {
+    "base": "Registering extensions…",
+    "medieval": "Laying the ink…"
+  },
+  "shelf.installing": {
+    "base": "INSTALLING…",
+    "medieval": "TRANSCRIBING…"
+  },
+  "shelf.requirements": {
+    "base": "SYSTEM REQUIREMENTS",
+    "medieval": "REQUIREMENTS OF THE ORDER"
+  },
+  "shelf.versionLabel": {
+    "base": "VERSION",
+    "medieval": "EDITION"
+  },
+  "shelf.wrappedHint": {
+    "base": "Still shrink-wrapped.",
+    "medieval": "The pages are yet uncut."
+  },
   "shell.explainer.label": {
     "base": "WHAT IS THIS",
     "medieval": "WHAT IS WRIT HERE"

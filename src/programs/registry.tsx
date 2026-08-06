@@ -87,13 +87,22 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/projects',
   },
   {
+    // SHIPPED.SW — the shelf of boxed case studies. The id stays `progress`
+    // (it names the copy keys, the window store and the deep link, not the
+    // program) and so does the name: `program.progress.name` drives BOTH
+    // the desktop icon and the titlebar, so the split lives inside — the
+    // window is "Case Studies", the masthead in it is SHIPPED.SW.
     id: 'progress',
     name: 'Case Studies',
     meta: 'IDX-16',
     icon: 'folder',
-    component: dynamic(() => import('@/programs/progress/InProgress')),
-    size: { w: 520, h: 460 },
-    pos: { x: 320, y: 150 },
+    component: dynamic(() => import('@/programs/shelf/Shelf')),
+    // measured: 720 leaves 676px of shelf after the 20px gutters, which is
+    // exactly three 200px-minimum boxes plus their gaps; 600 shows the
+    // masthead, one full 3:4 row, and the top of the next — the scroll
+    // affordance a shelf needs — and still fits a 1280×800 laptop
+    size: { w: 720, h: 600 },
+    pos: { x: 250, y: 48 },
     onDesktop: true,
     path: '/cases',
   },
