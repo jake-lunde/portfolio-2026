@@ -142,58 +142,64 @@ export function CommandWidget() {
               }. Enter the Command Center to see how this site gets built.`
         }
       >
-        <span className={styles.ccDot} aria-hidden="true" />
-        <span className={styles.ccStamp}>{stamp}</span>
+        {/* row 1 — the glance layer: dot + stamp + cast. Ambient, always
+            true, meant to be read without stopping. */}
+        <span className={styles.ccRowGlance}>
+          <span className={styles.ccDot} aria-hidden="true" />
+          <span className={styles.ccStamp}>{stamp}</span>
 
-        {/* the cast, in pyramid order: the human first, then the crew.
-            Decorative — every name is spelled out inside the deck. */}
-        <span className={styles.ccCast} aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className={styles.ccMono}
-            data-active={onDuty === HUMAN.id || undefined}
-            src={HUMAN_PORTRAIT}
-            alt=""
-          />
-          <span className={styles.ccCastRule} />
-          {CREW.map((a) => (
-            <span
-              key={a.id}
-              className={styles.ccFace}
-              data-active={onDuty === a.id || undefined}
-              style={{
-                WebkitMaskImage: `url(${avatarFor(a.id, skin)})`,
-                maskImage: `url(${avatarFor(a.id, skin)})`,
-              }}
+          {/* the cast, in pyramid order: the human first, then the crew.
+              Decorative — every name is spelled out inside the deck. */}
+          <span className={styles.ccCast} aria-hidden="true">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className={styles.ccMono}
+              data-active={onDuty === HUMAN.id || undefined}
+              src={HUMAN_PORTRAIT}
+              alt=""
             />
-          ))}
+            <span className={styles.ccCastRule} />
+            {CREW.map((a) => (
+              <span
+                key={a.id}
+                className={styles.ccFace}
+                data-active={onDuty === a.id || undefined}
+                style={{
+                  WebkitMaskImage: `url(${avatarFor(a.id, skin)})`,
+                  maskImage: `url(${avatarFor(a.id, skin)})`,
+                }}
+              />
+            ))}
+          </span>
         </span>
 
-        {/* the leading edge of the feed — the single most recent thing
-            that happened, inline */}
-        <span className={styles.ccEdge}>
-          {leading ? (
-            <>
-              <b>{edgeName}</b>
-              {' · '}
-              {leading.redact ? (
-                <span
-                  className={styles.ccRedact}
-                  role="img"
-                  aria-label="Redacted — classified until it ships"
-                />
-              ) : (
-                leading.label
-              )}
-            </>
-          ) : (
-            'NO TRAFFIC — CREW ASLEEP'
-          )}
-        </span>
+        {/* row 2 — the action layer: the leading edge of the feed, then
+            the way in. What happened, and what to do about it. */}
+        <span className={styles.ccRowAction}>
+          <span className={styles.ccEdge}>
+            {leading ? (
+              <>
+                <b>{edgeName}</b>
+                {' · '}
+                {leading.redact ? (
+                  <span
+                    className={styles.ccRedact}
+                    role="img"
+                    aria-label="Redacted — classified until it ships"
+                  />
+                ) : (
+                  leading.label
+                )}
+              </>
+            ) : (
+              'NO TRAFFIC — CREW ASLEEP'
+            )}
+          </span>
 
-        <span className={styles.ccCta}>
-          ENTER COMMAND CENTER
-          <span aria-hidden="true">&nbsp;→</span>
+          <span className={styles.ccCta}>
+            ENTER COMMAND CENTER
+            <span aria-hidden="true">&nbsp;→</span>
+          </span>
         </span>
       </motion.button>
 

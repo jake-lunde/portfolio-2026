@@ -111,7 +111,10 @@ export function Window({ def, z, active, desktopRef }: Props) {
       data-window-id={def.id}
       className={`${styles.window} ${active ? styles.windowActive : ''} ${zoomed ? styles.windowZoomed : ''} ${bare ? styles.windowBare : ''}`}
       style={{
-        left: def.pos.x,
+        /* clamp the resting x so a window's right edge never opens off
+           glass on narrow desktops — CSS min(), not innerWidth, so SSR
+           and client agree. Drag can still take it wherever. */
+        left: `min(${def.pos.x}px, calc(100vw - ${size.w + 12}px))`,
         top: def.pos.y,
         width: size.w,
         height: size.h,

@@ -5,7 +5,7 @@
       "t": 0,
       "agent": "jake",
       "action": "prompt",
-      "label": "BUILD THE SHELL FIRST: WINDOWS, ICONS, TOKENS"
+      "label": "start with the shell — windows, icons, tokens first"
     },
     {
       "t": 0,
@@ -18,7 +18,7 @@
       "t": 2,
       "agent": "jake",
       "action": "prompt",
-      "label": "TWO ACCENTS PER SKIN. NEVER A THIRD."
+      "label": "two accents per skin. never a third."
     },
     {
       "t": 3,
@@ -49,7 +49,7 @@
       "t": 10,
       "agent": "jake",
       "action": "curate",
-      "label": "KEPT THE CREAM PLATE. CUT THE GREY ONE."
+      "label": "keep the cream plate, cut the grey one"
     },
     {
       "t": 12,
@@ -74,7 +74,7 @@
       "t": 15,
       "agent": "jake",
       "action": "prompt",
-      "label": "SCRUB EVERY TRACKED SECRET FROM HISTORY"
+      "label": "scrub every secret out of the git history please"
     },
     {
       "t": 16,
@@ -98,7 +98,7 @@
       "t": 21,
       "agent": "jake",
       "action": "prompt",
-      "label": "GUESTBOOK PERSISTS IN BLOB, NOT LOCALSTORAGE"
+      "label": "guestbook should persist somewhere real, not localstorage"
     },
     {
       "t": 22,
@@ -136,7 +136,7 @@
       "t": 36,
       "agent": "jake",
       "action": "prompt",
-      "label": "PULL MY REAL RIDE · TRIM 150M FROM THE HOUSE"
+      "label": "pull my real ride in — and trim the 150m around the house"
     },
     {
       "t": 37,
@@ -167,7 +167,7 @@
       "t": 42,
       "agent": "jake",
       "action": "curate",
-      "label": "PICKED THE GARDEN SCAN · MY WIFE'S FLOWERS"
+      "label": "the garden scan. those are my wife's flowers"
     },
     {
       "t": 43,
@@ -192,7 +192,7 @@
       "t": 47,
       "agent": "jake",
       "action": "prompt",
-      "label": "DECIMATE THE PHOTOSCAN UNDER 2K FACES"
+      "label": "can you decimate the photoscan? under 2k faces"
     },
     {
       "t": 48,
@@ -243,7 +243,7 @@
       "t": 62,
       "agent": "jake",
       "action": "prompt",
-      "label": "WEBAUDIO, NOT A GIF. 60FPS OR CUT IT."
+      "label": "webaudio, not a gif. 60fps or it doesn't ship"
     },
     {
       "t": 63,
@@ -269,7 +269,7 @@
       "t": 68,
       "agent": "jake",
       "action": "curate",
-      "label": "KEPT 5 REMIXES OF 11 · THE REST ARE OUT"
+      "label": "keep these 5 remixes, the rest are out"
     },
     {
       "t": 69,
@@ -287,7 +287,7 @@
       "t": 73,
       "agent": "jake",
       "action": "prompt",
-      "label": "PIN THE LAST 3 BOOTH SNAPS. LOCAL ONLY."
+      "label": "pin the last 3 booth snaps. local only tho"
     },
     {
       "t": 74,
@@ -325,7 +325,7 @@
       "t": 83,
       "agent": "jake",
       "action": "prompt",
-      "label": "LOU WAKES AFTER 5 MINUTES IDLE"
+      "label": "lou should wake up after like 5 minutes idle"
     },
     {
       "t": 84,
@@ -356,7 +356,7 @@
       "t": 91,
       "agent": "jake",
       "action": "prompt",
-      "label": "WINDOWS MUST FIT THEIR CONTENT ON OPEN"
+      "label": "windows need to fit their content when they open"
     },
     {
       "t": 92,
@@ -394,7 +394,7 @@
       "t": 100,
       "agent": "jake",
       "action": "prompt",
-      "label": "AMBIENT WIDGETS: TRANSFORM AND OPACITY ONLY"
+      "label": "ambient widgets stay transform and opacity only"
     },
     {
       "t": 101,
@@ -432,7 +432,7 @@
       "t": 112,
       "agent": "jake",
       "action": "prompt",
-      "label": "SHOW THE ORCHESTRATION. REDACT WHAT IS UNSHIPPED."
+      "label": "show the orchestration. redact whatever hasn't shipped."
     },
     {
       "t": 113,
@@ -476,7 +476,7 @@
       "t": 121,
       "agent": "jake",
       "action": "curate",
-      "label": "SIGNED OFF · PUSHED TO LUNDE.CO"
+      "label": "signed off — push it to lunde.co"
     }
   ]
 }

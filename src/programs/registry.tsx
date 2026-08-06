@@ -252,8 +252,10 @@ export const PROGRAMS: ProgramDef[] = [
     icon: 'nodes',
     component: dynamic(() => import('@/programs/command/CommandCenter')),
     // sized to the deck with its transmission log CLOSED — that is the
-    // default state, and a window should fit what it opens showing
-    size: { w: 800, h: 592 },
+    // default state, and a window should fit what it opens showing.
+    // Wide enough to clear the deck's 700px container query, so the log
+    // opens as the right-hand rail rather than a bottom drawer.
+    size: { w: 880, h: 600 },
     pos: { x: 250, y: 26 },
     chrome: 'crt',
     onDesktop: false,
