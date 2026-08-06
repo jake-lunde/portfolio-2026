@@ -116,13 +116,17 @@ export function InstallOverlay({
     >
       <div className={styles.installPanel}>
         <p className={styles.installName}>{name}</p>
-        <InstallBar
-          pct={pct}
-          striped
-          role="progressbar"
-          label={`${t('shelf.installing', skin)} ${name}`}
-          seconds={0.42}
-        />
+        {/* the bar yields its rows to the sphere during the license check —
+            a 600px window fits one or the other, not both */}
+        {phase !== 'license' && (
+          <InstallBar
+            pct={pct}
+            striped
+            role="progressbar"
+            label={`${t('shelf.installing', skin)} ${name}`}
+            seconds={0.42}
+          />
+        )}
         <p className={styles.installStep} aria-live="polite">
           <Copy k={statusKey} as="span" />
         </p>

@@ -7,10 +7,14 @@
    shutter scaled from the right, so nothing about a bar is ever laid out
    twice. */
 
+/* height (not min-height): the wrap pins to the window body's visible
+   box and the GRID scrolls inside it, so the install layer's inset(0)
+   covers what the reader sees — anchored to scroll content it hangs the
+   license sphere past the window's bottom edge */
 .wrap {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  height: 100%;
   position: relative;
 }
 
@@ -49,6 +53,9 @@
 
 .grid {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   list-style: none;
   margin: 0;
   padding: 16px 20px 18px;
