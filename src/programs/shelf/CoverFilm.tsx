@@ -175,7 +175,24 @@ const mute = (p: YTPlayerLike) => {
   }
 }
 
-export function CoverFilm({ id, title }: { id: string; title: string }) {
+export function CoverFilm({
+  id,
+  title,
+  onClear,
+}: {
+  id: string
+  title: string
+  /** THE GATE, REPORTED OUT (pass 9). The film used to be the only thing
+      that answered to it, and CSS could read it off the iframe's own
+      attribute. It now has a partner underneath — the plate loader, which
+      has to fade out as the film fades in and back as it fades out — and no
+      CSS combinator reaches BACKWARD from the iframe to a preceding
+      sibling. So the state comes up here and ShelfBox hands it down to
+      both, which is also the honest shape: the gate is a property of the
+      box's cover, not of the embed. One render per gate edge — a loop every
+      forty-odd seconds — and nothing per frame. */
+  onClear?: (clear: boolean) => void
+}) {
   const frame = useRef<HTMLIFrameElement>(null)
   /** the player has been PLAYING for longer than its own chrome lasts */
   const [clear, setClear] = useState(false)
@@ -275,6 +292,23 @@ export function CoverFilm({ id, title }: { id: string; title: string }) {
       } catch {}
     }
   }, [])
+
+  /* the gate, announced. Its own effect rather than a call inside the
+     player's callback: `setClear` is fired from a YouTube event, which is
+     outside React's tree, and reporting from the render the state actually
+     landed in is what keeps the loader's fade and the film's fade on the
+     same frame. Unmounting reports the gate SHUT — a box whose film has
+     gone away is a box that is tuning again, not one holding a stale
+     clearance. */
+  useEffect(() => {
+    onClear?.(clear)
+  }, [clear, onClear])
+
+  /* and it is reported SHUT on the way out, in an effect of its own. Folding
+     this into the cleanup above would fire a false on every edge — React
+     runs the old cleanup before the new effect — and a gate that blinks shut
+     between two open states is a loader that flashes. */
+  useEffect(() => () => onClear?.(false), [onClear])
 
   return (
     <span className={styles.filmWrap} aria-hidden="true">

@@ -202,6 +202,10 @@
     "base": "LOADING…",
     "medieval": "UNROLLING…"
   },
+  "shelf.plateLoading": {
+    "base": "TUNING SIGNAL…",
+    "medieval": "SUMMONING THE PICTURE…"
+  },
   "shelf.play": {
     "base": "PLAY",
     "medieval": "PERFORM"

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { CopyText as Copy } from '@/content/CopyText'
@@ -12,6 +12,7 @@ import { useSettings } from '@/store/settings'
 import { Box3D } from './Box3D'
 import { CoverFilm } from './CoverFilm'
 import { InstallBar } from './InstallBar'
+import { PlateLoader } from './PlateLoader'
 import styles from './shelf.module.css'
 
 /* One box on the shelf. Back is the panel every 1992 box had — a thesis,
@@ -48,6 +49,15 @@ import styles from './shelf.module.css'
    all four boxes, the film crossfades over it and back to it at every gate,
    and the composed front is demoted to what happens when a byte range fails
    — reachable, never designed for.
+
+   PASS 9 TAKES THE TWO STILLS BACK OFF THE FILM BOXES. Jake, post-ship:
+   "throw a loader in there — something fun, maybe related to our data viz."
+   A still that a film replaces six seconds later is a poster frame by
+   another name, which is the argument pass 8 was already having. So the two
+   boxes that HAVE a film print the frequency-bar loader while the gate is
+   shut (PlateLoader.tsx) and the still becomes their reduced-motion face —
+   see the ruling on the plate below. The two boxes with no film keep their
+   pictures untouched: a loader on a box with nothing to load is a lie.
 
    THE FRONT IS JAKE'S BOX-ART TEMPLATE (pass 4), built from his Figma: a
    warm cream ground, product photography filling the upper two thirds and
@@ -160,6 +170,10 @@ export function ShelfBox({
   const [live, setLive] = useState(false)
   /** the key art did not load — the composed number takes the plate back */
   const [artFailed, setArtFailed] = useState(false)
+  /** the film's gate is open (CoverFilm reports it up — see the prop there).
+      Held HERE because two things answer to it now: the film fading in, and
+      the loader underneath fading out. */
+  const [filmClear, setFilmClear] = useState(false)
   const tag = useRef<HTMLButtonElement>(null)
   const back = useRef<HTMLDivElement>(null)
   const slot = useRef<HTMLDivElement>(null)
@@ -179,6 +193,30 @@ export function ShelfBox({
      first paint the composed front, which is the poster frame anyway. */
   useEffect(() => setLive(true), [])
   const film = shipped && box?.video && live && !reduced ? box.video : null
+  const onFilmClear = useCallback((c: boolean) => setFilmClear(c), [])
+
+  /* WHAT THE PLATE PRINTS AT REST (pass 9).
+     Jake struck the two stills — "throw a loader in there, something fun,
+     maybe related to our data viz" — so a box that HAS a film shows the
+     frequency-bar loader while the gate is shut, and the art it used to show
+     is demoted to the two paths where a loader would be wrong:
+
+       · REDUCED MOTION. No film mounts there at all (`film` is null above),
+         so a loader would be a permanent bar chart under a caption that says
+         TUNING SIGNAL and never resolves — an error message wearing the
+         house style. The still art IS the picture on that path, and it is
+         why the two `art` entries stay in cases.ts rather than being
+         deleted with the stills they used to draw.
+       · A BROKEN PICTURE. `onError` still falls to the composed number,
+         which is the last resort it has been since pass 8 — but on a film
+         box under full motion nothing requests the picture in the first
+         place, so that path is now reachable only under reduced motion.
+
+     The two boxes WITHOUT a film are untouched: tooling and
+     interview-pipeline print their art, at rest, exactly as pass 8 left it.
+     A loader on a box that has nothing to load would be a lie. */
+  const art = box?.art && !artFailed ? box.art : null
+  const tuning = Boolean(shipped && box?.video && !reduced)
 
   /* focus follows the flip: into the back panel's first live control, and
      back to the tag that turned the box over.
@@ -344,14 +382,22 @@ export function ShelfBox({
                 live (grouping property, leaf of the 3D tree — see the note at
                 the top of this file). */}
             <span className={styles.plate} aria-hidden="true">
-              {box?.art && !artFailed ? (
-                /* THE PICTURE. Pass 8: every cover has one, and it is the
-                   plate's RESTING state — on the two boxes with a film it is
-                   what the film fades in over and what comes back the instant
-                   the gate shuts, and on the two without it is simply the
-                   artwork. It takes the plate's own treatment because it is a
-                   child of the plate: the blob mask and the airbrush on
-                   figma, the printed border on the other three.
+              {tuning ? (
+                /* THE BOX TUNING IN (pass 9). The film's gate holds for the
+                   six-plus seconds the player paints its own furniture, and
+                   again on every loop — that is the window this fills, and it
+                   fills it with the site's own frequency-bar motif rather
+                   than with a still that the film then replaces. It sits
+                   under the film exactly where the art sat, and the same
+                   gate crossfades the two. PlateLoader.tsx has the ruling. */
+                <PlateLoader clear={filmClear} />
+              ) : art ? (
+                /* THE PICTURE. Pass 8 put one on every cover; pass 9 leaves
+                   it as the resting face of the two boxes that have no film
+                   (tooling, interview-pipeline) and as the REDUCED-MOTION
+                   face of the two that do. It takes the plate's own treatment
+                   because it is a child of the plate: the blob mask and the
+                   airbrush on figma, the printed border on the other three.
 
                    EAGER, and deliberately so. `loading="lazy"` is for pictures
                    below the fold; these four ARE the fold — the shelf window
@@ -369,10 +415,10 @@ export function ShelfBox({
                    case name, and a cover that names itself a second time is
                    two labels for one object. */
                 <img
-                  src={box.art.src}
+                  src={art.src}
                   alt={`${c.name} box art`}
-                  width={box.art.w}
-                  height={box.art.h}
+                  width={art.w}
+                  height={art.h}
                   loading="eager"
                   decoding="async"
                   draggable={false}
@@ -394,7 +440,13 @@ export function ShelfBox({
                   is actually rolling — the composed cover under it is the
                   printed face of this box, not a poster frame waiting to be
                   replaced. CoverFilm.tsx owns the gate. */}
-              {film && <CoverFilm id={film} title={`${c.name} — cover film`} />}
+              {film && (
+                <CoverFilm
+                  id={film}
+                  title={`${c.name} — cover film`}
+                  onClear={onFilmClear}
+                />
+              )}
             </span>
 
             {/* the game box's keyline: the art sits in a printed window

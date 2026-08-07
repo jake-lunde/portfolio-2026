@@ -61,7 +61,17 @@ export type CaseDef = {
         front composes itself from tokens with the shelf's index number in
         the plate. Pass 8 makes that a FALLBACK and nothing else: every
         shipped cover has art, and a number waiting for a film to fade in
-        was the state Jake struck ("the placeholder is just a number"). */
+        was the state Jake struck ("the placeholder is just a number").
+
+        ⚠️ ON A BOX THAT ALSO HAS A `video`, THIS IS NO LONGER THE RESTING
+        FACE (pass 9). Jake struck the two stills — "throw a loader in
+        there, something fun, maybe related to our data viz" — so those
+        plates run the frequency-bar loader while the film's gate is shut,
+        and the art stays here for the one path a loader would be wrong on:
+        REDUCED MOTION, where no film mounts at all and pulsing bars under
+        "TUNING SIGNAL…" would never resolve. Do not delete these two
+        entries because the shelf appears not to use them; they are the
+        reduced-motion cover. */
     art?: { src: string; w: number; h: number }
     /** the box-art template's publisher mark, printed small at the top-left
         the way a 1992 sleeve carried its house logo. Convention:
@@ -123,9 +133,10 @@ export const CASES: CaseDef[] = [
     box: {
       /* the three phones on mint — Jake's own product shot. 2.10:1 into a
          16:9 plate, so it gives up a sliver either side and keeps the
-         phones dead centre. It is also the FILM's resting frame: the
-         embed fades in over it and the picture comes back every time the
-         gate shuts (CoverFilm.tsx). */
+         phones dead centre. PASS 9: this is the REDUCED-MOTION cover now.
+         At full motion the plate tunes in with the loader and the film
+         crossfades over that; the mint still is what a reader who has asked
+         for no motion — and therefore gets no film — sees instead. */
       art: { src: '/case/greenlight-invest/box-art.webp', w: 1200, h: 571 },
       video: 'Nxl0uCGZNCw',
       coverVariant: 'stripe',
@@ -152,7 +163,10 @@ export const CASES: CaseDef[] = [
     box: {
       /* the hub dashboard, seated under the blob mask and the airbrush —
          the same treatment the film gets, which is what makes the two
-         crossfade as one picture rather than as two layers */
+         crossfade as one picture rather than as two layers. PASS 9: the
+         REDUCED-MOTION cover, as on Invest; at full motion the loader holds
+         this plate (bars inside the blob, under the airbrush) until the
+         film's gate opens. */
       art: { src: '/case/family-hub/box-art.webp', w: 1200, h: 727 },
       /* the launch film, the same cut plate 11 runs in the case study */
       video: 'G-tWcCCMdGE',
