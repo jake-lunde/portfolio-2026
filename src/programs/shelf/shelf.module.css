@@ -416,18 +416,26 @@
 
 /* COVER, for an iframe. YouTube letterboxes 16:9 into whatever box it is
    given, so the box is made 16:9 and oversized until the FACE is the crop:
-   height = box height × 1.02, width = that × 16/9. At 246 × 328 that is
-   335 × 595 — 2.4× the face's width — centred, with the face's own
-   overflow doing the cropping. The 2% overscan eats YouTube's sub-pixel
-   letterbox seam. Derived from --box-h, so the narrow breakpoint's smaller
-   box needs no second set of numbers, and fixed at layout time, so nothing
-   shifts when the video paints. */
+   height = box height × 1.4, width = that × 16/9. At 246 × 328 that is
+   459 × 816 — 3.3× the face's width — centred, with the face's own
+   overflow doing the cropping. Derived from --box-h, so the narrow
+   breakpoint's smaller box needs no second set of numbers, and fixed at
+   layout time, so nothing shifts when the video paints.
+
+   1.4, not the 1.02 that bare `cover` needs: the extra overscan buries the
+   PLAYER, not just the letterbox seam. YouTube's title overlay eats the
+   top ~14% of its own frame whenever playback hasn't started — data saver,
+   iOS Low Power, any autoplay refusal — and this embed can never be
+   clicked out of that state (pointer-events: none). 1.4 crops 14.6% off
+   each edge, so the chrome lands outside the face and what shows is always
+   film. A tighter crop on decorative cover art is the cheap side of that
+   trade. */
 .coverFrame {
   position: absolute;
   top: 50%;
   left: 50%;
-  height: calc(var(--box-h) * 1.02);
-  width: calc(var(--box-h) * 1.02 * 16 / 9);
+  height: calc(var(--box-h) * 1.4);
+  width: calc(var(--box-h) * 1.4 * 16 / 9);
   transform: translate(-50%, -50%);
   border: 0;
   pointer-events: none;
