@@ -800,250 +800,20 @@
   display: block;
 }
 
-/* --------- THE PLATE LOADER (pass 9) ---------
-   What the two boxes with a film print while the film is not allowed to be
-   seen. Jake struck the still that used to sit here — "throw a loader in
-   there, something fun, maybe related to our data viz" — so the plate now
-   runs the site's own frequency-bar motif (components/case/FrequencyBars,
-   the visualiser plates) at box scale: eleven hairline bars pulsing under a
-   line in the loading register.
-
-   EVERYTHING MOVES ON `transform`, AND NOTHING MOVES IN JAVASCRIPT. Each bar
-   is one `scaleY` keyframe with its own period and its own NEGATIVE delay —
-   negative so the row is already mid-signal on the first frame instead of
-   snapping up from flat together. Three periods cycled through eleven bars
-   is what stops them ever resyncing into a single beat. The sweep is one
-   more transform. No rAF, no interval, no state: a box on this shelf costs
-   twelve composited layers and zero main-thread work for as long as it
-   stands there.
-
-   THE GROUND IS THE BOARD, ONE SHADE IN. `--cover-ground` is the box's own
-   material, so the plate reads as an unprinted window in the paper rather
-   than a black screen someone cut into it — and it is the right ground for
-   the crossfade too: the film arrives over a warm neutral instead of over a
-   mint product shot it has nothing to do with. 8% of the cover's own ink is
-   what makes it read as recessed. Tokens throughout; the peak bar is the
-   expressive accent used as a MARK, which is the one thing that role is for.
-
-   ⚠️ IT LIVES INSIDE THE PLATE, WHICH IS A LEAF OF THE 3D TREE. Nothing here
-   may become a filter, a mask or a mix-blend on anything above `.plate` —
-   same law as the blob, the airbrush and medieval's #lunde-roughen.
-
-   ⚠️ AND IT IS NOT AN ERROR STATE. `data-clear` fades it out on exactly the
-   0.5s the film fades in on, and the gate shutting (a loop, a stall, a seek)
-   fades it back. The composed number is still the only thing on this face
-   that means something is broken. */
-.plateLoader {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: calc(var(--box-w) * 0.03);
-  /* derived from the cover's own pair, so all four variants — and medieval's
-     reset of them — get a loader in their own ink without a second rule */
-  --loader-ground: color-mix(in srgb, var(--cover-ink) 8%, var(--cover-ground));
-  --loader-ink: color-mix(in srgb, var(--cover-ink) 58%, var(--cover-ground));
-  --loader-ink-soft: color-mix(in srgb, var(--cover-ink) 20%, var(--cover-ground));
-  background: var(--loader-ground);
-  /* the same fade, the same duration and the same easing as `.coverFrame`:
-     the two are one crossfade, not two effects that happen to overlap */
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-}
-
-/* the film is up and has outlived its own chrome — stand down */
-.plateLoader[data-clear] {
-  opacity: 0;
-}
-
-.loaderBars {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: calc(var(--box-w) * 0.016);
-  height: calc(var(--box-w) * 0.17);
-  /* contains the sweep. Overflow is not a grouping property — this clips a
-     child, it does not flatten anything. */
-  overflow: hidden;
-}
-
-.loaderBar {
-  display: block;
-  width: calc(var(--box-w) * 0.014);
-  background: var(--loader-ink);
-  /* the bar grows off the baseline it stands on, the way every bar in this
-     house does (FrequencyBars uses the same origin) */
-  transform-origin: 50% 100%;
-  animation: plateTune var(--bar-t) ease-in-out infinite alternate;
-}
-
-/* the skyline, and the offsets that keep it a signal rather than a wave.
-   Heights are the resting silhouette; the animation scales each one about
-   its own base, so tall bars swing further and the row keeps its shape. */
-.loaderBar:nth-child(1) {
-  height: 34%;
-  --bar-t: 1.05s;
-  animation-delay: -0.62s;
-}
-.loaderBar:nth-child(2) {
-  height: 62%;
-  --bar-t: 1.25s;
-  animation-delay: -0.11s;
-}
-.loaderBar:nth-child(3) {
-  height: 28%;
-  --bar-t: 1.15s;
-  animation-delay: -0.45s;
-}
-.loaderBar:nth-child(4) {
-  height: 86%;
-  --bar-t: 1.05s;
-  animation-delay: -0.28s;
-}
-.loaderBar:nth-child(5) {
-  height: 50%;
-  --bar-t: 1.25s;
-  animation-delay: -0.05s;
-}
-/* THE PEAK. One bar in the expressive accent, exactly as the case study's
-   own frequency plate marks its release — a MARK, never type, which is the
-   only way that role may be used where it does not clear AA. */
-.loaderBar:nth-child(6) {
-  height: 100%;
-  --bar-t: 1.15s;
-  animation-delay: -0.53s;
-  background: var(--accent-expressive);
-}
-.loaderBar:nth-child(7) {
-  height: 44%;
-  --bar-t: 1.05s;
-  animation-delay: -0.22s;
-}
-.loaderBar:nth-child(8) {
-  height: 76%;
-  --bar-t: 1.25s;
-  animation-delay: -0.4s;
-}
-.loaderBar:nth-child(9) {
-  height: 32%;
-  --bar-t: 1.15s;
-  animation-delay: -0.58s;
-}
-.loaderBar:nth-child(10) {
-  height: 66%;
-  --bar-t: 1.05s;
-  animation-delay: -0.16s;
-}
-.loaderBar:nth-child(11) {
-  height: 40%;
-  --bar-t: 1.25s;
-  animation-delay: -0.34s;
-}
-
-/* the second beat: one soft band crossing the field, three times slower
-   than any bar. It is the whole width of the field with the band painted at
-   its middle, so a translate of ±100% carries the band clean off both ends
-   — a transform, never a background-position. */
-.loaderSweep {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 42%,
-    var(--loader-ink-soft) 50%,
-    transparent 58%
-  );
-  animation: plateSweep 3.4s linear infinite;
-}
-
-@keyframes plateTune {
-  from {
-    transform: scaleY(0.28);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
-
-@keyframes plateSweep {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(100%);
-  }
-}
-
-/* the caption, in the loading register the launch overlay's steps use
-   (`--type-caption-family` is `--mono`, which medieval answers with its own
-   display face — so the tome asks for its picture in a blackletter without a
-   rule of its own). The quiet ink is the cover's measured one, and it is
-   printed on the loader's ground rather than on bare board, which is a shade
-   darker and therefore a shade better in every light skin. */
-.loaderCaption {
-  font-family: var(--type-caption-family);
-  font-size: var(--type-caption-size);
-  letter-spacing: var(--tracking-16);
-  line-height: var(--leading-normal);
-  text-transform: uppercase;
-  text-align: center;
-  max-width: 82%;
-  color: var(--cover-ink-quiet);
-}
-
-/* belt to ShelfBox's braces. Reduced motion never mounts this — the still
-   art is the resting face there, because a bar chart that never resolves
-   under a caption that says TUNING is an error message, not a picture — but
-   an OS setting can be flipped mid-session and no frame of this may animate
-   after it is. The bars keep their varied heights, which is the skyline the
-   animation was scaling anyway. */
-@media (prefers-reduced-motion: reduce) {
-  .loaderBar {
-    animation: none;
-  }
-
-  .loaderSweep {
-    display: none;
-  }
-}
-
-/* The film, at its own proportion. The plate IS 16:9 now, so the iframe
-   only has to beat YouTube's residual letterbox gutter — the couple of
-   pixels its player rounds off when the container is not exactly the
-   aspect it wants. 1.02 does that and costs 1% off each edge; the 1.4
-   overscan this replaces cost 14.6%, which is what made the picture
-   unreadable.
-
-   PASS 6 CLOSED THE TRADE PASS 4 TOOK KNOWINGLY. That 1.4× overscan was
-   also burying YouTube's title overlay and centre play button, which appear
-   whenever autoplay is refused (data saver, iOS Low Power) and can never be
-   clicked away here (pointer-events: none). At 1.02 they would show — and
-   Jake's ruling is that the player chrome "can't be seen, it's the signature
-   cover". So the embed is GATED rather than cropped: it starts at opacity 0
-   with the composed cover showing through, and the IFrame API opens the gate
-   only when the film is rolling AND has outlived its own furniture
-   (CoverFilm.tsx). If that never happens — refused autoplay, blocked script,
-   no API at all — the opacity never changes and the reader simply sees the
-   printed cover.
-
-   ⚠️ PASS 7: DO NOT PUT THE OVERSCAN BACK. It was measured rather than
-   argued: YouTube's transport glyphs sit dead centre on the picture and its
-   "More videos" pill sits centre bottom, so no crop reaches them; and the
-   part that IS a band — the title bar — is ~36px tall whatever size the
-   player is painted at, a quarter of this 138px picture, which is an
-   overscan of 1.52 to clip. The gate is free and total. The 1.02 here is for
-   the letterbox rounding and nothing else.
-
-   Opacity, because opacity is free: the layer is already promoted and this
-   is a compositor property. Nothing about the plate's geometry moves.
-
-   NO FILTER. Passes 1–3 duotoned it (grayscale under an accent multiply)
-   so it read as "treated cover art"; Jake struck the treatment in pass 4 —
-   a box cover is a photograph, and the feather is what makes it belong to
-   the paper. */
+/* THE FILM, SELF-HOSTED (pass 10). Jake supplied the files
+   (public/case/<slug>/box-film.mp4), and the whole YouTube apparatus this
+   section used to document — the letterbox overscan, the opacity gate
+   against the player's own furniture, the IFrame API that armed it, the
+   frequency-bar loader that filled the gate's windows — retires with the
+   player. A native <video> paints no chrome and its loop seeks instead of
+   restarting, so the only jobs left are seating and the fade:
+   `object-fit: cover` fits any source ratio to the plate exactly as the
+   art under it is fitted, and the film fades in on its first painted
+   frame (`data-clear`, set by onPlaying in CoverFilm.tsx). The printed
+   art is the poster again — visible for the beat before that frame and on
+   any failure, which are the states a printed cover is FOR. Opacity only;
+   the plate's geometry never moves. NO FILTER (Jake struck the duotone in
+   pass 4 — a box cover is a photograph). */
 .filmWrap {
   position: absolute;
   inset: 0;
@@ -1053,27 +823,16 @@
 
 .coverFrame {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: calc(var(--plate-h) * 16 / 9);
-  height: var(--plate-h);
-  transform: translate(-50%, -50%);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   border: 0;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.5s ease;
 }
 
-/* THE GATE. Written by CoverFilm.tsx when the player has been PLAYING for
-   longer than the chrome it paints on every start, and taken away again the
-   instant it is not playing — a loop, a stall, a seek and an end all put the
-   title bar back over the artwork, measured, so all four put the printed
-   cover back in front of it. Pass 6 set this once and never unset it; pass 7
-   reverses that on evidence (the note in CoverFilm.tsx has the numbers).
-
-   The fade is slow on purpose and symmetrical: the cover dissolving into the
-   film and back is the box breathing, whereas a cut would read as a fault.
-   Opacity only — the layer is already promoted and nothing here moves. */
 .coverFrame[data-clear] {
   opacity: 1;
 }

@@ -63,15 +63,10 @@ export type CaseDef = {
         shipped cover has art, and a number waiting for a film to fade in
         was the state Jake struck ("the placeholder is just a number").
 
-        ⚠️ ON A BOX THAT ALSO HAS A `video`, THIS IS NO LONGER THE RESTING
-        FACE (pass 9). Jake struck the two stills — "throw a loader in
-        there, something fun, maybe related to our data viz" — so those
-        plates run the frequency-bar loader while the film's gate is shut,
-        and the art stays here for the one path a loader would be wrong on:
-        REDUCED MOTION, where no film mounts at all and pulsing bars under
-        "TUNING SIGNAL…" would never resolve. Do not delete these two
-        entries because the shelf appears not to use them; they are the
-        reduced-motion cover. */
+        On a box that also has a `video` the art is its POSTER (pass 10 —
+        the self-hosted films retired pass 9's loader): on screen for the
+        beat before the first frame, permanently under reduced motion
+        (no film mounts there) and on any playback failure. */
     art?: { src: string; w: number; h: number }
     /** the box-art template's publisher mark, printed small at the top-left
         the way a 1992 sleeve carried its house logo. Convention:
@@ -94,11 +89,12 @@ export type CaseDef = {
 
         Absent → `figma`, the composition Jake drew. */
     coverVariant?: CoverVariant
-    /** cover motion: a YouTube id, played silent and chromeless behind the
-        front face's treatment — the 1992 box with a moving cover it was
-        never able to have. Decorative and pointer-inert; the composed front
-        stays underneath as the poster frame (and the whole thing is skipped
-        under reduced motion). */
+    /** cover motion: a self-hosted file under public/ (pass 10 — Jake
+        supplied the films, retiring the YouTube embed and its whole
+        chrome-hiding apparatus), played silent, looping and pointer-inert
+        behind the front face's treatment — the 1992 box with a moving
+        cover it was never able to have. The art below is its poster; the
+        whole thing is skipped under reduced motion. */
     video?: string
     /** THE BACK PANEL'S SYSTEM REQUIREMENTS — exactly three rows.
 
@@ -133,12 +129,11 @@ export const CASES: CaseDef[] = [
     box: {
       /* the three phones on mint — Jake's own product shot. 2.10:1 into a
          16:9 plate, so it gives up a sliver either side and keeps the
-         phones dead centre. PASS 9: this is the REDUCED-MOTION cover now.
-         At full motion the plate tunes in with the loader and the film
-         crossfades over that; the mint still is what a reader who has asked
-         for no motion — and therefore gets no film — sees instead. */
+         phones dead centre. PASS 10: the film's poster — the beat before
+         its first frame, the reduced-motion cover, and the face any
+         playback failure rests on. */
       art: { src: '/case/greenlight-invest/box-art.webp', w: 1200, h: 571 },
-      video: 'Nxl0uCGZNCw',
+      video: '/case/greenlight-invest/box-film.mp4',
       coverVariant: 'stripe',
       tagline: 'know why, not just what.',
       thesis:
@@ -163,13 +158,12 @@ export const CASES: CaseDef[] = [
     box: {
       /* the hub dashboard, seated under the blob mask and the airbrush —
          the same treatment the film gets, which is what makes the two
-         crossfade as one picture rather than as two layers. PASS 9: the
-         REDUCED-MOTION cover, as on Invest; at full motion the loader holds
-         this plate (bars inside the blob, under the airbrush) until the
-         film's gate opens. */
+         crossfade as one picture rather than as two layers. PASS 10: the
+         film's poster, as on Invest — the beat before the first frame, the
+         reduced-motion cover, and the face any failure rests on. */
       art: { src: '/case/family-hub/box-art.webp', w: 1200, h: 727 },
       /* the launch film, the same cut plate 11 runs in the case study */
-      video: 'G-tWcCCMdGE',
+      video: '/case/family-hub/box-film.mp4',
       /* the reference cover — this is the one Jake drew, so it wears the
          treatment he drew it in */
       coverVariant: 'figma',
