@@ -9,7 +9,7 @@
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
   stays "pending" while Chromatic runs; apex 308s to www — curl -L).
-  **Production = COMMAND.CTR v2 (24b2f30) + SHIPPED.SW shipping now.**
+  **Production = SHIPPED.SW (merge 009d1f9, live-verified 2026-08-07) on top of COMMAND.CTR v2.**
 - **⚠️ Shared-checkout law: no concurrent sessions on one working tree;
   `git branch --show-current` before EVERY commit.** s39b ate it twice:
   GitHub-Desktop branch switch killed an agent mid-pass (auto-stash saved
@@ -17,7 +17,7 @@
   worktrees (CC v2 pattern) are the way; worktrees have their OWN .next —
   safe to build there.
 - **SHIPPED.SW (this session, s39b): Case Studies = shelf of boxed
-  software, 7 passes on `feat/shipped-sw-shelf`, SHIPPING** — see session
+  software, 7 passes on `feat/shipped-sw-shelf`, SHIPPED — live on lunde.co, box-art marker verified.** See session
   note. origin/main merged in (HANDOFF conflict resolved; Window.tsx
   clamp + registry auto-merged, tsc gates).
 - **COMMAND.CTR V2 SHIPPED 2026-08-06** (merge `24b2f30`): living
@@ -76,7 +76,7 @@ eval. Deck reported throughout. Jake: "very impressed."**
 - **3D ruling (HERTZ, verified):** shelf stays CSS 3D; The Desk = r3f +
   curated drei + Blender GLTF (~260-320KB code-split); screen-zoom via
   handoff pattern. Spline out (1MB+, paywalled video textures).
-- **Pass 8 (shipping):** Jake's four Figma covers land as real box.art
+- **Pass 8 (shipped):** Jake's four Figma covers land as real box.art
   (nodes in session log); composed fronts become true fallbacks.
 - **Flags:** BURN_OFF_MS 6200 = the YT-autohide guess knob · film absent
   ~13% of each loop (Jake to feel live) · medieval tagline 4.33 on
@@ -86,8 +86,8 @@ eval. Deck reported throughout. Jake: "very impressed."**
 
 ## Next steps
 
-1. **Ship verification** (this session): live smoke on lunde.co — shelf,
-   films, license flow, phone.
+1. **Jake: live smoke on lunde.co** — shelf, films (loop rhythm ~13%
+   art-breathing — rule on BURN_OFF_MS), license flow, phone.
 2. **Jake live pokes owed:** CC v2 deck (pipes, rail, phone) · Family Hub
    case walk · now the shelf.
 3. **Jake copy rewrite pass over all shelf drafts** (taglines, ledger,
