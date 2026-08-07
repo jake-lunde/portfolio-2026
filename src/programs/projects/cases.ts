@@ -70,7 +70,9 @@ export type CaseDef = {
     art?: { src: string; w: number; h: number }
     /** the box-art template's publisher mark, printed small at the top-left
         the way a 1992 sleeve carried its house logo. Convention:
-        /case/<slug>/mark.svg. Absent → nothing is drawn; a placeholder box
+        /case/<slug>/mark.svg for a case that has its own; the house mark
+        (/mark.png) for one printed under Jake's own imprint, which is what
+        the Figma comp shows. Absent → nothing is drawn; a placeholder box
         where a logo goes is worse than no logo. */
     mark?: string
     /** the line under the title on the front of the box — what the software
@@ -167,6 +169,13 @@ export const CASES: CaseDef[] = [
       /* the reference cover — this is the one Jake drew, so it wears the
          treatment he drew it in */
       coverVariant: 'figma',
+      /* THE HOUSE MARK, top-left, exactly as the comp has it. The slot has
+         existed since pass 4 and has never had an asset in it; pass 11
+         points the one cover Jake actually drew at the one mark he actually
+         has (public/mark.png — the same face the shell uses). It is the
+         publisher's colophon on a box he published, and it is deliberately
+         NOT on the other three: those are three other houses. */
+      mark: '/mark.png',
       /* Jake's own line, straight off the Figma box-art template */
       tagline: 'life organized effortlessly.',
       thesis:

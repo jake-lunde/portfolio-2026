@@ -4,6 +4,7 @@ import {
   Geist_Mono,
   Eagle_Lake,
   Instrument_Sans,
+  Instrument_Serif,
   MedievalSharp,
   Noto_Sans_JP,
 } from 'next/font/google'
@@ -47,6 +48,24 @@ const boxArt = Instrument_Sans({
   variable: '--font-boxart',
   display: 'swap',
   preload: false, // one program's artwork — never blocks the shell
+})
+
+/* BOX ART ONLY, AND ONE COVER OF IT. Jake's Family Hub comp is set in
+   Instrument Serif — the big 400-weight title, the italic promise under it —
+   and pass 11 prints the comp rather than approximating it in the sans. It
+   ships exactly one weight and an italic, which is why the cover states
+   `font-weight: 400` rather than inheriting the sans covers' 500: there is
+   no bold here to ask for, only a synthesised one to avoid.
+   Same rules as the sans above: not a token face, nothing outside the shelf
+   may reach for it, never preloaded — one cover's lettering does not get to
+   block the shell. */
+const boxArtSerif = Instrument_Serif({
+  weight: '400',
+  style: ['normal', 'italic'],
+  subsets: ['latin'],
+  variable: '--font-boxart-serif',
+  display: 'swap',
+  preload: false,
 })
 
 const cjk = Noto_Sans_JP({
@@ -102,7 +121,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable} ${boxArt.variable} ${medievalDisplay.variable} ${medievalBody.variable}`}
+      className={`${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable} ${boxArt.variable} ${boxArtSerif.variable} ${medievalDisplay.variable} ${medievalBody.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
