@@ -115,13 +115,15 @@ export const PROGRAMS: ProgramDef[] = [
     noRecede: true,
     // measured, one row deep: 720 leaves 676px of shelf after the 20px
     // gutters — two 246px boxes, a 24px gap and ~160px of the third, cut by
-    // the right edge on purpose. 496 = 32 titlebar + 410 row + 40 foot +
-    // the window's own borders, rounded up. The row is 18 above + 328 box
-    // + 22 gap + 22 flip tag + 20 below = 410 (the last 64 of which is the
-    // painted shelf plank the boxes stand on). Pass 4 moved the tag BELOW
-    // the box and DELETED the 54px SHIPPED.SW masthead, which is the −56
-    // against pass 3's 552 — the shelf is the whole window now.
-    size: { w: 720, h: 496 },
+    // the right edge on purpose. 443 = 410 row + 33 of window chrome
+    // (32 titlebar + the border), measured on the live window rather than
+    // added up. The row is 18 above + 328 box + 22 gap + 22 flip tag + 20
+    // below = 410 (the last 64 of which is the painted shelf plank the
+    // boxes stand on). Pass 4 moved the tag BELOW the box and DELETED the
+    // 54px SHIPPED.SW masthead (−56 against pass 3's 552); pass 7 struck
+    // the 40px foot under the row, so the window is now exactly the shelf
+    // and nothing else — no band above the boxes, no strip below them.
+    size: { w: 720, h: 443 },
     pos: { x: 250, y: 48 },
     onDesktop: true,
     path: '/cases',

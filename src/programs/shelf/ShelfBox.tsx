@@ -115,6 +115,7 @@ export function ShelfBox({
   sent,
   busy,
   durable,
+  error,
   fine,
   revealed,
   overlayOpen,
@@ -128,6 +129,10 @@ export function ShelfBox({
   sent: boolean
   busy: boolean
   durable: boolean
+  /** this box's own nudge came back with a refusal — printed under the
+      button that caused it, which is where pass 7 moved it from the shelf
+      footer it used to share with a hint nobody needed */
+  error: string | null
   /** hover-capable machine — measured once by the shelf */
   fine: boolean
   /** this box is the one whose tag is out */
@@ -145,7 +150,8 @@ export function ShelfBox({
   const tag = useRef<HTMLButtonElement>(null)
   const back = useRef<HTMLDivElement>(null)
   const slot = useRef<HTMLDivElement>(null)
-  const mounted = useRef(false)
+  /** the value the focus effect last acted on — see the note there */
+  const settled = useRef(flipped)
   /** this unflip was the pointer leaving, not a control being pressed */
   const walkedAway = useRef(false)
 
@@ -168,21 +174,37 @@ export function ShelfBox({
      for focus — pulling it onto the tag of a box the reader has walked away
      from would steal it from wherever they were going and drag the row along
      with it. Focus still has to LEAVE, because the panel is about to go
-     inert; it just goes nowhere rather than somewhere wrong. */
+     inert; it just goes nowhere rather than somewhere wrong.
+
+     ⚠️ IT ONLY RUNS WHEN THE FLIP ACTUALLY CHANGED, AND THAT GUARD IS LOAD-
+     BEARING (pass 7). It used to be a "have I mounted yet" flag, which is a
+     different question and the wrong one: an effect can run a second time on
+     the SAME value — StrictMode's mount/cleanup/mount is the everyday case —
+     and the second run walked straight past the flag into `tag.focus()`.
+     Four boxes did that in a row on window open, and focusing a control
+     inside a horizontal scroller scrolls the scroller TO IT: the shelf
+     opened parked at its right-hand stop with the first two boxes off frame
+     (measured, scrollLeft 378 of a possible 378 — Jake's "it starts in the
+     middle"). Comparing against the last value the effect acted on is the
+     honest test, and it is immune to however many times React runs it.
+
+     `preventScroll` is the structural half of the same fix. Every focus this
+     effect performs is a focus onto a box the reader is already looking at —
+     they just turned it over — so it has no business moving the row under
+     them. Tabbing to a tag still scrolls it into view, because that is the
+     browser's own doing and is what a keyboard reader wants. */
   useEffect(() => {
-    if (!mounted.current) {
-      mounted.current = true
-      return
-    }
+    if (settled.current === flipped) return
+    settled.current = flipped
     if (flipped) {
       const first = back.current?.querySelector<HTMLElement>('button:not([disabled])')
-      ;(first ?? back.current)?.focus()
+      ;(first ?? back.current)?.focus({ preventScroll: true })
     } else if (walkedAway.current) {
       walkedAway.current = false
       const active = document.activeElement
       if (active instanceof HTMLElement && slot.current?.contains(active)) active.blur()
     } else {
-      tag.current?.focus()
+      tag.current?.focus({ preventScroll: true })
     }
   }, [flipped])
 
@@ -474,6 +496,15 @@ export function ShelfBox({
                       </span>
                     )}
                   </div>
+                  {/* the refusal, printed with the button that earned it.
+                      Pass 7 deleted the shelf footer this used to live in —
+                      an error about ONE box announced under FOUR of them was
+                      the whole reason it needed a footer at all. */}
+                  {error && (
+                    <p className={styles.nudgeError} role="alert">
+                      {error}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

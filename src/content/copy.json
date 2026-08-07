@@ -153,12 +153,10 @@
     "base": "TELL HIM TO FINISH IT",
     "medieval": "IMPLORE"
   },
-  "progress.nudgeHint": "Sometimes you need a little push, you know?",
   "progress.nudged": {
     "base": "JAKE HAS BEEN ENCOURAGED",
     "medieval": "HEARD"
   },
-  "progress.offline": "The encouragement line isn’t connected to storage yet.",
   "projects.indexLabel": "Index — Selected work",
   "projects.itemsSuffix": "items",
   "readme.eyebrow": "README — Start here",

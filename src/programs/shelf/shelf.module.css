@@ -70,7 +70,18 @@
 .row {
   /* positioned: the row is the coordinate space every box is measured in */
   position: relative;
-  flex: 1;
+  /* ⚠️ NOT `flex: 1`, AND THE REASON IS A BUG JAKE FOUND (pass 7). The row
+     is bottom-aligned, so growing it puts the extra height ABOVE the boxes:
+     in a full-bleed window on a phone the shelf was 335px of content in a
+     674px row and the boxes sat under 339px of empty paper. A shelf is a
+     fixed piece of furniture — one board, one row of stock — so it now takes
+     its own intrinsic height (18 + 328 + 22 + 22 + 20 = 410 here, 335 at the
+     narrow breakpoint) and any slack falls BELOW it, where a room's empty
+     space belongs. `0 1 auto` rather than `0 0 auto`: a window dragged
+     shorter than the shelf still shrinks it rather than pushing it out.
+     At the window's own size the two are identical — the registry's height
+     is derived FROM this number — so nothing on the desktop moves. */
+  flex: 0 1 auto;
   min-height: 0;
   list-style: none;
   margin: 0;
@@ -1681,32 +1692,22 @@
   border-color: var(--accent);
 }
 
-/* ---------------- foot ---------------- */
+/* ---------------- (no foot) ----------------
+   The 40px strip under the row — a nudge hint, and a pink stamp saying the
+   encouragement line wasn't wired to storage yet — is struck (pass 7,
+   Jake's ruling). It explained a button that lives on the back of two boxes
+   and disables itself when it can't work, and it announced one box's refusal
+   under all four. The refusal moved to `.nudgeError`, beside the button that
+   earned it; the height went back to the window. */
 
-.foot {
-  padding: 0 20px 18px;
-  min-height: 22px;
-}
-
-.hint,
 .empty {
+  display: block;
+  padding: 20px;
   font-family: var(--type-caption-family);
   font-size: var(--type-caption-size);
   letter-spacing: var(--tracking-08);
   color: var(--content-muted);
   line-height: var(--leading-normal);
-}
-
-.empty {
-  display: block;
-  padding: 20px;
-}
-
-.error {
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  letter-spacing: var(--tracking-02);
-  color: var(--accent);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1924,10 +1925,6 @@
     left: 10px;
     width: 22px;
     height: 22px;
-  }
-
-  .foot {
-    padding: 0 14px 14px;
   }
 
   .overlay {

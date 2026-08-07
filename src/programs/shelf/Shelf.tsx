@@ -1,8 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'motion/react'
-import { Stamp } from '@/components/primitives/Stamp'
 import { CopyText as Copy } from '@/content/CopyText'
 import { metric } from '@/lib/metrics'
 import { sfx } from '@/lib/sound'
@@ -65,10 +64,13 @@ export default function Shelf() {
   const fine = useFinePointer()
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [durable, setDurable] = useState(true)
-  const [loaded, setLoaded] = useState(false)
   const [sent, setSent] = useState<string[]>([])
   const [busy, setBusy] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  /* WHOSE nudge failed, not just that one did. Pass 7 struck the shelf
+     footer, and with it the last place on this window where a message could
+     be printed about no box in particular; a refusal now prints under the
+     button that caused it, so it has to carry its slug this far. */
+  const [error, setError] = useState<{ slug: string; message: string } | null>(null)
   const [playing, setPlaying] = useState<string | null>(null)
   /* WHICH BOX IS SHOWING ITS TAG. One string for the whole shelf, because
      the rule is a shelf-level rule and not a box-level one: a tag comes out
@@ -107,6 +109,16 @@ export default function Shelf() {
     return () => el.removeEventListener('wheel', onWheel)
   }, [])
 
+  /* THE SHELF OPENS AT ITS OWN BEGINNING. Belt to ShelfBox's braces (the
+     focus guard there is the actual fix for pass 7's "it starts in the
+     middle"): whatever else has run by first paint, the row is at box one
+     before the reader ever sees it. Layout effect, so it lands before the
+     browser paints and no frame is ever drawn scrolled — a `useEffect` here
+     would be a visible jump and, on a scroll-snap container, a fight. */
+  useLayoutEffect(() => {
+    if (row.current) row.current.scrollLeft = 0
+  }, [])
+
   useEffect(() => {
     setSent(readSent())
     fetch('/api/nudge')
@@ -115,8 +127,11 @@ export default function Shelf() {
         setCounts(d.counts ?? {})
         setDurable(Boolean(d.durable))
       })
+      // no `loaded` flag any more: it existed only to keep the footer's
+      // offline stamp from flashing before the first answer came back, and
+      // the footer is gone. A nudge button that cannot work is disabled,
+      // which is the whole message and needs no line of copy under it.
       .catch(() => setDurable(false))
-      .finally(() => setLoaded(true))
   }, [])
 
   const nudge = async (slug: string) => {
@@ -142,7 +157,7 @@ export default function Shelf() {
       if (typeof d.count === 'number') setCounts((c) => ({ ...c, [slug]: d.count }))
       metric('case_nudge', { slug })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'The line went quiet.')
+      setError({ slug, message: err instanceof Error ? err.message : 'The line went quiet.' })
       setCounts((c) => ({ ...c, [slug]: Math.max(0, (c[slug] ?? 1) - 1) }))
       setSent((s) => s.filter((x) => x !== slug))
       try {
@@ -208,6 +223,7 @@ export default function Shelf() {
               sent={sent.includes(c.slug)}
               busy={busy === c.slug}
               durable={durable}
+              error={error?.slug === c.slug ? error.message : null}
               fine={fine}
               revealed={revealed === c.slug}
               // the launch layer covers the shelf, so every box under it
@@ -221,19 +237,14 @@ export default function Shelf() {
         ))}
       </ul>
 
-      <footer className={styles.foot} aria-live="polite">
-        {loaded && !durable ? (
-          <Stamp tone="pink">
-            <Copy k="progress.offline" as="span" />
-          </Stamp>
-        ) : error ? (
-          <span className={styles.error} role="alert">
-            {error}
-          </span>
-        ) : (
-          <Copy k="progress.nudgeHint" as="span" className={styles.hint} />
-        )}
-      </footer>
+      {/* NO FOOTER (pass 7, Jake's ruling). A hint line — "sometimes you need
+          a little push, you know?" — plus a pink stamp apologising that the
+          encouragement line was not wired to storage yet: 40px of the window
+          spent explaining a button that is on the back of two boxes and
+          disables itself when it cannot work. Both are gone; the refusal it
+          also carried moved onto the box that caused it (ShelfBox), which is
+          the only place it was ever about anything. The 40px went back to the
+          window — see the height derivation in programs/registry.tsx. */}
 
       <AnimatePresence>
         {playingCase && (
