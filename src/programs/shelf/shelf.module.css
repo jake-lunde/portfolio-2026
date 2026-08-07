@@ -1,6 +1,6 @@
 /* SHIPPED.SW — the case-studies shelf. Boxed software from a parallel
-   1992: a fixed 3:4 slot per case, a front that flips to the back panel,
-   and an install layer that actually finishes.
+   1992: one horizontal row of real cuboids, a front that turns over to the
+   back panel, and a loading beat that ends with the case opening.
 
    The bar CSS (track · stripes · shutter · creep) is carried whole from
    the retired IN PROGRESS window: a full-width fill layer with an opaque
@@ -8,7 +8,7 @@
    twice. */
 
 /* height (not min-height): the wrap pins to the window body's visible
-   box and the GRID scrolls inside it, so the install layer's inset(0)
+   box and the ROW scrolls inside it, so the launch layer's inset(0)
    covers what the reader sees — anchored to scroll content it hangs the
    license sphere past the window's bottom edge */
 .wrap {
@@ -46,40 +46,115 @@
   margin: 0;
 }
 
-/* ---------------- the shelf ----------------
-   200px minimum holds THREE boxes across the 676px of content a 720px
-   window leaves after padding; the narrow query below drops the minimum
-   so 360px still gets two. */
+/* ---------------- the carousel ----------------
+   ONE row, scrolled sideways, never wrapped. Measured: a 720px window
+   leaves 676px of content after the 20px gutters, and 246 + 16 + 246 =
+   508 — so two boxes stand clear and 152px of the third is cut by the
+   right edge. That cut is the point: a shelf you can see all of is a shelf
+   with nothing else on it.
 
-.grid {
+   PERSPECTIVE LIVES HERE, once. Every box on the row shares this vanishing
+   point, which is what makes them read as objects on one shelf rather than
+   four independent dioramas. perspective-origin is relative to this box,
+   not the content, so the camera stays put while the boxes ride past it. */
+
+.row {
+  /* positioned: the scroll-depth loop measures offsetLeft against this */
+  position: relative;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   list-style: none;
   margin: 0;
-  padding: 16px 20px 18px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  /* the deep bottom padding is the shelf itself: the contact shadows live
+     under the boxes and `overflow` clips at the padding edge */
+  padding: 18px 20px 34px;
+  display: flex;
+  align-items: center;
   gap: var(--space-4);
-  align-content: start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  /* snap to box STARTS, offset by the gutter: every rest position keeps a
+     box hanging off the right edge. Centre-snap would sometimes land the
+     last box flush and close the shelf off. */
+  scroll-padding-left: 20px;
+  /* 980px, not 1400: a close camera. At 1400 the row's own off-centre
+     boxes barely foreshortened and the whole shelf read as flat artwork —
+     the vanishing point has to be near enough that position in the row is
+     itself information. */
+  perspective: 980px;
+  scrollbar-width: thin;
 }
 
-.box {
+.slot {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+/* --------- the box as a solid ---------
+   --box-w / --box-d are the only numbers; Box3D.tsx derives all six faces
+   from them. Height is the 3:4 face ratio spelled out rather than
+   aspect-ratio, because the side strips need a resolved length too.
+
+   Depth 42px on a 246px face (17%): 32 was measured against a slim retail
+   sleeve and read as card, not board — at the angles this carousel holds,
+   42 is what makes the spine a surface rather than a line. A real big-box
+   PC game ran nearer a quarter of its width, which at this scale shoulders
+   into the neighbouring box.
+
+   `.plinth` is the flat wrapper the box stands on: it holds the contact
+   shadow, which is drawn with a blur and would flatten the whole cuboid if
+   it lived inside the 3D context. Nothing here may take a filter. */
+.plinth {
   position: relative;
+  width: var(--box-w);
+  height: var(--box-h);
+  --box-w: 246px;
+  --box-h: 328px;
+  --box-d: 42px;
 }
 
-/* the slot. Fixed ratio: the box occupies exactly this much room before
-   any art has loaded, and exactly this much after. */
-.frame {
-  position: relative;
-  aspect-ratio: 3 / 4;
+.stage {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
 }
 
-/* Two stacked faces, each carrying its OWN perspective + rotateY (set by
-   Motion) and its own backface-visibility. No `transform-style:
-   preserve-3d` anywhere: the shell's recede filter and medieval's
-   #lunde-roughen both flatten a 3D context, and this survives both. */
+.cuboid {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+/* Grounding. A blurred ellipse where the board meets the shelf — the one
+   cue that separates a solid from a card, and it does more work than any
+   amount of rotation. Tokenised (a mix of --content into nothing), so it
+   is the skin's own ink at low strength and never an invented grey.
+   Squashed and slid by the scroll loop to follow the box's footprint. */
+.shadow {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  /* the ellipse's dark core has to clear the box's own base — sat any
+     higher and the strongest part of the shadow hides behind the board it
+     is meant to ground */
+  bottom: -24px;
+  height: 34px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    color-mix(in srgb, var(--content) 62%, transparent) 0%,
+    color-mix(in srgb, var(--content) 34%, transparent) 38%,
+    transparent 70%
+  );
+  filter: blur(6px);
+  will-change: transform;
+}
+
+/* Front and back of the solid. `backface-visibility: hidden` still earns
+   its keep — it is what stops the back panel bleeding through the front
+   half of the turn. */
 .face {
   position: absolute;
   inset: 0;
@@ -88,6 +163,7 @@
   -webkit-backface-visibility: hidden;
   background: var(--surface-raised);
   border: var(--border-width-default) solid var(--content);
+  transform: translateZ(calc(var(--box-d) / 2));
 }
 
 [data-theme='dark'] .face {
@@ -96,6 +172,79 @@
 
 .face[inert] {
   pointer-events: none;
+}
+
+/* --------- cardboard thickness ---------
+   Each strip is pinned to its own edge and swung about it, then pushed
+   back half a depth so the four of them span -d/2 → +d/2 (the gap between
+   the front and back faces). No borders: the front and back faces already
+   draw the silhouette, and a border here would double every seam.
+
+   Colour is one token mixed four ways — light from the upper left, so the
+   top is nearly the face's own ground and the underside is the darkest.
+   No hardcoded shade: every skin gets its own board for free. */
+.side {
+  position: absolute;
+  background: var(--surface-raised);
+}
+
+.spine {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--box-d);
+  transform-origin: left center;
+  transform: translateZ(calc(var(--box-d) / -2)) rotateY(-90deg);
+  background: color-mix(in srgb, var(--content) 30%, var(--surface-raised));
+}
+
+.edge {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: var(--box-d);
+  transform-origin: right center;
+  transform: translateZ(calc(var(--box-d) / -2)) rotateY(90deg);
+  background: color-mix(in srgb, var(--content) 42%, var(--surface-raised));
+}
+
+.top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--box-d);
+  transform-origin: center top;
+  transform: translateZ(calc(var(--box-d) / -2)) rotateX(90deg);
+  background: color-mix(in srgb, var(--content) 13%, var(--surface-raised));
+}
+
+.bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--box-d);
+  transform-origin: center bottom;
+  transform: translateZ(calc(var(--box-d) / -2)) rotateX(-90deg);
+  background: color-mix(in srgb, var(--content) 50%, var(--surface-raised));
+}
+
+/* --------- reduced motion: the solid collapses ---------
+   No turning, no parallax, no sides — back to pass 1's two stacked faces
+   crossfading in place. Motion drives the opacity; this flattens the
+   geometry so the back face is visible at rest. */
+.flat .cuboid {
+  transform: none;
+  transform-style: flat;
+}
+
+.flat .side {
+  display: none;
+}
+
+.flat .face {
+  transform: none;
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
 }
 
 /* ---------------- front of box ---------------- */
@@ -235,10 +384,14 @@
 
 /* ---------------- back of box ---------------- */
 
+/* the far face of the solid: turned to look the other way, then pushed out
+   to its own surface — it lands at -d/2, facing away, exactly opposite the
+   front. The single rotateY(180deg) on the cuboid brings it round. */
 .backFace {
   display: flex;
   flex-direction: column;
   background: var(--surface);
+  transform: rotateY(180deg) translateZ(calc(var(--box-d) / 2));
 }
 
 .backFace:focus-visible {
@@ -370,19 +523,26 @@
   margin: 5px 0 0;
 }
 
-.backActions {
+/* the nudge sits with the meter it belongs to, inside the scrolling body */
+.nudgeRow {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 8px 10px;
+  margin-top: 8px;
+}
+
+/* PLAY's own register: the last thing before the bottom bar, full width,
+   nothing beside it */
+.heroAction {
+  padding: 9px 10px;
   border-top: var(--border-width-hairline) solid var(--border);
 }
 
 /* ---------------- buttons ---------------- */
 
-.installBtn,
+.playBtn,
 .nudgeBtn,
-.flipBackBtn,
+.flipBackBar,
 .cancelBtn {
   font-family: var(--type-label-family);
   font-size: var(--type-label-size); /* 11px */
@@ -395,52 +555,69 @@
   transition: transform 0.08s ease;
 }
 
-[data-theme='dark'] .installBtn,
+[data-theme='dark'] .playBtn,
 [data-theme='dark'] .nudgeBtn,
-[data-theme='dark'] .flipBackBtn,
 [data-theme='dark'] .cancelBtn {
   border-color: var(--border);
 }
 
-/* INSTALL is the primary act of this window */
-.installBtn {
+/* PLAY is the primary act of this window — the size says so */
+.playBtn {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  font-size: var(--type-body-sm-size);
   background: var(--accent);
   color: var(--surface);
-  flex: 1;
 }
 
-.flipBackBtn {
-  margin-left: auto;
-  font-size: var(--type-micro-size);
-  letter-spacing: var(--tracking-10);
-  padding: 5px 8px;
-  background: transparent;
-  border-color: var(--border);
+/* the back's bottom bar, geometrically identical to `.frontHint` on the
+   other face — same full-bleed strip, same type, pinned to the same edge.
+   The fill is the raised ground rather than accent: it is the way back,
+   not the way in, and PLAY sits directly above it. */
+.flipBackBar {
+  display: block;
+  width: 100%;
+  padding: 5px 10px;
+  text-align: center;
+  border: 0;
+  border-top: var(--border-width-default) solid var(--content);
+  background: var(--surface-raised);
   color: var(--content-muted);
+  cursor: pointer;
 }
 
-.installBtn:hover,
+[data-theme='dark'] .flipBackBar {
+  border-top-color: var(--border);
+}
+
+.playBtn:hover,
 .nudgeBtn:hover:not(:disabled),
-.flipBackBtn:hover,
+.flipBackBar:hover,
 .cancelBtn:hover {
   background: var(--accent);
   color: var(--surface);
 }
 
 /* physical press — transform only */
-.installBtn:active,
+.playBtn:active,
 .nudgeBtn:active:not(:disabled),
-.flipBackBtn:active,
+.flipBackBar:active,
 .cancelBtn:active {
   transform: translateY(1px);
 }
 
-.installBtn:focus-visible,
+.playBtn:focus-visible,
 .nudgeBtn:focus-visible,
-.flipBackBtn:focus-visible,
 .cancelBtn:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* the bar is flush to the face's edges — an outset ring would be clipped */
+.flipBackBar:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 .nudgeBtn:disabled {
@@ -522,28 +699,44 @@
   }
 }
 
-/* ---------------- the install layer ----------------
-   An absolute layer inside the shelf, not a new window: an install belongs
-   to the thing being installed. */
+/* ---------------- the launch layer ----------------
+   An absolute layer inside the shelf, not a new window: the beat before a
+   program opens belongs to the program, not to the desktop. */
 
 .overlay {
   position: absolute;
   inset: 0;
   z-index: 5;
   background: var(--surface);
+  color: var(--content);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* the light→dark handover. A colour crossfade, not a movement: safe to
+     leave running under prefers-reduced-motion, and an instant flip to an
+     inverse ground is the harsher of the two options. */
+  transition:
+    background-color 0.22s ease,
+    color 0.22s ease;
+}
+
+/* THE WHOLE FRAME GOES DARK for the license check. Same idiom as
+   `.windowBody.crt` in the shell: inverse ground, inverse ink. The gate's
+   own panel is dark, and on a light overlay it read as a hole punched in
+   the window — so the window goes with it instead of fighting it. */
+.overlayDark {
+  background: var(--surface-inverse);
+  color: var(--content-inverse);
 }
 
 .overlay:focus-visible {
   outline: none;
 }
 
-.installPanel {
+.loadPanel {
   width: 100%;
   max-width: 420px;
   display: flex;
@@ -552,14 +745,20 @@
   gap: var(--space-3);
 }
 
-.installName {
+/* the license phase claims the full height so the sphere can take whatever
+   room the window has — it sizes its radius off its own rect */
+.overlayDark .loadPanel {
+  height: 100%;
+}
+
+.loadName {
   font-family: var(--display);
   font-size: var(--type-body-size);
   margin: 0;
   text-align: center;
 }
 
-.installStep {
+.loadStep {
   font-family: var(--type-caption-family);
   font-size: var(--type-caption-size);
   letter-spacing: var(--tracking-08);
@@ -570,11 +769,25 @@
   min-height: 14px;
 }
 
+.overlayDark .loadName {
+  color: var(--content-inverse);
+}
+
+/* the muted role has no inverse twin, so it is mixed here: 72% of the
+   inverse ink on the inverse ground measures 7.6:1 in classic light and
+   higher in dark and medieval — AA with room to spare */
+.overlayDark .loadStep {
+  color: color-mix(in srgb, var(--content-inverse) 72%, var(--surface-inverse));
+}
+
 /* the license check — an unchanged GateSphere, reframed by the line above
-   it. The sphere sizes its radius off this box's rect. */
+   it. Flexes rather than reserving a fixed 420px: one row of boxes made
+   the window shorter, and the sphere plus its cancel button have to stay
+   whole at 360×740 as well as on the desktop. */
 .sphereWrap {
   display: flex;
-  min-height: 420px;
+  flex: 1;
+  min-height: 200px;
 }
 
 .sphereWrap > div {
@@ -588,6 +801,17 @@
   color: var(--content-muted);
   font-size: var(--type-micro-size);
   letter-spacing: var(--tracking-10);
+}
+
+.overlayDark .cancelBtn {
+  border-color: color-mix(in srgb, var(--content-inverse) 45%, var(--surface-inverse));
+  color: color-mix(in srgb, var(--content-inverse) 72%, var(--surface-inverse));
+}
+
+.overlayDark .cancelBtn:hover {
+  background: var(--accent);
+  color: var(--surface);
+  border-color: var(--accent);
 }
 
 /* ---------------- foot ---------------- */
@@ -619,9 +843,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .installBtn,
+  .playBtn,
   .nudgeBtn,
-  .flipBackBtn,
+  .flipBackBar,
   .cancelBtn {
     transition: none;
   }
@@ -653,22 +877,30 @@
   border-width: var(--border-width-thick);
 }
 
-/* the tome's spine, on the binding edge */
+/* The tome's spine, now on the actual SPINE — the left face of the solid,
+   where a binding physically is. Pass 1 painted it onto the front cover
+   because there was no third dimension to put it on. */
+:global([data-skin='medieval']) .spine {
+  background: var(--accent);
+}
+
+/* A tome squared up to the camera hides its own binding, so a hint of it
+   wraps onto the cover: 5px of board turning the corner, not the 12px band
+   pass 1 laid across the front. */
 :global([data-skin='medieval']) .frontFace::before {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
-  width: 12px;
+  width: 5px;
   z-index: 1;
   background: var(--accent);
-  border-right: var(--border-width-default) solid var(--content);
 }
 
-/* the meta strip clears the spine — 12px binding + the usual 10px */
+/* the meta strip clears the wrap — 5px of binding + the usual 10px */
 :global([data-skin='medieval']) .frontMeta {
-  padding-left: 22px;
+  padding-left: 15px;
 }
 
 /* vellum is not shrink-wrapped: uncut pages, not plastic */
@@ -684,18 +916,27 @@
   color: var(--accent-expressive-text);
 }
 
-/* ---------------- narrow ---------------- */
+/* ---------------- narrow ----------------
+   Same shelf, same gesture — a finger drags the row instead of a wheel.
+   The box shrinks to 208px so a 360px viewport (332px of content after the
+   14px gutters) shows one whole box and a third of the next: the cut
+   survives the smallest screen we build for. */
 
 @media (max-width: 420px) {
   .head {
     padding: 14px 14px 12px;
   }
 
-  .grid {
+  .row {
     padding: 14px;
-    /* 140px minimum keeps TWO boxes across a 360px viewport */
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: var(--space-3);
+    scroll-padding-left: 14px;
+  }
+
+  .plinth {
+    --box-w: 208px;
+    --box-h: 277px; /* 3:4, rounded */
+    --box-d: 34px;
   }
 
   .foot {
@@ -704,9 +945,5 @@
 
   .overlay {
     padding: 14px;
-  }
-
-  .sphereWrap {
-    min-height: 380px;
   }
 }

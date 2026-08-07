@@ -5,10 +5,10 @@ import { motion, useReducedMotion } from 'motion/react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { CopyText as Copy } from '@/content/CopyText'
 import { t } from '@/content/copy'
-import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
 import type { CaseDef } from '@/programs/projects/cases'
 import { useSettings } from '@/store/settings'
+import { Box3D } from './Box3D'
 import { InstallBar } from './InstallBar'
 import styles from './shelf.module.css'
 
@@ -16,13 +16,15 @@ import styles from './shelf.module.css'
    when the case has no assets yet); back is the panel every 1992 box had —
    system requirements, a review blurb, screenshots, and the button.
 
-   The flip carries a hard constraint: NO `transform-style: preserve-3d`.
-   The shell's recede filter on an inactive window body, and medieval's
-   #lunde-roughen, both flatten a 3D context — the box would go flat the
-   moment either applied. So the two faces are stacked absolutely and each
-   animates its OWN `perspective(900px) rotateY()` with its own
-   `backface-visibility: hidden`. Never put a filter on a face's ancestor
-   inside this component.
+   Pass 2 gave the box real thickness: the two faces are now the front and
+   back of a Box3D cuboid (see Box3D.tsx), and the flip is one rotateY on
+   the whole solid rather than two faces faking their own perspective.
+
+   That needs a live 3D context, which `filter` flattens — so the shelf's
+   registry entry carries `noRecede` (the shell's unfocused-window
+   `filter: opacity()` is skipped for this window) and medieval's
+   #lunde-roughen stays on descendants of a face (the bar track) and never
+   on an ancestor. Never put a filter on an ancestor of a face.
 
    useId is unsafe in programs (dynamic imports rehydrate into a reshaped
    tree), so ids derive from the slug — stable across SSR and client. */
@@ -38,7 +40,7 @@ export function ShelfBox({
   busy,
   durable,
   onNudge,
-  onInstall,
+  onPlay,
 }: {
   c: CaseDef
   index: number
@@ -47,7 +49,7 @@ export function ShelfBox({
   busy: boolean
   durable: boolean
   onNudge: (slug: string) => void
-  onInstall: (slug: string, trigger: HTMLElement) => void
+  onPlay: (slug: string, trigger: HTMLElement) => void
 }) {
   const reduced = useReducedMotion()
   const skin = useSettings((s) => s.skin)
@@ -76,18 +78,15 @@ export function ShelfBox({
     }
   }, [flipped])
 
-  /* Each face carries its own perspective + rotateY. Also passed as
-     `initial`, which is what makes Motion write the resting transform into
-     the SSR markup — without it the first paint stacks two untransformed
-     faces and the back one shows through until hydration. */
-  const faceAnim = (isBack: boolean) =>
-    reduced
-      ? { opacity: flipped === isBack ? 1 : 0 }
-      : { rotateY: (isBack ? 180 : 0) + (flipped ? -180 : 0), transformPerspective: 900 }
+  /* Rotation lives on the cuboid now (Box3D). All a face animates is
+     opacity, and only under reduced motion — where the solid collapses to
+     a flat stack and the two faces crossfade instead of turning. At full
+     motion this resolves to a constant 1 and Motion writes nothing. */
+  const faceFade = (isBack: boolean) => ({ opacity: reduced && flipped !== isBack ? 0 : 1 })
 
   return (
-    <div
-      className={styles.box}
+    <Box3D
+      flipped={flipped}
       // the Escape ladder: an open overlay eats the first one, a flipped
       // box the next, and only then does Window.tsx close the window
       onKeyDown={(e) => {
@@ -95,8 +94,7 @@ export function ShelfBox({
         e.stopPropagation()
         setFlipped(false)
       }}
-    >
-      <div className={styles.frame}>
+      front={
         <motion.button
           ref={front}
           type="button"
@@ -108,9 +106,9 @@ export function ShelfBox({
             sfx.tap()
             setFlipped(true)
           }}
-          initial={faceAnim(false)}
-          animate={faceAnim(false)}
-          transition={reduced ? { duration: 0 } : SPRINGS.deck}
+          initial={faceFade(false)}
+          animate={faceFade(false)}
+          transition={{ duration: reduced ? 0.14 : 0 }}
         >
           {box?.art ? (
             <span className={styles.art} aria-hidden="true">
@@ -146,16 +144,17 @@ export function ShelfBox({
             <Copy k="shelf.flip" as="span" />
           </span>
         </motion.button>
-
+      }
+      back={
         <motion.div
           ref={back}
           id={backId}
           className={`${styles.face} ${styles.backFace}`}
           tabIndex={-1}
           inert={!flipped}
-          initial={faceAnim(true)}
-          animate={faceAnim(true)}
-          transition={reduced ? { duration: 0 } : SPRINGS.deck}
+          initial={faceFade(true)}
+          animate={faceFade(true)}
+          transition={{ duration: reduced ? 0.14 : 0 }}
         >
           <div className={styles.backInner}>
             <p className={styles.backTitle}>
@@ -197,6 +196,9 @@ export function ShelfBox({
               </ul>
             ) : null}
 
+            {/* an unshipped box has no hero act to offer, so the nudge
+                stays down here in the body with the thing it's about — the
+                progress meter — rather than pretending to be PLAY */}
             {!shipped && (
               <div className={styles.meter}>
                 <p className={styles.phase}>{c.progress?.phase}</p>
@@ -207,52 +209,58 @@ export function ShelfBox({
                   delay={0.05 * (index + 1)}
                 />
                 <Copy k="shelf.wrappedHint" as="p" className={styles.wrappedHint} />
+                <div className={styles.nudgeRow}>
+                  <button
+                    type="button"
+                    className={styles.nudgeBtn}
+                    onClick={() => onNudge(c.slug)}
+                    disabled={!durable || sent || busy}
+                    aria-label={`Encourage Jake to work on ${c.name}`}
+                  >
+                    {sent ? (
+                      <Copy k="progress.nudged" as="span" />
+                    ) : (
+                      <Copy k="progress.nudge" as="span" />
+                    )}
+                  </button>
+                  {count > 0 && (
+                    <span className={styles.count} aria-label={`${count} nudges so far`}>
+                      · {count}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
           </div>
 
-          <div className={styles.backActions}>
-            {shipped ? (
+          {/* PLAY is the whole reason the box turns over: full width, its
+              own register above the fold of the panel, nothing sharing the
+              row with it. */}
+          {shipped && (
+            <div className={styles.heroAction}>
               <button
                 type="button"
-                className={styles.installBtn}
-                onClick={(e) => onInstall(c.slug, e.currentTarget)}
+                className={styles.playBtn}
+                onClick={(e) => onPlay(c.slug, e.currentTarget)}
               >
-                <Copy k="shelf.install" as="span" />
+                <Copy k="shelf.play" as="span" />
               </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  className={styles.nudgeBtn}
-                  onClick={() => onNudge(c.slug)}
-                  disabled={!durable || sent || busy}
-                  aria-label={`Encourage Jake to work on ${c.name}`}
-                >
-                  {sent ? (
-                    <Copy k="progress.nudged" as="span" />
-                  ) : (
-                    <Copy k="progress.nudge" as="span" />
-                  )}
-                </button>
-                {count > 0 && (
-                  <span className={styles.count} aria-label={`${count} nudges so far`}>
-                    · {count}
-                  </span>
-                )}
-              </>
-            )}
-            <button
-              type="button"
-              className={styles.flipBackBtn}
-              onClick={() => setFlipped(false)}
-              aria-label={`${t('shelf.flipBack', skin)} — ${c.name}`}
-            >
-              <Copy k="shelf.flipBack" as="span" />
-            </button>
-          </div>
+            </div>
+          )}
+
+          {/* the mirror of `.frontHint`: the front's bottom bar turns the
+              box over, and so does the back's. Same geometry, quieter fill
+              — two accent slabs stacked would flatten PLAY's primacy. */}
+          <button
+            type="button"
+            className={styles.flipBackBar}
+            onClick={() => setFlipped(false)}
+            aria-label={`${t('shelf.flipBack', skin)} — ${c.name}`}
+          >
+            <Copy k="shelf.flipBack" as="span" />
+          </button>
         </motion.div>
-      </div>
-    </div>
+      }
+    />
   )
 }

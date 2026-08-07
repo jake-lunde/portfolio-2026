@@ -16,6 +16,9 @@ export type ResolvedWindow = {
   explainer?: string
   /** requires macrodata refinement (the sphere) before the body shows */
   gated?: boolean
+  /** keeps full opacity when unfocused — the program owns a 3D context and
+      the recede is a `filter`, which flattens one (see registry.tsx) */
+  noRecede?: true
 }
 
 /* A window id is a program id, `case:<slug>`, or `viz:<id>`. */
@@ -68,6 +71,7 @@ export function resolveWindow(id: string): ResolvedWindow | null {
     pos: p.pos,
     path: p.path ?? null,
     explainer: p.explainer,
+    noRecede: p.noRecede,
     gated: id === 'projects',
   }
 }

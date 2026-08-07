@@ -21,6 +21,19 @@ export type ProgramDef = {
   pos: { x: number; y: number } // offsets from desktop top-left, deterministic for SSR
   /** `bare` = no titlebar, no resize grip: the program IS the chrome (see the iPod) */
   chrome?: 'paper' | 'crt' | 'bare'
+  /** Opt out of the unfocused-window recede.
+
+      The recede is `filter: opacity()` on the window's children, and
+      `filter` is a GROUPING property: it forces `transform-style` to
+      `flat` on everything beneath it. A program that builds real 3D — the
+      shelf's cuboid boxes (src/programs/shelf/Box3D.tsx) — would go flat
+      the instant the window lost focus, and pop back on hover. There is no
+      way to have both, so the program declares which it needs.
+
+      `bare` chrome opts out for a different reason (an appliance on the
+      desk shouldn't dim); this is the same escape hatch, different cause.
+      Set it only when a program owns a 3D context. */
+  noRecede?: true
   /** show an icon on the desktop */
   onDesktop?: boolean
   /** a drawer: window ids (program id or `viz:<id>`) this folder holds.
@@ -97,11 +110,16 @@ export const PROGRAMS: ProgramDef[] = [
     meta: 'IDX-16',
     icon: 'folder',
     component: dynamic(() => import('@/programs/shelf/Shelf')),
-    // measured: 720 leaves 676px of shelf after the 20px gutters, which is
-    // exactly three 200px-minimum boxes plus their gaps; 600 shows the
-    // masthead, one full 3:4 row, and the top of the next — the scroll
-    // affordance a shelf needs — and still fits a 1280×800 laptop
-    size: { w: 720, h: 600 },
+    // the boxes are real cuboids (preserve-3d) — the unfocused-window
+    // recede is a `filter`, and filter flattens 3D. See `noRecede` above.
+    noRecede: true,
+    // measured, one row deep: 720 leaves 678px of shelf after the 20px
+    // gutters — two 246px boxes and ~150px of the third, cut by the right
+    // edge on purpose. 520 = 32 titlebar + 54 masthead + 380 row (18 above
+    // a 328px box + 34 below it, where the contact shadows live) + 40 foot
+    // + the window's own borders, rounded up so the license sphere still
+    // has ~350px of frame when the whole body goes dark.
+    size: { w: 720, h: 520 },
     pos: { x: 250, y: 48 },
     onDesktop: true,
     path: '/cases',

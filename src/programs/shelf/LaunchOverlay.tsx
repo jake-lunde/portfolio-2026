@@ -13,25 +13,34 @@ import { useWindows } from '@/store/windows'
 import { InstallBar } from './InstallBar'
 import styles from './shelf.module.css'
 
-/* INSTALL — the old joke inverted. The installer that never finished now
-   finishes, because the work shipped. It is a layer inside the shelf, not
-   a window: an install belongs to the thing being installed.
+/* PLAY — the beat between pressing the button and the case arriving.
+
+   Not an install: nobody installs a case study, they play it. What a 1992
+   machine did in that gap was print status lines and creep a bar, and that
+   is exactly the theatre kept here — the bar mechanics are unchanged
+   (steps to 90, stall for the licence, 100 on clearance), only the framing
+   moved from "installing software" to "loading a program".
 
    The clearance gate is ABSORBED here rather than met at the case window.
-   `useGate` unlocks globally per session, so a license check inside the
-   install satisfies the case window's own `gated` flag on arrival — the
+   `useGate` unlocks globally per session, so a licence check inside the
+   load satisfies the case window's own `gated` flag on arrival — the
    sphere is unchanged, only the framing around it is new. Deep links
-   (/projects/<slug>) still meet the sphere in the case window itself. */
+   (/projects/<slug>) still meet the sphere in the case window itself.
 
-const STEPS = ['shelf.install.step1', 'shelf.install.step2', 'shelf.install.step3']
+   The licence phase takes the WHOLE frame dark (`.overlayDark`, the same
+   inverse-ground idiom as `.windowBody.crt`). The sphere's own panel is
+   dark; on a light overlay it read as a hole punched in the window, so the
+   window goes with it. */
+
+const STEPS = ['shelf.load.step1', 'shelf.load.step2', 'shelf.load.step3']
 const STEP_MS = 460
-/* the beat between "complete" and the window arriving — long enough to
-   read the line, short enough that nobody waits on a machine */
+/* the beat between "ready" and the window arriving — long enough to read
+   the line, short enough that nobody waits on a machine */
 const DONE_MS = 620
 
-type Phase = 'installing' | 'license' | 'done'
+type Phase = 'loading' | 'license' | 'done'
 
-export function InstallOverlay({
+export function LaunchOverlay({
   slug,
   name,
   onCancel,
@@ -50,19 +59,19 @@ export function InstallOverlay({
   const hydrate = useGate((s) => s.hydrate)
   const open = useWindows((s) => s.open)
   const [step, setStep] = useState(0)
-  const [phase, setPhase] = useState<Phase>('installing')
+  const [phase, setPhase] = useState<Phase>('loading')
   const panel = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     hydrate()
-    metric('case_install', { slug })
+    metric('case_play', { slug })
     panel.current?.focus()
   }, [hydrate, slug])
 
   // the stepped write. Each tick prints one status line; the bar stalls at
-  // 90% like every installer ever shipped, waiting on the license.
+  // 90% like every loader ever shipped, waiting on the licence.
   useEffect(() => {
-    if (phase !== 'installing') return
+    if (phase !== 'loading') return
     if (step >= STEPS.length) {
       setPhase(unlocked ? 'done' : 'license')
       return
@@ -78,29 +87,33 @@ export function InstallOverlay({
 
   useEffect(() => {
     if (phase !== 'done') return
-    const id = setTimeout(() => {
-      sfx.open()
-      open(`case:${slug}`)
-      onDone()
-    }, reduced ? 0 : DONE_MS)
+    const id = setTimeout(
+      () => {
+        sfx.open()
+        open(`case:${slug}`)
+        onDone()
+      },
+      reduced ? 0 : DONE_MS,
+    )
     return () => clearTimeout(id)
   }, [phase, reduced, open, slug, onDone])
 
+  const dark = phase === 'license'
   const pct = phase === 'done' ? 100 : Math.round((Math.min(step, STEPS.length) / STEPS.length) * 90)
   const statusKey =
     phase === 'done'
-      ? 'shelf.install.done'
+      ? 'shelf.play.done'
       : phase === 'license'
-        ? 'shelf.install.license'
+        ? 'shelf.play.license'
         : STEPS[Math.min(step, STEPS.length - 1)]
 
   return (
     <motion.div
       ref={panel}
-      className={styles.overlay}
+      className={`${styles.overlay} ${dark ? styles.overlayDark : ''}`}
       role="dialog"
       aria-modal="true"
-      aria-label={`${t('shelf.installing', skin)} ${name}`}
+      aria-label={`${t('shelf.loading', skin)} ${name}`}
       tabIndex={-1}
       initial={reduced ? { opacity: 1 } : { opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -114,31 +127,31 @@ export function InstallOverlay({
         onCancel()
       }}
     >
-      <div className={styles.installPanel}>
-        <p className={styles.installName}>{name}</p>
-        {/* the bar yields its rows to the sphere during the license check —
+      <div className={styles.loadPanel}>
+        <p className={styles.loadName}>{name}</p>
+        {/* the bar yields its rows to the sphere during the licence check —
             a 600px window fits one or the other, not both */}
-        {phase !== 'license' && (
+        {!dark && (
           <InstallBar
             pct={pct}
             striped
             role="progressbar"
-            label={`${t('shelf.installing', skin)} ${name}`}
+            label={`${t('shelf.loading', skin)} ${name}`}
             seconds={0.42}
           />
         )}
-        <p className={styles.installStep} aria-live="polite">
+        <p className={styles.loadStep} aria-live="polite">
           <Copy k={statusKey} as="span" />
         </p>
 
-        {phase === 'license' && (
+        {dark && (
           <div className={styles.sphereWrap}>
             <GateSphere />
           </div>
         )}
 
         <button type="button" className={styles.cancelBtn} onClick={onCancel}>
-          <Copy k="shelf.install.cancel" as="span" />
+          <Copy k="shelf.play.cancel" as="span" />
         </button>
       </div>
     </motion.div>

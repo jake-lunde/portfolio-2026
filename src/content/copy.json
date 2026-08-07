@@ -200,37 +200,37 @@
     "base": "IN DEVELOPMENT",
     "medieval": "STILL BEING ILLUMINATED"
   },
-  "shelf.install": {
-    "base": "INSTALL",
-    "medieval": "TRANSCRIBE"
+  "shelf.load.step1": {
+    "base": "Reading disk 1 of 2…",
+    "medieval": "Finding the shelf…"
   },
-  "shelf.install.cancel": {
+  "shelf.load.step2": {
+    "base": "Allocating memory…",
+    "medieval": "Unrolling the scroll…"
+  },
+  "shelf.load.step3": {
+    "base": "Waking the interface…",
+    "medieval": "Lighting the candle…"
+  },
+  "shelf.loading": {
+    "base": "LOADING…",
+    "medieval": "UNROLLING…"
+  },
+  "shelf.play": {
+    "base": "PLAY",
+    "medieval": "PERFORM"
+  },
+  "shelf.play.cancel": {
     "base": "CANCEL",
     "medieval": "STAY THE HAND"
   },
-  "shelf.install.done": {
-    "base": "Installation complete.",
-    "medieval": "The copy is made."
+  "shelf.play.done": {
+    "base": "Ready.",
+    "medieval": "The tale is ready."
   },
-  "shelf.install.license": {
+  "shelf.play.license": {
     "base": "One more thing, a license check.",
     "medieval": "The abbot requires the word."
-  },
-  "shelf.install.step1": {
-    "base": "Verifying media…",
-    "medieval": "Preparing the vellum…"
-  },
-  "shelf.install.step2": {
-    "base": "Writing files…",
-    "medieval": "Ruling the lines…"
-  },
-  "shelf.install.step3": {
-    "base": "Registering extensions…",
-    "medieval": "Laying the ink…"
-  },
-  "shelf.installing": {
-    "base": "INSTALLING…",
-    "medieval": "TRANSCRIBING…"
   },
   "shelf.requirements": {
     "base": "SYSTEM REQUIREMENTS",
