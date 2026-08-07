@@ -735,6 +735,26 @@
   mask-composite: add;
 }
 
+/* THE KEY ART, SEATED (pass 8). One rule serves four different plates
+   because every plate is fixed geometry off --box-w and the picture simply
+   fills whichever one it is printed in:
+
+     stripe    1200×571 (2.10:1) → a 16:9 window: a sliver off each side,
+               and the phones are centred in the original, so centre is the
+               crop. Bottom-anchored, hard border, no mask.
+     figma     1200×727 (1.65:1) → the 1.48:1 blob plate: cropped by the
+               MASK more than by the box, which is the point — the same
+               organic edge and the same airbrush the film gets, so the two
+               dissolve into each other rather than swapping.
+     catalog    960×960 (1:1)    → the square plate: no crop at all.
+     nocturne  1024×1024 (1:1)   → a 0.93:1 framed window: a hair off each
+               side, inside the printed keyline.
+
+   `cover` with the default centre origin on all four — every one of these
+   pictures is composed on its middle, so there is no reason to name an
+   edge. `display: block` kills the inline baseline gap; `object-fit` is
+   what stops any of them stretching. Nothing here can shift the layout:
+   the plate is absolutely positioned and sized before the bytes arrive. */
 .plate img {
   width: 100%;
   height: 100%;
@@ -810,9 +830,16 @@
   opacity: 1;
 }
 
-/* no art yet → the plate composes itself from tokens. Same geometry and the
-   same feather, so a case with assets and a case without sit on the shelf
-   as equals. */
+/* THE FALLBACK FRONT — no art, or art that failed to load. The plate
+   composes itself from tokens at the same geometry and under the same
+   feather, so a box with a broken picture is still a box.
+
+   ⚠️ PASS 8 DEMOTED IT AND IT MUST STAY DEMOTED. Until pass 8 this was what
+   every cover printed, and on the two boxes with a film it was also what the
+   reader looked at for the six seconds the gate holds — Jake's verdict, and
+   the reason the real art landed: "the waiting to fade in is jarring because
+   the placeholder is just a number." All four cases now ship a picture. This
+   is an error state wearing the house style, not a design. */
 .composed {
   position: absolute;
   inset: 0;
@@ -889,11 +916,13 @@
   object-position: left top;
 }
 
-/* The number stays on the DISPLAY face, not the box-art one. It is not
-   lettering printed by a publisher — it is the shelf's own index, the same
-   `no` the back panel and the case routes use, and keeping it in the pixel
-   face is what says so. Sized off the box for the same reason the type is:
-   it is art on an object. */
+/* The number, in the display face — not lettering printed by a publisher but
+   the shelf's own index, the same `no` the back panel and the case routes
+   use. It is FALLBACK-ONLY as of pass 8 (see `.composed`); it kept its size
+   and its ink because an error state that looks improvised is worse than one
+   that looks printed. The index itself has not gone anywhere: it is on the
+   back panel of every box, in `.backNo`, where the rest of the small print
+   lives. */
 .bigNo {
   font-family: var(--display);
   font-size: calc(var(--box-w) * 0.26); /* ~64px at 246 */

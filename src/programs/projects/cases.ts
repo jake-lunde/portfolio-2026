@@ -47,9 +47,22 @@ export type CaseDef = {
       case stays one CASES entry: no `box` at all still yields a box, just
       a bare one. */
   box?: {
-    /** key art. Convention: /case/<slug>/box.webp. Absent → the front face
-        composes itself from tokens (the big number as the art plate). */
-    art?: string
+    /** KEY ART — the picture printed in this cover's plate. Convention:
+        /case/<slug>/box-art.webp.
+
+        The intrinsic size travels WITH the source and is not optional,
+        which is the whole reason this is an object rather than a string:
+        the plate is fixed geometry, so `width`/`height` cost nothing to
+        layout, but they are what stop the decoder guessing and what keeps
+        the front honest if the plate ever stops being absolute. Take them
+        from the file, never from the design.
+
+        Absent — or a src that fails to load (ShelfBox's `onError`) — → the
+        front composes itself from tokens with the shelf's index number in
+        the plate. Pass 8 makes that a FALLBACK and nothing else: every
+        shipped cover has art, and a number waiting for a film to fade in
+        was the state Jake struck ("the placeholder is just a number"). */
+    art?: { src: string; w: number; h: number }
     /** the box-art template's publisher mark, printed small at the top-left
         the way a 1992 sleeve carried its house logo. Convention:
         /case/<slug>/mark.svg. Absent → nothing is drawn; a placeholder box
@@ -107,9 +120,13 @@ export const CASES: CaseDef[] = [
     status: 'live',
     component: dynamic(() => import('@/programs/projects/CaseInvest')),
     progress: { pct: 100, phase: 'Shipped — read it' },
-    /* no art file yet — the composed front carries this one, with the
-       product film rolling silently over it */
     box: {
+      /* the three phones on mint — Jake's own product shot. 2.10:1 into a
+         16:9 plate, so it gives up a sliver either side and keeps the
+         phones dead centre. It is also the FILM's resting frame: the
+         embed fades in over it and the picture comes back every time the
+         gate shuts (CoverFilm.tsx). */
+      art: { src: '/case/greenlight-invest/box-art.webp', w: 1200, h: 571 },
       video: 'Nxl0uCGZNCw',
       coverVariant: 'stripe',
       tagline: 'know why, not just what.',
@@ -133,6 +150,10 @@ export const CASES: CaseDef[] = [
     component: dynamic(() => import('@/programs/projects/CaseFamilyHub')),
     progress: { pct: 100, phase: 'Shipped — read it' },
     box: {
+      /* the hub dashboard, seated under the blob mask and the airbrush —
+         the same treatment the film gets, which is what makes the two
+         crossfade as one picture rather than as two layers */
+      art: { src: '/case/family-hub/box-art.webp', w: 1200, h: 727 },
       /* the launch film, the same cut plate 11 runs in the case study */
       video: 'G-tWcCCMdGE',
       /* the reference cover — this is the one Jake drew, so it wears the
@@ -167,8 +188,12 @@ export const CASES: CaseDef[] = [
     year: '2024–26',
     status: 'soon',
     progress: { pct: 30, phase: 'Artifacts gathered · hunting the through-line' },
-    /* no art, no film, no promises yet — but it still gets a printer */
-    box: { coverVariant: 'catalog' },
+    /* no film and no promises yet — but the picture is real, and a square
+       original in a square plate is the one cover that crops by nothing */
+    box: {
+      art: { src: '/case/tooling/box-art.webp', w: 960, h: 960 },
+      coverVariant: 'catalog',
+    },
   },
   {
     slug: 'interview-pipeline',
@@ -178,7 +203,12 @@ export const CASES: CaseDef[] = [
     year: '2026',
     status: 'soon',
     progress: { pct: 15, phase: 'Outline only — the self-referential one' },
-    box: { coverVariant: 'nocturne' },
+    /* the caterpillar, printed in the framed window the way a game box
+       carried its one illustration */
+    box: {
+      art: { src: '/case/interview-pipeline/box-art.webp', w: 1024, h: 1024 },
+      coverVariant: 'nocturne',
+    },
   },
 ]
 

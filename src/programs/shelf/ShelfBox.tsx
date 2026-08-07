@@ -38,6 +38,17 @@ import styles from './shelf.module.css'
    playing (CoverFilm.tsx), because the one thing worse than a still cover is
    YouTube's play button printed on the artwork.
 
+   PASS 8 PUTS THE PICTURES IN. Every cover carried a composed front — the
+   shelf's index number printed big on a token ground — because there was no
+   art to print. Jake's four covers land here, one per case, seated in each
+   variant's own plate, and his note is the whole ruling: "the waiting to
+   fade in is jarring because the placeholder is just a number." A number is
+   a fine placeholder for a picture that doesn't exist and a terrible poster
+   frame for a film that is about to roll. So the art IS the resting state on
+   all four boxes, the film crossfades over it and back to it at every gate,
+   and the composed front is demoted to what happens when a byte range fails
+   — reachable, never designed for.
+
    THE FRONT IS JAKE'S BOX-ART TEMPLATE (pass 4), built from his Figma: a
    warm cream ground, product photography filling the upper two thirds and
    FEATHERING into the cream rather than stopping at a crop line, a small
@@ -147,6 +158,8 @@ export function ShelfBox({
   const skin = useSettings((s) => s.skin)
   const [flipped, setFlipped] = useState(false)
   const [live, setLive] = useState(false)
+  /** the key art did not load — the composed number takes the plate back */
+  const [artFailed, setArtFailed] = useState(false)
   const tag = useRef<HTMLButtonElement>(null)
   const back = useRef<HTMLDivElement>(null)
   const slot = useRef<HTMLDivElement>(null)
@@ -331,9 +344,46 @@ export function ShelfBox({
                 live (grouping property, leaf of the 3D tree — see the note at
                 the top of this file). */}
             <span className={styles.plate} aria-hidden="true">
-              {box?.art ? (
-                <img src={box.art} alt="" width={600} height={800} draggable={false} />
+              {box?.art && !artFailed ? (
+                /* THE PICTURE. Pass 8: every cover has one, and it is the
+                   plate's RESTING state — on the two boxes with a film it is
+                   what the film fades in over and what comes back the instant
+                   the gate shuts, and on the two without it is simply the
+                   artwork. It takes the plate's own treatment because it is a
+                   child of the plate: the blob mask and the airbrush on
+                   figma, the printed border on the other three.
+
+                   EAGER, and deliberately so. `loading="lazy"` is for pictures
+                   below the fold; these four ARE the fold — the shelf window
+                   opens with all four in frame — and a lazy cover would fade
+                   in after the box it belongs to. Decoding is async because
+                   nothing here blocks: the plate is fixed geometry, so an
+                   image that arrives late arrives into a hole of exactly its
+                   own size and shifts nothing.
+
+                   The alt is written for the one place it can be read — a
+                   reader with images off, where "Family Hub box art" is the
+                   picture's name rather than a description of a thing that
+                   isn't there. The plate stays aria-hidden: the tag below the
+                   box is the announced control and it already carries the
+                   case name, and a cover that names itself a second time is
+                   two labels for one object. */
+                <img
+                  src={box.art.src}
+                  alt={`${c.name} box art`}
+                  width={box.art.w}
+                  height={box.art.h}
+                  loading="eager"
+                  decoding="async"
+                  draggable={false}
+                  onError={() => setArtFailed(true)}
+                />
               ) : (
+                /* THE LAST RESORT — not a designed state since pass 8. A
+                   number standing in for a picture is exactly what Jake
+                   struck ("the placeholder is just a number"), so this is
+                   what a broken byte range falls to and nothing else: the
+                   box still prints something rather than a hole. */
                 <span className={styles.composed}>
                   <span className={styles.bigNo}>{c.no}</span>
                 </span>
