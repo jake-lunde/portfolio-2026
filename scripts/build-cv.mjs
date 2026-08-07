@@ -26,7 +26,20 @@ import path from 'node:path'
 import os from 'node:os'
 
 const ROOT = process.cwd()
-const OUT = path.join(ROOT, 'public', 'jake-lunde-resume.pdf')
+/* Variant support (.claude/skills/tailor-resume): --input <resume.ts>
+ * --output <pdf>. Both default to the canonical paths, so the bare
+ * `cv:build` invocation in predev/prebuild is byte-identical to before.
+ * Tailored variants live under ref/applications/ and are never committed. */
+const argv = process.argv.slice(2)
+const flagValue = (name) => {
+  const i = argv.indexOf(name)
+  if (i === -1) return undefined
+  const v = argv[i + 1]
+  if (!v || v.startsWith('--')) throw new Error(`${name} needs a path argument`)
+  return v
+}
+const INPUT = path.resolve(ROOT, flagValue('--input') ?? path.join('src', 'content', 'resume.ts'))
+const OUT = path.resolve(ROOT, flagValue('--output') ?? path.join('public', 'jake-lunde-resume.pdf'))
 const MAX_BYTES = 200 * 1024
 
 /* resume.ts is TypeScript with no imports, so a bundle-less esbuild pass to a
@@ -35,7 +48,7 @@ const MAX_BYTES = 200 * 1024
 async function loadResume() {
   const tmp = path.join(await fs.mkdtemp(path.join(os.tmpdir(), 'cv-')), 'resume.mjs')
   await build({
-    entryPoints: [path.join(ROOT, 'src', 'content', 'resume.ts')],
+    entryPoints: [INPUT],
     outfile: tmp,
     format: 'esm',
     platform: 'node',
@@ -131,6 +144,7 @@ async function main() {
     },
   })
 
+  await fs.mkdir(path.dirname(OUT), { recursive: true })
   const stream = createWriteStream(OUT)
   doc.pipe(stream)
 
@@ -196,7 +210,7 @@ async function main() {
 
   if (pages > 1) {
     throw new Error(
-      `CV overflowed to ${pages} pages. Trim a bullet in src/content/resume.ts or drop the type scale in scripts/build-cv.mjs.`,
+      `CV overflowed to ${pages} pages. Trim a bullet in ${path.relative(ROOT, INPUT)} or drop the type scale in scripts/build-cv.mjs.`,
     )
   }
   if (size > MAX_BYTES) {
