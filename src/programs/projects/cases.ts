@@ -61,15 +61,21 @@ export type CaseDef = {
         stays underneath as the poster frame (and the whole thing is skipped
         under reduced motion). */
     video?: string
-    /** the case's metrics, printed as the back panel's SYSTEM REQUIREMENTS */
+    /** THE BACK PANEL'S SYSTEM REQUIREMENTS — exactly three rows.
+
+        Not a list that happens to be short: a ledger, and the ledger is
+        three lines because a box back has room for three lines of data at
+        a size worth reading. The one-line rule is enforced BY CONSTRUCTION
+        (`white-space: nowrap` in shelf.module.css) rather than by
+        truncation, which means the discipline lives HERE: a label is one
+        or two words, a value is a figure and the shortest phrase that
+        makes it mean something. If a value overflows, the copy is wrong —
+        do not shrink the type to rescue it, and never add a fourth row. */
     requirements?: { label: string; value: string }[]
     /** a quote from the work, printed as the review blurb */
     blurb?: { quote: string; source: string }
     /** the case's own thesis line, in Jake's words */
     thesis?: string
-    /** back-panel thumbs. Rendered in fixed 16/9 frames (object-fit:
-        cover), so any source ratio is safe and nothing shifts on load. */
-    shots?: string[]
   }
 }
 
@@ -94,10 +100,9 @@ export const CASES: CaseDef[] = [
       thesis:
         'A kid told me the numbers meant nothing. So I built the understanding — in code.',
       requirements: [
-        { label: 'First-trade rate', value: '3–4× vs. unexposed' },
-        { label: 'Detail-screen views', value: '355% growth' },
         { label: 'Role', value: 'Lead product designer' },
-        { label: 'Shipped', value: 'SwiftUI scrub · AI-data components · decision flow' },
+        { label: 'Trades', value: '3–4× vs. unexposed' },
+        { label: 'Detail views', value: '+355%' },
       ],
       blurb: { quote: 'It encouraged conversation.', source: 'Parent, user research' },
     },
@@ -122,23 +127,20 @@ export const CASES: CaseDef[] = [
       thesis:
         'The all-in-one family organizer, on Greenlight’s first device. I was its first skeptic. I ended up being its design team.',
       requirements: [
-        { label: 'Zero code to nationwide', value: '7 months' },
-        { label: 'Designer to engineers', value: '1 : 10' },
-        { label: 'Concept appeal', value: 'Cleared 80%, before price' },
-        { label: 'Shipped', value: '15.6″ + 10.1″ devices · GL’s first web app · Glow DS' },
+        { label: 'Design : eng', value: '1 : 10' },
+        { label: 'Nationwide', value: '7 months from zero' },
+        { label: 'Concept appeal', value: '80%, before price' },
       ],
+      /* The verbatim, elided rather than rewritten: the words are the
+         parent's and in her order, the ellipsis marks where "and a shared
+         Google calendar" came out. Full length it ran four lines on the
+         medieval panel — where --sans is a display face — and pushed the
+         back into scrolling. A box-back blurb is a trimmed quote by genre;
+         it is not allowed to be a paraphrase. */
       blurb: {
-        quote:
-          'A whiteboard chore chart for the kids, group texts, and a shared Google calendar — would love one tool instead.',
+        quote: 'A whiteboard chore chart for the kids, group texts… would love one tool instead.',
         source: 'Parent, exploration survey (n = 1,200)',
       },
-      /* the evolution rail's own posters, reused — the shelf never waits
-         on new assets to have something true to show */
-      shots: [
-        '/case/family-hub/evo/poster-wireframes.webp',
-        '/case/family-hub/evo/poster-poc.webp',
-        '/case/family-hub/evo/poster-hifi.webp',
-      ],
     },
   },
   {

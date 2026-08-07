@@ -872,15 +872,21 @@
   letter-spacing: var(--type-micro-tracking);
   text-transform: uppercase;
   color: var(--accent);
-  margin: 0 0 7px;
+  margin: 0 0 6px;
 }
 
+/* Leading is SNUG on both prose blocks, not normal. This is print on the
+   back of a package — the register where a real box set its blurb tight
+   and small — and at 11px in a 224px measure, 1.5 was opening gaps wide
+   enough to read as three separate paragraphs rather than one panel. It
+   is also what buys the room the bigger ledger costs, and it buys it from
+   the leading rather than from the type size, which is the whole rule. */
 .thesis {
   font-family: var(--sans);
   font-size: var(--type-label-size); /* 11px — prose at box scale */
-  line-height: var(--leading-normal);
+  line-height: var(--leading-snug);
   color: var(--content);
-  margin: 0 0 8px;
+  margin: 0 0 7px;
 }
 
 .backHead {
@@ -889,33 +895,75 @@
   letter-spacing: var(--tracking-16);
   text-transform: uppercase;
   color: var(--content-muted);
-  margin: 0 0 4px;
+  margin: 0 0 3px;
 }
 
+/* SYSTEM REQUIREMENTS — three rows, one line each, printed at box scale.
+
+   Pass 1 set this at --type-micro-size (8px) in a 1fr/auto grid, which is
+   a UI table: the label column took the slack, the values wrapped onto
+   second and third lines, and four of them stacked into a grey block. A
+   requirements panel is the one part of a box you are meant to be able to
+   read across the shop, so it is now sized off --box-w like the cover
+   lettering (same argument as `.type` — this is printing on an object, not
+   a control in a window).
+
+   IT IS NO LONGER A GRID, and that is the fix rather than a preference. A
+   shared column is sized to the widest label in the SET, so the longest
+   row levied a tax on all three and the values wrapped even when they had
+   room of their own. Each row is now its own flex line: label hard left,
+   value hard right, and the only thing a line has to clear is the panel.
+   The left and right edges still align down the panel, which is all the
+   "column" a three-row ledger was ever getting from the grid.
+
+   `white-space: nowrap` is the whole rule and it has no fallback. There is
+   no ellipsis, no min-width: 0, no wrap point — if a string cannot make
+   the width it will overflow visibly, and that is on purpose: the fix
+   belongs in cases.ts (see the note on `requirements`), where the copy can
+   be made shorter and truer, not here, where the only lever left would be
+   shrinking the type back to where pass 1 had it.
+
+   Budget at --box-w 246: 224px of content width, 222 in medieval. Label +
+   gap + value must clear it in EVERY skin, and medieval is the binding
+   one: it swaps BOTH faces for display cuts (--mono → MedievalSharp,
+   --sans → Eagle Lake) and sets ~20% wider, so a row that fits classic by
+   a hair wraps there. Measured worst case is 8px of slack. */
 .reqs {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2px var(--space-2);
-  margin: 0 0 8px;
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  line-height: var(--leading-normal);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--box-w) * 0.016);
+  margin: 0 0 9px;
+  line-height: var(--leading-tight);
+}
+
+.reqs > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 
 .reqs dt {
-  color: var(--content-muted);
-  text-transform: uppercase;
+  font-family: var(--type-micro-family);
+  font-size: calc(var(--box-w) * 0.042); /* ~10px at 246 */
+  font-weight: var(--type-micro-weight);
   letter-spacing: var(--tracking-08);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  white-space: nowrap;
 }
 
 .reqs dd {
   margin: 0;
+  font-family: var(--sans);
+  font-size: calc(var(--box-w) * 0.052); /* ~13px at 246 */
   text-align: right;
   color: var(--content);
+  white-space: nowrap;
 }
 
 .blurb {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   padding-left: 7px;
   border-left: var(--border-width-thick) solid var(--accent);
 }
@@ -923,7 +971,7 @@
 .blurb p {
   font-family: var(--sans);
   font-size: var(--type-label-size);
-  line-height: var(--leading-normal);
+  line-height: var(--leading-snug); /* see the note on .thesis */
   margin: 0;
 }
 
@@ -936,28 +984,10 @@
   margin-top: 3px;
 }
 
-.shots {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-}
-
-.shots li {
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  border: var(--border-width-hairline) solid var(--border);
-}
-
-.shots img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: grayscale(1) contrast(1.05);
-}
+/* (pass 5: `.shots` — three 16:9 thumbs under the blurb — deleted with the
+   `shots` data. The front face plays the product film now; a strip of
+   stills on the back was the same offer, smaller and worse, and it was
+   what pushed the panel into scrolling.) */
 
 .meter {
   margin-top: 6px;

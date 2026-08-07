@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { CopyText as Copy } from '@/content/CopyText'
@@ -13,8 +13,19 @@ import { Box3D } from './Box3D'
 import { InstallBar } from './InstallBar'
 import styles from './shelf.module.css'
 
-/* One box on the shelf. Back is the panel every 1992 box had — system
-   requirements, a review blurb, screenshots, and the button.
+/* One box on the shelf. Back is the panel every 1992 box had — a thesis,
+   a review blurb, system requirements, and the button.
+
+   PASS 5 EMPTIED THAT PANEL OUT. It had grown four data rows, three
+   screenshot thumbs and a version line under a thesis and a quote, which
+   on a 246px board is six registers of stacked text and no hierarchy at
+   all — and the rows were long enough to wrap, so the "requirements" read
+   as paragraphs. The thumbs went first: pass 4 gave the FRONT a moving
+   cover, and a strip of stills on the back is the same promise made worse.
+   Then the ledger was cut to exactly three rows and printed BIGGER — a box
+   back is read at arm's length, and three lines you can read beat six you
+   squint at. The one-line rule is structural (`nowrap` in the CSS, copy
+   authored to fit in cases.ts), never a truncation.
 
    THE FRONT IS JAKE'S BOX-ART TEMPLATE (pass 4), built from his Figma: a
    warm cream ground, product photography filling the upper two thirds and
@@ -294,12 +305,19 @@ export function ShelfBox({
               {box?.requirements?.length ? (
                 <>
                   <Copy k="shelf.requirements" as="h4" className={styles.backHead} />
+                  {/* Each row is its own element (dl > div > dt+dd is valid
+                      HTML and keeps the description-list semantics). It has
+                      to be: a shared grid column is sized to the WIDEST
+                      label in the set, so one long row used to eat width
+                      from every other row and the values wrapped. Row by
+                      row, each line only has to clear the panel on its own
+                      — which is what makes the one-line rule keepable. */}
                   <dl className={styles.reqs}>
                     {box.requirements.map((r) => (
-                      <Fragment key={r.label}>
+                      <div key={r.label}>
                         <dt>{r.label}</dt>
                         <dd>{r.value}</dd>
-                      </Fragment>
+                      </div>
                     ))}
                   </dl>
                 </>
@@ -311,18 +329,6 @@ export function ShelfBox({
                   <footer>{box.blurb.source}</footer>
                 </blockquote>
               )}
-
-              {box?.shots?.length ? (
-                <ul className={styles.shots}>
-                  {box.shots.map((src) => (
-                    <li key={src}>
-                      {/* fixed 16/9 frames, object-fit: cover — the slot is
-                          the same size before and after the bytes land */}
-                      <img src={src} alt="" width={160} height={90} draggable={false} />
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
 
               {/* an unshipped box has no hero act to offer, so the nudge
                   stays down here in the body with the thing it's about — the
