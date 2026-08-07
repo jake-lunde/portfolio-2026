@@ -210,6 +210,9 @@ export default function Shelf() {
               durable={durable}
               fine={fine}
               revealed={revealed === c.slug}
+              // the launch layer covers the shelf, so every box under it
+              // reads a pointerleave it must ignore — see ShelfBox's `leave`
+              overlayOpen={playing !== null}
               onReveal={setRevealed}
               onNudge={(slug) => void nudge(slug)}
               onPlay={startPlay}

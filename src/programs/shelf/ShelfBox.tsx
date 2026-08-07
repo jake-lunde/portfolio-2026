@@ -32,10 +32,11 @@ import styles from './shelf.module.css'
    composition — Jake's read of the set was "they still feel kind of the same
    because they're using the same soft blur" — so three of the four covers
    now borrow their STRUCTURE from a real box off his reference board (COVER,
-   below) and only family-hub keeps the comp he drew. The cover film came with
-   it: it may not be SEEN until it is genuinely playing (CoverFilm.tsx),
-   because the one thing worse than a still cover is YouTube's play button
-   printed on the artwork.
+   below) and only family-hub keeps the comp he drew. Two smaller rulings
+   landed with it: a turned box puts itself back when the pointer leaves the
+   slot (`leave`), and the cover film may not be seen until it is genuinely
+   playing (CoverFilm.tsx), because the one thing worse than a still cover is
+   YouTube's play button printed on the artwork.
 
    THE FRONT IS JAKE'S BOX-ART TEMPLATE (pass 4), built from his Figma: a
    warm cream ground, product photography filling the upper two thirds and
@@ -116,6 +117,7 @@ export function ShelfBox({
   durable,
   fine,
   revealed,
+  overlayOpen,
   onReveal,
   onNudge,
   onPlay,
@@ -130,6 +132,8 @@ export function ShelfBox({
   fine: boolean
   /** this box is the one whose tag is out */
   revealed: boolean
+  /** the launch layer is up, covering the shelf — see `leave` below */
+  overlayOpen: boolean
   onReveal: (slug: string) => void
   onNudge: (slug: string) => void
   onPlay: (slug: string, trigger: HTMLElement) => void
@@ -140,7 +144,10 @@ export function ShelfBox({
   const [live, setLive] = useState(false)
   const tag = useRef<HTMLButtonElement>(null)
   const back = useRef<HTMLDivElement>(null)
+  const slot = useRef<HTMLDivElement>(null)
   const mounted = useRef(false)
+  /** this unflip was the pointer leaving, not a control being pressed */
+  const walkedAway = useRef(false)
 
   const backId = `shelf-${c.slug}-back`
   const box = c.box
@@ -155,7 +162,13 @@ export function ShelfBox({
   const film = shipped && box?.video && live && !reduced ? box.video : null
 
   /* focus follows the flip: into the back panel's first live control, and
-     back to the tag that turned the box over */
+     back to the tag that turned the box over.
+
+     UNLESS THE POINTER SIMPLY LEFT. An auto-unflip (below) is not a request
+     for focus — pulling it onto the tag of a box the reader has walked away
+     from would steal it from wherever they were going and drag the row along
+     with it. Focus still has to LEAVE, because the panel is about to go
+     inert; it just goes nowhere rather than somewhere wrong. */
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true
@@ -164,6 +177,10 @@ export function ShelfBox({
     if (flipped) {
       const first = back.current?.querySelector<HTMLElement>('button:not([disabled])')
       ;(first ?? back.current)?.focus()
+    } else if (walkedAway.current) {
+      walkedAway.current = false
+      const active = document.activeElement
+      if (active instanceof HTMLElement && slot.current?.contains(active)) active.blur()
     } else {
       tag.current?.focus()
     }
@@ -175,9 +192,56 @@ export function ShelfBox({
      motion this resolves to a constant 1 and Motion writes nothing. */
   const faceFade = (isBack: boolean) => ({ opacity: reduced && flipped !== isBack ? 0 : 1 })
 
-  const turn = (next: boolean) => {
-    sfx.tap()
+  const turn = (next: boolean, quiet = false) => {
+    // an automatic flip-back is not a press: nothing was touched, so nothing
+    // clicks. The tap belongs to the control, not to the state.
+    if (!quiet) sfx.tap()
     setFlipped(next)
+  }
+
+  /* THE BOX PUTS ITSELF BACK WHEN YOU WALK AWAY (pass 6).
+
+     A turned box that stays turned is a box the reader has to close, and a
+     shelf where three of four are showing their small print is a filing
+     cabinet. So leaving the slot turns it back over — the same gesture that
+     pulled the tag out, run in reverse.
+
+     THE ZONE IS THE WHOLE SLOT, box and tag together, which is the only
+     reason this can work at all: `pointerleave` does not fire while the
+     pointer is anywhere inside, so moving from the back panel DOWN to the
+     tag — the single most likely path after reading a panel — never triggers
+     it. Same reasoning that put `onPointerEnter` here in pass 4.
+
+     Three refusals, each of them a way this would otherwise be wrong:
+
+     · A KEYBOARD USER IS NOT A POINTER. If the focus inside the slot is
+       VISIBLE focus, someone is working the panel with a keyboard and a
+       mouse brushing past the box must not close it under them. `:focus-
+       visible` is exactly the right question: the flip moves focus into the
+       panel either way, but the browser only paints it — and only matches
+       here — when the interaction that put it there was a keyboard one.
+     · A FINGER CANNOT HOVER. Touch raises pointerleave the moment the
+       pointer stops existing, which is immediately after the tap that
+       flipped the box. Mouse only, on a fine-pointer machine only.
+     · THE LAUNCH LAYER COVERS THE SHELF. Pressing PLAY puts an overlay over
+       the box, and the pointer is then over the overlay rather than the
+       slot — a leave event we must ignore, or the box the reader launched
+       would be face-front behind it and cancelling would land them on a
+       cover instead of the panel they came from. */
+  const leave = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!flipped || overlayOpen) return
+    if (!fine || e.pointerType !== 'mouse') return
+    const active = document.activeElement
+    if (active instanceof HTMLElement && slot.current?.contains(active)) {
+      // no :focus-visible support → assume the keyboard, and leave it alone
+      let visible = true
+      try {
+        visible = active.matches(':focus-visible')
+      } catch {}
+      if (visible) return
+    }
+    walkedAway.current = true
+    turn(false, true)
   }
 
   const tagKey = flipped ? 'shelf.tag.front' : 'shelf.tag.back'
@@ -197,6 +261,7 @@ export function ShelfBox({
 
   return (
     <div
+      ref={slot}
       className={styles.boxSlot}
       // reaching for the box is what pulls its tag out. On the SLOT, not the
       // box: the tag is inside this element too, so moving the pointer from
@@ -204,6 +269,8 @@ export function ShelfBox({
       // reached for. Touch raises pointerenter on tap as well, though `!fine`
       // has already shown every tag by then.
       onPointerEnter={() => onReveal(c.slug)}
+      // and letting go of it is what turns it back over — see `leave`
+      onPointerLeave={leave}
       // the a11y path: tab to the tag (or click into the box) and it is out
       // before it is needed. Focus events bubble; pointer ones here do not
       // interfere with it.
