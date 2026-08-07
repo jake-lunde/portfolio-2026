@@ -301,9 +301,46 @@
    nocturne's cover has used since pass 6, now stated once for the whole
    solid instead of once for one variant.
 
-   THE MATERIAL ITSELF is two static background layers and no node, no
+   THE MATERIAL ITSELF is five static background layers and no node, no
    animation and nothing for the compositor to redraw — a box of cardboard is
    not an effect.
+
+   PASS 11 MADE IT PRINTED AND WORN. Jake, against his own reference board:
+   "make the background of the boxes a bit distressed/pixelated like the
+   images here." What the real boxes have that pass 7's material did not is
+   three things, and each one is a layer:
+
+     · they are PRINTED, so the ground carries a screen — a regular lattice
+       of dots you can see at reading distance;
+     · they are printed BADLY, so the ink lies unevenly in slow blotches far
+       larger than any fibre;
+     · they have been HANDLED, so the perimeter is rubbed and the corners
+       are the most rubbed part of it.
+
+   Nothing here is a filter. Every one of them is a background layer on a
+   face or a strip, for the same reason as pass 7's two: a filter anywhere on
+   this solid collapses it.
+
+     DITHER (new). The house's own 4×4 Bayer matrix — the one PhotoBooth
+     dithers with (src/programs/booth/PhotoBooth.tsx) — drawn as sixteen
+     hard-edged squares of grey about the mid-point and laid down at 8px, so
+     each cell is exactly 2 device pixels. `shape-rendering: crispEdges` is
+     what makes it a PIXEL and not a gradient: the tile is vector, so it
+     resamples at any scale, and without that hint the browser would
+     antialias the very edges that carry the effect.
+     ⚠️ THE SPREAD IS ±20 OF 255, AND IT WAS CUT THERE FROM ±41 BY WHAT DARK
+     GROUNDS DO TO SOFT-LIGHT. The blend is not symmetric: on a near-black
+     ground the lift term goes as √b, so at b = 0.02 a light cell brightens
+     the ground THREE TIMES over while the same cell on cream moves it by a
+     percent. Measured on the invest cover at ±41 the screen stopped being a
+     screen and became woven canvas. ±20 reads as printing on the two dark
+     covers and as a whisper on the light ones, which is the right way round
+     — a black box shows its screen and a white one hides it.
+     ⚠️ THIS IS THE PERIODIC LATTICE THE PASS-7 NOTE WARNED ABOUT, ON
+     PURPOSE. What was wrong there was a lattice standing in for NOISE. A
+     halftone screen IS a lattice; it is the noise underneath it that stops
+     the two reading as graph paper, which is why the dither may never ship
+     without the grain.
 
      GRAIN. A 140px tile of fractal noise, laid on at soft-light. The first
      cut was repeating gradients (a fine fibre one way, a slower one the
@@ -316,12 +353,38 @@
      its own hue. One tile serves the cream board, the near-black board, the
      parchment and nocturne's black cover with no per-skin value at all,
      which is why there is no colour in it to tokenise.
+     PASS 11 COARSENED IT: baseFrequency 0.9 → 0.45 and three octaves down to
+     two, so the clumps are twice the size and half as busy, and then
+     POSTERISED it — `feFuncR type='discrete'` cuts the noise into five flat
+     plateaus. Smooth noise is fibre; noise in steps is ink, and the step is
+     what makes the coarser tile read as printing rather than as sand.
+
+     MOTTLE (new). The same turbulence at baseFrequency 0.012 on a 380px
+     tile — clumps the size of a whole panel rather than of a grain. This is
+     the layer that does the most work and is the hardest to see on its own:
+     it is the reason one corner of the board looks a shade heavier than the
+     other, which is what every photographed box on the reference board has
+     and what no amount of fine grain can fake.
+
+     WEAR (new). One radial gradient, transparent across the middle 58% and
+     reaching its strength only at the perimeter — so it is a rubbed EDGE,
+     strongest at the corners, and not a vignette. It rides `--board-wear-
+     ink`, which defaults to the board's light and is the one thing a cover
+     printed on WHITE has to flip: a worn cream box shows pale fibre at its
+     edges, a worn white box shows dirt. Capped at 13% for the same reason
+     the sheen is capped at 12% — see the contrast note below.
 
      SHEEN. One still diagonal sweep, brightest at the top-left corner the
      shelf's own plank is lit from. It sits BEHIND the art plate on every
      cover, which is also correct: the picture is printed ON the board, so
      the board's own light shows in the paper around it and never washes the
      photograph.
+
+     MISREGISTRATION (new, sides only). A hairline of light at the leading
+     edge of every strip and a hairline of ink at the trailing one: the wrap
+     printed a pixel out of true where it turns the fold. It is on the sides
+     alone because that is where a real one shows — a face is printed flat,
+     a fold is where the sheet moved.
 
    ⚠️ `background-blend-mode` IS NOT `mix-blend-mode`, and the difference is
    the reason this is allowed to exist here at all. It blends an element's
@@ -373,19 +436,48 @@
    it actually has. */
 .face,
 .side {
-  --board-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='.4'/%3E%3C/svg%3E");
+  /* THE PRINTING SCREEN. The house 4×4 Bayer, hard-edged, 2px to a cell —
+     see the note above for why a periodic lattice is the right answer here
+     and was the wrong one there. */
+  --board-dither: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%236d6d6d' d='M0 0h1v1H0z'/%3E%3Cpath fill='%23818181' d='M1 0h1v1H1z'/%3E%3Cpath fill='%23727272' d='M2 0h1v1H2z'/%3E%3Cpath fill='%23878787' d='M3 0h1v1H3z'/%3E%3Cpath fill='%238c8c8c' d='M0 1h1v1H0z'/%3E%3Cpath fill='%23777777' d='M1 1h1v1H1z'/%3E%3Cpath fill='%23919191' d='M2 1h1v1H2z'/%3E%3Cpath fill='%237c7c7c' d='M3 1h1v1H3z'/%3E%3Cpath fill='%23747474' d='M0 2h1v1H0z'/%3E%3Cpath fill='%23898989' d='M1 2h1v1H1z'/%3E%3Cpath fill='%236f6f6f' d='M2 2h1v1H2z'/%3E%3Cpath fill='%23848484' d='M3 2h1v1H3z'/%3E%3Cpath fill='%23949494' d='M0 3h1v1H0z'/%3E%3Cpath fill='%237f7f7f' d='M1 3h1v1H1z'/%3E%3Cpath fill='%238e8e8e' d='M2 3h1v1H2z'/%3E%3Cpath fill='%237a7a7a' d='M3 3h1v1H3z'/%3E%3C/svg%3E");
+  /* the fibre — coarser and stepped since pass 11 (see above) */
+  --board-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.45' numOctaves='2' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 0.25 0.5 0.75 1'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='.44'/%3E%3C/svg%3E");
+  /* the uneven lay of the ink, a panel wide */
+  --board-mottle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='380'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='380' height='380' filter='url(%23m)' opacity='.3'/%3E%3C/svg%3E");
+  /* THE RUBBED EDGE. Flips on a white cover — see `--board-wear-ink`. */
+  --board-wear-ink: var(--board-lit);
+  --board-wear: radial-gradient(
+    116% 104% at 50% 48%,
+    transparent 0 58%,
+    color-mix(in srgb, var(--board-wear-ink) 4%, transparent) 84%,
+    color-mix(in srgb, var(--board-wear-ink) 10%, transparent) 100%
+  );
+  /* the fold, printed a pixel out of true */
+  --board-misreg: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--board-lit) 16%, transparent) 0 1px,
+    transparent 1px calc(100% - 1px),
+    color-mix(in srgb, var(--board-ink) 14%, transparent) calc(100% - 1px)
+  );
   /* ⚠️ THE PEAK IS CAPPED BY CONTRAST, NOT BY TASTE. The sweep is a
      background layer, so every quiet line printed on the board is read
      against it, and the brightest corner is exactly where three of the four
      covers stand their type. Measured in classic dark, the binding skin
      (the sheen lifts a dark ground toward the ink rather than away from it):
      the quiet ink holds 4.80:1 over a 11% corner and 4.37 over a 14% one.
-     12% leaves a working margin. A stronger sweep needs a stronger quiet
-     ink, and that trade was taken the other way — the register matters. */
+     12% left a working margin. A stronger sweep needs a stronger quiet
+     ink, and that trade was taken the other way — the register matters.
+     ⚠️ PASS 11 GAVE THREE OF THOSE POINTS BACK: 12% → 9%. The sweep no
+     longer has the corner to itself — the wear rim peaks there too, and the
+     dither and the mottle sit on top of both — so the cap that was measured
+     against one layer had to be re-measured against four. The 3% it gives
+     up is what buys the same corner back for the quiet ink, and a light
+     sweep on a board that now has a screen and a rubbed edge is not a
+     poorer material for it. */
   --board-sheen: linear-gradient(
     118deg,
-    color-mix(in srgb, var(--board-lit) 12%, transparent) 0%,
-    color-mix(in srgb, var(--board-lit) 4%, transparent) 30%,
+    color-mix(in srgb, var(--board-lit) 9%, transparent) 0%,
+    color-mix(in srgb, var(--board-lit) 3%, transparent) 30%,
     transparent 58%,
     color-mix(in srgb, var(--board-ink) 5%, transparent) 100%
   );
@@ -462,9 +554,16 @@
      `background-color` alone, and the board's grain and sheen carry over it
      untouched. A `background` shorthand anywhere below would wipe them. */
   background-color: var(--board);
-  background-image: var(--board-grain), var(--board-sheen);
-  background-size: 140px 140px, auto;
-  background-blend-mode: soft-light, normal;
+  /* ⚠️ FIVE LAYERS, FIVE SIZES, FIVE BLEND MODES — the three lists are
+     positional and must stay the same length and the same order. Top of the
+     stack first: screen, then fibre, then the slow blotch, then the rubbed
+     edge, then the light. The three textures blend (they modulate whatever
+     ground the cover chose); wear and sheen are already alpha and go on
+     `normal`. */
+  background-image: var(--board-dither), var(--board-grain), var(--board-mottle),
+    var(--board-wear), var(--board-sheen);
+  background-size: 8px 8px, 140px 140px, 380px 380px, auto, auto;
+  background-blend-mode: soft-light, soft-light, soft-light, normal, normal;
   border: var(--border-width-default) solid var(--content);
   transform: translateZ(calc(var(--box-d) / 2));
 }
@@ -492,12 +591,15 @@
 .side {
   position: absolute;
   background-color: var(--board);
-  /* the same grain as the faces, so the material runs round the corner
-     rather than stopping at the silhouette. No sheen: a sweep is a
-     reflection off ONE plane, and these four are the other five. */
-  background-image: var(--board-grain);
-  background-size: 140px 140px;
-  background-blend-mode: soft-light;
+  /* the same screen and the same grain as the faces, so the material runs
+     round the corner rather than stopping at the silhouette. No sheen: a
+     sweep is a reflection off ONE plane, and these four are the other five.
+     No mottle either — a 380px blotch across a 42px strip is a flat wash,
+     which is a layer paying nothing. What the strips get instead is the
+     MISREGISTRATION, because a fold is the only place it would show. */
+  background-image: var(--board-dither), var(--board-grain), var(--board-misreg);
+  background-size: 8px 8px, 140px 140px, auto;
+  background-blend-mode: soft-light, soft-light, normal;
   /* cardboard is scenery: a 42px strip swung flat about the box's top edge
      projects a hit region well past the board, and it was eating clicks
      meant for the flip tag above. Nothing here is ever a target. */
@@ -669,6 +771,35 @@
      a shorthand here would take them off the box. */
   background-color: var(--cover-ground);
   color: var(--cover-ink);
+}
+
+/* ⚠️ A LIGHT INK ON A DARK GROUND NEEDS A TIGHTER QUIET MIX THAN THE OTHER
+   WAY ROUND, and pass 11 is where that stopped being theoretical. Everything
+   the board's material adds is ADDITIVE light — the sheen, the wear, the
+   bright half of the dither and of the grain — so a dark ground is lifted
+   toward its own ink by every layer while a light ground is barely moved
+   away from it. Measured on the real pixels under the type (probe: the page
+   shot twice, once with the lettering turned transparent, sampling the
+   modal ground in each line's own rect):
+
+     cover / theme                76% quiet ink   88%   need
+     stripe eyebrow  · light           4.12       5.42   4.5
+     stripe tagline  · light           4.48       5.90   4.5
+     catalog eyebrow · dark            3.78       4.86   4.5
+     nocturne footline · dark          6.28       7.71   4.5
+
+   The catalog line was ALREADY under AA before this pass — 4.64 with pass
+   10's material, because its type block stands hard in the top-left corner
+   where the board's sheen, the shrink-wrap's sheen and the box's own lift
+   all peak at once. The new material took it to 3.78 and this takes it back
+   over. The three covers listed are exactly the ones printing light ink on a
+   dark ground; figma prints dark ink on white and keeps the softer 76%,
+   which is the register Jake's comp actually has. Medieval resets it at the
+   foot of this file and is unaffected. */
+.vStripe,
+.vNocturne,
+[data-theme='dark'] .vCatalog {
+  --cover-ink-quiet: color-mix(in srgb, var(--cover-ink) 88%, var(--cover-ground));
 }
 
 .frontFace:focus-visible {
@@ -937,13 +1068,21 @@
   color: var(--accent-expressive-text);
 }
 
-/* shrink-wrap: a sheen across the plastic, and the stamp under it */
+/* shrink-wrap: a sheen across the plastic, and the stamp under it.
+
+   ⚠️ 5%, DOWN FROM 8% (pass 11), and it is a contrast fix rather than a
+   restyle. These bands cross the type block on the catalog cover, so half of
+   a letter can sit on a band and half beside it — which makes the WORST
+   ground under that line the band's, not the board's. Measured in classic
+   dark, where the whole palette is compressed: 8% put the eyebrow's worst
+   pixel at 3.26:1 against a 5.01 typical. The plastic is still plastic at
+   5%, and it is over the two boxes nobody has opened yet. */
 .sheen {
   position: absolute;
   inset: 0;
   background: repeating-linear-gradient(
     115deg,
-    color-mix(in srgb, var(--content) 8%, transparent) 0 14px,
+    color-mix(in srgb, var(--content) 5%, transparent) 0 14px,
     transparent 14px 34px
   );
 }
@@ -1109,14 +1248,77 @@
    actually drew, and reference 1 on his own board. */
 
 /* FIGMA — the soft comp. Feathered blob, airbrush, type standing on the
-   bottom-left of the cream, the promise signed off to the right. Family Hub
-   wears the drawing, and its airbrush sits as Jake drew it: unturned. */
+   bottom-left of the paper, the promise signed off to the right. Family Hub
+   wears the drawing, and its airbrush sits as Jake drew it: unturned.
+
+   PASS 11 FINALLY PRINTS THE COMP HE DREW. Three things in his original
+   were approximated by whatever the token set already had, and all three
+   are now what the drawing says:
+
+   THE GROUND IS WHITE. Pass 4 reached for `--surface-raised` because it was
+   the nearest paper in the system, and noted the delta as invisible; on a
+   shelf where the other three covers now print on a board, a boxed consumer
+   product on cream is the one that looks unfinished. Jake's comp is
+   near-paper-white and the mix says so: 34% of the skin's own light ink into
+   white lands #f7f5f0 in classic, which is the value sampled off the comp to
+   the byte. `#fff` is the one literal — there is no white token and a white
+   that re-skins is not a thing this system wants; what re-skins is the
+   WARMTH, carried by `--content-inverse`, so medieval's paper would come out
+   its own shade of warm if medieval printed this cover at all (it does not —
+   see the reset at the foot of this file).
+
+   THE INK IS `--surface-inverse`, not `--content`. This is the mirror of
+   nocturne and it has to be a token flip rather than a colour: in classic
+   DARK `--content` is cream, and cream on white is nothing. `--surface-
+   inverse` is the only role that is a DARK colour in every skin, which is
+   exactly what a light ground needs — the same argument, upside down, that
+   `--board-lit` makes in the board note above.
+
+   THE WEAR FLIPS WITH IT. A rubbed cream box shows pale fibre at the edges;
+   a rubbed WHITE box shows dirt, because there is nothing paler than the
+   ground to reveal. `--board-wear-ink` is the one lever the wear layer
+   exposes and this is the cover it exists for.
+
+   THE TYPE IS A SERIF. See `--boxart-face` below and the loader note in
+   app/layout.tsx: the comp is set in Instrument Serif, its italic carries
+   the promise, and it is the one cover that gets it — the other three are
+   four publishers who never spoke to each other, and three of them bought a
+   grotesque. */
 .vFigma {
   --wash-turn: 0deg;
+  --cover-ground: color-mix(in srgb, var(--content-inverse) 34%, #fff);
+  --cover-ink: var(--surface-inverse);
+  --board-ink: var(--surface-inverse);
+  --board-wear-ink: var(--surface-inverse);
+  --cover-rule: var(--surface-inverse);
+  /* Instrument Serif for this cover only. The stack still falls back
+     through the sans and then the skin's own body face, so a cover is never
+     unset while a font is in flight. */
+  --boxart-face: var(--font-boxart-serif), var(--font-boxart), var(--sans);
 }
 
 .vFigma .tagline {
   align-self: flex-end;
+}
+
+/* Instrument Serif ships one weight (400) and an italic, which is the whole
+   reason the comp works: the title is BIG rather than heavy, exactly as a
+   1990s consumer box set its name. The sans covers ask for 500 and would
+   synthesise a bold here, so the weight is stated rather than inherited.
+
+   0.18, measured off the comp rather than chosen: "Family Hub" spans 365 of
+   its 499px board (73%), and at 0.125 in the sans it was spanning 58% — the
+   name was the artwork in Jake's drawing and merely a caption on the shelf.
+   0.18 lands it at 179px of the 222 the printing margin leaves, so the
+   longest title on this shelf still has 43px of paper to grow into. */
+.vFigma .title {
+  font-weight: var(--weight-regular);
+  font-size: calc(var(--box-w) * 0.18);
+}
+
+.vFigma .frontEyebrow {
+  font-weight: var(--weight-regular);
+  font-size: calc(var(--box-w) * 0.056);
 }
 
 /* STRIPE — the cartridge (Atari 2600 / E.T., 1982). The brand zone owns the
@@ -1129,8 +1331,46 @@
    film loses nothing to a crop and the plate needs no extra height to pay
    for a feather (that 1.2× is the blob's tax, and this cover doesn't pay
    it). The type block takes everything above the band and centres itself in
-   it — a fixed offset would have left a pocket of dead paper. */
+   it — a fixed offset would have left a pocket of dead paper.
+
+   PASS 11 PRINTS IT ON NEAR-BLACK. Jake's call, and it is the reference
+   board's own argument: the Atari box put its rainbow on a pale sleeve
+   because 1982 could not print a full-bleed dark ground cheaply, and the two
+   boxes on that board that COULD — Starflight, Moonsweeper — are the ones
+   whose stripes actually sing. So the brand zone goes to the Starflight side
+   of the shelf and the band finally has something to pop against.
+
+   THE GROUND IS DERIVED, NOT PICKED: 92% of the skin's inverse surface with
+   8% of its inverse ink stirred back in. That mix is what makes it a very
+   dark GREY rather than a black — classic light's #131811 lifts to #242820,
+   classic dark's #090c0a to #1b1d1a — and the 8% is doing one specific job:
+   it is the gap that keeps this cover off nocturne's. Nocturne takes
+   `--surface-inverse` flat, so the two dark covers sit 17 levels apart in
+   classic light and 18 in classic dark, with the board's own ground (the
+   catalog cover) 14 the other side of this one. Three separated depths out
+   of a palette that only has one black.
+
+   ⚠️ AND THE STRUCTURE CARRIES THE REST OF IT. In classic dark the whole
+   skin compresses and 14–18 levels is a quiet difference; what stops the two
+   dark covers reading as one is that they are not the same composition at
+   all — a rainbow band over a full-bleed bottom-anchored 16:9 with a
+   type block filling the top, against a centred framed portrait with a
+   keyline, spaced caps and a publisher's signature. Depth separates them on
+   a screenshot; layout separates them across the room.
+
+   The ink inverts with the ground, by token, exactly as nocturne's does —
+   including the board's fibre and its light, or the grain would be dark ink
+   on a dark ground and there would be no material at all. */
 .vStripe {
+  --cover-ground: color-mix(in srgb, var(--surface-inverse) 92%, var(--content-inverse));
+  --cover-ink: var(--content-inverse);
+  --board-ink: var(--content-inverse);
+  --board-lit: var(--content-inverse);
+  /* the plate's hard border was `--content`, which on this ground is the
+     ground. Same construction nocturne uses: the inverse ink pulled back
+     toward the cover's own ground so the frame reads as a printed rule and
+     not as a light box round the picture. */
+  --cover-rule: color-mix(in srgb, var(--content-inverse) 60%, var(--cover-ground));
   --plate-top: auto;
   --plate-bottom: 0px;
   --plate-h: calc(var(--box-w) * 9 / 16);
@@ -1855,11 +2095,22 @@
   --cover-ground: var(--board);
   --cover-ink: var(--content);
   --cover-ink-quiet: color-mix(in srgb, var(--cover-ink) 76%, var(--cover-ground));
-  /* nocturne flips the board's fibre to a light ink for its black ground;
-     no tome is printed on black, so it flips back with the rest */
+  /* nocturne flips the board's fibre to a light ink for its black ground and
+     the figma cover flips it the other way for its white one; no tome is
+     printed on either, so both flip back with the rest — including the wear,
+     which is the layer that decides whether a rubbed edge shows pale fibre
+     or dirt */
   --board-ink: var(--content);
   --board-lit: var(--content-inverse);
+  --board-wear-ink: var(--content-inverse);
   --cover-rule: var(--content);
+  /* ⚠️ AND THE FACE. `--boxart-face` is set on `.wrap` for the whole program
+     (MedievalSharp, above), but the figma cover now declares its own serif ON
+     THE FRONT FACE — a nearer element wins, so the tome would come out in
+     Instrument Serif unless it is put back here. A scriptorium does not set
+     its tomes in a 2023 grotesque and it does not set them in a 2023 didone
+     either. */
+  --boxart-face: var(--display);
   --plate-top: 10%;
   --plate-bottom: auto;
   --plate-x: 0px;
@@ -1875,6 +2126,22 @@
   /* --type-align / --type-text are deliberately NOT reset: which way a block
      ranges is the scribe's hand, not the publisher's layout, and the tomes
      have had four of those since pass 4. */
+}
+
+/* AND THE FIGMA COVER'S LETTERING GOES BACK TOO. Pass 11 prints that cover
+   in Instrument Serif at 0.18 of the board, which is Jake's comp measured to
+   the pixel — and none of it is a thing a scriptorium does. The face is
+   already put back by `--boxart-face` above; the SIZES are direct properties
+   rather than parameters, so they need their own rule. MedievalSharp at 0.18
+   breaks "Family Hub" onto two lines and walks the type block up into the
+   picture; at the shared 0.125 the tome is exactly what it was. */
+:global([data-skin='medieval']) .vFigma .title {
+  font-size: calc(var(--box-w) * 0.125);
+  font-weight: var(--weight-medium);
+}
+
+:global([data-skin='medieval']) .vFigma .frontEyebrow {
+  font-size: calc(var(--box-w) * 0.05);
 }
 
 /* The one piece of LETTERING the scriptorium does overrule. A textura set in
