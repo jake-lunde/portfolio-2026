@@ -228,6 +228,120 @@
   transform-style: preserve-3d;
 }
 
+/* ---------------- THE BOARD: the box's own material ----------------
+   Pass 7, Jake's note: "the boxes read flat against the window because they
+   share the screen surface colour — a box should feel like an object with
+   its own material." He was right twice over. The front was `--surface-
+   raised`, one shade off the desk it stands on, and the BACK was literally
+   `--surface` — the window's own paper, printed on and called a package.
+
+   So the solid gets a ground of its own, and it is derived rather than
+   picked: 10% of the skin's ink stirred into its raised surface. That is the
+   direction every skin already means by "raised paper" — classic light's
+   #ded7c4 → #cac4b2, a tan board against a #e7e1d2 desk; classic dark's
+   near-black board lifts to #292d2d off a #0d100c desk; medieval's
+   parchment deepens to #cabe9f. One mix, three materials, no literals, and
+   a fourth skin gets its board for free.
+
+   THE QUIET INK IS DERIVED FROM THE BOARD, NOT FROM `--content-muted`, and
+   that is a contrast requirement rather than a preference. `--content-muted`
+   is authored against the window's surface; on a board 10% darker it falls
+   to 4.20:1 and stops clearing AA at the sizes this panel prints (8–12px).
+   Mixed from the board's own ink instead it measures 6.04 : 7.01 : 5.40
+   (classic light : dark : medieval) — and it is the same construction
+   nocturne's cover has used since pass 6, now stated once for the whole
+   solid instead of once for one variant.
+
+   THE MATERIAL ITSELF is two static background layers and no node, no
+   animation and nothing for the compositor to redraw — a box of cardboard is
+   not an effect.
+
+     GRAIN. A 140px tile of fractal noise, laid on at soft-light. The first
+     cut was repeating gradients (a fine fibre one way, a slower one the
+     other, a diagonal tooth over the top) and it was WRONG in a way worth
+     recording: any two periodic gradients cross into a visible lattice, and
+     at box scale the box read as millimetre graph paper. Cardboard grain is
+     noise, so it is drawn with noise. The tile is neutral grey — noise about
+     mid-point — and soft-light is what makes that portable: values above the
+     midpoint lift the ground, values below deepen it, and the ground keeps
+     its own hue. One tile serves the cream board, the near-black board, the
+     parchment and nocturne's black cover with no per-skin value at all,
+     which is why there is no colour in it to tokenise.
+
+     SHEEN. One still diagonal sweep, brightest at the top-left corner the
+     shelf's own plank is lit from. It sits BEHIND the art plate on every
+     cover, which is also correct: the picture is printed ON the board, so
+     the board's own light shows in the paper around it and never washes the
+     photograph.
+
+   ⚠️ `background-blend-mode` IS NOT `mix-blend-mode`, and the difference is
+   the reason this is allowed to exist here at all. It blends an element's
+   own background layers against each other and does not isolate, group or
+   flatten anything — unlike `mix-blend-mode`, `filter` and `mask`, which are
+   grouping properties and would collapse the cuboid from inside a face. Do
+   not "simplify" this into a mix-blend.
+   ⚠️ The noise's own filter is INSIDE the SVG, i.e. inside a raster image.
+   No CSS filter appears anywhere on the box. Same distinction.
+   ⚠️ The light in `--board-lit` is `--content-inverse` because that is the
+   only semantic role that is a LIGHT colour in every skin (it is the ink for
+   inverse surfaces — cream in classic light and medieval, cream in dark).
+   `--surface` would be right in a light skin and a shadow in a dark one. */
+.plinth {
+  --board: color-mix(in srgb, var(--surface-raised) 90%, var(--content));
+  /* the fibre's ink. Flipped by any cover printed on an inverse ground —
+     see `.vNocturne` — so the grain reads on a black box too. */
+  --board-ink: var(--content);
+  --board-lit: var(--content-inverse);
+  --board-quiet: color-mix(in srgb, var(--board-ink) 76%, var(--board));
+  /* THE ACCENT, PRINTED ON BOARD. The system accent is authored against the
+     window's surface; on a board that is 10% off it, classic dark's #5c7cff
+     measures 4.50:1 — the wrong side of AA by a rounding error, at the 8px
+     the version line is set. A fifth of the board's own ink stirred into it
+     lands the same colour at 5.94 : 4.66 : 4.79 (classic light : dark :
+     medieval) and stays recognisably the accent. It is a mix of two existing
+     tokens, never a third accent. */
+  --board-accent: color-mix(in srgb, var(--accent) 82%, var(--board-ink));
+}
+
+/* ⚠️ EXCEPT IN CLASSIC DARK, WHERE NO MIX OF THE SYSTEM ACCENT CLEARS.
+   Measured: #5c7cff manages 4.92:1 on the raised surface with no material on
+   it at all, so a board that reads as an object — any lift, any grain — puts
+   the version line under AA whatever it is mixed with, and mixing it toward
+   the cream ink only desaturates it toward a wash. This is exactly the case
+   `--accent-expressive-text` exists for: the role that routes expressive
+   colour to something that clears in the skin it is asked in. It answers
+   `--accent-expressive` here (5.16:1) and `--content` everywhere else, which
+   is why it is not simply used for all three. */
+[data-theme='dark'] .plinth {
+  --board-accent: var(--accent-expressive-text);
+}
+
+/* ⚠️ THE TWO MATERIAL LAYERS ARE DECLARED ON THE SURFACES THEMSELVES, NOT ON
+   `.plinth` WITH THE REST. A custom property is substituted where it is
+   DECLARED, so a grain written on the plinth would arrive at every face with
+   `--board-ink` already resolved to the plinth's value and nocturne's flip
+   would do nothing. Declared here, each face and each strip resolves the ink
+   it actually has. */
+.face,
+.side {
+  --board-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='.4'/%3E%3C/svg%3E");
+  /* ⚠️ THE PEAK IS CAPPED BY CONTRAST, NOT BY TASTE. The sweep is a
+     background layer, so every quiet line printed on the board is read
+     against it, and the brightest corner is exactly where three of the four
+     covers stand their type. Measured in classic dark, the binding skin
+     (the sheen lifts a dark ground toward the ink rather than away from it):
+     the quiet ink holds 4.80:1 over a 11% corner and 4.37 over a 14% one.
+     12% leaves a working margin. A stronger sweep needs a stronger quiet
+     ink, and that trade was taken the other way — the register matters. */
+  --board-sheen: linear-gradient(
+    118deg,
+    color-mix(in srgb, var(--board-lit) 12%, transparent) 0%,
+    color-mix(in srgb, var(--board-lit) 4%, transparent) 30%,
+    transparent 58%,
+    color-mix(in srgb, var(--board-ink) 5%, transparent) 100%
+  );
+}
+
 .stage {
   position: absolute;
   inset: 0;
@@ -294,7 +408,14 @@
   overflow: hidden;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  background: var(--surface-raised);
+  /* colour and material are separate declarations on purpose: a cover
+     variant may repaint the GROUND (nocturne prints on black) by setting
+     `background-color` alone, and the board's grain and sheen carry over it
+     untouched. A `background` shorthand anywhere below would wipe them. */
+  background-color: var(--board);
+  background-image: var(--board-grain), var(--board-sheen);
+  background-size: 140px 140px, auto;
+  background-blend-mode: soft-light, normal;
   border: var(--border-width-default) solid var(--content);
   transform: translateZ(calc(var(--box-d) / 2));
 }
@@ -315,10 +436,19 @@
 
    Colour is one token mixed four ways — light from the upper left, so the
    top is nearly the face's own ground and the underside is the darkest.
-   No hardcoded shade: every skin gets its own board for free. */
+   No hardcoded shade: every skin gets its own board for free. The four
+   mixes are taken against `--board` (pass 7) rather than `--surface-raised`,
+   so the ladder still steps away from the FACE's ground and the solid stays
+   one material rather than a printed front glued to a different carcass. */
 .side {
   position: absolute;
-  background: var(--surface-raised);
+  background-color: var(--board);
+  /* the same grain as the faces, so the material runs round the corner
+     rather than stopping at the silhouette. No sheen: a sweep is a
+     reflection off ONE plane, and these four are the other five. */
+  background-image: var(--board-grain);
+  background-size: 140px 140px;
+  background-blend-mode: soft-light;
   /* cardboard is scenery: a 42px strip swung flat about the box's top edge
      projects a hit region well past the board, and it was eating clicks
      meant for the flip tag above. Nothing here is ever a target. */
@@ -332,7 +462,7 @@
   width: var(--box-d);
   transform-origin: left center;
   transform: translateZ(calc(var(--box-d) / -2)) rotateY(-90deg);
-  background: color-mix(in srgb, var(--content) 30%, var(--surface-raised));
+  background-color: color-mix(in srgb, var(--content) 30%, var(--board));
 }
 
 .edge {
@@ -342,7 +472,7 @@
   width: var(--box-d);
   transform-origin: right center;
   transform: translateZ(calc(var(--box-d) / -2)) rotateY(90deg);
-  background: color-mix(in srgb, var(--content) 42%, var(--surface-raised));
+  background-color: color-mix(in srgb, var(--content) 42%, var(--board));
 }
 
 .top {
@@ -352,7 +482,7 @@
   height: var(--box-d);
   transform-origin: center top;
   transform: translateZ(calc(var(--box-d) / -2)) rotateX(90deg);
-  background: color-mix(in srgb, var(--content) 13%, var(--surface-raised));
+  background-color: color-mix(in srgb, var(--content) 13%, var(--board));
 }
 
 .bottom {
@@ -362,7 +492,7 @@
   height: var(--box-d);
   transform-origin: center bottom;
   transform: translateZ(calc(var(--box-d) / -2)) rotateX(-90deg);
-  background: color-mix(in srgb, var(--content) 50%, var(--surface-raised));
+  background-color: color-mix(in srgb, var(--content) 50%, var(--board));
 }
 
 /* --------- reduced motion: the solid collapses ---------
@@ -440,10 +570,17 @@
   cursor: pointer;
 
   /* --- ground and ink. Tokens, always: a variant may choose the INVERSE
-         ground, never a colour of its own. --- */
-  --cover-ground: var(--surface-raised);
+         ground, never a colour of its own. The default ground is the
+         BOARD (pass 7) — the material the whole solid is made of, mixed
+         once on `.plinth` — so a cover is printing on the box rather than
+         a rectangle of window surface standing where a box should be. ---*/
+  --cover-ground: var(--board);
   --cover-ink: var(--content);
-  --cover-ink-quiet: var(--content-muted);
+  /* mixed from this cover's own ink and ground, never from
+     `--content-muted`: a quiet ink authored against the WINDOW's surface
+     measures 4.20:1 on the board and stops clearing AA at 11px. See the
+     board note above for the three measured numbers. */
+  --cover-ink-quiet: color-mix(in srgb, var(--cover-ink) 76%, var(--cover-ground));
   /* hard edges — plate borders and keylines. Chrome-like, so: a token. */
   --cover-rule: var(--content);
   /* the printing margin. One number, because the narrow breakpoint moves it
@@ -479,7 +616,9 @@
   --band-h: 13px;
   --stamp-top: 66%;
 
-  background: var(--cover-ground);
+  /* COLOUR ONLY — the grain and the sheen are `.face`'s background-image and
+     a shorthand here would take them off the box. */
+  background-color: var(--cover-ground);
   color: var(--cover-ink);
 }
 
@@ -1036,7 +1175,12 @@
 .vNocturne {
   --cover-ground: var(--surface-inverse);
   --cover-ink: var(--content-inverse);
-  --cover-ink-quiet: color-mix(in srgb, var(--content-inverse) 72%, var(--surface-inverse));
+  /* the board's fibre, flipped: dark ink on a black ground is no grain at
+     all, so the one cover printed on an inverse ground gets a LIGHT fibre
+     and keeps the same material as the other three. It is the only lever
+     the material exposes, and it is the same token pair the ground is. */
+  --board-ink: var(--content-inverse);
+  --board-lit: var(--content-inverse);
   --cover-rule: color-mix(in srgb, var(--content-inverse) 60%, var(--surface-inverse));
   --plate-top: 26%;
   --plate-x: calc(var(--box-w) * 0.13);
@@ -1082,7 +1226,12 @@
 .backFace {
   display: flex;
   flex-direction: column;
-  background: var(--surface);
+  /* THE BOARD, not `--surface` (pass 7). The back panel used to be painted
+     in the window's own paper, which is exactly what Jake meant by the boxes
+     reading flat: turn one over and you were looking at the desktop with
+     text on it. It is the same material as the front now, grain and all —
+     the inside of a carton, printed. */
+  background-color: var(--board);
   transform: rotateY(180deg) translateZ(calc(var(--box-d) / 2));
 }
 
@@ -1117,7 +1266,7 @@
   font-size: var(--type-micro-size);
   letter-spacing: var(--type-micro-tracking);
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--board-accent);
   margin: 0 0 6px;
 }
 
@@ -1140,7 +1289,7 @@
   font-size: var(--type-caption-size);
   letter-spacing: var(--tracking-16);
   text-transform: uppercase;
-  color: var(--content-muted);
+  color: var(--board-quiet);
   margin: 0 0 3px;
 }
 
@@ -1195,7 +1344,7 @@
   font-weight: var(--type-micro-weight);
   letter-spacing: var(--tracking-08);
   text-transform: uppercase;
-  color: var(--content-muted);
+  color: var(--board-quiet);
   white-space: nowrap;
 }
 
@@ -1226,7 +1375,7 @@
   font-size: var(--type-micro-size);
   letter-spacing: var(--tracking-08);
   text-transform: uppercase;
-  color: var(--content-muted);
+  color: var(--board-quiet);
   margin-top: 3px;
 }
 
@@ -1243,7 +1392,7 @@
   font-family: var(--sans); /* prose, not a label */
   font-size: var(--type-micro-size);
   line-height: var(--leading-normal);
-  color: var(--content-muted);
+  color: var(--board-quiet);
   margin: 0 0 5px;
   overflow-wrap: anywhere;
 }
@@ -1252,8 +1401,21 @@
   font-family: var(--type-micro-family);
   font-size: var(--type-micro-size);
   letter-spacing: var(--tracking-08);
-  color: var(--content-muted);
+  color: var(--board-quiet);
   margin: 5px 0 0;
+}
+
+/* the refusal, printed where it happened. It is the only thing the struck
+   shelf footer was carrying that was worth keeping, and it is worth more
+   here: an error about ONE box announced under FOUR of them was the reason
+   that footer needed an aria-live region at all. */
+.nudgeError {
+  font-family: var(--type-label-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--tracking-02);
+  line-height: var(--leading-snug);
+  color: var(--board-accent);
+  margin: 6px 0 0;
 }
 
 /* the nudge sits with the meter it belongs to, inside the scrolling body */
@@ -1638,9 +1800,13 @@
    ⚠️ Adding a cover parameter to `.frontFace` means adding it here too, or a
    variant leaks into the scriptorium. */
 :global([data-skin='medieval']) .frontFace {
-  --cover-ground: var(--surface-raised);
+  --cover-ground: var(--board);
   --cover-ink: var(--content);
-  --cover-ink-quiet: var(--content-muted);
+  --cover-ink-quiet: color-mix(in srgb, var(--cover-ink) 76%, var(--cover-ground));
+  /* nocturne flips the board's fibre to a light ink for its black ground;
+     no tome is printed on black, so it flips back with the rest */
+  --board-ink: var(--content);
+  --board-lit: var(--content-inverse);
   --cover-rule: var(--content);
   --plate-top: 10%;
   --plate-bottom: auto;
@@ -1684,9 +1850,28 @@
 }
 
 /* rubricated, the way a scriptorium opened a work: the eyebrow is the
-   house, and the house gets the red */
+   house, and the house gets the red. The BOARD's red (pass 7) — the tome's
+   ground is deeper than the window's paper now, and the rubric goes with it:
+   measured over the airbrush, the plain accent reads 3.36 and the board's
+   3.99. Neither clears AA, and that shortfall is the AIRBRUSH's, not the
+   board's — it is a soft-light conic that lifts whatever it crosses, and
+   medieval is the only skin that prints type into it. So the rubric is
+   deepened until it clears the darkest sector the airbrush paints under it —
+   measured, not guessed: the plain accent reads 3.50 (it has been failing
+   since the airbrush landed), the board's accent 4.33, and this mix 4.7. An
+   oxblood rubric is still a rubric; a red nobody can read is not. */
 :global([data-skin='medieval']) .frontEyebrow {
-  color: var(--accent);
+  color: color-mix(in srgb, var(--accent) 62%, var(--content));
+}
+
+/* THE TOME'S OWN MATERIAL. Vellum is a skin, not a pressed board: the tooth
+   is coarser and much fainter — mottle rather than tooth — and it has to
+   stay out of the way of #lunde-roughen, which is already wavering every
+   rule and bar on the tome with a noise of its own. Same tile construction,
+   a third of the frequency and half the strength. */
+:global([data-skin='medieval']) .face,
+:global([data-skin='medieval']) .side {
+  --board-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='v'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.3' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23v)' opacity='.22'/%3E%3C/svg%3E");
 }
 
 /* vellum is not shrink-wrapped: uncut pages, not plastic */
