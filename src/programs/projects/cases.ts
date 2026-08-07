@@ -19,6 +19,12 @@ export type CaseDef = {
     /** key art. Convention: /case/<slug>/box.webp. Absent → the front face
         composes itself from tokens (number · name · org · version). */
     art?: string
+    /** cover motion: a YouTube id, played silent and chromeless behind the
+        front face's treatment — the 1992 box with a moving cover it was
+        never able to have. Decorative and pointer-inert; the composed front
+        stays underneath as the poster frame (and the whole thing is skipped
+        under reduced motion). */
+    video?: string
     /** the case's metrics, printed as the back panel's SYSTEM REQUIREMENTS */
     requirements?: { label: string; value: string }[]
     /** a quote from the work, printed as the review blurb */
@@ -43,8 +49,10 @@ export const CASES: CaseDef[] = [
     status: 'live',
     component: dynamic(() => import('@/programs/projects/CaseInvest')),
     progress: { pct: 100, phase: 'Shipped — read it' },
-    /* no art file yet — the composed front carries this one */
+    /* no art file yet — the composed front carries this one, with the
+       product film rolling silently over it */
     box: {
+      video: 'Nxl0uCGZNCw',
       thesis:
         'A kid told me the numbers meant nothing. So I built the understanding — in code.',
       requirements: [
@@ -66,6 +74,8 @@ export const CASES: CaseDef[] = [
     component: dynamic(() => import('@/programs/projects/CaseFamilyHub')),
     progress: { pct: 100, phase: 'Shipped — read it' },
     box: {
+      /* the launch film, the same cut plate 11 runs in the case study */
+      video: 'G-tWcCCMdGE',
       thesis:
         'The all-in-one family organizer, on Greenlight’s first device. I was its first skeptic. I ended up being its design team.',
       requirements: [
