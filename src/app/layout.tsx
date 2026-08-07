@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono, Eagle_Lake, MedievalSharp, Noto_Sans_JP } from 'next/font/google'
+import {
+  Geist,
+  Geist_Mono,
+  Eagle_Lake,
+  Instrument_Sans,
+  MedievalSharp,
+  Noto_Sans_JP,
+} from 'next/font/google'
 import localFont from 'next/font/local'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
@@ -23,6 +30,23 @@ const pixel = localFont({
   weight: '400',
   variable: '--font-pixel',
   display: 'swap',
+})
+
+/* BOX ART ONLY — Jake's own face, off his Figma box-art template, for the
+   type printed on the SHIPPED.SW covers (src/programs/shelf). It is NOT a
+   token face and must not become one by accident: nothing outside the shelf
+   may reach for it, the skins' --display/--sans/--mono are untouched, and
+   medieval's covers stay in MedievalSharp because a scriptorium does not
+   set its tomes in a 2023 grotesque.
+   ⚠️ At merge this wants folding into the token architecture properly (a
+   `boxart` face role rather than a raw next/font variable). Variable axes +
+   a true italic, which the cover variants use for the tagline. */
+const boxArt = Instrument_Sans({
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  variable: '--font-boxart',
+  display: 'swap',
+  preload: false, // one program's artwork — never blocks the shell
 })
 
 const cjk = Noto_Sans_JP({
@@ -78,7 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable} ${medievalDisplay.variable} ${medievalBody.variable}`}
+      className={`${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable} ${boxArt.variable} ${medievalDisplay.variable} ${medievalBody.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />

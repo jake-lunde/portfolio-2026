@@ -184,10 +184,6 @@
   "settings.wallpaperHint": "Desktop pattern — classic-Mac spirit, print-archive ink",
   "settings.wallpaperLabel": "Wallpaper",
   "shared.soon": "Soon",
-  "shelf.eyebrow": {
-    "base": "SHIPPED.SW · parallel 1992",
-    "medieval": "Tomes copied in this house"
-  },
   "shelf.indev": {
     "base": "IN DEVELOPMENT",
     "medieval": "STILL BEING ILLUMINATED"
