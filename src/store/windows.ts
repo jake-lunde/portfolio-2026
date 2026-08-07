@@ -13,10 +13,25 @@ type WindowsState = {
   zTop: number
   focused: string | null
   sizes: Record<string, Size> // per-window resize, persisted for the session
+  /* THE SIZE A PROGRAM BORROWED ITS WINDOW FROM (pass 11).
+     A program may need the frame bigger than the frame it was given for as
+     long as one of its states lasts — the shelf's licence check is the
+     case: a letter sphere with a 300px minimum plus slots, hint and cancel
+     does not fit in a window measured for one row of boxes. `requestSize`
+     stashes whatever size the window had HERE and writes the borrowed one;
+     `releaseSize` puts the stash back. `null` is a real value and means
+     "it had no stored size at all" — the registry default was in force —
+     so releasing deletes the key rather than pinning the default. That
+     distinction is the whole reason this is a separate map: a reader who
+     dragged the grip to their own size must get THAT size back, not the
+     one the program shipped with. */
+  holds: Record<string, Size | null>
   open: (id: string) => void
   close: (id: string) => void
   focus: (id: string) => void
   setSize: (id: string, size: Size) => void
+  requestSize: (id: string, size: Size) => void
+  releaseSize: (id: string) => void
   setInitial: (ids: string[]) => void
 }
 
@@ -25,6 +40,7 @@ export const useWindows = create<WindowsState>((set, get) => ({
   zTop: 10,
   focused: null,
   sizes: {},
+  holds: {},
 
   setInitial: (ids) =>
     set({
@@ -71,4 +87,30 @@ export const useWindows = create<WindowsState>((set, get) => ({
   },
 
   setSize: (id, size) => set((s) => ({ sizes: { ...s.sizes, [id]: size } })),
+
+  /* Borrow, then give back. The guard is load-bearing rather than tidy:
+     React runs an effect twice on the same value under StrictMode, and a
+     second request would stash the BORROWED size as the thing to restore —
+     the window would then never come back. First request wins; every one
+     after it is a no-op until the hold is released. */
+  requestSize: (id, size) =>
+    set((s) => {
+      if (id in s.holds) return {}
+      return {
+        holds: { ...s.holds, [id]: s.sizes[id] ?? null },
+        sizes: { ...s.sizes, [id]: size },
+      }
+    }),
+
+  releaseSize: (id) =>
+    set((s) => {
+      if (!(id in s.holds)) return {}
+      const prior = s.holds[id]
+      const holds = { ...s.holds }
+      delete holds[id]
+      const sizes = { ...s.sizes }
+      if (prior) sizes[id] = prior
+      else delete sizes[id]
+      return { holds, sizes }
+    }),
 }))

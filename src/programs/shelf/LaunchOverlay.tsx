@@ -30,7 +30,47 @@ import styles from './shelf.module.css'
    The licence phase takes the WHOLE frame dark (`.overlayDark`, the same
    inverse-ground idiom as `.windowBody.crt`). The sphere's own panel is
    dark; on a light overlay it read as a hole punched in the window, so the
-   window goes with it. */
+   window goes with it.
+
+   AND THE WINDOW GROWS TO FIT IT (pass 11). Jake: "resize the gate window
+   to fit when they get there." The shelf window is measured for one row of
+   boxes — 760×459, of which the licence phase gets 426 of body — and the
+   sphere stack wants a great deal more than that: `.gate` is 18/20 of
+   padding around a header, a row of 42px slots, a sphere with a 300px
+   FLOOR, a hint line and the type-it-instead row. It has `overflow: hidden`,
+   so what it did with the shortfall was cut the letters off. A dialog that
+   cannot fit its own contents is a bug in the dialog, not in the reader.
+
+   THE SIZE IS MEASURED, NOT DECLARED. `fitToGate` reads the real stack —
+   the bottom of the gate's lowest child against its own padding box — and
+   asks the window store for exactly that much more. Written as a constant
+   it would be a number that goes stale the first time the sphere's floor,
+   the hint or the fallback row changes; measured, it is right by
+   construction and right at the narrow breakpoint for free.
+
+   IT GROWS DOWN AND RIGHT, TITLEBAR ANCHORED. That is what a 1992 dialog
+   does: the frame you grabbed stays where you put it and the box gets
+   bigger beneath it. Growing about the centre would slide the titlebar out
+   from under the pointer for no reason.
+
+   ⚠️ CLAMPED TO THE GLASS, the same duty `Window.tsx` discharges for `left`.
+   The window opens at y=48 and can be dragged anywhere; unclamped, a 640px
+   dialog on a 700px desktop would push the cancel button off the bottom of
+   the screen, which is strictly worse than the clipping this fixes. So the
+   grow stops at the viewport (less a 12px margin) and the overflow lands on
+   the SPHERE — the one thing in the panel that is allowed to be cramped,
+   because `.loadPanel` keeps the name, the status line and cancel outside
+   the flexing row. Cancel is reachable at every size.
+
+   IT IS INSTANT, and that is a ruling rather than an omission. Width and
+   height are layout, not transform or opacity; a spring on them would
+   reflow the sphere every frame and break the 60fps law this file works
+   under. A machine that resizes a dialog the moment it needs the room is
+   also simply more honest than one that eases into it.
+
+   The restore is the store's job (`releaseSize`) and it restores the size
+   the window ACTUALLY had — including a size the reader dragged the grip
+   to — never the registry default. */
 
 const STEPS = ['shelf.load.step1', 'shelf.load.step2', 'shelf.load.step3']
 const STEP_MS = 460
@@ -39,6 +79,45 @@ const STEP_MS = 460
 const DONE_MS = 620
 
 type Phase = 'loading' | 'license' | 'done'
+
+/** breathing room between the grown window and the edge of the glass —
+    the same 12 `Window.tsx` leaves on the right when it clamps `left` */
+const GLASS_MARGIN = 12
+/** below this the shell stacks windows full-bleed (`shell.module.css`,
+    `max-width: 720px`, with `!important` on every box metric) — there is no
+    size to borrow and nothing to give back */
+const FULL_BLEED_MAX = 720
+
+/* WHAT THE SPHERE STACK ACTUALLY NEEDS, measured off the live gate.
+
+   `el` is `.gate` — a flex column with `overflow: hidden`, which is the
+   reason this cannot simply read `scrollHeight` off the overlay: the gate
+   clips its own overflow before any scroll container ever sees it. So the
+   shortfall is taken from the children themselves — the furthest bottom and
+   the furthest right of anything inside — plus the gate's own end padding,
+   which no browser's scrollable-overflow rectangle can be relied on to
+   include the same way twice.
+
+   Returns the DEFICIT, never a target: the window is grown by what is
+   missing, so a reader who has already dragged the frame bigger than the
+   sphere needs is left alone. */
+function deficit(el: HTMLElement) {
+  const box = el.getBoundingClientRect()
+  const cs = getComputedStyle(el)
+  const padB = parseFloat(cs.paddingBottom) || 0
+  const padR = parseFloat(cs.paddingRight) || 0
+  let bottom = 0
+  let right = 0
+  for (const kid of Array.from(el.children)) {
+    const r = kid.getBoundingClientRect()
+    bottom = Math.max(bottom, r.bottom - box.top)
+    right = Math.max(right, r.right - box.left)
+  }
+  return {
+    h: Math.max(0, Math.ceil(bottom + padB - el.clientHeight)),
+    w: Math.max(0, Math.ceil(right + padR - el.clientWidth)),
+  }
+}
 
 export function LaunchOverlay({
   slug,
@@ -58,9 +137,13 @@ export function LaunchOverlay({
   const unlocked = useGate((s) => s.unlocked)
   const hydrate = useGate((s) => s.hydrate)
   const open = useWindows((s) => s.open)
+  const requestSize = useWindows((s) => s.requestSize)
+  const releaseSize = useWindows((s) => s.releaseSize)
   const [step, setStep] = useState(0)
   const [phase, setPhase] = useState<Phase>('loading')
   const panel = useRef<HTMLDivElement>(null)
+  /** the licence phase's flex row — its one child is the gate */
+  const sphereWrap = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     hydrate()
@@ -84,6 +167,36 @@ export function LaunchOverlay({
   useEffect(() => {
     if (phase === 'license' && unlocked) setPhase('done')
   }, [phase, unlocked])
+
+  /* THE WINDOW GROWS FOR THE LICENCE CHECK — see the ruling at the top.
+     The cleanup is the whole restore path and it covers every way out of
+     this phase, which is why there is no second effect for any of them:
+     clearance granted (phase → done), cancel, Escape, the window closing
+     under us. All four unmount this component or leave the phase, and both
+     run the cleanup. */
+  useEffect(() => {
+    if (phase !== 'license') return
+    if (window.innerWidth <= FULL_BLEED_MAX) return
+    const gate = sphereWrap.current?.firstElementChild
+    const frame = panel.current?.closest<HTMLElement>('[data-window-id]')
+    if (!(gate instanceof HTMLElement) || !frame) return
+    const id = frame.dataset.windowId
+    if (!id) return
+
+    const need = deficit(gate)
+    if (!need.h && !need.w) return
+    // offsetWidth/Height, not the bounding rect: the window is a motion
+    // element and its open spring writes a scale — the rect would report
+    // the animated size and we would restore the wrong one. Layout metrics
+    // ignore transforms.
+    const from = { w: frame.offsetWidth, h: frame.offsetHeight }
+    const box = frame.getBoundingClientRect()
+    requestSize(id, {
+      w: Math.min(from.w + need.w, Math.max(from.w, window.innerWidth - box.left - GLASS_MARGIN)),
+      h: Math.min(from.h + need.h, Math.max(from.h, window.innerHeight - box.top - GLASS_MARGIN)),
+    })
+    return () => releaseSize(id)
+  }, [phase, requestSize, releaseSize])
 
   useEffect(() => {
     if (phase !== 'done') return
@@ -145,7 +258,7 @@ export function LaunchOverlay({
         </p>
 
         {dark && (
-          <div className={styles.sphereWrap}>
+          <div className={styles.sphereWrap} ref={sphereWrap}>
             <GateSphere />
           </div>
         )}
