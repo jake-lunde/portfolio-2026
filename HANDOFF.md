@@ -76,6 +76,14 @@ eval. Deck reported throughout. Jake: "very impressed."**
 - **3D ruling (HERTZ, verified):** shelf stays CSS 3D; The Desk = r3f +
   curated drei + Blender GLTF (~260-320KB code-split); screen-zoom via
   handoff pattern. Spline out (1MB+, paywalled video textures).
+- **Pass 10 (shipped `4c53f18`): films SELF-HOSTED** — Jake supplied the
+  two cover films (public/case/<slug>/box-film.mp4, 1.9MB + 15.9MB);
+  native <video> retired the ENTIRE YouTube apparatus (IFrame API, gate,
+  BURN_OFF_MS, caption unload) AND pass 9's PlateLoader (Jake: no loading
+  state needed). Art = poster again (pre-first-frame, reduced-motion,
+  failure — headless codec gap proved the fallback shows art, never
+  broken-media UI). Flag: family-hub film weight rides preload=auto on
+  shelf open.
 - **Pass 9 (shipped, fast-follow `e6f031e`):** pop clearance measured
   (sides were the failure: growth is about the vanishing point; window
   760×459, gutters 34/40, gap 32) + stills for the two film boxes
