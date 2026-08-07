@@ -444,9 +444,27 @@
    So: two ellipses, offset from each other, UNIONED (`mask-composite: add`)
    rather than intersected. The union of two off-centre ellipses has no axis
    of symmetry, which is what makes it read as a shape rather than a
-   treatment. Their solid cores overlap across the middle 80% of the plate —
-   Jake's other rule stands, the reader must still be able to READ the film —
-   and only the outer edges dissolve.
+   treatment.
+
+   ⚠️ THE ONE RULE THAT MATTERS, AND THE ONE THIS GOT WRONG FIRST: every
+   ellipse must reach ZERO ALPHA BEFORE THE PLATE'S EDGE, on all four
+   sides. The first cut used radii of 64%/78% centred off-middle, which put
+   the transparent stop 54px OUTSIDE the left edge and 47px above the top —
+   so the mask was still ~85% opaque where the rectangle ended and every
+   straight video border painted. Jake saw it immediately. A mask that has
+   not finished by the edge is not a mask, it is a vignette.
+
+   Contained, verified by arithmetic before it was written:
+
+     ellipse   zero-alpha stop        margin inside the plate
+     A  46%/47% centre, 45%/46% r     L 11.3px   R 31.0px   T  7.8px  B 17.7px
+     B  58%/55% centre, 42%/44% r     L 47.6px   R  8.3px   T 24.1px  B  7.5px
+     UNION (what actually shows)      L 11.3px   R  8.3px   T  7.8px  B  7.5px
+
+   — so the video's own four edges sit in dead space on every side, and
+   what the reader sees has no straight line anywhere on it. The opaque
+   core is still 66% × 64% of the plate (162 × 106px), because Jake's other
+   rule stands too: the film has to stay READABLE.
 
    `mask-image` is a GROUPING property, exactly like `filter`: it flattens
    the element it sits on. That is harmless here, on a leaf inside a face,
@@ -457,23 +475,33 @@
    `will-change: transform` promotes it: two embeds riding a 3D transform
    that a spring rewrites every frame is exactly the case where an
    unpromoted layer starts repainting. Not a translateZ(0) hack — that
-   computes to a 2D identity matrix and the promotion becomes unverifiable. */
+   computes to a 2D identity matrix and the promotion becomes unverifiable.
+
+   --plate-h is the picture's own height: 16:9 across the full width of the
+   face, then 1.2× taller. The extra height is what pays for the mask. An
+   ellipse that dies inside the rectangle necessarily eats the rectangle's
+   outer fifth, so the plate has to be bigger than the picture we want to
+   survive — and the width it costs (24.6px a side, cropped by the plate's
+   own overflow) comes out of exactly the band the mask was fading to
+   nothing anyway. Net: the readable core grows from 89px tall to 106px and
+   loses no legible width. */
 .plate {
   position: absolute;
-  /* 12% of the face leaves paper above the picture — which is where the
+  /* 10% of the face leaves paper above the picture — which is where the
      publisher's mark stands, exactly as it does in the Figma */
-  top: 12%;
+  top: 10%;
   left: 0;
   right: 0;
-  height: calc(var(--box-w) * 9 / 16);
+  --plate-h: calc(var(--box-w) * 9 / 16 * 1.2);
+  height: var(--plate-h);
   overflow: hidden;
   will-change: transform;
   -webkit-mask-image:
-    radial-gradient(64% 78% at 42% 44%, #000 0 52%, rgba(0, 0, 0, 0.7) 76%, transparent 100%),
-    radial-gradient(60% 70% at 64% 54%, #000 0 50%, rgba(0, 0, 0, 0.65) 74%, transparent 100%);
+    radial-gradient(45% 46% at 46% 47%, #000 0 62%, rgba(0, 0, 0, 0.5) 82%, transparent 92%),
+    radial-gradient(42% 44% at 58% 55%, #000 0 62%, rgba(0, 0, 0, 0.5) 82%, transparent 92%);
   mask-image:
-    radial-gradient(64% 78% at 42% 44%, #000 0 52%, rgba(0, 0, 0, 0.7) 76%, transparent 100%),
-    radial-gradient(60% 70% at 64% 54%, #000 0 50%, rgba(0, 0, 0, 0.65) 74%, transparent 100%);
+    radial-gradient(45% 46% at 46% 47%, #000 0 62%, rgba(0, 0, 0, 0.5) 82%, transparent 92%),
+    radial-gradient(42% 44% at 58% 55%, #000 0 62%, rgba(0, 0, 0, 0.5) 82%, transparent 92%);
   /* UNION, not intersection — see the note above. `add` is the standard
      spelling, `source-over` the WebKit one. */
   -webkit-mask-composite: source-over;
@@ -509,8 +537,8 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: calc(var(--box-w) * 1.02);
-  height: calc(var(--box-w) * 1.02 * 9 / 16);
+  width: calc(var(--plate-h) * 16 / 9);
+  height: var(--plate-h);
   transform: translate(-50%, -50%);
   border: 0;
   pointer-events: none;
@@ -556,7 +584,7 @@
 .wash {
   position: absolute;
   left: 50%;
-  top: 33%; /* the plate's own centre: 12% + (9/16 of the width) / 2 */
+  top: 35%; /* the plate's own centre: 10% + (--plate-h / 2) over the face */
   width: calc(var(--box-w) * 1.24);
   /* 470.93 × 409.64 in the comp — the ratio is what carries over, not the px */
   height: calc(var(--box-w) * 1.24 / 1.15);
@@ -612,13 +640,13 @@
   );
 }
 
-/* 58%, not 38%: the plate is no longer the whole face, so the old position
+/* 66%, not 38%: the plate is no longer the whole face, so the old position
    landed the stamp squarely on the big number. It now sits in the band of
    bare cream between the picture and the type — where a real shop would
    have slapped a sticker, on the paper rather than on the artwork. */
 .stampWrap {
   position: absolute;
-  top: 58%;
+  top: 66%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(-11deg);
 }
@@ -785,11 +813,15 @@
   margin-top: 3px;
 }
 
-/* and its number ranges with it, small and high — the art answering the
-   type rather than sitting under it */
+/* and its number ranges right with the type. NOT into the corner, which is
+   where this first put it and where the mask promptly ate it: the plate's
+   corners are dead alpha by design, so anything that has to be SEEN has to
+   sit inside the opaque core (roughly 18%–84% across, 19%–82% down). The
+   22% right inset lands the number's own right edge at 78%, just inside
+   it — the same reasoning that governs where the mask's ellipses stop. */
 .vRanged .composed {
-  place-items: start end;
-  padding: 12px 14px;
+  place-items: center end;
+  padding-right: 22%;
 }
 
 .vRanged .bigNo {
