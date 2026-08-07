@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { CopyText as Copy } from '@/content/CopyText'
 import { t } from '@/content/copy'
+import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
 import type { CaseDef } from '@/programs/projects/cases'
 import { useSettings } from '@/store/settings'
@@ -12,35 +13,55 @@ import { Box3D } from './Box3D'
 import { InstallBar } from './InstallBar'
 import styles from './shelf.module.css'
 
-/* One box on the shelf. Front is key art (or a front composed from tokens
-   when the case has no assets yet); back is the panel every 1992 box had —
-   system requirements, a review blurb, screenshots, and the button.
+/* One box on the shelf. Back is the panel every 1992 box had — system
+   requirements, a review blurb, screenshots, and the button.
 
-   Pass 2 gave the box real thickness: the two faces are now the front and
-   back of a Box3D cuboid (see Box3D.tsx), and the flip is one rotateY on
-   the whole solid rather than two faces faking their own perspective.
+   THE FRONT IS JAKE'S BOX-ART TEMPLATE (pass 4), built from his Figma: a
+   warm cream ground, product photography filling the upper two thirds and
+   FEATHERING into the cream rather than stopping at a crop line, a small
+   publisher mark at the top left, and a type block standing on the bottom
+   left — eyebrow, then the title as large as the face will carry, then the
+   promise in italics.
 
-   Pass 3 took the writing off the box. The two flip bars are gone — a
-   small tag hangs ABOVE the box instead, outside the cuboid so it never
-   turns with it, and it is the accessible control: the aria-expanded /
-   aria-controls wiring lives there and focus returns to it. The front face
-   is still a button (the whole cover is a hit target, which is what a
-   pointer expects of a box you can pick up) but it is out of the tab order
-   and carries no state — one control announcing the flip, not two.
+   Two things went in the bin to get there. The duotone is gone: passes 1–3
+   put grayscale-under-accent over the art so it read as "treated", and
+   Jake's answer was that a cover is a photograph. And the meta strip is
+   gone — the name/org/version bar across the foot was the software
+   apologising for its own artwork; the title IS the artwork now, and the
+   version moved to a quiet line on the back panel where the rest of the
+   data lives.
 
-   That needs a live 3D context, which `filter` flattens — so the shelf's
-   registry entry carries `noRecede` (the shell's unfocused-window
-   `filter: opacity()` is skipped for this window) and medieval's
-   #lunde-roughen stays on descendants of a face (the bar track) and never
-   on an ancestor. Never put a filter on an ancestor of a face. The cover
-   film's own grayscale filter obeys the same rule: it sits ON the iframe,
-   a leaf, never on the face.
+   The feather is a `mask-image` on the plate that holds the art. Mask is a
+   grouping property, exactly like filter: it flattens the element it sits
+   on. Inside a face — a leaf of the 3D tree — that costs nothing. On an
+   ancestor of a face it would collapse the whole cuboid. Same law as the
+   registry's `noRecede` (the shell's unfocused `filter: opacity()`) and
+   medieval's #lunde-roughen: never a grouping property above a face.
+
+   Pass 3 took the writing off the box; pass 4 moved the handle below it. A
+   small tag hangs UNDER the box, outside the cuboid so it never turns with
+   it, and it is the accessible control: the aria-expanded / aria-controls
+   wiring lives there and focus returns to it. The front face is still a
+   button (the whole cover is a hit target, which is what a pointer expects
+   of a box you can pick up) but it is out of the tab order and carries no
+   state — one control announcing the flip, not two.
 
    useId is unsafe in programs (dynamic imports rehydrate into a reshaped
    tree), so ids derive from the slug — stable across SSR and client. */
 
 /** the year printed as a version number: 2024–25 → 2024.25 */
 const version = (year: string) => year.replace(/[–—-]/g, '.')
+
+/* Cover treatment → class. Four publishers, one shelf: the arrangement of
+   the type differs per box the way it did on a real 1992 endcap, while the
+   face (Instrument Sans) and the colour (tokens) hold the set together.
+   See `CoverVariant` in cases.ts for what each one is. */
+const VARIANT: Record<NonNullable<CaseDef['box']>['coverVariant'] & string, string> = {
+  figma: styles.vFigma,
+  ledger: styles.vLedger,
+  plate: styles.vPlate,
+  ranged: styles.vRanged,
+}
 
 /* The tag's arrows are direction, not words: stripped from the accessible
    name so a screen reader says "FLIP — Greenlight Invest" rather than
@@ -54,6 +75,9 @@ export function ShelfBox({
   sent,
   busy,
   durable,
+  fine,
+  revealed,
+  onReveal,
   onNudge,
   onPlay,
 }: {
@@ -63,6 +87,11 @@ export function ShelfBox({
   sent: boolean
   busy: boolean
   durable: boolean
+  /** hover-capable machine — measured once by the shelf */
+  fine: boolean
+  /** this box is the one whose tag is out */
+  revealed: boolean
+  onReveal: (slug: string) => void
   onNudge: (slug: string) => void
   onPlay: (slug: string, trigger: HTMLElement) => void
 }) {
@@ -114,9 +143,30 @@ export function ShelfBox({
 
   const tagKey = flipped ? 'shelf.tag.front' : 'shelf.tag.back'
 
+  /* The tag is OUT when you have reached for this box, and it stays out
+     until you reach for another one (Shelf.tsx owns that turn-taking).
+
+     Two more ways in, both non-negotiable rather than nice:
+     · `flipped` — a turned box must always offer the way back, even if the
+       pointer has since wandered onto a neighbour and taken the reveal with
+       it. The control that returns you cannot be the one that vanishes.
+     · `!fine` — a finger cannot hover. On touch every tag is simply out;
+       there is nothing to reveal and nothing to discover. */
+  const show = revealed || flipped || !fine
+
   return (
     <div
       className={styles.boxSlot}
+      // reaching for the box is what pulls its tag out. On the SLOT, not the
+      // box: the tag is inside this element too, so moving the pointer from
+      // box to tag never crosses a boundary that would hide the thing being
+      // reached for. Touch raises pointerenter on tap as well, though `!fine`
+      // has already shown every tag by then.
+      onPointerEnter={() => onReveal(c.slug)}
+      // the a11y path: tab to the tag (or click into the box) and it is out
+      // before it is needed. Focus events bubble; pointer ones here do not
+      // interfere with it.
+      onFocus={() => onReveal(c.slug)}
       // the Escape ladder: an open overlay eats the first one, a flipped
       // box the next, and only then does Window.tsx close the window. It
       // lives here rather than on the box because the tag — the control
@@ -127,28 +177,13 @@ export function ShelfBox({
         turn(false)
       }}
     >
-      {/* The flip tag. Fixed-height row above the box: reserved, so the
-          box never moves when the label changes length or the box lifts. */}
-      <div className={styles.tagRow}>
-        <button
-          ref={tag}
-          type="button"
-          className={styles.tag}
-          aria-expanded={flipped}
-          aria-controls={backId}
-          aria-label={`${spoken(t(tagKey, skin))} — ${c.name}`}
-          onClick={() => turn(!flipped)}
-        >
-          <Copy k={tagKey} as="span" />
-        </button>
-      </div>
-
       <Box3D
         flipped={flipped}
+        fine={fine}
         front={
           <motion.button
             type="button"
-            className={`${styles.face} ${styles.frontFace}`}
+            className={`${styles.face} ${styles.frontFace} ${VARIANT[box?.coverVariant ?? 'figma']}`}
             // the cover is a hit target, not a second announced control:
             // the tag owns the state and the tab stop
             tabIndex={-1}
@@ -158,25 +193,27 @@ export function ShelfBox({
             animate={faceFade(false)}
             transition={{ duration: reduced ? 0.14 : 0 }}
           >
-            {box?.art ? (
-              <span className={styles.art} aria-hidden="true">
-                {/* duotone in CSS, not a pipeline: grayscale + an accent
-                    multiply/screen layer, so it re-skins for free */}
+            {/* THE PLATE — everything that counts as picture. One node, so
+                one mask feathers all of it into the cream at once: still art,
+                the composed ground, and the cover film alike. It is also the
+                only place the mask may live (grouping property, leaf of the
+                3D tree — see the note at the top of this file). */}
+            <span className={styles.plate} aria-hidden="true">
+              {box?.art ? (
                 <img src={box.art} alt="" width={600} height={800} draggable={false} />
-              </span>
-            ) : (
-              <span className={styles.composed} aria-hidden="true">
-                <span className={styles.bigNo}>{c.no}</span>
-              </span>
-            )}
+              ) : (
+                <span className={styles.composed}>
+                  <span className={styles.bigNo}>{c.no}</span>
+                </span>
+              )}
 
-            {/* The cover film. A silent, chromeless, pointer-inert embed
-                under the same duotone the key art gets, so it reads as
-                treated cover art rather than a player someone dropped on a
-                box. The composed front stays underneath it as the poster
-                frame; nothing here is ever a tab stop or a11y content. */}
-            {film && (
-              <span className={styles.cover} aria-hidden="true">
+              {/* The cover film: a silent, chromeless, pointer-inert embed,
+                  now UNTREATED — Jake's ruling is that a box cover is a
+                  photograph, so the duotone that used to sit over it is gone
+                  and the feather does all the blending. The composed front
+                  stays underneath as the poster frame; nothing here is ever a
+                  tab stop or a11y content. */}
+              {film && (
                 <iframe
                   className={styles.coverFrame}
                   src={`https://www.youtube-nocookie.com/embed/${film}?autoplay=1&mute=1&loop=1&playlist=${film}&controls=0&playsinline=1&rel=0&modestbranding=1`}
@@ -185,7 +222,25 @@ export function ShelfBox({
                   tabIndex={-1}
                   allow="autoplay; encrypted-media"
                 />
-              </span>
+              )}
+            </span>
+
+            {/* the airbrush — Jake's Figma "Ellipse 2", a conic sweep blurred
+                over the art at soft-light. Every 90s cover had one. It sits
+                AFTER the plate so it glows over the picture, and BEFORE the
+                type so the lettering stays untouched on top of it. */}
+            <span className={styles.wash} aria-hidden="true" />
+
+            {/* the publisher's mark, top left. No asset, no slot: an empty
+                frame where a logo goes is worse than no logo at all. */}
+            {box?.mark && (
+              <img
+                className={styles.mark}
+                src={box.mark}
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+              />
             )}
 
             {!shipped && (
@@ -199,12 +254,14 @@ export function ShelfBox({
               </>
             )}
 
-            <span className={styles.frontMeta}>
-              <span className={styles.boxName}>{c.name}</span>
-              <span className={styles.badge}>{c.org}</span>
-              <span className={styles.version}>
-                <Copy k="shelf.versionLabel" as="span" /> {version(c.year)}
-              </span>
+            {/* The type block, standing on the bottom left of the cream —
+                eyebrow, title, promise. It sits ON the artwork now instead of
+                in a strip beneath it, which is the whole difference between a
+                box and a card with a caption. */}
+            <span className={styles.type}>
+              <span className={styles.frontEyebrow}>{c.org}</span>
+              <span className={styles.title}>{c.name}</span>
+              {box?.tagline && <span className={styles.tagline}>{box.tagline}</span>}
             </span>
           </motion.button>
         }
@@ -222,6 +279,14 @@ export function ShelfBox({
             <div className={styles.backInner}>
               <p className={styles.backTitle}>
                 <span className={styles.backNo}>{c.no}</span> {c.name}
+              </p>
+
+              {/* the version, rehoused. It used to be printed on the front,
+                  under the name — pass 4's box art has no room for a serial
+                  number and no reason to carry one, so it moved here, where
+                  the rest of the box's small print already lives. */}
+              <p className={styles.backVersion}>
+                <Copy k="shelf.versionLabel" as="span" /> {version(c.year)}
               </p>
 
               {box?.thesis && <p className={styles.thesis}>{box.thesis}</p>}
@@ -313,6 +378,42 @@ export function ShelfBox({
           </motion.div>
         }
       />
+
+      {/* THE FLIP TAG, now UNDER the box and hidden until you reach for it.
+
+          Under, because the Figma's box art stands on the shelf and anything
+          floating above it competed with the title for the top of the
+          silhouette. Hidden, because four permanent chips on a shelf of four
+          boxes is four labels; one that arrives when you reach is a handle.
+
+          The band is RESERVED height either way — the tag animates on
+          transform and opacity only, so the shelf's layout is identical
+          revealed or not, and nothing on this row can ever shift.
+
+          `pointer-events: none` while hidden keeps a tag nobody can see from
+          eating a click meant for the box. It stays in the tab order on
+          purpose: focus reveals it on the way in, which is the standard
+          skip-link bargain and strictly better than a control that keyboard
+          users cannot reach at all. */}
+      <motion.div
+        className={styles.tagRow}
+        initial={false}
+        animate={{ opacity: show ? 1 : 0, y: show ? 0 : -6 }}
+        transition={reduced ? { duration: 0 } : SPRINGS.window}
+        style={{ pointerEvents: show ? 'auto' : 'none' }}
+      >
+        <button
+          ref={tag}
+          type="button"
+          className={styles.tag}
+          aria-expanded={flipped}
+          aria-controls={backId}
+          aria-label={`${spoken(t(tagKey, skin))} — ${c.name}`}
+          onClick={() => turn(!flipped)}
+        >
+          <Copy k={tagKey} as="span" />
+        </button>
+      </motion.div>
     </div>
   )
 }

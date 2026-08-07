@@ -28,11 +28,26 @@ import styles from './shelf.module.css'
    box on the shelf shares one vanishing point — per-box perspective gives
    each box its own camera, which is what makes CSS 3D look like stickers.
 
+   AND IT ONLY ARRIVES IF EVERY ELEMENT BETWEEN THE TWO SAYS SO. `perspective`
+   applies to an element's children; it reaches a grandchild only through an
+   unbroken chain of `transform-style: preserve-3d`. Passes 2–3 set it on
+   `.stage`/`.tilt`/`.cuboid` but not on `.slot`/`.boxSlot`/`.plinth`, so the
+   chain broke three levels up and the whole shelf rendered ORTHOGRAPHIC:
+   rotations sheared, translateZ did literally nothing, and no box ever
+   foreshortened. Measured, pass 4: translateZ(200px) moved the face's
+   rendered width by 0.00px. That is the bug behind "it still isn't reading
+   as 3D" — those passes were turning flat parallelograms. The chain is now
+   whole in shelf.module.css; do not break it again.
+
+   With a real camera the resting turn became unnecessary: an off-centre box
+   shows its own side face for free (that is what perspective IS), so pass 4
+   drops the faked rotation and lets position in the row do the work.
+
    THREE nested transforms, deliberately never merged — one element cannot
    own two of these without them fighting over `transform`:
 
-     .stage    PARALLAX rotateY, written by the carousel's scroll loop
-     .tilt     CURSOR PRESSURE rotateX/rotateY + the hover lift (springs)
+     .stage    reserved, static (held pass 2–3's scroll-linked parallax)
+     .tilt     CURSOR PRESSURE rotateX/rotateY + the hover POP (springs)
      .cuboid   the FLIP rotateY (Motion)
 
    Reduced motion collapses the whole thing (`.flat`): the sides disappear,
@@ -44,9 +59,7 @@ import styles from './shelf.module.css'
    OUTSIDE the 3D context, because it is drawn with `filter: blur()` and
    filter is a grouping property — inside the cuboid it would flatten every
    face beneath it. Grounding is what sells a solid: a box that turns but
-   floats still reads as a card. It is two nested nodes for the same reason
-   the box is: the scroll loop owns the inner one's footprint transform, the
-   hover spring owns the outer one's swell. */
+   floats still reads as a card. */
 
 /* Cursor pressure, Apple-TV style. The corner UNDER the cursor presses
    BACK — the tile pushes away from the finger, it does not lean into it —
@@ -56,24 +69,47 @@ import styles from './shelf.module.css'
      rotateX(+θ): a point at +y maps to +z, and CSS +y is DOWN,
                   so the TOP recedes         → cursor TOP   ⇒ rotateX POSITIVE
 
-   7deg is the ceiling. The row already turns each box 8–36deg of parallax
-   and the tilt composes on top of that; past ~7 the pressure stops reading
-   as a nudge and starts fighting the shelf's own perspective.
+   10deg, up from pass 3's 7. That cap was set against a resting turn of
+   8–36deg the tilt had to avoid fighting; with the row square-on at rest the
+   tilt is now the ONLY rotation on the box, and it has room. It is still
+   deliberately small — this is pressure under a finger, not a spin.
+
+   THE POP is what pass 4 added and what actually sells the solid: the box
+   translates 38px toward the viewer. Against the row's 980px camera that is
+   a scale of 980 / (980 − 38) = 1.040 — the box grows ~10px across as it
+   comes off the shelf, and its own sides swing into view. 38 was chosen
+   against neighbour clearance, not feel alone: the growth is applied about
+   the row's vanishing point, so a box near the edge of the frame moves
+   OUTWARD as well as forward, and the slot gap had to widen to 24px to keep
+   two boxes from touching at full pop (measured — see shelf.module.css).
 
    The spring is `window`, not `deck`: at stiffness 480 / damping 34 / mass
    0.7 its damping ratio is 34 / (2·√(480·0.7)) ≈ 0.93 — near-critical, so
    the box tracks the cursor without wobbling behind it on every micro-move.
    `deck` (0.76) overshoots, which is right for a flip that lands and wrong
    for a surface that is meant to feel like it is under your finger. */
-const TILT_CAP = 7
+const TILT_CAP = 10
+const POP = 38
 const LIFT = 6
-/* the shadow answers the lift, derived rather than dialled: a box 6px off a
-   shelf throws a footprint a shade wider and a shade weaker. */
-const SHADOW_SWELL = 1.08
-const SHADOW_FADE = 0.74
 
-/** fine pointer only — a tilt that tracks a finger is a tilt that fights it */
-function useFinePointer() {
+/* The shadow answers the pop, and it answers it by RETREATING.
+
+   Pass 3 swelled it, which is the right physics for a card rising off a
+   plane under a light directly above. This is not that: the box is leaving
+   the shelf toward the CAMERA, and the ellipse on the shelf is a contact
+   patch — the footprint of a board standing on it. Break the contact and
+   the patch has nothing left to draw: it narrows toward the base that is no
+   longer there, and the occlusion weakens because light now reaches under
+   the box. So it shrinks and fades together, which reads as the box coming
+   away from its own shadow rather than dragging it along. */
+const SHADOW_SHRINK = 0.9
+const SHADOW_FADE = 0.6
+
+/** fine pointer only — a tilt that tracks a finger is a tilt that fights it.
+    Called ONCE, in Shelf.tsx, and handed down: the answer is a property of
+    the machine, not of a box, and one media-query listener per box was a
+    debt flagged the moment a fifth case looked likely. */
+export function useFinePointer() {
   const [fine, setFine] = useState(false)
   useEffect(() => {
     const mq = window.matchMedia('(hover: hover) and (pointer: fine)')
@@ -89,26 +125,35 @@ export function Box3D({
   front,
   back,
   flipped,
+  fine,
   className,
 }: {
   /** the front-face element — must carry `.face` styling itself */
   front: ReactNode
   back: ReactNode
   flipped: boolean
+  /** measured once by the shelf: hover-capable, fine-pointer machine */
+  fine: boolean
   className?: string
 }) {
   const reduced = useReducedMotion()
-  const fine = useFinePointer()
   const tiltOn = !reduced && fine
 
   /* MotionValues, not state: pointermove sets a target and the spring loop
      chases it, so a pointer moving across a box writes no React renders and
-     no per-move style of our own. */
+     no per-move style of our own.
+
+     ONE spring drives the whole hover — pop, lift and both shadow responses
+     are transforms of the same 0→1 value, so they can never arrive out of
+     step with each other. Only the two rotations are independent, because
+     only they track the cursor. */
   const rx = useSpring(0, SPRINGS.window)
   const ry = useSpring(0, SPRINGS.window)
-  const lift = useSpring(0, SPRINGS.window)
-  const shadowScale = useTransform(lift, [0, -LIFT], [1, SHADOW_SWELL])
-  const shadowFade = useTransform(lift, [0, -LIFT], [1, SHADOW_FADE])
+  const pop = useSpring(0, SPRINGS.window)
+  const z = useTransform(pop, [0, 1], [0, POP])
+  const lift = useTransform(pop, [0, 1], [0, -LIFT])
+  const shadowScale = useTransform(pop, [0, 1], [1, SHADOW_SHRINK])
+  const shadowFade = useTransform(pop, [0, 1], [1, SHADOW_FADE])
 
   /* the box's own rect, read ONCE on enter. Reading it per pointermove is a
      forced layout on every mouse sample, which is exactly the cost this
@@ -118,7 +163,7 @@ export function Box3D({
   const enter = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!tiltOn || e.pointerType !== 'mouse') return
     rect.current = e.currentTarget.getBoundingClientRect()
-    lift.set(-LIFT)
+    pop.set(1)
   }
 
   const move = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -136,7 +181,7 @@ export function Box3D({
     rect.current = null
     rx.set(0)
     ry.set(0)
-    lift.set(0)
+    pop.set(0)
   }
 
   return (
@@ -146,32 +191,34 @@ export function Box3D({
       onPointerMove={move}
       onPointerLeave={leave}
     >
-      {/* the box's contact with the shelf. The inner span is written by the
-          same scroll loop that turns the box: as the face swings away its
-          footprint narrows and slides, and the shadow goes with it. The
-          wrapper carries the hover swell. Transform and opacity only. */}
+      {/* the box's contact with the shelf. Transform and opacity only, and
+          it is the one node here that must NOT be in the 3D context — it is
+          drawn with a blur, and filter is a grouping property. */}
       <motion.span
         className={styles.shadowWrap}
         aria-hidden="true"
         style={tiltOn ? { scale: shadowScale, opacity: shadowFade } : undefined}
       >
-        <span className={styles.shadow} data-shadow="" />
+        <span className={styles.shadow} />
       </motion.span>
-      <div
-        // data-stage: the carousel's scroll loop finds its boxes by this and
-        // writes the parallax rotateY here. Nothing else may set transform.
-        data-stage=""
-        className={styles.stage}
-      >
+      {/* reserved: passes 2–3 wrote a scroll-linked parallax rotateY here.
+          Jake's pass-4 ruling killed the resting turn, so it is static — but
+          it stays, because the flip and the tilt each need a layer of their
+          own and merging the two would make them fight over `transform`. */}
+      <div className={styles.stage} data-stage="">
         {tiltOn ? (
-          <motion.div className={styles.tilt} style={{ rotateX: rx, rotateY: ry, y: lift }}>
+          <motion.div
+            className={styles.tilt}
+            data-tilt=""
+            style={{ rotateX: rx, rotateY: ry, y: lift, z }}
+          >
             <Cuboid flipped={flipped} reduced={reduced}>
               {front}
               {back}
             </Cuboid>
           </motion.div>
         ) : (
-          <div className={styles.tilt}>
+          <div className={styles.tilt} data-tilt="">
             <Cuboid flipped={flipped} reduced={reduced}>
               {front}
               {back}

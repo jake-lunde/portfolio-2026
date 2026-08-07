@@ -113,15 +113,15 @@ export const PROGRAMS: ProgramDef[] = [
     // the boxes are real cuboids (preserve-3d) — the unfocused-window
     // recede is a `filter`, and filter flattens 3D. See `noRecede` above.
     noRecede: true,
-    // measured, one row deep: 720 leaves 678px of shelf after the 20px
-    // gutters — two 246px boxes and ~150px of the third, cut by the right
-    // edge on purpose. 552 = 32 titlebar + 54 masthead + 412 row + 40 foot
-    // + the window's own borders, rounded up so the license sphere still
-    // has ~380px of frame when the whole body goes dark. The row is 18
-    // above + 22 flip tag + 10 gap + 328 box + 34 below (where the contact
-    // shadows live) = 412; pass 3 hung the tag above each box, which is
-    // the +32 over pass 2's 520.
-    size: { w: 720, h: 552 },
+    // measured, one row deep: 720 leaves 676px of shelf after the 20px
+    // gutters — two 246px boxes, a 24px gap and ~160px of the third, cut by
+    // the right edge on purpose. 496 = 32 titlebar + 410 row + 40 foot +
+    // the window's own borders, rounded up. The row is 18 above + 328 box
+    // + 22 gap + 22 flip tag + 20 below = 410 (the last 64 of which is the
+    // painted shelf plank the boxes stand on). Pass 4 moved the tag BELOW
+    // the box and DELETED the 54px SHIPPED.SW masthead, which is the −56
+    // against pass 3's 552 — the shelf is the whole window now.
+    size: { w: 720, h: 496 },
     pos: { x: 250, y: 48 },
     onDesktop: true,
     path: '/cases',

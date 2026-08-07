@@ -1,12 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AnimatePresence, useReducedMotion } from 'motion/react'
+import { AnimatePresence } from 'motion/react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { CopyText as Copy } from '@/content/CopyText'
 import { metric } from '@/lib/metrics'
 import { sfx } from '@/lib/sound'
 import { CASES, getCase } from '@/programs/projects/cases'
+import { useFinePointer } from './Box3D'
 import { LaunchOverlay } from './LaunchOverlay'
 import { ShelfBox } from './ShelfBox'
 import styles from './shelf.module.css'
@@ -33,32 +34,22 @@ import styles from './shelf.module.css'
 
 const SENT_KEY = 'lunde-nudged'
 
-/* The carousel's turn, in two parts.
+/* THE RESTING TURN IS GONE (pass 4, Jake's ruling: head-on at rest).
 
-   REST is the standing angle every box holds, centred or not: a cuboid
-   square-on to the camera IS a flat rectangle, so nothing on this shelf is
-   ever allowed to face you dead-on. It is the angle stock sits at on a
-   store endcap — turned just enough that the spine is a permanent surface.
+   Passes 2–3 held every box at 22deg and swept it ±14 with scroll, on the
+   theory that a cuboid square-on to the camera is a flat rectangle. That
+   theory was only true because the shelf had no camera: the row's 980px
+   perspective never reached the boxes (the preserve-3d chain broke at
+   `.slot` — see Box3D.tsx), so the faked turn was shearing flat artwork and
+   the shelf read as exactly what it was.
 
-   SWEEP modulates it by position. Sign matters: positive rotateY brings a
-   box's LEFT edge toward the viewer, which is the spine, so the angle must
-   stay positive across the row.
-
-   The numbers are picked against the row's 980px perspective, which itself
-   turns a box by roughly atan(offset / 980) — a box 300px right of the
-   vanishing point already reads as 17deg turned. So the two compose:
-
-     box position      actual rotateY   + perspective   = apparent turn
-     far left (t=-1)        36deg          -20deg          ~16deg
-     centre   (t= 0)        22deg            0deg          ~22deg
-     far right(t=+1)         8deg          +30deg          ~38deg
-
-   which is the point — every box on the shelf is turned, and the ones
-   receding to the right are turned hardest, so the row reads as depth
-   rather than as a filmstrip. Nothing approaches the 90deg where the back
-   face would begin to show. */
-const REST = 22
-const SWEEP = 14
+   With the chain repaired, position in the row does the work the constants
+   used to fake: a box left of the vanishing point shows its right side, a
+   box right of it shows its spine, and the box you are looking at faces you.
+   So the loop that wrote those rotations — and the shadow-footprint maths
+   that existed only to match them (squash and slide both resolve to identity
+   at 0deg) — is deleted rather than zeroed. The shadow now answers the
+   hover, and only the hover, from Box3D. */
 
 const readSent = (): string[] => {
   try {
@@ -70,96 +61,8 @@ const readSent = (): string[] => {
   }
 }
 
-/* Scroll-linked depth, transform-only.
-
-   Geometry (offsetLeft/offsetWidth — layout values, so a box's own rotation
-   never feeds back into its measurement) is taken ONCE per resize and
-   cached; the per-frame loop reads a single scrollLeft and writes N
-   transforms. No rect reads in the loop, no layout thrash.
-
-   The listener is passive and coalesced into one rAF: several scroll events
-   inside a frame collapse to one write pass. OFF under reduced motion —
-   there the boxes stay square-on and the row is a plain scroller. */
-function useCarouselDepth(
-  row: React.RefObject<HTMLUListElement | null>,
-  enabled: boolean,
-  count: number,
-) {
-  useEffect(() => {
-    const el = row.current
-    if (!el || !enabled) return
-
-    let raf = 0
-    let stages: {
-      node: HTMLElement
-      shadow: HTMLElement | null
-      centre: number
-      width: number
-      depth: number
-    }[] = []
-
-    const paint = () => {
-      raf = 0
-      const half = el.clientWidth / 2
-      if (!half) return
-      const mid = el.scrollLeft + half
-      for (const s of stages) {
-        const t = Math.max(-1, Math.min(1, (s.centre - mid) / half))
-        const deg = REST - SWEEP * t
-        s.node.style.transform = `rotateY(${deg.toFixed(2)}deg)`
-        if (!s.shadow) continue
-        /* the footprint the box actually casts: a face of width w turned by
-           `deg` covers w·cos(deg) plus d·sin(deg) of its own board, and its
-           centre of mass slides toward the near edge. Both derived, not
-           dialled in — the shadow is the box's own geometry, flattened. */
-        const rad = (deg * Math.PI) / 180
-        const squash = (s.width * Math.cos(rad) + s.depth * Math.abs(Math.sin(rad))) / s.width
-        const slide = -Math.sin(rad) * (s.depth / 2)
-        s.shadow.style.transform = `translateX(${slide.toFixed(1)}px) scaleX(${squash.toFixed(3)})`
-      }
-    }
-
-    const schedule = () => {
-      if (!raf) raf = requestAnimationFrame(paint)
-    }
-
-    const measure = () => {
-      stages = Array.from(el.querySelectorAll<HTMLElement>('[data-stage]')).map((node) => {
-        /* measured on the PLINTH, not the stage: the stage is absolutely
-           positioned inside it, so its own offsetLeft is always 0. And
-           offsetLeft is a LAYOUT value — a box's rotation can never feed
-           back into the measurement that drives it. */
-        const plinth = node.parentElement as HTMLElement
-        return {
-          node,
-          shadow: plinth.querySelector<HTMLElement>('[data-shadow]'),
-          centre: plinth.offsetLeft + plinth.offsetWidth / 2,
-          width: plinth.offsetWidth || 1,
-          depth: parseFloat(getComputedStyle(plinth).getPropertyValue('--box-d')) || 0,
-        }
-      })
-      schedule()
-    }
-
-    el.addEventListener('scroll', schedule, { passive: true })
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    measure()
-
-    return () => {
-      el.removeEventListener('scroll', schedule)
-      ro.disconnect()
-      if (raf) cancelAnimationFrame(raf)
-      for (const s of stages) {
-        s.node.style.transform = ''
-        if (s.shadow) s.shadow.style.transform = ''
-      }
-    }
-  }, [row, enabled, count])
-}
-
 export default function Shelf() {
-  const reduced = useReducedMotion()
+  const fine = useFinePointer()
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [durable, setDurable] = useState(true)
   const [loaded, setLoaded] = useState(false)
@@ -167,11 +70,16 @@ export default function Shelf() {
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [playing, setPlaying] = useState<string | null>(null)
+  /* WHICH BOX IS SHOWING ITS TAG. One string for the whole shelf, because
+     the rule is a shelf-level rule and not a box-level one: a tag comes out
+     when you reach for its box and STAYS out — it is a handle you pulled,
+     not a tooltip — until you reach for a different box, which pulls that
+     one out and pushes this one back. Two independent booleans could show
+     two tags at once, which is the state this deliberately cannot reach. */
+  const [revealed, setRevealed] = useState<string | null>(null)
   const hp = useRef<HTMLInputElement>(null)
   const trigger = useRef<HTMLElement | null>(null)
   const row = useRef<HTMLUListElement>(null)
-
-  useCarouselDepth(row, !reduced, CASES.length)
 
   /* A shelf runs left-to-right but a mouse wheel only knows up-and-down, so
      vertical wheel over the row becomes horizontal scroll. Attached by hand
@@ -279,13 +187,17 @@ export default function Shelf() {
         className={styles.hp}
       />
 
-      <header className={styles.head}>
-        <Copy k="shelf.eyebrow" as="p" className={styles.eyebrow} />
-      </header>
+      {/* NO MASTHEAD. "SHIPPED.SW · parallel 1992" stood here for three
+          passes and Jake struck it in pass 4: the window is already titled
+          Case Studies, and a shelf of boxed software does not need a line of
+          copy explaining that it is a shelf of boxed software. The store
+          framing went with it — Family Hub is hardware as well as software,
+          and an aisle overcommits to a metaphor the work outgrew. The 54px
+          it used to occupy went to the row. */}
 
       {/* one row, never two: a shelf is a line of boxes you walk along. The
           row is the 3D camera for every box on it (perspective lives here,
-          in CSS) and the scroll surface the depth loop listens to. */}
+          in CSS) and it draws the plank they stand on. */}
       <ul className={styles.row} ref={row}>
         {CASES.map((c, i) => (
           <li key={c.slug} className={styles.slot}>
@@ -296,6 +208,9 @@ export default function Shelf() {
               sent={sent.includes(c.slug)}
               busy={busy === c.slug}
               durable={durable}
+              fine={fine}
+              revealed={revealed === c.slug}
+              onReveal={setRevealed}
               onNudge={(slug) => void nudge(slug)}
               onPlay={startPlay}
             />

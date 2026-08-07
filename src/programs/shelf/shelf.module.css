@@ -16,6 +16,19 @@
   flex-direction: column;
   height: 100%;
   position: relative;
+  /* THE BOX-ART FACE. Instrument Sans (loaded in app/layout.tsx), Jake's own
+     pick off the Figma template, scoped to this program and this program
+     only — it is artwork lettering, not a token face, and the skins'
+     --display/--sans/--mono are untouched by it. One indirection so the
+     covers ask for a ROLE and medieval can answer differently below.
+     ⚠️ merge task: fold this into the token architecture as a real face
+     role rather than a raw next/font variable. */
+  --boxart-face: var(--font-boxart), var(--sans);
+}
+
+/* a scriptorium does not set its tomes in a 2023 grotesque */
+:global([data-skin='medieval']) .wrap {
+  --boxart-face: var(--display);
 }
 
 .hp {
@@ -26,51 +39,79 @@
   opacity: 0;
 }
 
-/* ---------------- masthead ----------------
-   The window title stays "Case Studies" (program.progress.name drives both
-   the icon and the titlebar); SHIPPED.SW is the masthead inside. */
-
-.head {
-  padding: 16px 20px 14px;
-  background: var(--surface);
-  border-bottom: var(--border-width-default) solid var(--content);
-}
-
-[data-theme='dark'] .head {
-  border-bottom-color: var(--border);
-}
-
-.eyebrow {
-  font-family: var(--display);
-  font-size: var(--type-body-size);
-  margin: 0;
-}
+/* ---------------- (no masthead) ----------------
+   The "SHIPPED.SW · parallel 1992" strip that stood here for three passes
+   is gone, struck by Jake in pass 4 along with the store framing that was
+   going to replace it. The window is already titled Case Studies and the
+   shelf is self-evidently a shelf; a line of copy above it was the program
+   introducing itself twice. Its 54px went to the row. */
 
 /* ---------------- the carousel ----------------
    ONE row, scrolled sideways, never wrapped. Measured: a 720px window
-   leaves 676px of content after the 20px gutters, and 246 + 16 + 246 =
-   508 — so two boxes stand clear and 152px of the third is cut by the
+   leaves 676px of content after the 20px gutters, and 246 + 24 + 246 =
+   516 — so two boxes stand clear and 160px of the third is cut by the
    right edge. That cut is the point: a shelf you can see all of is a shelf
    with nothing else on it.
 
    PERSPECTIVE LIVES HERE, once. Every box on the row shares this vanishing
    point, which is what makes them read as objects on one shelf rather than
    four independent dioramas. perspective-origin is relative to this box,
-   not the content, so the camera stays put while the boxes ride past it. */
+   not the content, so the camera stays put while the boxes ride past it.
+
+   ⚠️ AND IT ONLY TRAVELS AS FAR AS `preserve-3d` CARRIES IT. `perspective`
+   applies to an element's CHILDREN; every generation below that has to opt
+   back in with `transform-style: preserve-3d` or the chain snaps and
+   everything under the break renders orthographic. Passes 2–3 set it on
+   `.stage`/`.tilt`/`.cuboid` and forgot `.slot`/`.boxSlot`/`.plinth`, so
+   this camera was pointed at nothing for two passes: measured in pass 4, a
+   translateZ(200px) on the tilt layer changed the face's rendered width by
+   0.00px. Do not remove preserve-3d from any of the three below. */
 
 .row {
-  /* positioned: the scroll-depth loop measures offsetLeft against this */
+  /* positioned: the row is the coordinate space every box is measured in */
   position: relative;
   flex: 1;
   min-height: 0;
   list-style: none;
   margin: 0;
-  /* the deep bottom padding is the shelf itself: the contact shadows live
-     under the boxes and `overflow` clips at the padding edge */
-  padding: 18px 20px 34px;
+  /* bottom padding holds the contact shadows and the tag band below them;
+     `overflow` clips at the padding edge */
+  padding: 18px 20px 20px;
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  /* flex-END, not centre, and the plank below depends on it: bottom
+     alignment makes the box's base a fixed distance from the row's bottom
+     edge (20 padding + 22 tag + 22 gap = 64), which is the only reason the
+     board can be painted at exactly the height the boxes stand on. Centring
+     leaves a few pixels of slack that move whenever the window does. */
+  align-items: flex-end;
+
+  /* ---- THE SHELF BOARD ----
+     A painted plank rather than an element, for two reasons. It is a
+     BACKGROUND, so it sits behind the boxes and behind their contact
+     shadows — the shadows fall ON the board, which is the whole point of
+     having one. And a background's positioning area on a scroller is the
+     padding box, which does NOT scroll with the content: the plank spans
+     the visible shelf and the boxes slide ALONG it. A board that scrolled
+     with the stock would be a conveyor belt, not furniture.
+
+     Two bands off one token: a lit top lip where the board catches the
+     light, and the front edge below it. Anchored `left bottom`, 64px tall,
+     so its surface lands exactly under the boxes' bases. */
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--content) 9%, var(--surface)) 0 3px,
+    color-mix(in srgb, var(--content) 24%, var(--surface)) 3px 15px,
+    transparent 15px
+  );
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 100% 64px;
+  /* 24, up from 16. The pop scales a box about the row's vanishing point,
+     so a box away from the centre of the frame grows OUTWARD as well as
+     forward: at the far edge of a 676px frame that is 338 × (1.040 − 1) ≈
+     14px of drift, plus ~7px of half-width growth from the pop and the
+     tilt together. 16px of gap could not absorb 21px of reach; 24 can. */
+  gap: var(--space-6);
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
@@ -90,45 +131,41 @@
 .slot {
   flex: 0 0 auto;
   scroll-snap-align: start;
+  /* link 1 of 3 in the camera chain — see the warning above */
+  transform-style: preserve-3d;
 }
 
-/* tag over box. The gap and the tag band are RESERVED height, not
-   discovered: the label swaps between two strings of different length and
-   the box lifts 6px on hover, and neither may ever move the shelf.
-   NOT positioned — the scroll loop measures `plinth.offsetLeft` against
-   `.row`, and a positioned wrapper here would silently become the
-   offsetParent and zero every measurement. */
+/* box over tag. The gap and the tag band are RESERVED height, not
+   discovered: the tag fades in and out on hover and the label swaps between
+   two strings of different length, and neither may ever move the shelf. */
 .boxSlot {
   display: flex;
   flex-direction: column;
-  /* 10, not 6: the box LIFTS 6px on hover, and the gap has to survive that
-     with air left over — at 6 the lifted board arrives exactly under the
-     tag */
-  gap: 10px;
+  /* 22, not 10: the tag moved BELOW the box in pass 4, and the gap now has
+     to clear the contact shadow that hangs 10px past the board as well as
+     the ~3px of the box's own underside that perspective reveals under it */
+  gap: 22px;
+  /* link 2 of 3 in the camera chain */
+  transform-style: preserve-3d;
 }
 
 /* 22px holds the 19px chip, and the 21px it becomes when medieval thickens
-   its border.
-
-   Positioned and lifted in paint order because the cuboid's TOP strip is a
-   42px-tall element rotated flat about the box's top edge: under
-   perspective its hit region reaches above the board, and on hover the
-   whole box rises into this row. The tag has to win that overlap — see
-   also `.side { pointer-events: none }`. Positioning here is safe: this is
-   a SIBLING of `.plinth`, never its offsetParent. */
+   its border. Reserved whether the tag is showing or not — the reveal is
+   opacity and transform, never layout. */
 .tagRow {
   position: relative;
   z-index: 1;
   height: 22px;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 /* THE flip control. Everything Jake struck off the box — the two full-bleed
-   CTA bars — collapses into this: one small chip hanging above the solid,
-   outside the cuboid so it never turns, tilts or lifts with it. Quieter
+   CTA bars — collapses into this: one small chip standing UNDER the solid,
+   outside the cuboid so it never turns, tilts or pops with it. Quieter
    than Stamp on purpose (no rotation, no mask, muted ink): the stamp is a
-   mark on the goods, this is a handle on the shelf.
+   mark on the goods, this is a handle on the shelf — and pass 4 makes it
+   behave like one, hidden until a hand reaches for the box it belongs to.
 
    It is also the accessible path — aria-expanded/aria-controls live here,
    Enter flips, and focus comes back here on the way out. */
@@ -176,9 +213,10 @@
    PC game ran nearer a quarter of its width, which at this scale shoulders
    into the neighbouring box.
 
-   `.plinth` is the flat wrapper the box stands on: it holds the contact
-   shadow, which is drawn with a blur and would flatten the whole cuboid if
-   it lived inside the 3D context. Nothing here may take a filter. */
+   `.plinth` is the wrapper the box stands on: it holds the contact shadow,
+   which is drawn with a blur — filter is a grouping property, so the shadow
+   flattens ITSELF and nothing else, which is exactly why it may live here
+   and never inside the cuboid. Nothing on this element may take a filter. */
 .plinth {
   position: relative;
   width: var(--box-w);
@@ -186,6 +224,8 @@
   --box-w: 246px;
   --box-h: 328px;
   --box-d: 42px;
+  /* link 3 of 3 in the camera chain — see the warning on `.row` */
+  transform-style: preserve-3d;
 }
 
 .stage {
@@ -194,10 +234,11 @@
   transform-style: preserve-3d;
 }
 
-/* the cursor-pressure layer: its own node between the carousel's parallax
-   (.stage) and the flip (.cuboid), because one element cannot own three
-   rotations without them overwriting each other. Transform written by
-   springs in Box3D.tsx; nothing in CSS may set it. */
+/* the cursor-pressure layer: its own node between `.stage` and the flip
+   (.cuboid), because one element cannot own three transforms without them
+   overwriting each other. It carries the POP (translateZ), the lift and
+   both tilt rotations, all written by springs in Box3D.tsx; nothing in CSS
+   may set it. */
 .tilt {
   position: absolute;
   inset: 0;
@@ -214,12 +255,11 @@
    cue that separates a solid from a card, and it does more work than any
    amount of rotation. Tokenised (a mix of --content into nothing), so it
    is the skin's own ink at low strength and never an invented grey.
-   Squashed and slid by the scroll loop to follow the box's footprint.
 
-   Two nodes, one shadow: the INNER span carries the footprint the scroll
-   loop computes (squash + slide), the OUTER one carries the hover swell —
-   a box 6px off the shelf throws a wider, weaker shadow. Nesting them is
-   what keeps the two writers off each other's `transform`. */
+   The wrapper carries the hover response (shrink + fade, from the same
+   spring that drives the pop — see Box3D.tsx); the inner span is left free
+   for the blur, which must sit on its own node or it would group the
+   opacity animation with it. */
 .shadowWrap {
   position: absolute;
   left: 4%;
@@ -326,9 +366,15 @@
 }
 
 /* --------- reduced motion: the solid collapses ---------
-   No turning, no parallax, no sides — back to pass 1's two stacked faces
+   No turning, no pop, no sides — back to pass 1's two stacked faces
    crossfading in place. Motion drives the opacity; this flattens the
-   geometry so the back face is visible at rest. */
+   geometry so the back face is visible at rest.
+
+   `.flat` IS the plinth, so it flattens itself first: leaving preserve-3d on
+   it would keep the row's camera pointed at a stack of faces that no longer
+   move, and the front face would still be projected off-centre. */
+.flat,
+.flat .stage,
 .flat .cuboid,
 .flat .tilt {
   transform: none;
@@ -345,13 +391,22 @@
   -webkit-backface-visibility: visible;
 }
 
-/* ---------------- front of box ---------------- */
+/* ---------------- front of box ----------------
+   JAKE'S BOX-ART TEMPLATE (pass 4, from his Figma). A 1990s Mac-software
+   sleeve: warm cream ground, product photography feathering into it, a
+   small publisher mark top-left, and the type standing on the bottom-left
+   corner of the cream.
+
+   THE CREAM IS `--surface-raised`, inherited from `.face`, not a new value.
+   Sampled from Jake's Figma the ground reads #e4d7bc; classic light's
+   surface-raised is #ded7c4 — the nearest token by a wide margin
+   (--surface, #e7e1d2, is more than twice as far, and greyer). The delta is
+   ~6/0/8 per channel, invisible next to the photography and worth far more
+   than a hardcoded hex that could never re-skin. Every skin gets its own
+   paper for free: medieval's is parchment, dark's is near-black board. */
 
 .frontFace {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 0;
+  display: block;
   padding: 0;
   margin: 0;
   text-align: left;
@@ -365,98 +420,105 @@
   outline-offset: 2px;
 }
 
-/* key art, duotoned in CSS: grayscale under an accent multiply (screen in
-   dark). Tokens-driven, so it re-skins with everything else. */
-.art {
+/* --------- the plate ---------
+   Everything that counts as picture, in one node, so ONE mask feathers all
+   of it: still key art, the composed token ground, and the cover film.
+
+   IT IS A PRODUCT PHOTO SEATED IN THE CREAM, NOT WALLPAPER BEHIND IT.
+   Pass 4's first cut ran the film full-bleed across the whole face and
+   cropped it 1.4× to bury YouTube's chrome; Jake's answer was that the
+   crop threw away the picture — the on-screen text in the Invest film was
+   unreadable, because a 16:9 frame squeezed into a 3:4 face loses two
+   thirds of its own width. So the plate is now the film's OWN shape: full
+   face width, 16:9, sitting in the upper part of the cream with paper above
+   it and paper below it. Everything derives from --box-w, so the narrow
+   breakpoint needs no second set of numbers and nothing is resolved at
+   paint time.
+
+   THE MASK IS A BLOB, NOT A FEATHERED RECTANGLE. Jake's ruling, from his
+   Figma "Ellipse 2": the picture should melt into the cream as a soft
+   organic shape, the way an airbrushed 90s cover does. Straight-edged
+   gradients — even soft ones — still read as a rectangle that has been
+   faded, because their falloff is parallel to an edge you can name.
+
+   So: two ellipses, offset from each other, UNIONED (`mask-composite: add`)
+   rather than intersected. The union of two off-centre ellipses has no axis
+   of symmetry, which is what makes it read as a shape rather than a
+   treatment. Their solid cores overlap across the middle 80% of the plate —
+   Jake's other rule stands, the reader must still be able to READ the film —
+   and only the outer edges dissolve.
+
+   `mask-image` is a GROUPING property, exactly like `filter`: it flattens
+   the element it sits on. That is harmless here, on a leaf inside a face,
+   and would be fatal one level up — a mask on the face, the cuboid or the
+   tilt layer would collapse the whole solid. Same law as `.side`, `.track`
+   and the registry's `noRecede`.
+
+   `will-change: transform` promotes it: two embeds riding a 3D transform
+   that a spring rewrites every frame is exactly the case where an
+   unpromoted layer starts repainting. Not a translateZ(0) hack — that
+   computes to a 2D identity matrix and the promotion becomes unverifiable. */
+.plate {
   position: absolute;
-  inset: 0;
-  isolation: isolate;
+  /* 12% of the face leaves paper above the picture — which is where the
+     publisher's mark stands, exactly as it does in the Figma */
+  top: 12%;
+  left: 0;
+  right: 0;
+  height: calc(var(--box-w) * 9 / 16);
+  overflow: hidden;
+  will-change: transform;
+  -webkit-mask-image:
+    radial-gradient(64% 78% at 42% 44%, #000 0 52%, rgba(0, 0, 0, 0.7) 76%, transparent 100%),
+    radial-gradient(60% 70% at 64% 54%, #000 0 50%, rgba(0, 0, 0, 0.65) 74%, transparent 100%);
+  mask-image:
+    radial-gradient(64% 78% at 42% 44%, #000 0 52%, rgba(0, 0, 0, 0.7) 76%, transparent 100%),
+    radial-gradient(60% 70% at 64% 54%, #000 0 50%, rgba(0, 0, 0, 0.65) 74%, transparent 100%);
+  /* UNION, not intersection — see the note above. `add` is the standard
+     spelling, `source-over` the WebKit one. */
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
 }
 
-.art img {
+.plate img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.1);
+  display: block;
 }
 
-.art::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--accent);
-  mix-blend-mode: multiply;
-}
+/* The film, at its own proportion. The plate IS 16:9 now, so the iframe
+   only has to beat YouTube's residual letterbox gutter — the couple of
+   pixels its player rounds off when the container is not exactly the
+   aspect it wants. 1.02 does that and costs 1% off each edge; the 1.4
+   overscan this replaces cost 14.6%, which is what made the picture
+   unreadable.
 
-[data-theme='dark'] .art::after {
-  mix-blend-mode: screen;
-}
+   THE TRADE JAKE TOOK KNOWINGLY: that overscan was also burying YouTube's
+   title overlay and centre play button, which appear whenever autoplay is
+   refused (data saver, iOS Low Power) and can never be clicked away here
+   (pointer-events: none). At 1.02 they would show. The real fix is the
+   YouTube IFrame API, still deliberately deferred — legibility of the film
+   beats hiding a failure mode most readers never hit.
 
-/* --------- the cover film ---------
-   A YouTube embed as cover art. The treatment is the SAME recipe as `.art`
-   — grayscale under an accent multiply (screen in dark) — because the point
-   is that it reads as a printed cover that happens to move, not as a player
-   someone stuck on a box.
-
-   The filter sits on the IFRAME, a leaf. Never on the face or any ancestor
-   of one: filter flattens the 3D context and the cuboid would collapse.
-
-   Its own compositing layer, hinted INSIDE the face: two embeds riding a 3D
-   transform that a spring rewrites every frame is exactly the case where an
-   unpromoted layer starts repainting. `will-change` rather than a
-   translateZ(0) hack because the computed value of translateZ(0) collapses
-   to a 2D identity matrix and the promotion becomes unverifiable. */
-.cover {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  isolation: isolate;
-  will-change: transform;
-}
-
-/* COVER, for an iframe. YouTube letterboxes 16:9 into whatever box it is
-   given, so the box is made 16:9 and oversized until the FACE is the crop:
-   height = box height × 1.4, width = that × 16/9. At 246 × 328 that is
-   459 × 816 — 3.3× the face's width — centred, with the face's own
-   overflow doing the cropping. Derived from --box-h, so the narrow
-   breakpoint's smaller box needs no second set of numbers, and fixed at
-   layout time, so nothing shifts when the video paints.
-
-   1.4, not the 1.02 that bare `cover` needs: the extra overscan buries the
-   PLAYER, not just the letterbox seam. YouTube's title overlay eats the
-   top ~14% of its own frame whenever playback hasn't started — data saver,
-   iOS Low Power, any autoplay refusal — and this embed can never be
-   clicked out of that state (pointer-events: none). 1.4 crops 14.6% off
-   each edge, so the chrome lands outside the face and what shows is always
-   film. A tighter crop on decorative cover art is the cheap side of that
-   trade. */
+   NO FILTER. Passes 1–3 duotoned it (grayscale under an accent multiply)
+   so it read as "treated cover art"; Jake struck the treatment in pass 4 —
+   a box cover is a photograph, and the feather is what makes it belong to
+   the paper. */
 .coverFrame {
   position: absolute;
   top: 50%;
   left: 50%;
-  height: calc(var(--box-h) * 1.4);
-  width: calc(var(--box-h) * 1.4 * 16 / 9);
+  width: calc(var(--box-w) * 1.02);
+  height: calc(var(--box-w) * 1.02 * 9 / 16);
   transform: translate(-50%, -50%);
   border: 0;
   pointer-events: none;
-  filter: grayscale(1) contrast(1.1);
 }
 
-.cover::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--accent);
-  mix-blend-mode: multiply;
-  pointer-events: none;
-}
-
-[data-theme='dark'] .cover::after {
-  mix-blend-mode: screen;
-}
-
-/* no art yet → the front composes itself from tokens. Same geometry, so a
-   case with assets and a case without sit on the shelf as equals. */
+/* no art yet → the plate composes itself from tokens. Same geometry and the
+   same feather, so a case with assets and a case without sit on the shelf
+   as equals. */
 .composed {
   position: absolute;
   inset: 0;
@@ -470,9 +532,71 @@
   );
 }
 
+/* --------- the airbrush ---------
+   Jake's Figma "Ellipse 2", lifted whole: a conic sweep in an ellipse, laid
+   over the art at soft-light through a 25px blur. It is the coloured glow
+   every 90s box had airbrushed behind its product shot — the thing that
+   made a photograph look PRINTED rather than pasted.
+
+   ⚠️ THE FOUR HEXES ARE ART, NOT CHROME. They are Jake's own pigment off
+   the comp and they are correct as literals: this is a painting on a box,
+   not a UI surface, and there is no semantic role for "the yellow at 98.65
+   degrees". DO NOT TOKENISE THEM. Everything that dresses the interface —
+   ground, ink, borders, the stamp — stays tokens, as it always was.
+
+   soft-light is what keeps it a glow and not a filter: it lifts and tints
+   what is under it without ever hiding it, so the film stays readable. The
+   blur sits here, on a leaf INSIDE the face, where it flattens only itself
+   — never on the face, the cuboid or the tilt layer, which it would
+   collapse. Same law as `.plate`'s mask and medieval's #lunde-roughen.
+
+   Sized off --box-w and centred on the plate, so it moves with the artwork
+   at any box size. Each cover variant turns and slides it differently —
+   four boxes, four airbrushes, one shelf. */
+.wash {
+  position: absolute;
+  left: 50%;
+  top: 33%; /* the plate's own centre: 12% + (9/16 of the width) / 2 */
+  width: calc(var(--box-w) * 1.24);
+  /* 470.93 × 409.64 in the comp — the ratio is what carries over, not the px */
+  height: calc(var(--box-w) * 1.24 / 1.15);
+  border-radius: 50%;
+  transform: translate(calc(-50% + var(--wash-x, 0%)), -50%) rotate(var(--wash-turn, 0deg));
+  background: conic-gradient(
+    from 180deg at 50% 50%,
+    #ff0000 0deg,
+    #dac718 98.65deg,
+    #4d28b0 273.46deg,
+    #999999 360deg
+  );
+  mix-blend-mode: soft-light;
+  filter: blur(25px);
+  pointer-events: none;
+}
+
+/* --------- the publisher's mark ---------
+   Top left, small, the way a 1992 sleeve carried its house logo. Fixed box
+   with object-fit, so an asset of any proportion lands in the same square
+   and nothing on this face can shift when the bytes arrive. Rendered only
+   when `box.mark` exists — no asset, no slot. */
+.mark {
+  position: absolute;
+  top: 11px;
+  left: 12px;
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  object-position: left top;
+}
+
+/* The number stays on the DISPLAY face, not the box-art one. It is not
+   lettering printed by a publisher — it is the shelf's own index, the same
+   `no` the back panel and the case routes use, and keeping it in the pixel
+   face is what says so. Sized off the box for the same reason the type is:
+   it is art on an object. */
 .bigNo {
   font-family: var(--display);
-  font-size: var(--type-display-size);
+  font-size: calc(var(--box-w) * 0.26); /* ~64px at 246 */
   line-height: var(--leading-none);
   color: var(--accent-expressive-text);
 }
@@ -488,47 +612,188 @@
   );
 }
 
+/* 58%, not 38%: the plate is no longer the whole face, so the old position
+   landed the stamp squarely on the big number. It now sits in the band of
+   bare cream between the picture and the type — where a real shop would
+   have slapped a sticker, on the paper rather than on the artwork. */
 .stampWrap {
   position: absolute;
-  top: 38%;
+  top: 58%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(-11deg);
 }
 
-.frontMeta {
-  position: relative;
+/* --------- the type block ---------
+   Bottom left, standing on the cream, three registers deep: who made it,
+   what it is, and what it promises. It replaces the meta strip that used to
+   run across the foot of the front — a bar of name/org/version was the
+   software labelling itself, and a box does not label itself, it is
+   printed. The version went to the back panel with the rest of the data.
+
+   THE SIZES ARE MULTIPLES OF THE BOX, NOT STEPS ON THE UI SCALE, and that
+   is deliberate rather than a dodge around the token law. This is ARTWORK
+   printed on an object: its type has to hold the same proportion whatever
+   size the object is, exactly like `.coverFrame`'s 16:9 and the six faces'
+   --box-d, which are derived here for the same reason. The UI scale tops
+   out at 22px and then jumps to viewport clamps built for page headings
+   (--type-heading-1-size resolves to 38px at desktop width) — neither end
+   of that can print a title on a 246px board. Deriving from --box-w also
+   deletes the narrow breakpoint's type overrides: the lettering shrinks
+   with the box because it is ON the box.
+   ⚠️ merge task: this wants a `boxart` type ramp in the token set.
+
+   COLOUR IS TOKENS, ALWAYS. Only the face and the geometry are local. */
+.type {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 8px 10px;
-  background: var(--surface-raised);
-  border-top: var(--border-width-default) solid var(--content);
+  align-items: flex-start;
+  font-family: var(--boxart-face);
 }
 
-[data-theme='dark'] .frontMeta {
-  border-top-color: var(--border);
-}
-
-.boxName {
-  font-family: var(--display);
-  font-size: var(--type-body-sm-size);
+.frontEyebrow {
+  font-size: calc(var(--box-w) * 0.05); /* ~12px at 246 */
+  font-weight: var(--weight-regular);
   line-height: var(--leading-tight);
-}
-
-.badge {
-  font-family: var(--type-caption-family);
-  font-size: var(--type-caption-size);
-  letter-spacing: var(--tracking-10);
-  text-transform: uppercase;
   color: var(--content-muted);
 }
 
-.version {
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  letter-spacing: var(--type-micro-tracking);
+.title {
+  font-size: calc(var(--box-w) * 0.125); /* ~31px at 246 */
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  color: var(--content);
+  overflow-wrap: anywhere;
+  margin-top: 1px;
+}
+
+.tagline {
+  font-style: italic;
+  font-size: calc(var(--box-w) * 0.046); /* ~11px at 246 */
+  line-height: var(--leading-tight);
+  color: var(--content-muted);
+  margin-top: 4px;
+}
+
+/* --------- four publishers, one shelf ---------
+   A rack of 1992 software is not a product family. Four houses who never
+   spoke to each other printed these, and the covers disagree the way those
+   did: weight, size, alignment, case and italics all move between boxes.
+
+   What does NOT move is the face — every classic cover is Instrument Sans —
+   or the colour, which is tokens on every one of them. That is the whole
+   trick of making four arguments read as one shelf rather than four
+   unrelated screenshots. `figma` is the default and the reference: it is
+   the treatment Jake actually drew, so it is the one nothing may drift
+   away from. */
+
+/* FIGMA — the reference. Small sentence-case eyebrow, big title, italic
+   promise signed off to the right. Family Hub wears the drawing, and its
+   airbrush sits as Jake drew it: unturned. */
+.vFigma {
+  --wash-turn: 0deg;
+}
+
+.vFigma .tagline {
+  align-self: flex-end;
+}
+
+/* LEDGER — finance software. Tracked-out uppercase house name, the title
+   heavy and set tight, the promise squared up underneath rather than
+   signed. Nothing here is allowed to look playful — including the
+   airbrush, turned so its cold end leads. */
+.vLedger {
+  --wash-turn: 132deg;
+  --wash-x: -7%;
+}
+
+.vLedger .frontEyebrow {
+  font-size: calc(var(--box-w) * 0.042);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-16);
   text-transform: uppercase;
-  color: var(--accent);
+}
+
+.vLedger .title {
+  font-size: calc(var(--box-w) * 0.118);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-none);
+  margin-top: 5px;
+}
+
+.vLedger .tagline {
+  align-self: flex-start;
+  margin-top: 7px;
+}
+
+/* PLATE — the utility. Everything centred, the title in spaced caps, and
+   no promise at all: the box that expects you to already know what it is.
+   Its wash is centred too, and turned nearly the long way round. */
+.vPlate {
+  --wash-turn: 248deg;
+}
+
+.vPlate .type {
+  align-items: center;
+  text-align: center;
+}
+
+.vPlate .frontEyebrow {
+  font-size: calc(var(--box-w) * 0.04);
+  letter-spacing: var(--tracking-20);
+  text-transform: uppercase;
+}
+
+.vPlate .title {
+  font-size: calc(var(--box-w) * 0.1);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-06);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+/* the number goes with it — centred art for a centred cover, and big,
+   because it is the only thing on this front doing any work */
+.vPlate .bigNo {
+  font-size: calc(var(--box-w) * 0.3);
+}
+
+/* RANGED — the import. The whole block ranged right, the title in italic, a
+   hairline house name above it, and the airbrush pushed right to follow. */
+.vRanged {
+  --wash-turn: 64deg;
+  --wash-x: 9%;
+}
+
+.vRanged .type {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.vRanged .frontEyebrow {
+  font-size: calc(var(--box-w) * 0.046);
+  letter-spacing: var(--tracking-08);
+}
+
+.vRanged .title {
+  font-size: calc(var(--box-w) * 0.112);
+  font-weight: var(--weight-regular);
+  font-style: italic;
+  margin-top: 3px;
+}
+
+/* and its number ranges with it, small and high — the art answering the
+   type rather than sitting under it */
+.vRanged .composed {
+  place-items: start end;
+  padding: 12px 14px;
+}
+
+.vRanged .bigNo {
+  font-size: calc(var(--box-w) * 0.19);
 }
 
 /* ---------------- back of box ---------------- */
@@ -565,6 +830,17 @@
 
 .backNo {
   color: var(--accent-expressive-text);
+}
+
+/* the version, rehoused off the front in pass 4. Quiet — it is small print
+   on a panel of small print, not a headline. */
+.backVersion {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--type-micro-tracking);
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 7px;
 }
 
 .thesis {
@@ -998,8 +1274,21 @@
   border-width: var(--border-width-thick);
 }
 
-/* the tag is a parchment slip pinned above the tome — same thick board rule
-   as the covers. The 22px band already reserves the extra pixel. */
+/* the board a scriptorium would have used: thicker, and edged in the ink
+   itself rather than a mix of it — the same thick-board rule the covers and
+   the tag chip already follow */
+:global([data-skin='medieval']) .row {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--content) 14%, var(--surface)) 0 4px,
+    var(--content) 4px 6px,
+    color-mix(in srgb, var(--content) 32%, var(--surface)) 6px 22px,
+    transparent 22px
+  );
+}
+
+/* the tag is a parchment slip pinned beneath the tome — same thick board
+   rule as the covers. The 22px band already reserves the extra pixel. */
 :global([data-skin='medieval']) .tag {
   border-width: var(--border-width-thick);
   border-color: var(--content);
@@ -1026,9 +1315,16 @@
   background: var(--accent);
 }
 
-/* the meta strip clears the wrap — 5px of binding + the usual 10px */
-:global([data-skin='medieval']) .frontMeta {
-  padding-left: 15px;
+/* the printing clears the wrapped binding — 5px of board + the usual 12px */
+:global([data-skin='medieval']) .type,
+:global([data-skin='medieval']) .mark {
+  left: 17px;
+}
+
+/* rubricated, the way a scriptorium opened a work: the eyebrow is the
+   house, and the house gets the red */
+:global([data-skin='medieval']) .frontEyebrow {
+  color: var(--accent);
 }
 
 /* vellum is not shrink-wrapped: uncut pages, not plastic */
@@ -1040,7 +1336,7 @@
   );
 }
 
-:global([data-skin='medieval']) .version {
+:global([data-skin='medieval']) .backVersion {
   color: var(--accent-expressive-text);
 }
 
@@ -1051,20 +1347,35 @@
    survives the smallest screen we build for. */
 
 @media (max-width: 420px) {
-  .head {
-    padding: 14px 14px 12px;
-  }
-
   .row {
     padding: 14px;
     gap: var(--space-3);
     scroll-padding-left: 14px;
+    /* the plank rides up with the smaller gutter: 14 padding + 22 tag +
+       22 gap = 58, the same derivation as the desktop's 64 */
+    background-size: 100% 58px;
   }
 
   .plinth {
     --box-w: 208px;
     --box-h: 277px; /* 3:4, rounded */
     --box-d: 34px;
+  }
+
+  /* only the margins move. Every type size on the cover is a multiple of
+     --box-w, so the lettering has already shrunk with the board — that is
+     the point of deriving it from the artwork instead of the UI scale. */
+  .type {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .mark {
+    top: 9px;
+    left: 10px;
+    width: 22px;
+    height: 22px;
   }
 
   .foot {
