@@ -1,22 +1,36 @@
 import dynamic from 'next/dynamic'
 import type { ComponentType } from 'react'
 
-/* The four box-art treatments on the shelf, named for what the type does
-   rather than for the case that happens to wear it — so a fifth case can
-   pick one up without renaming anything. Rendered by src/programs/shelf. */
+/* The four box-art LAYOUTS on the shelf, named for the composition rather
+   than for the case that happens to wear it — so a fifth case can pick one
+   up without renaming anything. Rendered by src/programs/shelf.
+
+   Passes 4–5 varied only the LETTERING over one composition (a feathered
+   picture in the upper two thirds, type on the bottom-left), and Jake's
+   verdict on that set was that it hadn't worked: "they still feel kind of
+   the same because they're using the same soft blur… I want a more rigid,
+   structured format for where the art content will go." So each of the three
+   that are not his own comp now borrows a real box off his reference board,
+   and what they borrow is the STRUCTURE. */
 export type CoverVariant =
-  /** Jake's Figma: small sentence-case eyebrow, big title, italic tagline
-      signed off to the right. The reference — family-hub keeps it. */
+  /** THE SOFT COMP — Jake's Figma, and reference 1 on his own board: an
+      organic feathered picture, an airbrushed wash over it, small
+      sentence-case eyebrow, big title, italic tagline signed off to the
+      right. The reference; family-hub keeps it, and nothing may drift. */
   | 'figma'
-  /** the finance-software look: tracked-out uppercase eyebrow, heavy title
-      set tight and hard left, tagline squared up under it. */
-  | 'ledger'
-  /** the utility look: everything centred, title in spaced caps, no
-      promises — the box that expects you to already know what it is. */
-  | 'plate'
-  /** the imported look: the whole block ranged right, title in italic, a
-      hairline eyebrow above it. */
-  | 'ranged'
+  /** THE CARTRIDGE (Atari 2600 / E.T., 1982): brand zone across the top, a
+      band of printed rainbow rules, then the art hard-edged and full width,
+      hanging off the bottom edge. No feather, no wash — the plate's own
+      frame is the design. */
+  | 'stripe'
+  /** THE APPLICATION (Adobe Photoshop 5.5, 1999): light ground, brand block
+      hard into the top-left, a centred SQUARE art plate with a printed edge,
+      and a solid category bar at the foot. */
+  | 'catalog'
+  /** THE GAME (Starflight, Electronic Arts): black ground, display title in
+      spaced caps across the top, the art in a framed vertical window, and
+      the publisher signed at the foot. */
+  | 'nocturne'
 
 export type CaseDef = {
   slug: string
@@ -44,16 +58,18 @@ export type CaseDef = {
     /** the line under the title on the front of the box — what the software
         promises, in six words. Jake's own from the Figma template. */
     tagline?: string
-    /** WHICH TYPE TREATMENT THIS COVER GETS.
+    /** WHICH BOX-ART LAYOUT THIS COVER GETS.
 
         A shelf of real 1992 software is not a product family — it is four
         publishers who never spoke to each other, and the covers have to
-        disagree the way those did: weight, size, alignment, case and italic
-        all move. What does NOT move is the face (Instrument Sans on every
-        classic cover) or the colour (tokens, always), which is what keeps a
-        set of arguments looking like one shelf.
+        disagree the way those did: where the picture sits, what contains it,
+        what the ground is, and only then the lettering. What does NOT move
+        is the face (Instrument Sans on every classic cover) or the colour
+        (tokens, always — a cover may choose the INVERSE ground, never a
+        colour of its own), which is what keeps a set of arguments looking
+        like one shelf.
 
-        Absent → `figma`, the treatment Jake drew. */
+        Absent → `figma`, the composition Jake drew. */
     coverVariant?: CoverVariant
     /** cover motion: a YouTube id, played silent and chromeless behind the
         front face's treatment — the 1992 box with a moving cover it was
@@ -95,7 +111,7 @@ export const CASES: CaseDef[] = [
        product film rolling silently over it */
     box: {
       video: 'Nxl0uCGZNCw',
-      coverVariant: 'ledger',
+      coverVariant: 'stripe',
       tagline: 'know why, not just what.',
       thesis:
         'A kid told me the numbers meant nothing. So I built the understanding — in code.',
@@ -152,7 +168,7 @@ export const CASES: CaseDef[] = [
     status: 'soon',
     progress: { pct: 30, phase: 'Artifacts gathered · hunting the through-line' },
     /* no art, no film, no promises yet — but it still gets a printer */
-    box: { coverVariant: 'plate' },
+    box: { coverVariant: 'catalog' },
   },
   {
     slug: 'interview-pipeline',
@@ -162,7 +178,7 @@ export const CASES: CaseDef[] = [
     year: '2026',
     status: 'soon',
     progress: { pct: 15, phase: 'Outline only — the self-referential one' },
-    box: { coverVariant: 'ranged' },
+    box: { coverVariant: 'nocturne' },
   },
 ]
 

@@ -403,7 +403,33 @@
    (--surface, #e7e1d2, is more than twice as far, and greyer). The delta is
    ~6/0/8 per channel, invisible next to the photography and worth far more
    than a hardcoded hex that could never re-skin. Every skin gets its own
-   paper for free: medieval's is parchment, dark's is near-black board. */
+   paper for free: medieval's is parchment, dark's is near-black board.
+
+   PASS 6: ONE TEMPLATE BECAME FOUR LAYOUTS. Passes 4–5 printed that comp on
+   every box and varied only the LETTERING, and Jake's verdict on the set was
+   that it hadn't worked — "they still feel kind of the same because they're
+   using the same soft blur… I want a more rigid, structured format for where
+   the art content will go. A clean container, less feathered edges." So the
+   covers now disagree about STRUCTURE, each borrowing a real packaging
+   language off his reference board:
+
+     .vFigma     Jake's own comp, unchanged        → family-hub
+     .vStripe    Atari / E.T. (1982): brand zone, a multicolour stripe band,
+                 hard-edged full-width art below   → greenlight-invest
+     .vCatalog   Photoshop 5.5 (1999): brand block top-left, a centred square
+                 art plate, solid category bar     → tooling
+     .vNocturne  Starflight (EA): black ground, display title across the top,
+                 a framed vertical art plate, publisher line at the foot
+                                                   → interview-pipeline
+
+   ⚠️ EVERY DIFFERENCE BETWEEN THE FOUR IS A CUSTOM PROPERTY DECLARED HERE.
+   Not one variant re-states a geometry, a ground or an ink — it rewrites the
+   parameter and the shared rules below do the drawing. That is what buys the
+   two things this section has to have: a fifth cover is a dozen lines, and
+   MEDIEVAL CAN PUT IT ALL BACK. A scriptorium does not print Atari stripes,
+   so the medieval block at the foot of this file resets these properties to
+   the figma composition in a single rule and the tomes come out exactly as
+   they were. Add a new lever here, add it to that reset. */
 
 .frontFace {
   display: block;
@@ -411,8 +437,50 @@
   margin: 0;
   text-align: left;
   font: inherit;
-  color: var(--content);
   cursor: pointer;
+
+  /* --- ground and ink. Tokens, always: a variant may choose the INVERSE
+         ground, never a colour of its own. --- */
+  --cover-ground: var(--surface-raised);
+  --cover-ink: var(--content);
+  --cover-ink-quiet: var(--content-muted);
+  /* hard edges — plate borders and keylines. Chrome-like, so: a token. */
+  --cover-rule: var(--content);
+  /* the printing margin. One number, because the narrow breakpoint moves it
+     and everything that stands on the paper has to move with it. */
+  --cover-pad: 12px;
+
+  /* --- the art plate. `top`+`height` OR `bottom`+`height`: a variant that
+         wants to hang the picture off the foot of the box sets --plate-top
+         to auto and --plate-bottom to 0. --- */
+  --plate-top: 10%;
+  --plate-bottom: auto;
+  --plate-x: 0px;
+  --plate-h: calc(var(--box-w) * 9 / 16 * 1.2);
+  --plate-frame: 0px;
+  /* THE FEATHER, declared once and inherited by whoever still wants it. The
+     arithmetic behind these numbers is in the `.plate` note below; it is the
+     figma comp's blob and no other cover uses it. */
+  --cover-blob:
+    radial-gradient(45% 46% at 46% 47%, #000 0 62%, rgba(0, 0, 0, 0.5) 82%, transparent 92%),
+    radial-gradient(42% 44% at 58% 55%, #000 0 62%, rgba(0, 0, 0, 0.5) 82%, transparent 92%);
+  --plate-mask: var(--cover-blob);
+
+  /* --- the type block --- */
+  --type-top: auto;
+  --type-bottom: var(--cover-pad);
+  --type-justify: flex-end;
+  --type-align: flex-start;
+  --type-text: left;
+  --eyebrow-display: block;
+
+  /* --- the furniture: which of the optional layers show --- */
+  --wash-display: block;
+  --band-h: 13px;
+  --stamp-top: 66%;
+
+  background: var(--cover-ground);
+  color: var(--cover-ink);
 }
 
 .frontFace:focus-visible {
@@ -484,26 +552,35 @@
    survive — and the width it costs (24.6px a side, cropped by the plate's
    own overflow) comes out of exactly the band the mask was fading to
    nothing anyway. Net: the readable core grows from 89px tall to 106px and
-   loses no legible width. */
+   loses no legible width.
+
+   ⚠️ AND IT IS ONE COVER'S TREATMENT NOW, NOT THE SYSTEM'S. Pass 6 takes the
+   feather off the other three: Jake's ruling is that a set of covers which
+   all melt into their own paper is a set that reads the same from across the
+   room. `--plate-mask: none` on those, and the plate's own BORDER does the
+   work instead — the clean hard container every box on the reference board
+   has. The blob survives, unchanged, on the one cover it was drawn for. */
 .plate {
   position: absolute;
-  /* 10% of the face leaves paper above the picture — which is where the
-     publisher's mark stands, exactly as it does in the Figma */
-  top: 10%;
-  left: 0;
-  right: 0;
-  --plate-h: calc(var(--box-w) * 9 / 16 * 1.2);
+  /* Every one of these is a parameter now — see the block on `.frontFace`.
+     The figma comp's defaults are the ones spelled out there: 10% of the
+     face leaves paper above the picture, which is where the publisher's mark
+     stands, exactly as it does in the Figma. */
+  top: var(--plate-top);
+  bottom: var(--plate-bottom);
+  left: var(--plate-x);
+  right: var(--plate-x);
   height: var(--plate-h);
   overflow: hidden;
   will-change: transform;
-  -webkit-mask-image:
-    radial-gradient(45% 46% at 46% 47%, #000 0 62%, rgba(0, 0, 0, 0.5) 82%, transparent 92%),
-    radial-gradient(42% 44% at 58% 55%, #000 0 62%, rgba(0, 0, 0, 0.5) 82%, transparent 92%);
-  mask-image:
-    radial-gradient(45% 46% at 46% 47%, #000 0 62%, rgba(0, 0, 0, 0.5) 82%, transparent 92%),
-    radial-gradient(42% 44% at 58% 55%, #000 0 62%, rgba(0, 0, 0, 0.5) 82%, transparent 92%);
+  /* the hard container: 0 on the figma comp, where the feather IS the edge —
+     a hairline of the skin's own ink on the three structured covers */
+  border: var(--plate-frame) solid var(--cover-rule);
+  -webkit-mask-image: var(--plate-mask);
+  mask-image: var(--plate-mask);
   /* UNION, not intersection — see the note above. `add` is the standard
-     spelling, `source-over` the WebKit one. */
+     spelling, `source-over` the WebKit one. Both are inert once the mask
+     resolves to `none`. */
   -webkit-mask-composite: source-over;
   mask-composite: add;
 }
@@ -522,17 +599,31 @@
    overscan this replaces cost 14.6%, which is what made the picture
    unreadable.
 
-   THE TRADE JAKE TOOK KNOWINGLY: that overscan was also burying YouTube's
-   title overlay and centre play button, which appear whenever autoplay is
-   refused (data saver, iOS Low Power) and can never be clicked away here
-   (pointer-events: none). At 1.02 they would show. The real fix is the
-   YouTube IFrame API, still deliberately deferred — legibility of the film
-   beats hiding a failure mode most readers never hit.
+   PASS 6 CLOSED THE TRADE PASS 4 TOOK KNOWINGLY. That 1.4× overscan was
+   also burying YouTube's title overlay and centre play button, which appear
+   whenever autoplay is refused (data saver, iOS Low Power) and can never be
+   clicked away here (pointer-events: none). At 1.02 they would show — and
+   Jake's ruling is that the player chrome "can't be seen, it's the signature
+   cover". So the embed is now GATED ON PLAYING: it starts at opacity 0 with
+   the composed cover showing through, and the IFrame API fades it in only
+   once the film is actually rolling (CoverFilm.tsx). If PLAYING never
+   arrives — refused autoplay, blocked script, no API at all — the opacity
+   never changes and the reader simply sees the printed cover.
+
+   Opacity, because opacity is free: the layer is already promoted and this
+   is a compositor property. Nothing about the plate's geometry moves.
 
    NO FILTER. Passes 1–3 duotoned it (grayscale under an accent multiply)
    so it read as "treated cover art"; Jake struck the treatment in pass 4 —
    a box cover is a photograph, and the feather is what makes it belong to
    the paper. */
+.filmWrap {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
 .coverFrame {
   position: absolute;
   top: 50%;
@@ -542,6 +633,16 @@
   transform: translate(-50%, -50%);
   border: 0;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.36s ease;
+}
+
+/* the gate. Written by CoverFilm.tsx the moment the player reports PLAYING
+   and never written back — a film that stalls mid-roll has already proved it
+   can play, and blinking the printed cover back in would be worse than the
+   pause it is covering. */
+.coverFrame[data-playing] {
+  opacity: 1;
 }
 
 /* no art yet → the plate composes itself from tokens. Same geometry and the
@@ -579,9 +680,15 @@
    collapse. Same law as `.plate`'s mask and medieval's #lunde-roughen.
 
    Sized off --box-w and centred on the plate, so it moves with the artwork
-   at any box size. Each cover variant turns and slides it differently —
-   four boxes, four airbrushes, one shelf. */
+   at any box size.
+
+   PASS 6 MAKES IT ONE COVER'S PROPERTY. Four airbrushes at four angles was
+   still four airbrushes, and it is half of what Jake meant by "the same soft
+   blur" — a glow that belongs to the comp it was drawn for, not to the
+   shelf. `--wash-display: none` on the three structured covers; medieval
+   turns it back on for all of them along with the rest of the composition. */
 .wash {
+  display: var(--wash-display);
   position: absolute;
   left: 50%;
   top: 35%; /* the plate's own centre: 10% + (--plate-h / 2) over the face */
@@ -643,10 +750,17 @@
 /* 66%, not 38%: the plate is no longer the whole face, so the old position
    landed the stamp squarely on the big number. It now sits in the band of
    bare cream between the picture and the type — where a real shop would
-   have slapped a sticker, on the paper rather than on the artwork. */
+   have slapped a sticker, on the paper rather than on the artwork.
+
+   Which band of bare paper that IS moves with the layout, so pass 6 makes it
+   a parameter. Only the two in-development boxes ever print it, and both of
+   those changed shape: catalog keeps the sticker on paper below its square
+   plate; nocturne has no bare paper worth the name, so its sticker goes ON
+   the art window — which is where a shop would have put it on a box that
+   dark anyway. */
 .stampWrap {
   position: absolute;
-  top: 66%;
+  top: var(--stamp-top);
   left: 50%;
   transform: translate(-50%, -50%) rotate(-11deg);
 }
@@ -670,30 +784,40 @@
    with the box because it is ON the box.
    ⚠️ merge task: this wants a `boxart` type ramp in the token set.
 
-   COLOUR IS TOKENS, ALWAYS. Only the face and the geometry are local. */
+   COLOUR IS TOKENS, ALWAYS. Only the face and the geometry are local.
+
+   WHERE the block stands is a parameter as of pass 6 — bottom-left on the
+   figma comp, centred in the upper zone on stripe, hard to the top-left on
+   catalog, top-centre on nocturne. `--type-top: auto` with a bottom offset
+   is the original behaviour and the default; a variant that sets BOTH gets a
+   sized block and `--type-justify` places the lettering inside it. */
 .type {
   position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
+  left: var(--cover-pad);
+  right: var(--cover-pad);
+  top: var(--type-top);
+  bottom: var(--type-bottom);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  justify-content: var(--type-justify);
+  align-items: var(--type-align);
+  text-align: var(--type-text);
   font-family: var(--boxart-face);
 }
 
 .frontEyebrow {
+  display: var(--eyebrow-display);
   font-size: calc(var(--box-w) * 0.05); /* ~12px at 246 */
   font-weight: var(--weight-regular);
   line-height: var(--leading-tight);
-  color: var(--content-muted);
+  color: var(--cover-ink-quiet);
 }
 
 .title {
   font-size: calc(var(--box-w) * 0.125); /* ~31px at 246 */
   font-weight: var(--weight-medium);
   line-height: var(--leading-tight);
-  color: var(--content);
+  color: var(--cover-ink);
   overflow-wrap: anywhere;
   margin-top: 1px;
 }
@@ -702,25 +826,90 @@
   font-style: italic;
   font-size: calc(var(--box-w) * 0.046); /* ~11px at 246 */
   line-height: var(--leading-tight);
-  color: var(--content-muted);
+  color: var(--cover-ink-quiet);
   margin-top: 4px;
 }
 
-/* --------- four publishers, one shelf ---------
+/* --------- the structured covers' furniture ---------
+   Three optional layers, each rendered only by the variant that wants it
+   (ShelfBox.tsx's STRUCTURE table) — which is what makes the four covers
+   distinguishable in the DOM as well as by eye.
+
+   ⚠️ THE STRIPE BAND'S COLOURS ARE ART, NOT CHROME — the same ruling as the
+   airbrush's four hexes above. This is a rainbow of ink printed on a piece
+   of cardboard in 1982, sampled off the Atari and Imagic boxes on Jake's
+   reference board; there is no semantic role for "the third stripe" and
+   there never will be. DO NOT TOKENISE THEM. Everything that dresses the
+   INTERFACE — ground, ink, rules, borders, the stamp — stays tokens, as it
+   always was, and the band is deliberately the only place on this cover
+   where a literal appears.
+
+   It is decorative and aria-hidden, so it carries no contrast duty of its
+   own; nothing is ever printed on it. */
+.band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* it sits flush on the top edge of the picture, which is what makes it
+     read as the rule between the type and the art rather than a stripe
+     floating in the paper. The plate is bottom-anchored on this cover, so
+     its height is also the band's offset. */
+  bottom: var(--plate-h);
+  height: var(--band-h);
+  background: linear-gradient(
+    to right,
+    #cf2a27 0 20%,
+    #e8721c 20% 40%,
+    #edc12a 40% 60%,
+    #2f8f5b 60% 80%,
+    #2b4c9b 80% 100%
+  );
+  pointer-events: none;
+}
+
+/* the keyline around a framed picture — nocturne's, off the Starflight
+   comp, where the art sits in a printed window rather than in the paper.
+   Derived from the plate's own parameters so the two can never drift: 5px
+   outside it on every side. */
+.frame {
+  position: absolute;
+  top: calc(var(--plate-top) - 5px);
+  left: calc(var(--plate-x) - 5px);
+  right: calc(var(--plate-x) - 5px);
+  height: calc(var(--plate-h) + 10px);
+  border: var(--border-width-default) solid var(--cover-rule);
+  pointer-events: none;
+}
+
+/* the line at the foot of the box: a category bar on catalog, a publisher
+   signature on nocturne. Same node, two jobs — see ShelfBox.tsx for which
+   string each one prints. */
+.footline {
+  position: absolute;
+  font-family: var(--boxart-face);
+  line-height: var(--leading-none);
+}
+
+/* --------- four publishers, four LAYOUTS ---------
    A rack of 1992 software is not a product family. Four houses who never
-   spoke to each other printed these, and the covers disagree the way those
-   did: weight, size, alignment, case and italics all move between boxes.
+   spoke to each other printed these, and until pass 6 they disagreed only
+   about lettering — weight, size, alignment, case, italics. Jake's verdict
+   was that it wasn't enough: the covers all shared one composition and one
+   soft feather, so the set read as four states of a template. Now they
+   disagree about the composition itself, each borrowing a real box off the
+   reference board.
 
-   What does NOT move is the face — every classic cover is Instrument Sans —
-   or the colour, which is tokens on every one of them. That is the whole
-   trick of making four arguments read as one shelf rather than four
-   unrelated screenshots. `figma` is the default and the reference: it is
-   the treatment Jake actually drew, so it is the one nothing may drift
-   away from. */
+   What still does NOT move is the face — every classic cover is Instrument
+   Sans — or the colour, which is tokens on every one of them (a variant may
+   pick the INVERSE ground; it may not pick a colour). That is what keeps
+   four arguments reading as one shelf rather than four screenshots.
 
-/* FIGMA — the reference. Small sentence-case eyebrow, big title, italic
-   promise signed off to the right. Family Hub wears the drawing, and its
-   airbrush sits as Jake drew it: unturned. */
+   `figma` is the reference and it is untouched: it is the treatment Jake
+   actually drew, and reference 1 on his own board. */
+
+/* FIGMA — the soft comp. Feathered blob, airbrush, type standing on the
+   bottom-left of the cream, the promise signed off to the right. Family Hub
+   wears the drawing, and its airbrush sits as Jake drew it: unturned. */
 .vFigma {
   --wash-turn: 0deg;
 }
@@ -729,103 +918,160 @@
   align-self: flex-end;
 }
 
-/* LEDGER — finance software. Tracked-out uppercase house name, the title
-   heavy and set tight, the promise squared up underneath rather than
-   signed. Nothing here is allowed to look playful — including the
-   airbrush, turned so its cold end leads. */
-.vLedger {
-  --wash-turn: 132deg;
-  --wash-x: -7%;
+/* STRIPE — the cartridge (Atari 2600 / E.T., 1982). The brand zone owns the
+   top of the box, a band of printed rainbow rules cuts across it, and the
+   art hangs off the bottom edge in a hard-edged full-width plate. No mask,
+   no airbrush: the plate's frame IS the design, which is exactly the note
+   Jake gave — "a clean container, less feathered edges".
+
+   The picture is a TRUE 16:9 at full face width, bottom-anchored, so the
+   film loses nothing to a crop and the plate needs no extra height to pay
+   for a feather (that 1.2× is the blob's tax, and this cover doesn't pay
+   it). The type block takes everything above the band and centres itself in
+   it — a fixed offset would have left a pocket of dead paper. */
+.vStripe {
+  --plate-top: auto;
+  --plate-bottom: 0px;
+  --plate-h: calc(var(--box-w) * 9 / 16);
+  --plate-frame: var(--border-width-default);
+  --plate-mask: none;
+  --wash-display: none;
+  --type-top: 0px;
+  --type-bottom: calc(var(--plate-h) + var(--band-h) + var(--cover-pad));
+  --type-justify: center;
+  --stamp-top: 26%;
 }
 
-.vLedger .frontEyebrow {
+.vStripe .frontEyebrow {
   font-size: calc(var(--box-w) * 0.042);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-16);
   text-transform: uppercase;
 }
 
-.vLedger .title {
-  font-size: calc(var(--box-w) * 0.118);
+/* as large as the zone will carry, which is the whole point of a cartridge
+   box: the wordmark is the artwork above the picture */
+.vStripe .title {
+  font-size: calc(var(--box-w) * 0.14);
   font-weight: var(--weight-bold);
-  line-height: var(--leading-none);
-  margin-top: 5px;
-}
-
-.vLedger .tagline {
-  align-self: flex-start;
-  margin-top: 7px;
-}
-
-/* PLATE — the utility. Everything centred, the title in spaced caps, and
-   no promise at all: the box that expects you to already know what it is.
-   Its wash is centred too, and turned nearly the long way round. */
-.vPlate {
-  --wash-turn: 248deg;
-}
-
-.vPlate .type {
-  align-items: center;
-  text-align: center;
-}
-
-.vPlate .frontEyebrow {
-  font-size: calc(var(--box-w) * 0.04);
-  letter-spacing: var(--tracking-20);
-  text-transform: uppercase;
-}
-
-.vPlate .title {
-  font-size: calc(var(--box-w) * 0.1);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-06);
-  text-transform: uppercase;
+  line-height: var(--leading-tight);
   margin-top: 6px;
 }
 
-/* the number goes with it — centred art for a centred cover, and big,
-   because it is the only thing on this front doing any work */
-.vPlate .bigNo {
+.vStripe .tagline {
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+/* CATALOG — the application box (Photoshop 5.5, 1999). A light ground with
+   the brand block hard into the top-left corner, the art in a centred SQUARE
+   plate with a printed edge, and a solid category bar at the foot. The
+   square is the tell: every other cover on this shelf is landscape or
+   portrait, and a 1:1 window reads as "this is a tool" before a word of it
+   is read. Width and height both derive from --box-w, so it stays square at
+   the narrow breakpoint without a second rule. */
+.vCatalog {
+  --plate-top: 26%;
+  --plate-x: calc(var(--box-w) * 0.19);
+  --plate-h: calc(var(--box-w) * 0.62);
+  --plate-frame: var(--border-width-default);
+  --plate-mask: none;
+  --wash-display: none;
+  --type-top: var(--cover-pad);
+  --type-bottom: auto;
+  /* the paper between the plate and the bar — the only bare ground on this
+     cover, so that is where the shop sticker lands. 82% clears the plate's
+     foot at 72% and the bar's head at 91%: a rotated stamp is 40px tall and
+     there is exactly one band on this cover that can hold it. */
+  --stamp-top: 82%;
+}
+
+.vCatalog .frontEyebrow {
+  font-size: calc(var(--box-w) * 0.045);
+  letter-spacing: var(--tracking-02);
+}
+
+.vCatalog .title {
+  font-size: calc(var(--box-w) * 0.125);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-02);
+  margin-top: 2px;
+}
+
+/* THE CATEGORY BAR. ⚠️ Two more art literals, and the same ruling as the
+   stripe band: this is the orange block Adobe printed "graphic design" into,
+   not a UI accent, and it may not become a token. It carries TYPE, so unlike
+   the band it has a contrast duty — #1a120a on #e07b1f measures 6.2:1,
+   which clears AA for the 10px it is set at. The dark ink is the reason the
+   orange could stay orange: white on this ground is 3.0:1 and would have
+   forced a muddier hex. */
+.vCatalog .footline {
+  left: var(--cover-pad);
+  bottom: var(--cover-pad);
+  padding: 4px 8px;
+  background: #e07b1f;
+  color: #1a120a;
+  font-size: calc(var(--box-w) * 0.04);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-16);
+  text-transform: uppercase;
+}
+
+/* the number is the only thing in this window, so it is printed to fill it */
+.vCatalog .bigNo {
   font-size: calc(var(--box-w) * 0.3);
 }
 
-/* RANGED — the import. The whole block ranged right, the title in italic, a
-   hairline house name above it, and the airbrush pushed right to follow. */
-.vRanged {
-  --wash-turn: 64deg;
-  --wash-x: 9%;
+/* NOCTURNE — the game box (Starflight, Electronic Arts). Black ground,
+   display title across the top in spaced caps, the art in a framed VERTICAL
+   window, and the publisher signed at the foot. It is the one cover that
+   inverts, and it inverts by token: `--surface-inverse` / `--content-inverse`
+   are the same pair the launch overlay's licence phase uses, so the dark
+   cover and the dark loading frame are the same idea printed twice.
+
+   AA: the quiet ink is the licence phase's own mix — 72% of the inverse ink
+   on the inverse ground, measured there at 7.6:1 in classic light and higher
+   in dark and medieval. The title takes the full inverse ink and clears by a
+   wider margin than that. */
+.vNocturne {
+  --cover-ground: var(--surface-inverse);
+  --cover-ink: var(--content-inverse);
+  --cover-ink-quiet: color-mix(in srgb, var(--content-inverse) 72%, var(--surface-inverse));
+  --cover-rule: color-mix(in srgb, var(--content-inverse) 60%, var(--surface-inverse));
+  --plate-top: 26%;
+  --plate-x: calc(var(--box-w) * 0.13);
+  --plate-h: calc(var(--box-w) * 0.8);
+  --plate-frame: var(--border-width-default);
+  --plate-mask: none;
+  --wash-display: none;
+  --type-top: 14px;
+  --type-bottom: auto;
+  --type-align: center;
+  --type-text: center;
+  /* the house name is printed at the FOOT on this one, the way EA signed a
+     box — so the eyebrow's usual slot above the title goes unused */
+  --eyebrow-display: none;
+  --stamp-top: 70%;
 }
 
-.vRanged .type {
-  align-items: flex-end;
-  text-align: right;
+.vNocturne .title {
+  font-size: calc(var(--box-w) * 0.115);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-06);
+  text-transform: uppercase;
+  line-height: var(--leading-tight);
 }
 
-.vRanged .frontEyebrow {
-  font-size: calc(var(--box-w) * 0.046);
-  letter-spacing: var(--tracking-08);
-}
-
-.vRanged .title {
-  font-size: calc(var(--box-w) * 0.112);
-  font-weight: var(--weight-regular);
-  font-style: italic;
-  margin-top: 3px;
-}
-
-/* and its number ranges right with the type. NOT into the corner, which is
-   where this first put it and where the mask promptly ate it: the plate's
-   corners are dead alpha by design, so anything that has to be SEEN has to
-   sit inside the opaque core (roughly 18%–84% across, 19%–82% down). The
-   22% right inset lands the number's own right edge at 78%, just inside
-   it — the same reasoning that governs where the mask's ellipses stop. */
-.vRanged .composed {
-  place-items: center end;
-  padding-right: 22%;
-}
-
-.vRanged .bigNo {
-  font-size: calc(var(--box-w) * 0.19);
+.vNocturne .footline {
+  left: 0;
+  right: 0;
+  bottom: var(--cover-pad);
+  text-align: center;
+  font-size: calc(var(--box-w) * 0.04);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-20);
+  text-transform: uppercase;
+  color: var(--cover-ink-quiet);
 }
 
 /* ---------------- back of box ---------------- */
@@ -1377,6 +1623,60 @@
   background: var(--accent);
 }
 
+/* ⚠️ A SCRIPTORIUM DOES NOT PRINT ATARI STRIPES.
+   Pass 6 gave the classic covers four different COMPOSITIONS — a rainbow
+   band, a square plate, an inverted ground — off a reference board of 1980s
+   and 1990s retail packaging. None of that is a thing a monastery could have
+   made, and the tomes were never wearing it: this one rule puts every cover
+   parameter back to the figma composition, which is the layout medieval has
+   printed since pass 4 and the only one it should ever print.
+
+   It resets the PARAMETERS, not the lettering. The four type treatments stay
+   — those predate pass 6 and the tomes have always had them, four scribes
+   with four hands rather than four publishers with four art departments.
+
+   ⚠️ Adding a cover parameter to `.frontFace` means adding it here too, or a
+   variant leaks into the scriptorium. */
+:global([data-skin='medieval']) .frontFace {
+  --cover-ground: var(--surface-raised);
+  --cover-ink: var(--content);
+  --cover-ink-quiet: var(--content-muted);
+  --cover-rule: var(--content);
+  --plate-top: 10%;
+  --plate-bottom: auto;
+  --plate-x: 0px;
+  --plate-h: calc(var(--box-w) * 9 / 16 * 1.2);
+  --plate-frame: 0px;
+  --plate-mask: var(--cover-blob);
+  --wash-display: block;
+  --type-top: auto;
+  --type-bottom: var(--cover-pad);
+  --type-justify: flex-end;
+  --eyebrow-display: block;
+  --stamp-top: 66%;
+  /* --type-align / --type-text are deliberately NOT reset: which way a block
+     ranges is the scribe's hand, not the publisher's layout, and the tomes
+     have had four of those since pass 4. */
+}
+
+/* The one piece of LETTERING the scriptorium does overrule. A textura set in
+   spaced capitals is a wall rather than a title, and at two lines of it the
+   tome's type block grew up into the shop sticker — measured, the two
+   overlapped. Sentence case is both more legible in a blackletter and short
+   enough to stand clear of it. */
+:global([data-skin='medieval']) .vNocturne .title {
+  text-transform: none;
+  letter-spacing: var(--tracking-02);
+}
+
+/* the three structured layers have no parchment equivalent at all, so they
+   are not reset — they are struck */
+:global([data-skin='medieval']) .band,
+:global([data-skin='medieval']) .frame,
+:global([data-skin='medieval']) .footline {
+  display: none;
+}
+
 /* the printing clears the wrapped binding — 5px of board + the usual 12px */
 :global([data-skin='medieval']) .type,
 :global([data-skin='medieval']) .mark {
@@ -1424,13 +1724,14 @@
     --box-d: 34px;
   }
 
-  /* only the margins move. Every type size on the cover is a multiple of
-     --box-w, so the lettering has already shrunk with the board — that is
-     the point of deriving it from the artwork instead of the UI scale. */
-  .type {
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
+  /* only the margins move, and they move ONCE: --cover-pad is the printing
+     margin every layer on the cover stands on, so the type block, the
+     category bar and the stripe cover's plate clearance all come in together.
+     Every type size is a multiple of --box-w, so the lettering has already
+     shrunk with the board — that is the point of deriving it from the
+     artwork instead of the UI scale. */
+  .frontFace {
+    --cover-pad: 10px;
   }
 
   .mark {

@@ -7,9 +7,10 @@ import { CopyText as Copy } from '@/content/CopyText'
 import { t } from '@/content/copy'
 import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
-import type { CaseDef } from '@/programs/projects/cases'
+import type { CaseDef, CoverVariant } from '@/programs/projects/cases'
 import { useSettings } from '@/store/settings'
 import { Box3D } from './Box3D'
+import { CoverFilm } from './CoverFilm'
 import { InstallBar } from './InstallBar'
 import styles from './shelf.module.css'
 
@@ -26,6 +27,15 @@ import styles from './shelf.module.css'
    back is read at arm's length, and three lines you can read beat six you
    squint at. The one-line rule is structural (`nowrap` in the CSS, copy
    authored to fit in cases.ts), never a truncation.
+
+   PASS 6 IS THE FRONTS. One composition in four moods was still one
+   composition — Jake's read of the set was "they still feel kind of the same
+   because they're using the same soft blur" — so three of the four covers
+   now borrow their STRUCTURE from a real box off his reference board (COVER,
+   below) and only family-hub keeps the comp he drew. The cover film came with
+   it: it may not be SEEN until it is genuinely playing (CoverFilm.tsx),
+   because the one thing worse than a still cover is YouTube's play button
+   printed on the artwork.
 
    THE FRONT IS JAKE'S BOX-ART TEMPLATE (pass 4), built from his Figma: a
    warm cream ground, product photography filling the upper two thirds and
@@ -63,15 +73,33 @@ import styles from './shelf.module.css'
 /** the year printed as a version number: 2024–25 → 2024.25 */
 const version = (year: string) => year.replace(/[–—-]/g, '.')
 
-/* Cover treatment → class. Four publishers, one shelf: the arrangement of
-   the type differs per box the way it did on a real 1992 endcap, while the
-   face (Instrument Sans) and the colour (tokens) hold the set together.
-   See `CoverVariant` in cases.ts for what each one is. */
-const VARIANT: Record<NonNullable<CaseDef['box']>['coverVariant'] & string, string> = {
-  figma: styles.vFigma,
-  ledger: styles.vLedger,
-  plate: styles.vPlate,
-  ranged: styles.vRanged,
+/* COVER LAYOUT → CLASS, AND THE FURNITURE THAT COMES WITH IT.
+
+   Four publishers, one shelf. Until pass 6 the four covers shared a single
+   composition and disagreed only about lettering, which Jake read straight
+   off the shelf as one template in four moods — "they still feel kind of the
+   same because they're using the same soft blur". So each layout now borrows
+   a real box off his reference board, and the parts that are STRUCTURAL
+   rather than typographic are rendered here rather than hidden in CSS: a
+   band exists on the cartridge cover and nowhere else, a keyline frame on
+   the game cover and nowhere else. The rest of the composition — where the
+   picture sits, what contains it, which ground it is printed on — is a set
+   of custom properties in shelf.module.css.
+
+   `foot` is the line printed at the bottom of the two covers that have one,
+   and the two want different words: the application box prints a CATEGORY
+   there (Photoshop's orange "graphic design" bar; ours takes the years, the
+   only category a case study honestly has), the game box prints its
+   PUBLISHER (Starflight's "ELECTRONIC ARTS"; ours takes the org, which is
+   why that cover drops its eyebrow — the house name is not printed twice). */
+const COVER: Record<
+  CoverVariant,
+  { className: string; band?: true; frame?: true; foot?: 'org' | 'year' }
+> = {
+  figma: { className: styles.vFigma },
+  stripe: { className: styles.vStripe, band: true },
+  catalog: { className: styles.vCatalog, foot: 'year' },
+  nocturne: { className: styles.vNocturne, frame: true, foot: 'org' },
 }
 
 /* The tag's arrows are direction, not words: stripped from the accessible
@@ -165,6 +193,8 @@ export function ShelfBox({
        there is nothing to reveal and nothing to discover. */
   const show = revealed || flipped || !fine
 
+  const cover = COVER[box?.coverVariant ?? 'figma']
+
   return (
     <div
       className={styles.boxSlot}
@@ -194,7 +224,7 @@ export function ShelfBox({
         front={
           <motion.button
             type="button"
-            className={`${styles.face} ${styles.frontFace} ${VARIANT[box?.coverVariant ?? 'figma']}`}
+            className={`${styles.face} ${styles.frontFace} ${cover.className}`}
             // the cover is a hit target, not a second announced control:
             // the tag owns the state and the tab stop
             tabIndex={-1}
@@ -204,11 +234,13 @@ export function ShelfBox({
             animate={faceFade(false)}
             transition={{ duration: reduced ? 0.14 : 0 }}
           >
-            {/* THE PLATE — everything that counts as picture. One node, so
-                one mask feathers all of it into the cream at once: still art,
-                the composed ground, and the cover film alike. It is also the
-                only place the mask may live (grouping property, leaf of the
-                3D tree — see the note at the top of this file). */}
+            {/* THE PLATE — everything that counts as picture, in one node.
+                On the figma comp that is what lets one mask feather still
+                art, composed ground and cover film into the cream together;
+                on the three structured covers it is what lets one clean
+                rectangle contain them. It is also the only place a mask may
+                live (grouping property, leaf of the 3D tree — see the note at
+                the top of this file). */}
             <span className={styles.plate} aria-hidden="true">
               {box?.art ? (
                 <img src={box.art} alt="" width={600} height={800} draggable={false} />
@@ -219,27 +251,29 @@ export function ShelfBox({
               )}
 
               {/* The cover film: a silent, chromeless, pointer-inert embed,
-                  now UNTREATED — Jake's ruling is that a box cover is a
-                  photograph, so the duotone that used to sit over it is gone
-                  and the feather does all the blending. The composed front
-                  stays underneath as the poster frame; nothing here is ever a
-                  tab stop or a11y content. */}
-              {film && (
-                <iframe
-                  className={styles.coverFrame}
-                  src={`https://www.youtube-nocookie.com/embed/${film}?autoplay=1&mute=1&loop=1&playlist=${film}&controls=0&playsinline=1&rel=0&modestbranding=1`}
-                  title={`${c.name} — cover film`}
-                  aria-hidden="true"
-                  tabIndex={-1}
-                  allow="autoplay; encrypted-media"
-                />
-              )}
+                  and as of pass 6 one that is not allowed to be SEEN until it
+                  is actually rolling — the composed cover under it is the
+                  printed face of this box, not a poster frame waiting to be
+                  replaced. CoverFilm.tsx owns the gate. */}
+              {film && <CoverFilm id={film} title={`${c.name} — cover film`} />}
             </span>
 
+            {/* the game box's keyline: the art sits in a printed window
+                rather than in the paper. Drawn from the plate's own
+                parameters, so it can never come adrift of it. */}
+            {cover.frame && <span className={styles.frame} aria-hidden="true" />}
+
+            {/* the cartridge box's rainbow rules, sitting flush on the top
+                edge of the picture — the one place on this shelf where ink is
+                a literal rather than a token (see shelf.module.css) */}
+            {cover.band && <span className={styles.band} aria-hidden="true" />}
+
             {/* the airbrush — Jake's Figma "Ellipse 2", a conic sweep blurred
-                over the art at soft-light. Every 90s cover had one. It sits
-                AFTER the plate so it glows over the picture, and BEFORE the
-                type so the lettering stays untouched on top of it. */}
+                over the art at soft-light. Every 90s cover had one; pass 6
+                leaves it to the cover it was drawn for and switches it off on
+                the other three (CSS, so medieval can turn it back on). It
+                sits AFTER the plate so it glows over the picture, and BEFORE
+                the type so the lettering stays untouched on top of it. */}
             <span className={styles.wash} aria-hidden="true" />
 
             {/* the publisher's mark, top left. No asset, no slot: an empty
@@ -274,6 +308,16 @@ export function ShelfBox({
               <span className={styles.title}>{c.name}</span>
               {box?.tagline && <span className={styles.tagline}>{box.tagline}</span>}
             </span>
+
+            {/* the line at the foot of the two covers that have one: a
+                category bar on the application box, the publisher's
+                signature on the game box. The game box hides its eyebrow to
+                make room (CSS), so no cover ever prints its house twice. */}
+            {cover.foot && (
+              <span className={styles.footline}>
+                {cover.foot === 'org' ? c.org : c.year}
+              </span>
+            )}
           </motion.button>
         }
         back={
