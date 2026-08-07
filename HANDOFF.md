@@ -49,7 +49,7 @@
   emulation. Never `npm run build` while any dev server owns `.next`
   (`lsof :3000 :3210` first).
 
-## Latest session — SHIPPED.SW: the shelf sells what's here (s39, 2026-08-06)
+## Latest session — SHIPPED.SW: the shelf sells what's here (s39, 2026-08-06→07)
 
 **Fable planned + reviewed, NYQUIST (Opus) built, Fable landed one layout
 fix solo (20-line scope — not worth a dispatch). Deck reported. Branch
@@ -85,9 +85,41 @@ fix solo (20-line scope — not worth a dispatch). Deck reported. Branch
   (252×336 slot pre/post), flip a11y, license geometry, unlocked install
   opens `case:` window, medieval copy live. Reduced-motion + Lighthouse
   unverified by emulation (standing debt).
-- **Flags:** family-hub back panel scrolls from the start (3-col density
-  is a taste call) · `public/case/family-hub 2/` untracked dup dir —
-  Jake to delete · box art all placeholder until Jake ships assets.
+- **Pass 2 (Jake live-directed):** grid → ONE horizontal carousel (4th
+  box hangs off — "no illusion of completeness"); hand-rolled `Box3D`
+  six-face CSS cuboid (42px board, 980px camera on the row, 22deg
+  resting turn ±14 scroll sweep, contact shadows on a `.plinth` outside
+  the 3D context); INSTALL → PLAY ("installing is the printing mistake
+  again"); license phase drops the whole frame to `--surface-inverse`.
+  Recede filter flattens preserve-3d → registry `noRecede` opt-out
+  (iPod precedent). Mid-pass GitHub-Desktop branch switch KILLED the
+  agent (auto-stash); work verified intact vs stash and committed.
+- **Pass 3:** flip CTAs deleted — one small `FLIP →` tag chip above
+  each box (the accessible path: aria-expanded, Enter, focus return),
+  front face still click-flips but tabIndex −1; Apple-TV cursor-pressure
+  tilt (±7deg, push-AWAY sign verified, −6px lift + shadow swell,
+  SPRINGS.window near-critical, own `.tilt` layer between parallax and
+  flip; fine-pointer only, off under reduced motion); YouTube loop
+  covers on the two shipped boxes (nocookie, muted, inert, aria-hidden,
+  1.4 overscan crop kills the letterbox+title, duotone over top;
+  invest `Nxl0uCGZNCw`, family-hub `G-tWcCCMdGE`). 60fps measured with
+  both iframes under tilt (p95 16.8ms). Windows 720×552.
+- **3D framework ruling (HERTZ eval, verified numbers):** shelf STAYS
+  CSS 3D (iframes can't rasterize to WebGL textures; migration =
+  ~180-235KB gzip for marginal gain + a11y regression). THE DESK =
+  react-three-fiber + curated drei + Blender→GLTF→gltfjsx (~260-320KB
+  code-split); screen-zoom illusion via the HANDOFF PATTERN (baked
+  screen texture → crossfade to real DOM at matched rect; drei `<Html
+  transform>` in reserve). Precedents: Galaxy Portfolio (steal its
+  shader-precompile trick), freeCodeCamp cute-room pipeline, Bruno
+  Simon. Spline ruled out (1MB+, proprietary format, video textures
+  paywalled).
+- **Flags:** YT autoplay refusal (data-saver/iOS low-power) leaves a
+  visible un-clickable play button — proper fix = YT IFrame API dep,
+  deliberately deferred · `public/case/family-hub 2/` untracked dup —
+  Jake to delete · stale GitHub-Desktop stash@{0} = safe to drop ·
+  `useFinePointer` per-box (hoist if a 5th case lands) · box art still
+  swappable when Jake ships real assets.
 
 ## Next steps
 
