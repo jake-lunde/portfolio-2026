@@ -76,6 +76,17 @@ eval. Deck reported throughout. Jake: "very impressed."**
 - **3D ruling (HERTZ, verified):** shelf stays CSS 3D; The Desk = r3f +
   curated drei + Blender GLTF (~260-320KB code-split); screen-zoom via
   handoff pattern. Spline out (1MB+, paywalled video textures).
+- **Pass 11 (shipped `fd39611`): gate fits + distressed covers** — license
+  phase GROWS the window (windows.ts requestSize/releaseSize; exact
+  restore incl. grip sizes; viewport-clamped; <720px skipped); board
+  material now printed-and-worn (Bayer dither tile + posterised grain +
+  mottle + edge wear, AA re-audited); invest = near-black inverted
+  (92% surface-inverse mix), family-hub = white #f7f5f0 + mark.png
+  top-left + INSTRUMENT SERIF (next/font, --font-boxart-serif).
+  Flags: vCatalog eyebrow classic-dark worst-pixel 3.62 (pre-existing
+  fail on main, improved, still under 4.5) · sub-750px-tall viewports
+  still clip the sphere (cancel always reachable) · medieval shows the
+  mark as a printer's device — strike if Jake dislikes.
 - **Pass 10 (shipped `4c53f18`): films SELF-HOSTED** — Jake supplied the
   two cover films (public/case/<slug>/box-film.mp4, 1.9MB + 15.9MB);
   native <video> retired the ENTIRE YouTube apparatus (IFrame API, gate,
