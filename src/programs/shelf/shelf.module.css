@@ -92,6 +92,79 @@
   scroll-snap-align: start;
 }
 
+/* tag over box. The gap and the tag band are RESERVED height, not
+   discovered: the label swaps between two strings of different length and
+   the box lifts 6px on hover, and neither may ever move the shelf.
+   NOT positioned — the scroll loop measures `plinth.offsetLeft` against
+   `.row`, and a positioned wrapper here would silently become the
+   offsetParent and zero every measurement. */
+.boxSlot {
+  display: flex;
+  flex-direction: column;
+  /* 10, not 6: the box LIFTS 6px on hover, and the gap has to survive that
+     with air left over — at 6 the lifted board arrives exactly under the
+     tag */
+  gap: 10px;
+}
+
+/* 22px holds the 19px chip, and the 21px it becomes when medieval thickens
+   its border.
+
+   Positioned and lifted in paint order because the cuboid's TOP strip is a
+   42px-tall element rotated flat about the box's top edge: under
+   perspective its hit region reaches above the board, and on hover the
+   whole box rises into this row. The tag has to win that overlap — see
+   also `.side { pointer-events: none }`. Positioning here is safe: this is
+   a SIBLING of `.plinth`, never its offsetParent. */
+.tagRow {
+  position: relative;
+  z-index: 1;
+  height: 22px;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* THE flip control. Everything Jake struck off the box — the two full-bleed
+   CTA bars — collapses into this: one small chip hanging above the solid,
+   outside the cuboid so it never turns, tilts or lifts with it. Quieter
+   than Stamp on purpose (no rotation, no mask, muted ink): the stamp is a
+   mark on the goods, this is a handle on the shelf.
+
+   It is also the accessible path — aria-expanded/aria-controls live here,
+   Enter flips, and focus comes back here on the way out. */
+.tag {
+  font-family: var(--type-label-family);
+  font-size: var(--type-caption-size); /* 9px — smaller than any face type */
+  font-weight: var(--button-weight);
+  letter-spacing: var(--tracking-16);
+  line-height: var(--leading-none);
+  text-transform: uppercase;
+  padding: 4px 8px;
+  background: var(--surface-raised);
+  color: var(--content-muted);
+  border: var(--border-width-default) solid var(--border);
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.tag:hover {
+  background: var(--accent);
+  color: var(--surface);
+  border-color: var(--accent);
+}
+
+/* physical press — transform only */
+.tag:active {
+  transform: translateY(1px);
+}
+
+.tag:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
 /* --------- the box as a solid ---------
    --box-w / --box-d are the only numbers; Box3D.tsx derives all six faces
    from them. Height is the 3:4 face ratio spelled out rather than
@@ -121,6 +194,16 @@
   transform-style: preserve-3d;
 }
 
+/* the cursor-pressure layer: its own node between the carousel's parallax
+   (.stage) and the flip (.cuboid), because one element cannot own three
+   rotations without them overwriting each other. Transform written by
+   springs in Box3D.tsx; nothing in CSS may set it. */
+.tilt {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
 .cuboid {
   position: absolute;
   inset: 0;
@@ -131,8 +214,13 @@
    cue that separates a solid from a card, and it does more work than any
    amount of rotation. Tokenised (a mix of --content into nothing), so it
    is the skin's own ink at low strength and never an invented grey.
-   Squashed and slid by the scroll loop to follow the box's footprint. */
-.shadow {
+   Squashed and slid by the scroll loop to follow the box's footprint.
+
+   Two nodes, one shadow: the INNER span carries the footprint the scroll
+   loop computes (squash + slide), the OUTER one carries the hover swell —
+   a box 6px off the shelf throws a wider, weaker shadow. Nesting them is
+   what keeps the two writers off each other's `transform`. */
+.shadowWrap {
   position: absolute;
   left: 4%;
   right: 4%;
@@ -142,6 +230,11 @@
   bottom: -24px;
   height: 34px;
   pointer-events: none;
+}
+
+.shadow {
+  position: absolute;
+  inset: 0;
   background: radial-gradient(
     ellipse at 50% 50%,
     color-mix(in srgb, var(--content) 62%, transparent) 0%,
@@ -186,6 +279,10 @@
 .side {
   position: absolute;
   background: var(--surface-raised);
+  /* cardboard is scenery: a 42px strip swung flat about the box's top edge
+     projects a hit region well past the board, and it was eating clicks
+     meant for the flip tag above. Nothing here is ever a target. */
+  pointer-events: none;
 }
 
 .spine {
@@ -232,7 +329,8 @@
    No turning, no parallax, no sides — back to pass 1's two stacked faces
    crossfading in place. Motion drives the opacity; this flattens the
    geometry so the back face is visible at rest. */
-.flat .cuboid {
+.flat .cuboid,
+.flat .tilt {
   transform: none;
   transform-style: flat;
 }
@@ -291,6 +389,61 @@
 }
 
 [data-theme='dark'] .art::after {
+  mix-blend-mode: screen;
+}
+
+/* --------- the cover film ---------
+   A YouTube embed as cover art. The treatment is the SAME recipe as `.art`
+   — grayscale under an accent multiply (screen in dark) — because the point
+   is that it reads as a printed cover that happens to move, not as a player
+   someone stuck on a box.
+
+   The filter sits on the IFRAME, a leaf. Never on the face or any ancestor
+   of one: filter flattens the 3D context and the cuboid would collapse.
+
+   Its own compositing layer, hinted INSIDE the face: two embeds riding a 3D
+   transform that a spring rewrites every frame is exactly the case where an
+   unpromoted layer starts repainting. `will-change` rather than a
+   translateZ(0) hack because the computed value of translateZ(0) collapses
+   to a 2D identity matrix and the promotion becomes unverifiable. */
+.cover {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  will-change: transform;
+}
+
+/* COVER, for an iframe. YouTube letterboxes 16:9 into whatever box it is
+   given, so the box is made 16:9 and oversized until the FACE is the crop:
+   height = box height × 1.02, width = that × 16/9. At 246 × 328 that is
+   335 × 595 — 2.4× the face's width — centred, with the face's own
+   overflow doing the cropping. The 2% overscan eats YouTube's sub-pixel
+   letterbox seam. Derived from --box-h, so the narrow breakpoint's smaller
+   box needs no second set of numbers, and fixed at layout time, so nothing
+   shifts when the video paints. */
+.coverFrame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: calc(var(--box-h) * 1.02);
+  width: calc(var(--box-h) * 1.02 * 16 / 9);
+  transform: translate(-50%, -50%);
+  border: 0;
+  pointer-events: none;
+  filter: grayscale(1) contrast(1.1);
+}
+
+.cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+[data-theme='dark'] .cover::after {
   mix-blend-mode: screen;
 }
 
@@ -368,18 +521,6 @@
   letter-spacing: var(--type-micro-tracking);
   text-transform: uppercase;
   color: var(--accent);
-}
-
-.frontHint {
-  position: relative;
-  padding: 5px 10px;
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  font-weight: var(--button-weight);
-  letter-spacing: var(--tracking-16);
-  text-align: center;
-  background: var(--accent);
-  color: var(--surface);
 }
 
 /* ---------------- back of box ---------------- */
@@ -531,8 +672,9 @@
   margin-top: 8px;
 }
 
-/* PLAY's own register: the last thing before the bottom bar, full width,
-   nothing beside it */
+/* PLAY's own register: the last thing on the panel, full width, nothing
+   beside it and — since the flip moved to the tag above the box — nothing
+   below it either */
 .heroAction {
   padding: 9px 10px;
   border-top: var(--border-width-hairline) solid var(--border);
@@ -542,7 +684,6 @@
 
 .playBtn,
 .nudgeBtn,
-.flipBackBar,
 .cancelBtn {
   font-family: var(--type-label-family);
   font-size: var(--type-label-size); /* 11px */
@@ -571,29 +712,8 @@
   color: var(--surface);
 }
 
-/* the back's bottom bar, geometrically identical to `.frontHint` on the
-   other face — same full-bleed strip, same type, pinned to the same edge.
-   The fill is the raised ground rather than accent: it is the way back,
-   not the way in, and PLAY sits directly above it. */
-.flipBackBar {
-  display: block;
-  width: 100%;
-  padding: 5px 10px;
-  text-align: center;
-  border: 0;
-  border-top: var(--border-width-default) solid var(--content);
-  background: var(--surface-raised);
-  color: var(--content-muted);
-  cursor: pointer;
-}
-
-[data-theme='dark'] .flipBackBar {
-  border-top-color: var(--border);
-}
-
 .playBtn:hover,
 .nudgeBtn:hover:not(:disabled),
-.flipBackBar:hover,
 .cancelBtn:hover {
   background: var(--accent);
   color: var(--surface);
@@ -602,7 +722,6 @@
 /* physical press — transform only */
 .playBtn:active,
 .nudgeBtn:active:not(:disabled),
-.flipBackBar:active,
 .cancelBtn:active {
   transform: translateY(1px);
 }
@@ -612,12 +731,6 @@
 .cancelBtn:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
-}
-
-/* the bar is flush to the face's edges — an outset ring would be clipped */
-.flipBackBar:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: -2px;
 }
 
 .nudgeBtn:disabled {
@@ -845,7 +958,7 @@
 @media (prefers-reduced-motion: reduce) {
   .playBtn,
   .nudgeBtn,
-  .flipBackBar,
+  .tag,
   .cancelBtn {
     transition: none;
   }
@@ -875,6 +988,13 @@
 
 :global([data-skin='medieval']) .face {
   border-width: var(--border-width-thick);
+}
+
+/* the tag is a parchment slip pinned above the tome — same thick board rule
+   as the covers. The 22px band already reserves the extra pixel. */
+:global([data-skin='medieval']) .tag {
+  border-width: var(--border-width-thick);
+  border-color: var(--content);
 }
 
 /* The tome's spine, now on the actual SPINE — the left face of the solid,

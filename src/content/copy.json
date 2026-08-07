@@ -188,14 +188,6 @@
     "base": "SHIPPED.SW · parallel 1992",
     "medieval": "Tomes copied in this house"
   },
-  "shelf.flip": {
-    "base": "SEE BACK OF BOX",
-    "medieval": "TURN THE TOME"
-  },
-  "shelf.flipBack": {
-    "base": "FRONT OF BOX",
-    "medieval": "CLOSE THE TOME"
-  },
   "shelf.indev": {
     "base": "IN DEVELOPMENT",
     "medieval": "STILL BEING ILLUMINATED"
@@ -235,6 +227,14 @@
   "shelf.requirements": {
     "base": "SYSTEM REQUIREMENTS",
     "medieval": "REQUIREMENTS OF THE ORDER"
+  },
+  "shelf.tag.back": {
+    "base": "FLIP →",
+    "medieval": "TURN →"
+  },
+  "shelf.tag.front": {
+    "base": "← FRONT",
+    "medieval": "← CLOSE"
   },
   "shelf.versionLabel": {
     "base": "VERSION",
