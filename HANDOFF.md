@@ -40,6 +40,20 @@
   avatar-token screenshots) · gate friction — s39's install-absorbed
   license check addresses the case-studies door once merged. **Standing
   ask: push HIM to prune and polish copy.**
+- **TAILOR-RESUME skill MERGED TO MAIN** (`3c79ef3`, deploy READY):
+  JD → fit brief + tailored PDF in `ref/applications/<slug>/` (never
+  committed). `build-cv.mjs` takes `--input/--output` (defaults
+  unchanged). Heading-alignment fix landed TWICE concurrently — the
+  resume-bugs session shipped it first (`515dc7a`); this session's
+  branch reconciled on top (kept their colophon anchor). Working-copy
+  build-cv.mjs synced to main's version; PDF byte-identical.
+  First run: `apple-cloud-infra` (verdict: apply). **Evidence corpus
+  grew: `ref/accomplishments-2026-h1-raw.md`** (H1-2026 pull; §6
+  do-not-use metrics are radioactive; §9 corrections bind). RULED
+  (Jake, 08-07): Staff Product Designer is the public title (Senior
+  Design Lead = internal, off external docs); 75.8% activation stays
+  off the PDF — spoken interview metric only. Apple PDF is FINAL
+  pending submission.
 - **Voice law (s35):** all user-facing drafts in Jake's spoken cadence;
   em dashes are an AI tell. s39 shelf copy is DRAFT — Jake rewrites.
 - **Tracking:** Notion (connector live). Deck reporting works; cost read
