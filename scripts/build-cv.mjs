@@ -69,7 +69,11 @@ function section(doc, label) {
     .font('Helvetica-Bold')
     .fontSize(T.section)
     .fillColor('#000')
-    .text(label.toUpperCase(), { characterSpacing: 1.2 })
+    /* x is EXPLICIT: pdfkit continues from wherever the previous block
+       left doc.x, so an unanchored heading inherits the bullet indent
+       (SKILLS floated 14pt) or the skills label column (EDUCATION floated
+       88pt) — Jake caught it on the shipped PDF. */
+    .text(label.toUpperCase(), PAGE.margin, doc.y, { characterSpacing: 1.2 })
   const y = doc.y + 3
   doc
     .moveTo(PAGE.margin, y)
@@ -177,7 +181,7 @@ async function main() {
     .font('Helvetica-Oblique')
     .fontSize(T.colophon)
     .fillColor('#333')
-    .text(R.COLOPHON, { width: W })
+    .text(R.COLOPHON, PAGE.margin, doc.y, { width: W })
 
   /* One page is the brief. pdfkit auto-paginates, so catching it here is the
    * difference between "shipped a two-page resume" and "build failed". */
