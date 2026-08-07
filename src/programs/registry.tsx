@@ -113,17 +113,28 @@ export const PROGRAMS: ProgramDef[] = [
     // the boxes are real cuboids (preserve-3d) — the unfocused-window
     // recede is a `filter`, and filter flattens 3D. See `noRecede` above.
     noRecede: true,
-    // measured, one row deep: 720 leaves 676px of shelf after the 20px
-    // gutters — two 246px boxes, a 24px gap and ~160px of the third, cut by
-    // the right edge on purpose. 443 = 410 row + 33 of window chrome
+    // measured, one row deep: 760 leaves 676px of shelf after the 40px
+    // gutters — two 246px boxes, a 32px gap and 160px of the third, cut by
+    // the right edge on purpose. 459 = 426 row + 33 of window chrome
     // (32 titlebar + the border), measured on the live window rather than
-    // added up. The row is 18 above + 328 box + 22 gap + 22 flip tag + 20
-    // below = 410 (the last 64 of which is the painted shelf plank the
+    // added up. The row is 34 above + 328 box + 22 gap + 22 flip tag + 20
+    // below = 426 (the last 64 of which is the painted shelf plank the
     // boxes stand on). Pass 4 moved the tag BELOW the box and DELETED the
     // 54px SHIPPED.SW masthead (−56 against pass 3's 552); pass 7 struck
-    // the 40px foot under the row, so the window is now exactly the shelf
-    // and nothing else — no band above the boxes, no strip below them.
-    size: { w: 720, h: 443 },
+    // the 40px foot under the row, so the window is exactly the shelf and
+    // nothing else — no band above the boxes, no strip below them.
+    //
+    // PASS 9 GREW IT BY THE CLEARANCE, NOT BY TASTE. A hovered box pops
+    // 38px toward a 980px camera, lifts 6 and tilts ±10, and the row clips
+    // at its own padding edge — so the shipped 18/20 gutters were cutting
+    // the top corner by 5.31px and box one's left edge by 15.61px
+    // (projected over every vertex, tilt pair and scroll stop; the working
+    // is in shelf.module.css on `.row`). 34/40 clears both with 11.33 and
+    // 4.39 to spare, and the window follows: +16 tall, +40 wide. The extra
+    // width is spent entirely on the two gutters, which is why the shelf
+    // still shows two whole boxes and a cut third — 160px of it, against
+    // the 156 the 720px window showed.
+    size: { w: 760, h: 459 },
     pos: { x: 250, y: 48 },
     onDesktop: true,
     path: '/cases',

@@ -47,11 +47,13 @@
    introducing itself twice. Its 54px went to the row. */
 
 /* ---------------- the carousel ----------------
-   ONE row, scrolled sideways, never wrapped. Measured: a 720px window
-   leaves 676px of content after the 20px gutters, and 246 + 24 + 246 =
-   516 — so two boxes stand clear and 160px of the third is cut by the
+   ONE row, scrolled sideways, never wrapped. Measured: a 760px window
+   leaves 676px of content after the 40px gutters, and 246 + 32 + 246 =
+   524 — so two boxes stand clear and 160px of the third is cut by the
    right edge. That cut is the point: a shelf you can see all of is a shelf
-   with nothing else on it.
+   with nothing else on it. (Pass 9 grew the window by exactly the clearance
+   it grew the gutters by, so the composition is the same shelf: 720/20/24
+   showed 156px of box three, 760/40/32 shows 160.)
 
    PERSPECTIVE LIVES HERE, once. Every box on the row shares this vanishing
    point, which is what makes them read as objects on one shelf rather than
@@ -75,7 +77,7 @@
      in a full-bleed window on a phone the shelf was 335px of content in a
      674px row and the boxes sat under 339px of empty paper. A shelf is a
      fixed piece of furniture — one board, one row of stock — so it now takes
-     its own intrinsic height (18 + 328 + 22 + 22 + 20 = 410 here, 335 at the
+     its own intrinsic height (34 + 328 + 22 + 22 + 20 = 426 here, 361 at the
      narrow breakpoint) and any slack falls BELOW it, where a room's empty
      space belongs. `0 1 auto` rather than `0 0 auto`: a window dragged
      shorter than the shelf still shrinks it rather than pushing it out.
@@ -85,9 +87,42 @@
   min-height: 0;
   list-style: none;
   margin: 0;
-  /* bottom padding holds the contact shadows and the tag band below them;
-     `overflow` clips at the padding edge */
-  padding: 18px 20px 20px;
+  /* ---- CLEARANCE FOR THE POP (pass 9, Jake: the boxes are getting cut) ----
+     `overflow` clips at the PADDING edge, and a popped box is bigger than
+     its slot in every direction — so the padding is the clearance, and it
+     was measured rather than picked. The chain, projected exactly as the
+     browser projects it (translate3d(0,−6,38) → rotateX(±10) → rotateY(±10)
+     on the tilt layer, +d/2 to the front face, then perspective(980) about
+     the row's own centre), over all eight cuboid vertices, every tilt pair
+     and every scroll position:
+
+       edge     shipped (18/20, gap 24)        pass 9 (34/40, gap 32)
+       top      CUT by 5.31px                  clear by 11.33px
+       left     CUT by 15.61px (box 1 @ 0)     clear by  4.39px
+       right    CUT by 15.61px (box 4 @ end)   clear by  4.39px
+       neighbour  —                            19.12px between two in-frame
+                                               boxes at full pop
+
+     THE SIDES WERE THE WORST OF IT AND THE LEAST OBVIOUS. Growth is applied
+     about the row's vanishing point, so a box LEFT of centre grows leftward:
+     box one at scrollLeft 0 pushed its own left edge 15.6px past the
+     scrollport start and lost the corner. The 20px gutter never stood a
+     chance — 1px of gutter buys only ~1.07px of clearance (the projection
+     scales the offset it is moving), which is why 40 and not 26.
+
+     THE TOP IS CHEAPER AND WAS STILL SHORT. The worst corner is rotateX −10
+     with the box lifted 6: that swings the top of the board toward the
+     camera (z 87 → scale 1.098) while the lift has already raised it, and
+     18px of padding left it 5.3px outside.
+
+     BOTTOM STAYS 20. It is not a clearance number — it is the first term of
+     the plank derivation (20 + 22 tag + 22 gap = 64, the painted board's
+     height) and the popped box's lowest point lands at y 353 of 426, well
+     inside it. Moving it would move the shelf the boxes stand on.
+
+     ⚠️ The window grew to match: 760 × 459 (registry.tsx has the arithmetic).
+     Change any number here and that one is wrong. */
+  padding: 34px 40px 20px;
   display: flex;
   /* flex-END, not centre, and the plank below depends on it: bottom
      alignment makes the box's base a fixed distance from the row's bottom
@@ -117,20 +152,23 @@
   background-repeat: no-repeat;
   background-position: left bottom;
   background-size: 100% 64px;
-  /* 24, up from 16. The pop scales a box about the row's vanishing point,
-     so a box away from the centre of the frame grows OUTWARD as well as
-     forward: at the far edge of a 676px frame that is 338 × (1.040 − 1) ≈
-     14px of drift, plus ~7px of half-width growth from the pop and the
-     tilt together. 16px of gap could not absorb 21px of reach; 24 can. */
-  gap: var(--space-6);
+  /* 32, up from pass 7's 24 (which was up from 16). Pass 7's 24 was never
+     WRONG — measured over the whole tilt range, two boxes both fully in
+     frame still kept 12.60px of daylight between them at full pop. It was
+     just tight enough to read as crowding, which is half of what Jake
+     reported. 32 puts 19.12px between them, and the other half of the fix
+     is the padding above. */
+  gap: var(--space-8);
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
   /* snap to box STARTS, offset by the gutter: every rest position keeps a
      box hanging off the right edge. Centre-snap would sometimes land the
-     last box flush and close the shelf off. */
-  scroll-padding-left: 20px;
+     last box flush and close the shelf off. It TRACKS the gutter — a snap
+     stop that does not match the padding parks a box against the clip edge
+     with none of the clearance above. */
+  scroll-padding-left: 40px;
   /* 980px, not 1400: a close camera. At 1400 the row's own off-centre
      boxes barely foreshortened and the whole shelf read as flat artwork —
      the vanishing point has to be near enough that position in the row is
@@ -1934,15 +1972,30 @@
 
 /* ---------------- narrow ----------------
    Same shelf, same gesture — a finger drags the row instead of a wheel.
-   The box shrinks to 208px so a 360px viewport (332px of content after the
-   14px gutters) shows one whole box and a third of the next: the cut
+   The box shrinks to 208px so a 360px viewport (316px of content after the
+   22px gutters) shows one whole box and 110px of the next: the cut
    survives the smallest screen we build for. */
 
 @media (max-width: 420px) {
   .row {
-    padding: 14px;
-    gap: var(--space-3);
-    scroll-padding-left: 14px;
+    /* THE SAME CLEARANCE ARITHMETIC AT THE SMALLER BOARD (pass 9). A finger
+       cannot hover, so nothing here ever pops — but a phone can be a
+       fine-pointer machine at 420px and the breakpoint is a width, not a
+       device, so the geometry is measured at 360 anyway. Same projection,
+       208×277×34 box, 360px frame:
+
+         top    shipped 14px → CUT by 5.68px      pass 9 26px → clear 6.73px
+         sides  shipped 14px → CUT by 0.53px      pass 9 22px → clear 8.19px
+
+       The sides were nearly clean here already: the frame is narrow enough
+       that box one sits close to the vanishing point and barely drifts. The
+       top is the same failure as the desktop's, at the same size, because it
+       is the lift and the tilt rather than the drift that causes it.
+
+       Bottom stays 14 — the plank derivation, exactly as on the desktop. */
+    padding: 26px 22px 14px;
+    gap: var(--space-5);
+    scroll-padding-left: 22px;
     /* the plank rides up with the smaller gutter: 14 padding + 22 tag +
        22 gap = 58, the same derivation as the desktop's 64 */
     background-size: 100% 58px;
