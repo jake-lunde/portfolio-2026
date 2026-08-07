@@ -1,172 +1,101 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-06 (s39 SHIPPED.SW built; s38 skin-builder note →
-> archive).
+> Last rotation: 2026-08-07 (two s39s same day: COMMAND.CTR v2 note →
+> archive; SHIPPED.SW note below).
 
 ## Current state
 
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
-  stays "pending" while Chromatic runs; NOTE the apex 308s to www — curl
-  with -L or grep finds nothing). **Production = Family Hub ship (s36).**
-- **⚠️ Jake's rulings on the shared checkout: no more concurrent sessions
-  on one working tree, and check `git branch --show-current` before EVERY
-  commit** (s36/s37 race, archive). Bit again in s39: another chat's dev
-  server owned :3000 while s39 switched the checkout to its branch.
-- **SHIPPED.SW BUILT, AWAITING JAKE'S TASTE PASS** (branch
-  `feat/shipped-sw-shelf`, NOT merged): the Case Studies window is now a
-  shelf of boxed 1992 software replacing the never-finishing installer.
-  Details in the session note below. Taste checkpoints open: flip feel,
-  install pacing, back-panel density (3 cols vs 2), box-art placeholders.
-- **FAMILY HUB CASE SHIPPED 2026-08-05** (s36): 7 sections, 11 plates,
-  4 interactives, PROGRESS.VWR evolution rail, LaunchFilm. Case windows
-  1280×720 @ x24. Assets `public/case/family-hub/evo/`; masters in
-  `ref/assets-casestudies/` (never commit ref/). Jake's live sanity-walk
-  still pending.
-- **RESUME.EXE v4 + BOX-86 live since 2026-08-04** (s37). Merged branches
-  `cv-exe`, `suggestion-box`, `case-family-hub` safe to delete;
-  `medieval-sfx`* once Jake confirms sfx live.
-- **NEW FLAGSHIP SPEC'D — "The Desk"** (Notion): zoom out to the room the
-  OS runs in; art direction OPEN, Jake's 3D refs incoming.
-- **Branch `leaf-patch` (parked, CRITTERS v2 in s34, `89970d8`).** At
-  revive: slot sizes; Family Hub 55 vs main 100; Trash TAG-03 `8934b21`.
-- **Jake's s31 rule: feature work starts on its OWN branch;** main stays
-  shippable.
-- **Skins:** classic (light/dark) + medieval (knight-speak + sfx LIVE);
-  underwater = stub. Copy layer + EDIT.MODE LIVE — rebase, merge copy.json
-  at the KEY level, never force-push.
-- **Jake is preparing to APPLY.** Audit gaps: Red Pen exhibit (Ryan
-  avatar-token screenshots) · gate friction — s39's install-absorbed
-  license check addresses the case-studies door once merged. **Standing
-  ask: push HIM to prune and polish copy.**
-- **TAILOR-RESUME skill MERGED TO MAIN** (`3c79ef3`, deploy READY):
-  JD → fit brief + tailored PDF in `ref/applications/<slug>/` (never
-  committed). `build-cv.mjs` takes `--input/--output` (defaults
-  unchanged). Heading-alignment fix landed TWICE concurrently — the
-  resume-bugs session shipped it first (`515dc7a`); this session's
-  branch reconciled on top (kept their colophon anchor). Working-copy
-  build-cv.mjs synced to main's version; PDF byte-identical.
-  First run: `apple-cloud-infra` (verdict: apply). **Evidence corpus
-  grew: `ref/accomplishments-2026-h1-raw.md`** (H1-2026 pull; §6
-  do-not-use metrics are radioactive; §9 corrections bind). RULED
-  (Jake, 08-07): Staff Product Designer is the public title (Senior
-  Design Lead = internal, off external docs); 75.8% activation stays
-  off the PDF — spoken interview metric only. Apple PDF is FINAL
-  pending submission.
-- **Voice law (s35):** all user-facing drafts in Jake's spoken cadence;
-  em dashes are an AI tell. s39 shelf copy is DRAFT — Jake rewrites.
-- **Tracking:** Notion (connector live). Deck reporting works; cost read
-  on steady-state usage wanted; zero-`list()` fix still worth it.
-- **Known debts:** SpecSheet motion quote-strings; first-load JS perf;
-  underwater; `--accent-on-inverse`; reduced-motion unverified by
-  emulation. Never `npm run build` while any dev server owns `.next`
-  (`lsof :3000 :3210` first).
+  stays "pending" while Chromatic runs; apex 308s to www — curl -L).
+  **Production = COMMAND.CTR v2 (24b2f30) + SHIPPED.SW shipping now.**
+- **⚠️ Shared-checkout law: no concurrent sessions on one working tree;
+  `git branch --show-current` before EVERY commit.** s39b ate it twice:
+  GitHub-Desktop branch switch killed an agent mid-pass (auto-stash saved
+  it), and a THIRD session's dirty files blocked the ship merge. Isolated
+  worktrees (CC v2 pattern) are the way; worktrees have their OWN .next —
+  safe to build there.
+- **SHIPPED.SW (this session, s39b): Case Studies = shelf of boxed
+  software, 7 passes on `feat/shipped-sw-shelf`, SHIPPING** — see session
+  note. origin/main merged in (HANDOFF conflict resolved; Window.tsx
+  clamp + registry auto-merged, tsc gates).
+- **COMMAND.CTR V2 SHIPPED 2026-08-06** (merge `24b2f30`): living
+  pipeline deck — bezier pipes, packet hover, receipts rail, measured AA
+  floors (alphas 0.39→3:1, 0.52→4.5:1, documented in command.module.css).
+  `cc-timeline.json` Jake-lines = approved lowercase voice (uppercase
+  guards in CSS — don't undo). Details in archive.
+- **Window.tsx shell change (CC v2):** resting `left` clamps to
+  `min(pos.x, 100vw − w − 12px)` — windows never open off-glass.
+- **TAILOR-RESUME skill live** (`.claude/skills/tailor-resume/`): JD →
+  fit brief + PDF in `ref/applications/<slug>/` (never committed). OPEN:
+  Jake rules Staff-vs-Senior title + 75.8% activation metric.
+- **FAMILY HUB CASE SHIPPED 2026-08-05**; assets `public/case/family-hub/
+  evo/`; masters in `ref/` (never commit). Jake's live sanity-walk pending.
+- **RESUME.EXE v4 + BOX-86 live (s37).** Merged branches deletable.
+- **THE DESK spec'd** (Notion): r3f + curated drei + Blender→GLTF ruling
+  in s39b session note; handoff-pattern screen illusion; refs incoming.
+- **`leaf-patch` parked** (CRITTERS v2 `89970d8`); Jake's s31 rule:
+  features on own branches, main stays shippable.
+- **Skins:** classic (light/dark) + medieval live; underwater stub. Copy
+  layer + EDIT.MODE live — merge copy.json at KEY level, never force-push.
+- **Jake is preparing to APPLY.** Gaps: Red Pen exhibit assets · gate
+  friction (s39b absorbed the license check into the shelf's PLAY flow —
+  browse free, gate the open). **Standing ask: push Jake to prune copy.**
+- **Voice law:** drafts in Jake's spoken cadence; em dashes are an AI
+  tell; his verbatims lowercase among uppercase machines. ALL shelf copy
+  = DRAFT for Jake's rewrite.
+- **Known debts:** SpecSheet motion quote-strings · first-load JS perf ·
+  underwater · `--accent-on-inverse` · reduced-motion by emulation ·
+  medieval airbrush eats contrast under type (eyebrow fixed, wash itself
+  needs a pass) · never build while a dev server owns the checkout .next.
 
-## Latest session — SHIPPED.SW: the shelf sells what's here (s39, 2026-08-06→07)
+## Latest session — SHIPPED.SW: the shelf ships (s39b, 2026-08-06→07)
 
-**Fable planned + reviewed, NYQUIST (Opus) built, Fable landed one layout
-fix solo (20-line scope — not worth a dispatch). Deck reported. Branch
-`feat/shipped-sw-shelf`, 3 commits, NOT merged — Jake's taste pass next.**
+**Fable orchestrated live with Jake in the loop all day; NYQUIST (Opus)
+built 7 passes on `feat/shipped-sw-shelf`; HERTZ ran the 3D-framework
+eval. Deck reported throughout. Jake: "very impressed."**
 
-- **The reframe (Jake's call):** the installer parody geared to progress
-  became a shelf of boxed retail software from the parallel 1992 — the
-  door sells the shipped work. Jake also ruled: browse free, gate the
-  open (audit's #1 friction risk absorbed into the bit).
-- **The build:** `src/programs/shelf/` (Shelf/ShelfBox/InstallOverlay/
-  InstallBar). Boxes = fixed 3:4 slots, composed token-only placeholder
-  fronts (art convention `/case/<slug>/box.webp`, none shipped yet),
-  3D flip WITHOUT preserve-3d (per-face `perspective() rotateY()` —
-  recede/roughen filters flatten 3D contexts), `inert` face swap, focus
-  choreography, Escape ladder (overlay → unflip → window). Shipped boxes
-  INSTALL: bar steps to 90, stalls for the license check (unchanged
-  GateSphere, reframed by one copy line), 100 on unlock, case window
-  opens. In-dev boxes stay shrink-wrapped (sheen + pink Stamp) with the
-  verbatim nudge wiring. Registry: `progress` → shelf, 720×600 @
-  (250,48); `/projects/<slug>` deep-link parent now `progress`;
-  `projects` flat index kept registered+gated for bare `/projects`.
-  InProgress.tsx + progress.module.css deleted; `progress.eyebrow/eta/
-  etaLabel` pruned; nudge/offline/empty keys reused. Medieval: tomes
-  (accent spine, hatched bar, TRANSCRIBE/EDITION/STILL BEING ILLUMINATED).
-- **The fix (Fable):** install layer anchored to scroll content hung the
-  license sphere 57px past the window bottom. Wrap pins to body height,
-  grid scrolls internally, bar yields its rows during license. Probed
-  headless (real viewports — the pane tab was hidden, layout degenerate):
-  sphere + cancel fully visible at 1280×800 and 360×740.
-- **Verified:** tsc, 25/25 tests, isolated prod build (28/28 pages —
-  main `.next` never touched; another chat's dev server owned :3000).
-  Probes: 4 boxes, 3 cols desktop / 2 @ 360px, no overflow, zero CLS
-  (252×336 slot pre/post), flip a11y, license geometry, unlocked install
-  opens `case:` window, medieval copy live. Reduced-motion + Lighthouse
-  unverified by emulation (standing debt).
-- **Pass 2 (Jake live-directed):** grid → ONE horizontal carousel (4th
-  box hangs off — "no illusion of completeness"); hand-rolled `Box3D`
-  six-face CSS cuboid (42px board, 980px camera on the row, 22deg
-  resting turn ±14 scroll sweep, contact shadows on a `.plinth` outside
-  the 3D context); INSTALL → PLAY ("installing is the printing mistake
-  again"); license phase drops the whole frame to `--surface-inverse`.
-  Recede filter flattens preserve-3d → registry `noRecede` opt-out
-  (iPod precedent). Mid-pass GitHub-Desktop branch switch KILLED the
-  agent (auto-stash); work verified intact vs stash and committed.
-- **Pass 3:** flip CTAs deleted — one small `FLIP →` tag chip above
-  each box (the accessible path: aria-expanded, Enter, focus return),
-  front face still click-flips but tabIndex −1; Apple-TV cursor-pressure
-  tilt (±7deg, push-AWAY sign verified, −6px lift + shadow swell,
-  SPRINGS.window near-critical, own `.tilt` layer between parallax and
-  flip; fine-pointer only, off under reduced motion); YouTube loop
-  covers on the two shipped boxes (nocookie, muted, inert, aria-hidden,
-  1.4 overscan crop kills the letterbox+title, duotone over top;
-  invest `Nxl0uCGZNCw`, family-hub `G-tWcCCMdGE`). 60fps measured with
-  both iframes under tilt (p95 16.8ms). Windows 720×552.
-- **3D framework ruling (HERTZ eval, verified numbers):** shelf STAYS
-  CSS 3D (iframes can't rasterize to WebGL textures; migration =
-  ~180-235KB gzip for marginal gain + a11y regression). THE DESK =
-  react-three-fiber + curated drei + Blender→GLTF→gltfjsx (~260-320KB
-  code-split); screen-zoom illusion via the HANDOFF PATTERN (baked
-  screen texture → crossfade to real DOM at matched rect; drei `<Html
-  transform>` in reserve). Precedents: Galaxy Portfolio (steal its
-  shader-precompile trick), freeCodeCamp cute-room pipeline, Bruno
-  Simon. Spline ruled out (1MB+, proprietary format, video textures
-  paywalled).
-- **Pass 4 (the big one): THE CAMERA WAS DEAD SINCE PASS 2** — perspective
-  only reaches children; `.slot`/`.boxSlot`/`.plinth` lacked preserve-3d,
-  so the shelf rendered ORTHOGRAPHIC (translateZ(200) moved a face
-  0.00px). Chain repaired + warned in CSS; NEVER remove preserve-3d from
-  those three. Jake's flat-feeling notes were right every round. Also:
-  head-on rest (REST/SWEEP deleted), hover pop 38px + ±10deg two-axis
-  tilt, shadow shrinks/fades on rise; front face = Jake's Figma box
-  template (cream `--surface-raised`, Instrument Sans via next/font,
-  per-case coverVariant "set not family", conic wash = Jake's art hexes
-  commented non-tokenizable); raw video inset ~16:9, ORGANIC stacked-
-  ellipse mask pixel-diff-proven (video touches nothing within 8px of
-  its rect); flip tag below box, hover-reveal, sticky; shelf plank;
-  SHIPPED.SW masthead deleted (store/marquee concept CANCELLED — Family
-  Hub is hardware+software); window 720×496.
-- **Pass 5:** back panel rebuilt — ledger wrap was a GRID bug (shared
-  label column sized by widest label; now per-row flex dl/dt/dd), 3
-  terse rows per case, thumbs cut, type box-derived (10.3/12.8px),
-  zero internal scroll both skins.
-- **Flags:** YT autoplay refusal (data-saver/iOS low-power) shows
-  un-clickable player chrome — worse post-crop-loosening; fix = YT
-  IFrame API dep, DECIDE BEFORE MERGE · Family Hub blurb ELIDED (research
-  verbatim, "…and a shared Google calendar" cut) — Jake must approve ·
-  Instrument Sans + box-type ramp → tokens at merge · box.art assets now
-  plate-ratio not 3:4 · narrow (≤420) Family Hub back scrolls 47px
-  (designed fallback) · `public/case/family-hub 2/` dup — Jake deletes ·
-  stale GH-Desktop stash@{0} droppable · Jake assets wanted: red mark
-  (top-left slot live), per-case cover art, real Instrument-Sans-era
-  system-requirements copy.
+- **The arc:** installer parody → boxed-software shelf. One horizontal
+  carousel (4th box hangs off), hand-rolled Box3D CSS cuboid (42px board,
+  980px camera), Apple-TV cursor tilt (±10deg, push-away, pop 38px),
+  flip via hover-revealed tag below box + exit-unflip, PLAY → loading →
+  license (GateSphere reframed, WHOLE frame inverse) → case opens.
+  Four cover variants off Jake's Figma refs ("set, not family"):
+  figma/stripe/catalog/nocturne. Instrument Sans (next/font, → tokens at
+  merge). YouTube covers: nocookie + IFrame-API gate — film visible only
+  after 6.2s continuous PLAYING (loop boundary repaints chrome — the
+  loop was the bug; crop provably can't fix it, numbers in CoverFilm.tsx).
+  Board material: color-mix ground + feTurbulence grain + 12% sheen;
+  AA re-audited (fixed 2 pre-existing medieval fails). Back panel: 3-row
+  ledger (wrap was a shared-label-column grid bug), blurb elision Jake-
+  approved. Footer/masthead deleted; window 720×443.
+- **THE CAMERA WAS DEAD SINCE PASS 2** — perspective needs preserve-3d
+  at EVERY level; .slot/.boxSlot/.plinth lacked it (translateZ moved a
+  face 0.00px). Fixed + warned in CSS. Never remove those three.
+- **3D ruling (HERTZ, verified):** shelf stays CSS 3D; The Desk = r3f +
+  curated drei + Blender GLTF (~260-320KB code-split); screen-zoom via
+  handoff pattern. Spline out (1MB+, paywalled video textures).
+- **Pass 8 (shipping):** Jake's four Figma covers land as real box.art
+  (nodes in session log); composed fronts become true fallbacks.
+- **Flags:** BURN_OFF_MS 6200 = the YT-autohide guess knob · film absent
+  ~13% of each loop (Jake to feel live) · medieval tagline 4.33 on
+  parchment pre-existing · `family-hub 2/` dup dir — Jake deletes ·
+  GH-Desktop stash@{0} droppable · Instrument Sans + art hexes ("ART,
+  NOT CHROME" comments) → token architecture later.
 
 ## Next steps
 
-1. **Jake taste pass on SHIPPED.SW** (dev server on :3000 serves the
-   branch): flip feel, install pacing, license beat, 3-col vs 2-col
-   back-panel density, medieval tomes. Then merge `feat/shipped-sw-shelf`.
-2. **Jake: sanity-walk Family Hub LIVE on lunde.co** (carried from s38).
-3. **Jake asset pass:** box art for the two shipped cases now joins the
-   list (Ryan avatar-token screenshots · Plate 10 · Drop plates · box.webp).
-4. **The Desk** — next flagship; 3D-room refs incoming.
-5. Cleanup when idle: delete merged branches; `family-hub 2/` dup dir.
-6. Carried: eyeball tracker v2 / `leaf-patch` revive-or-park · COMMAND.CTR
-   zero-`list()` + deck cost read · Figma stale STRING vars · typography
-   finale · underwater · First Pass `459-473268` unindexed.
+1. **Ship verification** (this session): live smoke on lunde.co — shelf,
+   films, license flow, phone.
+2. **Jake live pokes owed:** CC v2 deck (pipes, rail, phone) · Family Hub
+   case walk · now the shelf.
+3. **Jake copy rewrite pass over all shelf drafts** (taglines, ledger,
+   loading steps, license line, tag labels).
+4. **The Desk** — next flagship (r3f ruling stands; Blender refs incoming).
+5. Cleanup: delete merged branches (`cv-exe`, `suggestion-box`,
+   `case-family-hub`, `worktree-cc-v2-pipeline`, `medieval-sfx*` on
+   confirm) · `family-hub 2/` dup.
+6. Carried: gate friction elsewhere on site · COMMAND.CTR zero-`list()` +
+   cost read · replay-your-session task · Figma stale STRING vars ·
+   typography finale · underwater · eyeball tracker v2 / leaf-patch call.
