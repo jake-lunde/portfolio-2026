@@ -114,12 +114,34 @@ fix solo (20-line scope — not worth a dispatch). Deck reported. Branch
   shader-precompile trick), freeCodeCamp cute-room pipeline, Bruno
   Simon. Spline ruled out (1MB+, proprietary format, video textures
   paywalled).
-- **Flags:** YT autoplay refusal (data-saver/iOS low-power) leaves a
-  visible un-clickable play button — proper fix = YT IFrame API dep,
-  deliberately deferred · `public/case/family-hub 2/` untracked dup —
-  Jake to delete · stale GitHub-Desktop stash@{0} = safe to drop ·
-  `useFinePointer` per-box (hoist if a 5th case lands) · box art still
-  swappable when Jake ships real assets.
+- **Pass 4 (the big one): THE CAMERA WAS DEAD SINCE PASS 2** — perspective
+  only reaches children; `.slot`/`.boxSlot`/`.plinth` lacked preserve-3d,
+  so the shelf rendered ORTHOGRAPHIC (translateZ(200) moved a face
+  0.00px). Chain repaired + warned in CSS; NEVER remove preserve-3d from
+  those three. Jake's flat-feeling notes were right every round. Also:
+  head-on rest (REST/SWEEP deleted), hover pop 38px + ±10deg two-axis
+  tilt, shadow shrinks/fades on rise; front face = Jake's Figma box
+  template (cream `--surface-raised`, Instrument Sans via next/font,
+  per-case coverVariant "set not family", conic wash = Jake's art hexes
+  commented non-tokenizable); raw video inset ~16:9, ORGANIC stacked-
+  ellipse mask pixel-diff-proven (video touches nothing within 8px of
+  its rect); flip tag below box, hover-reveal, sticky; shelf plank;
+  SHIPPED.SW masthead deleted (store/marquee concept CANCELLED — Family
+  Hub is hardware+software); window 720×496.
+- **Pass 5:** back panel rebuilt — ledger wrap was a GRID bug (shared
+  label column sized by widest label; now per-row flex dl/dt/dd), 3
+  terse rows per case, thumbs cut, type box-derived (10.3/12.8px),
+  zero internal scroll both skins.
+- **Flags:** YT autoplay refusal (data-saver/iOS low-power) shows
+  un-clickable player chrome — worse post-crop-loosening; fix = YT
+  IFrame API dep, DECIDE BEFORE MERGE · Family Hub blurb ELIDED (research
+  verbatim, "…and a shared Google calendar" cut) — Jake must approve ·
+  Instrument Sans + box-type ramp → tokens at merge · box.art assets now
+  plate-ratio not 3:4 · narrow (≤420) Family Hub back scrolls 47px
+  (designed fallback) · `public/case/family-hub 2/` dup — Jake deletes ·
+  stale GH-Desktop stash@{0} droppable · Jake assets wanted: red mark
+  (top-left slot live), per-case cover art, real Instrument-Sans-era
+  system-requirements copy.
 
 ## Next steps
 
