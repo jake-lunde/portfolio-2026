@@ -76,6 +76,13 @@ eval. Deck reported throughout. Jake: "very impressed."**
 - **3D ruling (HERTZ, verified):** shelf stays CSS 3D; The Desk = r3f +
   curated drei + Blender GLTF (~260-320KB code-split); screen-zoom via
   handoff pattern. Spline out (1MB+, paywalled video textures).
+- **Pass 9 (shipped, fast-follow `e6f031e`):** pop clearance measured
+  (sides were the failure: growth is about the vanishing point; window
+  760×459, gutters 34/40, gap 32) + stills for the two film boxes
+  replaced by PlateLoader — 'TUNING SIGNAL…' frequency bars (scaleY-only,
+  accent-expressive peak); art kept as reduced-motion/onError face
+  (⚠️ in cases.ts — looks unused, isn't). Medieval renders it as a gilt
+  manuscript figure.
 - **Pass 8 (shipped):** Jake's four Figma covers land as real box.art
   (nodes in session log); composed fronts become true fallbacks.
 - **Flags:** BURN_OFF_MS 6200 = the YT-autohide guess knob · film absent
