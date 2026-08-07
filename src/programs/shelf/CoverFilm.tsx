@@ -17,17 +17,56 @@ import styles from './shelf.module.css'
    ruling on the failure itself — the player chrome "can't be seen, it's the
    signature cover" — so the embed is gated instead of cropped.
 
-   THE GATE: the iframe mounts at opacity 0 with the printed cover showing
-   through it, and it is faded in only when the player reports that it is
-   actually PLAYING. Every failure resolves to the same state — the printed
-   cover, which is a composed front designed to be looked at rather than a
-   poster frame waiting to be replaced:
+   PASS 7 FOUND THAT GATE OPENING TOO EARLY AND FAR TOO OFTEN. Jake still saw
+   YouTube's furniture in a real browser, so pass 7 measured what the player
+   actually paints and when (headless chromium 1178, both films, screenshots
+   every 0.5s — the numbers are on BURN_OFF_MS below). Two findings, and the
+   second is the one that mattered:
+
+     1. PLAYING IS THE MOMENT THE CHROME ARRIVES, NOT THE MOMENT IT LEAVES.
+        The title bar, the channel avatar, the top gradient, the centre
+        transport glyphs and the "More videos" pill are all up for the first
+        ~5 seconds OF PLAYBACK and then fade together. Pass 6 faded the film
+        in exactly when they appeared.
+     2. EVERY RESTART PAYS IT AGAIN. `loop=1&playlist=` does not seek — it
+        takes the player back through UNSTARTED → BUFFERING → PLAYING, and
+        the whole five-second display replays. Measured on the invest film
+        (47s): a full title bar every single cycle, for a tenth of the time
+        the box is on screen. That is what Jake was seeing.
+
+   So the gate is now armed by the TRANSITION, not by the session: the film
+   is visible only while the player has been continuously PLAYING for longer
+   than the chrome lasts, and ANY state that is not PLAYING shuts it again
+   at once. Every failure resolves to the same state — the printed cover,
+   which is a composed front designed to be looked at rather than a poster
+   frame waiting to be replaced:
 
      · the API script is blocked or fails       → promise rejects, no fade
      · the API loads but never calls back       → promise never settles
      · autoplay is refused                      → PLAYING never fires
+     · the playlist loop comes round            → gate shuts, then re-opens
+     · a stall, a pause, a quality switch       → gate shuts, then re-opens
      · reduced motion                           → this component never mounts
                                                   (ShelfBox drops `film`)
+
+   ⚠️ PASS 6'S "NEVER WRITE IT BACK" IS REVERSED, DELIBERATELY. That rule
+   read: a film that stalls has already proved it can play, and blinking the
+   printed cover back in would be worse than the pause it is covering. It
+   was written without the measurement. A stall is a BUFFERING → PLAYING
+   transition, and the player paints its title over the artwork on the far
+   side of one exactly as it does at a loop. Jake's rule is absolute — no
+   YouTube pixel, ever — so the cover comes back. It is the box's own front;
+   there is no worse state to fall to.
+
+   ⚠️ AND CROPPING CANNOT DO THIS JOB — DO NOT TRY IT AGAIN. Pass 4 buried
+   the chrome under a 1.4× overscan and Jake struck it in pass 5 because the
+   crop threw away the picture; pass 7 measured why no smaller crop can
+   replace it. The furniture is not confined to bands: the transport glyphs
+   sit dead centre on the artwork and the "More videos" pill sits centre
+   bottom. Even the part that IS a band cannot be reached cheaply — at the
+   246px the plate is actually painted at, YouTube's title bar is ~36px, a
+   quarter of a 138px 16:9 picture, so clipping it costs an overscan of 1.52.
+   The gate is free and total; a crop is expensive and partial.
 
    THE DEPENDENCY IS THE SCRIPT, AND IT IS LAZY. `iframe_api` is fetched by
    the first box that has a film, on mount, from this module — never from the
@@ -58,6 +97,27 @@ type YTNamespace = {
   ) => YTPlayerLike
   PlayerState: { PLAYING: number }
 }
+
+/* HOW LONG THE PLAYER PAINTS ITS OWN FURNITURE AFTER EVERY →PLAYING.
+
+   Measured pass 7, headless chromium 1178, the invest film in a 640×360
+   embed with controls=0, screenshots every 0.5s, chrome detected as the
+   luminance step across YouTube's top gradient:
+
+     first play          chrome up through +5.00s, gone by +5.50s
+     playlist loop       chrome up through +4.68s, gone by +5.68s
+     seekTo(0) mid-roll  chrome up through +4.63s (probe ended there)
+     seekTo(20) mid-roll chrome up through +4.43s, gone by +4.93s
+
+   — i.e. YouTube's documented 3s autohide plus its own start sequence,
+   restarted by every buffering→playing edge including a plain seek. 6.2s is
+   the worst of those plus half a second of margin for a slower machine.
+
+   It is the only number in this file that is a guess about someone else's
+   software, so it is deliberately generous: too long costs a few seconds of
+   printed cover — which is the artwork, and the resting state — while too
+   short costs exactly the thing Jake has now rejected twice. */
+const BURN_OFF_MS = 6200
 
 declare global {
   interface Window {
@@ -117,7 +177,9 @@ const mute = (p: YTPlayerLike) => {
 
 export function CoverFilm({ id, title }: { id: string; title: string }) {
   const frame = useRef<HTMLIFrameElement>(null)
-  const [rolling, setRolling] = useState(false)
+  /** the player has been PLAYING for longer than its own chrome lasts */
+  const [clear, setClear] = useState(false)
+  const burn = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   /* built once, on the client, because `origin` is a real requirement of the
      API rather than a nicety: the player validates the postMessage channel
@@ -151,6 +213,10 @@ export function CoverFilm({ id, title }: { id: string; title: string }) {
   useEffect(() => {
     let dropped = false
     let player: YTPlayerLike | null = null
+    const disarm = () => {
+      if (burn.current) clearTimeout(burn.current)
+      burn.current = null
+    }
 
     loadApi()
       .then((YT) => {
@@ -171,13 +237,29 @@ export function CoverFilm({ id, title }: { id: string; title: string }) {
               player = e.target
               mute(e.target)
             },
+            /* THE GATE, ARMED BY THE TRANSITION.
+
+               Not playing → shut, now, whatever it was: unstarted (the
+               playlist loop), ended, paused, buffering. Each of those is
+               followed by a →PLAYING edge, and the player paints its title
+               across the artwork on the far side of every one of them.
+
+               Playing → wait out the chrome, then open. The timer is
+               re-armed from scratch on each edge, so a stall that flickers
+               3→1→3→1 can never leave a half-expired countdown standing. */
             onStateChange: (e) => {
-              if (e.data !== YT.PlayerState.PLAYING) return
+              disarm()
+              if (e.data !== YT.PlayerState.PLAYING) {
+                setClear(false)
+                return
+              }
               // again on the transition: the caption module loads WITH the
               // video, so an unload issued before it started has nothing to
               // unload and the track arrives anyway
               if (player) mute(player)
-              setRolling(true)
+              burn.current = setTimeout(() => {
+                if (!dropped) setClear(true)
+              }, BURN_OFF_MS)
             },
           },
         })
@@ -187,6 +269,7 @@ export function CoverFilm({ id, title }: { id: string; title: string }) {
 
     return () => {
       dropped = true
+      disarm()
       try {
         player?.destroy?.()
       } catch {}
@@ -198,9 +281,9 @@ export function CoverFilm({ id, title }: { id: string; title: string }) {
       <iframe
         ref={frame}
         className={styles.coverFrame}
-        // the gate, read by CSS. Present → opacity 1. Set once and never
-        // unset: see the note on `.coverFrame[data-playing]`.
-        data-playing={rolling ? '' : undefined}
+        // the gate, read by CSS. Present → opacity 1, and it comes and goes
+        // with the player's state — see `.coverFrame[data-clear]`.
+        data-clear={clear ? '' : undefined}
         src={src}
         title={title}
         aria-hidden="true"

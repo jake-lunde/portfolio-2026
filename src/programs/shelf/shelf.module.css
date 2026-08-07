@@ -754,11 +754,20 @@
    whenever autoplay is refused (data saver, iOS Low Power) and can never be
    clicked away here (pointer-events: none). At 1.02 they would show — and
    Jake's ruling is that the player chrome "can't be seen, it's the signature
-   cover". So the embed is now GATED ON PLAYING: it starts at opacity 0 with
-   the composed cover showing through, and the IFrame API fades it in only
-   once the film is actually rolling (CoverFilm.tsx). If PLAYING never
-   arrives — refused autoplay, blocked script, no API at all — the opacity
-   never changes and the reader simply sees the printed cover.
+   cover". So the embed is GATED rather than cropped: it starts at opacity 0
+   with the composed cover showing through, and the IFrame API opens the gate
+   only when the film is rolling AND has outlived its own furniture
+   (CoverFilm.tsx). If that never happens — refused autoplay, blocked script,
+   no API at all — the opacity never changes and the reader simply sees the
+   printed cover.
+
+   ⚠️ PASS 7: DO NOT PUT THE OVERSCAN BACK. It was measured rather than
+   argued: YouTube's transport glyphs sit dead centre on the picture and its
+   "More videos" pill sits centre bottom, so no crop reaches them; and the
+   part that IS a band — the title bar — is ~36px tall whatever size the
+   player is painted at, a quarter of this 138px picture, which is an
+   overscan of 1.52 to clip. The gate is free and total. The 1.02 here is for
+   the letterbox rounding and nothing else.
 
    Opacity, because opacity is free: the layer is already promoted and this
    is a compositor property. Nothing about the plate's geometry moves.
@@ -784,14 +793,20 @@
   border: 0;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.36s ease;
+  transition: opacity 0.5s ease;
 }
 
-/* the gate. Written by CoverFilm.tsx the moment the player reports PLAYING
-   and never written back — a film that stalls mid-roll has already proved it
-   can play, and blinking the printed cover back in would be worse than the
-   pause it is covering. */
-.coverFrame[data-playing] {
+/* THE GATE. Written by CoverFilm.tsx when the player has been PLAYING for
+   longer than the chrome it paints on every start, and taken away again the
+   instant it is not playing — a loop, a stall, a seek and an end all put the
+   title bar back over the artwork, measured, so all four put the printed
+   cover back in front of it. Pass 6 set this once and never unset it; pass 7
+   reverses that on evidence (the note in CoverFilm.tsx has the numbers).
+
+   The fade is slow on purpose and symmetrical: the cover dissolving into the
+   film and back is the box breathing, whereas a cut would read as a fault.
+   Opacity only — the layer is already promoted and nothing here moves. */
+.coverFrame[data-clear] {
   opacity: 1;
 }
 
