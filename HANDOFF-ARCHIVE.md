@@ -9,6 +9,66 @@
 
 ---
 
+## SHIPPED.SW: the shelf ships (s39b, 2026-08-06→07)
+
+**Fable orchestrated live with Jake in the loop all day; NYQUIST (Opus)
+built 7 passes on `feat/shipped-sw-shelf`; HERTZ ran the 3D-framework
+eval. Deck reported throughout. Jake: "very impressed."**
+
+- **The arc:** installer parody → boxed-software shelf. One horizontal
+  carousel (4th box hangs off), hand-rolled Box3D CSS cuboid (42px board,
+  980px camera), Apple-TV cursor tilt (±10deg, push-away, pop 38px),
+  flip via hover-revealed tag below box + exit-unflip, PLAY → loading →
+  license (GateSphere reframed, WHOLE frame inverse) → case opens.
+  Four cover variants off Jake's Figma refs ("set, not family"):
+  figma/stripe/catalog/nocturne. Instrument Sans (next/font, → tokens at
+  merge). YouTube covers: nocookie + IFrame-API gate — film visible only
+  after 6.2s continuous PLAYING (loop boundary repaints chrome — the
+  loop was the bug; crop provably can't fix it, numbers in CoverFilm.tsx).
+  Board material: color-mix ground + feTurbulence grain + 12% sheen;
+  AA re-audited (fixed 2 pre-existing medieval fails). Back panel: 3-row
+  ledger (wrap was a shared-label-column grid bug), blurb elision Jake-
+  approved. Footer/masthead deleted; window 720×443.
+- **THE CAMERA WAS DEAD SINCE PASS 2** — perspective needs preserve-3d
+  at EVERY level; .slot/.boxSlot/.plinth lacked it (translateZ moved a
+  face 0.00px). Fixed + warned in CSS. Never remove those three.
+- **3D ruling (HERTZ, verified):** shelf stays CSS 3D; The Desk = r3f +
+  curated drei + Blender GLTF (~260-320KB code-split); screen-zoom via
+  handoff pattern. Spline out (1MB+, paywalled video textures).
+- **Pass 11 (shipped `fd39611`): gate fits + distressed covers** — license
+  phase GROWS the window (windows.ts requestSize/releaseSize; exact
+  restore incl. grip sizes; viewport-clamped; <720px skipped); board
+  material now printed-and-worn (Bayer dither tile + posterised grain +
+  mottle + edge wear, AA re-audited); invest = near-black inverted
+  (92% surface-inverse mix), family-hub = white #f7f5f0 + mark.png
+  top-left + INSTRUMENT SERIF (next/font, --font-boxart-serif).
+  Flags: vCatalog eyebrow classic-dark worst-pixel 3.62 (pre-existing
+  fail on main, improved, still under 4.5) · sub-750px-tall viewports
+  still clip the sphere (cancel always reachable) · medieval shows the
+  mark as a printer's device — strike if Jake dislikes.
+- **Pass 10 (shipped `4c53f18`): films SELF-HOSTED** — Jake supplied the
+  two cover films (public/case/<slug>/box-film.mp4, 1.9MB + 15.9MB);
+  native <video> retired the ENTIRE YouTube apparatus (IFrame API, gate,
+  BURN_OFF_MS, caption unload) AND pass 9's PlateLoader (Jake: no loading
+  state needed). Art = poster again (pre-first-frame, reduced-motion,
+  failure — headless codec gap proved the fallback shows art, never
+  broken-media UI). Flag: family-hub film weight rides preload=auto on
+  shelf open.
+- **Pass 9 (shipped, fast-follow `e6f031e`):** pop clearance measured
+  (sides were the failure: growth is about the vanishing point; window
+  760×459, gutters 34/40, gap 32) + stills for the two film boxes
+  replaced by PlateLoader — 'TUNING SIGNAL…' frequency bars (scaleY-only,
+  accent-expressive peak); art kept as reduced-motion/onError face
+  (⚠️ in cases.ts — looks unused, isn't). Medieval renders it as a gilt
+  manuscript figure.
+- **Pass 8 (shipped):** Jake's four Figma covers land as real box.art
+  (nodes in session log); composed fronts become true fallbacks.
+- **Flags:** BURN_OFF_MS 6200 = the YT-autohide guess knob · film absent
+  ~13% of each loop (Jake to feel live) · medieval tagline 4.33 on
+  parchment pre-existing · `family-hub 2/` dup dir — Jake deletes ·
+  GH-Desktop stash@{0} droppable · Instrument Sans + art hexes ("ART,
+  NOT CHROME" comments) → token architecture later.
+
 ## BUILD A SKIN: the two-accent law, playable (s38, 2026-08-05)
 
 **Fable orchestrated, NYQUIST (Opus) executed in three passes — clean
