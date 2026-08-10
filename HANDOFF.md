@@ -8,8 +8,8 @@
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
   stays "pending" while Chromatic runs; apex 308s to www — curl -L).
-  **Production = README focus-ticker (merge 3d5530e, live-verified
-  2026-08-09) on top of SHIPPED.SW + COMMAND.CTR v2.**
+  **Production = INSPECT.MODE (merge 7263e42, live-verified 2026-08-09)
+  on top of README focus-ticker + SHIPPED.SW + COMMAND.CTR v2.**
 - **⚠️ Shared-checkout law: no concurrent sessions on one working tree;
   `git branch --show-current` before EVERY commit.** Another session's
   worktree (`minors-random-wallpaper`) was live during s40 — worktrees are
@@ -23,8 +23,9 @@
   Anthropic workspace + spend cap as backstop**; cards work keyless.
 - **README focus-ticker SHIPPED** (merge `3d5530e`, verified live). Speed
   dial: `CRAWL_PX_PER_SEC` in About.tsx. Branch deletable.
-- **INSPECT.MODE (TUNE.MODE phase 0) BUILT on `feat/inspect-mode`
-  (`34661ba`) — AWAITS JAKE'S READ + MERGE CALL.** Public read-only token
+- **INSPECT.MODE (TUNE.MODE phase 0) SHIPPED** (Jake: "merge it and ship
+  it!!"; merge `7263e42`, deploy READY, marker-curl verified; branch
+  deleted). Public read-only token
   x-ray: SYS-21, `rings` desktop icon, `/inspect`; SCAN or alt-click →
   LAYERS chain · TOKENS (real var() provenance off CSSOM cssText, tier
   chips, core-law warnings) · size-aware CONTRAST grade · TYPE · MOTION
@@ -100,9 +101,8 @@ on branch per s31 law.**
    the branch, `/readme` then `/ai`), then merge call. After merge: create
    a dedicated Anthropic workspace + spend-capped key, add
    `ANTHROPIC_API_KEY` to Vercel env to light the composer.
-2. **Jake: try INSPECT.MODE** — `git switch feat/inspect-mode`, dev
-   server, hit SCAN and click around (try the menubar: it catches a real
-   hairline violation) — then merge call.
+2. **Jake: play with INSPECT.MODE on lunde.co** — it's live; hit SCAN
+   and click the menubar (it catches a real hairline violation).
 3. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
    if off) — it's live.
 4. **Jake: read the skills research + the TUNE.MODE plan** (both Notion
