@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSettings } from '@/store/settings'
 import { useInspect } from '@/store/inspect'
+import { t } from '@/content/copy'
 import { OS_VERSION } from '@/lib/version'
 import { SkinSwitch } from './SkinSwitch'
 import styles from './shell.module.css'
@@ -52,8 +53,22 @@ export function MenuBar() {
   const hydrate = useSettings((s) => s.hydrate)
   const inspecting = useInspect((s) => s.on)
   const toggleInspect = useInspect((s) => s.toggle)
+  /* EDIT.MODE (SYS-99) and INSPECT.MODE cannot both hold the desktop.
+     InspectShell already stands down when the editor arms, but as the
+     SECOND mover that showed as a flash: panels appeared, the desktop
+     compressed, and everything snapped back inside a frame with no word
+     of why. The refusal belongs on the control, before the flip. */
+  const [editing, setEditing] = useState(false)
 
   useEffect(() => hydrate(), [hydrate])
+
+  useEffect(() => {
+    const read = () => setEditing(!!document.body.dataset.editmode)
+    read()
+    const obs = new MutationObserver(read)
+    obs.observe(document.body, { attributes: true, attributeFilter: ['data-editmode'] })
+    return () => obs.disconnect()
+  }, [])
 
   return (
     /* the menubar is the tool's own toolbar while INSPECT.MODE is up, so
@@ -75,9 +90,20 @@ export function MenuBar() {
             900px, where there would be no canvas left (see .inspectBtn). */}
         <button
           className={`${styles.menuBtn} ${styles.inspectBtn}`}
-          onClick={toggleInspect}
+          data-inspect-toggle=""
+          onClick={() => {
+            if (editing) return
+            toggleInspect()
+          }}
           aria-pressed={inspecting}
-          aria-label={`Inspect mode ${inspecting ? 'on' : 'off'}`}
+          aria-disabled={editing || undefined}
+          data-busy={editing || undefined}
+          title={editing ? t('inspect.editbusy', skin) : undefined}
+          aria-label={
+            editing
+              ? t('inspect.editbusy', skin)
+              : `Inspect mode ${inspecting ? 'on' : 'off'}`
+          }
         >
           ◎ INSPECT
         </button>

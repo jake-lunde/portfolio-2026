@@ -66,13 +66,28 @@ export function nudge(prop: string, value: string): void {
   applied.set(prop, value)
 }
 
-/** Hand one role back to whoever held it before the nudge. */
+/** Hand one role back to whoever held it before the nudge.
+
+    The stash is only good while it is still OURS to give back. SKIN
+    BUILDER writes the same four accent properties this can write, and it
+    repaints on every skin or theme flip — so between a nudge and its
+    reset, --accent may have been re-set by somebody with a better claim.
+    Restoring the stash then would quietly revert the visitor's saved
+    skin pick to whatever it was before we touched it. So: put the prior
+    value back only if the property still reads as the value WE wrote.
+    Otherwise the newer writer already owns it, and all we do is drop our
+    bookkeeping and get out of the way. */
 export function reset(prop: string): void {
   const el = root()
   if (!el) return
-  el.style.removeProperty(prop)
-  const was = prior.get(prop)
-  if (was) el.style.setProperty(prop, was)
+  const ours = applied.get(prop)
+  const now = el.style.getPropertyValue(prop)
+  const stillOurs = ours !== undefined && now === ours
+  if (stillOurs) {
+    el.style.removeProperty(prop)
+    const was = prior.get(prop)
+    if (was) el.style.setProperty(prop, was)
+  }
   prior.delete(prop)
   applied.delete(prop)
   sweep(el)

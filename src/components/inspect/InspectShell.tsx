@@ -48,14 +48,25 @@ import styles from './inspectShell.module.css'
    Both the hover and the picked outline are gated on the armed body
    attribute now. The old bare [data-inspect-picked] selector existed
    because a pick had to SURVIVE disarming; a mode has no disarmed state,
-   so the gate is uniform and unmount takes the sheet with it. */
+   so the gate is uniform and unmount takes the sheet with it.
+
+   The crosshair is scoped to the CANVAS rather than sprayed across the
+   document with !important. "Everything here is a specimen" stopped being
+   true the moment the panels and the menubar became things you operate —
+   and an !important cursor on every node in the document also lands on
+   overlays this tool does not own. Descendant-of-canvas out-specifies the
+   components' own cursor rules without the hammer. Dialogs opt out with
+   the rest of the tool's chrome: a modal is a door, not a specimen. */
 const GLOBAL_CSS = `
-  body[data-inspectmode="on"] *{
-    cursor:crosshair !important;
+  body[data-inspectmode="on"] [data-desktop-root],
+  body[data-inspectmode="on"] [data-desktop-root] *{
+    cursor:crosshair;
   }
   body[data-inspectmode="on"] [data-inspect-self],
-  body[data-inspectmode="on"] [data-inspect-self] *{
-    cursor:auto !important;
+  body[data-inspectmode="on"] [data-inspect-self] *,
+  body[data-inspectmode="on"] [role="dialog"],
+  body[data-inspectmode="on"] [role="dialog"] *{
+    cursor:auto;
   }
   body[data-inspectmode="on"] [data-inspect-hover]{
     outline:var(--border-width-strong) dashed var(--accent);
@@ -91,6 +102,16 @@ export default function InspectShell() {
   /** which TOKENS row has its candidate palette open — lifted here because
       Escape has to close it before it deselects (see the ladder below) */
   const [openVar, setOpenVar] = useState<string | null>(null)
+
+  /* Who to hand focus back to. Captured during the FIRST RENDER, not in
+     an effect: React runs child effects before the parent's, so by the
+     time a mount effect here could look, LayersPanel has already moved
+     focus into the tree and the opener is gone. Every exit path — the
+     toggle, Escape, the 900px floor, EDIT.MODE taking the desk — ends in
+     the same teardown, so restoring there covers all four. */
+  const [opener] = useState<HTMLElement | null>(() =>
+    typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null),
+  )
 
   // the listeners bind once and read through refs, so they never go stale
   const pickRef = useRef<HTMLElement | null>(null)
@@ -136,20 +157,37 @@ export default function InspectShell() {
     setOpenVar(null)
   }, [])
 
-  /** The tree drives the same halo the pointer does. */
+  /** The one element currently wearing the halo. Held in a ref so moving
+      the pointer costs an attribute swap on two known nodes instead of a
+      document-wide query per pointerenter. */
+  const haloed = useRef<HTMLElement | null>(null)
+
   const hover = useCallback((el: HTMLElement | null) => {
-    scrub('data-inspect-hover')
-    if (el && document.contains(el)) el.setAttribute('data-inspect-hover', '')
+    const was = haloed.current
+    if (was === el) return
+    was?.removeAttribute('data-inspect-hover')
+    haloed.current = null
+    if (el && document.contains(el)) {
+      el.setAttribute('data-inspect-hover', '')
+      haloed.current = el
+    }
   }, [])
 
   /* ---- the canvas: select on click, operate on ALT+click ---- */
   useEffect(() => {
     document.body.setAttribute('data-inspectmode', 'on')
 
-    // our own chrome — panels and menubar — is never the subject. The
-    // menubar is exempt on purpose: it holds the way OUT of the mode, and
-    // a preventDefault there would strand the visitor in the tool.
-    const exempt = (el: Element | null) => !el || !!el.closest('[data-inspect-self]')
+    /* Never the subject:
+       · our own chrome (panels, menubar) — the menubar holds the way OUT
+         of the mode, and a preventDefault there strands the visitor;
+       · anything inside a DIALOG. A fixed, inset:0 overlay (the zoomed
+         print, the film modal, the shelf's launch overlay) covers the
+         docks and the menubar both — it is painted above everything by
+         design. Swallowing its dismiss click and eating its Escape left
+         the visitor sealed in with no way back to the tool OR the site.
+         A modal is a door; doors stay operable. */
+    const exempt = (el: Element | null) =>
+      !el || !!el.closest('[data-inspect-self], [role="dialog"]')
 
     const onDown = (e: PointerEvent) => {
       downAt.current = { x: e.clientX, y: e.clientY }
@@ -163,9 +201,29 @@ export default function InspectShell() {
 
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null
-      if (!target || exempt(target)) return
-      if (e.altKey) return // ALT reaches through: the site works normally
-      if (travelled(e)) return // that was a window being arranged
+      /* A keyboard activation (Enter/Space on a button) arrives as a click
+         with detail 0 and clientX/Y of 0, which the drag test reads as a
+         travelled pointer at the top-left corner — so it fell through to
+         a pick, or didn't, depending on where the last real press landed.
+         Keyboard always OPERATES: there is no pointer to have travelled,
+         and picking by keyboard is the tree's job. */
+      if (e.detail === 0) {
+        downAt.current = null
+        return
+      }
+      if (!target || exempt(target)) {
+        downAt.current = null
+        return
+      }
+      if (e.altKey) {
+        downAt.current = null
+        return // ALT reaches through: the site works normally
+      }
+      const dragged = travelled(e)
+      // one press, one decision — a stale origin must never judge the
+      // next click (a drag that ended off-target leaves no click at all)
+      downAt.current = null
+      if (dragged) return // that was a window being arranged
       // the link, button or icon underneath does NOT fire: the site is an
       // object while the tool is up
       e.preventDefault()
@@ -196,24 +254,47 @@ export default function InspectShell() {
     const onOver = (e: Event) => {
       const target = e.target as HTMLElement | null
       if (!target || exempt(target)) return
-      target.setAttribute('data-inspect-hover', '')
+      hover(target)
     }
     const onOut = (e: Event) => {
-      ;(e.target as HTMLElement | null)?.removeAttribute?.('data-inspect-hover')
+      if ((e.target as HTMLElement | null) === haloed.current) hover(null)
     }
 
     /* Escape is a ladder, shallowest first: a candidate palette, then the
-       selection, then the tool. Capture + stopPropagation so the focused
-       window's own Escape-to-close never fires underneath. */
+       selection, then the tool.
+
+       Only the first two rungs swallow the key. The document has a dozen
+       other Escape consumers — the skin flyout, the shelf overlay, the
+       film, COMMAND.CTR, the click wheel, the zoomed print — and a
+       capture-phase stopPropagation on EVERY Escape silently broke all of
+       them for as long as the tool was up. So: while the tool has
+       something of its own to close, it closes that and keeps the key;
+       once it doesn't, the key is not its to take.
+
+       And while a DIALOG is open the tool takes no rung at all. That
+       Escape belongs to the door standing in front of the visitor — the
+       zoomed print, the film, the shelf overlay — and every one of those
+       listens for it on the window, in the bubble phase, underneath us.
+
+       The test is whether a dialog is on screen, NOT whether focus is
+       inside one. These overlays never take focus: the zoom is opened by
+       clicking a print and the print keeps the caret, so an
+       activeElement test reads "no dialog here" and confidently eats the
+       key that was the only way out. Every dialog in this shell is
+       conditionally mounted, so its presence in the document IS its
+       open state. */
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
-      e.preventDefault()
-      e.stopPropagation()
+      if (document.querySelector('[role="dialog"]')) return
       if (openVarRef.current) {
+        e.preventDefault()
+        e.stopPropagation()
         setOpenVar(null)
         return
       }
       if (pickRef.current) {
+        e.preventDefault()
+        e.stopPropagation()
         deselect()
         return
       }
@@ -235,8 +316,9 @@ export default function InspectShell() {
       document.removeEventListener('keydown', onKeyDown, true)
       document.body.removeAttribute('data-inspectmode')
       scrub('data-inspect-hover')
+      haloed.current = null
     }
-  }, [pick, deselect, setOn])
+  }, [pick, deselect, setOn, hover])
 
   /* ---- EDIT.MODE (SYS-99) and this mode cannot both hold the desktop.
      The body flag is the contract; watching it settles both orders of
@@ -274,8 +356,13 @@ export default function InspectShell() {
     return () => mq.removeEventListener('change', sync)
   }, [setOn])
 
-  /* ---- teardown: the desktop must not carry a single mark of ours, and
-     a preview must never outlive the tool that made it ---- */
+  /* ---- teardown: the desktop must not carry a single mark of ours, a
+     preview must never outlive the tool that made it, and focus goes back
+     where it came from. Dropping focus to <body> on the way out means the
+     next Tab restarts at the top of the document — for a keyboard visitor
+     that is the whole shell to walk again, every time they put the tool
+     down. The menubar toggle is the fallback: it is where the mode lives,
+     so it is never a wrong answer. ---- */
   useEffect(
     () => () => {
       resetAll()
@@ -283,8 +370,13 @@ export default function InspectShell() {
       scrub('data-inspect-hover')
       scrub('data-inspect-picked')
       scrub('data-inspect-probe')
+      const home =
+        opener && document.contains(opener)
+          ? opener
+          : document.querySelector<HTMLElement>('[data-inspect-toggle]')
+      home?.focus?.({ preventScroll: true })
     },
-    [],
+    [opener],
   )
 
   return (

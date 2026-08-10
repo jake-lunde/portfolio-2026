@@ -77,6 +77,19 @@
   }
 }
 
+/* EDIT.MODE has the desk. aria-disabled rather than disabled, so the
+   control keeps its focus stop and can still ANSWER the question — the
+   label and the tooltip both say who is holding the floor. */
+.menuBtn[data-busy] {
+  color: var(--content-muted);
+  opacity: var(--interactive-disabled-opacity);
+  cursor: not-allowed;
+}
+
+.menuBtn[data-busy]:hover {
+  border-color: transparent;
+}
+
 /* ---- skin switch (flyout trailing the wordmark) ---- */
 
 .menuLeft {
@@ -242,12 +255,6 @@
   inset: calc(var(--menubar-h) + 21px) 0 0 0;
   overflow: hidden;
   background: var(--surface);
-  /* only INSPECT.MODE ever moves these edges, so the transition costs
-     nothing the rest of the time. A one-shot layout tween, not motion:
-     the springs are for transform/opacity and this is a reflow. */
-  transition:
-    left var(--duration-theme) ease-out,
-    right var(--duration-theme) ease-out;
 }
 
 /* ---- INSPECT.MODE (SYS-21): the desktop becomes the canvas ----
@@ -258,9 +265,17 @@
    child is absolutely positioned inside this box, moving its edges
    reflows the right-anchored widgets for free.
 
-   The widths are published by the tool's own sheet, which is only in the
-   document while the tool is mounted; the fallbacks name the same numbers
-   (see inspect/inspectShell.module.css). */
+   The widths come from globals.css; the fallbacks name the same numbers
+   (see inspect/inspectShell.module.css).
+
+   The inset SNAPS — it is not tweened. Animating left/right on this box
+   is a layout + paint pass on the entire OS every frame: every window,
+   every widget, the wallpaper, all of it, and none of it can be
+   composited. That is the exact thing the house rule about
+   transform/opacity exists to prevent. The motion the eye actually wants
+   is the docks arriving, and those slide on their own transform
+   (inspectShell.module.css) over a canvas that is already the right
+   size. Same read, none of the cost. */
 :global(body[data-inspectmode='on']) .desktop {
   left: var(--inspect-left, 244px);
   right: var(--inspect-right, 304px);
@@ -270,12 +285,6 @@
    stroll straight under the docked panels. It sits this one out. */
 :global(body[data-inspectmode='on']) .wanderer {
   display: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .desktop {
-    transition: none;
-  }
 }
 
 /* desktop pattern wallpaper — behind icons and windows */

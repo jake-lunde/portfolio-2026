@@ -34,7 +34,14 @@
      21px skills ticker, both of which stay visible and stay above */
   top: calc(var(--menubar-h) + 21px);
   bottom: 0;
-  z-index: 4000;
+  /* Above the desktop's own fixed overlays (.photoZoom is 6000) and above
+     the menubar (5000). A zoomed print is `fixed; inset: 0` — at 4000 the
+     docks vanished underneath it and the tool looked like it had crashed.
+     The docks are the frame around the canvas, so they stay on top of
+     anything the canvas puts up. Still below BOOT (8000), EDIT.MODE's
+     panel (9000) and the screensaver (9990), all of which outrank the
+     tool by right. */
+  z-index: 6500;
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -42,16 +49,41 @@
   font-family: var(--type-body-family);
 }
 
+/* The docks are the only thing that moves when the tool arrives: the
+   canvas behind them snaps to its new width in one frame (shell.module
+   .css explains why it must not tween), and these slide in over it on a
+   composited transform. */
 .left {
   left: 0;
   width: var(--inspect-left, 244px);
   border-right: var(--border-width-default) solid var(--content);
+  animation: dockInLeft var(--duration-theme) ease-out;
 }
 
 .right {
   right: 0;
   width: var(--inspect-right, 304px);
   border-left: var(--border-width-default) solid var(--content);
+  animation: dockInRight var(--duration-theme) ease-out;
+}
+
+@keyframes dockInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes dockInRight {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .left,
+  .right {
+    animation: none;
+  }
 }
 
 .panelHead {

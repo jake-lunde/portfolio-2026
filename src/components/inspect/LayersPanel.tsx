@@ -63,10 +63,12 @@ function meaningful(el: Element): boolean {
   return labelFor(node) !== el.tagName.toLowerCase()
 }
 
+type Kid = { i: number; el: HTMLElement }
+
 /** Children worth showing, carrying their index in the parent so a key
     stays stable while siblings come and go around them. */
-function kidsOf(el: HTMLElement): Array<{ i: number; el: HTMLElement }> {
-  const out: Array<{ i: number; el: HTMLElement }> = []
+function kidsOf(el: HTMLElement): Kid[] {
+  const out: Kid[] = []
   const kids = el.children
   for (let i = 0; i < kids.length && out.length < MAX_CHILDREN; i++) {
     if (meaningful(kids[i])) out.push({ i, el: kids[i] as HTMLElement })
@@ -120,10 +122,35 @@ export function LayersPanel({
   const treeRef = useRef<HTMLDivElement>(null)
   const wantFocus = useRef(false)
 
+  /* Keying the re-read on the windows array was too narrow by half: the
+     tree is a view of the LIVE DOM, and the DOM churns constantly without
+     a window opening or closing — a dynamic chunk resolving into a
+     window's body, a program switching tabs, a widget ticking. The rows
+     for whatever unmounted went on pointing at detached nodes, so
+     clicking one silently cleared the selection instead of picking.
+
+     So the canvas itself is the trigger. One observer on the desktop
+     root, coalesced to at most one re-read per frame — the point is to
+     stay current, not to re-render per mutation record. */
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setTick((n) => n + 1))
-    return () => cancelAnimationFrame(raf)
-  }, [windows])
+    const root = document.querySelector('[data-desktop-root]')
+    if (!root) return
+    let raf = 0
+    const bump = () => {
+      if (raf) return
+      raf = requestAnimationFrame(() => {
+        raf = 0
+        setTick((n) => n + 1)
+      })
+    }
+    bump() // the first read happens a frame after mount, when windows exist
+    const obs = new MutationObserver(bump)
+    obs.observe(root, { childList: true, subtree: true })
+    return () => {
+      obs.disconnect()
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [])
 
   /* ---- reveal: a pick on the canvas opens the tree to it ---- */
   useEffect(() => {
@@ -164,11 +191,15 @@ export function LayersPanel({
     })
     if (!open) return out
 
-    const walk = (el: HTMLElement, depth: number, prefix: string) => {
-      const kids = kidsOf(el)
+    /* `kids` is passed in, never re-derived: every node's children were
+       already scanned to decide whether its own row is expandable, and
+       scanning them a second time to walk them doubled the cost of the
+       whole tree for nothing. */
+    const walk = (kids: Kid[], depth: number, prefix: string) => {
       kids.forEach(({ i, el: kid }, n) => {
         const key = `${prefix}>${i}`
-        const canOpen = depth < MAX_DEPTH && kidsOf(kid).length > 0
+        const sub = depth < MAX_DEPTH ? kidsOf(kid) : []
+        const canOpen = sub.length > 0
         const isOpen = canOpen && expanded.has(key)
         out.push({
           key,
@@ -180,7 +211,7 @@ export function LayersPanel({
           posinset: n + 1,
           setsize: kids.length,
         })
-        if (isOpen) walk(kid, depth + 1, key)
+        if (isOpen) walk(sub, depth + 1, key)
       })
     }
 
@@ -188,7 +219,8 @@ export function LayersPanel({
       const el = document.querySelector<HTMLElement>(`[data-window-id="${CSS.escape(w.id)}"]`)
       if (!el) return
       const key = `win:${w.id}`
-      const canOpen = kidsOf(el).length > 0
+      const kids = kidsOf(el)
+      const canOpen = kids.length > 0
       const isOpen = canOpen && expanded.has(key)
       out.push({
         key,
@@ -203,7 +235,7 @@ export function LayersPanel({
         posinset: n + 1,
         setsize: stack.length,
       })
-      if (isOpen) walk(el, 2, key)
+      if (isOpen) walk(kids, 2, key)
     })
 
     return out
@@ -221,6 +253,16 @@ export function LayersPanel({
       ?.querySelector<HTMLElement>(`[data-row-key="${CSS.escape(activeKey)}"]`)
       ?.focus({ preventScroll: false })
   }, [activeKey, rows])
+
+  /* Entering the tool puts the caret in the tool. The tree is the only
+     root that reaches the whole desktop from the keyboard, so landing on
+     it means a keyboard visitor can start working immediately instead of
+     tabbing in from wherever the menubar left them. InspectShell captured
+     the opener during its first render, so this does not cost them the
+     way back. */
+  useEffect(() => {
+    treeRef.current?.querySelector<HTMLElement>('[role="treeitem"]')?.focus({ preventScroll: true })
+  }, [])
 
   const toggle = useCallback((key: string) => {
     setExpanded((prev) => {
@@ -298,7 +340,7 @@ export function LayersPanel({
   return (
     <>
       <h2 className={styles.panelHead}>
-        <CopyText k="inspect.section.layers" />
+        <CopyText k="inspect.panel.layers" />
       </h2>
       <div className={styles.panelBody}>
         <div

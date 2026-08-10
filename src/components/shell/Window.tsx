@@ -1,7 +1,13 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { AnimatePresence, motion, useDragControls, useReducedMotion } from 'motion/react'
+import {
+  AnimatePresence,
+  motion,
+  useDragControls,
+  useMotionValue,
+  useReducedMotion,
+} from 'motion/react'
 import { SPRINGS } from '@/lib/motion'
 import type { RefObject } from 'react'
 import type { ResolvedWindow } from '@/programs/resolve'
@@ -48,6 +54,66 @@ export function Window({ def, z, active, desktopRef }: Props) {
     if (active) ref.current?.focus({ preventScroll: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  /* THE DRAG OFFSET, HELD WHERE WE CAN REACH IT.
+     Motion keeps a drag in a transform it owns; handing it explicit
+     motion values changes nothing about the drag and makes the offset
+     readable and writable from here — which it has to be, because the
+     box this window was dragged inside can change size underneath it.
+
+     INSPECT.MODE is the case that forced it: dock 548px of panels and a
+     window parked at the old right edge is now outside the canvas, behind
+     a panel, under `overflow: hidden` — unreachable, unclosable, and
+     invisible. But the same thing was already true of a browser window
+     being narrowed, so the trigger is the DESKTOP BOX ITSELF (a
+     ResizeObserver), not the tool's flag. Every reason the canvas shrinks
+     is handled, and nothing here knows the tool exists. */
+  const dragX = useMotionValue(0)
+  const dragY = useMotionValue(0)
+  const dragging = useRef(false)
+
+  useEffect(() => {
+    const box = desktopRef.current
+    const el = ref.current
+    if (!box || !el) return
+
+    let raf = 0
+    const clamp = () => {
+      raf = 0
+      // never yank the window out from under the hand holding it
+      if (dragging.current) return
+      const w = el.getBoundingClientRect()
+      const d = box.getBoundingClientRect()
+      let dx = 0
+      let dy = 0
+      /* A window WIDER than the canvas is left exactly where it is. The
+         case-study frame is 1280 and deliberately hangs off a narrow
+         desktop (resolve.ts — Jake approved that overhang); "fixing" it
+         here would only trade one clipped edge for the other. Clamping is
+         for windows that could fit and don't currently sit inside. */
+      if (w.width < d.width) {
+        if (w.right > d.right) dx = d.right - w.right
+        if (w.left + dx < d.left) dx = d.left - w.left
+      }
+      if (w.height < d.height) {
+        if (w.bottom > d.bottom) dy = d.bottom - w.bottom
+        if (w.top + dy < d.top) dy = d.top - w.top
+      }
+      if (dx) dragX.set(dragX.get() + dx)
+      if (dy) dragY.set(dragY.get() + dy)
+    }
+    const schedule = () => {
+      if (raf) return
+      raf = requestAnimationFrame(clamp)
+    }
+
+    const obs = new ResizeObserver(schedule)
+    obs.observe(box)
+    return () => {
+      obs.disconnect()
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [desktopRef, dragX, dragY])
 
   /* Recede-when-inactive lives in CSS (`.window:not(.windowActive)`), not
      here: Motion owns this element's inline `opacity` for the open/close
@@ -131,6 +197,8 @@ export function Window({ def, z, active, desktopRef }: Props) {
         width: size.w,
         height: size.h,
         zIndex: z,
+        x: dragX,
+        y: dragY,
       }}
       initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 10 }}
       animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
@@ -143,6 +211,12 @@ export function Window({ def, z, active, desktopRef }: Props) {
       dragConstraints={desktopRef}
       dragElastic={0.12}
       dragMomentum={false}
+      onDragStart={() => {
+        dragging.current = true
+      }}
+      onDragEnd={() => {
+        dragging.current = false
+      }}
       onPointerDown={() => focus(def.id)}
       onKeyDown={(e) => {
         if (e.key !== 'Escape') return
