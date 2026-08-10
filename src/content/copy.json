@@ -10,6 +10,8 @@
   "aichat.offline": "MY LIVE WIRE ISN’T PLUGGED IN YET. THE CARDS STILL WORK.",
   "aichat.placeholder": "ask your own question…",
   "aichat.send": "ASK",
+  "cc.chat.doppler": "Open the suggestion box",
+  "cc.chat.fable": "Chat with FABLE",
   "command.explainer": "Jake writes the brief, judges every return and owns the taste. A crew of model agents does the fan-out. This deck is the real telemetry; the site is what came out of it.",
   "cv.download": "DOWNLOAD PDF",
   "cv.explainer": "It prints itself. What you are reading is typeset live from the same data as the PDF, so the download can never drift from the page.",
@@ -21,6 +23,8 @@
     "base": "Printing…",
     "medieval": "Scribing…"
   },
+  "fablemark.bubble": "WANT TO KNOW WHAT I THINK ABOUT JAKE?",
+  "fablemark.label": "Ask my AI about Jake",
   "feedback.head": {
     "base": "In their words",
     "medieval": "As they attest"

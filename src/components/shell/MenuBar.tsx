@@ -6,6 +6,7 @@ import { useInspect } from '@/store/inspect'
 import { t } from '@/content/copy'
 import { OS_VERSION } from '@/lib/version'
 import { SkinSwitch } from './SkinSwitch'
+import { FableMark } from './FableMark'
 import styles from './shell.module.css'
 
 function Clock() {
@@ -83,6 +84,13 @@ export function MenuBar() {
         <SkinSwitch />
       </div>
       <div className={styles.menuRight}>
+        {/* The one PICTURE in a bar of words, so it leads the cluster
+            rather than sitting inside the run of text switches — wedged
+            between ◎ INSPECT and SND a 17px mark reads as a separator
+            glyph, and out here at the cluster's leading edge it reads as
+            what it is: an identity. The order also survives the 900px
+            fold, where INSPECT stands down and this does not. */}
+        <FableMark />
         {/* INSPECT.MODE (SYS-21) is a tool mode, not a program: it docks
             two panels and turns the desktop into its canvas, so it is
             summoned from the chrome rather than opened from an icon. The
