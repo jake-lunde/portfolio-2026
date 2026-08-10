@@ -18,14 +18,28 @@ import { AmbientAgents } from './AmbientAgents'
 import { Screensaver } from './Screensaver'
 import { Window } from './Window'
 import { Boot } from './Boot'
+import { InspectMount } from '@/components/inspect/InspectMount'
+import { useInspect } from '@/store/inspect'
 import { KnightSpeakLayer } from '@/content/KnightSpeakLayer'
 import styles from './shell.module.css'
 
 /* The OS. Server pages hand us the windows a deep link opens; after
    hydration the store owns everything and the URL follows the focused
-   window via history.replaceState (view-state, not navigation). */
+   window via history.replaceState (view-state, not navigation).
 
-export function Desktop({ initialWindows }: { initialWindows: string[] }) {
+   `initialInspect` is the /inspect deep link: INSPECT.MODE is a tool mode
+   rather than a window now, so the path cannot open it the way every
+   other path opens a program — it opens README onto the canvas and arms
+   the tool over the top. After that the mode is orthogonal to the URL and
+   the focus-sync below carries on as normal. */
+
+export function Desktop({
+  initialWindows,
+  initialInspect = false,
+}: {
+  initialWindows: string[]
+  initialInspect?: boolean
+}) {
   const desktopRef = useRef<HTMLDivElement>(null)
   const stored = useWindows((s) => s.windows)
   const storedFocus = useWindows((s) => s.focused)
@@ -36,6 +50,9 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
     const mobileRoot =
       window.innerWidth <= 720 && initialWindows.length === 1 && initialWindows[0] === 'readme'
     useWindows.getState().setInitial(mobileRoot ? [] : initialWindows)
+    // the tool needs a canvas between its two docks — same floor the
+    // menubar toggle and InspectShell keep
+    if (initialInspect && window.innerWidth > 900) useInspect.getState().setOn(true)
     setHydrated(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -64,7 +81,9 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
       <KnightSpeakLayer />
       <MenuBar />
       <SkillsTicker />
-      <main ref={desktopRef} className={styles.desktop}>
+      {/* the root of INSPECT.MODE's layer tree — the canvas has to be
+          nameable from outside this module (LayersPanel finds it here) */}
+      <main ref={desktopRef} className={styles.desktop} data-desktop-root="">
         <Wallpaper />
         <NowPlayingWidget />
         <DesktopIcons />
@@ -92,6 +111,9 @@ export function Desktop({ initialWindows }: { initialWindows: string[] }) {
       </main>
       <Boot />
       <Screensaver />
+      {/* INSPECT.MODE's docks — code-split, and mounted OUTSIDE the
+          desktop so the canvas it compresses is not its own ancestor */}
+      <InspectMount />
       {/* Global "roughen" filter for the hand-inked medieval dataviz. Defined
           once at the shell so the id resolves document-wide (no duplicate ids
           when several viz windows are open); applied via CSS to `.viz svg`

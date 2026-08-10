@@ -67,6 +67,29 @@
   text-align: right;
 }
 
+/* INSPECT.MODE's toggle. The tool docks 548px of panels; below 900 there
+   is no canvas left between them, and the desktop has already shed its
+   widgets down there anyway. No toggle, no way in — and InspectShell
+   watches the same width and stands the mode down if it is already up. */
+@media (max-width: 900px) {
+  .inspectBtn {
+    display: none;
+  }
+}
+
+/* EDIT.MODE has the desk. aria-disabled rather than disabled, so the
+   control keeps its focus stop and can still ANSWER the question — the
+   label and the tooltip both say who is holding the floor. */
+.menuBtn[data-busy] {
+  color: var(--content-muted);
+  opacity: var(--interactive-disabled-opacity);
+  cursor: not-allowed;
+}
+
+.menuBtn[data-busy]:hover {
+  border-color: transparent;
+}
+
 /* ---- skin switch (flyout trailing the wordmark) ---- */
 
 .menuLeft {
@@ -232,6 +255,36 @@
   inset: calc(var(--menubar-h) + 21px) 0 0 0;
   overflow: hidden;
   background: var(--surface);
+}
+
+/* ---- INSPECT.MODE (SYS-21): the desktop becomes the canvas ----
+
+   The compression is an INSET change, never transform: scale(). A scaled
+   ancestor traps position:fixed descendants (the photo zoom, the film
+   modal) and desyncs Motion's drag coordinates — and since every desktop
+   child is absolutely positioned inside this box, moving its edges
+   reflows the right-anchored widgets for free.
+
+   The widths come from globals.css; the fallbacks name the same numbers
+   (see inspect/inspectShell.module.css).
+
+   The inset SNAPS — it is not tweened. Animating left/right on this box
+   is a layout + paint pass on the entire OS every frame: every window,
+   every widget, the wallpaper, all of it, and none of it can be
+   composited. That is the exact thing the house rule about
+   transform/opacity exists to prevent. The motion the eye actually wants
+   is the docks arriving, and those slide on their own transform
+   (inspectShell.module.css) over a canvas that is already the right
+   size. Same read, none of the cost. */
+:global(body[data-inspectmode='on']) .desktop {
+  left: var(--inspect-left, 244px);
+  right: var(--inspect-right, 304px);
+}
+
+/* The wanderer's walk is plotted against window.innerWidth, so it would
+   stroll straight under the docked panels. It sits this one out. */
+:global(body[data-inspectmode='on']) .wanderer {
+  display: none;
 }
 
 /* desktop pattern wallpaper — behind icons and windows */
@@ -1131,6 +1184,20 @@
   .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):focus-within > .titlebar,
   .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):focus-within > .windowBody {
     filter: opacity(1);
+  }
+
+  /* INSPECT.MODE: the recede is a focus cue for a desk, and the tool
+     turns the desk into a canvas. Objects on a canvas are all equally
+     THERE — a dimmed window would read as a disabled layer and would
+     also lie to the inspector about what the eye is reading. The extra
+     :not() chain is only there to out-specify the rule above. */
+  :global(body[data-inspectmode='on'])
+    .window:not(.windowActive):not(.windowBare):not(.windowNoRecede)
+    > .titlebar,
+  :global(body[data-inspectmode='on'])
+    .window:not(.windowActive):not(.windowBare):not(.windowNoRecede)
+    > .windowBody {
+    filter: none;
   }
 }
 

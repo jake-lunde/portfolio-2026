@@ -1,0 +1,595 @@
+/* INSPECT.MODE — SYS-21 chrome, tool-mode edition.
+
+   This tool grades other people's token usage, so it holds itself to the
+   strictest reading of the house rule — point it at its own panels and
+   every row must come back SEMANTIC:
+
+   · type comes from WHOLE roles (--type-<role>-family/size/tracking/
+     leading together), never a semantic family beside a raw --tracking-*,
+     which is a core primitive and would flag;
+   · spacing is --spacing-component-*, borders are --border-width-default /
+     --border-width-strong (the semantic pair) — not the core hairline/
+     thin/thick literals older program modules still reach for.
+
+   Two inline styles survive, both unavoidable and both reported values
+   rather than chosen ones: the swatch fill (the hex being reported IS the
+   hex being painted, and no token can name it) and the tree row's indent
+   (a depth counted at runtime).
+
+   The chrome is PAPER, not CRT: these panels sit on the desktop's own
+   surface as tool furniture, so ink is --content. The window version drew
+   on a CRT body and used --content-inverse throughout — none of that
+   carries over. */
+
+/* ================= the two docks =================
+
+   The widths come from --inspect-left / --inspect-right, declared in
+   globals.css on the body flag: the desktop compresses by exactly the
+   width of the panels beside it, and two CSS modules cannot hand each
+   other a number. Fallbacks name the same values on both sides. */
+
+.panel {
+  position: fixed;
+  /* the same top the desktop uses: under the menubar AND under the
+     21px skills ticker, both of which stay visible and stay above */
+  top: calc(var(--menubar-h) + 21px);
+  bottom: 0;
+  /* Above the desktop's own fixed overlays (.photoZoom is 6000) and above
+     the menubar (5000). A zoomed print is `fixed; inset: 0` — at 4000 the
+     docks vanished underneath it and the tool looked like it had crashed.
+     The docks are the frame around the canvas, so they stay on top of
+     anything the canvas puts up. Still below BOOT (8000), EDIT.MODE's
+     panel (9000) and the screensaver (9990), all of which outrank the
+     tool by right. */
+  z-index: 6500;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  color: var(--content);
+  font-family: var(--type-body-family);
+}
+
+/* The docks are the only thing that moves when the tool arrives: the
+   canvas behind them snaps to its new width in one frame (shell.module
+   .css explains why it must not tween), and these slide in over it on a
+   composited transform. */
+.left {
+  left: 0;
+  width: var(--inspect-left, 244px);
+  border-right: var(--border-width-default) solid var(--content);
+  animation: dockInLeft var(--duration-theme) ease-out;
+}
+
+.right {
+  right: 0;
+  width: var(--inspect-right, 304px);
+  border-left: var(--border-width-default) solid var(--content);
+  animation: dockInRight var(--duration-theme) ease-out;
+}
+
+@keyframes dockInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes dockInRight {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .left,
+  .right {
+    animation: none;
+  }
+}
+
+.panelHead {
+  flex: none;
+  margin: 0;
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  background: var(--surface-raised);
+  border-bottom: var(--border-width-default) solid var(--border);
+}
+
+.panelBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--spacing-component-sm);
+}
+
+/* ================= LAYERS (left) ================= */
+
+.tree {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  padding-top: var(--spacing-component-xs);
+  padding-right: var(--spacing-component-xs);
+  padding-bottom: var(--spacing-component-xs);
+  /* padding-left is the indent, set per row from its depth */
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  color: var(--content-muted);
+  cursor: default;
+  user-select: none;
+}
+
+.row:hover {
+  color: var(--content);
+  background: var(--interactive-default-hover);
+}
+
+/* a window row is the tier that matters: it is an object on the canvas */
+.row[data-window] {
+  color: var(--content);
+  text-transform: uppercase;
+}
+
+.row[data-focused] {
+  box-shadow: inset var(--border-width-strong) 0 0 var(--border);
+}
+
+/* what sits ON an accent fill is the paper, house-wide */
+.row[data-picked] {
+  color: var(--surface);
+  background: var(--accent);
+}
+
+.row:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: calc(var(--border-width-strong) * -1);
+}
+
+.chevron {
+  flex: none;
+  width: var(--spacing-component-md);
+  text-align: center;
+  color: var(--content-muted);
+  cursor: pointer;
+}
+
+.chevron[data-empty] {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.row[data-picked] .chevron {
+  color: var(--surface);
+}
+
+.rowLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ================= INSPECTOR (right) ================= */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-component-sm);
+}
+
+.empty,
+.note,
+.hint,
+.warnText {
+  margin: 0;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+  color: var(--content-muted);
+}
+
+.empty {
+  color: var(--content);
+}
+
+/* ---- the preview banner: live overrides, never saved ---- */
+.preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-component-sm);
+  margin-bottom: var(--spacing-component-md);
+  padding: var(--spacing-component-sm);
+  border: var(--border-width-default) solid var(--status-warning-base);
+  background: color-mix(in srgb, var(--status-warning-base) 12%, transparent);
+}
+
+.previewText {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  color: var(--content);
+}
+
+.resetAll {
+  flex: none;
+  padding: 0 var(--spacing-component-xs);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--content);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: var(--radius-none);
+  cursor: pointer;
+}
+
+.resetAll:hover {
+  color: var(--surface);
+  background: var(--content);
+}
+
+.resetAll:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- ident ---- */
+.ident {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-component-sm);
+  flex-wrap: wrap;
+  padding-bottom: var(--spacing-component-sm);
+  border-bottom: var(--border-width-default) solid var(--content);
+}
+
+.identLabel,
+.head,
+.tier,
+.gradeChip,
+.roleChip,
+.candidateName,
+.candidateGrade {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+}
+
+.identLabel {
+  color: var(--accent);
+}
+
+.identName,
+.prop,
+.varName,
+.value,
+.ratio,
+.facts {
+  font-family: var(--type-mono-family);
+  font-size: var(--type-mono-size);
+  font-weight: var(--type-mono-weight);
+  letter-spacing: var(--type-mono-tracking);
+  line-height: var(--type-mono-leading);
+}
+
+.identName {
+  color: var(--content);
+  overflow-wrap: anywhere;
+}
+
+.reskin {
+  margin: var(--spacing-component-sm) 0 0;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--accent-expressive-text);
+}
+
+.section {
+  margin-top: var(--spacing-component-lg);
+}
+
+.head {
+  margin: 0 0 var(--spacing-component-sm);
+  color: var(--content-muted);
+}
+
+/* ---- TOKENS ---- */
+.rows,
+.vars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-component-sm);
+}
+
+.tokenRow {
+  padding: var(--spacing-component-sm);
+  border: var(--border-width-default) solid var(--border);
+}
+
+.prop {
+  display: block;
+  color: var(--content);
+}
+
+.vars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-component-xs);
+  margin-top: var(--spacing-component-xs);
+}
+
+.var {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-xs);
+}
+
+/* a core primitive consumed raw: the danger role, as a left rule rather
+   than a fill, so the row stays readable while it stays accused */
+.var[data-warn] {
+  padding: var(--spacing-component-xs);
+  background: color-mix(in srgb, var(--status-danger-base) 12%, transparent);
+  box-shadow: inset var(--border-width-strong) 0 0 var(--status-danger-base);
+}
+
+/* a role currently previewing an override — the same left rule, in the
+   warning role, so "this is not what the file says" reads at a glance */
+.var[data-held] {
+  padding: var(--spacing-component-xs);
+  background: color-mix(in srgb, var(--status-warning-base) 12%, transparent);
+  box-shadow: inset var(--border-width-strong) 0 0 var(--status-warning-base);
+}
+
+.varName {
+  color: var(--content);
+  overflow-wrap: anywhere;
+}
+
+.value {
+  color: var(--content-muted);
+  overflow-wrap: anywhere;
+}
+
+.warnText {
+  flex: 1 1 100%;
+  color: var(--content);
+}
+
+.tier {
+  flex: none;
+  padding: 0 var(--spacing-component-xs);
+  color: var(--content-muted);
+  border: var(--border-width-default) solid var(--border);
+}
+
+.tier[data-tier='semantic'],
+.tier[data-tier='component'] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.tier[data-tier='core'] {
+  color: var(--status-danger-base);
+  border-color: var(--status-danger-base);
+}
+
+.swatch,
+.swatchBtn {
+  flex: none;
+  width: var(--spacing-component-md);
+  height: var(--spacing-component-md);
+  border: var(--border-width-default) solid var(--border);
+  border-radius: var(--radius-none);
+}
+
+/* the one editable thing in the panel: it opens the candidates */
+.swatchBtn {
+  cursor: pointer;
+  box-shadow: 0 0 0 var(--border-width-default) var(--surface);
+}
+
+.swatchBtn:hover,
+.swatchBtn[aria-expanded='true'] {
+  border-color: var(--content);
+  box-shadow: 0 0 0 var(--border-width-strong) var(--accent);
+}
+
+.swatchBtn:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- the candidate palette ---- */
+.palette {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--spacing-component-xs);
+  border: var(--border-width-default) solid var(--content);
+  background: var(--surface-raised);
+}
+
+.candidate {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  width: 100%;
+  padding: var(--spacing-component-xs);
+  text-align: left;
+  color: var(--content);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-none);
+  cursor: pointer;
+}
+
+.candidate:hover {
+  background: var(--interactive-default-hover);
+}
+
+.candidate:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: calc(var(--border-width-strong) * -1);
+}
+
+.candidateName {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: none;
+  color: var(--content-muted);
+}
+
+.candidateGrade {
+  flex: none;
+  padding: 0 var(--spacing-component-xs);
+  color: var(--content-muted);
+  border: var(--border-width-default) solid var(--border);
+}
+
+/* the pick would break the pair it lands in. It still previews — this is
+   the driver's seat — but the instrument reads red before the click. */
+.candidate[data-fail] .candidateGrade {
+  color: var(--status-danger-on-base);
+  background: var(--status-danger-base);
+  border-color: var(--status-danger-base);
+}
+
+.candidate[data-reset] {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  border-top: var(--border-width-default) solid var(--border);
+}
+
+/* ---- CONTRAST ---- */
+.contrast {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-sm);
+}
+
+.pair {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+}
+
+.on {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+  color: var(--content-muted);
+}
+
+.ratio {
+  color: var(--content);
+}
+
+.gradeChip {
+  padding: 0 var(--spacing-component-xs);
+  color: var(--accent);
+  border: var(--border-width-default) solid var(--accent);
+}
+
+.gradeChip[data-fail] {
+  color: var(--status-danger-on-base);
+  background: var(--status-danger-base);
+  border-color: var(--status-danger-base);
+}
+
+/* ---- TYPE ---- */
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--spacing-component-xs) var(--spacing-component-sm);
+  margin: 0 0 var(--spacing-component-sm);
+}
+
+.facts dt {
+  color: var(--content-muted);
+  text-transform: uppercase;
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--content);
+  overflow-wrap: anywhere;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-xs);
+}
+
+.roleChip {
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  color: var(--accent);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--accent);
+  border-radius: var(--radius-none);
+  text-transform: none;
+}
+
+/* ---- MOTION ---- */
+.springLine {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-sm);
+  margin: 0 0 var(--spacing-component-xs);
+}
+
+.springName {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  line-height: var(--type-label-leading);
+  color: var(--accent);
+}

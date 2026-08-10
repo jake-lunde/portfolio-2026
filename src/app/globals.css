@@ -35,6 +35,19 @@ input {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
+/* INSPECT.MODE's two docks (SYS-21). The widths live here, on the body
+   flag the tool sets, because TWO CSS modules need the same numbers and
+   neither can hand them to the other: the panels are sized by them
+   (components/inspect/inspectShell.module.css) and the desktop compresses
+   by exactly the same amount to make the canvas between them
+   (components/shell/shell.module.css). Not tokens — this is one tool's
+   furniture, not a system measure. Both consumers carry these as
+   fallbacks, so a missing sheet can never leave a gap or an overlap. */
+body[data-inspectmode='on'] {
+  --inspect-left: 244px;
+  --inspect-right: 304px;
+}
+
 a {
   color: var(--accent);
 }

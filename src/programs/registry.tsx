@@ -331,22 +331,11 @@ export const PROGRAMS: ProgramDef[] = [
     onDesktop: true,
     path: '/spec',
   },
-  {
-    // INSPECT.MODE — the read-only half of the token story. SPEC.SHEET
-    // prints the system; this one lets a visitor point at any pixel on the
-    // desktop and watch it name its own tokens. Public, zero writes.
-    id: 'inspect-mode',
-    name: 'INSPECT.MODE',
-    meta: 'SYS-21',
-    explainer: 'inspect.explainer',
-    icon: 'rings',
-    component: dynamic(() => import('@/programs/inspectmode/InspectMode')),
-    size: { w: 460, h: 640 },
-    pos: { x: 340, y: 70 },
-    chrome: 'crt',
-    onDesktop: true,
-    path: '/inspect',
-  },
+  /* INSPECT.MODE (SYS-21) is deliberately NOT here. It stopped being a
+     program: it is a tool mode summoned from the menubar that docks two
+     panels and turns the whole desktop into its canvas — a window would
+     have to cover the thing it inspects. See src/components/inspect/ and
+     src/store/inspect.ts. The /inspect path still resolves (resolve.ts). */
   {
     // SPEC.SHEET's playable half, in its own window. No desktop icon and no
     // deep link by design: it opens from the sheet's title row (the sheet
