@@ -26,6 +26,19 @@ import styles from './inspectShell.module.css'
      site is an OBJECT — plain click selects it — and ALT is the key that
      reaches through and OPERATES it. Same modifier, inverted meaning,
      which is the Figma bargain and the reason it reads as a tool.
+   · that bargain is now a NAMED PAIR rather than a hidden modifier.
+     SELECT and OPERATE are the two tools, one of them is always in the
+     hand, the header says which — and ALT borrows the other one for the
+     length of a click, in both directions. DevTools' picker toggle, and
+     the reason a visitor who never finds the ALT key can still use the
+     site with the tool up. The store holds the state (store/inspect.ts);
+     everything here reads it through a ref so the listeners never restage.
+   · the tool wears the crown. The OS menubar and the skills ticker stand
+     down while the mode runs (shell.module.css) and this file draws an
+     accent-flooded header across the canvas between the docks. Nothing
+     of the shell sits above the tool in the hierarchy any more: the two
+     panels and the header ARE the root frame, and the site is what is
+     mounted inside them.
    · the desktop compresses by INSET, never by transform: scale(). A
      scaled ancestor traps position:fixed descendants (the photo zoom, the
      film modal) and desyncs Motion's drag coordinates. Every desktop
@@ -56,10 +69,22 @@ import styles from './inspectShell.module.css'
    and an !important cursor on every node in the document also lands on
    overlays this tool does not own. Descendant-of-canvas out-specifies the
    components' own cursor rules without the hammer. Dialogs opt out with
-   the rest of the tool's chrome: a modal is a door, not a specimen. */
+   the rest of the tool's chrome: a modal is a door, not a specimen.
+
+   And the crosshair belongs to SELECT alone. In OPERATE the canvas is
+   just the site: the pointer has to say so, which means the site's own
+   cursors — the grab hand on a titlebar, the pointer on a link — come
+   back untouched. ALT does not repaint it; a cursor that flickered on a
+   modifier would be noise on every keystroke, and the header already
+   holds the answer to "which tool am I holding".
+
+   The HALO is deliberately NOT gated here, though the canvas stops
+   raising one in OPERATE (see onOver). The tree still highlights the row
+   under the pointer in either tool — that panel is the tool's own
+   instrument, not the canvas, and it works the same in both hands. */
 const GLOBAL_CSS = `
-  body[data-inspectmode="on"] [data-desktop-root],
-  body[data-inspectmode="on"] [data-desktop-root] *{
+  body[data-inspectmode="on"][data-inspecttool="select"] [data-desktop-root],
+  body[data-inspectmode="on"][data-inspecttool="select"] [data-desktop-root] *{
     cursor:crosshair;
   }
   body[data-inspectmode="on"] [data-inspect-self],
@@ -95,7 +120,11 @@ function scrub(attr: string) {
 
 export default function InspectShell() {
   const skin = useSettings((s) => s.skin)
+  const theme = useSettings((s) => s.theme)
+  const toggleTheme = useSettings((s) => s.toggleTheme)
   const setOn = useInspect((s) => s.setOn)
+  const tool = useInspect((s) => s.tool)
+  const setTool = useInspect((s) => s.setTool)
 
   const [report, setReport] = useState<Inspection | null>(null)
   const [picked, setPicked] = useState<HTMLElement | null>(null)
@@ -116,6 +145,7 @@ export default function InspectShell() {
   // the listeners bind once and read through refs, so they never go stale
   const pickRef = useRef<HTMLElement | null>(null)
   const openVarRef = useRef<string | null>(null)
+  const toolRef = useRef(tool)
   const downAt = useRef<{ x: number; y: number } | null>(null)
   useEffect(() => {
     openVarRef.current = openVar
@@ -173,7 +203,29 @@ export default function InspectShell() {
     }
   }, [])
 
-  /* ---- the canvas: select on click, operate on ALT+click ---- */
+  /* ---- which tool is in the hand ----
+     Three jobs, one effect, because they must never disagree: the ref the
+     capture listeners read, the body attribute the crosshair rule reads,
+     and dropping any halo the canvas raised on the way out of SELECT (an
+     outline left hanging over a site you are now clicking through reads
+     as a stuck selection). The attribute is written here rather than in
+     the listener effect so switching tools costs an attribute, not a full
+     unbind/rebind of six document listeners. */
+  useEffect(() => {
+    toolRef.current = tool
+    document.body.setAttribute('data-inspecttool', tool)
+    if (tool !== 'select') hover(null)
+  }, [tool, hover])
+
+  /** True when this pointer event is asking to PICK: the resting tool,
+      inverted while ALT is down. One rule, both directions — which is
+      what lets the hint say "alt is always the other tool" and be exact. */
+  const picking = useCallback(
+    (e: MouseEvent) => (toolRef.current === 'select' ? !e.altKey : e.altKey),
+    [],
+  )
+
+  /* ---- the canvas: pick or operate, per the tool and the ALT key ---- */
   useEffect(() => {
     document.body.setAttribute('data-inspectmode', 'on')
 
@@ -215,9 +267,12 @@ export default function InspectShell() {
         downAt.current = null
         return
       }
-      if (e.altKey) {
+      if (!picking(e)) {
         downAt.current = null
-        return // ALT reaches through: the site works normally
+        // OPERATE (or SELECT with ALT held): the site works normally —
+        // nothing is prevented, nothing is stopped, the click lands where
+        // it would with no tool up at all
+        return
       }
       const dragged = travelled(e)
       // one press, one decision — a stale origin must never judge the
@@ -234,11 +289,14 @@ export default function InspectShell() {
     /* Drill: with an ancestor already selected, a double-click walks ONE
        level down the chain toward the click rather than jumping to the
        deepest node. That is what makes a window row in the tree a usable
-       starting point. With no ancestor selected it is just a click. */
+       starting point. With no ancestor selected it is just a click.
+
+       Gated on the same one rule as the single click, which is what keeps
+       the desktop's own double-click-to-open alive in OPERATE. */
     const onDouble = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null
       if (!target || exempt(target)) return
-      if (e.altKey) return
+      if (!picking(e)) return
       e.preventDefault()
       e.stopPropagation()
       const current = pickRef.current
@@ -251,7 +309,13 @@ export default function InspectShell() {
       pick(target)
     }
 
+    /* The halo is SELECT's instrument: it answers "what would this click
+       take?", and in OPERATE that question has no answer worth drawing —
+       the click is going to the site. ALT is not consulted, for the same
+       reason the cursor isn't: a halo that blinked on and off with a
+       modifier is a flicker, not a reading. */
     const onOver = (e: Event) => {
+      if (toolRef.current !== 'select') return
       const target = e.target as HTMLElement | null
       if (!target || exempt(target)) return
       hover(target)
@@ -315,10 +379,11 @@ export default function InspectShell() {
       document.removeEventListener('pointerout', onOut, true)
       document.removeEventListener('keydown', onKeyDown, true)
       document.body.removeAttribute('data-inspectmode')
+      document.body.removeAttribute('data-inspecttool')
       scrub('data-inspect-hover')
       haloed.current = null
     }
-  }, [pick, deselect, setOn, hover])
+  }, [pick, deselect, setOn, hover, picking])
 
   /* ---- EDIT.MODE (SYS-99) and this mode cannot both hold the desktop.
      The body flag is the contract; watching it settles both orders of
@@ -362,18 +427,32 @@ export default function InspectShell() {
      next Tab restarts at the top of the document — for a keyboard visitor
      that is the whole shell to walk again, every time they put the tool
      down. The menubar toggle is the fallback: it is where the mode lives,
-     so it is never a wrong answer. ---- */
+     so it is never a wrong answer.
+
+     ORDER MATTERS now that the menubar hides while the tool is up. A
+     display:none element cannot take focus, so the flag has to be gone
+     before the call. It is: the listener effect above is declared FIRST
+     and React runs cleanups in declaration order, so `data-inspectmode`
+     comes off the body — and the bar comes back into the layout — a
+     statement before this one asks for the focus. Keep this effect last
+     in the file.
+
+     And <body> does not count as an opener. It is what activeElement
+     reports when nothing is focused at all — the mode entered by deep
+     link, or by a click the browser did not move focus for — and it
+     passes document.contains() happily, so "restore the opener" was
+     quietly restoring NOTHING on exactly the paths that most need a
+     landing. Body means no opener; the toggle takes it. ---- */
   useEffect(
     () => () => {
       resetAll()
       document.body.removeAttribute('data-inspectmode')
+      document.body.removeAttribute('data-inspecttool')
       scrub('data-inspect-hover')
       scrub('data-inspect-picked')
       scrub('data-inspect-probe')
-      const home =
-        opener && document.contains(opener)
-          ? opener
-          : document.querySelector<HTMLElement>('[data-inspect-toggle]')
+      const kept = opener && opener !== document.body && document.contains(opener) ? opener : null
+      const home = kept ?? document.querySelector<HTMLElement>('[data-inspect-toggle]')
       home?.focus?.({ preventScroll: true })
     },
     [opener],
@@ -386,6 +465,64 @@ export default function InspectShell() {
           the panel never reports its own instrumentation as the subject's */}
       {/* eslint-disable-next-line react/no-danger */}
       <style data-inspect-style="" dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
+
+      {/* THE CROWN. The OS bar and the ticker are hidden while this runs
+          (shell.module.css), so this row is the top of the hierarchy and
+          it belongs to the tool. `data-inspect-self` does double duty as
+          ever: exempt from picking, exempt from the crosshair. */}
+      <header className={styles.crown} data-inspect-head="" data-inspect-self="">
+        <span className={styles.crownTitle}>{t('inspect.title', skin)}</span>
+        <span className={styles.crownActive}>{t('inspect.active', skin)}</span>
+
+        <div className={styles.tools} role="group" aria-label={t('inspect.tool.group', skin)}>
+          <button
+            type="button"
+            className={styles.tool}
+            data-inspect-tool="select"
+            aria-pressed={tool === 'select'}
+            onClick={() => setTool('select')}
+          >
+            {t('inspect.tool.select', skin)}
+          </button>
+          <button
+            type="button"
+            className={styles.tool}
+            data-inspect-tool="operate"
+            aria-pressed={tool === 'operate'}
+            onClick={() => setTool('operate')}
+          >
+            {t('inspect.tool.operate', skin)}
+          </button>
+        </div>
+
+        {/* The light switch, brought inside the tool. Flipping theme
+            mid-nudge is the whole AA-judging workflow — pick a role, cast
+            a candidate, flip, watch the grade re-judge — and the bar that
+            used to hold it is not on screen any more. Same store action
+            and the same accessible name as the menubar's, and shown on
+            the same terms: classic is the only skin with two modes. */}
+        {skin === 'classic' && (
+          <button
+            type="button"
+            className={styles.crownBtn}
+            data-inspect-theme=""
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+          >
+            {theme === 'light' ? 'LGT' : 'DRK'}
+          </button>
+        )}
+
+        <button
+          type="button"
+          className={styles.crownBtn}
+          data-inspect-exit=""
+          onClick={() => setOn(false)}
+          aria-label={t('inspect.exit', skin)}
+        >
+          <span aria-hidden="true">✕</span>
+        </button>
+      </header>
 
       <aside
         className={`${styles.panel} ${styles.left}`}
