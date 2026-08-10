@@ -1,7 +1,8 @@
-/* ASK MY AI. Three bands in one column: the machine introduces itself,
-   the transcript scrolls, the composer is pinned. Nothing here invents a
-   color — the bubble stroke, the card fill and the accent are the same
-   roles the SUGGESTION BOX and the guestbook already use. */
+/* ASK MY AI. A phone thread in three bands: the contact header names who
+   is talking, the transcript scrolls, and the offers ride a rail docked
+   to the pinned composer. Nothing here invents a color — the bubble
+   stroke, the card fill and the accent are the same roles the SUGGESTION
+   BOX and the guestbook already use. */
 
 .chat {
   display: flex;
@@ -12,20 +13,24 @@
   background: var(--surface);
 }
 
-/* ---- the machine introduces itself ---- */
+/* ---- the contact header ---- */
 
-.head {
+/* mask, then name, then the transcript. The stack is the whole point:
+   centred identity reads as "who you are talking to", where the old
+   side-by-side read as "a panel with a mascot". */
+.identity {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
   flex: 0 0 auto;
+  padding-bottom: 12px;
+  border-bottom: var(--border-width-hairline) solid var(--border);
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
+.avatar,
+.thinkMark {
   flex: 0 0 auto;
-  margin-top: 2px;
   background: var(--content); /* one-ink rule — crew never gets color */
   mask-size: contain;
   mask-repeat: no-repeat;
@@ -35,55 +40,19 @@
   -webkit-mask-position: center;
 }
 
-.headText {
-  min-width: 0;
+.avatar {
+  width: 46px;
+  height: 46px;
 }
 
-/* the greeting is the one bubble that keeps DOPPLER's tail — it is
-   pointing at somebody */
-.greeting {
-  font-family: var(--mono);
-  font-size: var(--text-ui);
-  letter-spacing: 0.08em;
-  line-height: 1.5;
+/* the display face at body size — the same treatment the SUGGESTION BOX
+   gives its resident reviewer's name, so the crew is named one way */
+.name {
+  font-family: var(--display);
+  font-size: var(--type-body-size);
+  line-height: 1.2;
   color: var(--content);
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
-  border-radius: var(--radius-md);
-  padding: 9px 12px;
   margin: 0;
-  position: relative;
-}
-
-[data-theme='dark'] .greeting {
-  border-color: var(--border);
-}
-
-.greeting::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  left: -6px;
-  width: 10px;
-  height: 10px;
-  background: var(--surface-raised);
-  border-bottom: var(--border-width-default) solid var(--content);
-  border-left: var(--border-width-default) solid var(--content);
-  transform: rotate(45deg);
-}
-
-[data-theme='dark'] .greeting::before {
-  border-color: var(--border);
-}
-
-.note {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.04em;
-  line-height: 1.5;
-  color: var(--content-muted);
-  margin: 8px 0 0;
-  max-width: 52ch;
 }
 
 /* ---- the transcript ---- */
@@ -96,10 +65,12 @@
 }
 
 /* the visitor's turn is plain text on the right — no bubble. Only one
-   party in this window is a machine, and only the machine gets chrome. */
+   party in this window is a machine, and only the machine gets chrome.
+   Set at body-sm, matching the answers: the ask and the answer are two
+   halves of one exchange and neither should look like a footnote. */
 .ask {
   font-family: var(--mono);
-  font-size: var(--text-ui);
+  font-size: var(--type-body-sm-size);
   letter-spacing: 0.04em;
   line-height: 1.5;
   color: var(--content-muted);
@@ -130,29 +101,124 @@
   border-color: var(--border);
 }
 
-/* errors and the cap are the machine's own voice, not an answer */
-.saidSystem {
+/* the machine speaking as itself — the greeting, the errors, the cap.
+   Mono caps in the same bubble, because it is still a message. */
+.machine {
   font-family: var(--mono);
   font-size: var(--text-ui);
   letter-spacing: 0.08em;
+  line-height: 1.5;
+}
+
+/* errors and the cap are a warning on top of that, so they take accent */
+.saidSystem {
   color: var(--accent);
 }
 
-/* ---- the five cards (empty state) ---- */
+/* the provenance line rides under the greeting bubble as an aside, not
+   as chrome — it scrolls away once there is a conversation to read */
+.note {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  color: var(--content-muted);
+  margin: -10px 0 18px;
+  max-width: 52ch;
+}
 
-.cards {
+/* ---- the wait ---- */
+
+/* the wire is out and nothing is back yet. The bubble holds FABLE's own
+   mask, turning and breathing — one mark, transform and opacity only. */
+.thinking {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  padding: 10px 14px;
+  width: max-content;
+}
+
+.thinkMark {
+  width: 20px;
+  height: 20px;
+  animation: think 1.6s ease-in-out infinite;
+}
+
+@keyframes think {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.35;
+  }
+  50% {
+    transform: rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0.35;
+  }
+}
+
+/* said, not shown — the turning mark means "thinking" to an eye, and
+   this is the same sentence for an ear */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+/* ---- the offers ---- */
+
+/* one rail, docked to the top of the composer and never emptied until
+   every card is spent. The window scrolls vertically; this scrolls
+   sideways, and the right-edge fade is the only thing that says so.
+   The trailing padding is what lets the fade land on empty space at the
+   end of the scroll rather than dimming the last card forever. */
+.carousel {
+  display: flex;
   gap: 10px;
+  flex: 0 0 auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  /* the 4px gutter (paid back by the negative margin) is headroom for a
+     focus ring on the first card — overflow would shear it otherwise */
+  padding: 12px 24px 12px 4px;
+  margin-left: -4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  /* alpha-only mask: a fade hint, not a color decision */
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 24px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 24px), transparent 100%);
+}
+
+.carousel::-webkit-scrollbar {
+  height: 6px;
+}
+
+.carousel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.carousel::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-pill);
 }
 
 .card {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  align-items: center;
-  gap: 4px 12px;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 0 0 240px;
+  width: 240px;
+  scroll-snap-align: start;
   text-align: left;
   padding: 12px 14px;
   background: var(--surface-raised);
@@ -161,11 +227,18 @@
   cursor: pointer;
   transition:
     transform var(--duration-tap) ease-out,
+    opacity var(--duration-fade) ease-out,
     border-color var(--duration-tap) ease-out;
 }
 
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .cardEyebrow {
-  grid-column: 1;
   font-family: var(--mono);
   font-size: var(--text-label);
   letter-spacing: 0.16em;
@@ -174,11 +247,11 @@
 }
 
 .cardPrompt {
-  grid-column: 1;
   font-family: var(--display);
-  /* the card IS the ask, so the prompt is set at heading-3 (18px) — the
-     one rung above body-lg on the ramp, not a number picked by eye */
-  font-size: var(--type-heading-3-size);
+  /* the card IS the ask, so the prompt takes the body rung — one step
+     above the transcript, and the widest size that still lets the full
+     question sit in a 240px seat without a scrollbar of its own */
+  font-size: var(--type-body-size);
   line-height: 1.3;
   color: var(--content);
 }
@@ -186,8 +259,7 @@
 /* the send affordance, borrowed from the Family Hub panel. Decorative —
    the whole card is the button, so the arrow stays out of the a11y tree */
 .cardArrow {
-  grid-column: 2;
-  grid-row: 1 / span 2;
+  flex: 0 0 auto;
   font-family: var(--mono);
   font-size: var(--type-body-size);
   color: var(--content-muted);
@@ -196,16 +268,21 @@
     color var(--duration-tap) ease-out;
 }
 
-.card:hover,
+.card:hover:not(:disabled),
 .card:focus-visible {
   border-color: var(--content);
   transform: translateY(-1px);
 }
 
-.card:hover .cardArrow,
+.card:hover:not(:disabled) .cardArrow,
 .card:focus-visible .cardArrow {
   color: var(--accent);
   transform: translateX(3px);
+}
+
+/* the press — the only state that pushes IN rather than up */
+.card:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .card:focus-visible {
@@ -213,45 +290,19 @@
   outline-offset: 2px;
 }
 
-/* ---- the leftovers, once the conversation starts ---- */
-
-.rail {
-  display: flex;
-  gap: 8px;
-  flex: 0 0 auto;
-  overflow-x: auto;
-  padding: 10px 0;
-  /* the rail can scroll sideways; the window must not */
-  scrollbar-width: thin;
+/* while an answer streams every other offer is off the table, and the
+   dimming is what makes that read as deliberate rather than broken */
+.card:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
-.chip {
-  flex: 0 0 auto;
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--content-muted);
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--border);
-  border-radius: var(--radius-pill);
-  padding: 5px 12px;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    color var(--duration-tap) ease-out,
-    border-color var(--duration-tap) ease-out;
-}
-
-.chip:hover,
-.chip:focus-visible {
-  color: var(--content);
-  border-color: var(--content);
-}
-
-.chip:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+/* spent. The card slides out and hands its seat back on transitionend —
+   ordered after :disabled so a card retired mid-stream still leaves. */
+.card[data-leaving] {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
 }
 
 /* ---- the composer ---- */
@@ -348,19 +399,26 @@
 
 @media (prefers-reduced-motion: reduce) {
   .card,
-  .cardArrow,
-  .chip {
+  .cardArrow {
     transition: none;
   }
 
-  .card:hover,
-  .card:focus-visible {
+  .card:hover:not(:disabled),
+  .card:focus-visible,
+  .card:active:not(:disabled) {
     transform: none;
   }
 
-  .card:hover .cardArrow,
+  .card:hover:not(:disabled) .cardArrow,
   .card:focus-visible .cardArrow {
     transform: none;
+  }
+
+  /* the wait still has to look like a wait, so the mark stays — held at
+     a dimmed constant instead of turning */
+  .thinkMark {
+    animation: none;
+    opacity: 0.6;
   }
 }
 
@@ -386,5 +444,12 @@
   .said,
   .ask {
     max-width: 100%;
+  }
+
+  /* the seat narrows so a second card always peeks — the rail has to
+     announce itself as scrollable on the smallest screen too */
+  .card {
+    flex-basis: 210px;
+    width: 210px;
   }
 }

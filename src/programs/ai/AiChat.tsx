@@ -26,16 +26,24 @@ import styles from './ai.module.css'
    in the body face, because that is how a person reads an appraisal.
    (Same rule the retired essay ran on.)
 
-   Layout follows Jake's Family Hub assistant panel: greeting with a
-   glyph, then full-width cards each carrying a small category eyebrow
-   over a large prompt with a send arrow, then a composer pinned at the
-   bottom. Translated to LUNDE OS idiom — token borders, mono eyebrows,
-   the display face on the prompt — not its dark glass. */
+   ANATOMY (session 43, Jake's re-cut). The window is a phone messages
+   thread, not a panel: a contact header — FABLE's mask in a circle with
+   the name under it — pinned at the top; the whole conversation scrolls
+   beneath it, greeting included, as ordinary bubbles; the cards live in
+   one horizontal carousel docked to the top of the composer, present
+   from the first frame and staying there until each is spent. The old
+   side-by-side header, the stacked empty state and the eyebrow-only
+   chips are all gone: one place for identity, one place for the
+   transcript, one place for the offers. */
 
 const MAX_LEN = 500
 const MAX_SENDS = 8 // matches the route's own count; the UI just gets there first
 const CHARS_PER_FRAME = 3
 const EMAIL = 'JAKELUNDE@ME.COM'
+/* a spent card fades and slides before it leaves the rail. transitionend
+   retires it; this is the belt-and-braces in case the transition never
+   fires (a backgrounded tab freezes them) and the seat would stay empty. */
+const EXIT_MS = 420
 
 type Msg = {
   id: string
@@ -46,6 +54,9 @@ type Msg = {
   system?: true
   /** which copy key a machine line came from, so EDIT.MODE can find it */
   copyKey?: string
+  /** the fetch is out and nothing has come back — the bubble shows the
+      turning mark instead of an empty box. Cleared by the first token. */
+  pending?: true
 }
 
 /* The route answers a refusal with a SLUG, never a sentence — the copy
@@ -80,6 +91,9 @@ export default function AiChat() {
   const reduced = useReducedMotion()
   const [msgs, setMsgs] = useState<Msg[]>([])
   const [used, setUsed] = useState<string[]>([])
+  // spent but still on screen, playing its exit — kept out of `used` so
+  // the seat holds its width until the fade finishes
+  const [leaving, setLeaving] = useState<string[]>([])
   const [draft, setDraft] = useState('')
   const [sends, setSends] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -90,10 +104,13 @@ export default function AiChat() {
   const logRef = useRef<HTMLDivElement>(null)
   const hp = useRef<HTMLInputElement>(null)
   const seq = useRef(0)
+  const exits = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
+    const timers = exits.current
     return () => {
       if (raf.current !== null) cancelAnimationFrame(raf.current)
+      timers.forEach(clearTimeout)
     }
   }, [])
 
@@ -131,10 +148,19 @@ export default function AiChat() {
     raf.current = requestAnimationFrame(step)
   }
 
+  /* pull a spent card out of the rail for good. Idempotent, because both
+     the transition and the fallback timer race to call it. */
+  const retire = (id: string) => setUsed((u) => (u.includes(id) ? u : [...u, id]))
+
   const askCard = (card: CardDef) => {
     if (busy) return
     sfx.tap()
-    setUsed((u) => [...u, card.id])
+    if (reduced) {
+      retire(card.id)
+    } else {
+      setLeaving((l) => (l.includes(card.id) ? l : [...l, card.id]))
+      exits.current.push(setTimeout(() => retire(card.id), EXIT_MS))
+    }
     const answerId = `a-${card.id}`
     setMsgs((all) => [
       ...all,
@@ -142,6 +168,8 @@ export default function AiChat() {
       { id: answerId, role: 'assistant', content: '' },
     ])
     setBusy(true)
+    // a card answer is already in the bundle — no wire, no wait, so no
+    // thinking bubble; it goes straight to the typewriter
     typeOut(answerId, card.answer)
     metric('ai_chat_ask', { kind: 'card', card: card.id })
   }
@@ -162,7 +190,8 @@ export default function AiChat() {
     setMsgs((all) => [
       ...all,
       { id: `live-u-${n}`, role: 'user', content: question },
-      { id: answerId, role: 'assistant', content: '' },
+      // PENDING: this is the wire, so there is a wait to show
+      { id: answerId, role: 'assistant', content: '', pending: true },
     ])
     setDraft('')
     setSends((s) => s + 1)
@@ -170,7 +199,13 @@ export default function AiChat() {
     sfx.tap()
 
     const fail = (key: string) =>
-      grow(answerId, (m) => ({ ...m, content: t(key, skin), system: true, copyKey: key }))
+      grow(answerId, (m) => ({
+        ...m,
+        content: t(key, skin),
+        system: true,
+        copyKey: key,
+        pending: undefined,
+      }))
 
     try {
       const res = await fetch('/api/ai-chat', {
@@ -203,7 +238,9 @@ export default function AiChat() {
           const chunk = decoder.decode(value, { stream: true })
           if (!chunk) continue
           got += chunk.length
-          grow(answerId, (m) => ({ ...m, content: m.content + chunk }))
+          // the first token is what ends the thinking state — the mark
+          // is replaced by the words it was waiting on
+          grow(answerId, (m) => ({ ...m, content: m.content + chunk, pending: undefined }))
         }
         if (got === 0) fail('aichat.error')
       }
@@ -218,78 +255,83 @@ export default function AiChat() {
   }
 
   const remaining = CARDS.filter((c) => !used.includes(c.id))
-  const started = msgs.length > 0
   const capped = sends >= MAX_SENDS
   const avatar = avatarFor('fable', skin)
+  const mask = { WebkitMaskImage: `url(${avatar})`, maskImage: `url(${avatar})` }
 
   return (
     <div className={styles.chat}>
-      <header className={styles.head}>
-        <span
-          className={styles.avatar}
-          aria-hidden="true"
-          style={{ WebkitMaskImage: `url(${avatar})`, maskImage: `url(${avatar})` }}
-        />
-        <div className={styles.headText}>
-          <Copy k="aichat.greeting" as="p" className={styles.greeting} />
-          <Copy k="aichat.note" as="p" className={styles.note} />
-        </div>
+      {/* the contact header — who you are talking to, and nothing else.
+          Borrowed wholesale from a phone thread: mask in a circle, name
+          directly under it, both centred, both fixed above the scroll. */}
+      <header className={styles.identity}>
+        <span className={styles.avatar} aria-hidden="true" style={mask} />
+        <p className={styles.name}>CLAUDE</p>
       </header>
 
       {/* polite, but BUSY while an answer streams: without that, a screen
           reader re-announces the bubble every frame of the typewriter.
           The finished answer announces once, when busy clears. */}
       <div className={styles.log} ref={logRef} aria-live="polite" aria-busy={busy}>
-        {msgs.map((m) =>
-          m.role === 'user' ? (
-            <p key={m.id} className={styles.ask}>
-              {m.content}
-            </p>
-          ) : (
+        {/* the greeting is a message, not chrome — first bubble in the
+            thread, with the provenance line under it as an aside */}
+        <Copy k="aichat.greeting" as="p" className={`${styles.said} ${styles.machine}`} />
+        <Copy k="aichat.note" as="p" className={styles.note} />
+
+        {msgs.map((m) => {
+          if (m.role === 'user') {
+            return (
+              <p key={m.id} className={styles.ask}>
+                {m.content}
+              </p>
+            )
+          }
+          if (m.pending) {
+            return (
+              <p key={m.id} className={`${styles.said} ${styles.thinking}`} role="status">
+                <span className={styles.thinkMark} aria-hidden="true" style={mask} />
+                <span className={styles.srOnly}>THINKING</span>
+              </p>
+            )
+          }
+          return (
             <p
               key={m.id}
-              className={m.system ? `${styles.said} ${styles.saidSystem}` : styles.said}
+              className={
+                m.system ? `${styles.said} ${styles.machine} ${styles.saidSystem}` : styles.said
+              }
               data-copy-id={m.copyKey}
             >
               {m.system ? withMailto(m.content) : m.content}
             </p>
           )
-        )}
-
-        {!started && (
-          <div className={styles.cards}>
-            {CARDS.map((card) => (
-              <button
-                key={card.id}
-                type="button"
-                className={styles.card}
-                onClick={() => askCard(card)}
-              >
-                <span className={styles.cardEyebrow}>{card.eyebrow}</span>
-                <span className={styles.cardPrompt}>{card.prompt}</span>
-                <span className={styles.cardArrow} aria-hidden="true">
-                  →
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
+        })}
       </div>
 
-      {/* once the conversation starts the unused cards keep their seat —
-          they shrink to their eyebrows and ride a scrolling rail above
-          the composer, so nothing authored becomes unreachable */}
-      {started && remaining.length > 0 && (
-        <div className={styles.rail}>
+      {/* the offers, docked to the composer. One rail, full cards, always
+          on screen — an authored answer never has to be remembered from
+          an empty state that scrolled away. */}
+      {remaining.length > 0 && (
+        <div className={styles.carousel}>
           {remaining.map((card) => (
             <button
               key={card.id}
               type="button"
-              className={styles.chip}
+              className={styles.card}
+              disabled={busy}
+              data-leaving={leaving.includes(card.id) ? '' : undefined}
               onClick={() => askCard(card)}
-              title={card.prompt}
+              onTransitionEnd={(e) => {
+                if (e.propertyName === 'opacity' && leaving.includes(card.id)) retire(card.id)
+              }}
             >
-              {card.eyebrow}
+              <span className={styles.cardTop}>
+                <span className={styles.cardEyebrow}>{card.eyebrow}</span>
+                <span className={styles.cardArrow} aria-hidden="true">
+                  →
+                </span>
+              </span>
+              <span className={styles.cardPrompt}>{card.prompt}</span>
             </button>
           ))}
         </div>
