@@ -1,7 +1,7 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-09 (s39b SHIPPED.SW note → archive; s40 note below).
+> Last rotation: 2026-08-09 (s40/s40b note → archive; s41 note below).
 
 ## Current state
 
@@ -14,11 +14,15 @@
   `git branch --show-current` before EVERY commit.** Another session's
   worktree (`minors-random-wallpaper`) was live during s40 — worktrees are
   the pattern; leave the main checkout on main.
-- **README focus-ticker SHIPPED** (Jake: "publish it"; merge `3d5530e`,
-  deploy READY, marker-curl verified). FOCUS line crawls like the skills
-  ticker (35px/s, ✦ seam, overflow-gated, reduced-motion static,
-  EDIT.MODE parks it). Speed dial: `CRAWL_PX_PER_SEC` in About.tsx.
-  Branch `feat/readme-focus-ticker` deletable.
+- **`feat/ai-chat` (`a07dfe8`, worktree branch) AWAITS JAKE'S READ.**
+  ABOUT THIS MACHINE retired into README (single identity door): FABLE
+  avatar + bubble CTA at README's foot opens "Ask My AI" (SYS-20, `/ai`)
+  — 5 authored cards stream locally, composer hits `/api/ai-chat` (Opus 5,
+  per-IP cooldown, 8-msg cap). `/machine` 307→`/readme`. Live composer
+  needs `ANTHROPIC_API_KEY` in Vercel env — **Jake sets it, dedicated
+  Anthropic workspace + spend cap as backstop**; cards work keyless.
+- **README focus-ticker SHIPPED** (merge `3d5530e`, verified live). Speed
+  dial: `CRAWL_PX_PER_SEC` in About.tsx. Branch deletable.
 - **TUNE.MODE ruled the build path for figma↔code live editing (s40b
   research, full landscape in Notion task):** adopt NOTHING external
   (all write Tailwind/regenerate; none lockable to tokens/). Phases:
@@ -57,56 +61,51 @@
   medieval airbrush wash contrast · never build while a dev server owns
   the checkout .next · `family-hub 2/` dup dir (Jake deletes).
 
-## Latest session — NOTION SWEEP + SHIP + BRIDGE SCAN (s40/s40b, 2026-08-09)
+## Latest session — RECONCILE README × ABOUT THIS MACHINE (s41, 2026-08-09)
 
-**s40b (same day, Jake's follow-up):** "publish it" → focus-ticker merged
-to main (`3d5530e`), deploy verified live. Then the claude-design thread
-continued: two-stream research (Figma-side primary-source verification +
-full landscape synthesis) → **TUNE.MODE ruling** above; filed as new
-Notion task "figma↔code live editing bridge" (Done, P0) with build
-sketch + open questions. Key repo facts the ruling rests on: no Tailwind
-(26 CSS modules, 256 vars), motion already tokenized, `resolveVar()` in
-contrast.ts is the inspector primitive, copy-commit route is the commit-
-loop template, doctor-tokens --strict is the gate. Cheap wins flagged:
-DevTools Automatic Workspace Folders JSON (~30min) · Storybook
-save-from-controls already available · SpecSheet motion comment stale.
+**Jake's Notion task: README/machine overlap dilutes the message. Rulings
+(recorded in the task page): retire ABOUT THIS MACHINE fully · the memory
+dataviz retires with it (live-ops personality belongs to COMMAND.CTR) ·
+the essay window becomes a hybrid chat · coworkers card stays and leads ·
+focus crawl keeps (already merged s40b).**
 
-**Jake away ("have fun"); Fable orchestrated 4 parallel agents off the
-Notion board. Deck reported dispatch→returns throughout.**
-
-- **README.TXT ticker** (NYQUIST, worktree): FocusLine component in
-  About.tsx + programs.module.css — details in Current state above.
-  Verified by switching main checkout to the branch (other session's
-  worktree made in-worktree verify impossible: no node_modules), dev
-  server + JS probes, then restored to main. Agent worktree left detached
-  at `d8a15e6`; branch preserved.
-- **Research written into Notion task pages** (hooks · claude design ·
-  skills — see rulings above). All three marked Done; readme task checked
-  off but held for Jake's merge call.
-- **Skills research is the artifact Jake should read first**: 53 postings
-  pulled API-direct + Lenny-archive operator quotes; ranked gap analysis;
-  "if you only do three" = agent-supervision case study #3, CUTS.APP +
-  measurement beats, design-law-as-agent-skill over MCP.
-- Flags: lint unusable repo-wide (no eslint config — `next lint` drops to
-  interactive prompt; pre-existing) · `/readme` deep link didn't open the
-  window in the preview pane (window appeared only after icon
-  double-click — possibly hidden-tab rAF freeze, possibly real; check on
-  a visible tab before treating as a bug).
+- **Build (NYQUIST, worktree → `feat/ai-chat`):** machine/ dir + copy keys
+  deleted; README CTA block (suggest-box DOPPLER treatment, FABLE avatar);
+  AiChat window — Family Hub Assistant card pattern (Figma 201258-38244),
+  cards THE RECEIPTS · INDIVIDUAL · CRAFT · EDIT · SPARK in answers.ts
+  (Fable-authored, review verbatims), rAF typewriter w/ reduced-motion
+  instant path; `/api/ai-chat` follows suggestions-route idiom (nodejs,
+  cooldown Map, honeypot, 503 offline). New dep `@anthropic-ai/sdk`.
+- **Verified via worktree Bash dev server :3013 + pane JS probes:** README
+  CTA renders + opens window · `/ai` deep link works · cards collapse to
+  chips after first send · composer→503→offline copy→re-enables · 375px no
+  overflow · console clean. NOT seen moving: the typewriter (hidden-tab
+  rAF freeze; code path verified) — needs one visible-tab glance.
+- Chat economics ruled with Jake: ~2.5¢/live turn on Opus 5, $2–4/mo
+  realistic; hard backstop = spend-capped dedicated workspace key.
+- Parking lot (Notion task): coin-op gate on the message cap ("INSERT
+  COIN") — a bit, not a business.
+- s40 flag RESOLVED: `/readme` deep link does open the window (it was the
+  hidden-tab freeze).
 
 ## Next steps
 
-1. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
+1. **Jake: read `feat/ai-chat`** — card copy voice + chat feel (checkout
+   the branch, `/readme` then `/ai`), then merge call. After merge: create
+   a dedicated Anthropic workspace + spend-capped key, add
+   `ANTHROPIC_API_KEY` to Vercel env to light the composer.
+2. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
    if off) — it's live.
-2. **Jake: read the skills research + the TUNE.MODE plan** (both Notion
+3. **Jake: read the skills research + the TUNE.MODE plan** (both Notion
    task pages) — skills proposes case study #3 (agent supervision) +
    CUTS.APP; TUNE.MODE has 4 open questions (public INSPECT? PR vs main?
    Motion+? own program?).
-3. **Jake rulings owed:** install the 4 hooks? · shelf live smoke + copy
+4. **Jake rulings owed:** install the 4 hooks? · shelf live smoke + copy
    rewrite pass · Family Hub walk.
-4. **The Desk** — next flagship (r3f ruling stands; Blender refs incoming).
-5. Cleanup: delete merged branches (`cv-exe`, `suggestion-box`,
+5. **The Desk** — next flagship (r3f ruling stands; Blender refs incoming).
+6. Cleanup: delete merged branches (`cv-exe`, `suggestion-box`,
    `case-family-hub`, `worktree-cc-v2-pipeline`, `medieval-sfx*` on
    confirm) · `family-hub 2/` dup.
-6. Carried: gate friction elsewhere · COMMAND.CTR zero-`list()` + cost
+7. Carried: gate friction elsewhere · COMMAND.CTR zero-`list()` + cost
    read · replay-your-session task · Figma stale STRING vars · typography
    finale · underwater · eyeball tracker v2 / leaf-patch call.

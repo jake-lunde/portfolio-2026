@@ -1808,3 +1808,38 @@ Jake approved live mid-session ("ship it"). Deploy 24b2f30.**
   scratchpad · getBoundingClientRect poisons anchor math during open
   spring — offset chains are transform-immune.
 - Verified: tsc + build clean, JS probes, replay-traffic screenshots.
+## Latest session — NOTION SWEEP + SHIP + BRIDGE SCAN (s40/s40b, 2026-08-09)
+
+**s40b (same day, Jake's follow-up):** "publish it" → focus-ticker merged
+to main (`3d5530e`), deploy verified live. Then the claude-design thread
+continued: two-stream research (Figma-side primary-source verification +
+full landscape synthesis) → **TUNE.MODE ruling** above; filed as new
+Notion task "figma↔code live editing bridge" (Done, P0) with build
+sketch + open questions. Key repo facts the ruling rests on: no Tailwind
+(26 CSS modules, 256 vars), motion already tokenized, `resolveVar()` in
+contrast.ts is the inspector primitive, copy-commit route is the commit-
+loop template, doctor-tokens --strict is the gate. Cheap wins flagged:
+DevTools Automatic Workspace Folders JSON (~30min) · Storybook
+save-from-controls already available · SpecSheet motion comment stale.
+
+**Jake away ("have fun"); Fable orchestrated 4 parallel agents off the
+Notion board. Deck reported dispatch→returns throughout.**
+
+- **README.TXT ticker** (NYQUIST, worktree): FocusLine component in
+  About.tsx + programs.module.css — details in Current state above.
+  Verified by switching main checkout to the branch (other session's
+  worktree made in-worktree verify impossible: no node_modules), dev
+  server + JS probes, then restored to main. Agent worktree left detached
+  at `d8a15e6`; branch preserved.
+- **Research written into Notion task pages** (hooks · claude design ·
+  skills — see rulings above). All three marked Done; readme task checked
+  off but held for Jake's merge call.
+- **Skills research is the artifact Jake should read first**: 53 postings
+  pulled API-direct + Lenny-archive operator quotes; ranked gap analysis;
+  "if you only do three" = agent-supervision case study #3, CUTS.APP +
+  measurement beats, design-law-as-agent-skill over MCP.
+- Flags: lint unusable repo-wide (no eslint config — `next lint` drops to
+  interactive prompt; pre-existing) · `/readme` deep link didn't open the
+  window in the preview pane (window appeared only after icon
+  double-click — possibly hidden-tab rAF freeze, possibly real; check on
+  a visible tab before treating as a bug).
