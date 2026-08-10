@@ -96,9 +96,11 @@
 }
 
 /* ---- FABLE mark (the resident AI's seat in the bar) ---- */
-/* One-ink silhouette in the bar's own ink, sized to the row it sits in so
-   the bar's height never moves. Pressed, it wears the expressive accent —
-   the marks-only accent, on an actual mark. */
+/* A "?" in a square, built as the skin picker's sibling: same hairline on
+   the same --border token, same square corners, same 3px band above and
+   below a text-label line, so the two framed controls bracket the bar and
+   read as one family. The face used to be a one-ink avatar; a question
+   mark says "ask" without needing to be recognised first. */
 
 .fableMark {
   position: relative;
@@ -109,46 +111,40 @@
 .fableBtn {
   display: flex;
   align-items: center;
-  padding: 3px 6px;
-  border: var(--border-width-hairline) solid transparent;
+  justify-content: center;
+  padding: 3px;
+  background: var(--surface);
+  border: var(--border-width-hairline) solid var(--border);
+  color: var(--content);
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  /* the bar tracks at 0.14em; on a single glyph that is trailing air, and
+     it would sit the "?" left of centre */
+  letter-spacing: normal;
+  transition:
+    border-color var(--duration-tap) ease,
+    color var(--duration-tap) ease;
 }
 
-.fableBtn:hover {
-  border-color: var(--border);
-}
-
-.fableAvatar {
+/* The square is drawn by the glyph's own line box: the button's height is
+   one line plus the 3px band, so a glyph exactly one line WIDE makes the
+   two axes equal — no magic pixel, and it re-squares itself when a skin
+   swaps the mono face. `1lh` is the same metric the height is built from. */
+.fableBtn > span {
   display: block;
-  width: 17px;
-  height: 17px;
-  background-color: var(--content);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-position: center;
-  mask-position: center;
-  transition: background-color var(--duration-tap) ease;
+  width: 1lh;
+  text-align: center;
 }
 
-.fableBtn:hover .fableAvatar,
-.fableBtn:focus-visible .fableAvatar {
-  background-color: var(--accent-expressive);
+.fableBtn:hover,
+.fableBtn:focus-visible {
+  border-color: var(--content); /* the picker's hover, exactly */
+  color: var(--accent);
 }
 
-/* Phone widths: INSPECT has stood down but the wordmark, the skin switch
-   and two toggles still want the whole line, so the mark gives back the
-   ten pixels it can spare. 15px still reads as a face at arm's length. */
-@media (max-width: 720px) {
-  .fableBtn {
-    padding: 3px 3px;
-  }
-
-  .fableAvatar {
-    width: 15px;
-    height: 15px;
-  }
-}
+/* No phone-width slimming. The avatar had to give back ten pixels at 720;
+   the square is 21px wide, two narrower than that slimmed face, and at 360
+   the two clusters still clear each other by 22px on one 34px row. */
 
 /* The offer, made once ever. Hangs off the mark's right edge — the seat is
    in the right cluster, so a centred bubble would run off a 360px screen. */
@@ -178,7 +174,9 @@
   content: '';
   position: absolute;
   top: -6px;
-  right: 12px;
+  /* dead centre under the 21px square: the bubble's right edge overhangs
+     it by 4, so the square's middle is 14.5 in, and the tail is 10 wide */
+  right: 9.5px;
   width: 10px;
   height: 10px;
   background: var(--surface);

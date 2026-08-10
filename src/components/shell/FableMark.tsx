@@ -8,7 +8,6 @@ import { useSettings } from '@/store/settings'
 import { useWindows } from '@/store/windows'
 import { CopyText as Copy } from '@/content/CopyText'
 import { t } from '@/content/copy'
-import { avatarFor } from './crew'
 import styles from './shell.module.css'
 
 /* FABLE in the menu bar — the system slot for "ask the machine about
@@ -96,14 +95,9 @@ export function FableMark() {
         onClick={ask}
         aria-label={t('fablemark.label', skin)}
       >
-        <span
-          className={styles.fableAvatar}
-          aria-hidden="true"
-          style={{
-            WebkitMaskImage: `url(${avatarFor('fable', skin)})`,
-            maskImage: `url(${avatarFor('fable', skin)})`,
-          }}
-        />
+        {/* the glyph is scenery — the button's aria-label carries the
+            meaning, and a bare "?" read aloud says nothing */}
+        <span aria-hidden="true">?</span>
       </button>
 
       <AnimatePresence>
