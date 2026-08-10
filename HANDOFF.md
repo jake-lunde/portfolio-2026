@@ -20,8 +20,10 @@
   shared chat primitives at `src/components/chat/` (IdentityHeader,
   Bubble w/ thinking state, Feed, riseIn — new agent chat = header +
   greeting + canned cards, canned-first cost law); suggestion box is now
-  a DOPPLER chat feed on those bones; menu-bar FABLE mark (leads right
-  cluster, once-ever discovery bubble, localStorage-sealed) + deck wires
+  a DOPPLER chat feed on those bones; menu-bar mark — now a `?` square
+  borrowing the mode switcher's border (s43c; README's ask-me CTA
+  removed, window back to 700: menu bar + deck are the only doors;
+  once-ever discovery bubble, localStorage-sealed) + deck wires
   (FABLE→ai-chat, DOPPLER→suggest; other three await P1 mini-chats —
   fourier task). ⚠️ 360px menubar is now FULL — next control added must
   fold something. Original ship record (guardrails, spend caps):
