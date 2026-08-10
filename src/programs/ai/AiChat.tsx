@@ -9,6 +9,7 @@ import { useSettings } from '@/store/settings'
 import { t } from '@/content/copy'
 import { CopyText as Copy } from '@/content/CopyText'
 import { avatarFor } from '@/components/shell/crew'
+import { Bubble, Feed, FEED_STAGGER, IdentityHeader, riseIn } from '@/components/chat/Chat'
 import { CARDS, type CardDef } from './answers'
 import styles from './ai.module.css'
 
@@ -47,17 +48,19 @@ import styles from './ai.module.css'
    the same stagger, minus whatever you spent, the moment the answer
    finishes. Every appended bubble rides the same rise. The one thing
    that must NOT re-enter is the thinking bubble turning into its answer:
-   same key, same element type, so it morphs where it stands. */
+   same key, same element type, so it morphs where it stands.
+
+   The identity header, the feed and the bubbles themselves now live in
+   `@/components/chat` — the SUGGESTION BOX runs the same anatomy. What
+   is still ASK MY AI's alone is below: the card rail and the live wire. */
 
 const MAX_LEN = 500
 const MAX_SENDS = 8 // matches the route's own count; the UI just gets there first
 const CHARS_PER_FRAME = 3
 const EMAIL = 'JAKELUNDE@ME.COM'
-/* the feed's beats. The greeting gets a head start so the rail reads as
-   arriving BEHIND it rather than with it; 70ms between cards is the
-   smallest gap that still reads left-to-right instead of all-at-once. */
+/* the greeting's head start, so the rail reads as arriving BEHIND it
+   rather than with it. (The gap BETWEEN cards is the shared FEED_STAGGER.) */
 const GREETING_BEAT = 0.14
-const CARD_STAGGER = 0.07
 
 type Msg = {
   id: string
@@ -100,19 +103,6 @@ function withMailto(line: string) {
   )
 }
 
-/* the one entrance in this window: opacity and a short rise on the
-   WINDOW spring — the same spring the shell opens a window with, which
-   is the right answer twice over, because a new message arriving is the
-   same event at a smaller scale. `initial: false` is how reduced motion
-   opts out: the node renders landed and no animation ever runs. */
-function riseIn(reduced: boolean, delay = 0) {
-  return {
-    initial: reduced ? false : { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    transition: reduced ? { duration: 0 } : { ...SPRINGS.window, delay },
-  }
-}
-
 export default function AiChat() {
   const skin = useSettings((s) => s.skin)
   const reduced = !!useReducedMotion()
@@ -125,7 +115,6 @@ export default function AiChat() {
   // taking questions, so nobody hammers a wire that is already spent
   const [spent, setSpent] = useState(false)
   const raf = useRef<number | null>(null)
-  const logRef = useRef<HTMLDivElement>(null)
   const hp = useRef<HTMLInputElement>(null)
   const field = useRef<HTMLInputElement>(null)
   const seq = useRef(0)
@@ -148,14 +137,7 @@ export default function AiChat() {
     if (document.activeElement === document.body) field.current?.focus()
   }, [busy])
 
-  // follow the stream down. Behaviour is `auto`, not `smooth`: a smooth
-  // scroll re-triggered every frame of the typewriter never arrives.
-  useEffect(() => {
-    const log = logRef.current
-    if (log) log.scrollTop = log.scrollHeight
-  }, [msgs])
-
-  const grow = (id: string, patch: (prev: Msg) => Msg) =>
+  const grow =(id: string, patch: (prev: Msg) => Msg) =>
     setMsgs((all) => all.map((m) => (m.id === id ? patch(m) : m)))
 
   /* the local typewriter — three characters a frame, which reads as
@@ -288,74 +270,43 @@ export default function AiChat() {
   const remaining = CARDS.filter((c) => !used.includes(c.id))
   const capped = sends >= MAX_SENDS
   const avatar = avatarFor('fable', skin)
-  const mask = { WebkitMaskImage: `url(${avatar})`, maskImage: `url(${avatar})` }
 
   return (
     <div className={styles.chat}>
-      {/* the contact header — who you are talking to, and nothing else.
-          Borrowed wholesale from a phone thread: mask in a circle, name
-          directly under it, both centred, both fixed above the scroll. */}
-      <header className={styles.identity}>
-        <span className={styles.avatar} aria-hidden="true" style={mask} />
-        <p className={styles.name}>CLAUDE</p>
-      </header>
+      <IdentityHeader name="CLAUDE" avatar={avatar} />
 
-      {/* polite, but BUSY while an answer streams: without that, a screen
-          reader re-announces the bubble every frame of the typewriter.
-          The finished answer announces once, when busy clears. */}
-      <div className={styles.log} ref={logRef} aria-live="polite" aria-busy={busy}>
+      <Feed busy={busy}>
         {/* the greeting is a message, not chrome — ONE bubble, the hello
             in the machine's caps and the provenance line under it as a
             smaller aside. Two copy keys, one speech act: nothing in this
             feed is naked system text sitting outside a bubble. */}
-        <motion.div
-          className={`${styles.said} ${styles.machine}`}
-          {...riseIn(reduced)}
-        >
+        <Bubble machine as="div" reduced={reduced}>
           <Copy k="aichat.greeting" as="p" className={styles.greetLine} />
           <Copy k="aichat.note" as="p" className={styles.note} />
-        </motion.div>
+        </Bubble>
 
-        {msgs.map((m) => {
-          if (m.role === 'user') {
-            return (
-              <motion.p key={m.id} className={styles.ask} {...riseIn(reduced)}>
-                {m.content}
-              </motion.p>
-            )
-          }
-          /* pending and answered are the SAME element type under the same
-             key on purpose: the thinking mark is replaced by the words in
-             place, and the entrance — which only runs on mount — never
-             gets a second chance to play. */
-          return (
-            <motion.p
+        {msgs.map((m) =>
+          m.role === 'user' ? (
+            <Bubble key={m.id} tone="user" reduced={reduced}>
+              {m.content}
+            </Bubble>
+          ) : (
+            /* pending and answered are the SAME component under the same
+               key on purpose: the thinking mark is replaced by the words
+               in place, and the entrance — which only runs on mount —
+               never gets a second chance to play. */
+            <Bubble
               key={m.id}
-              className={
-                m.pending
-                  ? `${styles.said} ${styles.thinking}`
-                  : m.system
-                    ? `${styles.said} ${styles.machine} ${styles.saidSystem}`
-                    : styles.said
-              }
-              role={m.pending ? 'status' : undefined}
-              data-copy-id={m.pending ? undefined : m.copyKey}
-              {...riseIn(reduced)}
+              tone={m.system ? 'system' : 'assistant'}
+              thinking={m.pending ? { mark: avatar, label: 'THINKING' } : undefined}
+              copyId={m.copyKey}
+              reduced={reduced}
             >
-              {m.pending ? (
-                <>
-                  <span className={styles.thinkMark} aria-hidden="true" style={mask} />
-                  <span className={styles.srOnly}>THINKING</span>
-                </>
-              ) : m.system ? (
-                withMailto(m.content)
-              ) : (
-                m.content
-              )}
-            </motion.p>
-          )
-        })}
-      </div>
+              {m.system ? withMailto(m.content) : m.content}
+            </Bubble>
+          ),
+        )}
+      </Feed>
 
       {/* the offers, docked to the composer — and they come and go with
           the conversation. While an answer is being written the rail is
@@ -380,7 +331,7 @@ export default function AiChat() {
               <motion.div
                 key={card.id}
                 className={styles.seat}
-                {...riseIn(reduced, (msgs.length === 0 ? GREETING_BEAT : 0) + i * CARD_STAGGER)}
+                {...riseIn(reduced, (msgs.length === 0 ? GREETING_BEAT : 0) + i * FEED_STAGGER)}
               >
                 <button type="button" className={styles.card} onClick={() => askCard(card)}>
                   <span className={styles.cardTop}>

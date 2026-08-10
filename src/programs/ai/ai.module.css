@@ -2,7 +2,11 @@
    is talking, the transcript scrolls, and the offers ride a rail docked
    to the pinned composer. Nothing here invents a color — the bubble
    stroke, the card fill and the accent are the same roles the SUGGESTION
-   BOX and the guestbook already use. */
+   BOX and the guestbook already use.
+
+   The identity, the feed and the bubbles are in `components/chat` now —
+   this sheet holds only what ASK MY AI has and nobody else does: the
+   greeting's second paragraph, the card rail, and the live composer. */
 
 .chat {
   display: flex;
@@ -11,108 +15,6 @@
   min-height: 0;
   padding: 18px 20px 20px;
   background: var(--surface);
-}
-
-/* ---- the contact header ---- */
-
-/* mask, then name, then the transcript. The stack is the whole point:
-   centred identity reads as "who you are talking to", where the old
-   side-by-side read as "a panel with a mascot". */
-.identity {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  padding-bottom: 12px;
-  border-bottom: var(--border-width-hairline) solid var(--border);
-}
-
-.avatar,
-.thinkMark {
-  flex: 0 0 auto;
-  background: var(--content); /* one-ink rule — crew never gets color */
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-}
-
-.avatar {
-  width: 46px;
-  height: 46px;
-}
-
-/* the display face at body size — the same treatment the SUGGESTION BOX
-   gives its resident reviewer's name, so the crew is named one way */
-.name {
-  font-family: var(--display);
-  font-size: var(--type-body-size);
-  line-height: 1.2;
-  color: var(--content);
-  margin: 0;
-}
-
-/* ---- the transcript ---- */
-
-.log {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 16px 0 4px;
-}
-
-/* the visitor's turn is plain text on the right — no bubble. Only one
-   party in this window is a machine, and only the machine gets chrome.
-   Set at body-sm, matching the answers: the ask and the answer are two
-   halves of one exchange and neither should look like a footnote. */
-.ask {
-  font-family: var(--mono);
-  font-size: var(--type-body-sm-size);
-  letter-spacing: 0.04em;
-  line-height: 1.5;
-  color: var(--content-muted);
-  text-align: right;
-  max-width: 40ch;
-  margin: 0 0 10px auto;
-}
-
-/* the answer: prose, body face, comfortable measure. Long-form reads as
-   writing; the CAPS are reserved for the machine talking ABOUT itself. */
-.said {
-  font-family: var(--sans);
-  font-size: var(--type-body-sm-size);
-  line-height: var(--leading-relaxed);
-  color: var(--content);
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  margin: 0 0 18px;
-  max-width: 46ch;
-  /* the typewriter grows this node character by character; reserving one
-     line means an empty bubble never pops in at zero height */
-  min-height: 1.6em;
-}
-
-[data-theme='dark'] .said {
-  border-color: var(--border);
-}
-
-/* the machine speaking as itself — the greeting, the errors, the cap.
-   Mono caps in the same bubble, because it is still a message. */
-.machine {
-  font-family: var(--mono);
-  font-size: var(--text-ui);
-  letter-spacing: 0.08em;
-  line-height: 1.5;
-}
-
-/* errors and the cap are a warning on top of that, so they take accent */
-.saidSystem {
-  color: var(--accent);
 }
 
 /* ---- the greeting ---- */
@@ -131,53 +33,6 @@
   letter-spacing: 0.04em;
   color: var(--content-muted);
   margin: 8px 0 0;
-}
-
-/* ---- the wait ---- */
-
-/* the wire is out and nothing is back yet. The bubble holds FABLE's own
-   mask, turning and breathing — one mark, transform and opacity only. */
-.thinking {
-  display: flex;
-  align-items: center;
-  min-height: 0;
-  padding: 10px 14px;
-  width: max-content;
-}
-
-.thinkMark {
-  width: 20px;
-  height: 20px;
-  animation: think 1.6s ease-in-out infinite;
-}
-
-@keyframes think {
-  0% {
-    transform: rotate(0deg);
-    opacity: 0.35;
-  }
-  50% {
-    transform: rotate(180deg);
-    opacity: 1;
-  }
-  100% {
-    transform: rotate(360deg);
-    opacity: 0.35;
-  }
-}
-
-/* said, not shown — the turning mark means "thinking" to an eye, and
-   this is the same sentence for an ear */
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  clip-path: inset(50%);
 }
 
 /* ---- the offers ---- */
@@ -415,13 +270,6 @@
   .card:focus-visible .cardArrow {
     transform: none;
   }
-
-  /* the wait still has to look like a wait, so the mark stays — held at
-     a dimmed constant instead of turning */
-  .thinkMark {
-    animation: none;
-    opacity: 0.6;
-  }
 }
 
 /* ---- 360px ---- */
@@ -441,11 +289,6 @@
 
   .sendBtn {
     flex: 1 1 100%;
-  }
-
-  .said,
-  .ask {
-    max-width: 100%;
   }
 
   /* the seat narrows so a second card always peeks — the rail has to

@@ -241,10 +241,10 @@
 
 /* ---------- README → ASK MY AI (the machine's CTA) ---------- */
 
-/* Lifted from suggest.module.css so the two crew introductions read as
-   one component of the OS: 40px one-ink mask, name in the display face,
-   role in mono. The difference is one line down — that bubble is a
-   button. */
+/* The same crew introduction the chat windows run (components/chat), on
+   a row rather than a column, so the OS names a unit one way wherever it
+   names one: 40px one-ink mask, name in the display face, role in mono.
+   The difference is one line down — that bubble is a button. */
 
 .claudeRow {
   display: flex;
