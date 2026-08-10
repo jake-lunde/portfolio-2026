@@ -1,214 +1,36 @@
+/* SUGGESTION BOX. The chat anatomy comes from `components/chat` — the
+   identity, the feed, the bubbles and their entrance. What is left here
+   is DOPPLER's own: the score plate inside his verdict, the way back in,
+   and the composer his 140 characters go through. Nothing invents a
+   color; the accent and the stroke are the roles the rest of the OS uses. */
+
 .box {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  height: 100%;
+  min-height: 0;
   padding: 18px 20px 20px;
   background: var(--surface);
 }
 
-/* ---- the resident reviewer ---- */
-
-.reviewer {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 auto;
-  background: var(--content); /* one-ink rule — crew never gets color */
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-}
-
-.who {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.whoName {
-  font-family: var(--display);
-  font-size: var(--type-body-size);
-}
-
-.whoRole {
-  font-family: var(--mono);
-  font-size: var(--type-caption-size);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--content-muted);
-}
-
-/* ---- the running commentary ---- */
-
-.bubble {
-  font-family: var(--mono);
-  font-size: var(--text-ui);
-  letter-spacing: 0.08em;
-  line-height: 1.5;
-  color: var(--content);
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
-  /* chat, not chrome — rounded like a message from a coworker */
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  margin: 14px 0 16px;
-  min-height: 3.2em; /* two lines — longest jab wraps without reflow */
-  position: relative;
-  animation: bubbleIn 140ms ease-out;
-}
-
-[data-theme='dark'] .bubble {
-  border-color: var(--border);
-}
-
-/* Speech-bubble tail pointing up at DOPPLER. A rotated square wearing only
-   its top and left borders, filled with the bubble's own surface — the
-   outline reads as one continuous stroke with the bubble, instead of the
-   filled wedge that sat like a spot of solid ink on a line-art window. */
-.bubble::before {
-  content: '';
-  position: absolute;
-  top: -6px;
-  left: 18px;
-  width: 10px;
-  height: 10px;
-  background: var(--surface-raised);
-  border-top: var(--border-width-default) solid var(--content);
-  border-left: var(--border-width-default) solid var(--content);
-  transform: rotate(45deg);
-}
-
-[data-theme='dark'] .bubble::before {
-  border-color: var(--border);
-}
-
-@keyframes bubbleIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bubble {
-    animation: none;
-  }
-}
-
-/* ---- the form (guestbook idiom) ---- */
-
-.hp {
-  position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-}
-
-.field {
-  display: block;
-  margin-bottom: var(--space-3);
-}
-
-.field span {
-  display: block;
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--content-muted);
-  margin-bottom: 5px;
-}
-
-.field textarea {
-  width: 100%;
-  box-sizing: border-box;
-  font-family: var(--sans);
-  font-size: var(--type-body-sm-size);
-  color: var(--content);
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
-  border-radius: 0;
-  padding: 8px 10px;
-  resize: vertical;
-}
-
-[data-theme='dark'] .field textarea {
-  border-color: var(--border);
-}
-
-.field textarea:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.foot {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.submitBtn {
-  font-family: var(--mono);
-  font-size: var(--text-ui);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.16em;
-  padding: 8px 18px;
-  background: var(--accent);
-  color: var(--surface);
-  border: var(--border-width-default) solid var(--content);
-}
-
-[data-theme='dark'] .submitBtn {
-  color: #0d100c;
-  border-color: var(--border);
-}
-
-.submitBtn:hover:not(:disabled) {
-  background: var(--accent-expressive);
-  color: #17150d;
-}
-
-.submitBtn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.error {
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  letter-spacing: 0.04em;
-  color: var(--accent);
-}
-
 /* ---- the verdict ---- */
 
-.result {
-  display: flex;
-  flex-direction: column;
-}
-
+/* the number lives INSIDE the bubble, above the line it earned. Two
+   spans rather than a nested div because the bubble is a paragraph's
+   worth of speech, and a score is part of what he said. */
 .scoreRow {
   display: flex;
   align-items: baseline;
   gap: 4px;
-  margin: 4px 0 2px;
+  margin-bottom: 2px;
 }
 
+/* 44px, down from the 56 it wore as a full panel: inside a bubble the
+   number has to read as the loudest thing DOPPLER says, not as a screen
+   of its own — and every pixel it gives back is feed. */
 .scoreNum {
   font-family: var(--display);
-  font-size: 56px;
+  font-size: 44px;
   line-height: 1;
   color: var(--content);
 }
@@ -220,18 +42,139 @@
   color: var(--content-muted);
 }
 
-.method {
-  font-family: var(--type-caption-family);
-  font-size: var(--type-caption-size);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--content-muted);
-  margin: 6px 0 16px;
+.verdictLine {
+  display: block;
 }
 
-.resultFoot {
+/* ---- the way back in ---- */
+
+/* aligned with the bubbles rather than the window, so it reads as the
+   next thing in the conversation and not as a toolbar */
+.againRow {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.againBtn {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.16em;
+  color: var(--content);
+  background: transparent;
+  border: var(--border-width-default) solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.againBtn:hover {
+  border-color: var(--content);
+  color: var(--accent);
+}
+
+.againBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- the composer ---- */
+
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+/* two rows, not one: "SUBMIT FOR JUDGMENT" is a long instruction and the
+   window is 430 wide, so the field takes its own line and the counter
+   rides beside the button underneath it. Every row the composer does NOT
+   take is a row of feed, and the feed is the point. */
+.composer {
+  display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding-top: 12px;
+  border-top: var(--border-width-hairline) solid var(--border);
+}
+
+.count {
+  flex: 1 1 auto;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+.field {
+  flex: 1 1 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  font-family: var(--sans);
+  font-size: var(--type-body-sm-size);
+  color: var(--content);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: 0;
+  padding: 8px 10px;
+}
+
+[data-theme='dark'] .field {
+  border-color: var(--border);
+}
+
+.field:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.field:disabled {
+  opacity: 0.55;
+}
+
+.submitBtn {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.16em;
+  padding: 8px 18px;
+  background: var(--accent);
+  color: var(--surface);
+  border: var(--border-width-default) solid var(--content);
+  cursor: pointer;
+}
+
+[data-theme='dark'] .submitBtn {
+  color: #0d100c; /* derived from classic-dark --surface; see specsheet */
+  border-color: var(--border);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--accent-expressive);
+  color: #17150d; /* derived from the expressive accent's AA pair */
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---- 360px ---- */
+
+@media (max-width: 480px) {
+  .box {
+    padding: 14px 14px 16px;
+  }
+
+  .submitBtn {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
 }

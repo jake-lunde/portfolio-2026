@@ -1,0 +1,188 @@
+/* The chat anatomy, shared. Extracted from ASK MY AI once the SUGGESTION
+   BOX wanted the same thing: a centred identity, a scrolling feed, and
+   bubbles that arrive rather than appear. Nothing here invents a color —
+   the bubble stroke, the raised fill and the accent are the same roles
+   the guestbook already uses. What lives in a PROGRAM's own sheet is
+   whatever only that program has: ASK MY AI's card rail, the SUGGESTION
+   BOX's score plate. */
+
+/* ---- who you are talking to ---- */
+
+/* mask, then name, then the feed. The stack is the whole point: centred
+   identity reads as "who you are talking to", where a side-by-side row
+   reads as "a panel with a mascot". */
+.identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding-bottom: 12px;
+  border-bottom: var(--border-width-hairline) solid var(--border);
+}
+
+.avatar,
+.thinkMark {
+  flex: 0 0 auto;
+  background: var(--content); /* one-ink rule — crew never gets color */
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+}
+
+/* the display face at body size — one crew, named one way, everywhere */
+.name {
+  font-family: var(--display);
+  font-size: var(--type-body-size);
+  line-height: 1.2;
+  color: var(--content);
+  margin: 0;
+}
+
+/* the optional second line: what this unit is here to do. FABLE doesn't
+   take one (the window title already says ASK MY AI); DOPPLER does,
+   because "review unit · on loan" is half the joke. */
+.role {
+  font-family: var(--mono);
+  font-size: var(--type-caption-size);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+/* ---- the feed ---- */
+
+.feed {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 0 4px;
+}
+
+/* the visitor's turn is plain text on the right — no bubble. Only one
+   party in these windows is a machine, and only the machine gets chrome.
+   Set at body-sm, matching the answers: the ask and the answer are two
+   halves of one exchange and neither should look like a footnote. */
+.ask {
+  font-family: var(--mono);
+  font-size: var(--type-body-sm-size);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  color: var(--content-muted);
+  text-align: right;
+  max-width: 40ch;
+  margin: 0 0 10px auto;
+}
+
+/* the answer: prose, body face, comfortable measure. Long-form reads as
+   writing; the CAPS are reserved for the machine talking ABOUT itself. */
+.said {
+  font-family: var(--sans);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--leading-relaxed);
+  color: var(--content);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin: 0 0 18px;
+  max-width: 46ch;
+  /* the typewriter grows this node character by character; reserving one
+     line means an empty bubble never pops in at zero height */
+  min-height: 1.6em;
+}
+
+[data-theme='dark'] .said {
+  border-color: var(--border);
+}
+
+/* the machine speaking as itself — greetings, errors, verdicts, the cap.
+   Mono caps in the same bubble, because it is still a message. */
+.machine {
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+}
+
+/* errors and the cap are a warning on top of that, so they take accent */
+.saidSystem {
+  color: var(--accent);
+}
+
+/* ---- the wait ---- */
+
+/* the wire is out and nothing is back yet. The bubble holds the unit's
+   own mask, turning and breathing — one mark, transform and opacity
+   only. It is the SAME bubble that becomes the answer, so the entrance
+   never gets to play twice. */
+.thinking {
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  padding: 10px 14px;
+  width: max-content;
+}
+
+.thinkMark {
+  width: 20px;
+  height: 20px;
+  animation: think 1.6s ease-in-out infinite;
+}
+
+@keyframes think {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.35;
+  }
+  50% {
+    transform: rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0.35;
+  }
+}
+
+/* said, not shown — the turning mark means "thinking" to an eye, and
+   this is the same sentence for an ear */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+/* ---- motion law ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  /* the wait still has to look like a wait, so the mark stays — held at
+     a dimmed constant instead of turning */
+  .thinkMark {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* ---- 360px ---- */
+
+@media (max-width: 480px) {
+  .said,
+  .ask {
+    max-width: 100%;
+  }
+}

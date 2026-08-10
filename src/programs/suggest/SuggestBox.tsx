@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { metric } from '@/lib/metrics'
 import { gateSfx, sfx } from '@/lib/sound'
@@ -8,6 +9,7 @@ import { useSettings } from '@/store/settings'
 import { t } from '@/content/copy'
 import { CopyText as Copy } from '@/content/CopyText'
 import { avatarFor } from '@/components/shell/crew'
+import { Bubble, Feed, IdentityHeader, riseIn } from '@/components/chat/Chat'
 import {
   AGAIN_LINE,
   GREETING,
@@ -23,36 +25,75 @@ import styles from './suggest.module.css'
    loan from the deck) heckles the draft as it is typed and delivers a
    deterministic score on submit. Ideas post to /api/suggestions (write-
    only ledger — they go to Jake, not back on the wall). The roast keeps
-   working even when storage is down; only the stamp changes. */
+   working even when storage is down; only the stamp changes.
+
+   ANATOMY (session 44). Jake's framing: the agents live on the site, and
+   clicking one pulls up a CHAT. So this is no longer a panel with a
+   mascot and a form — it is the same chat ASK MY AI runs, with DOPPLER
+   at the top of it. The whole exchange is a feed: his greeting is the
+   first message, every jab he throws at your draft is another message,
+   your idea is a message, and the judgment arrives as three of his,
+   one after another, the way a person delivers bad news. The form is
+   now a composer; the AGAIN affordance waits under the last bubble.
+   Anatomy and motion come from `@/components/chat`; what is left here
+   is DOPPLER's own: the roast table, the score plate, the ledger stamp. */
 
 const MAX = 140
 const IDLE_MS = 3500
+/* the beat between the three lines of the judgment. He does not dump the
+   verdict, the methodology and the receipt at once — he lets each land.
+   Reduced motion collapses it to zero and posts all three together. */
+const BEAT_MS = 420
 
-type Result = { score: number; verdict: string; filed: boolean }
+type Line = {
+  id: string
+  who: 'doppler' | 'visitor' | 'system'
+  text?: string
+  /** the verdict bubble wears the number above the line */
+  score?: number
+  /** the ledger bubble wears a stamp instead of a sentence */
+  filed?: boolean
+  /** the wire is out; the bubble turns DOPPLER's mask until it isn't */
+  pending?: true
+  /** holds block children, so it renders as a div and STAYS one — the
+      element type has to survive the pending→judged morph untouched */
+  plate?: true
+  /** which copy key a machine line came from, so EDIT.MODE can find it */
+  copyId?: string
+}
 
 export default function SuggestBox() {
   const skin = useSettings((s) => s.skin)
+  const reduced = !!useReducedMotion()
+  const [lines, setLines] = useState<Line[]>([{ id: 'greet', who: 'doppler', text: GREETING }])
   const [idea, setIdea] = useState('')
-  const [line, setLine] = useState(GREETING)
-  const [result, setResult] = useState<Result | null>(null)
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // the judgment has landed in full — the composer closes and AGAIN opens
+  const [judged, setJudged] = useState(false)
   const fired = useRef<Set<string>>(new Set())
   const peak = useRef(0) // longest the draft has been — for the wipe jab
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const beats = useRef<ReturnType<typeof setTimeout>[]>([])
   const hp = useRef<HTMLInputElement>(null)
+  const field = useRef<HTMLInputElement>(null)
+  const uid = useRef(0)
 
   useEffect(() => {
+    const timers = beats.current
     return () => {
       if (idleTimer.current) clearTimeout(idleTimer.current)
+      timers.forEach(clearTimeout)
     }
   }, [])
 
-  const say = (next: string) => setLine(next)
+  const say = (text: string) =>
+    setLines((l) => [...l, { id: `d-${++uid.current}`, who: 'doppler', text }])
+
+  const patch = (id: string, next: (l: Line) => Line) =>
+    setLines((all) => all.map((l) => (l.id === id ? next(l) : l)))
 
   const onChange = (v: string) => {
     setIdea(v)
-    setError(null)
     if (v.length === 0 && peak.current >= 20 && !fired.current.has('wipe')) {
       fired.current.add('wipe')
       say(WIPE_LINE)
@@ -79,126 +120,171 @@ export default function SuggestBox() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (busy || !idea.trim()) return
-    setBusy(true)
-    setError(null)
+    const text = idea.trim()
+    if (busy || judged || !text) return
     if (idleTimer.current) clearTimeout(idleTimer.current)
-    const { score, verdict } = scoreIdea(idea)
+    setBusy(true)
+
+    // the idea goes up as the visitor's own message; DOPPLER's answer
+    // opens as the turning mark and becomes the verdict in place
+    const verdictId = `v-${++uid.current}`
+    setLines((l) => [
+      ...l,
+      { id: `u-${uid.current}`, who: 'visitor', text },
+      { id: verdictId, who: 'doppler', pending: true, plate: true },
+    ])
+    setIdea('')
+
+    const { score, verdict } = scoreIdea(text)
     let filed = false
+    let jam: string | null = null
+    let jamKey: string | undefined
     try {
       const res = await fetch('/api/suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idea, score, verdict, website: hp.current?.value ?? '' }),
+        body: JSON.stringify({ idea: text, score, verdict, website: hp.current?.value ?? '' }),
       })
       if (res.status === 429 || res.status === 400) {
-        const d = await res.json().catch(() => ({}))
-        setError(d.error ?? t('suggest.error', skin))
-        setBusy(false)
-        return
+        const d = (await res.json().catch(() => ({}))) as { error?: string }
+        jam = d.error ?? t('suggest.error', skin)
+        jamKey = d.error === undefined ? 'suggest.error' : undefined
+      } else {
+        filed = res.ok
       }
-      filed = res.ok
     } catch {
       // storage down ≠ judgment down — score anyway, stamp honestly
       filed = false
     }
-    setResult({ score, verdict, filed })
-    say(verdict)
+
+    if (jam !== null) {
+      // the box jammed before it judged. The pending bubble becomes the
+      // complaint, the draft comes back, and nothing was scored.
+      patch(verdictId, (l) => ({
+        ...l,
+        who: 'system',
+        text: jam ?? undefined,
+        copyId: jamKey,
+        pending: undefined,
+      }))
+      setIdea(text)
+      setBusy(false)
+      return
+    }
+
+    patch(verdictId, (l) => ({ ...l, text: verdict, score, pending: undefined }))
     if (score >= 90) gateSfx.success()
     else if (score < 35) gateSfx.fail()
     else sfx.open()
     metric('suggestion_score', { score, filed })
-    setBusy(false)
+
+    // …then the methodology, then the receipt, on the beat
+    const beat = reduced ? 0 : BEAT_MS
+    beats.current.push(
+      setTimeout(() => {
+        setLines((l) => [...l, { id: `m-${++uid.current}`, who: 'doppler', text: METHODOLOGY }])
+      }, beat),
+      setTimeout(() => {
+        setLines((l) => [...l, { id: `f-${++uid.current}`, who: 'doppler', filed }])
+        setBusy(false)
+        setJudged(true)
+      }, beat * 2),
+    )
   }
 
   const again = () => {
-    setResult(null)
+    setJudged(false)
     setIdea('')
-    setError(null)
     fired.current = new Set()
     peak.current = 0
     say(AGAIN_LINE)
+    // the AGAIN button is about to unmount out from under the focus that
+    // pressed it — hand it to the composer, which is the next move anyway
+    field.current?.focus()
   }
+
+  const avatar = avatarFor('doppler', skin)
 
   return (
     <div className={styles.box}>
-      <div className={styles.reviewer}>
-        <span
-          className={styles.avatar}
-          aria-hidden="true"
-          style={{
-            WebkitMaskImage: `url(${avatarFor('doppler', skin)})`,
-            maskImage: `url(${avatarFor('doppler', skin)})`,
-          }}
-        />
-        <div className={styles.who}>
-          <span className={styles.whoName}>DOPPLER</span>
-          <Copy k="suggest.reviewerRole" as="span" className={styles.whoRole} />
-        </div>
-      </div>
+      <IdentityHeader
+        name="DOPPLER"
+        avatar={avatar}
+        role={<Copy k="suggest.reviewerRole" as="span" />}
+      />
 
-      <p key={line} className={styles.bubble} aria-live="polite">
-        {line}
-      </p>
-
-      {result === null ? (
-        <form className={styles.form} onSubmit={submit}>
-          <input
-            ref={hp}
-            type="text"
-            name="website"
-            tabIndex={-1}
-            autoComplete="off"
-            aria-hidden="true"
-            className={styles.hp}
-          />
-          <label className={styles.field}>
-            <span>
-              <Copy k="suggest.label" as="span" /> · {MAX - idea.length}
-            </span>
-            <textarea
-              value={idea}
-              onChange={(e) => onChange(e.target.value)}
-              maxLength={MAX}
-              required
-              rows={3}
-              placeholder={t('suggest.placeholder', skin)}
-            />
-          </label>
-          <div className={styles.foot}>
-            <button type="submit" className={styles.submitBtn} disabled={busy}>
-              {busy ? <Copy k="suggest.judging" as="span" /> : <Copy k="suggest.submit" as="span" />}
-            </button>
-            {error && (
-              <span className={styles.error} role="alert">
-                {error}
-              </span>
-            )}
-          </div>
-        </form>
-      ) : (
-        <div className={styles.result} role="status">
-          <div className={styles.scoreRow}>
-            <span className={styles.scoreNum}>{result.score}</span>
-            <span className={styles.scoreDen}>/100</span>
-          </div>
-          <p className={styles.method}>{METHODOLOGY}</p>
-          <div className={styles.resultFoot}>
-            <button type="button" className={styles.submitBtn} onClick={again}>
-              <Copy k="suggest.again" as="span" />
-            </button>
-            {result.filed ? (
-              <Stamp>
-                <Copy k="suggest.filed" as="span" />
+      <Feed busy={busy}>
+        {lines.map((l) => (
+          <Bubble
+            key={l.id}
+            tone={l.who === 'visitor' ? 'user' : l.who === 'system' ? 'system' : 'assistant'}
+            machine={l.who === 'doppler'}
+            as={l.plate ? 'div' : 'p'}
+            thinking={l.pending ? { mark: avatar, label: t('suggest.judging', skin) } : undefined}
+            copyId={l.copyId}
+            reduced={reduced}
+          >
+            {l.score !== undefined ? (
+              <>
+                <span className={styles.scoreRow}>
+                  <span className={styles.scoreNum}>{l.score}</span>
+                  <span className={styles.scoreDen}>/100</span>
+                </span>
+                <span className={styles.verdictLine}>{l.text}</span>
+              </>
+            ) : l.filed !== undefined ? (
+              <Stamp tone={l.filed ? 'blue' : 'pink'}>
+                <Copy k={l.filed ? 'suggest.filed' : 'suggest.notFiled'} as="span" />
               </Stamp>
             ) : (
-              <Stamp tone="pink">
-                <Copy k="suggest.notFiled" as="span" />
-              </Stamp>
+              l.text
             )}
-          </div>
-        </div>
-      )}
+          </Bubble>
+        ))}
+
+        {/* the way back in, under the last thing he said — a message-sized
+            affordance rather than a panel swapping out beneath the feed */}
+        {judged && (
+          <motion.div className={styles.againRow} {...riseIn(reduced)}>
+            <button type="button" className={styles.againBtn} onClick={again}>
+              <Copy k="suggest.again" as="span" />
+            </button>
+          </motion.div>
+        )}
+      </Feed>
+
+      <form className={styles.composer} onSubmit={submit}>
+        <input
+          ref={hp}
+          type="text"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className={styles.hp}
+        />
+        <input
+          ref={field}
+          type="text"
+          className={styles.field}
+          value={idea}
+          onChange={(e) => onChange(e.target.value)}
+          maxLength={MAX}
+          disabled={busy || judged}
+          aria-label={t('suggest.label', skin)}
+          placeholder={t('suggest.placeholder', skin)}
+        />
+        <span className={styles.count}>
+          <Copy k="suggest.label" as="span" /> · {MAX - idea.length}
+        </span>
+        <button
+          type="submit"
+          className={styles.submitBtn}
+          disabled={busy || judged || !idea.trim()}
+        >
+          <Copy k="suggest.submit" as="span" />
+        </button>
+      </form>
     </div>
   )
 }

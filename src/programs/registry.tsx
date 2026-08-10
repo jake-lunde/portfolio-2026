@@ -200,7 +200,12 @@ export const PROGRAMS: ProgramDef[] = [
     meta: 'BOX-86',
     icon: 'suggest',
     component: dynamic(() => import('@/programs/suggest/SuggestBox')),
-    size: { w: 430, h: 468 },
+    // 560 tall, up from 468: the box is a chat feed now (session 44), and
+    // a full round is DOPPLER's greeting, a jab or two, the idea, and the
+    // three bubbles of the judgment. 560 shows a whole verdict — greeting
+    // through receipt — without a scroll; the width stays 430 because the
+    // composer is one field and the roast lines are capped at 44 chars.
+    size: { w: 430, h: 560 },
     pos: { x: 402, y: 92 },
     onDesktop: true,
     path: '/suggest',
