@@ -163,6 +163,7 @@
 }
 
 .aboutList {
+  --k-w: 92px; /* the label column the values are set against */
   font-family: var(--mono);
   font-size: var(--type-body-sm-size); /* 12px → 13px */
   letter-spacing: 0.02em;
@@ -179,7 +180,63 @@
   font-size: var(--text-label);
   letter-spacing: 0.12em;
   display: inline-block;
-  min-width: 92px;
+  min-width: var(--k-w);
+}
+
+/* FOCUS crawls rather than wraps — the menu-bar ticker's mechanic, held
+   to one line (see About.tsx). The row refuses to break so the rail can
+   never drop below its label, whatever a skin does to the label's width;
+   the rail is the window the line runs in, top-aligned so its single
+   line sits on the row's baseline even though clipping would otherwise
+   sink it. Static, it ellipsizes. */
+.focusRow {
+  white-space: nowrap;
+}
+
+.focusRail {
+  display: inline-block;
+  vertical-align: top;
+  max-width: calc(100% - var(--k-w));
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.focusTrack {
+  display: inline;
+}
+
+/* two halves side by side, walked one half-width per cycle: the seam
+   never lands. Duration is set per-instance from the measured width. */
+.focusCrawl {
+  display: flex;
+  width: max-content;
+  animation: focusCrawl 12s linear infinite;
+}
+
+.focusHalf {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@keyframes focusCrawl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* EDIT.MODE types into the line in place — a moving target can't be
+   clicked into, so the crawl parks and the ghost copy steps out. */
+:global(body[data-editmode='on']) .focusCrawl {
+  animation: none;
+  transform: none;
+}
+
+:global(body[data-editmode='on']) .focusGhost {
+  display: none;
 }
 
 /* ---------- Projects index ---------- */
