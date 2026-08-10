@@ -615,6 +615,7 @@ export function ShelfBox({
         initial={false}
         animate={{ opacity: show ? 1 : 0, y: show ? 0 : -6 }}
         transition={reduced ? { duration: 0 } : SPRINGS.window}
+        data-spring="window"
         style={{ pointerEvents: show ? 'auto' : 'none' }}
       >
         <button

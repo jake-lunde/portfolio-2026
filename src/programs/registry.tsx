@@ -328,6 +328,22 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/spec',
   },
   {
+    // INSPECT.MODE — the read-only half of the token story. SPEC.SHEET
+    // prints the system; this one lets a visitor point at any pixel on the
+    // desktop and watch it name its own tokens. Public, zero writes.
+    id: 'inspect-mode',
+    name: 'INSPECT.MODE',
+    meta: 'SYS-21',
+    explainer: 'inspect.explainer',
+    icon: 'rings',
+    component: dynamic(() => import('@/programs/inspectmode/InspectMode')),
+    size: { w: 460, h: 640 },
+    pos: { x: 340, y: 70 },
+    chrome: 'crt',
+    onDesktop: true,
+    path: '/inspect',
+  },
+  {
     // SPEC.SHEET's playable half, in its own window. No desktop icon and no
     // deep link by design: it opens from the sheet's title row (the sheet
     // is what explains the two-accent law it lets you break).

@@ -237,6 +237,9 @@ export default function Studio() {
     animate: { opacity: 1, x: 0 },
     exit: reduced ? { opacity: 0 } : { opacity: 0, x: -10 },
     transition: SPRINGS.deck,
+    // rides the shared prop bag so every pane declares the spring that
+    // moves it — INSPECT.MODE reads this off the DOM
+    'data-spring': 'deck',
   }
 
   return (

@@ -81,6 +81,7 @@ export function NowPlayingWidget() {
           className={styles.npWidget}
           onClick={() => setZoomed(true)}
           transition={spring}
+          data-spring="zoom"
           aria-label={`Now playing: ${track.title} by ${track.artist}. View closely.`}
         >
           {card(false)}
@@ -103,6 +104,7 @@ export function NowPlayingWidget() {
               layoutId="np-card"
               className={`${styles.npWidget} ${styles.npZoomed}`}
               transition={spring}
+              data-spring="zoom"
             >
               {card(true)}
             </motion.div>

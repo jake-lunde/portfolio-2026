@@ -198,6 +198,7 @@ export function Box3D({
         className={styles.shadowWrap}
         aria-hidden="true"
         style={tiltOn ? { scale: shadowScale, opacity: shadowFade } : undefined}
+        data-spring="window"
       >
         <span className={styles.shadow} />
       </motion.span>
@@ -210,6 +211,7 @@ export function Box3D({
           <motion.div
             className={styles.tilt}
             data-tilt=""
+            data-spring="window"
             style={{ rotateX: rx, rotateY: ry, y: lift, z }}
           >
             <Cuboid flipped={flipped} reduced={reduced}>
@@ -248,6 +250,7 @@ function Cuboid({
       initial={reduced ? undefined : { rotateY: 0 }}
       animate={reduced ? undefined : { rotateY: flipped ? 180 : 0 }}
       transition={reduced ? { duration: 0 } : SPRINGS.deck}
+      data-spring="deck"
     >
       {children}
       {/* cardboard thickness. Token-only: the face ground darkened by a

@@ -64,6 +64,7 @@ export function MiniPlayer() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={reduced ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.96 }}
           transition={SPRINGS.mini}
+          data-spring="mini"
         >
           {current.art && (
             // eslint-disable-next-line @next/next/no-img-element

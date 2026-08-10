@@ -132,6 +132,7 @@ export function CommandWidget() {
         initial={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...SPRINGS.widget, delay: 0.5 }}
+        data-spring="widget"
         aria-label={
           live
             ? `Command Center is live — Jake's agents are orchestrating now${

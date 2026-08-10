@@ -31,6 +31,7 @@ export function DailyWidget() {
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...SPRINGS.widget, delay: 0.4 }}
+      data-spring="widget"
     >
       <div className={styles.dailyHead}>
         <span>DAILY.SYS</span>

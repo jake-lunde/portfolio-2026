@@ -33,6 +33,36 @@
   "guestbook.sign": "SIGN",
   "guestbook.signAgain": "SIGN AGAIN",
   "guestbook.storagePending": "Storage pending",
+  "inspect.armed": "ARMED — CLICK ANYTHING ON THE DESKTOP. ESC STANDS DOWN.",
+  "inspect.corewarn": "CORE PRIMITIVE, CONSUMED RAW — HOUSE LAW SAYS USE A SEMANTIC ROLE.",
+  "inspect.editbusy": "EDIT.MODE HAS THE FLOOR — CLOSE IT FIRST.",
+  "inspect.empty": "NOTHING PICKED YET.",
+  "inspect.explainer": "A READ-ONLY X-RAY. EVERY COLOR, TYPE ROLE, AND SPRING ON THIS SCREEN RESOLVES FROM ONE TOKEN SOURCE — CLICK AROUND AND IT SHOWS ITS WORK.",
+  "inspect.eyebrow": "INSPECT.MODE · READ-ONLY TOKEN X-RAY",
+  "inspect.hint": "HIT SCAN, THEN CLICK ANYTHING. ALT+CLICK WORKS ANYTIME THIS WINDOW IS OPEN.",
+  "inspect.ident": "IDENT",
+  "inspect.inherited": "NO TOKENED RULE OF ITS OWN — READING WHAT IT INHERITS.",
+  "inspect.mobile": "INSPECT.MODE WANTS A BIGGER SCREEN.",
+  "inspect.nospring": "NO SPRING — THIS ONE HOLDS STILL.",
+  "inspect.on": "ON",
+  "inspect.region": "INSPECTION RESULT",
+  "inspect.reskinned": "RESKINNED SUBTREE — TOKENS RESOLVED LOCALLY.",
+  "inspect.scan": "SCAN",
+  "inspect.section.contrast": "CONTRAST",
+  "inspect.section.layers": "LAYERS",
+  "inspect.section.motion": "MOTION",
+  "inspect.section.tokens": "TOKENS",
+  "inspect.section.type": "TYPE",
+  "inspect.spring.deck": "COMMAND CENTER PANELS — BRISK, NO OVERSHOOT.",
+  "inspect.spring.flight": "GATE LETTERS FLYING TO THEIR SLOTS.",
+  "inspect.spring.human": "JAKE’S OWN INPUTS — HEAVIER, SLOWER, ALLOWED TO OVERSHOOT. THE MACHINES ARE DIGITAL; THE HUMAN IS ANALOG.",
+  "inspect.spring.mini": "THE MINI PLAYER ARRIVING.",
+  "inspect.spring.rise": "GATE SLOTS ASCENDING.",
+  "inspect.spring.widget": "DESKTOP WIDGETS MAKING THEIR ENTRANCE.",
+  "inspect.spring.window": "WINDOW CHROME — OPENING, ZOOMING, SETTLING.",
+  "inspect.spring.zoom": "SHARED-ELEMENT ZOOMS — A PRINT FLYING UP CLOSE AND BACK.",
+  "inspect.springvia": "RIDING AN ANCESTOR’S SPRING — MOTION IS INHERITED HERE.",
+  "inspect.stop": "STOP",
   "machine.ai.eyebrow": {
     "base": "An appraisal · SYS-20",
     "medieval": "An assay · SYS-20"
@@ -83,6 +113,10 @@
   "program.guestbook.name": {
     "base": "Guestbook",
     "medieval": "The Ledger"
+  },
+  "program.inspect-mode.name": {
+    "base": "INSPECT.MODE",
+    "medieval": "The Assay"
   },
   "program.machine.name": {
     "base": "About This Machine",
