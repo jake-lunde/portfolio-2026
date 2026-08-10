@@ -1,15 +1,16 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-10 (s41b/s42 notes → archive; s43 note below).
+> Last rotation: 2026-08-10 (s43 note → archive; s44 note below).
 
 ## Current state
 
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
   stays "pending" while Chromatic runs; apex 308s to www — curl -L).
-  **Production = INSPECT SHELL (merge 5731587, 2026-08-10) on top of
-  ASK MY AI + chat anatomy + INSPECT.MODE + focus-ticker + SHIPPED.SW.**
+  **Production = s44 MISC QUARTET (merge 3332a9f, 2026-08-10, marker
+  verified) on top of INSPECT SHELL + ASK MY AI + chat anatomy +
+  focus-ticker + SHIPPED.SW.**
 - **⚠️ Shared-checkout law: no concurrent sessions on one working tree;
   `git branch --show-current` before EVERY commit.** Another session's
   worktree (`minors-random-wallpaper`) was live during s40 — worktrees are
@@ -25,8 +26,10 @@
   removed, window back to 700: menu bar + deck are the only doors;
   once-ever discovery bubble, localStorage-sealed) + deck wires
   (FABLE→ai-chat, DOPPLER→suggest; other three await P1 mini-chats —
-  fourier task). ⚠️ 360px menubar is now FULL — next control added must
-  fold something. Original ship record (guardrails, spend caps):
+  fourier task). s44 re-ordered the bar (INSPECT · ♪ · sun/moon · ? ·
+  clock) and the glyph swap bought back ~40px of 360 slack — one more
+  control fits before something must fold. Original ship record
+  (guardrails, spend caps):
   ABOUT THIS MACHINE retired into README (single identity door): FABLE
   bubble CTA at README's foot → "Ask My AI" (SYS-20, `/ai`); 5 authored
   cards local, composer live. Guardrails: global daily blob counter
@@ -100,39 +103,35 @@
 > fourier "agents are clickable" framework developed + phased in its task.
 > Next in that arc: P1 canned mini-chats for HERTZ/NYQUIST/FOURIER.
 
-## Latest session — INSPECT SHELL: THE TOOL TAKES THE SCREEN (s43, 2026-08-10)
+## Latest session — S44 MISC QUARTET: GLYPHS, PAPER, ARROW (2026-08-10)
 
-**Jake, on phase 0: "make it feel like the software I'm used to — layers
-left, inspector right, in the toolbar, update live, less like another
-window." Then "ship it when the fixes land!!" Both done.**
+**Jake's four asks, all shipped solo-Fable (merge `3332a9f`, branch
+`misc/s44-quartet` deleted, prod marker verified):**
 
-- **Build (NYQUIST worktree, 2 rounds):** shell `a470808` → DOPPLER 8
-  findings fixed `afaf1b4` → merge `5731587`. Window program deleted;
-  engine untouched. New: store/inspect.ts · lib/tune.ts (preview-only
-  re-alias nudge, prior-stash reset) · components/inspect/* (shell,
-  WAI-ARIA layers tree, inspector, code-split mount).
-- **DOPPLER's sharpest:** fixed-position dialogs escaped the compressed
-  canvas ABOVE the docks and trapped the visitor (Escape eaten by the
-  mode ladder) → docks z6500 + [role="dialog"] exemption end-to-end ·
-  keyboard-synthesized clicks (detail 0) made pick-vs-operate
-  nondeterministic · tree went stale on in-window DOM churn → rAF-coalesced
-  MutationObserver · Motion drag offsets stranded windows outside the
-  canvas → ResizeObserver re-clamp (fixes browser-narrowing too).
-- **Rulings that stick:** click picks / dblclick drills / ALT+CLICK
-  operates (inverted from phase 0 — in the tool, alt means "use it") ·
-  titlebar drag arranges (4px slop) · Escape ladder palette→selection→
-  mode, transparent to open dialogs · recede off while on (flat canvas) ·
-  paper docks, glyph toggle ◎ INSPECT (no icons in menubar) · 900px floor
-  · compression = inset snap + dock transform slide (no layout tween on
-  the OS container) · nudge candidates = buildASkin PALETTE as hexes
-  (core primitives flatten at build — nothing to var() to), AA-judged
-  per theme.
-- Residual accepted: one Escape can close a non-dialog transient AND exit
-  the mode · desktop icons/widgets have no tree rows (windows only) ·
-  alt-click on a real link triggers browser download-default.
-- Token debt sweep SCOPED (Notion P1 + session chip for Jake): manifest
-  grep → re-alias ledger → doctor-zero. Phase 1 commit loop still awaits
-  the PR-vs-main ruling; Motion+ answered (tuning fork yes, dependency no).
+- **Menubar re-cut:** order INSPECT · ♪ · sun/moon · ? · clock. SND/LGT/
+  DRK text retired for 16-grid line-art glyphs local to MenuBar.tsx
+  (note takes a slash when muted; theme shows the CURRENT state's glyph;
+  both currentColor so aria-pressed accent recolours free). FableMark
+  moved to the corner seat beside the clock — its "leads the cluster"
+  comment rewritten. `.menuGlyphBtn` in shell.module.css.
+- **FEEDBACK hidden** (`onDesktop: false`, ORDER slot kept, /feedback
+  deep link live) — flip the flag to restore.
+- **RESUME.EXE prints for real** (Notion "animate paper" P0 → Done):
+  sheet slides up from below the tray in lockstep with the thermometer —
+  same `--print-t` (tick/TICKS) drives both, travel = 100cqh (feed is a
+  size container), overflow locked while printing, transform none +
+  overflow auto at done. Opacity theater deleted; ink is on the page as
+  it feeds. Probe-verified: t=0 → 549px down, t=.5 → 275, t=1 → 0.
+- **CC chip:** desktop CTA text gone — `.ccArrow` surfaces at the right
+  edge on hover/:focus-visible (24px lane reserved in .ccBar padding);
+  900–1240 the empty action row hides (glance line only). NEW: chip
+  returns below 720 as a full-rail card above the launcher grid (was
+  display:none), ENTER COMMAND CENTER on its own centred line — mobile
+  finally has a deck door. `.icons` top 76px clears it (constants
+  travel together, both commented).
+- Dev-only note: hidden pane tab freezes Motion entries (chip probes at
+  opacity 0) AND the Boot exit — reload with `lunde-booted` sessionStorage
+  set to skip boot when probing.
 
 ## Next steps
 
@@ -162,6 +161,9 @@ window." Then "ship it when the fixes land!!" Both done.**
 9. Cleanup: delete merged branches (`cv-exe`, `suggestion-box`,
    `case-family-hub`, `worktree-cc-v2-pipeline`, `medieval-sfx*` on
    confirm) · `family-hub 2/` dup.
+   **Jake: eyeball s44 on lunde.co** — RESUME.EXE's feeding paper (the
+   feel dial is TICKS/TICK_MS in CV.tsx), the glyph bar, the mobile
+   deck card.
 10. Carried: gate friction elsewhere · COMMAND.CTR zero-`list()` + cost
    read · replay-your-session task · Figma stale STRING vars · typography
    finale · underwater · eyeball tracker v2 / leaf-patch call.

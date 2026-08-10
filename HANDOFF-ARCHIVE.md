@@ -1904,3 +1904,39 @@ on branch per s31 law.**
   under reduced-motion · nested data-skin pick = probe burst.
 - Concurrent-session note: s41 rotated HANDOFF mid-session; laws held
   (worktrees, branch check before commit, main stayed on main).
+
+---
+
+## Latest session — INSPECT SHELL: THE TOOL TAKES THE SCREEN (s43, 2026-08-10)
+
+**Jake, on phase 0: "make it feel like the software I'm used to — layers
+left, inspector right, in the toolbar, update live, less like another
+window." Then "ship it when the fixes land!!" Both done.**
+
+- **Build (NYQUIST worktree, 2 rounds):** shell `a470808` → DOPPLER 8
+  findings fixed `afaf1b4` → merge `5731587`. Window program deleted;
+  engine untouched. New: store/inspect.ts · lib/tune.ts (preview-only
+  re-alias nudge, prior-stash reset) · components/inspect/* (shell,
+  WAI-ARIA layers tree, inspector, code-split mount).
+- **DOPPLER's sharpest:** fixed-position dialogs escaped the compressed
+  canvas ABOVE the docks and trapped the visitor (Escape eaten by the
+  mode ladder) → docks z6500 + [role="dialog"] exemption end-to-end ·
+  keyboard-synthesized clicks (detail 0) made pick-vs-operate
+  nondeterministic · tree went stale on in-window DOM churn → rAF-coalesced
+  MutationObserver · Motion drag offsets stranded windows outside the
+  canvas → ResizeObserver re-clamp (fixes browser-narrowing too).
+- **Rulings that stick:** click picks / dblclick drills / ALT+CLICK
+  operates (inverted from phase 0 — in the tool, alt means "use it") ·
+  titlebar drag arranges (4px slop) · Escape ladder palette→selection→
+  mode, transparent to open dialogs · recede off while on (flat canvas) ·
+  paper docks, glyph toggle ◎ INSPECT (no icons in menubar) · 900px floor
+  · compression = inset snap + dock transform slide (no layout tween on
+  the OS container) · nudge candidates = buildASkin PALETTE as hexes
+  (core primitives flatten at build — nothing to var() to), AA-judged
+  per theme.
+- Residual accepted: one Escape can close a non-dialog transient AND exit
+  the mode · desktop icons/widgets have no tree rows (windows only) ·
+  alt-click on a real link triggers browser download-default.
+- Token debt sweep SCOPED (Notion P1 + session chip for Jake): manifest
+  grep → re-alias ledger → doctor-zero. Phase 1 commit loop still awaits
+  the PR-vs-main ruling; Motion+ answered (tuning fork yes, dependency no).
