@@ -16,9 +16,11 @@ import styles from './commandWidget.module.css'
    One row, one target, four things in it: the state, the CAST (Jake's
    monogram at the head of the line, then the five units, the one named
    by the latest event lit), the LEADING EDGE of the feed inline, and
-   the way in — ENTER COMMAND CENTER. The chip used to expand a little
-   feed of its own; the leading edge says the same thing in a quarter of
-   the space and leaves exactly one control on the desktop.
+   the way in — an arrow that surfaces on hover (the spelled-out ENTER
+   COMMAND CENTER line survives only on mobile, where there is no hover).
+   The chip used to expand a little feed of its own; the leading edge
+   says the same thing in a quarter of the space and leaves exactly one
+   control on the desktop.
 
    Two states, and the difference is carried by TEXT, DOT SHAPE and
    ELEVATION before it is carried by colour or motion:
@@ -197,10 +199,19 @@ export function CommandWidget() {
             )}
           </span>
 
+          {/* the spelled-out way in survives only on mobile, where there
+              is no hover; on desktop the whole chip is the target and the
+              arrow below says so on approach (Jake, s44) */}
           <span className={styles.ccCta}>
             ENTER COMMAND CENTER
             <span aria-hidden="true">&nbsp;→</span>
           </span>
+        </span>
+
+        {/* desktop affordance: an arrow surfaces at the chip's right edge
+            on hover/focus — the aria-label already says where it goes */}
+        <span className={styles.ccArrow} aria-hidden="true">
+          →
         </span>
       </motion.button>
 
