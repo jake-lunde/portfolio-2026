@@ -65,8 +65,14 @@ export function Window({ def, z, active, desktopRef }: Props) {
     const startY = e.clientY
     const startW = size.w
     const startH = size.h
-    const maxW = window.innerWidth - 24
-    const maxH = window.innerHeight - 46 // leave the menu bar clear
+    /* Measure the DESKTOP, not the viewport. They were the same thing
+       until INSPECT.MODE started docking panels beside the desktop — now
+       a viewport-sized window would resize straight under them. The
+       container already starts below the menubar and the ticker, so the
+       old innerHeight-46 allowance for the menu bar is baked in. */
+    const box = desktopRef.current
+    const maxW = (box?.clientWidth ?? window.innerWidth) - 24
+    const maxH = (box?.clientHeight ?? window.innerHeight - 55) - 24
     try {
       ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
     } catch {
@@ -113,8 +119,14 @@ export function Window({ def, z, active, desktopRef }: Props) {
       style={{
         /* clamp the resting x so a window's right edge never opens off
            glass on narrow desktops — CSS min(), not innerWidth, so SSR
-           and client agree. Drag can still take it wherever. */
-        left: `min(${def.pos.x}px, calc(100vw - ${size.w + 12}px))`,
+           and client agree. Drag can still take it wherever.
+
+           Percent, not vw: this element is absolute inside .desktop, and
+           .desktop is no longer always viewport-wide (INSPECT.MODE docks
+           panels beside it). % resolves against the containing block,
+           which is the glass this clamp is actually about — and it keeps
+           the SSR-agreement property the vw unit was chosen for. */
+        left: `min(${def.pos.x}px, calc(100% - ${size.w + 12}px))`,
         top: def.pos.y,
         width: size.w,
         height: size.h,

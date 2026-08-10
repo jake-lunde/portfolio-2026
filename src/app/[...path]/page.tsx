@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Desktop } from '@/components/shell/Desktop'
-import { ALL_PATHS, windowsForPath } from '@/programs/resolve'
+import { ALL_PATHS, inspectForPath, windowsForPath } from '@/programs/resolve'
 import { getCase } from '@/programs/projects/cases'
 
 type Props = { params: Promise<{ path: string[] }> }
@@ -22,10 +22,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   if (path[0] === 'projects') return { title: 'Projects' }
   if (path[0] === 'readme') return { title: 'README' }
+  if (path[0] === 'inspect') return { title: 'INSPECT.MODE' }
   return {}
 }
 
 export default async function DeepLink({ params }: Props) {
   const { path } = await params
-  return <Desktop initialWindows={windowsForPath(path)} />
+  return (
+    <Desktop initialWindows={windowsForPath(path)} initialInspect={inspectForPath(path)} />
+  )
 }
