@@ -61,18 +61,24 @@
   border-color: var(--border);
 }
 
-/* glyph controls (sound, theme): same hit target and hover frame as the
-   word buttons, but the label is a 14px line-art SVG on currentColor —
-   so aria-pressed accent and data-busy muting recolour it for free */
+/* glyph controls (sound, theme): built on the fableBtn's exact box —
+   same 3px band, same 1lh square — so the three glyph seats (♪, sun/
+   moon, ?) are identical in size and sit on one tight rhythm (Jake,
+   s44b: the ?–sun gap is the spacing law, not the old padded one).
+   Hover draws the border the ? wears permanently: one family, one
+   footprint. Label is line-art SVG on currentColor, so aria-pressed
+   accent and data-busy muting recolour it for free. */
 .menuGlyphBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 6px;
+  padding: 3px;
 }
 
 .menuGlyphBtn svg {
   display: block;
+  width: 1lh;
+  height: 1lh;
 }
 
 .menuBtn[aria-pressed='true'] {
