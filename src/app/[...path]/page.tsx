@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Desktop } from '@/components/shell/Desktop'
-import { ALL_PATHS, windowsForPath } from '@/programs/resolve'
+import { ALL_PATHS, inspectForPath, windowsForPath } from '@/programs/resolve'
+import { BASE } from '@/lib/base'
 import { getCase } from '@/programs/projects/cases'
 
 type Props = { params: Promise<{ path: string[] }> }
@@ -22,10 +23,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   if (path[0] === 'projects') return { title: 'Projects' }
   if (path[0] === 'readme') return { title: 'README' }
+  /* /inspect prerenders the same desktop /readme does — it only arms a
+     tool over the top, which is client state a crawler never sees. Two
+     URLs, one document: point the canonical at the real one. */
+  if (path[0] === 'inspect') {
+    return { title: 'INSPECT.MODE', alternates: { canonical: `${BASE}/readme` } }
+  }
   return {}
 }
 
 export default async function DeepLink({ params }: Props) {
   const { path } = await params
-  return <Desktop initialWindows={windowsForPath(path)} />
+  return (
+    <Desktop initialWindows={windowsForPath(path)} initialInspect={inspectForPath(path)} />
+  )
 }

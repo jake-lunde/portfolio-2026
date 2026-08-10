@@ -1,15 +1,15 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-09 (s41 note → archive; s42 note below).
+> Last rotation: 2026-08-10 (s41b/s42 notes → archive; s43 note below).
 
 ## Current state
 
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
   stays "pending" while Chromatic runs; apex 308s to www — curl -L).
-  **Production = INSPECT.MODE (merge 7263e42, live-verified 2026-08-09)
-  on top of README focus-ticker + SHIPPED.SW + COMMAND.CTR v2.**
+  **Production = INSPECT SHELL (merge 5731587, 2026-08-10) on top of
+  ASK MY AI + chat anatomy + INSPECT.MODE + focus-ticker + SHIPPED.SW.**
 - **⚠️ Shared-checkout law: no concurrent sessions on one working tree;
   `git branch --show-current` before EVERY commit.** Another session's
   worktree (`minors-random-wallpaper`) was live during s40 — worktrees are
@@ -27,19 +27,19 @@
   `@anthropic-ai/sdk`. Parked bit: INSERT COIN gate on the cap (Notion).
 - **README focus-ticker SHIPPED** (merge `3d5530e`, verified live). Speed
   dial: `CRAWL_PX_PER_SEC` in About.tsx. Branch deletable.
-- **INSPECT.MODE (TUNE.MODE phase 0) SHIPPED** (Jake: "merge it and ship
-  it!!"; merge `7263e42`, deploy READY, marker-curl verified; branch
-  deleted). Public read-only token
-  x-ray: SYS-21, `rings` desktop icon, `/inspect`; SCAN or alt-click →
-  LAYERS chain · TOKENS (real var() provenance off CSSOM cssText, tier
-  chips, core-law warnings) · size-aware CONTRAST grade · TYPE · MOTION
-  via `data-spring` tags (27 sites, all 8 springs). New infra:
-  `tokens.generated.ts` manifest (199 props → tier; build fails loud on
-  cross-theme tier collisions — caught `--display/--sans/--mono` mis-tiered
-  core). DOPPLER audit: 13 findings, all fixed. Probe-verified + prod
-  build green. Panel already flagged real debt: menubar hairline (core)
-  + dead `--wash-x`. TUNE.MODE phases 1–2 (token nudge + commit · SPRING
-  scrub) still open — questions 2–4 in the Notion task.
+- **INSPECT.MODE IS NOW A TOOL MODE (the "INSPECT SHELL"), LIVE** —
+  ◎ INSPECT menubar toggle (≥900px) or `/inspect`: desktop compresses to
+  a canvas between paper docks — LAYERS tree left (WAI-ARIA, keyboard
+  end-to-end, MutationObserver-fresh), INSPECTOR right (engine
+  `src/lib/inspect.ts` unchanged: tokens w/ tier chips + core-law
+  warnings, size-aware contrast, type, springs). Click picks · dblclick
+  drills · ALT+CLICK operates the site · Escape ladder · dialogs exempt +
+  above-dock z. LIVE NUDGE: semantic color roles re-alias from core
+  PALETTE candidates, AA-judged per theme, inline-on-html preview only
+  ("NOT SAVED" banner, RESET ALL, resets on exit) — persistence = phase 1,
+  blocked on Jake's PR-vs-main ruling. tune.ts is the override channel;
+  buildASkin untouched. Window program deleted; `/inspect` canonicals to
+  `/readme`. EDIT.MODE mutual exclusion incl. disabled toggle state.
 - **Notion research rulings (s40, full writeups in each task page):**
   hooks — none installed, adopt 4 (SessionStart deck-report, block
   generated-token edits, block forbidden commits, block prettier), ~15 min
@@ -70,39 +70,39 @@
   medieval airbrush wash contrast · never build while a dev server owns
   the checkout .next · `family-hub 2/` dup dir (Jake deletes).
 
-> s41b addendum (2026-08-10): ASK MY AI shipped — guardrails v2 commit
-> `5bfd9bb` on the branch, KEY-level copy.json merge vs INSPECT.MODE's
-> keys (zero double-edits), merge `c7956d7`, prod-verified incl. one paid
-> live turn (~2.5¢). Full s41 story in HANDOFF-ARCHIVE.md + Notion task.
+## Latest session — INSPECT SHELL: THE TOOL TAKES THE SCREEN (s43, 2026-08-10)
 
-## Latest session — INSPECT.MODE PHASE 0 (s42, 2026-08-09)
+**Jake, on phase 0: "make it feel like the software I'm used to — layers
+left, inspector right, in the toolbar, update live, less like another
+window." Then "ship it when the fixes land!!" Both done.**
 
-**Jake ruled question 1 by acclamation ("it is a designer flex!! build
-it") → INSPECT.MODE is public + on the desktop. Built, audited, verified;
-on branch per s31 law.**
-
-- **Build (NYQUIST worktree → my review):** `src/lib/inspect.ts` engine +
-  InspectMode program + `tokens.generated.ts` emit in build-tokens.mjs +
-  `data-spring` at 27 sites. 3 commits: build `81edaa3` → CRT-ink fix
-  `e94988a` → DOPPLER fixes `34661ba`.
-- **DOPPLER audit paid for itself twice:** (1) tier merge let classic
-  outvote medieval — the panel would have publicly accused ~90 legal
-  `--sans/--mono/--display` uses; (2) `style.item()` never enumerates
-  var()-bearing shorthands — ~440 declarations (background/border/gap)
-  were invisible until the walk moved to `cssText`. Also: @container
-  leaked closed conditions; own injected sheet self-reported; AA·LG was
-  size-blind. All fixed.
-- **CRT ink rule learned** (memory + archive): crt bodies paint
-  `--surface-inverse` with NO token re-scope — on-body text must be
-  `--content-inverse`; EDIT.MODE only dodges it via muted/accent/fills.
-- Verified: headless_shell CDP probes (arm/hover/pick/exempt/Escape/
-  teardown, zero leftovers, console clean), light + dark shots,
-  tokens:doctor at baseline, tsc + prod build green.
-- Phase-0 debts (Notion task): no keyboard path to a FIRST pick ·
-  @container skipped not evaluated · data-spring reports authored intent
-  under reduced-motion · nested data-skin pick = probe burst.
-- Concurrent-session note: s41 rotated HANDOFF mid-session; laws held
-  (worktrees, branch check before commit, main stayed on main).
+- **Build (NYQUIST worktree, 2 rounds):** shell `a470808` → DOPPLER 8
+  findings fixed `afaf1b4` → merge `5731587`. Window program deleted;
+  engine untouched. New: store/inspect.ts · lib/tune.ts (preview-only
+  re-alias nudge, prior-stash reset) · components/inspect/* (shell,
+  WAI-ARIA layers tree, inspector, code-split mount).
+- **DOPPLER's sharpest:** fixed-position dialogs escaped the compressed
+  canvas ABOVE the docks and trapped the visitor (Escape eaten by the
+  mode ladder) → docks z6500 + [role="dialog"] exemption end-to-end ·
+  keyboard-synthesized clicks (detail 0) made pick-vs-operate
+  nondeterministic · tree went stale on in-window DOM churn → rAF-coalesced
+  MutationObserver · Motion drag offsets stranded windows outside the
+  canvas → ResizeObserver re-clamp (fixes browser-narrowing too).
+- **Rulings that stick:** click picks / dblclick drills / ALT+CLICK
+  operates (inverted from phase 0 — in the tool, alt means "use it") ·
+  titlebar drag arranges (4px slop) · Escape ladder palette→selection→
+  mode, transparent to open dialogs · recede off while on (flat canvas) ·
+  paper docks, glyph toggle ◎ INSPECT (no icons in menubar) · 900px floor
+  · compression = inset snap + dock transform slide (no layout tween on
+  the OS container) · nudge candidates = buildASkin PALETTE as hexes
+  (core primitives flatten at build — nothing to var() to), AA-judged
+  per theme.
+- Residual accepted: one Escape can close a non-dialog transient AND exit
+  the mode · desktop icons/widgets have no tree rows (windows only) ·
+  alt-click on a real link triggers browser download-default.
+- Token debt sweep SCOPED (Notion P1 + session chip for Jake): manifest
+  grep → re-alias ledger → doctor-zero. Phase 1 commit loop still awaits
+  the PR-vs-main ruling; Motion+ answered (tuning fork yes, dependency no).
 
 ## Next steps
 
@@ -110,8 +110,10 @@ on branch per s31 law.**
    + a live question; eyeball the typewriter motion (never seen on a
    visible tab) and the card voice. **Confirm the workspace spend limit
    is set in the Anthropic console** — it's the only unhackable guard.
-2. **Jake: play with INSPECT.MODE on lunde.co** — it's live; hit SCAN
-   and click the menubar (it catches a real hairline violation).
+2. **Jake: drive the INSPECT SHELL on lunde.co** — ◎ INSPECT in the
+   menubar. Click picks, alt+click uses the site, try a nudge on
+   --accent. Then two rulings: token-commit path (PR vs main — unblocks
+   saving nudges) + launch the token-debt-sweep chip.
 3. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
    if off) — it's live.
 4. **Jake: read the skills research + the TUNE.MODE plan** (both Notion

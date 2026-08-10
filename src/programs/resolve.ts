@@ -81,6 +81,10 @@ export function resolveWindow(id: string): ResolvedWindow | null {
 export function windowsForPath(path: string[]): string[] {
   if (path.length === 0) return ['readme'] // first-run window
   if (path[0] === 'readme') return ['readme']
+  /* /inspect is the one path with no window behind it: INSPECT.MODE is a
+     tool mode, not a program, so the link puts something ON the canvas and
+     arms the tool over it (see inspectForPath + Desktop). */
+  if (path[0] === 'inspect') return ['readme']
   if (path[0] === 'projects') {
     // a case deep-link opens the SHELF behind the case window — that is the
     // room this work lives in now. The flat `projects` index stays
@@ -97,9 +101,16 @@ export function windowsForPath(path: string[]): string[] {
   return p ? [p.id] : ['readme']
 }
 
+/** Does this path arm INSPECT.MODE? Separate from windowsForPath because
+    the mode is not a window — the path opens one AND turns the tool on. */
+export function inspectForPath(path: string[]): boolean {
+  return path[0] === 'inspect'
+}
+
 export const ALL_PATHS: string[][] = [
   [],
   ['readme'],
+  ['inspect'],
   ['projects'],
   ['cases'],
   ['music'],
