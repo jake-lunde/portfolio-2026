@@ -8,10 +8,13 @@ import { sfx } from '@/lib/sound'
 import { Icon } from './Icon'
 import styles from './shell.module.css'
 
-/* Desktop launcher. Explicit reading order: README · CASE STUDIES ·
-   ABOUT THIS MACHINE lead the top row; SETTINGS is always last. The grid
-   flows by row so the top row is literal. Trash rides the bottom-left
-   corner on desktop, but joins the scrolling grid on mobile.
+/* Desktop launcher. Explicit reading order: README · RESUME.EXE · CASE
+   STUDIES lead the top row; SETTINGS is always last. The grid flows by
+   row so the top row is literal. Trash rides the bottom-left corner on
+   desktop, but joins the scrolling grid on mobile.
+
+   README is the single identity door (session 41 retired ABOUT THIS
+   MACHINE): the machine's own opinion now hangs off a CTA inside it.
 
    Kept deliberately short (session 25): programs live inside the MUSIC /
    FUN / FEEDBACK drawers or behind CASE STUDIES rather than all landing
@@ -21,7 +24,6 @@ const ORDER = [
   'readme',
   'cv',
   'progress',
-  'machine',
   'guestbook',
   'music',
   'fun',

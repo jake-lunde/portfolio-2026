@@ -239,6 +239,127 @@
   display: none;
 }
 
+/* ---------- README → ASK MY AI (the machine's CTA) ---------- */
+
+/* Lifted from suggest.module.css so the two crew introductions read as
+   one component of the OS: 40px one-ink mask, name in the display face,
+   role in mono. The difference is one line down — that bubble is a
+   button. */
+
+.claudeRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: var(--border-width-hairline) solid var(--border);
+}
+
+.claudeAvatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  background: var(--content); /* one-ink rule — crew never gets color */
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+.claudeWho {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.claudeName {
+  font-family: var(--display);
+  font-size: var(--type-body-size);
+}
+
+.claudeRole {
+  font-family: var(--mono);
+  font-size: var(--type-caption-size);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+/* the bubble IS the CTA. Same stroke, radius and rotated-square tail as
+   DOPPLER's, so it still reads as speech; pressable because the border
+   takes the accent and the whole thing lifts 1px on hover — transform
+   and color only, nothing that reflows the list above it. */
+.claudeBubble {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  color: var(--content);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin: 12px 0 0;
+  position: relative;
+  cursor: pointer;
+  transition:
+    transform var(--duration-tap) ease-out,
+    border-color var(--duration-tap) ease-out;
+}
+
+[data-theme='dark'] .claudeBubble {
+  border-color: var(--border);
+}
+
+.claudeBubble::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 18px;
+  width: 10px;
+  height: 10px;
+  background: var(--surface-raised);
+  border-top: var(--border-width-default) solid var(--content);
+  border-left: var(--border-width-default) solid var(--content);
+  transform: rotate(45deg);
+}
+
+[data-theme='dark'] .claudeBubble::before {
+  border-color: var(--border);
+}
+
+.claudeBubble:hover,
+.claudeBubble:focus-visible {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.claudeBubble:hover::before,
+.claudeBubble:focus-visible::before {
+  border-color: var(--accent);
+}
+
+.claudeBubble:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .claudeBubble {
+    transition: none;
+  }
+
+  .claudeBubble:hover,
+  .claudeBubble:focus-visible {
+    transform: none;
+  }
+}
+
 /* ---------- Projects index ---------- */
 
 .projects {

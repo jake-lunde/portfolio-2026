@@ -156,7 +156,10 @@ export function agentForWindow(id: string): string {
   if (id.startsWith('case:')) return 'doppler'
   if (id.startsWith('viz:')) return 'hertz'
   if (['studio', 'booth', 'puzzle', 'paint', 'sequencer'].includes(id)) return 'nyquist'
-  if (['machine', 'readme'].includes(id)) return 'fourier'
+  // the chat window IS Claude answering for itself — the orchestrator
+  // shows up as itself, not as a delegate
+  if (id === 'ai-chat') return 'fable'
+  if (id === 'readme') return 'fourier'
   let h = 0
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xffff
   return ['hertz', 'nyquist', 'fourier', 'doppler'][h % 4]
