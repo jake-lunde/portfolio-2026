@@ -9,7 +9,6 @@ import { BASE } from '@/lib/base'
 import { OS_VERSION } from '@/lib/version'
 import { CopyText as Copy } from '@/content/CopyText'
 import { t } from '@/content/copy'
-import { avatarFor } from '@/components/shell/crew'
 import styles from '../programs.module.css'
 
 /* FOCUS runs longer than the label column leaves room for, and wrapping
@@ -87,7 +86,6 @@ function FocusLine() {
 
 export default function About() {
   const open = useWindows((s) => s.open)
-  const skin = useSettings((s) => s.skin)
 
   return (
     <div className={styles.about}>
@@ -170,38 +168,10 @@ export default function About() {
           </span>
         </li>
       </ul>
-
-      {/* The machine gets the last word. ABOUT THIS MACHINE used to own a
-          desktop icon and a window of its own; now README is the single
-          identity door and the AI that built the site introduces itself
-          at the bottom of it — the SUGGESTION BOX reviewer row, borrowed
-          whole (one-ink mask avatar, name, mono role), except the bubble
-          is the button. A speech bubble you can press is the least
-          chrome-y CTA this window could carry. */}
-      <div className={styles.claudeRow}>
-        <span
-          className={styles.claudeAvatar}
-          aria-hidden="true"
-          style={{
-            WebkitMaskImage: `url(${avatarFor('fable', skin)})`,
-            maskImage: `url(${avatarFor('fable', skin)})`,
-          }}
-        />
-        <div className={styles.claudeWho}>
-          <span className={styles.claudeName}>CLAUDE</span>
-          <Copy k="readme.claude.role" as="span" className={styles.claudeRole} />
-        </div>
-      </div>
-      <button
-        type="button"
-        className={styles.claudeBubble}
-        onClick={() => {
-          sfx.open()
-          open('ai-chat')
-        }}
-      >
-        <Copy k="readme.claude.bubble" as="span" />
-      </button>
+      {/* README used to end with CLAUDE introducing itself and an ASK MY AI
+          bubble. Two other doors now lead to the same room — the ? in the
+          menu bar and COMMAND.CTR's wire — so the window ends on the spec
+          list, where a README should. */}
     </div>
   )
 }

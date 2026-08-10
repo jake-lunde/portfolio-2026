@@ -182,14 +182,6 @@
   },
   "projects.indexLabel": "Index — Selected work",
   "projects.itemsSuffix": "items",
-  "readme.claude.bubble": {
-    "base": "WANT TO KNOW WHAT I THINK ABOUT JAKE?",
-    "medieval": "WOULDST THOU KNOW WHAT I MAKE OF JAKE?"
-  },
-  "readme.claude.role": {
-    "base": "THE MACHINE THAT HELPED BUILD THIS ONE",
-    "medieval": "THE FAMILIAR THAT HELPED RAISE THIS ONE"
-  },
   "readme.eyebrow": "",
   "readme.focus": "Design systems · AI-data products · Helping families work better",
   "readme.label.contact": "Contact",

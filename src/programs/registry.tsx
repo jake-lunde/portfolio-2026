@@ -61,11 +61,7 @@ export const PROGRAMS: ProgramDef[] = [
     meta: 'DOC-00',
     icon: 'doc',
     component: dynamic(() => import('@/programs/about/About')),
-    // +40 over the shipped 700: README now carries CLAUDE's introduction
-    // and the ASK MY AI bubble under the spec list (~110px). It still
-    // scrolls — this window always has — but the CTA should not be
-    // entirely below the fold on a first open.
-    size: { w: 520, h: 740 },
+    size: { w: 520, h: 700 },
     pos: { x: 120, y: 60 },
     onDesktop: true,
     path: '/readme',
