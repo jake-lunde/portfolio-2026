@@ -381,6 +381,29 @@
 :global(body[data-inspectmode='on']) .desktop {
   left: var(--inspect-left, 244px);
   right: var(--inspect-right, 304px);
+  /* the ticker's 21px comes off the top too: while the tool is up the
+     row above the canvas is the tool's OWN header, one menubar tall, and
+     the canvas sits directly under it (see the note on .menubar below) */
+  top: var(--menubar-h);
+}
+
+/* ---- while the tool is up, the OS chrome stands down ----
+
+   The docks used to hang below the menubar and the ticker, which put the
+   shell's furniture ABOVE the tool in the hierarchy: a header that said
+   LUNDE OS spanning across the top of a tool that owned everything under
+   it, and a scrolling skills marquee between the two. The tool is the
+   root while it runs, so the bar and the ticker leave and the tool's own
+   accent-flooded header takes the crown (inspect/inspectShell.module.css).
+
+   display:none, not visibility/opacity: both are `position: fixed`, so
+   nothing below them reflows and nothing above them is holding a space.
+   The menubar's INSPECT toggle is the documented focus home on exit —
+   the tool's teardown drops this flag BEFORE it restores focus, so the
+   button is back in the layout by the time it is asked to take it. */
+:global(body[data-inspectmode='on']) .menubar,
+:global(body[data-inspectmode='on']) .ticker {
+  display: none;
 }
 
 /* The wanderer's walk is plotted against window.innerWidth, so it would

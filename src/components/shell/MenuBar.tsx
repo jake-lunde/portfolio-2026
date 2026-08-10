@@ -93,9 +93,17 @@ export function MenuBar() {
         <FableMark />
         {/* INSPECT.MODE (SYS-21) is a tool mode, not a program: it docks
             two panels and turns the desktop into its canvas, so it is
-            summoned from the chrome rather than opened from an icon. The
-            ring glyph is the program's own identity mark. Hidden below
-            900px, where there would be no canvas left (see .inspectBtn). */}
+            summoned from the chrome rather than opened from an icon.
+
+            No glyph. The ring used to carry the program's identity here,
+            back when this bar stayed up while the tool ran and the toggle
+            was the only thing on screen that said INSPECT. The mode wears
+            its own accent-flooded header now and this bar hides behind
+            it, so the mark had nothing left to identify — it was decoration
+            on a word that was already the label. Word only.
+
+            Hidden below 900px, where there would be no canvas left
+            between the docks (see .inspectBtn). */}
         <button
           className={`${styles.menuBtn} ${styles.inspectBtn}`}
           data-inspect-toggle=""
@@ -113,7 +121,7 @@ export function MenuBar() {
               : `Inspect mode ${inspecting ? 'on' : 'off'}`
           }
         >
-          ◎ INSPECT
+          INSPECT
         </button>
         <button
           className={styles.menuBtn}

@@ -30,9 +30,14 @@
 
 .panel {
   position: fixed;
-  /* the same top the desktop uses: under the menubar AND under the
-     21px skills ticker, both of which stay visible and stay above */
-  top: calc(var(--menubar-h) + 21px);
+  /* Full height, corner to corner. The docks used to start under the
+     menubar and the ticker, which said — in the only language a layout
+     has — that the OS chrome outranked the tool. It doesn't: while the
+     tool is up it IS the root, so the shell's bar and ticker stand down
+     (shell.module.css) and these two run the whole viewport. The only
+     thing above the canvas now is this tool's own header, and that spans
+     exactly the gap between these two docks. */
+  top: 0;
   bottom: 0;
   /* Above the desktop's own fixed overlays (.photoZoom is 6000) and above
      the menubar (5000). A zoomed print is `fixed; inset: 0` — at 4000 the
@@ -79,11 +84,164 @@
   }
 }
 
+/* ================= the tool header (the crown) =================
+
+   The third edge of the frame. Left dock, right dock, and this across the
+   top — the tool's own titlebar, spanning exactly the canvas between the
+   other two so the three of them read as one housing with the running
+   site mounted inside it.
+
+   It is ACCENT-FLOODED in the window idiom: this OS already has one
+   grammar for "this chrome is the active thing" — the focused window's
+   titlebar, accent fill with paper ink — and the tool is the active thing
+   at the scale of the whole OS while it runs. Same fill, same ink, same
+   hard bottom rule; only the span is bigger.
+
+   One divergence from shell.module.css's .titlebar, and it is deliberate:
+   that rule paints its on-accent ink as literal hexes (#f4f1e6 / #0d100c),
+   which predate the token set. This module grades other people's token
+   usage — point the tool at its own header and every row has to come back
+   SEMANTIC — so the ink here is --surface, the paper, which is what the
+   picked tree row already uses on the same accent fill and what those two
+   hexes were approximating. Audited AA on all three skins against
+   --accent: 6.6:1 classic light, 5.3:1 classic dark, 5.6:1 medieval. */
+
+.crown {
+  position: fixed;
+  top: 0;
+  /* exactly the gap between the docks — the same two custom properties
+     the desktop compresses by (globals.css), same fallbacks */
+  left: var(--inspect-left, 244px);
+  right: var(--inspect-right, 304px);
+  height: var(--menubar-h);
+  z-index: 6500;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-sm);
+  padding: 0 var(--spacing-component-sm);
+  background: var(--accent);
+  color: var(--surface);
+  border-bottom: var(--border-width-default) solid var(--content);
+  user-select: none;
+  animation: crownIn var(--duration-theme) ease-out;
+}
+
+/* arrives with the docks, on the same transform-only terms */
+@keyframes crownIn {
+  from {
+    transform: translateY(-100%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .left,
-  .right {
+  .right,
+  .crown {
     animation: none;
   }
+}
+
+.crownTitle {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  /* the role renders at 400 by design; a bolder mono label is sanctioned
+     as a call-site override (see tokens.generated.css) and the window
+     titlebar takes the same one */
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--type-label-tracking);
+  line-height: var(--type-label-leading);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* the running light. Not a decoration: it is the one word that says the
+   tool is holding the desk, in the row that took the OS bar's place. */
+.crownActive {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+/* ---- SELECT | OPERATE ----
+   A segmented pair, not two independent switches: there is always exactly
+   one tool in the hand, and ALT borrows the other one for the length of a
+   click. The pressed segment inverts to a paper chip on the flood, which
+   is the same figure/ground flip the picked tree row makes. */
+
+.tools {
+  flex: none;
+  display: flex;
+  border: var(--border-width-default) solid currentColor;
+}
+
+.tool {
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+  text-transform: uppercase;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-none);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tool + .tool {
+  border-left: var(--border-width-default) solid currentColor;
+}
+
+.tool:hover {
+  background: color-mix(in srgb, var(--surface) 22%, transparent);
+}
+
+.tool[aria-pressed='true'] {
+  color: var(--accent);
+  background: var(--surface);
+}
+
+/* ---- the loose controls: theme, and the way out ---- */
+
+.crownBtn {
+  flex: none;
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+  text-transform: uppercase;
+  color: inherit;
+  background: none;
+  border: var(--border-width-default) solid transparent;
+  border-radius: var(--radius-none);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.crownBtn:hover {
+  border-color: currentColor;
+}
+
+/* every control on the flood takes its focus ring in the ink it is
+   printed in — --focus is tuned against --surface, and on an accent fill
+   it disappears */
+.tool:focus-visible,
+.crownBtn:focus-visible {
+  outline: var(--border-width-strong) solid var(--surface);
+  outline-offset: calc(var(--border-width-strong) * -1);
 }
 
 .panelHead {
