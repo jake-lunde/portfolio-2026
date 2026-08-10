@@ -44,6 +44,35 @@ type Msg = {
   /** a machine line (error, the cap) rather than an answer — prints in
       mono caps and is kept OUT of the history sent to the model */
   system?: true
+  /** which copy key a machine line came from, so EDIT.MODE can find it */
+  copyKey?: string
+}
+
+/* The route answers a refusal with a SLUG, never a sentence — the copy
+   layer owns the words, and the same slug has to read right in every
+   skin. Anything unrecognised (and any body that isn't JSON) falls back
+   to the generic dropped-wire line. */
+const SLUG_COPY: Record<string, string> = {
+  offline: 'aichat.offline', // no key, or Jake pulled AI_CHAT_OFF
+  session: 'aichat.capped', // more than eight asks in this transcript
+  budget: 'aichat.budget', // the day's ration is gone (per-IP or global)
+  cooldown: 'aichat.error', // five seconds apart; "try again" covers it
+}
+
+/* An address printed on screen should be clickable. Splitting the line
+   around it — rather than concatenating a link onto a shorter string —
+   keeps the whole sentence ONE editable copy key, and degrades to flat
+   text if a skin's voice ever rewrites the address away. */
+function withMailto(line: string) {
+  const at = line.indexOf(EMAIL)
+  if (at === -1) return line
+  return (
+    <>
+      {line.slice(0, at)}
+      <a href={`mailto:${EMAIL.toLowerCase()}`}>{line.slice(at, at + EMAIL.length)}</a>
+      {line.slice(at + EMAIL.length)}
+    </>
+  )
 }
 
 export default function AiChat() {
@@ -54,6 +83,9 @@ export default function AiChat() {
   const [draft, setDraft] = useState('')
   const [sends, setSends] = useState(0)
   const [busy, setBusy] = useState(false)
+  // the day's budget is gone — the composer stays on screen but stops
+  // taking questions, so nobody hammers a wire that is already spent
+  const [spent, setSpent] = useState(false)
   const raf = useRef<number | null>(null)
   const logRef = useRef<HTMLDivElement>(null)
   const hp = useRef<HTMLInputElement>(null)
@@ -117,7 +149,7 @@ export default function AiChat() {
   const send = async (e: React.FormEvent) => {
     e.preventDefault()
     const question = draft.trim()
-    if (!question || busy || sends >= MAX_SENDS) return
+    if (!question || busy || spent || sends >= MAX_SENDS) return
 
     // the model sees the card Q&A too — a follow-up like "say more about
     // the scrubbing thing" only works if the transcript came along
@@ -138,7 +170,7 @@ export default function AiChat() {
     sfx.tap()
 
     const fail = (key: string) =>
-      grow(answerId, (m) => ({ ...m, content: t(key, skin), system: true }))
+      grow(answerId, (m) => ({ ...m, content: t(key, skin), system: true, copyKey: key }))
 
     try {
       const res = await fetch('/api/ai-chat', {
@@ -149,10 +181,18 @@ export default function AiChat() {
           website: hp.current?.value ?? '',
         }),
       })
-      if (res.status === 503) {
-        fail('aichat.offline')
-      } else if (!res.ok || !res.body) {
-        fail('aichat.error')
+      if (!res.ok || !res.body) {
+        // the route names its refusal; the copy layer says it out loud
+        let slug = ''
+        try {
+          const data: unknown = await res.json()
+          const named = (data as { error?: unknown } | null)?.error
+          if (typeof named === 'string') slug = named
+        } catch {
+          /* not JSON — the generic line is the honest answer */
+        }
+        if (slug === 'budget') setSpent(true)
+        fail(SLUG_COPY[slug] ?? 'aichat.error')
       } else {
         const reader = res.body.getReader()
         const decoder = new TextDecoder()
@@ -182,14 +222,6 @@ export default function AiChat() {
   const capped = sends >= MAX_SENDS
   const avatar = avatarFor('fable', skin)
 
-  /* the cap line names the address, and an address on screen should be
-     clickable. Split around it rather than concatenating a link, so the
-     whole sentence stays ONE editable copy key (EDIT.MODE finds it by
-     data-copy-id) — and fall back to flat text if a skin's voice has
-     rewritten the address away. */
-  const cappedLine = t('aichat.capped', skin)
-  const at = cappedLine.indexOf(EMAIL)
-
   return (
     <div className={styles.chat}>
       <header className={styles.head}>
@@ -217,8 +249,9 @@ export default function AiChat() {
             <p
               key={m.id}
               className={m.system ? `${styles.said} ${styles.saidSystem}` : styles.said}
+              data-copy-id={m.copyKey}
             >
-              {m.content}
+              {m.system ? withMailto(m.content) : m.content}
             </p>
           )
         )}
@@ -264,17 +297,7 @@ export default function AiChat() {
 
       {capped ? (
         <p className={styles.capped} role="status" data-copy-id="aichat.capped">
-          {at === -1 ? (
-            cappedLine
-          ) : (
-            <>
-              {cappedLine.slice(0, at)}
-              <a href={`mailto:${EMAIL.toLowerCase()}`}>
-                {cappedLine.slice(at, at + EMAIL.length)}
-              </a>
-              {cappedLine.slice(at + EMAIL.length)}
-            </>
-          )}
+          {withMailto(t('aichat.capped', skin))}
         </p>
       ) : (
         <form className={styles.composer} onSubmit={send}>
@@ -293,11 +316,15 @@ export default function AiChat() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             maxLength={MAX_LEN}
-            disabled={busy}
+            disabled={busy || spent}
             aria-label={t('aichat.placeholder', skin)}
             placeholder={t('aichat.placeholder', skin)}
           />
-          <button type="submit" className={styles.sendBtn} disabled={busy || !draft.trim()}>
+          <button
+            type="submit"
+            className={styles.sendBtn}
+            disabled={busy || spent || !draft.trim()}
+          >
             <Copy k="aichat.send" as="span" />
           </button>
         </form>

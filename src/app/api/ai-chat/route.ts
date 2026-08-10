@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { list, put } from '@vercel/blob'
 import { NextResponse } from 'next/server'
 
 /* ASK MY AI — the live half of the chat window. The five cards stream
@@ -13,9 +14,19 @@ import { NextResponse } from 'next/server'
    appends chunks straight into the growing bubble, so there is no
    envelope to parse and a dropped connection just stops the sentence.
 
-   No key configured → 503 `offline`, which the window renders as "my
-   live wire isn't plugged in yet. The cards still work." — true, and the
-   window is still worth opening without it. */
+   FOUR GUARDS STAND BETWEEN A VISITOR AND JAKE'S CARD, cheapest first:
+     1. AI_CHAT_OFF   — kill switch, a Vercel env flip, no deploy
+     2. cooldown      — 5s per IP, in memory
+     3. per-IP day    — 20 live turns per IP per UTC day, in memory
+     4. global day    — AI_CHAT_DAILY_MAX (250) turns for everyone,
+                        counted in Blob so it survives a cold start
+   Every refusal answers JSON `{ error: <slug> }` so the window can say
+   the right true thing: offline · cooldown · session · budget ·
+   bad_request. A slug is never a sentence — the copy layer owns those.
+
+   Nothing here is allowed to break the chat. The blob counter degrades
+   to "skip the check" on any failure, and no key configured is a
+   designed state (503 `offline`) — the five cards still work. */
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -29,6 +40,71 @@ const MAX_USER_TURNS = 8
 
 const lastPost = new Map<string, number>()
 const COOLDOWN_MS = 5000
+
+/* Guard 3 — per-IP, per-UTC-day, keyed `${ip}:${day}`. Per-instance and
+   best-effort by design: a cold start or a second lambda resets it, and
+   that is fine. It exists to stop one bored visitor holding the window
+   open all afternoon, not to be an accounting system — guard 4 is the
+   one that actually bounds the bill. */
+const dayHits = new Map<string, number>()
+const MAX_IP_TURNS_PER_DAY = 20
+let seenDay = ''
+
+/* Guard 4 — the durable one. One counter blob per UTC day, read before
+   the model is called and bumped after the stream opens. */
+const DEFAULT_DAILY_MAX = 250
+const USAGE_PREFIX = 'ai-chat/usage/'
+
+const storeId = () =>
+  process.env.aichat_STORE_ID ??
+  process.env.guestbook_STORE_ID ??
+  process.env.BLOB_STORE_ID
+
+const hasStore = () => Boolean(storeId() ?? process.env.BLOB_READ_WRITE_TOKEN)
+
+const utcDay = (now: number) => new Date(now).toISOString().slice(0, 10)
+const usagePath = (day: string) => `${USAGE_PREFIX}${day}.json`
+const dailyMax = () => Number(process.env.AI_CHAT_DAILY_MAX) || DEFAULT_DAILY_MAX
+
+/** Today's global count, or `null` meaning "couldn't tell — don't block".
+    A guard that fails closed would take the chat down with the store. */
+async function readDayCount(day: string): Promise<number | null> {
+  if (!hasStore()) return null
+  try {
+    const { blobs } = await list({ prefix: usagePath(day), limit: 1, storeId: storeId() })
+    const blob = blobs[0]
+    if (!blob) return 0 // first turn of the day
+    /* Blob URLs are CDN-cached and this path is OVERWRITTEN rather than
+       versioned (project law prefers versioned paths for mutable data —
+       a counter is the exception: one blob per day, and an unbounded
+       pile of versions would be the worse cost). So the read has to
+       defeat the CDN itself: unique query + no-store, every time. */
+    const base = blob.downloadUrl ?? blob.url
+    const url = `${base}${base.includes('?') ? '&' : '?'}b=${Date.now()}`
+    const res = await fetch(url, { cache: 'no-store' })
+    const data: unknown = await res.json()
+    const n = (data as { count?: unknown } | null)?.count
+    return typeof n === 'number' && Number.isFinite(n) ? n : 0
+  } catch {
+    return null
+  }
+}
+
+/** Fire-and-forget bump. Two lambdas racing can drop an increment; this
+    is a guard, not billing, and undercounting by a few costs pennies
+    where a blocking read-modify-write would cost every visitor latency. */
+function bumpDayCount(day: string, next: number) {
+  if (!hasStore()) return
+  void put(usagePath(day), JSON.stringify({ count: next }), {
+    access: 'public',
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: 'application/json',
+    storeId: storeId(),
+  }).catch(() => {
+    /* the counter is allowed to fail; the answer is not */
+  })
+}
 
 type Turn = { role: 'user' | 'assistant'; content: string }
 
@@ -76,11 +152,18 @@ function parseTurns(raw: unknown): Turn[] | null {
 }
 
 export async function POST(req: Request) {
+  /* Guard 1 — the kill switch, ahead of everything including parsing.
+     Jake flips AI_CHAT_OFF in the Vercel dashboard and the window goes
+     back to being five cards and a polite note, with no deploy. */
+  if (process.env.AI_CHAT_OFF) {
+    return NextResponse.json({ error: 'offline' }, { status: 503 })
+  }
+
   let body: unknown
   try {
     body = await req.json()
   } catch {
-    return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
+    return NextResponse.json({ error: 'bad_request' }, { status: 400 })
   }
 
   const { messages, website } = (body ?? {}) as Record<string, unknown>
@@ -96,23 +179,49 @@ export async function POST(req: Request) {
 
   const turns = parseTurns(messages)
   if (!turns) {
-    return NextResponse.json({ error: 'Ask me something shorter.' }, { status: 400 })
+    return NextResponse.json({ error: 'bad_request' }, { status: 400 })
   }
 
   if (turns.filter((m) => m.role === 'user').length > MAX_USER_TURNS) {
-    return NextResponse.json({ error: 'capped' }, { status: 429 })
+    return NextResponse.json({ error: 'session' }, { status: 429 })
   }
 
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
   const now = Date.now()
+  const day = utcDay(now)
+
+  // Guard 2 — the 5s cooldown
   if (now - (lastPost.get(ip) ?? 0) < COOLDOWN_MS) {
-    return NextResponse.json({ error: 'One question at a time.' }, { status: 429 })
+    return NextResponse.json({ error: 'cooldown' }, { status: 429 })
   }
   lastPost.set(ip, now)
+
+  /* Guard 3 — the per-IP daily ration. Yesterday's keys are dropped the
+     first time a new date is seen rather than on a timer: the map only
+     grows while the instance is warm, so one sweep a day is enough. */
+  if (day !== seenDay) {
+    seenDay = day
+    for (const key of dayHits.keys()) {
+      if (!key.endsWith(`:${day}`)) dayHits.delete(key)
+    }
+  }
+  const ipKey = `${ip}:${day}`
+  const ipTurns = dayHits.get(ipKey) ?? 0
+  if (ipTurns >= MAX_IP_TURNS_PER_DAY) {
+    return NextResponse.json({ error: 'budget' }, { status: 429 })
+  }
 
   // never log, echo or branch on the key's VALUE — only on its presence
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'offline' }, { status: 503 })
+  }
+
+  /* Guard 4 — the global daily budget, checked BEFORE the model is
+     called because after is too late to matter. `null` means the store
+     couldn't answer; the three in-memory guards carry it from there. */
+  const spent = await readDayCount(day)
+  if (spent !== null && spent >= dailyMax()) {
+    return NextResponse.json({ error: 'budget' }, { status: 429 })
   }
 
   try {
@@ -129,6 +238,12 @@ export async function POST(req: Request) {
       ],
       messages: turns,
     })
+
+    // the turn is spent the moment the model is engaged, so both
+    // counters move here — not on a successful last token, which a
+    // visitor could avoid by closing the tab
+    dayHits.set(ipKey, ipTurns + 1)
+    if (spent !== null) bumpDayCount(day, spent + 1)
 
     const body = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -166,6 +281,6 @@ export async function POST(req: Request) {
       },
     })
   } catch {
-    return NextResponse.json({ error: 'The wire dropped.' }, { status: 500 })
+    return NextResponse.json({ error: 'upstream' }, { status: 500 })
   }
 }
