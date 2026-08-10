@@ -14,8 +14,17 @@
   `git branch --show-current` before EVERY commit.** Another session's
   worktree (`minors-random-wallpaper`) was live during s40 — worktrees are
   the pattern; leave the main checkout on main.
-- **ASK MY AI SHIPPED** (Jake: "merge and ship"; merge `c7956d7`, marker +
-  redirect + LIVE WIRE verified in prod — real Opus 5 answer streamed).
+- **ASK MY AI v3 + DOPPLER CHAT + FABLE MARK SHIPPED** (s43b, merges
+  `e295bc9`; prod-probed). Chat-feed choreography (greeting+note one
+  bubble springs in, cards stagger, carousel steps aside during replies);
+  shared chat primitives at `src/components/chat/` (IdentityHeader,
+  Bubble w/ thinking state, Feed, riseIn — new agent chat = header +
+  greeting + canned cards, canned-first cost law); suggestion box is now
+  a DOPPLER chat feed on those bones; menu-bar FABLE mark (leads right
+  cluster, once-ever discovery bubble, localStorage-sealed) + deck wires
+  (FABLE→ai-chat, DOPPLER→suggest; other three await P1 mini-chats —
+  fourier task). ⚠️ 360px menubar is now FULL — next control added must
+  fold something. Original ship record (guardrails, spend caps):
   ABOUT THIS MACHINE retired into README (single identity door): FABLE
   bubble CTA at README's foot → "Ask My AI" (SYS-20, `/ai`); 5 authored
   cards local, composer live. Guardrails: global daily blob counter
@@ -69,6 +78,13 @@
   underwater · `--accent-on-inverse` · reduced-motion by emulation ·
   medieval airbrush wash contrast · never build while a dev server owns
   the checkout .next · `family-hub 2/` dup dir (Jake deletes).
+
+> s43b addendum (2026-08-10, the ai-chat session): chat-feed choreography
+> + DOPPLER chat + fable mark all shipped (merges `e295bc9`), branches
+> deleted, worktrees cleaned. Entry-point task Done (menu-bar mark + deck
+> wire chosen over desktop tile/clippy — options in the task page);
+> fourier "agents are clickable" framework developed + phased in its task.
+> Next in that arc: P1 canned mini-chats for HERTZ/NYQUIST/FOURIER.
 
 ## Latest session — INSPECT SHELL: THE TOOL TAKES THE SCREEN (s43, 2026-08-10)
 
