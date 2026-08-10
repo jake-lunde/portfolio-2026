@@ -1,7 +1,7 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-09 (s40/s40b note → archive; s41 note below).
+> Last rotation: 2026-08-09 (s41 note → archive; s42 note below).
 
 ## Current state
 
@@ -23,14 +23,18 @@
   Anthropic workspace + spend cap as backstop**; cards work keyless.
 - **README focus-ticker SHIPPED** (merge `3d5530e`, verified live). Speed
   dial: `CRAWL_PX_PER_SEC` in About.tsx. Branch deletable.
-- **TUNE.MODE ruled the build path for figma↔code live editing (s40b
-  research, full landscape in Notion task):** adopt NOTHING external
-  (all write Tailwind/regenerate; none lockable to tokens/). Phases:
-  INSPECT.MODE read-only public (S) → token nudge + doctor-gated
-  `/api/token-commit` modelled on copy-commit (M) → SPRING scrub with
-  runtime override indirection in motion.ts (M) → agent-mediated (L,
-  optional). Watch: Figma Make in-local-codebase (closed beta, Mac-only,
-  no token enforcement). 4 open questions for Jake in the task page.
+- **INSPECT.MODE (TUNE.MODE phase 0) BUILT on `feat/inspect-mode`
+  (`34661ba`) — AWAITS JAKE'S READ + MERGE CALL.** Public read-only token
+  x-ray: SYS-21, `rings` desktop icon, `/inspect`; SCAN or alt-click →
+  LAYERS chain · TOKENS (real var() provenance off CSSOM cssText, tier
+  chips, core-law warnings) · size-aware CONTRAST grade · TYPE · MOTION
+  via `data-spring` tags (27 sites, all 8 springs). New infra:
+  `tokens.generated.ts` manifest (199 props → tier; build fails loud on
+  cross-theme tier collisions — caught `--display/--sans/--mono` mis-tiered
+  core). DOPPLER audit: 13 findings, all fixed. Probe-verified + prod
+  build green. Panel already flagged real debt: menubar hairline (core)
+  + dead `--wash-x`. TUNE.MODE phases 1–2 (token nudge + commit · SPRING
+  scrub) still open — questions 2–4 in the Notion task.
 - **Notion research rulings (s40, full writeups in each task page):**
   hooks — none installed, adopt 4 (SessionStart deck-report, block
   generated-token edits, block forbidden commits, block prettier), ~15 min
@@ -61,32 +65,34 @@
   medieval airbrush wash contrast · never build while a dev server owns
   the checkout .next · `family-hub 2/` dup dir (Jake deletes).
 
-## Latest session — RECONCILE README × ABOUT THIS MACHINE (s41, 2026-08-09)
+## Latest session — INSPECT.MODE PHASE 0 (s42, 2026-08-09)
 
-**Jake's Notion task: README/machine overlap dilutes the message. Rulings
-(recorded in the task page): retire ABOUT THIS MACHINE fully · the memory
-dataviz retires with it (live-ops personality belongs to COMMAND.CTR) ·
-the essay window becomes a hybrid chat · coworkers card stays and leads ·
-focus crawl keeps (already merged s40b).**
+**Jake ruled question 1 by acclamation ("it is a designer flex!! build
+it") → INSPECT.MODE is public + on the desktop. Built, audited, verified;
+on branch per s31 law.**
 
-- **Build (NYQUIST, worktree → `feat/ai-chat`):** machine/ dir + copy keys
-  deleted; README CTA block (suggest-box DOPPLER treatment, FABLE avatar);
-  AiChat window — Family Hub Assistant card pattern (Figma 201258-38244),
-  cards THE RECEIPTS · INDIVIDUAL · CRAFT · EDIT · SPARK in answers.ts
-  (Fable-authored, review verbatims), rAF typewriter w/ reduced-motion
-  instant path; `/api/ai-chat` follows suggestions-route idiom (nodejs,
-  cooldown Map, honeypot, 503 offline). New dep `@anthropic-ai/sdk`.
-- **Verified via worktree Bash dev server :3013 + pane JS probes:** README
-  CTA renders + opens window · `/ai` deep link works · cards collapse to
-  chips after first send · composer→503→offline copy→re-enables · 375px no
-  overflow · console clean. NOT seen moving: the typewriter (hidden-tab
-  rAF freeze; code path verified) — needs one visible-tab glance.
-- Chat economics ruled with Jake: ~2.5¢/live turn on Opus 5, $2–4/mo
-  realistic; hard backstop = spend-capped dedicated workspace key.
-- Parking lot (Notion task): coin-op gate on the message cap ("INSERT
-  COIN") — a bit, not a business.
-- s40 flag RESOLVED: `/readme` deep link does open the window (it was the
-  hidden-tab freeze).
+- **Build (NYQUIST worktree → my review):** `src/lib/inspect.ts` engine +
+  InspectMode program + `tokens.generated.ts` emit in build-tokens.mjs +
+  `data-spring` at 27 sites. 3 commits: build `81edaa3` → CRT-ink fix
+  `e94988a` → DOPPLER fixes `34661ba`.
+- **DOPPLER audit paid for itself twice:** (1) tier merge let classic
+  outvote medieval — the panel would have publicly accused ~90 legal
+  `--sans/--mono/--display` uses; (2) `style.item()` never enumerates
+  var()-bearing shorthands — ~440 declarations (background/border/gap)
+  were invisible until the walk moved to `cssText`. Also: @container
+  leaked closed conditions; own injected sheet self-reported; AA·LG was
+  size-blind. All fixed.
+- **CRT ink rule learned** (memory + archive): crt bodies paint
+  `--surface-inverse` with NO token re-scope — on-body text must be
+  `--content-inverse`; EDIT.MODE only dodges it via muted/accent/fills.
+- Verified: headless_shell CDP probes (arm/hover/pick/exempt/Escape/
+  teardown, zero leftovers, console clean), light + dark shots,
+  tokens:doctor at baseline, tsc + prod build green.
+- Phase-0 debts (Notion task): no keyboard path to a FIRST pick ·
+  @container skipped not evaluated · data-spring reports authored intent
+  under reduced-motion · nested data-skin pick = probe burst.
+- Concurrent-session note: s41 rotated HANDOFF mid-session; laws held
+  (worktrees, branch check before commit, main stayed on main).
 
 ## Next steps
 
@@ -94,18 +100,21 @@ focus crawl keeps (already merged s40b).**
    the branch, `/readme` then `/ai`), then merge call. After merge: create
    a dedicated Anthropic workspace + spend-capped key, add
    `ANTHROPIC_API_KEY` to Vercel env to light the composer.
-2. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
+2. **Jake: try INSPECT.MODE** — `git switch feat/inspect-mode`, dev
+   server, hit SCAN and click around (try the menubar: it catches a real
+   hairline violation) — then merge call.
+3. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
    if off) — it's live.
-3. **Jake: read the skills research + the TUNE.MODE plan** (both Notion
+4. **Jake: read the skills research + the TUNE.MODE plan** (both Notion
    task pages) — skills proposes case study #3 (agent supervision) +
-   CUTS.APP; TUNE.MODE has 4 open questions (public INSPECT? PR vs main?
-   Motion+? own program?).
-4. **Jake rulings owed:** install the 4 hooks? · shelf live smoke + copy
+   CUTS.APP; TUNE.MODE questions 2–4 still open (token commits PR vs
+   main? Motion+? — question 1 answered, phase 0 built).
+5. **Jake rulings owed:** install the 4 hooks? · shelf live smoke + copy
    rewrite pass · Family Hub walk.
-5. **The Desk** — next flagship (r3f ruling stands; Blender refs incoming).
-6. Cleanup: delete merged branches (`cv-exe`, `suggestion-box`,
+6. **The Desk** — next flagship (r3f ruling stands; Blender refs incoming).
+7. Cleanup: delete merged branches (`cv-exe`, `suggestion-box`,
    `case-family-hub`, `worktree-cc-v2-pipeline`, `medieval-sfx*` on
    confirm) · `family-hub 2/` dup.
-7. Carried: gate friction elsewhere · COMMAND.CTR zero-`list()` + cost
+8. Carried: gate friction elsewhere · COMMAND.CTR zero-`list()` + cost
    read · replay-your-session task · Figma stale STRING vars · typography
    finale · underwater · eyeball tracker v2 / leaf-patch call.

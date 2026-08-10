@@ -1843,3 +1843,30 @@ Notion board. Deck reported dispatch→returns throughout.**
   window in the preview pane (window appeared only after icon
   double-click — possibly hidden-tab rAF freeze, possibly real; check on
   a visible tab before treating as a bug).
+
+## Latest session — RECONCILE README × ABOUT THIS MACHINE (s41, 2026-08-09)
+
+**Jake's Notion task: README/machine overlap dilutes the message. Rulings
+(recorded in the task page): retire ABOUT THIS MACHINE fully · the memory
+dataviz retires with it (live-ops personality belongs to COMMAND.CTR) ·
+the essay window becomes a hybrid chat · coworkers card stays and leads ·
+focus crawl keeps (already merged s40b).**
+
+- **Build (NYQUIST, worktree → `feat/ai-chat`):** machine/ dir + copy keys
+  deleted; README CTA block (suggest-box DOPPLER treatment, FABLE avatar);
+  AiChat window — Family Hub Assistant card pattern (Figma 201258-38244),
+  cards THE RECEIPTS · INDIVIDUAL · CRAFT · EDIT · SPARK in answers.ts
+  (Fable-authored, review verbatims), rAF typewriter w/ reduced-motion
+  instant path; `/api/ai-chat` follows suggestions-route idiom (nodejs,
+  cooldown Map, honeypot, 503 offline). New dep `@anthropic-ai/sdk`.
+- **Verified via worktree Bash dev server :3013 + pane JS probes:** README
+  CTA renders + opens window · `/ai` deep link works · cards collapse to
+  chips after first send · composer→503→offline copy→re-enables · 375px no
+  overflow · console clean. NOT seen moving: the typewriter (hidden-tab
+  rAF freeze; code path verified) — needs one visible-tab glance.
+- Chat economics ruled with Jake: ~2.5¢/live turn on Opus 5, $2–4/mo
+  realistic; hard backstop = spend-capped dedicated workspace key.
+- Parking lot (Notion task): coin-op gate on the message cap ("INSERT
+  COIN") — a bit, not a business.
+- s40 flag RESOLVED: `/readme` deep link does open the window (it was the
+  hidden-tab freeze).
