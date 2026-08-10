@@ -18,7 +18,7 @@
 .root {
   padding: var(--spacing-component-lg);
   font-family: var(--type-body-family);
-  color: var(--content);
+  color: var(--content-inverse);
 }
 
 .eyebrow {
@@ -85,7 +85,7 @@
   font-weight: var(--type-caption-weight);
   letter-spacing: var(--type-caption-tracking);
   line-height: var(--type-caption-leading);
-  color: var(--content);
+  color: var(--content-inverse);
   border: var(--border-width-default) solid var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
@@ -113,7 +113,7 @@
   gap: var(--spacing-component-sm);
   flex-wrap: wrap;
   padding-bottom: var(--spacing-component-sm);
-  border-bottom: var(--border-width-default) solid var(--content);
+  border-bottom: var(--border-width-default) solid var(--content-inverse);
 }
 
 .identLabel,
@@ -148,7 +148,7 @@
 }
 
 .identName {
-  color: var(--content);
+  color: var(--content-inverse);
   overflow-wrap: anywhere;
 }
 
@@ -229,12 +229,13 @@
 
 .row {
   padding: var(--spacing-component-sm);
-  border: var(--border-width-default) solid var(--border);
+  border: var(--border-width-default) solid
+    color-mix(in srgb, var(--content-inverse) 30%, transparent);
 }
 
 .prop {
   display: block;
-  color: var(--content);
+  color: var(--content-inverse);
 }
 
 .vars {
@@ -260,7 +261,7 @@
 }
 
 .varName {
-  color: var(--content);
+  color: var(--content-inverse);
   overflow-wrap: anywhere;
 }
 
@@ -271,14 +272,15 @@
 
 .warnText {
   flex: 1 1 100%;
-  color: var(--content);
+  color: var(--content-inverse);
 }
 
 .tier {
   flex: none;
   padding: 0 var(--spacing-component-xs);
   color: var(--content-muted);
-  border: var(--border-width-default) solid var(--border);
+  border: var(--border-width-default) solid
+    color-mix(in srgb, var(--content-inverse) 30%, transparent);
 }
 
 .tier[data-tier='semantic'],
@@ -296,7 +298,8 @@
   flex: none;
   width: var(--spacing-component-md);
   height: var(--spacing-component-md);
-  border: var(--border-width-default) solid var(--border);
+  border: var(--border-width-default) solid
+    color-mix(in srgb, var(--content-inverse) 30%, transparent);
 }
 
 /* ---------- CONTRAST ---------- */
@@ -322,7 +325,7 @@
 }
 
 .ratio {
-  color: var(--content);
+  color: var(--content-inverse);
 }
 
 .gradeChip {
@@ -352,7 +355,7 @@
 
 .facts dd {
   margin: 0;
-  color: var(--content);
+  color: var(--content-inverse);
   overflow-wrap: anywhere;
 }
 

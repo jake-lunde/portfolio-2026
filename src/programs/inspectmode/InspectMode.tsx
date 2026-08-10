@@ -34,7 +34,9 @@ const GLOBAL_CSS = `
     cursor:crosshair !important;
   }
   body[data-inspectmode="on"] [data-inspect-self],
-  body[data-inspectmode="on"] [data-inspect-self] *{
+  body[data-inspectmode="on"] [data-inspect-self] *,
+  body[data-inspectmode="on"] [data-window-id="inspect-mode"],
+  body[data-inspectmode="on"] [data-window-id="inspect-mode"] *{
     cursor:auto !important;
   }
   body[data-inspectmode="on"] [data-inspect-hover]{
@@ -100,8 +102,12 @@ export default function InspectMode() {
   /* ---- the pick itself: bound for the whole mounted life, because
      ALT+CLICK works whether or not SCAN is armed ---- */
   useEffect(() => {
+    // the whole frame is exempt, titlebar included — while armed, our own
+    // close box must still close, not get itself inspected
     const exempt = (el: Element | null) =>
-      !el || !!el.closest('[data-inspect-self]') || !!document.body.dataset.editmode
+      !el ||
+      !!el.closest('[data-inspect-self], [data-window-id="inspect-mode"]') ||
+      !!document.body.dataset.editmode
 
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null
@@ -138,7 +144,7 @@ export default function InspectMode() {
 
     const onOver = (e: Event) => {
       const target = e.target as HTMLElement | null
-      if (!target || target.closest('[data-inspect-self]')) return
+      if (!target || target.closest('[data-inspect-self], [data-window-id="inspect-mode"]')) return
       target.setAttribute('data-inspect-hover', '')
     }
     const onOut = (e: Event) => {
