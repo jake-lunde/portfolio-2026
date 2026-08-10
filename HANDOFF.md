@@ -14,13 +14,17 @@
   `git branch --show-current` before EVERY commit.** Another session's
   worktree (`minors-random-wallpaper`) was live during s40 — worktrees are
   the pattern; leave the main checkout on main.
-- **`feat/ai-chat` (`a07dfe8`, worktree branch) AWAITS JAKE'S READ.**
+- **ASK MY AI SHIPPED** (Jake: "merge and ship"; merge `c7956d7`, marker +
+  redirect + LIVE WIRE verified in prod — real Opus 5 answer streamed).
   ABOUT THIS MACHINE retired into README (single identity door): FABLE
-  avatar + bubble CTA at README's foot opens "Ask My AI" (SYS-20, `/ai`)
-  — 5 authored cards stream locally, composer hits `/api/ai-chat` (Opus 5,
-  per-IP cooldown, 8-msg cap). `/machine` 307→`/readme`. Live composer
-  needs `ANTHROPIC_API_KEY` in Vercel env — **Jake sets it, dedicated
-  Anthropic workspace + spend cap as backstop**; cards work keyless.
+  bubble CTA at README's foot → "Ask My AI" (SYS-20, `/ai`); 5 authored
+  cards local, composer live. Guardrails: global daily blob counter
+  (`AI_CHAT_DAILY_MAX`, default 250) · per-IP 20/day · 8-msg session cap
+  (graceful "email the human") · 5s cooldown (per-instance — observed
+  missing across instances, accepted) · kill switch `AI_CHAT_OFF` ·
+  **true backstop = spend limit on the key's Anthropic workspace (Jake
+  confirms it's set)**. `/machine` 307→`/readme`. New dep
+  `@anthropic-ai/sdk`. Parked bit: INSERT COIN gate on the cap (Notion).
 - **README focus-ticker SHIPPED** (merge `3d5530e`, verified live). Speed
   dial: `CRAWL_PX_PER_SEC` in About.tsx. Branch deletable.
 - **INSPECT.MODE (TUNE.MODE phase 0) SHIPPED** (Jake: "merge it and ship
@@ -66,6 +70,11 @@
   medieval airbrush wash contrast · never build while a dev server owns
   the checkout .next · `family-hub 2/` dup dir (Jake deletes).
 
+> s41b addendum (2026-08-10): ASK MY AI shipped — guardrails v2 commit
+> `5bfd9bb` on the branch, KEY-level copy.json merge vs INSPECT.MODE's
+> keys (zero double-edits), merge `c7956d7`, prod-verified incl. one paid
+> live turn (~2.5¢). Full s41 story in HANDOFF-ARCHIVE.md + Notion task.
+
 ## Latest session — INSPECT.MODE PHASE 0 (s42, 2026-08-09)
 
 **Jake ruled question 1 by acclamation ("it is a designer flex!! build
@@ -97,10 +106,10 @@ on branch per s31 law.**
 
 ## Next steps
 
-1. **Jake: read `feat/ai-chat`** — card copy voice + chat feel (checkout
-   the branch, `/readme` then `/ai`), then merge call. After merge: create
-   a dedicated Anthropic workspace + spend-capped key, add
-   `ANTHROPIC_API_KEY` to Vercel env to light the composer.
+1. **Jake: walk ASK MY AI on lunde.co** — `/readme` foot → bubble → cards
+   + a live question; eyeball the typewriter motion (never seen on a
+   visible tab) and the card voice. **Confirm the workspace spend limit
+   is set in the Anthropic console** — it's the only unhackable guard.
 2. **Jake: play with INSPECT.MODE on lunde.co** — it's live; hit SCAN
    and click the menubar (it catches a real hairline violation).
 3. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
