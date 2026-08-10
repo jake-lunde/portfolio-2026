@@ -8,16 +8,25 @@
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
   stays "pending" while Chromatic runs; apex 308s to www — curl -L).
-  **Production = SHIPPED.SW (merge 009d1f9) on top of COMMAND.CTR v2.**
+  **Production = README focus-ticker (merge 3d5530e, live-verified
+  2026-08-09) on top of SHIPPED.SW + COMMAND.CTR v2.**
 - **⚠️ Shared-checkout law: no concurrent sessions on one working tree;
   `git branch --show-current` before EVERY commit.** Another session's
   worktree (`minors-random-wallpaper`) was live during s40 — worktrees are
   the pattern; leave the main checkout on main.
-- **`feat/readme-focus-ticker` (`d8a15e6`) AWAITS JAKE'S READ — not merged.**
-  README.TXT FOCUS line crawls like the skills ticker (35px/s, ✦ seam,
-  overflow-gated, reduced-motion static+ellipsis, EDIT.MODE parks it,
-  ghost aria-hidden). Live-verified in dev server s40 (34.8px/s measured,
-  no CLS, console clean). Speed dial: `CRAWL_PX_PER_SEC` in About.tsx.
+- **README focus-ticker SHIPPED** (Jake: "publish it"; merge `3d5530e`,
+  deploy READY, marker-curl verified). FOCUS line crawls like the skills
+  ticker (35px/s, ✦ seam, overflow-gated, reduced-motion static,
+  EDIT.MODE parks it). Speed dial: `CRAWL_PX_PER_SEC` in About.tsx.
+  Branch `feat/readme-focus-ticker` deletable.
+- **TUNE.MODE ruled the build path for figma↔code live editing (s40b
+  research, full landscape in Notion task):** adopt NOTHING external
+  (all write Tailwind/regenerate; none lockable to tokens/). Phases:
+  INSPECT.MODE read-only public (S) → token nudge + doctor-gated
+  `/api/token-commit` modelled on copy-commit (M) → SPRING scrub with
+  runtime override indirection in motion.ts (M) → agent-mediated (L,
+  optional). Watch: Figma Make in-local-codebase (closed beta, Mac-only,
+  no token enforcement). 4 open questions for Jake in the task page.
 - **Notion research rulings (s40, full writeups in each task page):**
   hooks — none installed, adopt 4 (SessionStart deck-report, block
   generated-token edits, block forbidden commits, block prettier), ~15 min
@@ -48,7 +57,19 @@
   medieval airbrush wash contrast · never build while a dev server owns
   the checkout .next · `family-hub 2/` dup dir (Jake deletes).
 
-## Latest session — NOTION SWEEP: four tasks, three answers, one crawl (s40, 2026-08-09)
+## Latest session — NOTION SWEEP + SHIP + BRIDGE SCAN (s40/s40b, 2026-08-09)
+
+**s40b (same day, Jake's follow-up):** "publish it" → focus-ticker merged
+to main (`3d5530e`), deploy verified live. Then the claude-design thread
+continued: two-stream research (Figma-side primary-source verification +
+full landscape synthesis) → **TUNE.MODE ruling** above; filed as new
+Notion task "figma↔code live editing bridge" (Done, P0) with build
+sketch + open questions. Key repo facts the ruling rests on: no Tailwind
+(26 CSS modules, 256 vars), motion already tokenized, `resolveVar()` in
+contrast.ts is the inspector primitive, copy-commit route is the commit-
+loop template, doctor-tokens --strict is the gate. Cheap wins flagged:
+DevTools Automatic Workspace Folders JSON (~30min) · Storybook
+save-from-controls already available · SpecSheet motion comment stale.
 
 **Jake away ("have fun"); Fable orchestrated 4 parallel agents off the
 Notion board. Deck reported dispatch→returns throughout.**
@@ -74,12 +95,14 @@ Notion board. Deck reported dispatch→returns throughout.**
 
 ## Next steps
 
-1. **Jake: read + merge call on `feat/readme-focus-ticker`** (crawl feel:
-   35px/s — one dial if off).
-2. **Jake: read the skills research** (Notion task page) — it proposes
-   case study #3 (agent supervision) and CUTS.APP; both fit the APPLY push.
-3. **Jake rulings owed:** install the 4 hooks? · claude design trial or
-   skip-and-close · shelf live smoke + copy rewrite pass · Family Hub walk.
+1. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
+   if off) — it's live.
+2. **Jake: read the skills research + the TUNE.MODE plan** (both Notion
+   task pages) — skills proposes case study #3 (agent supervision) +
+   CUTS.APP; TUNE.MODE has 4 open questions (public INSPECT? PR vs main?
+   Motion+? own program?).
+3. **Jake rulings owed:** install the 4 hooks? · shelf live smoke + copy
+   rewrite pass · Family Hub walk.
 4. **The Desk** — next flagship (r3f ruling stands; Blender refs incoming).
 5. Cleanup: delete merged branches (`cv-exe`, `suggestion-box`,
    `case-family-hub`, `worktree-cc-v2-pipeline`, `medieval-sfx*` on
