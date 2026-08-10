@@ -38,14 +38,18 @@
   `@anthropic-ai/sdk`. Parked bit: INSERT COIN gate on the cap (Notion).
 - **README focus-ticker SHIPPED** (merge `3d5530e`, verified live). Speed
   dial: `CRAWL_PX_PER_SEC` in About.tsx. Branch deletable.
-- **DIAL-IN ROUND on `feat/inspect-dialin` (`fc37040`) AWAITS JAKE'S
-  LOOK:** menubar toggle text-only · mode hides menubar+ticker, docks go
-  root-level full-height, accent-flooded CROWN header spans the canvas
-  (titlebar idiom, tokened ink) with SELECT/OPERATE toggle (DevTools
-  picker; alt = momentarily the other tool) + LGT/DRK + exit ✕.
-  Probe-verified incl. teardown/preemption/focus; build green. No
-  DOPPLER round (small chrome surface, full probe table) — merge on
-  Jake's word.
+- **DIAL-IN SHIPPED (Jake: "ship it!"; merge `86dc3fc`, READY, marker
+  verified; branch deleted):** menubar toggle text-only · mode hides
+  menubar+ticker, docks root-level full-height, accent-flooded CROWN
+  header (titlebar idiom, tokened ink — AA 6.6/5.3/5.6 per skin) with
+  SELECT/OPERATE toggle (DevTools picker; alt = momentarily the other
+  tool) + LGT/DRK + exit ✕. No DOPPLER round (small chrome surface,
+  full probe table).
+- **MOTION+ RULED: Jake buys it.** Task scoped in Notion ("motion+
+  upgrade", P2): law = re-cut in house idiom, values through
+  motion.json, reduced-motion gated, data-spring tags; first three =
+  window exit choreography · shelf/case shimmer · magnetic icons
+  (dialed to 1992); Studio = tuning fork only, never writes components.
 - **INSPECT.MODE IS NOW A TOOL MODE (the "INSPECT SHELL"), LIVE** —
   ◎ INSPECT menubar toggle (≥900px) or `/inspect`: desktop compresses to
   a canvas between paper docks — LAYERS tree left (WAI-ARIA, keyboard
@@ -136,9 +140,9 @@ window." Then "ship it when the fixes land!!" Both done.**
    + a live question; eyeball the typewriter motion (never seen on a
    visible tab) and the card voice. **Confirm the workspace spend limit
    is set in the Anthropic console** — it's the only unhackable guard.
-2. **Jake: drive the INSPECT SHELL on lunde.co** — ◎ INSPECT in the
-   menubar — and eyeball the dial-in branch (`feat/inspect-dialin`):
-   crown header, SELECT/OPERATE. Merge call owed.
+2. **Jake: drive the finished INSPECT SHELL on lunde.co** — INSPECT in
+   the menubar; crown + SELECT/OPERATE are live. **Jake: buy Motion+**
+   (his account) → then run the motion+ task (Notion, P2).
 3. **Token debt sweep (Jake: launch the chip, or any fresh session):**
    scoped P1, brief + ledger method in Notion →
    https://app.notion.com/p/3b8d29ee9854810399d8c387686eab5c —
