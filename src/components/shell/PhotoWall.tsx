@@ -100,6 +100,7 @@ export function PhotoWall() {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.8, y: 16 }}
                   transition={spring}
+                  data-spring="zoom"
                   onClick={() => setZoomed(photo)}
                   aria-label={`View pinned booth photo ${i + 1} closely`}
                 >
@@ -129,6 +130,7 @@ export function PhotoWall() {
               layoutId={zoomed}
               className={`${styles.pinned} ${styles.pinnedZoomed}`}
               transition={spring}
+              data-spring="zoom"
             >
               <span className={styles.pin} aria-hidden="true" />
               {/* eslint-disable-next-line @next/next/no-img-element */}

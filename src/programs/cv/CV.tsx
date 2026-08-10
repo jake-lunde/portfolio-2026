@@ -103,6 +103,7 @@ export default function CV() {
               initial={{ opacity: 0, scale: 0.95, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={SPRINGS.deck}
+              data-spring="deck"
             >
               <div className={styles.dialogBar}>
                 <span className={styles.dialogStripes} aria-hidden="true" />

@@ -1,0 +1,383 @@
+/* INSPECT.MODE — SYS-21 chrome.
+
+   This panel grades other people's token usage, so it holds itself to the
+   strictest reading of the house rule — point the inspector at its own
+   window and every row must come back SEMANTIC:
+
+   · type comes from WHOLE roles (--type-<role>-family/size/tracking/
+     leading together), never a semantic family beside a raw --tracking-*,
+     which is a core primitive and would flag;
+   · spacing is --spacing-component-*, borders are --border-width-default /
+     --border-width-strong (the semantic pair) — not the core hairline/
+     thin/thick literals older program modules still reach for.
+
+   The one inline style is the swatch fill, set from the resolved token hex
+   at runtime (InspectMode.tsx): the value being reported IS the value
+   being painted, and no token can name it. */
+
+.root {
+  padding: var(--spacing-component-lg);
+  font-family: var(--type-body-family);
+  color: var(--content);
+}
+
+.eyebrow {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 var(--spacing-component-md);
+}
+
+/* ---------- the one control ---------- */
+.bar {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-component-md);
+  flex-wrap: wrap;
+}
+
+.scan {
+  flex: none;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  text-transform: uppercase;
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
+  color: var(--content);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.scan[data-on] {
+  color: var(--surface);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.scan:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+.hint {
+  flex: 1 1 12rem;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+  color: var(--content-muted);
+}
+
+.notice {
+  margin: var(--spacing-component-md) 0 0;
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+  color: var(--content);
+  border: var(--border-width-default) solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* ---------- results ---------- */
+.results {
+  margin-top: var(--spacing-component-lg);
+}
+
+.empty,
+.note,
+.warnText {
+  margin: 0;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+  color: var(--content-muted);
+}
+
+.ident {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-component-sm);
+  flex-wrap: wrap;
+  padding-bottom: var(--spacing-component-sm);
+  border-bottom: var(--border-width-default) solid var(--content);
+}
+
+.identLabel,
+.head,
+.tier,
+.gradeChip,
+.chip,
+.roleChip {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+}
+
+.identLabel {
+  color: var(--accent);
+}
+
+.identName,
+.prop,
+.varName,
+.value,
+.ratio,
+.facts {
+  font-family: var(--type-mono-family);
+  font-size: var(--type-mono-size);
+  font-weight: var(--type-mono-weight);
+  letter-spacing: var(--type-mono-tracking);
+  line-height: var(--type-mono-leading);
+}
+
+.identName {
+  color: var(--content);
+  overflow-wrap: anywhere;
+}
+
+.reskin {
+  margin: var(--spacing-component-sm) 0 0;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  text-transform: uppercase;
+  color: var(--accent-expressive-text);
+}
+
+.section {
+  margin-top: var(--spacing-component-lg);
+}
+
+.head {
+  margin: 0 0 var(--spacing-component-sm);
+  color: var(--content-muted);
+}
+
+/* ---------- LAYERS ---------- */
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-xs);
+}
+
+.chip,
+.roleChip {
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  color: var(--content-muted);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+  border-radius: 0;
+  text-transform: none;
+}
+
+.chip {
+  cursor: pointer;
+}
+
+.chip:hover {
+  color: var(--content);
+  border-color: var(--content);
+}
+
+.chip[data-current] {
+  color: var(--surface);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.chip:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+.roleChip {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------- TOKENS ---------- */
+.rows,
+.vars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-component-sm);
+}
+
+.row {
+  padding: var(--spacing-component-sm);
+  border: var(--border-width-default) solid var(--border);
+}
+
+.prop {
+  display: block;
+  color: var(--content);
+}
+
+.vars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-component-xs);
+  margin-top: var(--spacing-component-xs);
+}
+
+.var {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-xs);
+}
+
+/* a core primitive consumed raw: the danger role, as a left rule rather
+   than a fill, so the row stays readable while it stays accused */
+.var[data-warn] {
+  padding: var(--spacing-component-xs);
+  background: color-mix(in srgb, var(--status-danger-base) 12%, transparent);
+  box-shadow: inset var(--border-width-strong) 0 0 var(--status-danger-base);
+}
+
+.varName {
+  color: var(--content);
+  overflow-wrap: anywhere;
+}
+
+.value {
+  color: var(--content-muted);
+  overflow-wrap: anywhere;
+}
+
+.warnText {
+  flex: 1 1 100%;
+  color: var(--content);
+}
+
+.tier {
+  flex: none;
+  padding: 0 var(--spacing-component-xs);
+  color: var(--content-muted);
+  border: var(--border-width-default) solid var(--border);
+}
+
+.tier[data-tier='semantic'],
+.tier[data-tier='component'] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.tier[data-tier='core'] {
+  color: var(--status-danger-base);
+  border-color: var(--status-danger-base);
+}
+
+.swatch {
+  flex: none;
+  width: var(--spacing-component-md);
+  height: var(--spacing-component-md);
+  border: var(--border-width-default) solid var(--border);
+}
+
+/* ---------- CONTRAST ---------- */
+.contrast {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-sm);
+}
+
+.pair {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+}
+
+.on {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--content-muted);
+}
+
+.ratio {
+  color: var(--content);
+}
+
+.gradeChip {
+  padding: 0 var(--spacing-component-xs);
+  color: var(--accent);
+  border: var(--border-width-default) solid var(--accent);
+}
+
+.gradeChip[data-fail] {
+  color: var(--status-danger-on-base);
+  background: var(--status-danger-base);
+  border-color: var(--status-danger-base);
+}
+
+/* ---------- TYPE ---------- */
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--spacing-component-xs) var(--spacing-component-sm);
+  margin: 0 0 var(--spacing-component-sm);
+}
+
+.facts dt {
+  color: var(--content-muted);
+  text-transform: uppercase;
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--content);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- MOTION ---------- */
+.springLine {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-sm);
+  margin: 0 0 var(--spacing-component-xs);
+}
+
+.springName {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  color: var(--accent);
+}
+
+/* Nothing here animates — a readout that moves while you read it is worse
+   than one that doesn't. The hover tint is a color change only; the block
+   stays so a future pass that adds motion remembers to gate it. */
+@media (prefers-reduced-motion: reduce) {
+  .chip {
+    transition: none;
+  }
+}

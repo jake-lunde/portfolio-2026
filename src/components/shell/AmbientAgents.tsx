@@ -268,6 +268,7 @@ export function AmbientAgents() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={SPRINGS.deck}
+                data-spring="deck"
               >
                 <span className={styles.introHi}>
                   HI — I&apos;M {CREW_BY_ID[intro.id]?.name}. ONE OF JAKE&apos;S AGENTS.

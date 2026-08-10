@@ -237,6 +237,7 @@ export function GateSphere() {
           <span key={i} className={styles.slotCol}>
             <motion.span
               className={styles.slotBox}
+              data-spring="rise"
               data-filled={(s && s !== '·') || undefined}
               animate={
                 phase === 'rising' && !reduced
@@ -318,6 +319,7 @@ export function GateSphere() {
                 scale: 1,
               }}
               transition={reduced ? { duration: 0 } : SPRINGS.flight}
+              data-spring="flight"
               onAnimationComplete={() => landFlight(f)}
             >
               {f.char}

@@ -29,6 +29,31 @@ const TOKENS_DIR = path.join(ROOT, 'tokens')
 const OUT_DIR = path.join(ROOT, 'src/styles/generated')
 const OUT_FILE = path.join(ROOT, 'src/styles/tokens.generated.css')
 
+/* Tier = the source directory a token was authored in (tokens/core,
+ * tokens/semantic, tokens/component). INSPECT.MODE reads this to grade a
+ * declaration against house law — a core primitive consumed raw in product
+ * CSS is a violation, and the inspector can only say so if the build tells
+ * it which tier each emitted custom property came from. Emitted alongside
+ * the CSS, from the same filtered dictionary, so the map can never list a
+ * property the stylesheet doesn't actually ship. */
+const TIERS = ['core', 'semantic', 'component']
+const tierOf = (filePath) => {
+  const seg = path.relative(TOKENS_DIR, path.resolve(filePath)).split(path.sep)[0]
+  return TIERS.includes(seg) ? seg : null
+}
+
+StyleDictionary.registerFormat({
+  name: 'json/token-tiers',
+  format: ({ dictionary }) => {
+    const out = {}
+    for (const token of dictionary.allTokens) {
+      const tier = tierOf(token.filePath)
+      if (tier) out[`--${token.name}`] = tier
+    }
+    return JSON.stringify(out, null, 2)
+  },
+})
+
 /* Final selector model. classic-dark also matches today's bare
  * [data-theme='dark'] so dark mode keeps working before the data-skin
  * attribute exists (introduced in Milestone B / store widening). */
@@ -94,6 +119,13 @@ for (const theme of themes) {
               },
             },
           },
+          {
+            destination: `${theme.id}.tiers.json`,
+            format: 'json/token-tiers',
+            // the SAME filter as the CSS file above: one dictionary, two
+            // renderings, so the map and the stylesheet can't drift
+            filter: (token) => enabled.has(path.resolve(token.filePath)),
+          },
         ],
       },
     },
@@ -132,3 +164,28 @@ const motionTs =
   `export const DURATION_TOKENS = ${JSON.stringify(durations, null, 2)} as const\n`
 await fs.writeFile(path.join(ROOT, 'src/lib/motion.generated.ts'), motionTs)
 console.log('✓ wrote src/lib/motion.generated.ts')
+
+/* The tier map, merged across themes in $themes order (first theme to emit
+ * a property names its tier — a property is authored in exactly one tier,
+ * so the themes only ever agree). Read by src/lib/inspect.ts. */
+const tiers = {}
+for (const theme of themes) {
+  const part = JSON.parse(await fs.readFile(path.join(OUT_DIR, `${theme.id}.tiers.json`), 'utf8'))
+  for (const [name, tier] of Object.entries(part)) {
+    if (!(name in tiers)) tiers[name] = tier
+  }
+}
+const tierEntries = Object.keys(tiers)
+  .sort()
+  .map((name) => `  '${name}': '${tiers[name]}',`)
+  .join('\n')
+const tiersTs =
+  '/* GENERATED FILE — DO NOT EDIT. Run npm run tokens:build. */\n\n' +
+  '/* Every custom property tokens.generated.css emits, mapped to the tier it\n' +
+  ' * was authored in. INSPECT.MODE grades declarations against it: a core\n' +
+  " * primitive consumed raw in product CSS is house-law violation, and a\n" +
+  ' * property absent from this map came from outside the token system. */\n' +
+  "export const TOKEN_TIERS: Record<string, 'core' | 'semantic' | 'component'> = {\n" +
+  `${tierEntries}\n}\n`
+await fs.writeFile(path.join(ROOT, 'src/lib/tokens.generated.ts'), tiersTs)
+console.log(`✓ wrote src/lib/tokens.generated.ts (${Object.keys(tiers).length} properties)`)

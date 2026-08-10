@@ -145,6 +145,7 @@ function SketchScene({ on }: { on: boolean }) {
           }}
           animate={{ x: push[i].x, y: push[i].y }}
           transition={SPRINGS.widget}
+          data-spring="widget"
         >
           <img
             src={`${DIR}/sketch/${b.f}.webp`}

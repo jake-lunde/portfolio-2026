@@ -124,6 +124,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
       animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
       exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, transition: { duration: 0.14 } }}
       transition={SPRINGS.window}
+      data-spring="window"
       drag={!zoomed}
       dragListener={false}
       dragControls={dragControls}
@@ -224,6 +225,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
                     animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
                     exit={{ opacity: 0, transition: { duration: 0.12 } }}
                     transition={SPRINGS.widget}
+                    data-spring="widget"
                   >
                     <CopyText k={def.explainer} as="p" className={styles.explainerText} />
                   </motion.div>

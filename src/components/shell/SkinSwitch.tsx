@@ -85,6 +85,7 @@ export function SkinSwitch() {
             animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.97 }}
             transition={SPRINGS.deck}
+            data-spring="deck"
             style={{ transformOrigin: 'top left' }}
           >
             {SKINS.map((sk) => (

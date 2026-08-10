@@ -470,6 +470,7 @@ export default function EditMode() {
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: 12 }}
             animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={SPRINGS.deck}
+            data-spring="deck"
           >
             <header className={styles.panelHead}>
               <span className={styles.panelTitle}>SAVE.CHANGES</span>

@@ -28,6 +28,7 @@ const ORDER = [
   'feedback',
   'suggest',
   'spec-sheet',
+  'inspect-mode',
 ]
 
 const rank = (id: string) => {

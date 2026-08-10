@@ -1076,6 +1076,7 @@ export default function CommandCenter() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={SPRINGS.deck}
+                    data-spring="deck"
                   >
                     {toast.ev.redact ? (
                       <Redacted seed={toast.ev.label + toast.ev.t} small />
@@ -1103,6 +1104,7 @@ export default function CommandCenter() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 6 }}
                   transition={SPRINGS.human}
+                  data-spring="human"
                 >
                   <span className={styles.saidKind}>
                     {said.ev.action === 'curate' ? 'PICKS' : 'ASKS'}
@@ -1134,6 +1136,7 @@ export default function CommandCenter() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={SPRINGS.deck}
+                  data-spring="deck"
                 >
                   <span className={styles.cardName}>{cardMember.name}</span>
                   <span className={styles.cardJob}>
@@ -1164,6 +1167,7 @@ export default function CommandCenter() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={SPRINGS.deck}
+                  data-spring="deck"
                 >
                   {/* an empty pipe is a real answer — a route that exists
                       and has not been used yet, which is worth saying out
@@ -1227,6 +1231,7 @@ export default function CommandCenter() {
               initial={counter.pulse && !reduced ? { opacity: 0.35, scale: 1.22 } : false}
               animate={{ opacity: 1, scale: 1 }}
               transition={SPRINGS.deck}
+              data-spring="deck"
             >
               {transcript || counter.n <= rows.length
                 ? rows.length
@@ -1263,6 +1268,7 @@ export default function CommandCenter() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       transition={SPRINGS.deck}
+                      data-spring="deck"
                     >
                       <span className={styles.rowT}>{clock(ev.t)}</span>
                       <span className={styles.rowArrow} data-action={ev.action}>
