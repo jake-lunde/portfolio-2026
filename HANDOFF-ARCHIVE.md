@@ -1870,3 +1870,37 @@ focus crawl keeps (already merged s40b).**
   COIN") — a bit, not a business.
 - s40 flag RESOLVED: `/readme` deep link does open the window (it was the
   hidden-tab freeze).
+
+> s41b addendum (2026-08-10): ASK MY AI shipped — guardrails v2 commit
+> `5bfd9bb` on the branch, KEY-level copy.json merge vs INSPECT.MODE's
+> keys (zero double-edits), merge `c7956d7`, prod-verified incl. one paid
+> live turn (~2.5¢). Full s41 story in HANDOFF-ARCHIVE.md + Notion task.
+
+## Session — INSPECT.MODE PHASE 0 (s42, 2026-08-09)
+
+**Jake ruled question 1 by acclamation ("it is a designer flex!! build
+it") → INSPECT.MODE is public + on the desktop. Built, audited, verified;
+on branch per s31 law.**
+
+- **Build (NYQUIST worktree → my review):** `src/lib/inspect.ts` engine +
+  InspectMode program + `tokens.generated.ts` emit in build-tokens.mjs +
+  `data-spring` at 27 sites. 3 commits: build `81edaa3` → CRT-ink fix
+  `e94988a` → DOPPLER fixes `34661ba`.
+- **DOPPLER audit paid for itself twice:** (1) tier merge let classic
+  outvote medieval — the panel would have publicly accused ~90 legal
+  `--sans/--mono/--display` uses; (2) `style.item()` never enumerates
+  var()-bearing shorthands — ~440 declarations (background/border/gap)
+  were invisible until the walk moved to `cssText`. Also: @container
+  leaked closed conditions; own injected sheet self-reported; AA·LG was
+  size-blind. All fixed.
+- **CRT ink rule learned** (memory + archive): crt bodies paint
+  `--surface-inverse` with NO token re-scope — on-body text must be
+  `--content-inverse`; EDIT.MODE only dodges it via muted/accent/fills.
+- Verified: headless_shell CDP probes (arm/hover/pick/exempt/Escape/
+  teardown, zero leftovers, console clean), light + dark shots,
+  tokens:doctor at baseline, tsc + prod build green.
+- Phase-0 debts (Notion task): no keyboard path to a FIRST pick ·
+  @container skipped not evaluated · data-spring reports authored intent
+  under reduced-motion · nested data-skin pick = probe burst.
+- Concurrent-session note: s41 rotated HANDOFF mid-session; laws held
+  (worktrees, branch check before commit, main stayed on main).
