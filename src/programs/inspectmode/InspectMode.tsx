@@ -84,6 +84,13 @@ export default function InspectMode() {
 
   const pick = useCallback((el: HTMLElement) => {
     scrub('data-inspect-picked')
+    // a LAYERS chip outlives its node whenever the subject unmounts —
+    // stamping a detached element reports a screenful of em-dashes
+    if (!document.contains(el)) {
+      pickRef.current = null
+      setReport(null)
+      return
+    }
     el.setAttribute('data-inspect-picked', '')
     pickRef.current = el
     setReport(inspectElement(el))
@@ -93,7 +100,12 @@ export default function InspectMode() {
      full-bleed, so the panel would cover the thing it is inspecting ---- */
   useEffect(() => {
     const mq = window.matchMedia(NARROW)
-    const sync = () => setNarrow(mq.matches)
+    const sync = () => {
+      setNarrow(mq.matches)
+      // the SCAN/STOP control goes with the panel below this width: staying
+      // armed would leave a crosshair on the desktop and no visible way off
+      if (mq.matches) setArmed(false)
+    }
     sync()
     mq.addEventListener('change', sync)
     return () => mq.removeEventListener('change', sync)
@@ -161,6 +173,25 @@ export default function InspectMode() {
     }
   }, [armed])
 
+  /* ---- EDIT.MODE (SYS-99) and this program cannot both hold the
+     desktop. toggle() refuses to arm while EDIT.MODE has the floor, but
+     that only covers the second-mover: armed FIRST, we would keep
+     painting a crosshair and a halo over the editor. Watching the body
+     flag settles both directions — and clears the notice the moment
+     EDIT.MODE closes, which otherwise latched until the next toggle. ---- */
+  useEffect(() => {
+    const obs = new MutationObserver(() => {
+      if (document.body.dataset.editmode) {
+        setArmed(false)
+        setBusy(true)
+      } else {
+        setBusy(false)
+      }
+    })
+    obs.observe(document.body, { attributes: true, attributeFilter: ['data-editmode'] })
+    return () => obs.disconnect()
+  }, [])
+
   /* ---- a skin or theme flip swaps the whole token set, and SKIN
      BUILDER's inline overrides land on the root's style attribute: the
      current pick has to be re-read, not just re-rendered. (Same observer
@@ -203,8 +234,11 @@ export default function InspectMode() {
 
   return (
     <div className={styles.root} data-inspect-self="">
+      {/* this sheet is live in the document, and the picked outline lands
+          BEFORE a reading is taken — the engine skips it by this marker so
+          the panel never reports its own instrumentation as the subject's */}
       {/* eslint-disable-next-line react/no-danger */}
-      <style dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
+      <style data-inspect-style="" dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
 
       <CopyText k="inspect.eyebrow" as="p" className={styles.eyebrow} />
 
@@ -418,6 +452,9 @@ export default function InspectMode() {
                     </span>
                   </p>
                   <CopyText k={springKey} as="p" className={styles.note} />
+                  {report.spring.inherited && (
+                    <CopyText k="inspect.springvia" as="p" className={styles.note} />
+                  )}
                 </>
               ) : (
                 <p className={styles.note}>

@@ -375,12 +375,3 @@
   letter-spacing: var(--type-label-tracking);
   color: var(--accent);
 }
-
-/* Nothing here animates — a readout that moves while you read it is worse
-   than one that doesn't. The hover tint is a color change only; the block
-   stays so a future pass that adds motion remembers to gate it. */
-@media (prefers-reduced-motion: reduce) {
-  .chip {
-    transition: none;
-  }
-}

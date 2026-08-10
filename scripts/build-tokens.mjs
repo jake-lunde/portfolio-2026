@@ -165,14 +165,27 @@ const motionTs =
 await fs.writeFile(path.join(ROOT, 'src/lib/motion.generated.ts'), motionTs)
 console.log('✓ wrote src/lib/motion.generated.ts')
 
-/* The tier map, merged across themes in $themes order (first theme to emit
- * a property names its tier — a property is authored in exactly one tier,
- * so the themes only ever agree). Read by src/lib/inspect.ts. */
+/* The tier map, merged across themes in $themes order. Themes CAN disagree:
+ * a property may be authored in core for one skin and re-declared in the
+ * semantic set of another (--display/--sans/--mono do exactly this — core
+ * in classic, semantic/medieval.json in medieval). A property that any skin
+ * publishes as its per-skin API IS semantic, whatever the other skin's
+ * source file, so SEMANTIC wins the collision and the disagreement is
+ * logged by name — a new one should never pass unseen. Read by
+ * src/lib/inspect.ts. */
 const tiers = {}
 for (const theme of themes) {
   const part = JSON.parse(await fs.readFile(path.join(OUT_DIR, `${theme.id}.tiers.json`), 'utf8'))
   for (const [name, tier] of Object.entries(part)) {
-    if (!(name in tiers)) tiers[name] = tier
+    const prior = tiers[name]
+    if (prior === undefined) {
+      tiers[name] = tier
+      continue
+    }
+    if (prior === tier) continue
+    const winner = prior === 'semantic' || tier === 'semantic' ? 'semantic' : prior
+    tiers[name] = winner
+    console.warn(`  ⚠ tier collision: ${name} is ${prior} and ${tier} — recording ${winner}`)
   }
 }
 const tierEntries = Object.keys(tiers)

@@ -10,13 +10,22 @@ import { parseColor, hexToRgb, toHex, contrast, grade, type RGB } from './contra
    data-skin re-scopes the whole set), what does its fg/bg pair grade, and
    which named spring moves it.
 
-   Two honest limits, both fine for phase 0 and both worth knowing:
+   The honest limits, all fine for phase 0 and all worth knowing:
    · the cascade is approximated by DOCUMENT ORDER, not specificity — the
      last matching rule that sets a property wins. Right for this
      codebase (CSS modules, one rule per property per component) and
      wrong for a stylesheet that leans on specificity.
    · pseudo-class state is read live: a `:hover` rule matches only while
-     the element is actually hovered. */
+     the element is actually hovered.
+   · declarations are read off the serialized declaration block, not the
+     property enumeration, because a shorthand written with substitutions
+     enumerates only longhands that read back empty (see collectFrom).
+   · @container rules are SKIPPED: their condition is relative to a query
+     container we can't identify from here, so walking them lands rows
+     from mutually exclusive branches at once. Better absent than wrong.
+   · selector lists are split on commas without parsing, so a comma inside
+     :is()/:where()/:not() would split mid-selector. Zero such selectors in
+     this codebase today; the split becomes a real parser when there is one. */
 
 export type Tier = 'core' | 'semantic' | 'component' | 'unknown'
 
@@ -62,6 +71,9 @@ export type SpringInfo = {
   stiffness: string
   damping: string
   mass: string | null
+  /** the spring is declared on an ANCESTOR — true of everything inside a
+      window, which rides the window's own opening spring */
+  inherited: boolean
 }
 
 export type Inspection = {
@@ -178,39 +190,98 @@ function varNamesIn(value: string): string[] {
 /* `.thing::before` can't be matched with el.matches, and the rule still
    tells us which tokens the component reaches for. Strip the trailing
    pseudo-element and match the subject instead. Pseudo-CLASSES are left
-   alone on purpose — :hover / :focus-visible are real live state. */
+   alone on purpose — :hover / :focus-visible are real live state. The
+   single-colon legacy list needs the negative lookahead or it eats the
+   head of a longer pseudo-class (:placeholder-shown → -shown). */
 const PSEUDO_EL_RE =
-  /::[\w-]+(\([^)]*\))?|:(before|after|first-line|first-letter|selection|placeholder|marker|backdrop)\b/gi
+  /::[\w-]+(\([^)]*\))?|:(before|after|first-line|first-letter|selection|placeholder|marker|backdrop)(?![\w-])/gi
 
-function matchesSelector(el: HTMLElement, selectorText: string): boolean {
+/** Does `el` match this rule? Returns null for no match, otherwise the
+    pseudo-element the matching selector carried — '' when it carried
+    none. Rows from a pseudo-element say so: they style a different box. */
+function matchSubject(el: HTMLElement, selectorText: string): string | null {
   for (const part of selectorText.split(',')) {
-    const subject = part.replace(PSEUDO_EL_RE, '').trim()
+    let pseudo = ''
+    const subject = part
+      .replace(PSEUDO_EL_RE, (hit) => {
+        if (!pseudo) pseudo = hit
+        return ''
+      })
+      .trim()
     if (!subject) continue
     try {
-      if (el.matches(subject)) return true
+      if (el.matches(subject)) return pseudo
     } catch {
       /* :has(), ::part(), vendor selectors older browsers choke on — skip it */
     }
   }
-  return false
+  return null
 }
 
-function collectFrom(style: CSSStyleDeclaration, into: Map<string, TokenRow>) {
-  for (let i = 0; i < style.length; i++) {
-    const property = style.item(i)
-    const raw = style.getPropertyValue(property)
-    if (!raw || !raw.includes('var(')) continue
+/* Declarations come from the serialized block, NOT from style.item(i).
+   A shorthand whose value goes through substitutions is stored unresolved
+   ("pending-substitution"): the enumeration lists only its longhands and
+   every one of them reads back as the empty string, so a tokened border,
+   background or gap is invisible to a property-by-property walk — most of
+   a reading, gone. The serialized text keeps the shorthand as authored.
+
+   Split on top-level semicolons only: quoted strings hold semicolons
+   (content) and so do parenthesized values (a base64 url()). */
+function declarationsIn(cssText: string): Array<[string, string]> {
+  const out: Array<[string, string]> = []
+  let depth = 0
+  let quote = ''
+  let start = 0
+
+  const take = (chunk: string) => {
+    const at = chunk.indexOf(':')
+    if (at < 1) return
+    const property = chunk.slice(0, at).trim()
+    const value = chunk.slice(at + 1).trim()
+    if (property && value) out.push([property, value])
+  }
+
+  for (let i = 0; i < cssText.length; i++) {
+    const c = cssText[i]
+    if (quote) {
+      if (c === quote && cssText[i - 1] !== '\\') quote = ''
+      continue
+    }
+    if (c === '"' || c === "'") quote = c
+    else if (c === '(') depth++
+    else if (c === ')') depth = Math.max(0, depth - 1)
+    else if (c === ';' && depth === 0) {
+      take(cssText.slice(start, i))
+      start = i + 1
+    }
+  }
+  take(cssText.slice(start))
+
+  return out
+}
+
+function collectFrom(style: CSSStyleDeclaration, into: Map<string, TokenRow>, pseudo = '') {
+  for (const [name, raw] of declarationsIn(style.cssText)) {
+    if (!raw.includes('var(')) continue
     const varNames = varNamesIn(raw)
     if (varNames.length === 0) continue
+    // a ::before row is a different box from the element's own — keyed
+    // apart so neither overwrites the other
+    const property = pseudo ? `${name} ${pseudo}` : name
     // last writer in document order wins; Map keeps the first insertion
     // POSITION, which reads better than shuffling rows on every override
-    into.set(property, { property, varNames, raw: raw.trim() })
+    into.set(property, { property, varNames, raw })
   }
 }
 
 function walkRules(rules: CSSRuleList, el: HTMLElement, into: Map<string, TokenRow>) {
   for (let i = 0; i < rules.length; i++) {
     const rule = rules[i]
+
+    /* @container: the condition is measured against a query container
+       this walk can't identify, so both branches of a mutually exclusive
+       pair would report at once. Skipped whole — see the header. */
+    if (typeof CSSContainerRule !== 'undefined' && rule instanceof CSSContainerRule) continue
 
     // @media that doesn't apply right now isn't styling anything right now
     if (typeof CSSMediaRule !== 'undefined' && rule instanceof CSSMediaRule) {
@@ -226,7 +297,8 @@ function walkRules(rules: CSSRuleList, el: HTMLElement, into: Map<string, TokenR
     if (typeof CSSKeyframesRule !== 'undefined' && rule instanceof CSSKeyframesRule) continue
 
     if (typeof CSSStyleRule !== 'undefined' && rule instanceof CSSStyleRule) {
-      if (matchesSelector(el, rule.selectorText)) collectFrom(rule.style, into)
+      const pseudo = matchSubject(el, rule.selectorText)
+      if (pseudo !== null) collectFrom(rule.style, into, pseudo)
       // nested rules (CSS nesting, @supports inside a rule)
       const nested = (rule as CSSStyleRule & { cssRules?: CSSRuleList }).cssRules
       if (nested && nested.length) walkRules(nested, el, into)
@@ -244,6 +316,12 @@ export function collectTokenUsage(el: HTMLElement): TokenRow[] {
   const rows = new Map<string, TokenRow>()
 
   for (const sheet of Array.from(document.styleSheets)) {
+    /* Our own instrumentation is not part of anybody's reading: the picked
+       outline is stamped BEFORE the walk runs, so without this every
+       report grows a phantom outline row citing the panel's own tokens. */
+    const owner = sheet.ownerNode
+    if (owner instanceof Element && owner.hasAttribute('data-inspect-style')) continue
+
     let rules: CSSRuleList | null = null
     try {
       rules = sheet.cssRules
@@ -278,11 +356,25 @@ function alphaOf(color: string): number {
   return Number.isNaN(a) ? 1 : a
 }
 
+/* WCAG "large text": 24px, or 18.66px at bold. The 3:1 grade belongs to
+   that text ONLY — grade() takes a ratio and can't know the size, so a
+   12px caption at 3.2:1 comes back AA·LG and reads as a pass. The size
+   test lives here rather than in contrast.ts, which stays pure ratio
+   arithmetic shared with SPEC.SHEET and the skin gates. */
+function isLargeText(cs: CSSStyleDeclaration): boolean {
+  const size = parseFloat(cs.fontSize)
+  if (Number.isNaN(size)) return false
+  if (size >= 24) return true
+  const weight = cs.fontWeight === 'bold' ? 700 : parseFloat(cs.fontWeight)
+  return size >= 18.66 && weight >= 700
+}
+
 /** Foreground as computed, background as PAINTED — the nearest ancestor
     that actually lays down an opaque color, which is what the eye reads
     and therefore what the ratio has to be measured against. */
 export function effectiveColors(el: HTMLElement): EffectiveColors {
-  const fg = parseColor(getComputedStyle(el).color)
+  const cs = getComputedStyle(el)
+  const fg = parseColor(cs.color)
 
   let bg: RGB | null = null
   let node: HTMLElement | null = el
@@ -301,13 +393,16 @@ export function effectiveColors(el: HTMLElement): EffectiveColors {
   }
 
   const ratio = fg && bg ? contrast(fg, bg) : null
+  let mark = ratio === null ? null : grade(ratio)
+  if (mark === 'AA·LG' && !isLargeText(cs)) mark = 'FAIL'
+
   return {
     fg,
     bg,
     fgHex: fg ? toHex(fg) : null,
     bgHex: bg ? toHex(bg) : null,
     ratio,
-    grade: ratio === null ? null : grade(ratio),
+    grade: mark,
   }
 }
 
@@ -320,26 +415,30 @@ const MODULE_CLASS_RE = /^[A-Za-z0-9]+_([A-Za-z0-9-]+)__[A-Za-z0-9-]+$/
 function readableClass(el: HTMLElement): string | null {
   const raw = el.getAttribute('class')
   if (!raw) return null
-  for (const cls of raw.split(/\s+/).filter(Boolean)) {
+  const classes = raw.split(/\s+/).filter(Boolean)
+  // the authored name hides in a module class, which is rarely the first
+  // one on the node — keep looking before settling for whatever leads
+  for (const cls of classes) {
     const m = cls.match(MODULE_CLASS_RE)
-    return m ? m[1] : cls
+    if (m) return m[1]
   }
-  return null
+  return classes[0] ?? null
 }
 
 /** tag + the most human identity the node carries. A window announces
     itself by its live aria-label — the copy layer and skinVocab have
     already resolved that, so the chain reads in the visitor's skin
-    without this file knowing the registry exists. */
+    without this file knowing the registry exists.
+
+    Only the window ROOT gets that name. Handing it to every descendant
+    made a whole LAYERS chain read "div · in Spec Sheet" — the same label
+    on every chip, which is no identity at all. */
 export function labelFor(el: HTMLElement): string {
   const tag = el.tagName.toLowerCase()
 
-  const win = el.closest<HTMLElement>('[data-window-id]')
-  if (win) {
-    const title = win.getAttribute('aria-label') || win.dataset.windowId || ''
-    if (title) {
-      return win === el ? `${tag} · ${title}` : `${tag} · in ${title}`
-    }
+  if (el.hasAttribute('data-window-id')) {
+    const title = el.getAttribute('aria-label') || el.dataset.windowId || ''
+    if (title) return `${tag} · ${title}`
   }
 
   const copyId = el.dataset.copyId
@@ -367,7 +466,9 @@ const SPRING_NAMES = new Set(Object.keys(SPRING_TOKENS))
 
 /** Which named spring moves this? Read off the nearest [data-spring]
     ancestor — the components declare it at the motion element, so the
-    mapping maintains itself as the shell grows. */
+    mapping maintains itself as the shell grows. A hit on an ancestor is
+    still true (the subtree rides that spring) but it is not the same
+    claim as a spring declared HERE, so it reports as inherited. */
 export function springFor(el: HTMLElement): SpringInfo | null {
   const host = el.closest<HTMLElement>('[data-spring]')
   const name = host?.dataset.spring
@@ -387,6 +488,7 @@ export function springFor(el: HTMLElement): SpringInfo | null {
     stiffness: read('stiffness') ?? '—',
     damping: read('damping') ?? '—',
     mass: read('mass'),
+    inherited: host !== el,
   }
 }
 
