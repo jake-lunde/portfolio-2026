@@ -1,4 +1,15 @@
 {
+  "aichat.budget": "I’VE SAID A LOT TODAY — THE DAILY BUDGET IS SPENT. COME BACK TOMORROW, OR EMAIL THE HUMAN: JAKELUNDE@ME.COM",
+  "aichat.capped": "THAT’S MY LIMIT FOR ONE SITTING — EMAIL THE HUMAN: JAKELUNDE@ME.COM",
+  "aichat.error": "THE WIRE DROPPED. TRY AGAIN — OR EMAIL THE HUMAN.",
+  "aichat.greeting": {
+    "base": "I HELPED JAKE BUILD THIS MACHINE. ASK ME ABOUT HIM.",
+    "medieval": "I HELPED JAKE RAISE THIS ENGINE. ASK ME OF HIM."
+  },
+  "aichat.note": "Answers are mine — Claude’s — from his reviews, research, and three days inside this codebase.",
+  "aichat.offline": "MY LIVE WIRE ISN’T PLUGGED IN YET. THE CARDS STILL WORK.",
+  "aichat.placeholder": "ask your own question…",
+  "aichat.send": "ASK",
   "command.explainer": "Jake writes the brief, judges every return and owns the taste. A crew of model agents does the fan-out. This deck is the real telemetry; the site is what came out of it.",
   "cv.download": "DOWNLOAD PDF",
   "cv.explainer": "It prints itself. What you are reading is typeset live from the same data as the PDF, so the download can never drift from the page.",
@@ -63,31 +74,13 @@
   "inspect.spring.zoom": "SHARED-ELEMENT ZOOMS — A PRINT FLYING UP CLOSE AND BACK.",
   "inspect.springvia": "RIDING AN ANCESTOR’S SPRING — MOTION IS INHERITED HERE.",
   "inspect.stop": "STOP",
-  "machine.ai.eyebrow": {
-    "base": "An appraisal · SYS-20",
-    "medieval": "An assay · SYS-20"
-  },
-  "machine.ai.specsHeading": {
-    "base": "Specifications",
-    "medieval": "Particulars"
-  },
-  "machine.ai.title": {
-    "base": "What my AI thinks about me",
-    "medieval": "What my familiar makes of me"
-  },
-  "machine.essayNote": "The following appraisal was written by the AI that helped build this site, at Jake’s request that it be honest. Sources: his LinkedIn, his 2024–2025 performance reviews, and verbatim user research. He did not edit it.",
-  "machine.eyebrow": "About This Machine",
-  "machine.h.artist": "The artist",
-  "machine.h.engineer": "The design engineer",
-  "machine.h.individual": "The individual",
-  "machine.h.verdict": "Verdict",
   "now-playing.lastPlayed": "Last played ♪",
   "now-playing.loading": "TUNING…",
   "now-playing.openLink": "OPEN IN APPLE MUSIC ↗",
   "now-playing.underConstruction": "What Jake's listening to. Signal expected in a future broadcast.",
-  "program.ai-opinion.name": {
-    "base": "What My AI Thinks",
-    "medieval": "The Oracle"
+  "program.ai-chat.name": {
+    "base": "Ask My AI",
+    "medieval": "Ask the Familiar"
   },
   "program.booth.name": {
     "base": "Photo Booth",
@@ -117,10 +110,6 @@
   "program.inspect-mode.name": {
     "base": "INSPECT.MODE",
     "medieval": "The Assay"
-  },
-  "program.machine.name": {
-    "base": "About This Machine",
-    "medieval": "The Engine"
   },
   "program.music.name": {
     "base": "Music",
@@ -193,6 +182,14 @@
   },
   "projects.indexLabel": "Index — Selected work",
   "projects.itemsSuffix": "items",
+  "readme.claude.bubble": {
+    "base": "WANT TO KNOW WHAT I THINK ABOUT JAKE?",
+    "medieval": "WOULDST THOU KNOW WHAT I MAKE OF JAKE?"
+  },
+  "readme.claude.role": {
+    "base": "THE MACHINE THAT HELPED BUILD THIS ONE",
+    "medieval": "THE FAMILIAR THAT HELPED RAISE THIS ONE"
+  },
   "readme.eyebrow": "",
   "readme.focus": "Design systems · AI-data products · Helping families work better",
   "readme.label.contact": "Contact",

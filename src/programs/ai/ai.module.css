@@ -1,0 +1,390 @@
+/* ASK MY AI. Three bands in one column: the machine introduces itself,
+   the transcript scrolls, the composer is pinned. Nothing here invents a
+   color — the bubble stroke, the card fill and the accent are the same
+   roles the SUGGESTION BOX and the guestbook already use. */
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 18px 20px 20px;
+  background: var(--surface);
+}
+
+/* ---- the machine introduces itself ---- */
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  background: var(--content); /* one-ink rule — crew never gets color */
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+.headText {
+  min-width: 0;
+}
+
+/* the greeting is the one bubble that keeps DOPPLER's tail — it is
+   pointing at somebody */
+.greeting {
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  color: var(--content);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: var(--radius-md);
+  padding: 9px 12px;
+  margin: 0;
+  position: relative;
+}
+
+[data-theme='dark'] .greeting {
+  border-color: var(--border);
+}
+
+.greeting::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: -6px;
+  width: 10px;
+  height: 10px;
+  background: var(--surface-raised);
+  border-bottom: var(--border-width-default) solid var(--content);
+  border-left: var(--border-width-default) solid var(--content);
+  transform: rotate(45deg);
+}
+
+[data-theme='dark'] .greeting::before {
+  border-color: var(--border);
+}
+
+.note {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  color: var(--content-muted);
+  margin: 8px 0 0;
+  max-width: 52ch;
+}
+
+/* ---- the transcript ---- */
+
+.log {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 0 4px;
+}
+
+/* the visitor's turn is plain text on the right — no bubble. Only one
+   party in this window is a machine, and only the machine gets chrome. */
+.ask {
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  color: var(--content-muted);
+  text-align: right;
+  max-width: 40ch;
+  margin: 0 0 10px auto;
+}
+
+/* the answer: prose, body face, comfortable measure. Long-form reads as
+   writing; the CAPS are reserved for the machine talking ABOUT itself. */
+.said {
+  font-family: var(--sans);
+  font-size: var(--type-body-sm-size);
+  line-height: var(--leading-relaxed);
+  color: var(--content);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin: 0 0 18px;
+  max-width: 46ch;
+  /* the typewriter grows this node character by character; reserving one
+     line means an empty bubble never pops in at zero height */
+  min-height: 1.6em;
+}
+
+[data-theme='dark'] .said {
+  border-color: var(--border);
+}
+
+/* errors and the cap are the machine's own voice, not an answer */
+.saidSystem {
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+/* ---- the five cards (empty state) ---- */
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 4px 12px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    transform var(--duration-tap) ease-out,
+    border-color var(--duration-tap) ease-out;
+}
+
+.cardEyebrow {
+  grid-column: 1;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+.cardPrompt {
+  grid-column: 1;
+  font-family: var(--display);
+  /* the card IS the ask, so the prompt is set at heading-3 (18px) — the
+     one rung above body-lg on the ramp, not a number picked by eye */
+  font-size: var(--type-heading-3-size);
+  line-height: 1.3;
+  color: var(--content);
+}
+
+/* the send affordance, borrowed from the Family Hub panel. Decorative —
+   the whole card is the button, so the arrow stays out of the a11y tree */
+.cardArrow {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-family: var(--mono);
+  font-size: var(--type-body-size);
+  color: var(--content-muted);
+  transition:
+    transform var(--duration-tap) ease-out,
+    color var(--duration-tap) ease-out;
+}
+
+.card:hover,
+.card:focus-visible {
+  border-color: var(--content);
+  transform: translateY(-1px);
+}
+
+.card:hover .cardArrow,
+.card:focus-visible .cardArrow {
+  color: var(--accent);
+  transform: translateX(3px);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- the leftovers, once the conversation starts ---- */
+
+.rail {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+  overflow-x: auto;
+  padding: 10px 0;
+  /* the rail can scroll sideways; the window must not */
+  scrollbar-width: thin;
+}
+
+.chip {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--duration-tap) ease-out,
+    border-color var(--duration-tap) ease-out;
+}
+
+.chip:hover,
+.chip:focus-visible {
+  color: var(--content);
+  border-color: var(--content);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- the composer ---- */
+
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.composer {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding-top: 12px;
+  border-top: var(--border-width-hairline) solid var(--border);
+}
+
+.field {
+  flex: 1 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  font-family: var(--sans);
+  font-size: var(--type-body-sm-size);
+  color: var(--content);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: 0;
+  padding: 8px 10px;
+}
+
+[data-theme='dark'] .field {
+  border-color: var(--border);
+}
+
+.field:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.field:disabled {
+  opacity: 0.55;
+}
+
+.sendBtn {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.16em;
+  padding: 8px 18px;
+  background: var(--accent);
+  color: var(--surface);
+  border: var(--border-width-default) solid var(--content);
+  cursor: pointer;
+}
+
+[data-theme='dark'] .sendBtn {
+  color: #0d100c; /* derived from classic-dark --surface; see specsheet */
+  border-color: var(--border);
+}
+
+.sendBtn:hover:not(:disabled) {
+  background: var(--accent-expressive);
+  color: #17150d; /* derived from the expressive accent's AA pair */
+}
+
+.sendBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---- the cap ---- */
+
+.capped {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  color: var(--accent);
+  margin: 0;
+  padding-top: 12px;
+  border-top: var(--border-width-hairline) solid var(--border);
+}
+
+.capped a {
+  color: inherit;
+}
+
+/* ---- motion law ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cardArrow,
+  .chip {
+    transition: none;
+  }
+
+  .card:hover,
+  .card:focus-visible {
+    transform: none;
+  }
+
+  .card:hover .cardArrow,
+  .card:focus-visible .cardArrow {
+    transform: none;
+  }
+}
+
+/* ---- 360px ---- */
+
+@media (max-width: 480px) {
+  .chat {
+    padding: 14px 14px 16px;
+  }
+
+  .composer {
+    flex-wrap: wrap;
+  }
+
+  .field {
+    flex: 1 1 100%;
+  }
+
+  .sendBtn {
+    flex: 1 1 100%;
+  }
+
+  .said,
+  .ask {
+    max-width: 100%;
+  }
+}

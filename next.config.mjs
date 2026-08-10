@@ -8,6 +8,13 @@ import createMDX from '@next/mdx'
 const nextConfig = {
   pageExtensions: ['ts', 'tsx', 'mdx'],
 
+  /* ABOUT THIS MACHINE was retired into README (session 41). The router
+     would already fall back to README for an unregistered path, but a
+     real redirect is what a link shared in 2026 deserves — temporary,
+     because the id could yet come back on a different window. */
+  async redirects() {
+    return [{ source: '/machine', destination: '/readme', permanent: false }]
+  },
 }
 
 /* ⚠️ CDN-caching /api/cc-feed: THREE approaches tried, none survives to

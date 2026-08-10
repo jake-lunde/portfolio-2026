@@ -61,7 +61,11 @@ export const PROGRAMS: ProgramDef[] = [
     meta: 'DOC-00',
     icon: 'doc',
     component: dynamic(() => import('@/programs/about/About')),
-    size: { w: 520, h: 700 },
+    // +40 over the shipped 700: README now carries CLAUDE's introduction
+    // and the ASK MY AI bubble under the spec list (~110px). It still
+    // scrolls — this window always has — but the CTA should not be
+    // entirely below the fold on a first open.
+    size: { w: 520, h: 740 },
     pos: { x: 120, y: 60 },
     onDesktop: true,
     path: '/readme',
@@ -363,27 +367,18 @@ export const PROGRAMS: ProgramDef[] = [
     onDesktop: false,
   },
   {
-    id: 'machine',
-    name: 'About This Machine',
-    meta: 'SYS-10',
-    icon: 'chip',
-    component: dynamic(() => import('@/programs/machine/AboutMachine')),
-    // 420 = measured content (medieval's ruled colophon is the tall one at
-    // 406px incl. chrome) + a little slack the CSS absorbs above the CTA
-    size: { w: 600, h: 420 },
-    pos: { x: 280, y: 30 },
-    onDesktop: true,
-    path: '/machine',
-  },
-  {
-    // the essay + old SPECS block, promoted out of ABOUT THIS MACHINE's
-    // disclosure into its own window behind a CTA.
-    id: 'ai-opinion',
-    name: 'What My AI Thinks',
+    // ASK MY AI. ABOUT THIS MACHINE and its essay window both retired here
+    // (session 41): one identity door — README — and the machine that
+    // helped build the site answers questions at the bottom of it. Five
+    // authored cards stream locally; the composer is a live wire to
+    // /api/ai-chat. No desktop icon: it opens from README's CTA, and /ai
+    // (the essay's old deep link) still lands on it.
+    id: 'ai-chat',
+    name: 'Ask My AI',
     meta: 'SYS-20',
     icon: 'chip',
-    component: dynamic(() => import('@/programs/machine/AiOpinion')),
-    size: { w: 560, h: 620 },
+    component: dynamic(() => import('@/programs/ai/AiChat')),
+    size: { w: 560, h: 680 },
     pos: { x: 330, y: 44 },
     onDesktop: false,
     path: '/ai',
