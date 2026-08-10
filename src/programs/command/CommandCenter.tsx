@@ -5,6 +5,8 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { DURATIONS, SPRINGS } from '@/lib/motion'
 import { sfx, telemetry } from '@/lib/sound'
 import { useSettings } from '@/store/settings'
+import { useWindows } from '@/store/windows'
+import { t } from '@/content/copy'
 import {
   CREW,
   CREW_BY_ID,
@@ -101,6 +103,16 @@ const HIGHLIGHT_MS = 900
 /* hovering a pipe is a request to READ it, so the capsule inside drops to
    a fifth speed rather than stopping: still moving, still legible */
 const SLOW_RATE = 0.2
+
+/* Which units you can actually TALK to, and where that lands. The deck
+   stops being a diagram at these two nodes: FABLE answers questions about
+   Jake, DOPPLER takes the suggestion. The rest are inert until P1 gives
+   them chats of their own — and an inert node wears no affordance, so the
+   deck never offers a handle that comes off in your hand. */
+const WIRED: Record<string, { key: string; window: string }> = {
+  fable: { key: 'cc.chat.fable', window: 'ai-chat' },
+  doppler: { key: 'cc.chat.doppler', window: 'suggest' },
+}
 
 const LEAD_IDS = LEADS.map((a) => a.id)
 const DELEGATE_IDS = DELEGATES.map((a) => a.id)
@@ -333,6 +345,7 @@ function Node({
   skin,
   state,
   hot,
+  wired,
   measure,
   onOpen,
   onClose,
@@ -343,6 +356,9 @@ function Node({
   skin: 'classic' | 'medieval' | 'underwater'
   state: AgentState
   hot?: boolean
+  /** this unit answers: pressing it opens its program instead of latching
+      the spec card. Label is the promise; absent means the node is inert. */
+  wired?: { label: string; onPress: () => void }
   measure: (id: string, el: HTMLElement | null) => void
   onOpen: (id: string) => void
   onClose: (id: string) => void
@@ -358,10 +374,15 @@ function Node({
       className={human ? styles.nodeHuman : styles.node}
       data-mode={state.mode}
       data-hot={hot || undefined}
+      data-wired={wired ? true : undefined}
       /* The NAME is fixed — identity does not churn. Live telemetry is a
          DESCRIPTION, so a status arriving while this node holds focus
-         does not make a screen reader announce the unit all over again. */
-      aria-label={`${m.name} — ${m.model}, ${m.role}`}
+         does not make a screen reader announce the unit all over again.
+         A wired unit leads with what pressing it DOES; the spec still
+         arrives on hover and in the description. */
+      aria-label={
+        wired ? `${wired.label} — ${m.model}, ${m.role}` : `${m.name} — ${m.model}, ${m.role}`
+      }
       aria-describedby={`${STATUS_ID}-${id}`}
       /* a touch "enter" is really a tap: let the click toggle it instead,
          or the card opens and closes in the same gesture */
@@ -373,7 +394,7 @@ function Node({
       }}
       onFocus={() => onOpen(id)}
       onBlur={() => onClose(id)}
-      onClick={() => onToggle(id)}
+      onClick={() => (wired ? wired.onPress() : onToggle(id))}
     >
       <span className={styles.scanMark} aria-hidden="true" />
       {human ? (
@@ -409,6 +430,7 @@ type Row = Ev & { key: number }
 export default function CommandCenter() {
   const reduced = useReducedMotion()
   const skin = useSettings((s) => s.skin)
+  const openWindow = useWindows((s) => s.open)
   const [mode, setMode] = useState<'replay' | 'live'>('replay')
   const [log, setLog] = useState<Row[]>([])
   const [states, setStates] = useState<Record<string, AgentState>>(idleStates)
@@ -862,6 +884,17 @@ export default function CommandCenter() {
   /* click toggles rather than re-opens: on touch there is no hover to
      leave, so a tap has to be able to close what a tap opened */
   const toggleCard = (id: string) => setCardNode((cur) => (cur === id ? null : id))
+  const wiredFor = (id: string) => {
+    const w = WIRED[id]
+    if (!w) return undefined
+    return {
+      label: t(w.key, skin),
+      onPress: () => {
+        sfx.open()
+        openWindow(w.window)
+      },
+    }
+  }
   const dismiss = () => {
     setCardNode(null)
     setHoverPipe(null)
@@ -1012,6 +1045,7 @@ export default function CommandCenter() {
                   skin={skin}
                   state={states[id]}
                   hot={Boolean(hotNodes[id])}
+                  wired={wiredFor(id)}
                   measure={measure}
                   onOpen={setCardNode}
                   onClose={(cid) => setCardNode((cur) => (cur === cid ? null : cur))}
@@ -1028,6 +1062,7 @@ export default function CommandCenter() {
                   skin={skin}
                   state={states[id]}
                   hot={Boolean(hotNodes[id])}
+                  wired={wiredFor(id)}
                   measure={measure}
                   onOpen={setCardNode}
                   onClose={(cid) => setCardNode((cur) => (cur === cid ? null : cur))}

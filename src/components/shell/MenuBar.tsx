@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSettings } from '@/store/settings'
 import { OS_VERSION } from '@/lib/version'
 import { SkinSwitch } from './SkinSwitch'
+import { FableMark } from './FableMark'
 import styles from './shell.module.css'
 
 function Clock() {
@@ -62,6 +63,9 @@ export function MenuBar() {
         <SkinSwitch />
       </div>
       <div className={styles.menuRight}>
+        {/* the resident AI leads the cluster — a way INTO a program, so it
+            sits ahead of the toggles rather than between them */}
+        <FableMark />
         <button
           className={styles.menuBtn}
           onClick={toggleSound}
