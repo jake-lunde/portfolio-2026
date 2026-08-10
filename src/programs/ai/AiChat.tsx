@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useReducedMotion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { SPRINGS } from '@/lib/motion'
 import { metric } from '@/lib/metrics'
 import { sfx } from '@/lib/sound'
 import { useSettings } from '@/store/settings'
@@ -34,16 +35,29 @@ import styles from './ai.module.css'
    from the first frame and staying there until each is spent. The old
    side-by-side header, the stacked empty state and the eyebrow-only
    chips are all gone: one place for identity, one place for the
-   transcript, one place for the offers. */
+   transcript, one place for the offers.
+
+   CHOREOGRAPHY (session 44, Jake's ruling: "the movement should feel
+   like a chat feed"). Nothing in here is chrome that was always there —
+   every part arrives the way a message arrives. On open the greeting
+   bubble rises in alone, and only once it has landed does the rail lazy
+   in behind it, card by card. While an answer is being written the rail
+   LEAVES — it slides down and unmounts, so the offers are not sitting
+   there competing with the sentence you asked for — and comes back on
+   the same stagger, minus whatever you spent, the moment the answer
+   finishes. Every appended bubble rides the same rise. The one thing
+   that must NOT re-enter is the thinking bubble turning into its answer:
+   same key, same element type, so it morphs where it stands. */
 
 const MAX_LEN = 500
 const MAX_SENDS = 8 // matches the route's own count; the UI just gets there first
 const CHARS_PER_FRAME = 3
 const EMAIL = 'JAKELUNDE@ME.COM'
-/* a spent card fades and slides before it leaves the rail. transitionend
-   retires it; this is the belt-and-braces in case the transition never
-   fires (a backgrounded tab freezes them) and the seat would stay empty. */
-const EXIT_MS = 420
+/* the feed's beats. The greeting gets a head start so the rail reads as
+   arriving BEHIND it rather than with it; 70ms between cards is the
+   smallest gap that still reads left-to-right instead of all-at-once. */
+const GREETING_BEAT = 0.14
+const CARD_STAGGER = 0.07
 
 type Msg = {
   id: string
@@ -86,14 +100,24 @@ function withMailto(line: string) {
   )
 }
 
+/* the one entrance in this window: opacity and a short rise on the
+   WINDOW spring — the same spring the shell opens a window with, which
+   is the right answer twice over, because a new message arriving is the
+   same event at a smaller scale. `initial: false` is how reduced motion
+   opts out: the node renders landed and no animation ever runs. */
+function riseIn(reduced: boolean, delay = 0) {
+  return {
+    initial: reduced ? false : { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    transition: reduced ? { duration: 0 } : { ...SPRINGS.window, delay },
+  }
+}
+
 export default function AiChat() {
   const skin = useSettings((s) => s.skin)
-  const reduced = useReducedMotion()
+  const reduced = !!useReducedMotion()
   const [msgs, setMsgs] = useState<Msg[]>([])
   const [used, setUsed] = useState<string[]>([])
-  // spent but still on screen, playing its exit — kept out of `used` so
-  // the seat holds its width until the fade finishes
-  const [leaving, setLeaving] = useState<string[]>([])
   const [draft, setDraft] = useState('')
   const [sends, setSends] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -103,16 +127,26 @@ export default function AiChat() {
   const raf = useRef<number | null>(null)
   const logRef = useRef<HTMLDivElement>(null)
   const hp = useRef<HTMLInputElement>(null)
+  const field = useRef<HTMLInputElement>(null)
   const seq = useRef(0)
-  const exits = useRef<ReturnType<typeof setTimeout>[]>([])
+  // a card press unmounts the rail out from under the button that was
+  // pressed, which drops focus on <body> and restarts the tab order
+  const stole = useRef(false)
 
   useEffect(() => {
-    const timers = exits.current
     return () => {
       if (raf.current !== null) cancelAnimationFrame(raf.current)
-      timers.forEach(clearTimeout)
     }
   }, [])
+
+  // …so when the answer is finished, hand focus to the composer — the
+  // honest next step. Guarded on <body> so we only ever take back the
+  // focus we dropped, never focus somebody else is using.
+  useEffect(() => {
+    if (busy || !stole.current) return
+    stole.current = false
+    if (document.activeElement === document.body) field.current?.focus()
+  }, [busy])
 
   // follow the stream down. Behaviour is `auto`, not `smooth`: a smooth
   // scroll re-triggered every frame of the typewriter never arrives.
@@ -148,19 +182,16 @@ export default function AiChat() {
     raf.current = requestAnimationFrame(step)
   }
 
-  /* pull a spent card out of the rail for good. Idempotent, because both
-     the transition and the fallback timer race to call it. */
-  const retire = (id: string) => setUsed((u) => (u.includes(id) ? u : [...u, id]))
-
   const askCard = (card: CardDef) => {
     if (busy) return
     sfx.tap()
-    if (reduced) {
-      retire(card.id)
-    } else {
-      setLeaving((l) => (l.includes(card.id) ? l : [...l, card.id]))
-      exits.current.push(setTimeout(() => retire(card.id), EXIT_MS))
-    }
+    /* spent immediately — no per-card exit to run any more. The whole
+       rail is about to leave (busy), and AnimatePresence plays out the
+       frame it was removed on, so the card the visitor just pressed is
+       still on screen for the fade and simply is not there when the
+       rail comes back. */
+    setUsed((u) => (u.includes(card.id) ? u : [...u, card.id]))
+    stole.current = true
     const answerId = `a-${card.id}`
     setMsgs((all) => [
       ...all,
@@ -273,69 +304,98 @@ export default function AiChat() {
           reader re-announces the bubble every frame of the typewriter.
           The finished answer announces once, when busy clears. */}
       <div className={styles.log} ref={logRef} aria-live="polite" aria-busy={busy}>
-        {/* the greeting is a message, not chrome — first bubble in the
-            thread, with the provenance line under it as an aside */}
-        <Copy k="aichat.greeting" as="p" className={`${styles.said} ${styles.machine}`} />
-        <Copy k="aichat.note" as="p" className={styles.note} />
+        {/* the greeting is a message, not chrome — ONE bubble, the hello
+            in the machine's caps and the provenance line under it as a
+            smaller aside. Two copy keys, one speech act: nothing in this
+            feed is naked system text sitting outside a bubble. */}
+        <motion.div
+          className={`${styles.said} ${styles.machine}`}
+          {...riseIn(reduced)}
+        >
+          <Copy k="aichat.greeting" as="p" className={styles.greetLine} />
+          <Copy k="aichat.note" as="p" className={styles.note} />
+        </motion.div>
 
         {msgs.map((m) => {
           if (m.role === 'user') {
             return (
-              <p key={m.id} className={styles.ask}>
+              <motion.p key={m.id} className={styles.ask} {...riseIn(reduced)}>
                 {m.content}
-              </p>
+              </motion.p>
             )
           }
-          if (m.pending) {
-            return (
-              <p key={m.id} className={`${styles.said} ${styles.thinking}`} role="status">
-                <span className={styles.thinkMark} aria-hidden="true" style={mask} />
-                <span className={styles.srOnly}>THINKING</span>
-              </p>
-            )
-          }
+          /* pending and answered are the SAME element type under the same
+             key on purpose: the thinking mark is replaced by the words in
+             place, and the entrance — which only runs on mount — never
+             gets a second chance to play. */
           return (
-            <p
+            <motion.p
               key={m.id}
               className={
-                m.system ? `${styles.said} ${styles.machine} ${styles.saidSystem}` : styles.said
+                m.pending
+                  ? `${styles.said} ${styles.thinking}`
+                  : m.system
+                    ? `${styles.said} ${styles.machine} ${styles.saidSystem}`
+                    : styles.said
               }
-              data-copy-id={m.copyKey}
+              role={m.pending ? 'status' : undefined}
+              data-copy-id={m.pending ? undefined : m.copyKey}
+              {...riseIn(reduced)}
             >
-              {m.system ? withMailto(m.content) : m.content}
-            </p>
+              {m.pending ? (
+                <>
+                  <span className={styles.thinkMark} aria-hidden="true" style={mask} />
+                  <span className={styles.srOnly}>THINKING</span>
+                </>
+              ) : m.system ? (
+                withMailto(m.content)
+              ) : (
+                m.content
+              )}
+            </motion.p>
           )
         })}
       </div>
 
-      {/* the offers, docked to the composer. One rail, full cards, always
-          on screen — an authored answer never has to be remembered from
-          an empty state that scrolled away. */}
-      {remaining.length > 0 && (
-        <div className={styles.carousel}>
-          {remaining.map((card) => (
-            <button
-              key={card.id}
-              type="button"
-              className={styles.card}
-              disabled={busy}
-              data-leaving={leaving.includes(card.id) ? '' : undefined}
-              onClick={() => askCard(card)}
-              onTransitionEnd={(e) => {
-                if (e.propertyName === 'opacity' && leaving.includes(card.id)) retire(card.id)
-              }}
-            >
-              <span className={styles.cardTop}>
-                <span className={styles.cardEyebrow}>{card.eyebrow}</span>
-                <span className={styles.cardArrow} aria-hidden="true">
-                  →
-                </span>
-              </span>
-              <span className={styles.cardPrompt}>{card.prompt}</span>
-            </button>
-          ))}
-        </div>
-      )}
+      {/* the offers, docked to the composer — and they come and go with
+          the conversation. While an answer is being written the rail is
+          gone; the fade covers its own reflow, so nothing under it jumps.
+          The stagger is the same on the way back in, which is what makes
+          the return read as "here are your remaining options" rather than
+          as a panel blinking. */}
+      <AnimatePresence>
+        {remaining.length > 0 && !busy && (
+          <motion.div
+            key="rail"
+            className={styles.carousel}
+            /* the rail itself never plays an entrance — the CARDS do,
+               one after another. It only owns the exit, where a single
+               fading layer is what hides the reflow underneath it. */
+            initial={false}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: 10, pointerEvents: 'none' }}
+            transition={reduced ? { duration: 0 } : SPRINGS.window}
+          >
+            {remaining.map((card, i) => (
+              <motion.div
+                key={card.id}
+                className={styles.seat}
+                {...riseIn(reduced, (msgs.length === 0 ? GREETING_BEAT : 0) + i * CARD_STAGGER)}
+              >
+                <button type="button" className={styles.card} onClick={() => askCard(card)}>
+                  <span className={styles.cardTop}>
+                    <span className={styles.cardEyebrow}>{card.eyebrow}</span>
+                    <span className={styles.cardArrow} aria-hidden="true">
+                      →
+                    </span>
+                  </span>
+                  <span className={styles.cardPrompt}>{card.prompt}</span>
+                </button>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {capped ? (
         <p className={styles.capped} role="status" data-copy-id="aichat.capped">
@@ -353,6 +413,7 @@ export default function AiChat() {
             className={styles.hp}
           />
           <input
+            ref={field}
             type="text"
             className={styles.field}
             value={draft}

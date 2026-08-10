@@ -115,16 +115,22 @@
   color: var(--accent);
 }
 
-/* the provenance line rides under the greeting bubble as an aside, not
-   as chrome — it scrolls away once there is a conversation to read */
+/* ---- the greeting ---- */
+
+/* the hello and its provenance line are ONE bubble with two paragraphs,
+   not a bubble with a caption loose underneath it. Everything the
+   machine says lives inside chrome; the note is simply the quieter half
+   of the same message, so it takes a smaller size and the muted ink
+   while the bubble keeps its own measure. */
+.greetLine {
+  margin: 0;
+}
+
 .note {
-  font-family: var(--mono);
   font-size: var(--text-label);
   letter-spacing: 0.04em;
-  line-height: 1.5;
   color: var(--content-muted);
-  margin: -10px 0 18px;
-  max-width: 52ch;
+  margin: 8px 0 0;
 }
 
 /* ---- the wait ---- */
@@ -212,13 +218,24 @@
   border-radius: var(--radius-pill);
 }
 
+/* the seat holds the width; the card inside holds the look. The split
+   exists because two different systems want this element's transform:
+   the feed's entrance rise (Motion, written inline) and the hover lift
+   (this sheet) — and an inline transform always beats a stylesheet. One
+   node each, and both keep working. */
+.seat {
+  display: flex;
+  flex: 0 0 240px;
+  width: 240px;
+  scroll-snap-align: start;
+}
+
 .card {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 0 0 240px;
-  width: 240px;
-  scroll-snap-align: start;
+  flex: 1 1 auto;
+  min-width: 0;
   text-align: left;
   padding: 12px 14px;
   background: var(--surface-raised);
@@ -268,41 +285,26 @@
     color var(--duration-tap) ease-out;
 }
 
-.card:hover:not(:disabled),
+.card:hover,
 .card:focus-visible {
   border-color: var(--content);
   transform: translateY(-1px);
 }
 
-.card:hover:not(:disabled) .cardArrow,
+.card:hover .cardArrow,
 .card:focus-visible .cardArrow {
   color: var(--accent);
   transform: translateX(3px);
 }
 
 /* the press — the only state that pushes IN rather than up */
-.card:active:not(:disabled) {
+.card:active {
   transform: scale(0.98);
 }
 
 .card:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-}
-
-/* while an answer streams every other offer is off the table, and the
-   dimming is what makes that read as deliberate rather than broken */
-.card:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-/* spent. The card slides out and hands its seat back on transitionend —
-   ordered after :disabled so a card retired mid-stream still leaves. */
-.card[data-leaving] {
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
 }
 
 /* ---- the composer ---- */
@@ -403,13 +405,13 @@
     transition: none;
   }
 
-  .card:hover:not(:disabled),
+  .card:hover,
   .card:focus-visible,
-  .card:active:not(:disabled) {
+  .card:active {
     transform: none;
   }
 
-  .card:hover:not(:disabled) .cardArrow,
+  .card:hover .cardArrow,
   .card:focus-visible .cardArrow {
     transform: none;
   }
@@ -448,7 +450,7 @@
 
   /* the seat narrows so a second card always peeks — the rail has to
      announce itself as scrollable on the smallest screen too */
-  .card {
+  .seat {
     flex-basis: 210px;
     width: 210px;
   }
