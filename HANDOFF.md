@@ -38,6 +38,14 @@
   `@anthropic-ai/sdk`. Parked bit: INSERT COIN gate on the cap (Notion).
 - **README focus-ticker SHIPPED** (merge `3d5530e`, verified live). Speed
   dial: `CRAWL_PX_PER_SEC` in About.tsx. Branch deletable.
+- **DIAL-IN ROUND on `feat/inspect-dialin` (`fc37040`) AWAITS JAKE'S
+  LOOK:** menubar toggle text-only · mode hides menubar+ticker, docks go
+  root-level full-height, accent-flooded CROWN header spans the canvas
+  (titlebar idiom, tokened ink) with SELECT/OPERATE toggle (DevTools
+  picker; alt = momentarily the other tool) + LGT/DRK + exit ✕.
+  Probe-verified incl. teardown/preemption/focus; build green. No
+  DOPPLER round (small chrome surface, full probe table) — merge on
+  Jake's word.
 - **INSPECT.MODE IS NOW A TOOL MODE (the "INSPECT SHELL"), LIVE** —
   ◎ INSPECT menubar toggle (≥900px) or `/inspect`: desktop compresses to
   a canvas between paper docks — LAYERS tree left (WAI-ARIA, keyboard
@@ -47,8 +55,8 @@
   drills · ALT+CLICK operates the site · Escape ladder · dialogs exempt +
   above-dock z. LIVE NUDGE: semantic color roles re-alias from core
   PALETTE candidates, AA-judged per theme, inline-on-html preview only
-  ("NOT SAVED" banner, RESET ALL, resets on exit) — persistence = phase 1,
-  blocked on Jake's PR-vs-main ruling. tune.ts is the override channel;
+  ("NOT SAVED" banner, RESET ALL, resets on exit) — **Jake RULED (s43b):
+  token commits go via PR** — phase-1 commit route unblocked. tune.ts is the override channel;
   buildASkin untouched. Window program deleted; `/inspect` canonicals to
   `/readme`. EDIT.MODE mutual exclusion incl. disabled toggle state.
 - **Notion research rulings (s40, full writeups in each task page):**
@@ -129,21 +137,27 @@ window." Then "ship it when the fixes land!!" Both done.**
    visible tab) and the card voice. **Confirm the workspace spend limit
    is set in the Anthropic console** — it's the only unhackable guard.
 2. **Jake: drive the INSPECT SHELL on lunde.co** — ◎ INSPECT in the
-   menubar. Click picks, alt+click uses the site, try a nudge on
-   --accent. Then two rulings: token-commit path (PR vs main — unblocks
-   saving nudges) + launch the token-debt-sweep chip.
-3. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
+   menubar — and eyeball the dial-in branch (`feat/inspect-dialin`):
+   crown header, SELECT/OPERATE. Merge call owed.
+3. **Token debt sweep (Jake: launch the chip, or any fresh session):**
+   scoped P1, brief + ledger method in Notion →
+   https://app.notion.com/p/3b8d29ee9854810399d8c387686eab5c —
+   re-alias core-consumed-raw, adopt/kill the 54 dead tokens, doctor→0.
+4. **Phase-1 token commit route (UNBLOCKED — PR path ruled):** model on
+   copy-commit but open a PR (branch + doctor-tokens --strict gate),
+   wire the nudge palette's SAVE to it.
+5. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
    if off) — it's live.
-4. **Jake: read the skills research + the TUNE.MODE plan** (both Notion
+6. **Jake: read the skills research + the TUNE.MODE plan** (both Notion
    task pages) — skills proposes case study #3 (agent supervision) +
    CUTS.APP; TUNE.MODE questions 2–4 still open (token commits PR vs
    main? Motion+? — question 1 answered, phase 0 built).
-5. **Jake rulings owed:** install the 4 hooks? · shelf live smoke + copy
+7. **Jake rulings owed:** install the 4 hooks? · shelf live smoke + copy
    rewrite pass · Family Hub walk.
-6. **The Desk** — next flagship (r3f ruling stands; Blender refs incoming).
-7. Cleanup: delete merged branches (`cv-exe`, `suggestion-box`,
+8. **The Desk** — next flagship (r3f ruling stands; Blender refs incoming).
+9. Cleanup: delete merged branches (`cv-exe`, `suggestion-box`,
    `case-family-hub`, `worktree-cc-v2-pipeline`, `medieval-sfx*` on
    confirm) · `family-hub 2/` dup.
-8. Carried: gate friction elsewhere · COMMAND.CTR zero-`list()` + cost
+10. Carried: gate friction elsewhere · COMMAND.CTR zero-`list()` + cost
    read · replay-your-session task · Figma stale STRING vars · typography
    finale · underwater · eyeball tracker v2 / leaf-patch call.
