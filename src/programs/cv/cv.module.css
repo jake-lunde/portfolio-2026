@@ -31,12 +31,33 @@
   min-height: 0;
   overflow-y: auto;
   background: var(--surface);
+  /* size container so the paper's travel can be measured in tray-heights
+     (100cqh below) — the feed's size comes from flex, never its contents,
+     so containment changes nothing about the layout */
+  container-type: size;
+}
+
+/* while the job runs the tray is a slot, not a scroller — the translated
+   paper below the fold must not mint scroll range or flash a scrollbar */
+.cv[data-phase='printing'] .feed {
+  overflow: hidden;
 }
 
 .paper {
   display: grid;
   grid-template-columns: 16px minmax(0, 1fr) 16px;
   min-height: 100%;
+}
+
+/* the feed: the page slides up from below the tray in lockstep with the
+   thermometer — `--print-t` is the dialog's own tick/TICKS, so at t=0 the
+   paper's top edge sits at the tray's bottom edge (one full tray-height
+   down) and each 150ms tick advances it a fourteenth of the way home.
+   Same 160ms linear smoothing as .dProgressFill, and the same hidden-tab
+   guarantee: a frozen transition still lands on the target transform. */
+.cv[data-phase='printing'] .paper {
+  transform: translateY(calc((1 - var(--print-t, 0)) * 100cqh));
+  transition: transform 160ms linear;
 }
 
 /* tractor-feed edge strips: the stock remembers what kind of printer this
@@ -56,14 +77,9 @@
   font-size: var(--text-caption);
   line-height: var(--leading-relaxed);
   color: var(--content);
-  /* pre-print the page is blank — opacity only, so screen readers get the
-     full document from first paint regardless of the theater */
-  opacity: 0;
-  transition: opacity var(--duration-slow) ease-out;
-}
-
-.cv[data-phase='done'] .sheet {
-  opacity: 1;
+  /* no opacity theater: the sheet is always painted, and the pre-print
+     blank is the paper sitting a full tray-height below the fold — ink is
+     already on the page as it feeds out, exactly like a real printer */
 }
 
 /* ---- printout typography ---- */
@@ -299,9 +315,12 @@
 }
 
 /* ---- reduced motion: the dialog appears, the document arrives ---- */
+/* (the paper never moves either — CV.tsx jumps the phase straight to
+   'done', where the printing transform doesn't apply at all) */
 
 @media (prefers-reduced-motion: reduce) {
-  .dProgressFill {
+  .dProgressFill,
+  .cv[data-phase='printing'] .paper {
     transition: none;
   }
 }

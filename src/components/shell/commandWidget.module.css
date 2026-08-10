@@ -44,12 +44,15 @@
    change on its own, with no colour involved. */
 
 .ccBar {
+  position: relative; /* anchors the hover arrow at the right edge */
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: var(--space-1);
   max-width: 100%;
-  padding: 5px 10px;
+  /* right padding reserves the hover arrow's lane so it never lands on
+     the leading edge's ellipsis; mobile gives it back (no hover there) */
+  padding: 5px 24px 5px 10px;
   background: var(--surface);
   border: var(--border-width-hairline) solid var(--border);
   text-align: left;
@@ -235,9 +238,13 @@
 }
 
 /* ---------- the way in ---------- */
+/* Desktop says it on approach: the CTA line is gone (Jake, s44 — the
+   whole chip is the target and the aria-label spells the destination)
+   and an arrow surfaces at the right edge on hover or keyboard focus.
+   The spelled-out line below is mobile-only, where hover doesn't exist. */
 
 .ccCta {
-  flex: 0 0 auto;
+  display: none;
   font-family: var(--mono);
   font-size: var(--text-micro);
   font-weight: var(--weight-bold);
@@ -246,9 +253,33 @@
   white-space: nowrap;
 }
 
-.ccBar:hover .ccCta {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.ccArrow {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  font-family: var(--mono);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-bold);
+  color: var(--interactive-default-content-hover);
+  opacity: 0;
+  transform: translateY(-50%) translateX(-3px);
+  transition:
+    opacity var(--duration-tap) ease,
+    transform var(--duration-tap) ease;
+  pointer-events: none;
+}
+
+.ccBar:hover .ccArrow,
+.ccBar:focus-visible .ccArrow {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ccArrow {
+    transition: opacity var(--duration-tap) ease;
+    transform: translateY(-50%);
+  }
 }
 
 /* marker blackout — some event labels stay classified until the work
@@ -279,27 +310,58 @@
 /* ---------- squeezed ---------- */
 /* Between 900px and ~1240px the derived max-width has already taken the
    chip below the width the leading edge needs to say anything useful —
-   drop it rather than serve an ellipsised label. The glance row (dot,
-   stamp, cast) is unaffected; the action row falls back to just the CTA. */
+   drop it rather than serve an ellipsised label. With the CTA line gone
+   from desktop entirely that leaves the action row empty, so the row
+   goes with it: the chip compresses to the glance line + hover arrow. */
 
 @media (max-width: 1240px) {
-  .ccEdge {
-    display: none;
-  }
-
-  /* with the edge gone the CTA is the row's only occupant — centred, so
-     the action row reads as a deliberate button line, not a leftover */
+  .ccEdge,
   .ccRowAction {
-    justify-content: center;
+    display: none;
   }
 }
 
-/* ---------- mobile ---------- */
-/* Same 900px cut the other ambient widgets take: below it the desktop
-   becomes a scrolling launcher with full-bleed windows, and a
-   top-centred floating chip would sit on top of the icon grid. */
+/* ---------- 720–900: no lane ---------- */
+/* The ambient-widget cut: the centred lane's derived max-width has gone
+   negative but the desktop still floats windows, so there is nowhere for
+   the chip to stand. It returns below 720 as part of the launcher. */
 @media (max-width: 900px) {
   .ccWidget {
     display: none;
+  }
+}
+
+/* ---------- mobile: a card above the launcher grid ---------- */
+/* Below 720 the desktop is a scrolling launcher (shell.module.css moves
+   .icons down to clear this — the two constants travel together). The
+   chip spans the grid's own 12px rails, and the way in is the spelled-out
+   CTA on its own centred line — hover doesn't exist here (Jake, s44). */
+@media (max-width: 720px) {
+  .ccWidget {
+    display: flex;
+    top: 14px;
+    left: 12px;
+    right: 12px;
+    transform: none;
+    max-width: none;
+    /* a card, not a floating chip: the bar spans the grid's rails */
+    align-items: stretch;
+  }
+
+  .ccBar {
+    padding: 5px 10px;
+  }
+
+  .ccArrow {
+    display: none;
+  }
+
+  .ccRowAction {
+    display: flex;
+    justify-content: center;
+  }
+
+  .ccCta {
+    display: block;
   }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/primitives/Button'
 import { t } from '@/content/copy'
@@ -23,12 +23,17 @@ import styles from './cv.module.css'
  * scripts/build-cv.mjs, so the two can't drift. Content is Jake's own
  * pruning pass — encourage more of those; he is the person.
  *
+ * The paper FEEDS: while the job runs, the sheet slides up from below the
+ * tray one tick at a time, in lockstep with the thermometer (`--print-t`
+ * is the same tick/TICKS the fill uses) — the page physically arrives
+ * instead of fading in where it already sat.
+ *
  * A11y invariants: the full resume is in the DOM from first paint (the
- * pre-print state hides it with opacity only, which screen readers ignore);
- * reduced motion skips the theater entirely; reveal is CSS driven by
- * data-phase, never Motion (rAF freezes in hidden tabs). data-no-translate
- * keeps knight-speak off the facts. No useId (dynamic-import programs
- * mismatch at SSR handover); constant ids only.
+ * pre-print state moves it with transform only, which screen readers
+ * ignore); reduced motion skips the theater entirely; reveal is CSS driven
+ * by data-phase + a custom property, never Motion (rAF freezes in hidden
+ * tabs). data-no-translate keeps knight-speak off the facts. No useId
+ * (dynamic-import programs mismatch at SSR handover); constant ids only.
  */
 
 const PDF = '/jake-lunde-resume.pdf'
@@ -72,7 +77,11 @@ export default function CV() {
   }, [])
 
   return (
-    <div className={styles.cv} data-phase={phase}>
+    <div
+      className={styles.cv}
+      data-phase={phase}
+      style={{ '--print-t': tick / TICKS } as CSSProperties}
+    >
       <div className={styles.toolbar}>
         <Button size="md" tone="expressive" onClick={download}>
           {t('cv.download', skin)}

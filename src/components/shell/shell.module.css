@@ -51,14 +51,28 @@
   border: var(--border-width-hairline) solid transparent;
   color: var(--content);
   /* a control's label never breaks. The bar is one line and at 360 the
-     right cluster sits at zero slack, so a shrink of two pixels was
-     enough to drop SND's dot onto a second row and push the cluster
-     taller than the bar it lives in. */
+     right cluster sits at zero slack, so a shrink of two pixels once
+     dropped the old SND button's dot onto a second row and pushed the
+     cluster taller than the bar it lives in. */
   white-space: nowrap;
 }
 
 .menuBtn:hover {
   border-color: var(--border);
+}
+
+/* glyph controls (sound, theme): same hit target and hover frame as the
+   word buttons, but the label is a 14px line-art SVG on currentColor —
+   so aria-pressed accent and data-busy muting recolour it for free */
+.menuGlyphBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 6px;
+}
+
+.menuGlyphBtn svg {
+  display: block;
 }
 
 .menuBtn[aria-pressed='true'] {
@@ -1448,7 +1462,10 @@
 
 @media (max-width: 720px) {
   .icons {
-    top: 18px;
+    /* clears the COMMAND.CTR chip, which docks in-flow above the grid on
+       mobile (commandWidget.module.css: top 14 + ~48px of two-row chip +
+       breathing room — the two constants travel together) */
+    top: 76px;
     left: 12px;
     right: 12px;
     bottom: 12px;

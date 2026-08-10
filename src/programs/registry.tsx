@@ -279,6 +279,8 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/fun',
   },
   {
+    // off the desktop for now (Jake, s44) — deep link stays live, flip
+    // onDesktop back to restore the icon (its ORDER slot is kept)
     id: 'feedback',
     name: 'Feedback',
     meta: 'LOG-19',
@@ -286,7 +288,7 @@ export const PROGRAMS: ProgramDef[] = [
     component: dynamic(() => import('@/programs/feedback/Feedback')),
     size: { w: 560, h: 520 },
     pos: { x: 210, y: 62 },
-    onDesktop: true,
+    onDesktop: false,
     path: '/feedback',
   },
   {

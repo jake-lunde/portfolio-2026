@@ -9,6 +9,61 @@ import { SkinSwitch } from './SkinSwitch'
 import { FableMark } from './FableMark'
 import styles from './shell.module.css'
 
+/* Menubar glyphs — the desktop icon language (Icon.tsx: 1.5px line art on
+   currentColor) redrawn on a 16 grid for a 34px bar. Local to this file:
+   these controls are the only place the OS says "sound" or "theme" as a
+   picture. Decorative always — the button's aria-label is the meaning. */
+function NoteGlyph({ muted }: { muted: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <path d="M7 12.4V3.2c2.2.7 3.3 2 3.3 4" />
+      <circle cx="5.2" cy="12.4" r="1.9" fill="currentColor" stroke="none" />
+      {muted ? <path d="M2.6 2.6l10.8 10.8" /> : null}
+    </svg>
+  )
+}
+
+function SunGlyph() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <circle cx="8" cy="8" r="3" />
+      <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M12.95 3.05l-1.4 1.4M4.45 11.55l-1.4 1.4" />
+    </svg>
+  )
+}
+
+function MoonGlyph() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <path d="M8 2a4 4 0 0 0 6 6 6 6 0 1 1-6-6Z" />
+    </svg>
+  )
+}
+
 function Clock() {
   const [time, setTime] = useState<string | null>(null)
   const clicks = useRef<number[]>([])
@@ -84,13 +139,6 @@ export function MenuBar() {
         <SkinSwitch />
       </div>
       <div className={styles.menuRight}>
-        {/* The one PICTURE in a bar of words, so it leads the cluster
-            rather than sitting inside the run of text switches — wedged
-            between ◎ INSPECT and SND a 17px mark reads as a separator
-            glyph, and out here at the cluster's leading edge it reads as
-            what it is: an identity. The order also survives the 900px
-            fold, where INSPECT stands down and this does not. */}
-        <FableMark />
         {/* INSPECT.MODE (SYS-21) is a tool mode, not a program: it docks
             two panels and turns the desktop into its canvas, so it is
             summoned from the chrome rather than opened from an icon.
@@ -123,23 +171,35 @@ export function MenuBar() {
         >
           INSPECT
         </button>
+        {/* sound + theme dropped their three-letter names for glyphs
+            (Jake, s44): a music note that takes a slash when muted, and
+            the current theme as sun or moon. State still reads without
+            colour — the slash and the shape change carry it. */}
         <button
-          className={styles.menuBtn}
+          className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
           onClick={toggleSound}
           aria-pressed={sound}
           aria-label={`Sound ${sound ? 'on' : 'off'}`}
+          title={`Sound ${sound ? 'on' : 'off'}`}
         >
-          SND {sound ? '●' : '○'}
+          <NoteGlyph muted={!sound} />
         </button>
         {skin === 'classic' && (
           <button
-            className={styles.menuBtn}
+            className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
           >
-            {theme === 'light' ? 'LGT' : 'DRK'}
+            {theme === 'light' ? <SunGlyph /> : <MoonGlyph />}
           </button>
         )}
+        {/* The mark holds the far-right corner, beside the time (Jake's
+            s44 order: INSPECT · sound · theme · ? · clock) — the last
+            interactive thing in the bar, where a "?" reads as the door to
+            ask something. Below 720 the clock hides and the mark IS the
+            corner. Survives the 900px fold where INSPECT stands down. */}
+        <FableMark />
         <Clock />
       </div>
     </header>
