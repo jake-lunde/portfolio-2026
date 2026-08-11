@@ -323,6 +323,6 @@
   letter-spacing: var(--tracking-14); /* diverges from caption's tracking-16 — closest match to original 0.13em */
   text-transform: uppercase;
   color: var(--content-muted);
-  line-height: var(--leading-relaxed); /* 1.7 exact */
+  line-height: var(--leading-body); /* 1.7 exact */
   margin: 26px 0 0;
 }
