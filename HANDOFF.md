@@ -1,7 +1,7 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-11 (s46 note → archive; s47 note below).
+> Last rotation: 2026-08-11 (s47 note → archive; s48 note below).
 
 ## Current state
 
@@ -111,6 +111,11 @@
   rewrite. **Standing ask: push Jake to prune copy.**
 - **Voice law:** drafts in Jake's spoken cadence; em dashes are an AI tell;
   his verbatims lowercase among uppercase machines.
+- **STORYBOOK CATALOG WAVE 1+1.5 → PR #7 OPEN (s48):** 8 story files,
+  21→51 stories; TypeRamp/ScaleBoards = the ruling instrument for the
+  PR #6 ledger. Jake: accept 13 stale Chromatic baselines on main
+  FIRST, then review/merge #7. Wave 2 (settings-store decorator) is
+  the follow-up task.
 - **Known debts:** SpecSheet motion quote-strings · first-load JS perf ·
   underwater · `--accent-on-inverse` · reduced-motion by emulation ·
   medieval airbrush wash contrast · never build while a dev server owns
@@ -126,44 +131,41 @@
 > fourier "agents are clickable" framework developed + phased in its task.
 > Next in that arc: P1 canned mini-chats for HERTZ/NYQUIST/FOURIER.
 
-## Latest session — S47 TOKEN DEBT SWEEP: THE PRIMITIVES GO HOME (2026-08-11)
+## Latest session — S48 STORYBOOK CATALOG WAVE: THE HARVEST (2026-08-11)
 
-**Handoff item 3, the scoped P1 (Notion "token debt sweep") → PR #6
-open, awaiting Jake's merge + ledger rulings. Fable orchestrating;
-4 Sonnet patch crews (disjoint module families) + 1 Opus tokens crew;
-deck reported throughout. Zero-visual-change law held.**
+**Notion "storybook catalog wave" Waves 1+1.5 → PR #7 open, awaiting
+Chromatic + Jake. Fable orchestrating; 2 Sonnet story crews + 1 Opus
+boards crew, disjoint all-new files, zero refactoring; deck reported.**
 
-- **Doctor 2→0 errors, 51→30 warnings.** Both errors were misdiagnoses:
-  `--print-t` = doctor blind spot (TSX inline declarations — D6 now
-  scans them); `--wash-x` = undeclared knob (now `0%` beside
-  `--wash-turn`). The 18 `--spring-*` "dead" warnings were false too:
-  `inspect.ts springFor()` reads them via `getPropertyValue`, invisible
-  to the var() grep — documented D6 allowlist, emission kept (killing
-  it would have silently degraded INSPECT.MODE).
-- **155 value-identical re-aliases across 21 modules** (5 commits, one
-  per family): space→spacing-component/layout by context ·
-  hairline/thin/thick→subtle/default/strong · radius-md/full→
-  control/circle · radius-none→0 · prose leading-relaxed→leading-body ·
-  exact-match type-role adoptions. Verified by a mechanical diff audit
-  (every -/+ pair vs the mapping table) + parity 597/3/0/0 + 50/50
-  tests + prod build. Chromatic on the PR is the final visual gate.
-- **New legislation:** semantic `border-width.subtle` (1px; ramp subtle<
-  default<strong) · tier relocations, names unchanged: `duration.*`
-  core→semantic, `menubar-h` core→component (they were role-named
-  tokens misfiled as primitives — INSPECT graded every honest use a
-  violation).
-- **The ledger is in the PR body — Jake's rulings:** ~70 snap-candidates
-  (mono UI text one step off its role tracking — rule the ramp, next
-  pass is mechanical) · case `.statBig`/`.section h2` near display/
-  heading-1 · kill-list recs (kill font-size-sm/md, duration-slow,
-  radius-none, text-body[=17px, surprise]; keep type sub-tokens +
-  status/interactive color roles + spacing-layout-xl) · `--space-5`
-  needs a role or a blessing.
-- Follow-ups: next Figma pull moves relocated vars between collections
-  (re-bind); stale comment figma-plugin/src/tokens.ts:145; semantic
-  tier now holds literal durations (precedent exists) — deliberate
-  call later; untracked `".claude/* 2.*"` dup files = macOS artifacts,
-  Jake deletes.
+- **Catalog 5→12 components, 21→51 stories** (8 new colocated story
+  files). Chat primitives (tones/thinking/machine-vs-human/reduced/
+  composed feed) · Icon 31-name grid (hand-enumerated — Icon.tsx
+  exports no runtime list; follow-up: export ICON_NAMES) · VizShell
+  (finding: the CRT plate is painted by the WINDOW shell, not VizShell
+  — stories reproduce it in a decorator; content-inverse law held) ·
+  shelf trio (Box3D live tilt via `fine`; InstallBar both call-site
+  shapes; CoverFilm `Playing` = Chromatic snapshot disabled,
+  nondeterministic autoplay).
+- **Wave 1.5 boards = the ruling instrument for PR #6's ledger:**
+  TypeRamp (eleven roles, runtime-measured 5-axis readouts + mono
+  bench with pairwise Δs + SnapFinder: paste a candidate's spec → raw
+  per-role deltas; one story beyond scope, Jake rules if it stays) ·
+  ScaleBoards (spacing/border-width/radius ramps on a 4px grid that
+  self-flags off-grid values).
+- **Board findings → ledger ammo:** six type roles have NO tracking
+  token (heading-1/2/3, body-lg/body/body-sm) · label/mono share
+  --font-size-base and differ only in tracking (the snap-candidate
+  crux) · --leading-body ≡ --leading-relaxed; legacy --size-*/--text-*
+  aliases duplicate --font-size-* (kill-list candidates).
+- **Verified:** tsc clean · zero hardcoded colors/springs (grep audit)
+  · build-storybook green · all 29 new stories probe-verified on the
+  static build (body error-class + root-children; NOT screenshots) ·
+  4 skin/mode combos resolve (medieval single-mode by design).
+- Follow-ups: Wave 2 settings-store decorator (unlocks 8 shell
+  components) · extract duplicated token-probe helpers →
+  design-system/tokenProbe.ts (TokensBoard could adopt) · probe note:
+  .sb-errordisplay div exists in EVERY storybook iframe — error
+  signal is the sb-show-errordisplay class on <body>.
 
 ## Next steps
 
@@ -178,11 +180,9 @@ deck reported throughout. Zero-visual-change law held.**
    marker-verified; Notion task Done) — snap-candidates ramp · kill-list ·
    --space-5. Chromatic's 13 unreviewed changes are main's own stale
    baselines (pre-sweep build 147 shows the identical set) — accept them
-   in Chromatic to re-zero the visual gate. Storybook audit done (s47b);
-   full plan in Notion task "storybook catalog wave" (P2, Scoped):
-   Wave 1 chat/Icon/VizShell/shelf trio · Wave 1.5 type-ramp+scale
-   boards (the ruling instrument for the ledger) · Wave 2 store
-   decorator unlocks shell chrome.
+   in Chromatic to re-zero the visual gate. Then **review/merge PR #7**
+   (storybook catalog wave, s48) — its TypeRamp/SnapFinder boards are
+   the instrument for these rulings; rule SnapFinder stay/kill too.
 4. **Jake: add Pull requests:write + Issues:write to GITHUB_COPY_TOKEN**
    (Vercel env) — the inspector's SAVE can't open PRs without them —
    then nudge a color on lunde.co and merge your first `inspect-tune` PR.

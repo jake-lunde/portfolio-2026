@@ -2028,3 +2028,42 @@ branch deleted, deck reported throughout.**
   minting roles from the panel (legislation, not value edit); type/space
   extend via the same mechanic; component-isolation stage + mode
   unification are unscoped ideas awaiting his want.
+
+## Latest session — S47 TOKEN DEBT SWEEP: THE PRIMITIVES GO HOME (2026-08-11) — moved from HANDOFF at s48 rotation
+
+**Handoff item 3, the scoped P1 (Notion "token debt sweep") → PR #6
+open, awaiting Jake's merge + ledger rulings. Fable orchestrating;
+4 Sonnet patch crews (disjoint module families) + 1 Opus tokens crew;
+deck reported throughout. Zero-visual-change law held.**
+
+- **Doctor 2→0 errors, 51→30 warnings.** Both errors were misdiagnoses:
+  `--print-t` = doctor blind spot (TSX inline declarations — D6 now
+  scans them); `--wash-x` = undeclared knob (now `0%` beside
+  `--wash-turn`). The 18 `--spring-*` "dead" warnings were false too:
+  `inspect.ts springFor()` reads them via `getPropertyValue`, invisible
+  to the var() grep — documented D6 allowlist, emission kept (killing
+  it would have silently degraded INSPECT.MODE).
+- **155 value-identical re-aliases across 21 modules** (5 commits, one
+  per family): space→spacing-component/layout by context ·
+  hairline/thin/thick→subtle/default/strong · radius-md/full→
+  control/circle · radius-none→0 · prose leading-relaxed→leading-body ·
+  exact-match type-role adoptions. Verified by a mechanical diff audit
+  (every -/+ pair vs the mapping table) + parity 597/3/0/0 + 50/50
+  tests + prod build. Chromatic on the PR is the final visual gate.
+- **New legislation:** semantic `border-width.subtle` (1px; ramp subtle<
+  default<strong) · tier relocations, names unchanged: `duration.*`
+  core→semantic, `menubar-h` core→component (they were role-named
+  tokens misfiled as primitives — INSPECT graded every honest use a
+  violation).
+- **The ledger is in the PR body — Jake's rulings:** ~70 snap-candidates
+  (mono UI text one step off its role tracking — rule the ramp, next
+  pass is mechanical) · case `.statBig`/`.section h2` near display/
+  heading-1 · kill-list recs (kill font-size-sm/md, duration-slow,
+  radius-none, text-body[=17px, surprise]; keep type sub-tokens +
+  status/interactive color roles + spacing-layout-xl) · `--space-5`
+  needs a role or a blessing.
+- Follow-ups: next Figma pull moves relocated vars between collections
+  (re-bind); stale comment figma-plugin/src/tokens.ts:145; semantic
+  tier now holds literal durations (precedent exists) — deliberate
+  call later; untracked `".claude/* 2.*"` dup files = macOS artifacts,
+  Jake deletes.
