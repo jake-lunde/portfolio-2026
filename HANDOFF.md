@@ -178,9 +178,11 @@ deck reported throughout. Zero-visual-change law held.**
    marker-verified; Notion task Done) — snap-candidates ramp · kill-list ·
    --space-5. Chromatic's 13 unreviewed changes are main's own stale
    baselines (pre-sweep build 147 shows the identical set) — accept them
-   in Chromatic to re-zero the visual gate. Storybook audit done (s47b):
-   inventory + recommendation in the session log; next catalog wave =
-   chat primitives, Icon, VizShell, shelf trio + type-ramp/scale boards.
+   in Chromatic to re-zero the visual gate. Storybook audit done (s47b);
+   full plan in Notion task "storybook catalog wave" (P2, Scoped):
+   Wave 1 chat/Icon/VizShell/shelf trio · Wave 1.5 type-ramp+scale
+   boards (the ruling instrument for the ledger) · Wave 2 store
+   decorator unlocks shell chrome.
 4. **Jake: add Pull requests:write + Issues:write to GITHUB_COPY_TOKEN**
    (Vercel env) — the inspector's SAVE can't open PRs without them —
    then nudge a color on lunde.co and merge your first `inspect-tune` PR.
