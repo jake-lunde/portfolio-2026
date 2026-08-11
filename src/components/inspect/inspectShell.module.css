@@ -194,7 +194,7 @@
   color: inherit;
   background: none;
   border: 0;
-  border-radius: var(--radius-none);
+  border-radius: 0;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -226,7 +226,7 @@
   color: inherit;
   background: none;
   border: var(--border-width-default) solid transparent;
-  border-radius: var(--radius-none);
+  border-radius: 0;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -419,7 +419,7 @@
   color: var(--content);
   background: var(--surface);
   border: var(--border-width-default) solid var(--content);
-  border-radius: var(--radius-none);
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -505,7 +505,7 @@
   color: var(--content);
   background: var(--surface);
   border: var(--border-width-default) solid var(--content);
-  border-radius: var(--radius-none);
+  border-radius: 0;
 }
 
 .keyInput:focus-visible {
@@ -691,7 +691,7 @@
   width: var(--spacing-component-md);
   height: var(--spacing-component-md);
   border: var(--border-width-default) solid var(--border);
-  border-radius: var(--radius-none);
+  border-radius: 0;
 }
 
 /* the one editable thing in the panel: it opens the candidates */
@@ -731,7 +731,7 @@
   color: var(--content);
   background: none;
   border: 0;
-  border-radius: var(--radius-none);
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -848,7 +848,7 @@
   color: var(--accent);
   background: var(--surface);
   border: var(--border-width-default) solid var(--accent);
-  border-radius: var(--radius-none);
+  border-radius: 0;
   text-transform: none;
 }
 

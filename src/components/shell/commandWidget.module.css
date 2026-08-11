@@ -48,13 +48,13 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-1);
+  gap: var(--spacing-component-xs);
   max-width: 100%;
   /* right padding reserves the hover arrow's lane so it never lands on
      the leading edge's ellipsis; mobile gives it back (no hover there) */
   padding: 5px 24px 5px 10px;
   background: var(--surface);
-  border: var(--border-width-hairline) solid var(--border);
+  border: var(--border-width-subtle) solid var(--border);
   text-align: left;
 }
 
@@ -65,7 +65,7 @@
 .ccRowAction {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--spacing-component-sm);
   max-width: 100%;
 }
 
@@ -93,7 +93,7 @@
   width: 8px;
   height: 8px;
   border-radius: var(--radius-circle);
-  border: var(--border-width-hairline) solid var(--content-muted);
+  border: var(--border-width-subtle) solid var(--content-muted);
   background: transparent;
 }
 
@@ -170,8 +170,8 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding-left: var(--space-2);
-  border-left: var(--border-width-hairline) solid var(--border);
+  padding-left: var(--spacing-component-sm);
+  border-left: var(--border-width-subtle) solid var(--border);
 }
 
 /* the human is the only face in colour — the crew are one-ink masks. No
@@ -186,7 +186,7 @@
 }
 
 .ccMono[data-active] {
-  outline: var(--border-width-hairline) solid var(--accent-expressive);
+  outline: var(--border-width-subtle) solid var(--accent-expressive);
   outline-offset: 1px;
 }
 
