@@ -4,8 +4,19 @@ import { useState } from 'react'
 import { useSettings } from '@/store/settings'
 import { t } from '@/content/copy'
 import { CopyText } from '@/content/CopyText'
+import { clearEditKey, readEditKey, verifyEditKey } from '@/lib/editKey'
 import type { Inspection } from '@/lib/inspect'
-import { CANDIDATES, isNudged, nudge, overrides, reset, resetAll, wouldGrade } from '@/lib/tune'
+import { themeFor } from '@/lib/tokenEdit'
+import {
+  CANDIDATES,
+  isNudged,
+  nudge,
+  overrides,
+  pendingEdits,
+  reset,
+  resetAll,
+  wouldGrade,
+} from '@/lib/tune'
 import styles from './inspectShell.module.css'
 
 /* INSPECTOR — the right dock. Everything the window version reported,
@@ -24,7 +35,34 @@ import styles from './inspectShell.module.css'
    The AA gate is deliberately NOT a refusal. SKIN BUILDER refuses, because
    there the visitor is publishing a skin into the shipped system. Here
    they are looking, so a failing pick previews and the candidate wears its
-   own failing grade. Driver's seat, with the instrument lit red. */
+   own failing grade. Driver's seat, with the instrument lit red.
+
+   SAVE is the one exception, and it is the seam where looking becomes
+   proposing. Armed with the edit key, Jake sends the pending re-casts to
+   /api/token-commit, which re-aliases them in tokens/semantic/<theme>.json
+   and opens a PULL REQUEST — never a push to main, because a token edit
+   moves every skin downstream of it. There the instrument DOES refuse: a
+   red PR is a wasted PR, so a set carrying a failing pick cannot be sent.
+   CI's token doctor (--strict --parity) stays the real gate behind it. */
+
+/* Constant ids, never useId: this panel mounts inside a tree that reshapes
+   at the SSR handover, and a generated id mismatches across it (see memory).
+   Both nodes are unique on the page — the mode is a singleton. */
+const KEY_ID = 'inspect-save-key'
+const NOTE_ID = 'inspect-save-note'
+
+type Save =
+  /** nothing sent yet — the SAVE button is showing */
+  | { k: 'idle' }
+  /** the inline key prompt, armed against the same secret EDIT.MODE uses */
+  | { k: 'key'; rejected?: true }
+  | { k: 'busy' }
+  /** committed: the override is on a branch, awaiting review — NOT live */
+  | { k: 'done'; number: number; url: string }
+  /** terse and retryable; `msg` is a copy key */
+  | { k: 'error'; msg: string }
+  /** no EDIT_MODE_KEY or no commit token on this deployment */
+  | { k: 'locked' }
 
 export function InspectorPanel({
   report,
@@ -39,17 +77,122 @@ export function InspectorPanel({
   onRefresh: () => void
 }) {
   const skin = useSettings((s) => s.skin)
+  const theme = useSettings((s) => s.theme)
   // tune.ts is module state, not a store — this is what re-reads it
   const [, bump] = useState(0)
+  const [save, setSave] = useState<Save>({ k: 'idle' })
+  const [keyInput, setKeyInput] = useState('')
   const live = overrides()
   const anyLive = Object.keys(live).length > 0
 
   const springKey = report?.spring ? `inspect.spring.${report.spring.name}` : null
 
+  /* Which token file the desktop on screen is actually reading. */
+  const target = themeFor(skin, theme)
+  const pending = pendingEdits()
+  /* The two reasons SAVE is not offered. A failing pick still PREVIEWS —
+     that is the driver's seat — but a PR that lands a AA failure is a PR
+     CI will paint red, so it never leaves the panel. */
+  const blocked = !target
+    ? 'inspect.save.notheme'
+    : pending.some((e) => e.fails)
+      ? 'inspect.save.aafail'
+      : null
+
   const after = () => {
+    // a new pick makes any reported PR describe a different set — the
+    // panel goes back to offering SAVE rather than quoting a stale number
+    setSave((s) => (s.k === 'done' || s.k === 'error' ? { k: 'idle' } : s))
     bump((n) => n + 1)
     onRefresh()
   }
+
+  /* ---- SAVE: read the file's sha, then post the re-casts as a PR ---- */
+  const commit = async () => {
+    if (!target || blocked) return
+    const edits = pendingEdits().map((e) => ({ role: e.role, token: e.token }))
+    if (edits.length === 0) return
+    setSave({ k: 'busy' })
+    try {
+      const head = await fetch(`/api/token-commit?theme=${target}`, {
+        headers: { 'x-edit-key': readEditKey() },
+        cache: 'no-store',
+      })
+      if (head.status === 501) return setSave({ k: 'locked' })
+      if (head.status === 401) {
+        clearEditKey()
+        return setSave({ k: 'key', rejected: true })
+      }
+      if (!head.ok) return setSave({ k: 'error', msg: 'inspect.save.failed' })
+      const { sha } = (await head.json()) as { sha: string }
+
+      const post = (baseSha: string) =>
+        fetch('/api/token-commit', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-edit-key': readEditKey() },
+          body: JSON.stringify({ theme: target, baseSha, edits }),
+        })
+
+      let res = await post(sha)
+      /* A 409 hands back the revision that moved under us. These edits are
+         DECLARATIVE — "this role now aliases that primitive" — so replaying
+         them onto the fresh content is exactly what the visitor meant, and
+         the server re-applies rather than the client patching blind. One
+         retry only: a second 409 means something is genuinely churning, and
+         at that point the honest answer is to say so. */
+      if (res.status === 409) {
+        const fresh = (await res.json().catch(() => ({}))) as { sha?: string }
+        if (fresh.sha) res = await post(fresh.sha)
+      }
+      if (res.status === 409) return setSave({ k: 'error', msg: 'inspect.save.conflict' })
+      if (!res.ok) {
+        // the one refusal worth naming: the token already says this
+        const why = (await res.json().catch(() => ({}))) as { error?: string }
+        return setSave({
+          k: 'error',
+          msg: why.error === 'no change' ? 'inspect.save.nochange' : 'inspect.save.failed',
+        })
+      }
+      const j = (await res.json()) as { prNumber: number; prUrl: string }
+      setSave({ k: 'done', number: j.prNumber, url: j.prUrl })
+    } catch {
+      setSave({ k: 'error', msg: 'inspect.save.failed' })
+    }
+  }
+
+  const arm = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const entered = keyInput
+    setKeyInput('')
+    const verdict = await verifyEditKey(entered)
+    if (verdict === 'unconfigured') return setSave({ k: 'locked' })
+    if (!verdict) return setSave({ k: 'key', rejected: true })
+    await commit()
+  }
+
+  /* The status line under the banner — one at a time, terse. */
+  const note: { key: string; fail?: boolean } | null =
+    save.k === 'busy'
+      ? { key: 'inspect.save.saving' }
+      : save.k === 'locked'
+        ? { key: 'inspect.save.locked' }
+        : save.k === 'error'
+          ? { key: save.msg, fail: true }
+          : save.k === 'key' && save.rejected
+            ? { key: 'inspect.save.badkey', fail: true }
+            : blocked
+              ? { key: blocked, fail: true }
+              : null
+
+  /* SAVE is present in every state — never unmounted mid-interaction, or
+     focus falls to <body> exactly when the visitor is waiting to hear what
+     happened. It goes ARIA-disabled rather than `disabled` for the same
+     reason: a disabled control is dropped from the tab order and its
+     aria-describedby reason becomes unreachable, so the button that refuses
+     would also refuse to say why. The click handler enforces what the
+     attribute only advertises. After a PR lands it re-arms, because a
+     follow-up nudge now stacks onto that same open PR. */
+  const saveInert = save.k === 'busy' || !!blocked
 
   return (
     <>
@@ -59,19 +202,91 @@ export function InspectorPanel({
 
       <div className={styles.panelBody}>
         {anyLive && (
-          <div className={styles.preview} role="status">
-            <CopyText k="inspect.preview" className={styles.previewText} />
-            <button
-              type="button"
-              className={styles.resetAll}
-              onClick={() => {
-                resetAll()
-                setOpenVar(null)
-                after()
-              }}
-            >
-              <CopyText k="inspect.resetall" />
-            </button>
+          <div className={styles.preview}>
+            <div className={styles.previewTop} role="status">
+              {/* the two states the visitor must be able to tell apart:
+                  previewing an override, vs. that override sitting in a PR
+                  waiting on review. Neither one is live. */}
+              <CopyText
+                k={save.k === 'done' ? 'inspect.previewpr' : 'inspect.preview'}
+                className={styles.previewText}
+              />
+              <span className={styles.previewActions}>
+                <button
+                  type="button"
+                  className={`${styles.resetAll} ${styles.save}`}
+                  aria-disabled={saveInert || undefined}
+                  aria-describedby={note ? NOTE_ID : undefined}
+                  onClick={() => {
+                    if (saveInert) return
+                    if (readEditKey()) void commit()
+                    else setSave({ k: 'key' })
+                  }}
+                >
+                  <CopyText k="inspect.save" />
+                  {target && <span className={styles.saveTarget}>{target.toUpperCase()}</span>}
+                </button>
+                <button
+                  type="button"
+                  className={styles.resetAll}
+                  onClick={() => {
+                    resetAll()
+                    setOpenVar(null)
+                    setSave({ k: 'idle' })
+                    after()
+                  }}
+                >
+                  <CopyText k="inspect.resetall" />
+                </button>
+              </span>
+            </div>
+
+            {save.k === 'key' && (
+              <form className={styles.keyRow} onSubmit={arm}>
+                <label className={styles.keyLabel} htmlFor={KEY_ID}>
+                  <CopyText k="inspect.save.key" />
+                </label>
+                <input
+                  id={KEY_ID}
+                  type="password"
+                  className={styles.keyInput}
+                  value={keyInput}
+                  onChange={(e) => setKeyInput(e.target.value)}
+                  autoComplete="off"
+                  autoFocus
+                />
+                <button type="submit" className={styles.resetAll}>
+                  <CopyText k="inspect.save.arm" />
+                </button>
+              </form>
+            )}
+
+            {/* The live region is mounted for the whole life of the banner,
+                empty or not: a role="status" node that appears at the same
+                moment as its text is announced unreliably, because there was
+                no region to observe when the text arrived. */}
+            <div className={styles.saveStatus} role="status">
+              {save.k === 'done' ? (
+                <p className={styles.saveNote} id={NOTE_ID}>
+                  <CopyText k="inspect.save.done" />{' '}
+                  <a
+                    className={styles.prLink}
+                    href={save.url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    {/* fragment + number, the same composition
+                        `inspect.on` uses between two value spans */}
+                    <CopyText k="inspect.save.pr" />
+                    {save.number}
+                  </a>
+                </p>
+              ) : note ? (
+                <p className={styles.saveNote} id={NOTE_ID} data-fail={note.fail || undefined}>
+                  <CopyText k={note.key} />
+                </p>
+              ) : null}
+            </div>
           </div>
         )}
 
@@ -171,7 +386,9 @@ export function InspectorPanel({
                                         className={styles.candidate}
                                         data-fail={would?.fails || undefined}
                                         onClick={() => {
-                                          nudge(r.varName, c.hex)
+                                          // the verdict the row is showing
+                                          // rides along — SAVE refuses on it
+                                          nudge(r.varName, c, would)
                                           after()
                                         }}
                                       >

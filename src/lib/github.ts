@@ -1,9 +1,18 @@
-/* TOKEN BRIDGE — minimal GitHub REST client.
+/* MINIMAL GITHUB REST CLIENT — zero-dep, plain `fetch`, two callers.
  *
- * Only api.github.com is contacted (manifest networkAccess whitelists exactly
- * this host). `fetch` runs in the Figma plugin sandbox, so the PAT never
- * leaves the sandbox for the UI iframe. The PAT is only ever read from
- * clientStorage and passed here; it is never logged or echoed.
+ * 1. TOKEN BRIDGE (figma-plugin/src/code.ts) — runs in the Figma plugin
+ *    sandbox. Only api.github.com is contacted (the manifest's networkAccess
+ *    whitelists exactly this host), so the PAT never leaves the sandbox for
+ *    the UI iframe; it is read from clientStorage and passed here.
+ * 2. INSPECT.MODE's token commit (src/app/api/token-commit/route.ts) — runs
+ *    on the Node server, where the token is GITHUB_COPY_TOKEN.
+ *
+ * Both open the SAME kind of PR against tokens/*.json, so they share one
+ * client rather than growing two drifting copies. Constraint that keeps it
+ * shareable: no Node built-ins, no Figma globals, no React — `fetch` only.
+ *
+ * The token is never logged or echoed. Errors carry the GitHub status text;
+ * the server route deliberately does NOT forward those bodies to the client.
  *
  * Uses the contents API (raw media type) for reads and the git data API
  * (blobs/trees/commits/refs) + pulls API for the push-as-PR flow.
@@ -66,6 +75,31 @@ export class GitHub {
     try {
       const res = await this.req('GET', url, { accept: 'application/vnd.github.raw+json' })
       return await res.text()
+    } catch (e) {
+      if (e instanceof Error && / → 404 /.test(e.message)) return null
+      throw e
+    }
+  }
+
+  /** Body AND blob sha of a repo file at a ref, in ONE call — the two have
+      to come from the same response or the sha can describe a different
+      revision than the text it is meant to guard.
+
+      The body is handed back still base64-encoded, on purpose: decoding it
+      needs Buffer or a TextDecoder dance, and this client is shared with the
+      Figma plugin sandbox. The caller decodes with whatever its runtime has.
+      Returns null on 404, or when GitHub declines to inline the content
+      (files over ~1MB come back with encoding "none"). */
+  async getFileBase64(
+    path: string,
+    ref: string,
+  ): Promise<{ base64: string; sha: string } | null> {
+    const url = `${this.base()}/contents/${encodePath(path)}?ref=${encodeURIComponent(ref)}`
+    try {
+      const res = await this.req('GET', url)
+      const json = (await res.json()) as { sha?: string; content?: string; encoding?: string }
+      if (!json.sha || typeof json.content !== 'string' || json.encoding !== 'base64') return null
+      return { base64: json.content, sha: json.sha }
     } catch (e) {
       if (e instanceof Error && / → 404 /.test(e.message)) return null
       throw e
@@ -164,12 +198,12 @@ export class GitHub {
     base: string,
     title: string,
     body: string
-  ): Promise<string> {
+  ): Promise<{ html_url: string; number: number }> {
     const res = await this.req('POST', `${this.base()}/pulls`, {
       body: { title, head: headBranch, base, body },
     })
-    const json = (await res.json()) as { html_url: string }
-    return json.html_url
+    const json = (await res.json()) as { html_url: string; number: number }
+    return { html_url: json.html_url, number: json.number }
   }
 
   /** Post a comment on an issue/PR (POST /repos/{owner}/{repo}/issues/{number}/comments). */

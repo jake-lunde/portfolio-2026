@@ -1,10 +1,9 @@
 'use client'
 
-import { PALETTE } from './buildASkin'
 import { contrast, hexToRgb, grade, type RGB } from './contrast'
+import { PALETTE, type Candidate } from './palette'
 
-/* LIVE NUDGE — INSPECT.MODE's one write, and it writes to nothing that
- * lasts. SYS-21 phase 0.5.
+/* LIVE NUDGE — INSPECT.MODE's one write. SYS-21.
  *
  * The bargain: a visitor points at an element, sees which semantic role
  * paints it, and re-casts that role to a different core primitive to watch
@@ -21,29 +20,58 @@ import { contrast, hexToRgb, grade, type RGB } from './contrast'
  *   This module writes ANY semantic color role and gates nothing — it is
  *   the designer's driver's seat, so a failing pair previews and the row
  *   shows the failure instead of refusing the click.
- * · nothing is stored. No sessionStorage, no persistence, no commit path.
- *   Every override dies with the mode (InspectShell calls resetAll on the
- *   way out) and the banner says so while any are live.
  * · the PRIOR inline value is stashed per property, so resetting hands the
  *   property back to whoever held it — which matters precisely because
  *   buildASkin may be holding --accent at the same moment.
  *
- * Candidates are core primitives, not invented colors: PALETTE is the same
- * twelve tokens SKIN BUILDER paints from (tokens/core/color.json), carried
- * here with their token paths so the panel names the token rather than the
- * hex. They apply as hexes because the core tier is flattened at build
- * time — a core color has no custom property of its own to alias to.
+ * TWO STATES, AND THE DIFFERENCE MATTERS:
+ *
+ * · PREVIEWING. The inline property, and nothing else. It is not stored
+ *   anywhere, it does not survive the mode (InspectShell calls resetAll on
+ *   the way out), it does not survive a reload, and the banner says so.
+ * · COMMITTED. Jake, armed with the edit key, sends the pending set to
+ *   /api/token-commit, which re-aliases the role in
+ *   tokens/semantic/<theme>.json and opens a PULL REQUEST. Still not live —
+ *   a token edit moves every skin downstream, so it gets reviewed, and CI's
+ *   token doctor gets the last word. The preview on screen is unchanged
+ *   either way; the panel relabels itself to say which state it is in.
+ *
+ * So the applied map carries the whole CANDIDATE, not just a hex: the hex
+ * is what paints, but the TOKEN PATH is what a commit needs — a PR that
+ * wrote `#2036C8` instead of `{color.nasa.cobalt}` would be inventing a
+ * color, which house law does not allow. The AA verdict recorded at nudge
+ * time rides along too, because SAVE refuses a set with a failing pick:
+ * previewing a red instrument is the point, shipping one is not.
+ *
+ * Candidates are core primitives (lib/palette.ts — the same twelve SKIN
+ * BUILDER paints from, tokens/core/color.json). They apply as hexes because
+ * the core tier is flattened at build time: a core color has no custom
+ * property of its own to alias to.
  */
 
-export type Candidate = { name: string; hex: string; token: string }
+export type { Candidate }
 
 /** The twelve core color primitives a role can be re-cast to. */
 export const CANDIDATES: readonly Candidate[] = PALETTE
 
+/** What we wrote, and what we knew when we wrote it. */
+type Held = { candidate: Candidate; would: Would }
+
+/** One pending role change, in the shape the commit route consumes. */
+export type PendingEdit = {
+  varName: string
+  /** the custom property without its dashes — the token key */
+  role: string
+  hex: string
+  token: string
+  /** did the pick fail AA on the pair it landed in? */
+  fails: boolean
+}
+
 /** prop → the inline value it carried before we touched it ('' if none). */
 const prior = new Map<string, string>()
-/** prop → the value we wrote. The live override set. */
-const applied = new Map<string, string>()
+/** prop → what we wrote. The live override set. */
+const applied = new Map<string, Held>()
 
 function root(): HTMLElement | null {
   if (typeof document === 'undefined') return null
@@ -55,15 +83,18 @@ function sweep(el: HTMLElement) {
   if (!el.getAttribute('style')) el.removeAttribute('style')
 }
 
-/** Preview `value` on `prop`. Clears first, like paint() — a second nudge
-    on the same role must never stack onto the first. */
-export function nudge(prop: string, value: string): void {
+/** Preview `candidate` on `prop`. Clears first, like paint() — a second
+    nudge on the same role must never stack onto the first. `would` is the
+    verdict the row was already showing when it was clicked; it is kept so
+    SAVE can refuse a failing set without re-deriving a pair that has since
+    been repainted by this very override. */
+export function nudge(prop: string, candidate: Candidate, would: Would = null): void {
   const el = root()
   if (!el) return
   if (!prior.has(prop)) prior.set(prop, el.style.getPropertyValue(prop))
   el.style.removeProperty(prop)
-  el.style.setProperty(prop, value)
-  applied.set(prop, value)
+  el.style.setProperty(prop, candidate.hex)
+  applied.set(prop, { candidate, would })
 }
 
 /** Hand one role back to whoever held it before the nudge.
@@ -82,7 +113,7 @@ export function reset(prop: string): void {
   if (!el) return
   const ours = applied.get(prop)
   const now = el.style.getPropertyValue(prop)
-  const stillOurs = ours !== undefined && now === ours
+  const stillOurs = ours !== undefined && now === ours.candidate.hex
   if (stillOurs) {
     el.style.removeProperty(prop)
     const was = prior.get(prop)
@@ -98,9 +129,24 @@ export function resetAll(): void {
   for (const prop of Array.from(applied.keys())) reset(prop)
 }
 
-/** The live override set, as a plain snapshot (never the live Map). */
+/** The live override set as prop → hex, a plain snapshot (never the live
+    Map). Kept in this shape because callers only ask "how many, and what
+    colour" — pendingEdits() is the one that carries token paths. */
 export function overrides(): Record<string, string> {
-  return Object.fromEntries(applied)
+  return Object.fromEntries(Array.from(applied, ([prop, h]) => [prop, h.candidate.hex]))
+}
+
+/** The live override set as the commit route reads it: role + token path,
+    plus the AA verdict the pick was made under. Insertion-ordered, so the
+    PR ledger lists the roles in the order they were re-cast. */
+export function pendingEdits(): PendingEdit[] {
+  return Array.from(applied, ([prop, h]) => ({
+    varName: prop,
+    role: prop.replace(/^--/, ''),
+    hex: h.candidate.hex,
+    token: h.candidate.token,
+    fails: h.would?.fails ?? false,
+  }))
 }
 
 /** Is this role currently previewing something? */
