@@ -11,13 +11,14 @@
     "core/tracking",
     "core/font",
     "core/font-figma",
-    "core/layout",
     "core/motion",
+    "semantic/motion",
     "semantic/scale",
     "semantic/typography",
     "semantic/classic-light",
     "semantic/classic-dark",
     "semantic/medieval",
-    "component/button"
+    "component/button",
+    "component/menubar"
   ]
 }

@@ -87,6 +87,27 @@ component** vars only — never core. `var(--surface)`, `var(--radius-control)`,
 Delegation: FABLE designs + parity gate + Figma; NYQUIST runs the CSS codemod
 sweep (closed, mechanical, grep-verifiable).
 
+## Tier relocation — motion durations + menubar-h (2026-08-11, token-debt sweep)
+
+Line 29 above ("`duration.*`, `spring.*` — already primitive") was wrong about
+half of it, and INSPECT.MODE was the one paying: `TOKEN_TIERS` grades by the
+**source directory** a token is authored in, so every `var(--duration-tap)` in
+product CSS read as a core-primitive violation. Same for `var(--menubar-h)`.
+Both are role/component names, not scales. So:
+
+- `duration.{tap,fade,theme,slow}` → **`semantic/motion.json`** (the whole ramp
+  moves; a ramp that straddles tiers is the actual smell). `core/motion.json`
+  keeps `spring.*` — spring physics genuinely are primitives.
+- `menubar-h` → **`component/menubar.json`**. `core/layout.json` held nothing
+  else and is retired (dropped from `$metadata`/`$themes`).
+
+**Emitted names are identical** (`--duration-tap/-fade/-theme/-slow`,
+`--menubar-h`) — nothing in `src/` changes; only the tier map does.
+`scripts/build-tokens.mjs` now reads springs from core and durations from
+semantic to build `motion.generated.ts`. Figma-side, the bridge names by set,
+so a re-PULL moves these out of the `core` collection: `motion/duration/*` →
+semantic `duration/*`, `layout/menubar-h` → component `menubar-h`.
+
 ## Decision C — REVERSED (2026-07-19, DS-mirror step 3)
 
 Original Decision C kept spacing numeric-only (`--space-1..12`), declining a

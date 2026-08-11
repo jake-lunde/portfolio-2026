@@ -1,0 +1,17 @@
+{
+  "duration": {
+    "$description": "The duration ramp — role names (tap/fade/theme/slow), so it is the semantic API product CSS consumes, not a core scale. Moved here whole from core/motion.json, which keeps the spring physics (the real primitives); emitted names are unchanged (--duration-tap/-fade/-theme/-slow). scripts/build-tokens.mjs reads this file for DURATION_TOKENS.",
+    "tap": {
+      "$value": "0.16s"
+    },
+    "fade": {
+      "$value": "0.18s"
+    },
+    "theme": {
+      "$value": "0.25s"
+    },
+    "slow": {
+      "$value": "0.7s"
+    }
+  }
+}

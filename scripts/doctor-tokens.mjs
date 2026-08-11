@@ -674,15 +674,27 @@ function checkContrast(model, resolvedThemeMaps, strict) {
 const SRC_DIR = path.join(ROOT, 'src')
 const SCAN_EXT_RE = /\.(css|tsx|ts)$/
 const CONSUMED_RE = /var\(\s*--([a-zA-Z0-9-]+)/g
-// Two shapes of "this codebase declares --x itself, outside the token
-// pipeline": a plain CSS/object declaration (`--x: value` / `'--x': value`),
-// and a computed-property key with a TS cast (`['--x' as string]: value`,
-// as PhotoWall.tsx uses for its per-photo --tilt). Deliberately NOT scoped
-// to "same file as the consumer" — --tilt is declared in PhotoWall.tsx and
-// consumed in shell.module.css, two different files, and that's a fine
-// pattern (inline style cascades to children styled by the module CSS).
+// Emitted families that ARE consumed, just never through var() — so the
+// "emitted but never consumed" half of D6 would libel them forever.
+//   --spring-*  the 18 spring params reach motion/react as JS numbers via
+//               SPRING_TOKENS in src/lib/motion.generated.ts; INSPECT.MODE
+//               additionally reads them off :root by NAME
+//               (getPropertyValue('--spring-' + name + '-' + key),
+//               src/lib/inspect.ts springFor()), which is why they must keep
+//               emitting to CSS and can't be filtered out of the build.
+const NON_VAR_CONSUMER_ALLOWLIST = [/^--spring-/]
+// Three shapes of "this codebase declares --x itself, outside the token
+// pipeline": a bare CSS declaration (`--x: value`), a QUOTED key in an inline
+// style object (`'--print-t': tick / TICKS`, as CV.tsx uses for its print
+// thermometer — the quotes are what stop RE_1 from seeing it), and a computed-
+// property key with a TS cast (`['--x' as string]: value`, as PhotoWall.tsx
+// uses for its per-photo --tilt). Deliberately NOT scoped to "same file as the
+// consumer" — --tilt is declared in PhotoWall.tsx and consumed in
+// shell.module.css, two different files, and that's a fine pattern (inline
+// style cascades to children styled by the module CSS).
 const LOCAL_DECL_RE_1 = /--([a-zA-Z0-9-]+)\s*:/g
 const LOCAL_DECL_RE_2 = /['"]--([a-zA-Z0-9-]+)['"]\s*(?:as\s+\w+)?\s*\]/g
+const LOCAL_DECL_RE_3 = /['"]--([a-zA-Z0-9-]+)['"]\s*:/g
 
 async function walkSrcFiles(dir) {
   const out = []
@@ -716,6 +728,7 @@ async function checkOrphans(emittedNames) {
     const text = await fs.readFile(file, 'utf8')
     for (const m of text.matchAll(LOCAL_DECL_RE_1)) declaredLocally.add(m[1])
     for (const m of text.matchAll(LOCAL_DECL_RE_2)) declaredLocally.add(m[1])
+    for (const m of text.matchAll(LOCAL_DECL_RE_3)) declaredLocally.add(m[1])
     for (const m of text.matchAll(CONSUMED_RE)) {
       const rel = path.relative(ROOT, file)
       if (!consumedByName.has(m[1])) consumedByName.set(m[1], new Set())
@@ -736,6 +749,7 @@ async function checkOrphans(emittedNames) {
   }
 
   for (const name of emittedNames) {
+    if (NON_VAR_CONSUMER_ALLOWLIST.some((re) => re.test(`--${name}`))) continue
     if (!consumedByName.has(name)) {
       warn('D6', `--${name} is emitted but never consumed via var() anywhere in src/ — dead, or not yet adopted.`)
     }

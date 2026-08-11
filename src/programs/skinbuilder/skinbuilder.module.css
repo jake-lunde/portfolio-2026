@@ -10,7 +10,7 @@
   font-family: var(--type-label-family);
   font-size: var(--type-label-size);
   letter-spacing: 0.02em;
-  line-height: var(--leading-relaxed);
+  line-height: var(--leading-body);
   color: var(--content-muted);
   margin: 0 0 14px;
 }
@@ -128,7 +128,7 @@
   font-family: var(--type-label-family);
   font-size: var(--type-label-size);
   letter-spacing: 0.02em;
-  line-height: var(--leading-relaxed);
+  line-height: var(--leading-body);
   color: var(--content-muted);
 }
 

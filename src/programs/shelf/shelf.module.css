@@ -158,7 +158,7 @@
      just tight enough to read as crowding, which is half of what Jake
      reported. 32 puts 19.12px between them, and the other half of the fix
      is the padding above. */
-  gap: var(--space-8);
+  gap: var(--spacing-layout-lg);
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
@@ -1286,6 +1286,7 @@
    grotesque. */
 .vFigma {
   --wash-turn: 0deg;
+  --wash-x: 0%;
   --cover-ground: color-mix(in srgb, var(--content-inverse) 34%, #fff);
   --cover-ink: var(--surface-inverse);
   --board-ink: var(--surface-inverse);
@@ -1637,7 +1638,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-2);
+  gap: var(--spacing-component-sm);
 }
 
 .reqs dt {
@@ -1662,7 +1663,7 @@
 .blurb {
   margin: 0 0 6px;
   padding-left: 7px;
-  border-left: var(--border-width-thick) solid var(--accent);
+  border-left: var(--border-width-strong) solid var(--accent);
 }
 
 .blurb p {
@@ -1724,7 +1725,7 @@
 .nudgeRow {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--spacing-component-sm);
   margin-top: 8px;
 }
 
@@ -1733,7 +1734,7 @@
    below it either */
 .heroAction {
   padding: 9px 10px;
-  border-top: var(--border-width-hairline) solid var(--border);
+  border-top: var(--border-width-subtle) solid var(--border);
 }
 
 /* ---------------- buttons ---------------- */
@@ -1911,7 +1912,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-3);
+  gap: var(--spacing-component-md);
 }
 
 /* the license phase claims the full height so the sphere can take whatever
@@ -2018,7 +2019,7 @@
    descendant of a face — never on a face's ancestor. */
 
 :global([data-skin='medieval']) .track {
-  border-width: var(--border-width-thick);
+  border-width: var(--border-width-strong);
   filter: url(#lunde-roughen);
 }
 
@@ -2033,7 +2034,7 @@
 }
 
 :global([data-skin='medieval']) .face {
-  border-width: var(--border-width-thick);
+  border-width: var(--border-width-strong);
 }
 
 /* the board a scriptorium would have used: thicker, and edged in the ink
@@ -2052,7 +2053,7 @@
 /* the tag is a parchment slip pinned beneath the tome — same thick board
    rule as the covers. The 22px band already reserves the extra pixel. */
 :global([data-skin='medieval']) .tag {
-  border-width: var(--border-width-thick);
+  border-width: var(--border-width-strong);
   border-color: var(--content);
 }
 

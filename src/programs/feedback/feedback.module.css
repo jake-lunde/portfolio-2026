@@ -19,7 +19,7 @@
    .projHead, so cross-module order can't decide it. */
 .feedback > div:first-child {
   flex-wrap: wrap;
-  gap: 2px var(--space-3);
+  gap: 2px var(--spacing-component-md);
 }
 
 /* The board. Each note keeps --surface-raised (the window's own paper) and
@@ -31,10 +31,10 @@
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 26px 18px;
   align-items: start;
-  margin-top: var(--space-4);
+  margin-top: var(--spacing-component-lg);
   padding: 18px 14px 22px;
   background: var(--surface);
-  border: var(--border-width-hairline) solid var(--border);
+  border: var(--border-width-subtle) solid var(--border);
 }
 
 .sticky {
@@ -42,7 +42,7 @@
   margin: 0;
   padding: 16px 13px 11px; /* top clears the tape (−6px, 12px tall) */
   background: var(--surface-raised);
-  border: var(--border-width-hairline) solid var(--border);
+  border: var(--border-width-subtle) solid var(--border);
   box-shadow: var(--shadow-sticky);
   transform: rotate(var(--tilt, 0deg));
   transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -88,7 +88,7 @@
 }
 
 .stickyQuote {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--spacing-component-sm);
   font-size: var(--type-body-sm-size); /* 13px exact */
   font-style: italic;
   line-height: var(--leading-normal); /* 1.5 exact */

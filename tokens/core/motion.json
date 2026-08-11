@@ -1,18 +1,4 @@
 {
-  "duration": {
-    "tap": {
-      "$value": "0.16s"
-    },
-    "fade": {
-      "$value": "0.18s"
-    },
-    "theme": {
-      "$value": "0.25s"
-    },
-    "slow": {
-      "$value": "0.7s"
-    }
-  },
   "spring": {
     "window": {
       "stiffness": {

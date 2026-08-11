@@ -10,7 +10,7 @@
 .frame {
   width: 100%;
   height: 100%;
-  border: 1.5px solid #17150d;
+  border: var(--border-width-default) solid #17150d;
   background: #e7e1d2;
   display: flex;
   flex-direction: column;
@@ -22,7 +22,7 @@
   align-items: center;
   gap: 12px;
   padding: 5px 10px;
-  border-bottom: 1.5px solid #17150d;
+  border-bottom: var(--border-width-default) solid #17150d;
   background: #e7e1d2;
   flex: 0 0 auto;
 }

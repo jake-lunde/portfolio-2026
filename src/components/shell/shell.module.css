@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--spacing-component-lg);
   padding: 0 14px;
   background: var(--surface);
   border-bottom: var(--border-width-default) solid var(--content);
@@ -39,7 +39,7 @@
 .menuRight {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--spacing-component-xs);
 }
 
 .menuBtn {
@@ -48,7 +48,7 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding: 4px 8px;
-  border: var(--border-width-hairline) solid transparent;
+  border: var(--border-width-subtle) solid transparent;
   color: var(--content);
   /* a control's label never breaks. The bar is one line and at 360 the
      right cluster sits at zero slack, so a shrink of two pixels once
@@ -134,7 +134,7 @@
   justify-content: center;
   padding: 3px;
   background: var(--surface);
-  border: var(--border-width-hairline) solid var(--border);
+  border: var(--border-width-subtle) solid var(--border);
   color: var(--content);
   font-family: var(--mono);
   font-size: var(--text-label);
@@ -234,7 +234,7 @@
   color: var(--content);
   padding: 3px 8px;
   background: var(--surface);
-  border: var(--border-width-hairline) solid var(--border);
+  border: var(--border-width-subtle) solid var(--border);
   transition: border-color var(--duration-tap) ease;
 }
 
@@ -257,7 +257,7 @@
   width: 7px;
   height: 7px;
   flex: none;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-circle);
   background: var(--accent);
 }
 
@@ -290,7 +290,7 @@
   background: var(--surface);
   color: var(--content);
   border: none;
-  border-bottom: var(--border-width-hairline) solid var(--border);
+  border-bottom: var(--border-width-subtle) solid var(--border);
   font-family: var(--mono);
   font-size: var(--text-label);
   letter-spacing: 0.12em;
@@ -338,7 +338,7 @@
   z-index: 4990;
   overflow: hidden;
   background: var(--surface);
-  border-bottom: var(--border-width-hairline) solid var(--border);
+  border-bottom: var(--border-width-subtle) solid var(--border);
   display: flex;
   align-items: center;
   font-family: var(--type-micro-family);
@@ -465,7 +465,7 @@
   width: 88px;
   padding: 10px 4px 8px;
   color: var(--content);
-  border: var(--border-width-hairline) solid transparent;
+  border: var(--border-width-subtle) solid transparent;
 }
 
 .iconBtn:hover {
@@ -623,7 +623,7 @@
   font-size: var(--text-caption);
   letter-spacing: 0.16em;
   color: var(--content-muted);
-  border-bottom: var(--border-width-hairline) solid var(--border);
+  border-bottom: var(--border-width-subtle) solid var(--border);
   padding-bottom: 7px;
   margin-bottom: 10px;
 }
@@ -643,7 +643,7 @@
   font-family: var(--mono);
   font-size: var(--text-label);
   letter-spacing: 0.1em;
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--spacing-component-xs);
 }
 
 .dailyPct {
@@ -676,7 +676,7 @@
   letter-spacing: var(--tracking-08); /* diverges from caption's tracking-16 — matches original 0.08em */
   text-transform: uppercase;
   color: var(--content-muted);
-  margin-top: var(--space-1);
+  margin-top: var(--spacing-component-xs);
 }
 
 /* ================= PHOTO WALL (pinned booth snaps, right edge) ========= */
@@ -709,7 +709,7 @@
   display: block;
   width: 100%;
   height: auto;
-  border: var(--border-width-hairline) solid var(--content);
+  border: var(--border-width-subtle) solid var(--content);
 }
 
 [data-theme='dark'] .pinnedImg {
@@ -723,7 +723,7 @@
   width: 10px;
   height: 10px;
   margin-left: -5px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-circle);
   background: var(--accent);
   border: var(--border-width-default) solid var(--content);
   box-shadow: var(--shadow-pin);
@@ -792,7 +792,7 @@
   z-index: 2;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--spacing-component-sm);
   width: 230px;
   padding: 8px 9px;
   background: var(--surface-raised);
@@ -809,7 +809,7 @@
   width: 40px;
   height: 40px;
   object-fit: cover;
-  border: var(--border-width-hairline) solid var(--content);
+  border: var(--border-width-subtle) solid var(--content);
   flex: 0 0 auto;
 }
 
@@ -844,7 +844,7 @@
   font-family: var(--mono);
   font-size: var(--text-label);
   color: var(--content);
-  border: var(--border-width-hairline) solid transparent;
+  border: var(--border-width-subtle) solid transparent;
   line-height: var(--leading-none); /* 1 exact */
 }
 
@@ -1191,7 +1191,7 @@
      no opacity dimming here, unlike .titleMeta, because this one is hit */
   color: inherit;
   padding: 2px 5px;
-  border: var(--border-width-hairline) solid transparent;
+  border: var(--border-width-subtle) solid transparent;
   transition: border-color var(--duration-tap) ease;
 }
 
@@ -1207,7 +1207,7 @@
   z-index: 6; /* over the body content and the resize grip (4) */
   width: max-content;
   max-width: min(300px, calc(100vw - 32px));
-  padding: var(--space-2) var(--space-3);
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
   background: var(--surface-raised);
   border: var(--border-width-default) solid var(--content);
   box-shadow: var(--shadow-print);
@@ -1235,7 +1235,7 @@
   margin: 0;
   font-family: var(--sans);
   font-size: var(--text-label);
-  line-height: var(--leading-relaxed);
+  line-height: var(--leading-body);
 }
 
 .windowBody {
@@ -1380,7 +1380,7 @@
 /* medieval skin: heavier frame + manuscript corner ornaments — scoped
    entirely under [data-skin='medieval'] so classic/dark are untouched */
 :global([data-skin='medieval']) .window {
-  border-width: 2px;
+  border-width: var(--border-width-strong);
   border-color: var(--content);
 }
 
@@ -1403,13 +1403,13 @@
 :global([data-skin='medieval']) .window::before {
   top: 3px;
   left: 3px;
-  border-width: 1.5px 0 0 1.5px;
+  border-width: var(--border-width-default) 0 0 var(--border-width-default);
 }
 
 :global([data-skin='medieval']) .window::after {
   bottom: 3px;
   right: 3px;
-  border-width: 0 1.5px 1.5px 0;
+  border-width: 0 var(--border-width-default) var(--border-width-default) 0;
 }
 
 /* ================= BOOT ================= */

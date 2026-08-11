@@ -17,7 +17,7 @@
 .formHead {
   font-family: var(--display);
   font-size: var(--type-body-size); /* 15px exact */
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--spacing-component-md);
 }
 
 .hp {
@@ -30,7 +30,7 @@
 
 .field {
   display: block;
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--spacing-component-md);
 }
 
 .field span {
@@ -124,7 +124,7 @@
 
 .entry {
   padding: 13px 0;
-  border-bottom: var(--border-width-hairline) solid var(--border);
+  border-bottom: var(--border-width-subtle) solid var(--border);
 }
 
 .entry:last-child {
@@ -135,7 +135,7 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: var(--space-3);
+  gap: var(--spacing-component-md);
 }
 
 .entryName {

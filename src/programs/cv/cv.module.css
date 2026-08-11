@@ -18,8 +18,8 @@
   flex: none;
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-4);
+  gap: var(--spacing-component-md);
+  padding: var(--spacing-component-sm) var(--spacing-component-lg);
   border-bottom: var(--border-width-default) solid var(--border);
   background: var(--surface-raised);
 }
@@ -68,14 +68,14 @@
   background-size: 16px 14px;
   background-repeat: repeat-y;
   background-color: color-mix(in srgb, var(--content) 7%, transparent);
-  border-inline: var(--border-width-hairline) dashed var(--border);
+  border-inline: var(--border-width-subtle) dashed var(--border);
 }
 
 .sheet {
-  padding: var(--space-4) var(--space-4) var(--space-6);
+  padding: var(--spacing-component-lg) var(--spacing-component-lg) var(--spacing-component-xl);
   font-family: var(--mono);
   font-size: var(--text-caption);
-  line-height: var(--leading-relaxed);
+  line-height: var(--leading-body);
   color: var(--content);
   /* no opacity theater: the sheet is always painted, and the pre-print
      blank is the paper sitting a full tray-height below the fold — ink is
@@ -85,31 +85,31 @@
 /* ---- printout typography ---- */
 
 .head {
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--spacing-component-md);
 }
 
 .name {
   margin: 0;
   font-family: var(--mono);
-  font-size: var(--font-size-lg);
+  font-size: var(--type-body-sm-size);
   font-weight: 700;
   letter-spacing: var(--tracking-10);
   text-transform: uppercase;
 }
 
 .contact {
-  margin: var(--space-1) 0 0;
+  margin: var(--spacing-component-xs) 0 0;
   color: var(--content-muted);
   font-size: var(--text-micro);
 }
 
 .summary {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--spacing-component-sm);
 }
 
 .section {
-  margin: var(--space-4) 0 var(--space-2);
-  padding-bottom: var(--space-1);
+  margin: var(--spacing-layout-sm) 0 var(--spacing-component-sm);
+  padding-bottom: var(--spacing-component-xs);
   border-bottom: var(--border-width-default) solid var(--border);
   font-family: var(--mono);
   font-size: var(--text-micro);
@@ -121,8 +121,8 @@
 .roleHead {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0 var(--space-2);
-  margin-top: var(--space-2);
+  gap: 0 var(--spacing-component-sm);
+  margin-top: var(--spacing-component-sm);
 }
 
 .roleTitle {
@@ -152,9 +152,9 @@
 }
 
 .bullet {
-  margin: var(--space-2) 0 0;
-  padding-left: var(--space-3);
-  text-indent: calc(var(--space-3) * -1);
+  margin: var(--spacing-component-sm) 0 0;
+  padding-left: var(--spacing-component-md);
+  text-indent: calc(var(--spacing-component-md) * -1);
 }
 
 .bullet::before {
@@ -167,8 +167,8 @@
   display: grid;
   /* sized to the widest label, "Code Generation" */
   grid-template-columns: 7.5rem minmax(0, 1fr);
-  gap: var(--space-2);
-  margin: var(--space-1) 0 0;
+  gap: var(--spacing-component-sm);
+  margin: var(--spacing-component-xs) 0 0;
 }
 
 .skillLabel {
@@ -178,7 +178,7 @@
 .edu {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0 var(--space-2);
+  gap: 0 var(--spacing-component-sm);
 }
 
 .eduSchool {
@@ -199,8 +199,8 @@
 
 .colophon {
   margin: var(--space-5) 0 0;
-  padding-top: var(--space-2);
-  border-top: var(--border-width-hairline) dashed var(--border);
+  padding-top: var(--spacing-component-sm);
+  border-top: var(--border-width-subtle) dashed var(--border);
   color: var(--content-muted);
   font-size: var(--text-micro);
   font-style: italic;
@@ -216,7 +216,7 @@
   z-index: 300;
   display: grid;
   place-items: center;
-  padding: var(--space-4);
+  padding: var(--spacing-component-lg);
   background: color-mix(in srgb, var(--surface-inverse) 45%, transparent);
 }
 
@@ -260,8 +260,8 @@
 .dialogBody {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
+  gap: var(--spacing-component-md);
+  padding: var(--spacing-component-lg);
 }
 
 /* progress: a classic thermometer. Fill is a scaleX transform so nothing
@@ -305,7 +305,7 @@
   }
 
   .sheet {
-    padding: var(--space-3) var(--space-2) var(--space-5);
+    padding: var(--spacing-component-md) var(--spacing-component-sm) var(--space-5);
   }
 
   .skill {

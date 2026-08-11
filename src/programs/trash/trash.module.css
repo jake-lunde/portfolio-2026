@@ -14,13 +14,13 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--spacing-component-lg);
 }
 
 .eyebrow {
   font-family: var(--type-label-family);
   font-size: var(--type-label-size);
-  letter-spacing: var(--tracking-14);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
   color: var(--content-muted);
   margin: 0;
@@ -44,7 +44,7 @@
 .record {
   padding: 16px 16px 18px;
   background: var(--surface-raised);
-  border: var(--border-width-hairline) solid var(--border);
+  border: var(--border-width-subtle) solid var(--border);
   box-shadow: var(--shadow-sticky);
 }
 
@@ -62,7 +62,7 @@
 .tagNo {
   font-family: var(--type-label-family);
   font-size: var(--type-label-size);
-  letter-spacing: var(--tracking-14);
+  letter-spacing: var(--type-label-tracking);
   color: var(--content-muted);
 }
 
@@ -78,7 +78,7 @@
 .origin {
   font-family: var(--type-label-family);
   font-size: var(--type-label-size);
-  letter-spacing: var(--tracking-14);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
   color: var(--content-muted);
   margin: 4px 0 10px;
@@ -97,7 +97,7 @@
   flex-direction: column;
   gap: 2px;
   padding-top: 8px;
-  border-top: var(--border-width-hairline) solid var(--border);
+  border-top: var(--border-width-subtle) solid var(--border);
 }
 
 .field + .field {
@@ -107,7 +107,7 @@
 .fieldLabel {
   font-family: var(--type-label-family);
   font-size: var(--type-label-size);
-  letter-spacing: var(--tracking-14);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
   color: var(--accent);
 }
@@ -130,6 +130,6 @@
   letter-spacing: var(--tracking-10);
   text-transform: uppercase;
   color: var(--content-muted);
-  margin: var(--space-4) 0 0;
+  margin: var(--spacing-component-lg) 0 0;
   text-align: center;
 }
