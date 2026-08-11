@@ -11,7 +11,7 @@
 .eyebrow {
   font-family: var(--type-label-family);
   font-size: var(--type-label-size);
-  letter-spacing: var(--tracking-14);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
   color: var(--accent);
   margin: 0 0 16px;
@@ -53,7 +53,7 @@
 .input {
   font-family: var(--type-mono-family);
   font-size: var(--type-mono-size);
-  letter-spacing: var(--tracking-08);
+  letter-spacing: var(--type-mono-tracking);
   padding: 8px 10px;
   color: var(--content);
   background: var(--surface);
@@ -168,7 +168,7 @@
 .panelTitle {
   font-family: var(--type-label-family);
   font-size: var(--type-label-size);
-  letter-spacing: var(--tracking-14);
+  letter-spacing: var(--type-label-tracking);
   text-transform: uppercase;
   color: var(--accent);
 }
