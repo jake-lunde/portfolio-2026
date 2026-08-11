@@ -1,7 +1,7 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-11 (s45 note → archive; s46 note below).
+> Last rotation: 2026-08-11 (s46 note → archive; s47 note below).
 
 ## Current state
 
@@ -114,7 +114,10 @@
 - **Known debts:** SpecSheet motion quote-strings · first-load JS perf ·
   underwater · `--accent-on-inverse` · reduced-motion by emulation ·
   medieval airbrush wash contrast · never build while a dev server owns
-  the checkout .next · `family-hub 2/` dup dir (Jake deletes).
+  the checkout .next · `family-hub 2/` + `".claude/* 2.*"` dups (Jake
+  deletes). Token debt: PR #6 sweeps core-consumed-raw (155 re-aliases,
+  doctor 0 err/30 warn); leftovers = ~70 snap-candidates + kill-list in
+  the PR ledger, awaiting Jake's ramp ruling.
 
 > s43b addendum (2026-08-10, the ai-chat session): chat-feed choreography
 > + DOPPLER chat + fable mark all shipped (merges `e295bc9`), branches
@@ -123,33 +126,44 @@
 > fourier "agents are clickable" framework developed + phased in its task.
 > Next in that arc: P1 canned mini-chats for HERTZ/NYQUIST/FOURIER.
 
-## Latest session — S46 TOKEN COMMIT ROUTE: THE INSPECTOR FILES PAPERWORK (2026-08-11)
+## Latest session — S47 TOKEN DEBT SWEEP: THE PRIMITIVES GO HOME (2026-08-11)
 
-**Handoff item 4 → shipped same session (Jake: "lets fuckin jam").
-Opus implementer + DOPPLER audit, Fable orchestrating; merge `7e9f07a`,
-branch deleted, deck reported throughout.**
+**Handoff item 3, the scoped P1 (Notion "token debt sweep") → PR #6
+open, awaiting Jake's merge + ledger rulings. Fable orchestrating;
+4 Sonnet patch crews (disjoint module families) + 1 Opus tokens crew;
+deck reported throughout. Zero-visual-change law held.**
 
-- Route + SAVE UI as the current-state bullet describes. DOPPLER round:
-  2 HIGH (stacking revert — fixed via editable-head; `$description`
-  deletion on re-alias — fixed, diffs are one line again) + 4 MEDIUM
-  (chip invisible in classic-dark: `--content-inverse` ≡ `--content`
-  there, swapped to surface-on-content 15:1; prLink AA; live-region +
-  focus drops; discarded 409 body → one-shot retry) — all fixed.
-  Security surface verified clean: no injection path (role regex + tier
-  + palette allowlists), no secret echo, tree confined to the one theme
-  file.
-- **Deviation from the Notion sketch, Jake-blessed by merge:** doctor
-  `--strict` gate runs in CI on the PR (tokens-sync.yml pre-existed),
-  not server-side pre-commit — the sketch predates the PR ruling.
-- Verified live pre-merge: prod build green, 50/50 tests (25-case pure
-  tokenEdit suite added), full UI chain driven on dev (pick → re-cast
-  → save row → wrong-key reject w/ focus kept → RESET ALL clean);
-  route ladder curl-proven 401/401/501.
-- Jake's design Qs answered in-chat and captured in the Notion "editing
-  modes ledger" task: re-cast = remapping semantic→core (yes); no
-  minting roles from the panel (legislation, not value edit); type/space
-  extend via the same mechanic; component-isolation stage + mode
-  unification are unscoped ideas awaiting his want.
+- **Doctor 2→0 errors, 51→30 warnings.** Both errors were misdiagnoses:
+  `--print-t` = doctor blind spot (TSX inline declarations — D6 now
+  scans them); `--wash-x` = undeclared knob (now `0%` beside
+  `--wash-turn`). The 18 `--spring-*` "dead" warnings were false too:
+  `inspect.ts springFor()` reads them via `getPropertyValue`, invisible
+  to the var() grep — documented D6 allowlist, emission kept (killing
+  it would have silently degraded INSPECT.MODE).
+- **155 value-identical re-aliases across 21 modules** (5 commits, one
+  per family): space→spacing-component/layout by context ·
+  hairline/thin/thick→subtle/default/strong · radius-md/full→
+  control/circle · radius-none→0 · prose leading-relaxed→leading-body ·
+  exact-match type-role adoptions. Verified by a mechanical diff audit
+  (every -/+ pair vs the mapping table) + parity 597/3/0/0 + 50/50
+  tests + prod build. Chromatic on the PR is the final visual gate.
+- **New legislation:** semantic `border-width.subtle` (1px; ramp subtle<
+  default<strong) · tier relocations, names unchanged: `duration.*`
+  core→semantic, `menubar-h` core→component (they were role-named
+  tokens misfiled as primitives — INSPECT graded every honest use a
+  violation).
+- **The ledger is in the PR body — Jake's rulings:** ~70 snap-candidates
+  (mono UI text one step off its role tracking — rule the ramp, next
+  pass is mechanical) · case `.statBig`/`.section h2` near display/
+  heading-1 · kill-list recs (kill font-size-sm/md, duration-slow,
+  radius-none, text-body[=17px, surprise]; keep type sub-tokens +
+  status/interactive color roles + spacing-layout-xl) · `--space-5`
+  needs a role or a blessing.
+- Follow-ups: next Figma pull moves relocated vars between collections
+  (re-bind); stale comment figma-plugin/src/tokens.ts:145; semantic
+  tier now holds literal durations (precedent exists) — deliberate
+  call later; untracked `".claude/* 2.*"` dup files = macOS artifacts,
+  Jake deletes.
 
 ## Next steps
 
@@ -160,10 +174,10 @@ branch deleted, deck reported throughout.**
 2. **Jake: drive the finished INSPECT SHELL on lunde.co** — INSPECT in
    the menubar; crown + SELECT/OPERATE are live. **Jake: buy Motion+**
    (his account) → then run the motion+ task (Notion, P2).
-3. **Token debt sweep — Jake is spinning up a fresh session for it:**
-   scoped P1, brief + ledger method in Notion →
-   https://app.notion.com/p/3b8d29ee9854810399d8c387686eab5c —
-   re-alias core-consumed-raw, adopt/kill the 54 dead tokens, doctor→0.
+3. **Jake: merge PR #6 (token debt sweep) + rule its ledger** —
+   https://github.com/jake-lunde/portfolio-2026/pull/6 — Chromatic diff
+   should be EMPTY (zero-change law); rulings owed: snap-candidates ramp,
+   kill-list, --space-5. Notion task → In review.
 4. **Jake: add Pull requests:write + Issues:write to GITHUB_COPY_TOKEN**
    (Vercel env) — the inspector's SAVE can't open PRs without them —
    then nudge a color on lunde.co and merge your first `inspect-tune` PR.

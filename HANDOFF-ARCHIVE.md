@@ -2000,3 +2000,31 @@ window." Then "ship it when the fixes land!!" Both done.**
 - Dev-only note: hidden pane tab freezes Motion entries (chip probes at
   opacity 0) AND the Boot exit — reload with `lunde-booted` sessionStorage
   set to skip boot when probing.
+
+## Latest session — S46 TOKEN COMMIT ROUTE: THE INSPECTOR FILES PAPERWORK (2026-08-11) — moved from HANDOFF at s47 rotation
+
+**Handoff item 4 → shipped same session (Jake: "lets fuckin jam").
+Opus implementer + DOPPLER audit, Fable orchestrating; merge `7e9f07a`,
+branch deleted, deck reported throughout.**
+
+- Route + SAVE UI as the current-state bullet describes. DOPPLER round:
+  2 HIGH (stacking revert — fixed via editable-head; `$description`
+  deletion on re-alias — fixed, diffs are one line again) + 4 MEDIUM
+  (chip invisible in classic-dark: `--content-inverse` ≡ `--content`
+  there, swapped to surface-on-content 15:1; prLink AA; live-region +
+  focus drops; discarded 409 body → one-shot retry) — all fixed.
+  Security surface verified clean: no injection path (role regex + tier
+  + palette allowlists), no secret echo, tree confined to the one theme
+  file.
+- **Deviation from the Notion sketch, Jake-blessed by merge:** doctor
+  `--strict` gate runs in CI on the PR (tokens-sync.yml pre-existed),
+  not server-side pre-commit — the sketch predates the PR ruling.
+- Verified live pre-merge: prod build green, 50/50 tests (25-case pure
+  tokenEdit suite added), full UI chain driven on dev (pick → re-cast
+  → save row → wrong-key reject w/ focus kept → RESET ALL clean);
+  route ladder curl-proven 401/401/501.
+- Jake's design Qs answered in-chat and captured in the Notion "editing
+  modes ledger" task: re-cast = remapping semantic→core (yes); no
+  minting roles from the panel (legislation, not value edit); type/space
+  extend via the same mechanic; component-isolation stage + mode
+  unification are unscoped ideas awaiting his want.
