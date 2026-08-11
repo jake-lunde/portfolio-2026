@@ -1,7 +1,7 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-10 (s43 note → archive; s44 note below).
+> Last rotation: 2026-08-11 (s44 note → archive; s45 note below).
 
 ## Current state
 
@@ -66,10 +66,14 @@
   token commits go via PR** — phase-1 commit route unblocked. tune.ts is the override channel;
   buildASkin untouched. Window program deleted; `/inspect` canonicals to
   `/readme`. EDIT.MODE mutual exclusion incl. disabled toggle state.
+- **HARNESS HOOKS LIVE (s45, merge `5e533cf`):** checked-in
+  `.claude/settings.json` + `.claude/hooks/` — SessionStart injects the
+  §4.1 dispatch reminder; PreToolUse blocks hand-edits to
+  `*.generated.*` token output, forbidden-path commits (§3.3), and any
+  prettier run. New sessions inherit them automatically (hooks load at
+  session start — running sessions unaffected).
 - **Notion research rulings (s40, full writeups in each task page):**
-  hooks — none installed, adopt 4 (SessionStart deck-report, block
-  generated-token edits, block forbidden commits, block prettier), ~15 min
-  on Jake's OK · claude design/DesignSync — SKIP as infra (snapshot not
+  claude design/DesignSync — SKIP as infra (snapshot not
   sync, no Figma/Storybook), optional 20-min sketch-tool trial · skills
   research — "I use AI" is table stakes; top gaps: designing FOR agents
   (case study #3 spec drafted), evals-as-design-artifact, measurement
@@ -103,35 +107,33 @@
 > fourier "agents are clickable" framework developed + phased in its task.
 > Next in that arc: P1 canned mini-chats for HERTZ/NYQUIST/FOURIER.
 
-## Latest session — S44 MISC QUARTET: GLYPHS, PAPER, ARROW (2026-08-10)
+## Latest session — S45 HARNESS HOOKS: THE LAW ENFORCES ITSELF (2026-08-11)
 
-**Jake's four asks, all shipped solo-Fable (merge `3332a9f`, branch
-`misc/s44-quartet` deleted, prod marker verified):**
+**Notion "should we be using hooks?" → installed (Jake's go), solo-Fable
+(merge `5e533cf`, branch `infra/harness-hooks` deleted). Config-only —
+no site surface, no deploy verification needed.**
 
-- **Menubar re-cut:** order INSPECT · ♪ · sun/moon · ? · clock. SND/LGT/
-  DRK text retired for 16-grid line-art glyphs local to MenuBar.tsx
-  (note takes a slash when muted; theme shows the CURRENT state's glyph;
-  both currentColor so aria-pressed accent recolours free). FableMark
-  moved to the corner seat beside the clock — its "leads the cluster"
-  comment rewritten. `.menuGlyphBtn` in shell.module.css.
-- **FEEDBACK hidden** (`onDesktop: false`, ORDER slot kept, /feedback
-  deep link live) — flip the flag to restore.
-- **RESUME.EXE prints for real** (Notion "animate paper" P0 → Done):
-  sheet slides up from below the tray in lockstep with the thermometer —
-  same `--print-t` (tick/TICKS) drives both, travel = 100cqh (feed is a
-  size container), overflow locked while printing, transform none +
-  overflow auto at done. Opacity theater deleted; ink is on the page as
-  it feeds. Probe-verified: t=0 → 549px down, t=.5 → 275, t=1 → 0.
-- **CC chip:** desktop CTA text gone — `.ccArrow` surfaces at the right
-  edge on hover/:focus-visible (24px lane reserved in .ccBar padding);
-  900–1240 the empty action row hides (glance line only). NEW: chip
-  returns below 720 as a full-rail card above the launcher grid (was
-  display:none), ENTER COMMAND CENTER on its own centred line — mobile
-  finally has a deck door. `.icons` top 76px clears it (constants
-  travel together, both commented).
-- Dev-only note: hidden pane tab freezes Motion entries (chip probes at
-  opacity 0) AND the Boot exit — reload with `lunde-booted` sessionStorage
-  set to skip boot when probing.
+- Checked-in `.claude/settings.json` + three scripts in `.claude/hooks/`:
+  `session-start.sh` (SessionStart, matcher startup|clear — injects the
+  §4.1 deck-dispatch reminder with the exact sourcing command; warns if
+  CC_FEED_KEY missing) · `guard-generated.mjs` (PreToolUse
+  Edit|Write|MultiEdit — exit-2 blocks `tokens.generated.css`,
+  `tokens.generated.ts`, `motion.generated.ts`, `src/styles/generated/`,
+  points at `npm run tokens:build`) · `guard-bash.mjs` (PreToolUse Bash —
+  blocks prettier as a command word; blocks `git commit` when §3.3 paths
+  are staged AND scans add-segments of compound commands, since one-shot
+  `add && commit` stages after the hook fires).
+- **Deviation from the research sketch:** SessionStart *reminds* with the
+  exact dispatch command instead of auto-firing cc-report — a hook can't
+  know the task label, and generic units would litter the live deck.
+- 23-case assertion suite green (incl. live staged-`docs/` block and the
+  source-`.env.local`-then-commit false-positive case). Meta-proof: the
+  guard blocked this session's own test command for containing a
+  prettier invocation.
+- Hooks snapshot at session start — sessions already running when this
+  merged don't have them; everything started after does. #4 from the
+  research table (block `npm run build` while dev server owns `.next`)
+  remains unbuilt — needs a port-probe script, still in the task page.
 
 ## Next steps
 
@@ -155,8 +157,8 @@
    task pages) — skills proposes case study #3 (agent supervision) +
    CUTS.APP; TUNE.MODE questions 2–4 still open (token commits PR vs
    main? Motion+? — question 1 answered, phase 0 built).
-7. **Jake rulings owed:** install the 4 hooks? · shelf live smoke + copy
-   rewrite pass · Family Hub walk.
+7. **Jake rulings owed:** shelf live smoke + copy rewrite pass · Family
+   Hub walk.
 8. **The Desk** — next flagship (r3f ruling stands; Blender refs incoming).
 9. Cleanup: delete merged branches (`cv-exe`, `suggestion-box`,
    `case-family-hub`, `worktree-cc-v2-pipeline`, `medieval-sfx*` on

@@ -1940,3 +1940,33 @@ window." Then "ship it when the fixes land!!" Both done.**
 - Token debt sweep SCOPED (Notion P1 + session chip for Jake): manifest
   grep → re-alias ledger → doctor-zero. Phase 1 commit loop still awaits
   the PR-vs-main ruling; Motion+ answered (tuning fork yes, dependency no).
+
+## Latest session — S44 MISC QUARTET: GLYPHS, PAPER, ARROW (2026-08-10)
+
+**Jake's four asks, all shipped solo-Fable (merge `3332a9f`, branch
+`misc/s44-quartet` deleted, prod marker verified):**
+
+- **Menubar re-cut:** order INSPECT · ♪ · sun/moon · ? · clock. SND/LGT/
+  DRK text retired for 16-grid line-art glyphs local to MenuBar.tsx
+  (note takes a slash when muted; theme shows the CURRENT state's glyph;
+  both currentColor so aria-pressed accent recolours free). FableMark
+  moved to the corner seat beside the clock — its "leads the cluster"
+  comment rewritten. `.menuGlyphBtn` in shell.module.css.
+- **FEEDBACK hidden** (`onDesktop: false`, ORDER slot kept, /feedback
+  deep link live) — flip the flag to restore.
+- **RESUME.EXE prints for real** (Notion "animate paper" P0 → Done):
+  sheet slides up from below the tray in lockstep with the thermometer —
+  same `--print-t` (tick/TICKS) drives both, travel = 100cqh (feed is a
+  size container), overflow locked while printing, transform none +
+  overflow auto at done. Opacity theater deleted; ink is on the page as
+  it feeds. Probe-verified: t=0 → 549px down, t=.5 → 275, t=1 → 0.
+- **CC chip:** desktop CTA text gone — `.ccArrow` surfaces at the right
+  edge on hover/:focus-visible (24px lane reserved in .ccBar padding);
+  900–1240 the empty action row hides (glance line only). NEW: chip
+  returns below 720 as a full-rail card above the launcher grid (was
+  display:none), ENTER COMMAND CENTER on its own centred line — mobile
+  finally has a deck door. `.icons` top 76px clears it (constants
+  travel together, both commented).
+- Dev-only note: hidden pane tab freezes Motion entries (chip probes at
+  opacity 0) AND the Boot exit — reload with `lunde-booted` sessionStorage
+  set to skip boot when probing.
