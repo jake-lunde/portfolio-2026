@@ -9,6 +9,36 @@
 
 ---
 
+## S45 HARNESS HOOKS: THE LAW ENFORCES ITSELF (2026-08-11)
+
+**Notion "should we be using hooks?" → installed (Jake's go), solo-Fable
+(merge `5e533cf`, branch `infra/harness-hooks` deleted). Config-only —
+no site surface, no deploy verification needed.**
+
+- Checked-in `.claude/settings.json` + three scripts in `.claude/hooks/`:
+  `session-start.sh` (SessionStart, matcher startup|clear — injects the
+  §4.1 deck-dispatch reminder with the exact sourcing command; warns if
+  CC_FEED_KEY missing) · `guard-generated.mjs` (PreToolUse
+  Edit|Write|MultiEdit — exit-2 blocks `tokens.generated.css`,
+  `tokens.generated.ts`, `motion.generated.ts`, `src/styles/generated/`,
+  points at `npm run tokens:build`) · `guard-bash.mjs` (PreToolUse Bash —
+  blocks prettier as a command word; blocks `git commit` when §3.3 paths
+  are staged AND scans add-segments of compound commands, since one-shot
+  `add && commit` stages after the hook fires).
+- **Deviation from the research sketch:** SessionStart *reminds* with the
+  exact dispatch command instead of auto-firing cc-report — a hook can't
+  know the task label, and generic units would litter the live deck.
+- 23-case assertion suite green (incl. live staged-`docs/` block and the
+  source-`.env.local`-then-commit false-positive case). Meta-proof: the
+  guard blocked this session's own test command for containing a
+  prettier invocation.
+- Hooks snapshot at session start — sessions already running when this
+  merged don't have them; everything started after does. #4 from the
+  research table (block `npm run build` while dev server owns `.next`)
+  remains unbuilt — needs a port-probe script, still in the task page.
+
+---
+
 ## SHIPPED.SW: the shelf ships (s39b, 2026-08-06→07)
 
 **Fable orchestrated live with Jake in the loop all day; NYQUIST (Opus)

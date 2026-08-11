@@ -1,16 +1,16 @@
 # HANDOFF — current state (rotates per CLAUDE.md §4.4)
 
 > Older session notes: `HANDOFF-ARCHIVE.md` (never auto-read).
-> Last rotation: 2026-08-11 (s44 note → archive; s45 note below).
+> Last rotation: 2026-08-11 (s45 note → archive; s46 note below).
 
 ## Current state
 
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`; push to
   main = deploy; verify via Vercel MCP + content-marker curl — GitHub status
   stays "pending" while Chromatic runs; apex 308s to www — curl -L).
-  **Production = s44 MISC QUARTET (merge 3332a9f, 2026-08-10, marker
-  verified) on top of INSPECT SHELL + ASK MY AI + chat anatomy +
-  focus-ticker + SHIPPED.SW.**
+  **Production = s46 TOKEN COMMIT ROUTE (merge 7e9f07a, 2026-08-11,
+  401-marker verified) on top of s44 MISC QUARTET + INSPECT SHELL +
+  ASK MY AI + chat anatomy + focus-ticker + SHIPPED.SW.**
 - **⚠️ Shared-checkout law: no concurrent sessions on one working tree;
   `git branch --show-current` before EVERY commit.** Another session's
   worktree (`minors-random-wallpaper`) was live during s40 — worktrees are
@@ -62,10 +62,26 @@
   drills · ALT+CLICK operates the site · Escape ladder · dialogs exempt +
   above-dock z. LIVE NUDGE: semantic color roles re-alias from core
   PALETTE candidates, AA-judged per theme, inline-on-html preview only
-  ("NOT SAVED" banner, RESET ALL, resets on exit) — **Jake RULED (s43b):
-  token commits go via PR** — phase-1 commit route unblocked. tune.ts is the override channel;
-  buildASkin untouched. Window program deleted; `/inspect` canonicals to
-  `/readme`. EDIT.MODE mutual exclusion incl. disabled toggle state.
+  — and as of s46 SAVE opens a real PR (bullet below). tune.ts is the
+  override channel; buildASkin untouched. Window program deleted;
+  `/inspect` canonicals to `/readme`. EDIT.MODE mutual exclusion incl.
+  disabled toggle state.
+- **TOKEN COMMIT ROUTE SHIPPED (s46, merge `7e9f07a`, prod 401-marker
+  verified):** `/api/token-commit` — copy-commit's mold (same x-edit-key,
+  409 flow) but commits `tokens/semantic/<theme>.json` to fixed branch
+  `inspect-tune` and opens/stacks a PR; CI `tokens-sync.yml`
+  (doctor --strict --parity) is the merge gate. Editable head = branch
+  while its PR is open (second SAVE stacks, never reverts). Server
+  validates semantic-color roles (TOKEN_TIERS) + 12 PALETTE candidates
+  only — raw hex unreachable. Panel: SAVE → PR (THEME) chip, shared
+  arming w/ EDIT.MODE (`lib/editKey`, one sessionStorage slot), AA-fail
+  block, PR link, live-region a11y. figma-plugin's GitHub client
+  promoted to `src/lib/github.ts` (shared, both builds green).
+  **⚠️ Jake: add Pull requests:write + Issues:write to
+  GITHUB_COPY_TOKEN** — until then SAVE arms but can't open the PR.
+  Editing-modes ledger (modes today · Jake's goals · parity arc:
+  motion → type/space → component stage → unification) in Notion task
+  "editing modes ledger".
 - **HARNESS HOOKS LIVE (s45, merge `5e533cf`):** checked-in
   `.claude/settings.json` + `.claude/hooks/` — SessionStart injects the
   §4.1 dispatch reminder; PreToolUse blocks hand-edits to
@@ -107,33 +123,33 @@
 > fourier "agents are clickable" framework developed + phased in its task.
 > Next in that arc: P1 canned mini-chats for HERTZ/NYQUIST/FOURIER.
 
-## Latest session — S45 HARNESS HOOKS: THE LAW ENFORCES ITSELF (2026-08-11)
+## Latest session — S46 TOKEN COMMIT ROUTE: THE INSPECTOR FILES PAPERWORK (2026-08-11)
 
-**Notion "should we be using hooks?" → installed (Jake's go), solo-Fable
-(merge `5e533cf`, branch `infra/harness-hooks` deleted). Config-only —
-no site surface, no deploy verification needed.**
+**Handoff item 4 → shipped same session (Jake: "lets fuckin jam").
+Opus implementer + DOPPLER audit, Fable orchestrating; merge `7e9f07a`,
+branch deleted, deck reported throughout.**
 
-- Checked-in `.claude/settings.json` + three scripts in `.claude/hooks/`:
-  `session-start.sh` (SessionStart, matcher startup|clear — injects the
-  §4.1 deck-dispatch reminder with the exact sourcing command; warns if
-  CC_FEED_KEY missing) · `guard-generated.mjs` (PreToolUse
-  Edit|Write|MultiEdit — exit-2 blocks `tokens.generated.css`,
-  `tokens.generated.ts`, `motion.generated.ts`, `src/styles/generated/`,
-  points at `npm run tokens:build`) · `guard-bash.mjs` (PreToolUse Bash —
-  blocks prettier as a command word; blocks `git commit` when §3.3 paths
-  are staged AND scans add-segments of compound commands, since one-shot
-  `add && commit` stages after the hook fires).
-- **Deviation from the research sketch:** SessionStart *reminds* with the
-  exact dispatch command instead of auto-firing cc-report — a hook can't
-  know the task label, and generic units would litter the live deck.
-- 23-case assertion suite green (incl. live staged-`docs/` block and the
-  source-`.env.local`-then-commit false-positive case). Meta-proof: the
-  guard blocked this session's own test command for containing a
-  prettier invocation.
-- Hooks snapshot at session start — sessions already running when this
-  merged don't have them; everything started after does. #4 from the
-  research table (block `npm run build` while dev server owns `.next`)
-  remains unbuilt — needs a port-probe script, still in the task page.
+- Route + SAVE UI as the current-state bullet describes. DOPPLER round:
+  2 HIGH (stacking revert — fixed via editable-head; `$description`
+  deletion on re-alias — fixed, diffs are one line again) + 4 MEDIUM
+  (chip invisible in classic-dark: `--content-inverse` ≡ `--content`
+  there, swapped to surface-on-content 15:1; prLink AA; live-region +
+  focus drops; discarded 409 body → one-shot retry) — all fixed.
+  Security surface verified clean: no injection path (role regex + tier
+  + palette allowlists), no secret echo, tree confined to the one theme
+  file.
+- **Deviation from the Notion sketch, Jake-blessed by merge:** doctor
+  `--strict` gate runs in CI on the PR (tokens-sync.yml pre-existed),
+  not server-side pre-commit — the sketch predates the PR ruling.
+- Verified live pre-merge: prod build green, 50/50 tests (25-case pure
+  tokenEdit suite added), full UI chain driven on dev (pick → re-cast
+  → save row → wrong-key reject w/ focus kept → RESET ALL clean);
+  route ladder curl-proven 401/401/501.
+- Jake's design Qs answered in-chat and captured in the Notion "editing
+  modes ledger" task: re-cast = remapping semantic→core (yes); no
+  minting roles from the panel (legislation, not value edit); type/space
+  extend via the same mechanic; component-isolation stage + mode
+  unification are unscoped ideas awaiting his want.
 
 ## Next steps
 
@@ -144,13 +160,13 @@ no site surface, no deploy verification needed.**
 2. **Jake: drive the finished INSPECT SHELL on lunde.co** — INSPECT in
    the menubar; crown + SELECT/OPERATE are live. **Jake: buy Motion+**
    (his account) → then run the motion+ task (Notion, P2).
-3. **Token debt sweep (Jake: launch the chip, or any fresh session):**
+3. **Token debt sweep — Jake is spinning up a fresh session for it:**
    scoped P1, brief + ledger method in Notion →
    https://app.notion.com/p/3b8d29ee9854810399d8c387686eab5c —
    re-alias core-consumed-raw, adopt/kill the 54 dead tokens, doctor→0.
-4. **Phase-1 token commit route (UNBLOCKED — PR path ruled):** model on
-   copy-commit but open a PR (branch + doctor-tokens --strict gate),
-   wire the nudge palette's SAVE to it.
+4. **Jake: add Pull requests:write + Issues:write to GITHUB_COPY_TOKEN**
+   (Vercel env) — the inspector's SAVE can't open PRs without them —
+   then nudge a color on lunde.co and merge your first `inspect-tune` PR.
 5. **Jake: feel the FOCUS crawl on lunde.co** (35px/s — `CRAWL_PX_PER_SEC`
    if off) — it's live.
 6. **Jake: read the skills research + the TUNE.MODE plan** (both Notion
