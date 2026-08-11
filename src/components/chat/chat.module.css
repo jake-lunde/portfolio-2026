@@ -18,7 +18,7 @@
   gap: 6px;
   flex: 0 0 auto;
   padding-bottom: 12px;
-  border-bottom: var(--border-width-hairline) solid var(--border);
+  border-bottom: var(--border-width-subtle) solid var(--border);
 }
 
 .avatar,
@@ -87,11 +87,11 @@
 .said {
   font-family: var(--sans);
   font-size: var(--type-body-sm-size);
-  line-height: var(--leading-relaxed);
+  line-height: var(--leading-body);
   color: var(--content);
   background: var(--surface-raised);
   border: var(--border-width-default) solid var(--content);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   padding: 12px 14px;
   margin: 0 0 18px;
   max-width: 46ch;
