@@ -174,10 +174,13 @@ deck reported throughout. Zero-visual-change law held.**
 2. **Jake: drive the finished INSPECT SHELL on lunde.co** — INSPECT in
    the menubar; crown + SELECT/OPERATE are live. **Jake: buy Motion+**
    (his account) → then run the motion+ task (Notion, P2).
-3. **Jake: merge PR #6 (token debt sweep) + rule its ledger** —
-   https://github.com/jake-lunde/portfolio-2026/pull/6 — Chromatic diff
-   should be EMPTY (zero-change law); rulings owed: snap-candidates ramp,
-   kill-list, --space-5. Notion task → In review.
+3. **Jake: rule the PR #6 ledger** (sweep MERGED `ccc1a9d`, prod
+   marker-verified; Notion task Done) — snap-candidates ramp · kill-list ·
+   --space-5. Chromatic's 13 unreviewed changes are main's own stale
+   baselines (pre-sweep build 147 shows the identical set) — accept them
+   in Chromatic to re-zero the visual gate. Storybook audit done (s47b):
+   inventory + recommendation in the session log; next catalog wave =
+   chat primitives, Icon, VizShell, shelf trio + type-ramp/scale boards.
 4. **Jake: add Pull requests:write + Issues:write to GITHUB_COPY_TOKEN**
    (Vercel env) — the inspector's SAVE can't open PRs without them —
    then nudge a color on lunde.co and merge your first `inspect-tune` PR.
