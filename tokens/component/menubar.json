@@ -1,0 +1,7 @@
+{
+  "menubar-h": {
+    "$value": "34px",
+    "$type": "dimension",
+    "$description": "The menubar's own height — a component decision, not a layout primitive."
+  }
+}

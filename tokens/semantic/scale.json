@@ -14,6 +14,10 @@
     }
   },
   "border-width": {
+    "subtle": {
+      "$value": "{border-width.hairline}",
+      "$type": "dimension"
+    },
     "default": {
       "$value": "{border-width.thin}",
       "$type": "dimension"

@@ -63,11 +63,6 @@
   --mono: var(--font-mono), 'SF Mono', ui-monospace, Menlo, monospace;
   --cjk: var(--font-cjk), sans-serif;
   --display: var(--font-pixel), var(--font-mono), monospace;
-  --menubar-h: 34px;
-  --duration-tap: 0.16s;
-  --duration-fade: 0.18s;
-  --duration-theme: 0.25s;
-  --duration-slow: 0.7s;
   --spring-window-stiffness: 480;
   --spring-window-damping: 34;
   --spring-window-mass: 0.7;
@@ -86,6 +81,10 @@
   --spring-rise-damping: 20;
   --spring-flight-stiffness: 260;
   --spring-flight-damping: 26;
+  --duration-tap: 0.16s;
+  --duration-fade: 0.18s;
+  --duration-theme: 0.25s;
+  --duration-slow: 0.7s;
   --type-display-size: clamp(34px, 6vw, 62px);
   --type-display-tracking: 0;
   --type-heading-1-size: clamp(28px, 5.5vw, 38px);
@@ -104,9 +103,11 @@
   --button-sm-padding-y: 6px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. Snap to 8px (8px) when a deliberate visual change is approved. */
   --button-md-padding-x: 18px; /** OFF-GRID literal. Snap to 16px (16px) or 20px (20px) when approved. */
   --button-md-padding-y: 7px; /** OFF-GRID literal. Snap to 8px (8px) when approved. */
+  --menubar-h: 34px; /** The menubar's own height — a component decision, not a layout primitive. */
   --radius-control: var(--radius-md);
   --radius-pill: var(--radius-lg);
   --radius-circle: var(--radius-full);
+  --border-width-subtle: var(--border-width-hairline);
   --border-width-default: var(--border-width-thin);
   --border-width-strong: var(--border-width-thick);
   --leading-body: var(--leading-relaxed);
