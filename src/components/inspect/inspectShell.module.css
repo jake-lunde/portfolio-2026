@@ -366,16 +366,36 @@
   color: var(--content);
 }
 
-/* ---- the preview banner: live overrides, never saved ---- */
+/* ---- the preview banner: live overrides, never live ----
+   Two states share it. PREVIEWING: inline props on <html>, gone with the
+   mode. COMMITTED: the same override is also sitting in a pull request,
+   awaiting review — still not live, which is why the banner keeps its
+   warning ground either way and only the sentence changes. */
+/* No `gap` here on purpose: the live region below is always mounted, and a
+   gap would reserve space for it even while it is empty. The rows carry
+   their own margin-top instead, so an empty region costs exactly nothing
+   and never has to be display:none — a hidden region is not announced. */
 .preview {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-component-sm);
+  flex-direction: column;
   margin-bottom: var(--spacing-component-md);
   padding: var(--spacing-component-sm);
   border: var(--border-width-default) solid var(--status-warning-base);
   background: color-mix(in srgb, var(--status-warning-base) 12%, transparent);
+}
+
+.previewTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-component-sm);
+}
+
+.previewActions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
 }
 
 .previewText {
@@ -411,6 +431,104 @@
 .resetAll:focus-visible {
   outline: var(--border-width-strong) solid var(--accent);
   outline-offset: 2px;
+}
+
+/* ---- SAVE: the one control here that proposes a real change ---- */
+.save {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+}
+
+/* aria-disabled, not :disabled — the button stays focusable so its reason
+   stays reachable (see InspectorPanel). The styling has to follow the ARIA
+   state rather than the DOM one. */
+.save[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: var(--interactive-disabled-opacity);
+}
+
+.save[aria-disabled='true']:hover {
+  color: var(--content);
+  background: var(--surface);
+}
+
+.save[aria-disabled='true']:hover .saveTarget {
+  color: var(--surface);
+  background: var(--content);
+}
+
+/* the destination, stated on the button — a token commit lands in ONE
+   theme file and the visitor should never have to infer which.
+
+   Ink on the plate is --surface, NOT --content-inverse: on classic-dark
+   those two resolve to the same cream and the chip grades 1.00:1. That is
+   the --accent-on-inverse debt family — "inverse" means inverted relative to
+   the LIGHT theme, so it stops being the opposite of --content the moment
+   the theme flips. --surface is the true opposite in every skin.
+   Measured against the generated hexes: 14.00 light · 15.07 dark · 12.86
+   medieval. */
+.saveTarget {
+  padding: 0 var(--spacing-component-xs);
+  color: var(--surface);
+  background: var(--content);
+}
+
+.save:hover .saveTarget {
+  color: var(--content);
+  background: var(--surface);
+}
+
+.keyRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  margin-top: var(--spacing-component-xs);
+}
+
+.keyLabel,
+.saveNote {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  color: var(--content);
+}
+
+.keyInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 var(--spacing-component-xs);
+  font-family: var(--mono);
+  font-size: var(--type-micro-size);
+  color: var(--content);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: var(--radius-none);
+}
+
+.keyInput:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+.saveNote {
+  margin-top: var(--spacing-component-xs);
+}
+
+.saveNote[data-fail] {
+  color: var(--status-danger-base);
+}
+
+/* The link is 8px bold on the banner's warning-tinted ground, where --accent
+   grades 4.29:1 on classic-dark — under AA for text this size. Ink instead,
+   with the underline carrying the affordance rather than the hue (WCAG 1.4.1
+   wants more than colour anyway). 11.75 light · 12.27 dark · 10.81 medieval. */
+.prLink {
+  color: var(--content);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* ---- ident ---- */

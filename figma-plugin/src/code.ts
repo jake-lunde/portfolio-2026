@@ -10,7 +10,9 @@
  * UI iframe and never written to the status log.
  */
 
-import { GitHub, parseRepo } from './github'
+// Shared with the site's /api/token-commit route — one GitHub client, one
+// PR-flow shape. Lives in src/lib so a Next server route can import it too.
+import { GitHub, parseRepo } from '../../src/lib/github'
 import {
   buildModel,
   capLines,
@@ -951,5 +953,5 @@ async function commitAndPr(
     return existingPr.html_url
   }
   const body = `${PR_BODY_INTRO}\n\n${changesSection(changes)}`
-  return gh.createPr(PR_BRANCH, base, PR_TITLE, body)
+  return (await gh.createPr(PR_BRANCH, base, PR_TITLE, body)).html_url
 }

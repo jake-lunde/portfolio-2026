@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import { SPRINGS } from '@/lib/motion'
 import { useSettings } from '@/store/settings'
 import { resolveCopy, type CopySlot } from '@/content/copy'
+import { clearEditKey, readEditKey, verifyEditKey } from '@/lib/editKey'
 import styles from './editmode.module.css'
 
 /* EDIT.MODE — SYS-99. Jake's in-place copy editor. Arm it with the shared
@@ -14,9 +15,9 @@ import styles from './editmode.module.css'
    straight to copy.json on main via /api/copy-commit.
 
    The secret key is verified server-side (timing-safe) and only ever held
-   in sessionStorage on the client — it is never rendered, never logged. */
-
-const KEY_STORE = 'lunde-edit-key'
+   in sessionStorage on the client — it is never rendered, never logged.
+   The storage slot itself lives in lib/editKey.ts, because INSPECT.MODE's
+   token SAVE arms against the same secret and one arming should cover both. */
 
 type Edit = { key: string; slot: CopySlot; oldValue: string; newValue: string }
 type Phase = 'checking' | 'locked' | 'armed' | 'unconfigured'
@@ -88,13 +89,7 @@ export default function EditMode() {
     skinRef.current = skin
   }, [skin])
 
-  const authKey = () => {
-    try {
-      return sessionStorage.getItem(KEY_STORE) ?? ''
-    } catch {
-      return ''
-    }
-  }
+  const authKey = readEditKey
 
   /* ---- fetch the current sha/content; report where the UI should land ---- */
   const loadBase = useCallback(async (): Promise<'armed' | 'locked' | 'unconfigured'> => {
@@ -132,11 +127,7 @@ export default function EditMode() {
       }
       const outcome = await loadBase()
       if (!alive) return
-      if (outcome === 'locked') {
-        try {
-          sessionStorage.removeItem(KEY_STORE)
-        } catch {}
-      }
+      if (outcome === 'locked') clearEditKey()
       setPhase(outcome)
     })()
     return () => {
@@ -150,21 +141,15 @@ export default function EditMode() {
     e.preventDefault()
     setAuthError(null)
     const entered = keyInput
-    const res = await fetch('/api/copy-commit/verify', {
-      method: 'POST',
-      headers: { 'x-edit-key': entered },
-    })
-    if (res.status === 501) {
+    const verdict = await verifyEditKey(entered)
+    if (verdict === 'unconfigured') {
       setPhase('unconfigured')
       return
     }
-    if (!res.ok) {
+    if (!verdict) {
       setAuthError('Key rejected.')
       return
     }
-    try {
-      sessionStorage.setItem(KEY_STORE, entered)
-    } catch {}
     setKeyInput('')
     const outcome = await loadBase()
     setPhase(outcome)
@@ -302,9 +287,7 @@ export default function EditMode() {
     setConflict(false)
     setStatus(null)
     setPhase('locked')
-    try {
-      sessionStorage.removeItem(KEY_STORE)
-    } catch {}
+    clearEditKey()
   }
 
   /* ---- commit ---- */
