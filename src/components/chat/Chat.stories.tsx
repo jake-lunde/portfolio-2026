@@ -52,9 +52,13 @@ export const Tones: Story = {
 
 export const Thinking: Story = {
   name: 'Bubble — thinking state',
+  /* Both registers of the wait: plain (ASK MY AI pending) and machine
+     (the SUGGESTION BOX's DOPPLER line). The capsule must win over the
+     machine's square — cascade order, so it gets a snapshot. */
   render: () => (
-    <div style={{ maxWidth: 420 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 420 }}>
       <Bubble thinking={{ mark: fableAvatar, label: 'THINKING' }} />
+      <Bubble machine thinking={{ mark: fableAvatar, label: 'JUDGING' }} />
     </div>
   ),
 }
@@ -73,7 +77,7 @@ export const MachineVsHuman: Story = {
             marginBottom: 8,
           }}
         >
-          Machine — mono caps
+          Machine — the CRT register
         </p>
         <Bubble machine as="div">
           RESUME.EXE COMPILED CLEAN — 1 WARNING, 0 ERRORS

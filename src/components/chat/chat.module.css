@@ -100,22 +100,39 @@
   min-height: 1.6em;
 }
 
-[data-theme='dark'] .said {
+[data-theme='dark'] .said:not(.machine) {
   border-color: var(--border);
 }
 
 /* the machine speaking as itself — greetings, errors, verdicts, the cap.
-   Mono caps in the same bubble, because it is still a message. */
+   Not just mono in the same bubble any more (Jake's build-153 ruling):
+   the machine's own voice is the CRT idiom at message scale — inverse
+   plate, light ink, square corners, the mono type ROLE. Same dialect as
+   the visualizers' tubes, so a machine line reads as machine at a
+   glance. Border mixes from the plate's own ink, the tubes' 0.25 line. */
 .machine {
-  font-family: var(--mono);
-  font-size: var(--text-ui);
-  letter-spacing: 0.08em;
-  line-height: 1.5;
+  font-family: var(--type-mono-family);
+  font-size: var(--type-mono-size);
+  font-weight: var(--type-mono-weight);
+  letter-spacing: var(--type-mono-tracking);
+  line-height: var(--type-mono-leading);
+  color: var(--content-inverse);
+  background: var(--surface-inverse);
+  border-color: color-mix(in srgb, var(--content-inverse) 25%, transparent);
+  border-radius: 0;
 }
 
-/* errors and the cap are a warning on top of that, so they take accent */
+/* the mark has to speak the plate's ink or it drowns in it */
+.machine .thinkMark {
+  background: var(--content-inverse);
+}
+
+/* errors and the cap are a warning on top of that. Accent TEXT fails AA
+   on the inverse plate (the --accent-on-inverse debt), so the warning is
+   a mark instead — expressive border, the same move the tubes make for
+   their live markers. Marks-only is the expressive law anyway. */
 .saidSystem {
-  color: var(--accent);
+  border-color: var(--accent-expressive);
 }
 
 /* ---- the wait ---- */
@@ -123,13 +140,16 @@
 /* the wire is out and nothing is back yet. The bubble holds the unit's
    own mask, turning and breathing — one mark, transform and opacity
    only. It is the SAME bubble that becomes the answer, so the entrance
-   never gets to play twice. */
+   never gets to play twice. Fully round while it lasts (Jake's build-153
+   ruling): the machine's thought is a capsule, its speech has corners —
+   declared after .machine so the thought wins even on a machine line. */
 .thinking {
   display: flex;
   align-items: center;
   min-height: 0;
   padding: 10px 14px;
   width: max-content;
+  border-radius: var(--radius-thinking);
 }
 
 .thinkMark {

@@ -134,18 +134,23 @@ type Metrics = {
   leadToken: string | null
 }
 
+/** var() for one axis of one role. Assembled from the name, not written
+    inline — tokens:doctor greps source for var-plus-prefix literals (code
+    AND comments) and would read a template's prefix as a truncated token. */
+const typeVar = (key: string, axis: string) => `var(${`--type-${key}-${axis}`})`
+
 /** Style object built from a role's own vars — what the specimen renders with
     and what the probe measures, so the caption can never drift from the sample. */
 function roleStyle(key: string): CSSProperties {
   const s: CSSProperties = {
-    fontFamily: `var(--type-${key}-family)`,
-    fontSize: `var(--type-${key}-size)`,
-    fontWeight: `var(--type-${key}-weight)` as CSSProperties['fontWeight'],
-    lineHeight: `var(--type-${key}-leading)`,
+    fontFamily: typeVar(key, 'family'),
+    fontSize: typeVar(key, 'size'),
+    fontWeight: typeVar(key, 'weight') as CSSProperties['fontWeight'],
+    lineHeight: typeVar(key, 'leading'),
   }
   /* Six roles declare no tracking token; setting the var anyway would be
      invalid-at-computed-value-time. Left unset, and reported as NO TOKEN. */
-  if (raw(`--type-${key}-tracking`)) s.letterSpacing = `var(--type-${key}-tracking)`
+  if (raw(`--type-${key}-tracking`)) s.letterSpacing = typeVar(key, 'tracking')
   return s
 }
 
@@ -180,9 +185,9 @@ function measure(key: string): Metrics {
   probe.setAttribute('aria-hidden', 'true')
   probe.textContent = 'M'
   probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;white-space:pre'
-  for (const [prop, axis] of PROBE_AXES) probe.style.setProperty(prop, `var(--type-${key}-${axis})`)
+  for (const [prop, axis] of PROBE_AXES) probe.style.setProperty(prop, typeVar(key, axis))
   if (raw(`--type-${key}-tracking`)) {
-    probe.style.setProperty('letter-spacing', `var(--type-${key}-tracking)`)
+    probe.style.setProperty('letter-spacing', typeVar(key, 'tracking'))
   }
   document.body.appendChild(probe)
   const cs = getComputedStyle(probe)
@@ -492,9 +497,16 @@ function SnapFinderBoard({ text, size, tracking, weight, family, uppercase }: Ca
     <div style={{ color: ink }}>
       <Heading>Snap finder · one candidate, eleven roles</Heading>
       <Note>
-        Paste a ledger candidate into the controls — its literal size and tracking — and read which
-        role it is already sitting on. No score, no weighting: just the measured distance on each
-        axis, so the call stays yours. Δ 0 on both axes is a free snap.
+        Why: the token-debt ledger (PR #6) holds ~70 pieces of mono UI text sitting one literal step
+        off a named role — each needs a ruling: snap it to the role, or decide the difference is
+        deliberate and name it. Eyeballing that across eleven roles is guesswork; this measures it.
+      </Note>
+      <Note>
+        How: open the Controls panel and type one candidate&apos;s literal spec — the text itself,
+        its px size, em tracking, weight, family (all readable off the ledger row, or INSPECT on the
+        live site). Every role&apos;s measured distance appears below, per axis. Δ 0 on both axes is
+        a free snap; a small Δ on one axis is the actual question — rule whether that step carries
+        meaning. No score, no weighting: the call stays yours.
       </Note>
 
       <section style={{ ...card, background: 'var(--surface-raised)' }}>

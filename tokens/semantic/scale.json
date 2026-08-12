@@ -11,6 +11,11 @@
     "circle": {
       "$value": "{radius.full}",
       "$type": "dimension"
+    },
+    "thinking": {
+      "$value": "999px",
+      "$type": "dimension",
+      "$description": "The machine's thought is round; its speech is square — a chat bubble in the thinking state. A literal (like the fluid type sizes) because the core full radius is 50%, which draws an ellipse on a rectangle; the capsule needs an absolute overshoot."
     }
   },
   "border-width": {

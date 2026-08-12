@@ -94,7 +94,7 @@ const RADIUS_PRIMS = () =>
   namesOr(
     /^--radius-/,
     ['--radius-none', '--radius-xs', '--radius-sm', '--radius-md', '--radius-lg', '--radius-full'],
-    /^--radius-(control|pill|circle)$/,
+    /^--radius-(control|pill|circle|thinking)$/,
   ).sort(byValue)
 
 const BORDER_PRIMS = () =>
@@ -128,9 +128,11 @@ function spacingRamps(): Array<{ tier: string; tokens: string[] }> {
   )
 }
 
-/* The tier this board exists to defend: three names, in order. */
+/* The tier this board exists to defend: named shapes, in order. `thinking`
+   is the build-153 addition — the chat bubble's capsule while the machine
+   works (999px literal; the core full radius is 50%, an ellipse on rects). */
 const BORDER_SEMANTIC = ['--border-width-subtle', '--border-width-default', '--border-width-strong']
-const RADIUS_SEMANTIC = ['--radius-control', '--radius-pill', '--radius-circle']
+const RADIUS_SEMANTIC = ['--radius-control', '--radius-pill', '--radius-thinking', '--radius-circle']
 
 /* ── re-render on skin / mode change (same wiring as TokensBoard) ──────────── */
 
@@ -375,18 +377,24 @@ function RadiusBoard() {
     <div>
       <Heading>Radius</Heading>
       <Note>
-        Three shapes, three jobs: control, pill, circle. A radius ruling is a shape ruling — if two
-        tiles below read as the same object, the system has one name too many.
+        Four shapes, four jobs: control, pill, thinking, circle. A radius ruling is a shape ruling —
+        if two tiles below read as the same object, the system has one name too many. Thinking is
+        judged on a rectangle: it is the chat bubble&apos;s capsule while the machine works, and on a
+        square it would counterfeit circle.
       </Note>
       <TierLabel>Semantic</TierLabel>
-      <section style={{ ...card, display: 'flex', flexWrap: 'wrap', gap: 'var(--space-6)' }}>
+      <section
+        style={{ ...card, display: 'flex', flexWrap: 'wrap', gap: 'var(--space-6)', alignItems: 'end' }}
+      >
         {RADIUS_SEMANTIC.map((token) => (
           <div key={token} style={{ display: 'grid', gap: 'var(--space-2)' }}>
             <div
               aria-hidden
               style={{
                 width: TILE,
-                height: TILE,
+                /* thinking only exists on a rectangle — capsule vs circle's
+                   50% ellipse is the whole distinction the tile must show */
+                height: token === '--radius-thinking' ? 'var(--space-8)' : TILE,
                 background: 'var(--surface-raised)',
                 border: `var(--border-width-strong) solid var(--content)`,
                 borderRadius: `var(${token})`,
