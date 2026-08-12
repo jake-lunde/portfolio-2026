@@ -11,14 +11,17 @@ export const runtime = 'nodejs'
 export const revalidate = 20
 
 /* COST NOTE — read this before touching the GET path.
-   Every readFeed() costs a Blob `list()`, which is a BILLED operation, and
+   Blob `list()` is a BILLED advanced operation (12.5× a simple GET), and
    this endpoint is polled by a chip that sits on the desktop forever. One
-   browser left open overnight was quietly spending thousands of ops. Three
+   browser left open overnight was quietly spending thousands of ops. Four
    defences, cheapest first:
      1. the CDN answers most polls (s-maxage below), so they never reach us
      2. a module-scope cache answers most of the rest — serverless instances
-        are reused, so a burst of misses still costs ONE list()
-     3. the clients don't poll a hidden tab at all (see CommandWidget)
+        are reused, so a burst of misses still costs ONE read
+     3. a cache miss reads the fixed-path pointer blob (a plain fetch, no
+        list()) — see readLatestPointer; list() survives only as its
+        fallback and in the rare write path
+     4. the clients don't poll a hidden tab at all (see CommandWidget)
    A write invalidates the cache in-process; other instances catch up within
    FEED_TTL_MS. This is a deck of build telemetry — 20 seconds of staleness
    is free, and a billed op per visitor per 20s is not. */
@@ -35,6 +38,10 @@ const storeId = () => process.env.guestbook_STORE_ID ?? process.env.BLOB_STORE_I
 // versioned pathnames: overwriting one path serves stale CDN reads (same
 // lesson as the guestbook) — every write is a new URL, old ones pruned
 const FEED_PREFIX = 'cc/feed-'
+/* fixed-path pointer mirroring the newest versioned blob; deliberately
+   OUTSIDE the FEED_PREFIX namespace so the prune and the list()
+   fallback never mistake it for a versioned write */
+const FEED_LATEST = 'cc/latest.json'
 const MAX_EVENTS = 80
 
 const ACTIONS = ['dispatch', 'status', 'return', 'review', 'merge', 'prompt', 'curate'] as const
@@ -61,8 +68,8 @@ const wellFormed = (e: FeedEvent) =>
 
 let cache: { at: number; data: { updated: number; events: FeedEvent[] } } | null = null
 
-/** The cached read every GET goes through. Only a cache MISS costs a
-    `list()`; a write clears it so the next read is honest. */
+/** The cached read every GET goes through. Only a cache MISS reads the
+    store at all; a write clears it so the next read is honest. */
 async function readFeedCached(): Promise<{ updated: number; events: FeedEvent[] }> {
   if (cache && Date.now() - cache.at < FEED_TTL_MS) return cache.data
   const data = await readFeed()
@@ -71,6 +78,37 @@ async function readFeedCached(): Promise<{ updated: number; events: FeedEvent[] 
 }
 
 async function readFeed(): Promise<{ updated: number; events: FeedEvent[] }> {
+  return (await readLatestPointer()) ?? readFeedViaList()
+}
+
+/* Zero-`list()` read path. POST mirrors every write to the fixed-path
+   pointer blob, and a public blob's URL is constructible: host = the
+   store id minus its `store_` prefix, lowercased (derivation verified
+   against this store's live wall URLs — see /api/wall). The unique
+   query defeats the fixed-path CDN staleness trap (guestbook lesson);
+   if the CDN ever ignores query strings, the pointer's
+   cacheControlMaxAge (60s) bounds staleness instead — either way inside
+   the deck's tolerance. Any failure returns null and the caller falls
+   back to the billed list() below, so the worst case is yesterday's
+   cost, never an outage. */
+async function readLatestPointer(): Promise<{ updated: number; events: FeedEvent[] } | null> {
+  const host = storeId()?.replace(/^store_/i, '').toLowerCase()
+  if (!host) return null
+  try {
+    const res = await fetch(
+      `https://${host}.public.blob.vercel-storage.com/${FEED_LATEST}?v=${Date.now()}`,
+      { cache: 'no-store' },
+    )
+    if (!res.ok) return null
+    const d = await res.json()
+    if (typeof d?.updated !== 'number' || !Array.isArray(d?.events)) return null
+    return { updated: d.updated, events: d.events.filter(wellFormed).slice(-MAX_EVENTS) }
+  } catch {
+    return null
+  }
+}
+
+async function readFeedViaList(): Promise<{ updated: number; events: FeedEvent[] }> {
   const { blobs } = await list({ prefix: FEED_PREFIX, limit: 10, storeId: storeId() })
   const blob = blobs.sort((a, b) => b.pathname.localeCompare(a.pathname))[0]
   if (!blob) return { updated: 0, events: [] }
@@ -120,12 +158,25 @@ export async function POST(req: Request) {
   const payload = { updated: Date.now(), events }
 
   const stamp = String(Date.now()).padStart(14, '0')
-  await put(`${FEED_PREFIX}${stamp}.json`, JSON.stringify(payload), {
-    access: 'public',
-    addRandomSuffix: false,
-    contentType: 'application/json',
-    storeId: storeId(),
-  })
+  const json = JSON.stringify(payload)
+  // versioned blob = durable history + the list() fallback's source;
+  // pointer blob = what the zero-list() read path actually fetches
+  await Promise.all([
+    put(`${FEED_PREFIX}${stamp}.json`, json, {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'application/json',
+      storeId: storeId(),
+    }),
+    put(FEED_LATEST, json, {
+      access: 'public',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      cacheControlMaxAge: 60,
+      contentType: 'application/json',
+      storeId: storeId(),
+    }),
+  ])
   // prune older feed versions (keep the 3 newest)
   try {
     const { blobs } = await list({ prefix: FEED_PREFIX, limit: 20, storeId: storeId() })
