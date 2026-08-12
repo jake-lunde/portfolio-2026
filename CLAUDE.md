@@ -1,10 +1,11 @@
 # LUNDE OS — Law (slim edition, 2026-07-19)
 
 > The binding rules only. Full original brief archived at
-> `docs/BRIEF-ARCHIVE.md` (reference, not law). Process + current state:
-> `HANDOFF.md`. Crew doctrine: `CREW.md`. Token architecture:
-> `tokens/ARCHITECTURE.md`. Read HANDOFF.md at session start — it is ≤80
-> lines by protocol (§4).
+> `docs/BRIEF-ARCHIVE.md` (reference, not law). Code-adjacent state:
+> `HANDOFF.md` (≤60 lines by protocol §4). Projects/tasks/rulings: the
+> **jaique vault** (`/Users/jake/jaique`, §3.6). Crew doctrine: `CREW.md`.
+> Token architecture: `tokens/ARCHITECTURE.md`. Read HANDOFF.md at
+> session start; open the vault's LUNDE OS Map when task context matters.
 
 ## 1. What this is
 
@@ -61,8 +62,11 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
 5. Blob storage: OIDC `storeId` fallback (no *_READ_WRITE_TOKEN env);
    versioned blob paths for mutable data (single-path overwrite serves
    stale CDN).
-6. Task tracking lives in **Notion** (connector available). COMMAND.CTR
-   deck reporting per §4.
+6. Task tracking lives in the **jaique vault** (`/Users/jake/jaique` —
+   Obsidian, ACE format; navigation law in its `AIOS/Vault Map.md`;
+   portfolio hub = `Atlas/Maps/LUNDE OS Map.md`; the vault is its own
+   local git repo — commit there, separately). Notion is RETIRED
+   (2026-08-12) — never write to it. COMMAND.CTR deck reporting per §4.
 
 ## 4. Session protocol (applies to WHOEVER orchestrates)
 
@@ -84,11 +88,14 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
    file-heavy work to subagents (isolation keeps big reads out of the main
    context). Fable turns = orchestration/taste/review only; execution runs
    Opus-led. Batch asks. (Economics: CREW.md §4.)
-4. **End of session — always**: update `HANDOFF.md` and ROTATE it —
-   HANDOFF.md holds CURRENT STATE (≤60 lines) + the latest session note
-   ONLY; move older notes to `HANDOFF-ARCHIVE.md`. A session that doesn't
-   write itself down didn't happen; a HANDOFF that scrolls burns every
-   future session.
+4. **End of session — always**: (a) session note → vault
+   `Calendar/Notes/YYYY-MM-DD sNN.md`; (b) update touched vault
+   efforts/tasks (status, Shipped lines, new tasks from Jake's dictation;
+   commit the vault); (c) refresh `HANDOFF.md` CURRENT STATE — ≤60 lines,
+   code-adjacent facts ONLY (prod state, gotchas, branch state, debts);
+   Jake-facing tasks/rulings go to the vault, never HANDOFF; older notes
+   → `HANDOFF-ARCHIVE.md`. A session that doesn't write itself down
+   didn't happen; a HANDOFF that scrolls burns every future session.
 
 ## 5. Guardrails
 
