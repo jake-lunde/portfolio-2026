@@ -42,12 +42,10 @@
   `--accent-on-inverse` · reduced-motion by emulation · medieval airbrush
   wash contrast · token-debt leftovers (ruling = vault task) ·
   `family-hub 2/` + `".claude/* 2.*"` dups (Jake deletes).
-- **Cleanup owed:** remote deletes Jake must run (classifier blocks them
-  for Claude): `git push origin --delete case-family-hub suggestion-box`.
-  `medieval-sfx*` still on confirm. Locals `cv-exe`/`case-family-hub`
-  swept s50; `worktree-cc-v2-pipeline` was already gone. ~14 more stale
-  merged locals (`worktree-agent-*`, `blue-update-test`, old `feat/*`)
-  await Jake's ruling.
+- **Cleanup owed:** remote deletes Jake must run (classifier blocks
+  them): `git push origin --delete case-family-hub suggestion-box`;
+  `medieval-sfx*` on confirm. Locals swept s50; ~14 stale merged locals
+  (`worktree-agent-*`, `blue-update-test`, old `feat/*`) await ruling.
 
 ## Latest session — S51 BACKLOG TRIO (2026-08-12)
 
@@ -58,4 +56,4 @@
 - **⚠️ Vercel Web Analytics NEVER ENABLED** — all 14 `metric()` events
   silently discarded until Jake flips the toggle (vault: "optimize
   analytics"). Pocock recon done (vault note). Session note: vault
-  `Calendar/Notes/2026-08-12 s51.md`. s50 → HANDOFF-ARCHIVE.
+  `Calendar/Notes/2026-08-12 s51.md`. s50 → archive.
