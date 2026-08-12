@@ -1,5 +1,16 @@
 # HANDOFF ARCHIVE — LUNDE OS
 
+## Rotated 2026-08-12 (s50) — s49 session block
+
+S49 THE GREAT MIGRATION: Notion → Obsidian, complete. Vault
+`/Users/jake/jaique` (Ideaverse/ACE): 23 effort notes · 43 task notes ·
+28 Shipped lines · Family Hub subpages + SKILL (no repo drift) · AIOS
+layer (ME/Vault Map/Skill Map) · Greenlight day-job tracking. Audit: 1
+gap → 73rd task recovered (WIP-15 `/progress`). CLAUDE.md §3.6/§4.4
+rewritten; memory updated. Open before Notion trash: Jake's vault walk ·
+2 Family Hub binaries · trash confirm. Crew: 4 Sonnet waves + Opus ME.md
++ Opus audit. Full note: vault `Calendar/Notes/2026-08-12 s49.md`.
+
 ## Rotated 2026-08-12 (s49) — full pre-migration HANDOFF (Notion era ends; tasks → jaique vault)
 
 

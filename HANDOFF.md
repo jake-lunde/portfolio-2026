@@ -44,19 +44,19 @@
   `--accent-on-inverse` · reduced-motion by emulation · medieval airbrush
   wash contrast · token-debt leftovers (ruling = vault task) ·
   `family-hub 2/` + `".claude/* 2.*"` dups (Jake deletes).
-- **Cleanup owed:** delete merged branches (`cv-exe`, `suggestion-box`,
-  `case-family-hub`, `worktree-cc-v2-pipeline`, `medieval-sfx*` on
-  confirm).
+- **Cleanup owed:** remote deletes Jake must run (classifier blocks them
+  for Claude): `git push origin --delete case-family-hub suggestion-box`.
+  `medieval-sfx*` still on confirm. Locals `cv-exe`/`case-family-hub`
+  swept s50; `worktree-cc-v2-pipeline` was already gone. ~14 more stale
+  merged locals (`worktree-agent-*`, `blue-update-test`, old `feat/*`)
+  await Jake's ruling.
 
-## Latest session — S49 THE GREAT MIGRATION (2026-08-12)
+## Latest session — S50 VAULT SHAKEDOWN (2026-08-12)
 
-Notion → Obsidian, complete. Vault `/Users/jake/jaique` (Ideaverse/ACE):
-23 effort notes · 43 task notes · 28 Shipped lines · Family Hub subpages
-+ SKILL (no repo drift) · AIOS layer (ME/Vault Map/Skill Map) · Greenlight
-day-job tracking (log + streams). Audit: 1 gap found → 73rd task recovered
-verbatim (WIP-15 `/progress` shipping record). s48 delta folded into vault
-tasks post-rotation. CLAUDE.md §3.6/§4.4 rewritten; memory updated. Open
-before Notion trash: Jake's vault walk · 2 Family Hub binaries (manual
-pull, vault task) · explicit trash confirm. Crew: 4 Sonnet waves + Opus
-ME.md + Opus audit; deck reported. Full note: vault
-`Calendar/Notes/2026-08-12 s49.md`.
+First task run through the vault. Family Hub binary pull re-attacked
+from 3 new angles (MCP fetch/download-attachment/raw API) — all dead,
+findings in the task note; verdict stands: Jake hand-pulls (still blocks
+Notion trash). Branch sweep: locals `cv-exe`+`case-family-hub` deleted
+(remote deletes → Jake, see Cleanup owed). Vault workflow verdict +
+friction notes: vault `Calendar/Notes/2026-08-12 s50.md`. s49 summary →
+HANDOFF-ARCHIVE.
