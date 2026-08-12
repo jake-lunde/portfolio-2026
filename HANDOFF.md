@@ -161,6 +161,20 @@ boards crew, disjoint all-new files, zero refactoring; deck reported.**
   · build-storybook green · all 29 new stories probe-verified on the
   static build (body error-class + root-children; NOT screenshots) ·
   4 skin/mode combos resolve (medieval single-mode by design).
+- **BUILD-153 REVIEW LOOP CLOSED (same session):** Jake reviewed in
+  Chromatic (3 denials + 3 comments — read via anonymous GraphQL, see
+  memory `chromatic-review-readback`); rulings applied in `7f533bd` on
+  the PR branch. Machine voice = CRT register (inverse plate, square,
+  type-mono role adopted, --text-ui alias retired) · new semantic
+  `radius.thinking` 999px literal (thought is a capsule, speech has
+  corners; radius.full=50% draws ellipses on rects) · system warnings
+  = accent-expressive BORDER (accent text on plate fails AA 2.08;
+  expressive measures 9.4/10.3/5.75) · machine+thinking register
+  (DOPPLER pending) added to the thinking story · SnapFinder why/how
+  notes (Jake: "i think i like it" — it stays) · TypeRamp assembles
+  var names (doctor greps template prefixes — was 1 CI-gating error).
+  Jake's mono-bench motion idea filed into the motion+ task page.
+  Chromatic re-snapshots; Jake re-reviews the three.
 - Follow-ups: Wave 2 settings-store decorator (unlocks 8 shell
   components) · extract duplicated token-probe helpers →
   design-system/tokenProbe.ts (TokensBoard could adopt) · probe note:
