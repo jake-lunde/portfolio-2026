@@ -14,10 +14,8 @@
   — GitHub status stays "pending" while Chromatic runs; apex 308s to www).
   **Production = s51 DECK ZERO-LIST (`0386e89`) on s46 TOKEN COMMIT
   ROUTE + s44 MISC QUARTET + INSPECT SHELL + ASK MY AI + SHIPPED.SW.**
-- **PR #7 MERGED `cb48868` (s48 storybook catalog, waves 1+1.5,
-  build-153 rulings in `7f533bd`):** TypeRamp/SnapFinder ruling boards
-  now on main; Wave 2 = settings-store decorator (ruling sequence:
-  vault task "rule the PR 6 ledger").
+- **PR #7 MERGED `cb48868` (s48 storybook catalog):** ruling boards on
+  main; Wave 2 = settings-store decorator (vault: "rule the PR 6 ledger").
 - **⚠️ Shared-checkout law:** no concurrent sessions on one working tree;
   `git branch --show-current` before EVERY commit; worktrees are the
   pattern; leave the main checkout on main.
@@ -53,13 +51,11 @@
 
 ## Latest session — S51 BACKLOG TRIO (2026-08-12)
 
-- **cc-feed zero-list SHIPPED (`0386e89`):** `/api/cc-feed` GETs no
-  longer pay a billed `list()` — POST mirrors writes to fixed-path
-  pointer `cc/latest.json` (allowOverwrite + cache-bust read defeats
-  the stale-overwrite trap); `list()` = self-healing fallback only.
-  Pointer URL derived from storeId (verified vs wall URLs). Prod-tested.
-- **⚠️ Vercel Web Analytics was NEVER ENABLED on the project** — the 14
-  wired `metric()` events are silently discarded until Jake flips the
-  toggle (steps + 6 proposed events: vault "optimize analytics").
-- Pocock skills recon done (verdict in vault task note). Session note:
-  vault `Calendar/Notes/2026-08-12 s51.md`. s50 → HANDOFF-ARCHIVE.
+- **cc-feed zero-list SHIPPED (`0386e89`, prod-tested):** GETs read
+  fixed-path pointer `cc/latest.json` (POST mirrors writes there;
+  cache-bust query defeats the stale-overwrite trap; URL derived from
+  storeId); `list()` = self-healing fallback only.
+- **⚠️ Vercel Web Analytics NEVER ENABLED** — all 14 `metric()` events
+  silently discarded until Jake flips the toggle (vault: "optimize
+  analytics"). Pocock recon done (vault note). Session note: vault
+  `Calendar/Notes/2026-08-12 s51.md`. s50 → HANDOFF-ARCHIVE.
