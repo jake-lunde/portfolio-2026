@@ -77,6 +77,7 @@ export const TOKEN_TIERS: Record<string, 'core' | 'semantic' | 'component'> = {
   '--radius-none': 'core',
   '--radius-pill': 'semantic',
   '--radius-sm': 'core',
+  '--radius-thinking': 'semantic',
   '--radius-xs': 'core',
   '--sans': 'semantic',
   '--shadow-lift': 'semantic',
