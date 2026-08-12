@@ -1,5 +1,15 @@
 # HANDOFF ARCHIVE — LUNDE OS
 
+## Rotated 2026-08-12 (s51) — s50 session block
+
+S50 VAULT SHAKEDOWN (first task run through the vault): Family Hub
+binary pull re-attacked from 3 new angles (MCP fetch/download-attachment
+/raw API) — all dead, findings in the task note; verdict stands: Jake
+hand-pulls (still blocks Notion trash). Branch sweep: locals
+`cv-exe`+`case-family-hub` deleted (remote deletes → Jake). Vault
+workflow verdict + friction notes: vault `Calendar/Notes/2026-08-12
+s50.md`.
+
 ## Rotated 2026-08-12 (s50) — s49 session block
 
 S49 THE GREAT MIGRATION: Notion → Obsidian, complete. Vault
