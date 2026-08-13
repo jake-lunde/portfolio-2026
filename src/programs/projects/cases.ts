@@ -127,7 +127,7 @@ export const CASES: CaseDef[] = [
     year: '2024–25',
     status: 'live',
     component: dynamic(() => import('@/programs/projects/CaseInvest')),
-    progress: { pct: 100, phase: 'Shipped — read it' },
+    progress: { pct: 100, phase: 'Shipped. Read it' },
     box: {
       /* the three phones on mint — Jake's own product shot. 2.10:1 into a
          16:9 plate, so it gives up a sliver either side and keeps the
@@ -139,7 +139,7 @@ export const CASES: CaseDef[] = [
       coverVariant: 'stripe',
       tagline: 'know why, not just what.',
       thesis:
-        'A kid told me the numbers meant nothing. So I built the understanding — in code.',
+        'Regardless of the layout or data, kids told us they didn’t understand, so we got on their level.',
       requirements: [
         { label: 'Role', value: 'Lead product designer' },
         { label: 'Trades', value: '3–4× vs. unexposed' },
@@ -156,7 +156,7 @@ export const CASES: CaseDef[] = [
     year: '2025–26',
     status: 'live',
     component: dynamic(() => import('@/programs/projects/CaseFamilyHub')),
-    progress: { pct: 100, phase: 'Shipped — read it' },
+    progress: { pct: 100, phase: 'Shipped. Read it' },
     box: {
       /* the hub dashboard, seated under the blob mask and the airbrush —
          the same treatment the film gets, which is what makes the two
@@ -219,7 +219,7 @@ export const CASES: CaseDef[] = [
     org: 'This site',
     year: '2026',
     status: 'soon',
-    progress: { pct: 15, phase: 'Outline only — the self-referential one' },
+    progress: { pct: 15, phase: 'Outline only. The one about this site' },
     /* the caterpillar, printed in the framed window the way a game box
        carried its one illustration */
     box: {
