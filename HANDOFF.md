@@ -12,8 +12,8 @@
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`;
   push to main = deploy; verify via Vercel MCP + content-marker `curl -sL`
   — GitHub status stays "pending" while Chromatic runs; apex 308s to www).
-  **Production = s51 DECK ZERO-LIST (`0386e89`) on s46 TOKEN COMMIT
-  ROUTE + s44 MISC QUARTET + INSPECT SHELL + ASK MY AI + SHIPPED.SW.**
+  **Production = s52 VHS SIGNAL (`21ef552`) on s51 deck zero-list + s46
+  token commit route + s44 misc quartet + INSPECT + ASK MY AI + SHIPPED.SW.**
 - **PR #7 MERGED `cb48868` (s48 storybook catalog):** ruling boards on
   main; Wave 2 = settings-store decorator (vault: "rule the PR 6 ledger").
 - **⚠️ Shared-checkout law:** no concurrent sessions on one working tree;
@@ -43,18 +43,18 @@
   wash contrast · token-debt leftovers (ruling = vault task) ·
   `family-hub 2/` + `".claude/* 2.*"` dups (Jake deletes).
 - **Cleanup owed:** remote deletes Jake must run (classifier blocks
-  them): `git push origin --delete case-family-hub suggestion-box`;
-  `medieval-sfx*` on confirm. Locals swept s50; ~14 stale merged locals
-  (`worktree-agent-*`, `blue-update-test`, old `feat/*`) await ruling.
+  them): `git push origin --delete case-family-hub suggestion-box
+  film-vhs-signal`; `medieval-sfx*` on confirm. Locals swept s50; ~14
+  stale merged (`worktree-agent-*`, `blue-update-test`, old `feat/*`)
+  await ruling.
 
 ## Latest session — S52 VHS SIGNAL (2026-08-13)
 
-- **PR #8 `film-vhs-signal` OPEN (awaiting Jake's taste pass):** CSS-only
-  VHS pass on shelf cover films — `.filmVhs` leaf in `.filmWrap`
-  (scanlines + 12s tracking roll, transform-only), gated on the film's
-  `data-clear` (printed art never dressed; pass-4 no-filter law holds);
-  medieval strikes it. Dials in shelf.module.css `.filmVhs`. NTSCplayer
+- **PR #8 MERGED `21ef552`, LIVE (marker-verified):** CSS-only VHS pass
+  on shelf cover films — `.filmVhs` leaf in `.filmWrap` (scanlines + 12s
+  tracking roll, transform-only), gated on the film's `data-clear`
+  (printed art never dressed; pass-4 no-filter law holds); medieval
+  strikes it. Taste dials in shelf.module.css `.filmVhs`. NTSCplayer
   RULED OUT (desktop mpv app, GPL shaders, no license) — look, not code.
-- **⚠️ Vercel Web Analytics still NEVER ENABLED** — `metric()` events
-  discarded until Jake flips the toggle (vault: "optimize analytics").
+- **⚠️ Web Analytics still NEVER ENABLED** (vault: "optimize analytics").
   Session note: vault `Calendar/Notes/2026-08-13 s52.md`. s51 → archive.
