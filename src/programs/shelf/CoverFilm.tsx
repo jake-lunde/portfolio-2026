@@ -27,7 +27,15 @@ import styles from './shelf.module.css'
    Decorative and pointer-inert throughout: aria-hidden, no tab stop, no
    controls, muted (a requirement of autoplay, not just politeness).
    Reduced motion never mounts this component (ShelfBox drops `film`), so
-   nothing here needs a motion query. */
+   nothing here needs a motion query.
+
+   The signal (s52): the empty span after the video is the VHS pass —
+   scanlines and a tracking roll, all of it CSS on that one leaf
+   (`.filmVhs` in shelf.module.css). It rides the same `data-clear` gate
+   through a sibling selector, so the printed art below is never dressed
+   as tape — only the footage is. Jake's vault task: "use this framework
+   to make our videos look legit" (the framework, NTSCplayer, is a desktop
+   player — this is its look, not its code). */
 
 export function CoverFilm({ src, title }: { src: string; title: string }) {
   /** the film has painted a frame — until then the art below is the face */
@@ -49,6 +57,7 @@ export function CoverFilm({ src, title }: { src: string; title: string }) {
         tabIndex={-1}
         onPlaying={() => setClear(true)}
       />
+      <span className={styles.filmVhs} />
     </span>
   )
 }
