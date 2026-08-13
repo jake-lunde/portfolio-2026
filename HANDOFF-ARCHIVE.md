@@ -1,5 +1,13 @@
 # HANDOFF ARCHIVE — LUNDE OS
 
+## Rotated 2026-08-13 (s52) — s51 session block
+
+S51 BACKLOG TRIO: cc-feed zero-list SHIPPED (`0386e89`, prod-tested) —
+GETs read fixed-path pointer `cc/latest.json` (POST mirrors writes;
+cache-bust query defeats the stale-overwrite trap; URL derived from
+storeId); `list()` = self-healing fallback only. Pocock recon done
+(vault note). Session note: vault `Calendar/Notes/2026-08-12 s51.md`.
+
 ## Rotated 2026-08-12 (s51) — s50 session block
 
 S50 VAULT SHAKEDOWN (first task run through the vault): Family Hub

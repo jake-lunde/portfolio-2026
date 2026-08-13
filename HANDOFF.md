@@ -47,13 +47,14 @@
   `medieval-sfx*` on confirm. Locals swept s50; ~14 stale merged locals
   (`worktree-agent-*`, `blue-update-test`, old `feat/*`) await ruling.
 
-## Latest session — S51 BACKLOG TRIO (2026-08-12)
+## Latest session — S52 VHS SIGNAL (2026-08-13)
 
-- **cc-feed zero-list SHIPPED (`0386e89`, prod-tested):** GETs read
-  fixed-path pointer `cc/latest.json` (POST mirrors writes there;
-  cache-bust query defeats the stale-overwrite trap; URL derived from
-  storeId); `list()` = self-healing fallback only.
-- **⚠️ Vercel Web Analytics NEVER ENABLED** — all 14 `metric()` events
-  silently discarded until Jake flips the toggle (vault: "optimize
-  analytics"). Pocock recon done (vault note). Session note: vault
-  `Calendar/Notes/2026-08-12 s51.md`. s50 → archive.
+- **PR #8 `film-vhs-signal` OPEN (awaiting Jake's taste pass):** CSS-only
+  VHS pass on shelf cover films — `.filmVhs` leaf in `.filmWrap`
+  (scanlines + 12s tracking roll, transform-only), gated on the film's
+  `data-clear` (printed art never dressed; pass-4 no-filter law holds);
+  medieval strikes it. Dials in shelf.module.css `.filmVhs`. NTSCplayer
+  RULED OUT (desktop mpv app, GPL shaders, no license) — look, not code.
+- **⚠️ Vercel Web Analytics still NEVER ENABLED** — `metric()` events
+  discarded until Jake flips the toggle (vault: "optimize analytics").
+  Session note: vault `Calendar/Notes/2026-08-13 s52.md`. s51 → archive.
