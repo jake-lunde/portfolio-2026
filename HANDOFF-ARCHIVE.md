@@ -2319,3 +2319,12 @@ deck reported throughout. Zero-visual-change law held.**
   tier now holds literal durations (precedent exists) — deliberate
   call later; untracked `".claude/* 2.*"` dup files = macOS artifacts,
   Jake deletes.
+
+## S52 VHS SIGNAL (2026-08-13)
+
+- PR #8 MERGED `21ef552`, LIVE (marker-verified): CSS-only VHS pass on
+  shelf cover films — `.filmVhs` leaf in `.filmWrap` (scanlines + 12s
+  tracking roll, transform-only), gated on the film's `data-clear`
+  (printed art never dressed; pass-4 no-filter law holds); medieval
+  strikes it. Taste dials in shelf.module.css `.filmVhs`. NTSCplayer
+  RULED OUT (desktop mpv app, GPL shaders, no license) — look, not code.

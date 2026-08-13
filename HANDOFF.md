@@ -12,8 +12,8 @@
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`;
   push to main = deploy; verify via Vercel MCP + content-marker `curl -sL`
   — GitHub status stays "pending" while Chromatic runs; apex 308s to www).
-  **Production = s52 VHS SIGNAL (`21ef552`) on s51 deck zero-list + s46
-  token commit route + s44 misc quartet + INSPECT + ASK MY AI + SHIPPED.SW.**
+  **Production = s53 VOICE PASS (`0660624`) on s52 VHS signal + s51 deck
+  zero-list + s46 token commit route + INSPECT + ASK MY AI + SHIPPED.SW.**
 - **PR #7 MERGED `cb48868` (s48 storybook catalog):** ruling boards on
   main; Wave 2 = settings-store decorator (vault: "rule the PR 6 ledger").
 - **⚠️ Shared-checkout law:** no concurrent sessions on one working tree;
@@ -48,13 +48,16 @@
   stale merged (`worktree-agent-*`, `blue-update-test`, old `feat/*`)
   await ruling.
 
-## Latest session — S52 VHS SIGNAL (2026-08-13)
+## Latest session — S53 VOICE PASS (2026-08-13)
 
-- **PR #8 MERGED `21ef552`, LIVE (marker-verified):** CSS-only VHS pass
-  on shelf cover films — `.filmVhs` leaf in `.filmWrap` (scanlines + 12s
-  tracking roll, transform-only), gated on the film's `data-clear`
-  (printed art never dressed; pass-4 no-filter law holds); medieval
-  strikes it. Taste dials in shelf.module.css `.filmVhs`. NTSCplayer
-  RULED OUT (desktop mpv app, GPL shaders, no license) — look, not code.
+- **voice-pass MERGED `0660624`:** `VOICE.md` (repo root) is now LAW for
+  every written word on the site (machine caps strings included) and for
+  agent chat with Jake; CLAUDE.md §2 points at it. Both case MDX reworded
+  to Jake's redline (source: jaique `x/Attachments/redline-01.md`);
+  copy.json de-em-dashed, three Jake-voiced strings verbatim his. Rulings:
+  truth over punch (never sharpen a claim, ask); phrase "green light"
+  banned (company collision); survey quotes stay verbatim.
+- **Debt:** hardcoded program strings (Paint FLASH WALL, SpecSheet heads…)
+  still pre-voice — spawn-task chip pending. Knightspeak comments exempt.
 - **⚠️ Web Analytics still NEVER ENABLED** (vault: "optimize analytics").
-  Session note: vault `Calendar/Notes/2026-08-13 s52.md`. s51 → archive.
+  Session note: vault `Calendar/Notes/2026-08-13 s53.md`. s52 → archive.
