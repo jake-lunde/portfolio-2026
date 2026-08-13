@@ -148,6 +148,7 @@
 
 .plateCap .fig {
   color: var(--accent-expressive);
+  margin-left: auto; /* keeps FIG right-aligned when the cap label is dropped */
 }
 
 .figcap {
@@ -193,29 +194,50 @@
   z-index: 1;
 }
 
+/* fine pointers: the stage is a hover scrub — cursor x picks the group */
+.deckStage {
+  position: relative;
+  height: 400px;
+}
+
+.deckStage:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.deckStage img {
+  position: absolute;
+  inset: 24px 24px 10px;
+  width: calc(100% - 48px);
+  height: calc(100% - 34px);
+  object-fit: contain;
+  opacity: 0; /* opacity-only swap — instant, scrub feel */
+}
+
+.deckStage img[data-on] {
+  opacity: 1;
+}
+
+/* touch: a snap carousel — one group per swipe */
 .deckScroll {
   display: flex;
-  align-items: flex-start;
-  gap: 24px;
   overflow-x: auto;
-  padding: 24px 24px 10px;
-  scroll-snap-type: x proximity;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(231, 225, 210, 0.25) transparent;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
 }
 
-.deckScroll img {
-  flex: none;
+.deckSlide {
+  flex: 0 0 100%;
+  height: 260px;
+  padding: 20px 20px 8px;
+  scroll-snap-align: center;
+}
+
+.deckSlide img {
   display: block;
-  height: 380px;
-  width: auto;
-  scroll-snap-align: start;
-}
-
-@media (max-width: 760px) {
-  .deckScroll img {
-    height: 250px;
-  }
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* the deck's own footer — live text, pinned under the scroll */
@@ -236,7 +258,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
-  margin-top: 26px;
+  margin: 26px 0; /* symmetric — the following prose starts with no top margin */
 }
 
 @media (max-width: 760px) {
@@ -413,7 +435,7 @@
 
 /* pull quote */
 .quote {
-  margin: 30px 0 0;
+  margin: 30px 0; /* symmetric — the following prose starts with no top margin */
   padding: 0 0 0 22px;
   border-left: 3px solid var(--accent-expressive);
   font-size: var(--type-heading-2-size); /* 22px exact */

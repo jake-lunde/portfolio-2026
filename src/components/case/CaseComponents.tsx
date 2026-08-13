@@ -64,7 +64,7 @@ export function Plate({
   caption,
   children,
 }: {
-  cap: string
+  cap?: string /* filled plates drop their "Plate NN" label (Jake's s55 rule); placeholders keep it */
   fig: string
   caption?: string
   children: React.ReactNode
@@ -73,7 +73,7 @@ export function Plate({
     <figure className={styles.figure}>
       <div className={styles.plate}>
         <div className={styles.plateCap}>
-          <span>{cap}</span>
+          {cap && <span>{cap}</span>}
           <span className={styles.fig}>{fig}</span>
         </div>
         {children}
