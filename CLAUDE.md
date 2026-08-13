@@ -43,6 +43,9 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
 - Images are swappable placeholders until Jake ships assets — fixed
   ratios, treatments applied by components, never block on them.
 - Facts: cross-check `portfolio-tracker.md`; honor its ⚠️ flags.
+- **Voice**: every written word on the site, and agent chat with Jake,
+  follows `VOICE.md` (patterns, banned moves, exemplars). Machine caps
+  strings included. Truth over punch; ask Jake rather than sharpen.
 
 ## 3. Process rules (hard-won — do not relearn)
 
