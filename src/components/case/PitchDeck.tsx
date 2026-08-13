@@ -11,15 +11,15 @@ import styles from './case.module.css'
 const BASE = '/case/family-hub/pitch'
 
 const SLIDES: Array<[file: string, w: number, alt: string]> = [
-  ['01-ingredients', 1821, 'Deck intro — “Greenlight helps your family plan, stay organized, and connected,” with the family, their needs, and the feature list'],
-  ['02-mobile', 732, 'The mobile companion — home-screen widget plus a detailed planning view, shown on two phones'],
-  ['03-ambient', 1085, 'The home display in its morning ambient state — just what the family needs at a glance to start the day'],
-  ['04-day', 1085, 'Happening Now — the day view'],
-  ['05-week', 1085, 'This Week — the week view'],
-  ['06-month', 1085, 'This Month — the full month view'],
-  ['07-ask', 1085, 'Ask GL — the assistant, invoked from the hub'],
+  ['01-ingredients', 1821, 'Deck intro: “Greenlight helps your family plan, stay organized, and connected,” with the family, their needs, and the feature list'],
+  ['02-mobile', 732, 'The mobile companion, a home-screen widget plus a detailed planning view, shown on two phones'],
+  ['03-ambient', 1085, 'The home display in its morning ambient state: just what the family needs at a glance to start the day'],
+  ['04-day', 1085, 'Happening Now, the day view'],
+  ['05-week', 1085, 'This Week, the week view'],
+  ['06-month', 1085, 'This Month, the full month view'],
+  ['07-ask', 1085, 'Ask GL, the assistant, invoked from the hub'],
   ['08-thinking', 1085, 'The assistant thinking'],
-  ['09-response', 1085, 'The assistant responding — a new component with related prompts and next steps'],
+  ['09-response', 1085, 'The assistant responding: a new component with related prompts and next steps'],
 ]
 
 export function PitchDeck() {
@@ -29,7 +29,7 @@ export function PitchDeck() {
         className={styles.deckScroll}
         tabIndex={0}
         role="group"
-        aria-label="Vision-deck strip — scrolls horizontally"
+        aria-label="Vision-deck strip, scrolls horizontally"
       >
         {SLIDES.map(([file, w, alt]) => (
           <img
