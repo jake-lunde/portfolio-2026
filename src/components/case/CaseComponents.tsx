@@ -96,14 +96,29 @@ export function Moves({ children }: { children: React.ReactNode }) {
 export function Move({
   n,
   title,
+  img,
+  imgAlt,
   children,
 }: {
   n: string
   title: string
+  img?: string
+  imgAlt?: string
   children: React.ReactNode
 }) {
   return (
     <div className={styles.move}>
+      {img && (
+        <img
+          className={styles.moveArt}
+          src={img}
+          alt={imgAlt ?? ''}
+          width={1200}
+          height={675}
+          loading="lazy"
+          draggable={false}
+        />
+      )}
       <div className={styles.n}>Move {n}</div>
       <h3>{title}</h3>
       {children}

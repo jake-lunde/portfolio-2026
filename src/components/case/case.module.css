@@ -182,6 +182,55 @@
   overflow: visible;
 }
 
+/* plate 01 — the pitch deck as one horizontally scrolling slide.
+   #000 is the slide fill sampled from the source deck frame (GL
+   artifact, not LUNDE OS chrome — guardrail §5 derivation). */
+.deck {
+  background: #000;
+  border: 1px solid rgba(231, 225, 210, 0.14); /* hairline from the plate's paper tone */
+  border-radius: 3px;
+  position: relative;
+  z-index: 1;
+}
+
+.deckScroll {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  overflow-x: auto;
+  padding: 24px 24px 10px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(231, 225, 210, 0.25) transparent;
+}
+
+.deckScroll img {
+  flex: none;
+  display: block;
+  height: 380px;
+  width: auto;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 760px) {
+  .deckScroll img {
+    height: 250px;
+  }
+}
+
+/* the deck's own footer — live text, pinned under the scroll */
+.deckFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-component-md);
+  padding: 8px 24px 14px;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(231, 225, 210, 0.6);
+}
+
 /* three moves */
 .moves {
   display: grid;
@@ -205,6 +254,16 @@
 [data-theme='dark'] .move {
   border-color: var(--border);
   background: var(--surface-raised);
+}
+
+/* vision-deck still at the top of a move card — full-bleed over the
+   card's 18px padding, ratio fixed by width/height attrs (no CLS) */
+.moveArt {
+  display: block;
+  width: calc(100% + 36px);
+  height: auto;
+  margin: -18px -18px 14px;
+  max-width: none;
 }
 
 .move .n {
