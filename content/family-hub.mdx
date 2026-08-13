@@ -17,6 +17,7 @@ import { HubModes } from '@/components/case/HubModes'
 import { TandemSetup } from '@/components/case/TandemSetup'
 import { TokenThread } from '@/components/case/TokenThread'
 import { CaseFooter } from '@/components/case/CaseFooter'
+import { PitchDeck } from '@/components/case/PitchDeck'
 import { EvolutionRail } from '@/components/case/EvolutionRail'
 import { LaunchFilm } from '@/components/case/LaunchFilm'
 
@@ -41,17 +42,17 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
   </Lead>
 
   <Moves>
-    <Move n="01" title="Live Drive">
+    <Move n="01" title="Live Drive" img="/case/family-hub/moves/move-live-drive.webp" imgAlt="Vision-deck still: a teen driver at the wheel at dusk, Live Drive on the dash display">
       CarPlay for new drivers. A drive score on the dash, a family
       leaderboard. The smaller bet, and I still think it happens at some
       point.
     </Move>
-    <Move n="02" title="Tutor">
+    <Move n="02" title="Tutor" img="/case/family-hub/moves/move-tutor.webp" imgAlt="Vision-deck still: a kid at a desk with a lesson glowing on a phone, Greenlight Tutor">
       An AI tutor that reshapes a lesson into whatever format actually works
       for your kid. A podcast, a quiz, a conversation. Too far ahead for the
       room.
     </Move>
-    <Move n="03" title="Family Hub">
+    <Move n="03" title="Family Hub" img="/case/family-hub/moves/move-family-hub.webp" imgAlt="Vision-deck still: a parent in the kitchen glancing at the Family Hub on the wall">
       One home base for running a family. Calendar, chores, location, money.
       A lateral move from family finance to family operating system, and the
       one everyone could see. It won.
@@ -64,8 +65,8 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
   skeptic turned out to be useful. Everything in the pitch had to get past
   me first.
 
-  <Plate cap="Plate 01 · the pitch" fig="FIG. A" caption="Drop: vision-deck hero + thesis slide, the frame that sold the room (Figma · High Level POC · 453-342130).">
-    <Placeholder>Vision-deck hero</Placeholder>
+  <Plate fig="FIG. A" caption="The pitch, end to end: the family, the mobile companion, and the hub in every state, straight from the vision deck. Sweep across it.">
+    <PitchDeck />
   </Plate>
 </Section>
 
@@ -79,11 +80,12 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
 
   <PullQuote cite="Parent, exploration survey (n = 1,200)">&ldquo;A whiteboard chore chart for the kids, group texts, and a shared Google calendar — would love one tool instead.&rdquo;</PullQuote>
 
-  Appeal cleared 80% before we showed a price, the strongest concept test
-  Greenlight had run. We didn&rsquo;t follow the data everywhere, though.
-  The chart is honest about where we overruled it.
+  More than 80% of parents said it appealed to them, and that was before
+  we showed a price. It was the strongest concept test Greenlight had run.
+  We didn&rsquo;t follow the data everywhere, though. The chart shows
+  where we overruled it.
 
-  <Plate cap="Plate 02 · what parents ranked essential" fig="FIG. B · SEPT 2025" caption="Real survey data. Tap a bar. The dashed ones are where we overruled the research, on purpose.">
+  <Plate fig="FIG. B · SEPT 2025" caption="Real survey data. Tap a bar. The dashed ones are where we overruled the research, on purpose.">
     <ResearchBars />
   </Plate>
 
@@ -103,7 +105,7 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
   the thing and actually doing something on it. Approving chores, moving
   money, editing the calendar.
 
-  <Plate cap="Plate 03 · the interaction model" fig="FIG. C" caption="Switch modes. This is the spec the whole product hangs off (ix-models canvas: 453-342132).">
+  <Plate fig="FIG. C" caption="Switch modes. This is the spec the whole product hangs off (ix-models canvas: 453-342132).">
     <HubModes />
   </Plate>
 
@@ -152,7 +154,7 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
     shows up on both screens the whole way.
   </Lead>
 
-  <Plate cap="Plate 07 · paired onboarding" fig="FIG. G" caption="Step through it. Two screens, one flow.">
+  <Plate fig="FIG. G" caption="Step through it. Two screens, one flow.">
     <TandemSetup />
   </Plate>
 
@@ -199,7 +201,7 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
   It went both directions, too. My favorite review on the whole project came
   from an engineer, about one token:
 
-  <Plate cap="Plate 09 · the red pen, live" fig="FIG. I · AVATAR TOKEN" caption="Replay the thread: my spec said weakest, his eye said otherwise, strongest shipped. (Real Slack captures land here.)">
+  <Plate fig="FIG. I · AVATAR TOKEN" caption="Replay the thread: my spec said weakest, his eye said otherwise, strongest shipped. (Real Slack captures land here.)">
     <TokenThread />
   </Plate>
 
