@@ -50,7 +50,12 @@
   Verified dev + mobile, build green, voice pass merged on top.
   Classifier blocks `gh pr merge` — Jake merges, then deletes branch +
   worktree `.claude/worktrees/fh-media`. Plates 04/05/06/08/10 still
-  placeholders. Note: vault `2026-08-13 s54.md`.
+  placeholders. Note: vault `2026-08-13 s54.md`. ⚠️ Local
+  `fh-plate-media` carries stray dup commit `1da6d84` (shared-checkout
+  bite; same fix is on main as `1d6e9be`) — force-delete is safe.
+- **s53 follow-up LIVE (chunk-verified):** cases.ts shelf blurbs missed
+  by the voice pass (Invest box thesis + 2 progress phases) fixed on
+  main `1d6e9be`.
 
 ## Prior session — S53 VOICE PASS (2026-08-13)
 
