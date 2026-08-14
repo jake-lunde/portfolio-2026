@@ -1,0 +1,80 @@
+/* THE CUSTOMIZE BUTTON — see CustomizeButton.tsx for the strip's motion-law
+   reasoning and its hex-sampling derivation. Same outline-invert idiom the
+   two doors it replaces both wore (mono caps, hairline box, inverts on
+   hover) so it reads as the same control everywhere it appears. */
+
+.customize {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-16);
+  text-transform: uppercase;
+  color: var(--content);
+  background: var(--surface);
+  border: 1.5px solid var(--content);
+  border-radius: 0; /* squared, period furniture — no rounded corners in this system */
+  padding: 9px 12px 13px;
+  cursor: pointer;
+}
+
+.customize:hover {
+  background: var(--content);
+  color: var(--surface);
+}
+
+.customize:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.label {
+  position: relative;
+  z-index: 1;
+}
+
+/* the strip rides the inner bottom edge only, well clear of the label's
+   line box above it (13px padding-bottom vs. 4px strip) — the two never
+   touch, so the label's contrast never depends on where the loop is */
+.strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.stripTrack {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  animation: customizeStrip 10s linear infinite;
+}
+
+.stripBlock {
+  flex: 0 0 36px;
+  height: 100%;
+}
+
+@keyframes customizeStrip {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* the track holds the sequence twice back to back, so walking half its
+       width is walking exactly one full sequence — the reset is invisible */
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stripTrack {
+    animation: none;
+  }
+}

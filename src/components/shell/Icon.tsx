@@ -34,6 +34,7 @@ export type IconName =
   | 'suggest'
   | 'work'
   | 'palette'
+  | 'download'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -308,6 +309,18 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <circle cx="19.5" cy="8" r="1.5" fill="currentColor" stroke="none" />
       <circle cx="24" cy="13" r="1.5" fill="currentColor" stroke="none" />
       <circle cx="21.5" cy="20" r="1.5" fill="currentColor" stroke="none" />
+    </>
+  ),
+  // download — the resume window's export control. A shaft-and-chevron
+  // arrow feeding down into an open tray: the tray's open top (unclosed
+  // path, same trick `folder`'s tab uses) keeps it from reading as a
+  // closed box the arrow can't enter, and the 3px gap to the chevron's
+  // tip keeps the two shapes from touching at 32px.
+  download: (
+    <>
+      <path d="M16 4v14" />
+      <path d="M10.5 13l5.5 5.5L21.5 13" />
+      <path d="M6 21v5a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-5" />
     </>
   ),
 }

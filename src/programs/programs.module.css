@@ -571,32 +571,6 @@
   color: #0d100c;
 }
 
-/* the settings window's own door to SKIN BUILDER — same outline-invert
-   button SpecSheet's .customize wears at its own door to the same window,
-   so the two entry points read as one control wherever a visitor meets it */
-.customizeBtn {
-  flex: none;
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  letter-spacing: var(--tracking-16);
-  text-transform: uppercase;
-  color: var(--content);
-  background: none;
-  border: 1.5px solid var(--content);
-  padding: 5px 12px;
-  cursor: pointer;
-}
-
-.customizeBtn:hover {
-  background: var(--content);
-  color: var(--surface);
-}
-
-.customizeBtn:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
 /* ------------------------------------------------------------------
    Folder windows (MUSIC · FUN) — the desktop's second storey. Same
    icon-and-label vocabulary as the launcher (.iconBtn in shell.module.css)

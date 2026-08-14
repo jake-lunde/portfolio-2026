@@ -12,7 +12,6 @@ import { Dock } from './Dock'
 import { Wallpaper } from './Wallpaper'
 import { NowPlayingWidget } from './NowPlayingWidget'
 import { MiniPlayer } from './MiniPlayer'
-import { CommandWidget } from './CommandWidget'
 import { PhotoWall } from './PhotoWall'
 import { AmbientAgents } from './AmbientAgents'
 import { Screensaver } from './Screensaver'
@@ -96,8 +95,9 @@ export function Desktop({
             "just doesn't feel super helpful". The component survives at
             DailyWidget.tsx; remounting it is this one line back. */}
         <MiniPlayer />
-        {/* the sticky notes moved into the FEEDBACK window (session 25) */}
-        <CommandWidget />
+        {/* COMMAND.CTR stood here until case-rail round 4 — Jake's call
+            that it's system chrome, not a floating widget. It now lives
+            in the menu bar; see MenuBar.tsx and CommandWidget.tsx. */}
         <PhotoWall />
         <AmbientAgents />
         <AnimatePresence>

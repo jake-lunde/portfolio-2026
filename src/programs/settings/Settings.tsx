@@ -2,10 +2,10 @@
 
 import type { Skin } from '@/store/settings'
 import { useSettings } from '@/store/settings'
-import { useWindows } from '@/store/windows'
 import { WALLPAPER_OPTIONS, wallpaperMask } from '@/components/shell/wallpapers'
 import { sfx } from '@/lib/sound'
 import { CopyText as Copy } from '@/content/CopyText'
+import { CustomizeButton } from '@/components/primitives/CustomizeButton'
 import styles from '../programs.module.css'
 
 const SKINS: Array<{ id: Skin; name: string; disabled?: boolean }> = [
@@ -23,7 +23,6 @@ export default function Settings() {
   const toggleSound = useSettings((s) => s.toggleSound)
   const setWallpaper = useSettings((s) => s.setWallpaper)
   const setSkin = useSettings((s) => s.setSkin)
-  const openWindow = useWindows((s) => s.open)
 
   return (
     <div className={styles.settings}>
@@ -120,16 +119,7 @@ export default function Settings() {
       </div>
 
       <div className={styles.setRow} style={{ borderBottom: 'none', paddingBottom: 0 }}>
-        <button
-          type="button"
-          className={styles.customizeBtn}
-          onClick={() => {
-            sfx.open()
-            openWindow('skinbuilder')
-          }}
-        >
-          <Copy k="settings.customize" as="span" />
-        </button>
+        <CustomizeButton />
       </div>
     </div>
   )

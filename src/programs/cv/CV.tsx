@@ -1,11 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Button } from '@/components/primitives/Button'
 import { t } from '@/content/copy'
 import { SPRINGS } from '@/lib/motion'
-import { cvSfx, sfx } from '@/lib/sound'
+import { cvSfx } from '@/lib/sound'
 import { useSettings } from '@/store/settings'
 import { buildPasses } from './passes'
 import styles from './cv.module.css'
@@ -23,6 +22,11 @@ import styles from './cv.module.css'
  * scripts/build-cv.mjs, so the two can't drift. Content is Jake's own
  * pruning pass — encourage more of those; he is the person.
  *
+ * The download control itself lives in the titlebar now (registry.tsx's
+ * `titleAction`, rendered by Window.tsx) — round 4 retired the in-body
+ * toolbar button and its hidden-anchor apparatus as tacked-on; the paper
+ * is the whole body again.
+ *
  * The paper FEEDS: while the job runs, the sheet slides up from below the
  * tray one tick at a time, in lockstep with the thermometer (`--print-t`
  * is the same tick/TICKS the fill uses) — the page physically arrives
@@ -36,7 +40,6 @@ import styles from './cv.module.css'
  * (dynamic-import programs mismatch at SSR handover); constant ids only.
  */
 
-const PDF = '/jake-lunde-resume.pdf'
 const TICKS = 14
 const TICK_MS = 150
 
@@ -49,7 +52,6 @@ export default function CV() {
 
   const [phase, setPhase] = useState<Phase>('printing')
   const [tick, setTick] = useState(0)
-  const linkRef = useRef<HTMLAnchorElement>(null)
 
   // reduced motion: the document simply arrives
   useEffect(() => {
@@ -71,23 +73,12 @@ export default function CV() {
     return () => clearTimeout(id)
   }, [phase, tick, reduced])
 
-  const download = useCallback(() => {
-    sfx.tap()
-    linkRef.current?.click()
-  }, [])
-
   return (
     <div
       className={styles.cv}
       data-phase={phase}
       style={{ '--print-t': tick / TICKS } as CSSProperties}
     >
-      <div className={styles.toolbar}>
-        <Button size="md" tone="expressive" onClick={download}>
-          {t('cv.download', skin)}
-        </Button>
-      </div>
-
       <div className={styles.feed}>
         <div className={styles.paper} data-no-translate="">
           <span className={styles.sprocket} aria-hidden="true" />
@@ -134,11 +125,6 @@ export default function CV() {
           </motion.div>
         ) : null}
       </AnimatePresence>
-
-      {/* the actual artifact; the button just clicks it */}
-      <a ref={linkRef} href={PDF} download hidden aria-hidden="true" tabIndex={-1}>
-        {t('cv.download', skin)}
-      </a>
     </div>
   )
 }

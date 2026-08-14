@@ -12,18 +12,6 @@
   color: var(--content);
 }
 
-/* ---- toolbar: PRINT… + the quiet escape hatch ---- */
-
-.toolbar {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-component-md);
-  padding: var(--spacing-component-sm) var(--spacing-component-lg);
-  border-bottom: var(--border-width-default) solid var(--border);
-  background: var(--surface-raised);
-}
-
 /* ---- the paper ---- */
 
 .feed {

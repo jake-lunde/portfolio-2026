@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import { getProgram, PROGRAMS } from '@/programs/registry'
+import type { ProgramDef } from '@/programs/registry'
 import { CASES, getCase } from '@/programs/projects/cases'
 import { VIZ, getViz } from '@/programs/visualizers/vizRegistry'
 import type { InspectTool } from '@/store/inspect'
@@ -15,6 +16,9 @@ export type ResolvedWindow = {
   path: string | null
   /** copy key for the titlebar's "what is this" explainer (see registry) */
   explainer?: string
+  /** titlebar action link — wins over both the doc-id and the explainer
+      in the meta slot (see registry) */
+  titleAction?: ProgramDef['titleAction']
   /** requires macrodata refinement (the sphere) before the body shows */
   gated?: boolean
   /** keeps full opacity when unfocused — the program owns a 3D context and
@@ -72,6 +76,7 @@ export function resolveWindow(id: string): ResolvedWindow | null {
     pos: p.pos,
     path: p.path ?? null,
     explainer: p.explainer,
+    titleAction: p.titleAction,
     noRecede: p.noRecede,
     gated: id === 'projects',
   }

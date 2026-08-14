@@ -14,6 +14,12 @@ export type ProgramDef = {
       meta slot becomes a button that reveals the text instead of printing
       the doc-id — a program explains itself in chrome, not in its body. */
   explainer?: string
+  /** a titlebar-level action link (e.g. "download the PDF"), rendered in
+      the same meta slot the doc-id / explainer occupy. Set it and it wins
+      over both — a program gets one thing in that slot, never two. The
+      icon rides ahead of the copy string; `download` marks it as a real
+      file download rather than a navigation. */
+  titleAction?: { icon: IconName; copyKey: string; href: string; download?: true }
   icon: IconName
   component: ComponentType
   /** default window geometry (desktop; mobile goes full-bleed) */
@@ -84,7 +90,7 @@ export const PROGRAMS: ProgramDef[] = [
     id: 'cv',
     name: 'Resume',
     meta: 'DOC-01',
-    explainer: 'cv.explainer',
+    titleAction: { icon: 'download', copyKey: 'cv.download', href: '/jake-lunde-resume.pdf', download: true },
     icon: 'resume',
     component: dynamic(() => import('@/programs/cv/CV')),
     size: { w: 520, h: 640 },
