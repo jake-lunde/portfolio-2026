@@ -23,6 +23,11 @@
 /* ---------- Button — token-driven, the component-loop demo target ------- */
 
 .btn {
+  /* inline-flex so the anchor form (href) sits identical to the button */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   font-family: var(--mono);
   font-weight: var(--button-weight);
   text-transform: uppercase;
@@ -59,6 +64,15 @@
 }
 
 .btnSystem:hover {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+/* solid: the system accent at rest (hub-player's CASE STUDY). Hover spec
+   is still open in Figma, so it holds its rest colors — the tone hover
+   rules resolve to the same fill. */
+.btnSolid,
+.btnSolid:hover {
   background: var(--accent);
   color: var(--surface);
 }

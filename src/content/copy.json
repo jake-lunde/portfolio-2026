@@ -160,6 +160,9 @@
     "base": "Guestbook",
     "medieval": "The Ledger"
   },
+  "program.hub-player.name": {
+    "base": "Latest Work"
+  },
   "program.music.name": {
     "base": "Music",
     "medieval": "Consort"

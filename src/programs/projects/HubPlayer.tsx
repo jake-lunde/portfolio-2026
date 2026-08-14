@@ -1,6 +1,7 @@
 'use client'
 
 import { useReducedMotion } from 'motion/react'
+import { Button } from '@/components/primitives/Button'
 import { getCase } from '@/programs/projects/cases'
 import { useWindows } from '@/store/windows'
 import { sfx } from '@/lib/sound'
@@ -8,9 +9,9 @@ import styles from './player.module.css'
 
 /* THE PLAYER — Family Hub's case study standing open on the desktop as a
    film loop, poolsuite.net's player translated into this machine (Jake's
-   refresh pass, this session): the cover film running under a print
-   treatment, a file strip naming the reel, and the overview below with
-   one PLAY. It boots open BEHIND README (resolve.ts BOOT_WINDOWS) — the
+   refresh pass + his Figma mirror pass): the cover film running under a
+   print treatment, a file strip naming the reel, and the overview below
+   with a CTA pair. It boots open BEHIND README (resolve.ts BOOT_WINDOWS) — the
    desk is set with the work already running on it.
 
    This is a TEASER SURFACE, so it is deliberately not gated the way the
@@ -57,22 +58,35 @@ export function HubPlayer() {
           window did. LOOP, not a resolution: the honest fact about this
           film is that it never ends. */}
       <div className={styles.strip} aria-hidden="true">
-        <span>family-hub_26.avi</span>
+        <span>family-hub-26.avi</span>
         <span>LOOP</span>
       </div>
 
+      {/* Jake's Figma pass (mirror round-trip, this session): the title
+          takes the display face at heading-1 with a NEW pill (the
+          expressive accent's marks-only license), and one PLAY becomes a
+          CTA pair — VIEW SITE out to the live product, CASE STUDY into
+          the gated read. Meta drops to the sill under both. */}
       <div className={styles.info}>
-        <p className={styles.title}>
-          {c.name}: SHIPPED <span className={styles.pip} aria-hidden="true" />
-        </p>
-        {box.thesis && <p className={styles.thesis}>{box.thesis}</p>}
+        <div className={styles.textBlock}>
+          <p className={styles.title}>
+            {c.name}
+            <span className={styles.badge}>NEW</span>
+          </p>
+          {box.thesis && <p className={styles.thesis}>{box.thesis}</p>}
+        </div>
         <div className={styles.foot}>
+          <div className={styles.ctas}>
+            <Button size="md" tone="system" href="https://greenlight.com/family-hub">
+              VIEW SITE
+            </Button>
+            <Button size="md" tone="system" variant="solid" onClick={play}>
+              CASE STUDY
+            </Button>
+          </div>
           <span className={styles.meta}>
             {c.no} · {c.org.toUpperCase()} · {c.year}
           </span>
-          <button type="button" className={styles.play} onClick={play}>
-            PLAY
-          </button>
         </div>
       </div>
     </div>

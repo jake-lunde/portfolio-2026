@@ -165,10 +165,12 @@ export const PROGRAMS: ProgramDef[] = [
     meta: 'REEL-02',
     icon: 'folder',
     component: dynamic(() => import('@/programs/projects/HubPlayer')),
-    /* 520 + y56 + ~33 chrome bottoms out at ~609 — clear of the dock rail
-       (~87px on the floor) on a 720 viewport, the shortest desk we set */
-    size: { w: 460, h: 520 },
-    pos: { x: 600, y: 56 },
+    /* 585 total (Jake's Figma pass: heading-1 title + CTA pair grew the
+       info panel) + y40 + desk offset bottoms ~680 — a ~34px berth under
+       the rail's top edge at 714 on an 800-tall viewport, the shortest
+       desk we design for (same floor README's berth math uses) */
+    size: { w: 460, h: 585 },
+    pos: { x: 600, y: 40 },
     onDesktop: false,
   },
   {
