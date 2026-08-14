@@ -57,5 +57,4 @@
 
 - **PR #9 MERGED (`3478b0a`):** FH moves 1–3 stills + Plate 01 scrub.
   Plates 04/05/06/08/10 still placeholders. Jake owes: delete
-  `fh-plate-media` (stray dup `1da6d84` — force-delete safe) + worktree
-  `.claude/worktrees/fh-media`. Note: vault s54. s53 → archive.
+  `fh-plate-media` (dup `1da6d84`, force-delete safe) + its worktree.
