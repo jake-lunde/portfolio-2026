@@ -1,0 +1,103 @@
+/* ================= DOCK (POC, case-rail) =================
+   NeXTSTEP-style bottom rail: one uniform row of tiles for the programs
+   the desktop grid no longer carries at desktop widths (see Dock.tsx /
+   DesktopIcons.tsx for the split). Fixed to the viewport rather than the
+   desktop's own inset, so it holds its seat even while INSPECT.MODE
+   compresses the canvas — moot in practice, since the rail stands down
+   entirely while that tool is up (see below), same as the wanderer. */
+
+.rail {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-5);
+  transform: translateX(-50%);
+  /* windows open at z:10 and only ever climb from there (useWindows.open
+     bumps zTop by 1 per open/focus, never resets) — 6 sits above every
+     other piece of desktop furniture (icons/widgets at 2-4, the wanderer
+     at 3) and strictly below the floor a window can ever occupy, so an
+     open window always wins over the rail without the rail having to
+     watch window z-index at all. */
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift);
+}
+
+/* INSPECT.MODE turns the desktop into the tool's own canvas — the same
+   furniture rule the wanderer follows (shell.module.css): the rail steps
+   aside rather than floating over docked panels it has no relationship
+   to. */
+:global(body[data-inspectmode='on']) .rail {
+  display: none;
+}
+
+.tile {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--content);
+  border-radius: var(--radius-md);
+  background: transparent;
+}
+
+.tile:hover {
+  background: var(--interactive-default-hover);
+}
+
+.tile:active svg {
+  transform: translateY(1px);
+}
+
+/* running indicator — centred under the icon, inside the tile's own
+   bottom margin (icon is 32px in a 52px tile: a 10px band top and bottom,
+   the 4px dot sits centred in the lower one, 3px clear on either side) */
+.led {
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-circle);
+  background: var(--accent);
+  pointer-events: none;
+}
+
+/* the hover/focus title hint, NeXT-style — reserves no layout of its own
+   (absolute, pointer-events:none) and never changes the tile's footprint */
+.label {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--space-2));
+  transform: translateX(-50%);
+  z-index: 1;
+  pointer-events: none;
+  white-space: nowrap;
+  padding: 4px 7px;
+  background: var(--surface-raised);
+  border: var(--border-width-subtle) solid var(--border);
+  color: var(--content);
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--type-caption-tracking);
+  text-transform: uppercase;
+}
+
+/* below the shell's mobile floor (shell.module.css: the same width that
+   turns windows into a full-bleed stack) the rail doesn't render at all —
+   the docked programs reappear in the desktop icon grid instead, see
+   DesktopIcons.tsx's .dockedGrid */
+@media (max-width: 720px) {
+  .rail {
+    display: none;
+  }
+}

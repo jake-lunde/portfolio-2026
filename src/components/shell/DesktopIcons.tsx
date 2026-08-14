@@ -6,36 +6,44 @@ import { useSettings } from '@/store/settings'
 import { programName } from '@/lib/skinVocab'
 import { sfx } from '@/lib/sound'
 import { Icon } from './Icon'
+import { DOCKED, DOCKED_ORDER } from './Dock'
 import styles from './shell.module.css'
 
 /* Desktop launcher. Explicit reading order: README · RESUME.EXE · CASE
-   STUDIES lead the top row; SETTINGS is always last. The grid flows by
-   row so the top row is literal. Trash rides the bottom-left corner on
-   desktop, but joins the scrolling grid on mobile.
+   STUDIES. Trash rides the bottom-left corner on desktop, but joins the
+   scrolling grid on mobile.
+
+   THE SPLIT (case-rail POC): the grid used to carry every onDesktop
+   program in one reading order, doors and tail both (README through
+   SETTINGS). The tail — GUESTBOOK, MUSIC, FUN, FEEDBACK, SUGGESTION BOX,
+   SPEC SHEET, SETTINGS — now rides the bottom Dock instead (Dock.tsx): a
+   NeXTSTEP-style rail of uniform tiles, so it reads as one machined row
+   rather than more desktop clutter. DOCKED (Dock.tsx) is the membership
+   test; DOOR_ORDER below is just the three that stayed.
+
+   The dock doesn't render below the shell's mobile floor (720px — the
+   same width that turns windows into a full-bleed stack), and a media
+   query can't reach into JSX to exclude an id. So the docked programs are
+   ALSO rendered here, in the order they used to hold in the old ORDER
+   array, hidden by default (.dockedGrid) and shown only inside that same
+   media query — mirroring how .trashGrid already works. Nothing renders
+   twice: on desktop the docked buttons are display:none and the rail is
+   the only copy on screen; below 720px the rail is display:none and the
+   grid is the only copy.
 
    README is the single identity door (session 41 retired ABOUT THIS
-   MACHINE): the machine's own opinion now hangs off a CTA inside it.
+   MACHINE): the machine's own opinion now hangs off a CTA inside it. */
 
-   Kept deliberately short (session 25): programs live inside the MUSIC /
-   FUN / FEEDBACK drawers or behind CASE STUDIES rather than all landing
-   here. `onDesktop` in the registry is the switch — this is only order. */
+const DOOR_ORDER = ['readme', 'cv', 'progress']
 
-const ORDER = [
-  'readme',
-  'cv',
-  'progress',
-  'guestbook',
-  'music',
-  'fun',
-  'feedback',
-  'suggest',
-  'spec-sheet',
-]
+const doorRank = (id: string) => {
+  const i = DOOR_ORDER.indexOf(id)
+  return i === -1 ? 5000 : i
+}
 
-const rank = (id: string) => {
-  if (id === 'settings') return 9999 // always last
-  const i = ORDER.indexOf(id)
-  return i === -1 ? 5000 : i // unknowns land before settings
+const dockedRank = (id: string) => {
+  const i = DOCKED_ORDER.indexOf(id)
+  return i === -1 ? 5000 : i
 }
 
 export function DesktopIcons() {
@@ -43,9 +51,14 @@ export function DesktopIcons() {
   const skin = useSettings((s) => s.skin)
   const desktopPrograms = PROGRAMS.filter((p) => p.onDesktop)
   const trash = desktopPrograms.find((p) => p.id === 'trash')
-  const rest = desktopPrograms
-    .filter((p) => p.id !== 'trash')
-    .sort((a, b) => rank(a.id) - rank(b.id))
+  const doors = desktopPrograms
+    .filter((p) => p.id !== 'trash' && !DOCKED.has(p.id))
+    .sort((a, b) => doorRank(a.id) - doorRank(b.id))
+  // mobile-only fallback: the same programs the dock holds, rendered here
+  // too and hidden by CSS above the mobile floor (see header comment)
+  const dockedForMobile = desktopPrograms
+    .filter((p) => DOCKED.has(p.id))
+    .sort((a, b) => dockedRank(a.id) - dockedRank(b.id))
 
   const launch = (id: string) => {
     sfx.open()
@@ -64,7 +77,8 @@ export function DesktopIcons() {
   return (
     <>
       <nav className={styles.icons} aria-label="Programs">
-        {rest.map((p) => iconBtn(p))}
+        {doors.map((p) => iconBtn(p))}
+        {dockedForMobile.map((p) => iconBtn(p, styles.dockedGrid))}
         {/* trash joins the grid on mobile only (see .trashGrid) */}
         {trash && iconBtn(trash, styles.trashGrid)}
       </nav>

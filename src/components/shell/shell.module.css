@@ -486,6 +486,13 @@
   display: none;
 }
 
+/* the docked programs' mobile fallback (Dock.tsx doesn't render below
+   720px) — hidden here above that floor, shown only in the mobile media
+   query below, same mechanism as .trashGrid right above */
+.dockedGrid {
+  display: none;
+}
+
 /* ================= NOW-PLAYING WIDGET ================= */
 
 .npWidget {
@@ -1482,6 +1489,12 @@
 
   .trashIcon {
     display: none;
+  }
+
+  /* the dock (dock.module.css) doesn't render at this width — its
+     programs reappear here instead */
+  .dockedGrid {
+    display: flex;
   }
 
   .window {

@@ -8,6 +8,7 @@ import { BASE } from '@/lib/base'
 import { MenuBar } from './MenuBar'
 import { SkillsTicker } from './SkillsTicker'
 import { DesktopIcons } from './DesktopIcons'
+import { Dock } from './Dock'
 import { Wallpaper } from './Wallpaper'
 import { NowPlayingWidget } from './NowPlayingWidget'
 import { MiniPlayer } from './MiniPlayer'
@@ -90,6 +91,7 @@ export function Desktop({
         <Wallpaper />
         <NowPlayingWidget />
         <DesktopIcons />
+        <Dock />
         <DailyWidget />
         <MiniPlayer />
         {/* the sticky notes moved into the FEEDBACK window (session 25) */}
