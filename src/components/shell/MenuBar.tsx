@@ -3,9 +3,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSettings } from '@/store/settings'
 import { useInspect } from '@/store/inspect'
+import { useWindows } from '@/store/windows'
 import { OS_VERSION } from '@/lib/version'
+import { sfx } from '@/lib/sound'
+import { t } from '@/content/copy'
 import { SkinSwitch } from './SkinSwitch'
 import { FableMark } from './FableMark'
+import { Icon } from './Icon'
 import styles from './shell.module.css'
 
 /* Menubar glyphs — the desktop icon language (Icon.tsx: 1.5px line art on
@@ -108,6 +112,7 @@ export function MenuBar() {
   const hydrate = useSettings((s) => s.hydrate)
   const inspecting = useInspect((s) => s.on)
   const toggleInspect = useInspect((s) => s.toggle)
+  const openWindow = useWindows((s) => s.open)
 
   useEffect(() => hydrate(), [hydrate])
 
@@ -118,6 +123,11 @@ export function MenuBar() {
     <header className={styles.menubar} data-inspect-self="">
       <div className={styles.menuLeft}>
         <div className={styles.wordmark}>
+          {/* the house mark, in system ink — mask-image lets a raster
+              PNG take var(--content) and follow dark mode for free
+              (see .mark below). Decorative: the wordmark text already
+              names the machine. */}
+          <span className={styles.mark} aria-hidden="true" />
           LUNDE&nbsp;OS
           <span aria-hidden="true">{OS_VERSION} · 1992年アメリカ製</span>
         </div>
@@ -173,6 +183,21 @@ export function MenuBar() {
             {theme === 'light' ? <SunGlyph /> : <MoonGlyph />}
           </button>
         )}
+        {/* DESIGN SYSTEM — a straight line to the token doc from anywhere
+            in the OS, on the same glyph-button footprint as sound/theme.
+            Opens the same window (spec-sheet) SETTINGS' customize row and
+            the SPEC.SHEET desktop icon both lead to. */}
+        <button
+          className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
+          onClick={() => {
+            sfx.open()
+            openWindow('spec-sheet')
+          }}
+          aria-label={t('menubar.designSystem', skin)}
+          title={t('menubar.designSystem', skin)}
+        >
+          <Icon name="palette" size={14} />
+        </button>
         {/* The mark holds the far-right corner, beside the time (Jake's
             s44 order: INSPECT · sound · theme · ? · clock) — the last
             interactive thing in the bar, where a "?" reads as the door to

@@ -61,8 +61,15 @@ export const PROGRAMS: ProgramDef[] = [
     meta: 'DOC-00',
     icon: 'doc',
     component: dynamic(() => import('@/programs/about/About')),
-    size: { w: 520, h: 700 },
-    pos: { x: 120, y: 60 },
+    /* the dock rail went content-width this round but stayed flush to
+       the floor (bottom: 0) — boot windows now have to clear it instead
+       of a full-width bar clearing itself. Chrome is 46px MEASURED on
+       the live window (the ~33 estimate left the foot kissing the rail
+       at exactly 0px): 48 + 600 + 46 = 694, a 20px berth under the
+       rail's top edge at 714 on an 800-tall viewport, the shortest desk
+       we design for. hub-player clears at ~625 (see its entry below). */
+    size: { w: 520, h: 600 },
+    pos: { x: 120, y: 48 },
     onDesktop: true,
     path: '/readme',
   },
@@ -75,7 +82,7 @@ export const PROGRAMS: ProgramDef[] = [
     // the code, the copy keys and the window store, not the user-facing
     // program.
     id: 'cv',
-    name: 'RESUME.EXE',
+    name: 'Resume',
     meta: 'DOC-01',
     explainer: 'cv.explainer',
     icon: 'resume',
@@ -211,7 +218,7 @@ export const PROGRAMS: ProgramDef[] = [
   },
   {
     id: 'suggest',
-    name: 'Suggestion Box',
+    name: 'Suggestions',
     meta: 'BOX-86',
     icon: 'suggest',
     component: dynamic(() => import('@/programs/suggest/SuggestBox')),

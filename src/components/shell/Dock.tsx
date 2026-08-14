@@ -8,17 +8,40 @@ import { sfx } from '@/lib/sound'
 import { Icon } from './Icon'
 import styles from './dock.module.css'
 
-/* NeXTSTEP-style dock, poolsuite.net pass (case-rail). Every desktop
-   program now lives here except README (the one identity door left on
-   the desktop) and Trash (its own corner) — see DesktopIcons.tsx's
-   header comment for that split and its mobile fallback.
+/* NeXTSTEP-style dock, poolsuite.net pass (case-rail, round 3). Every
+   desktop program now lives here except README (the one identity door
+   left on the desktop) and spec-sheet, which just left for the menubar
+   (other workstream) — see DesktopIcons.tsx's header comment for the
+   desktop/mobile split. Trash joined this round too, last tile.
 
-   DOCKED_ORDER is this rail's reading order, left to right. DOCKED is
-   the membership test DesktopIcons filters its own grid against.
+   Two exports, two different jobs — they used to be one list and that
+   conflated them:
+   - RAIL_ORDER is what THIS component renders, left to right. It drops
+     spec-sheet (gone from the rail) and adds trash (new, last).
+   - DOCKED_ORDER / DOCKED (below) is the membership test DesktopIcons
+     filters its own grid against — it KEEPS spec-sheet, because on
+     mobile there is no menubar for spec-sheet to live in, so mobile
+     still needs it in the launcher grid; drop it from DOCKED and it
+     would resurface as an orphan desktop icon and vanish from mobile in
+     the same move. Trash stays out of DOCKED_ORDER, same as before —
+     DesktopIcons has always special-cased trash on its own.
+
    `feedback` rides along even though its registry entry is
    onDesktop:false today (Jake, s44) — the `onDesktop` filter below
    already keeps it off screen everywhere until he flips it back, at
    which point it lands here with no further wiring. */
+
+export const RAIL_ORDER = [
+  'progress',
+  'cv',
+  'guestbook',
+  'music',
+  'fun',
+  'feedback',
+  'suggest',
+  'settings',
+  'trash',
+]
 
 export const DOCKED_ORDER = [
   'progress',
@@ -34,8 +57,10 @@ export const DOCKED_ORDER = [
 
 export const DOCKED = new Set<string>(DOCKED_ORDER)
 
+const RAIL = new Set<string>(RAIL_ORDER)
+
 const rank = (id: string) => {
-  const i = DOCKED_ORDER.indexOf(id)
+  const i = RAIL_ORDER.indexOf(id)
   return i === -1 ? 999 : i
 }
 
@@ -44,7 +69,7 @@ export function Dock() {
   const windows = useWindows((s) => s.windows)
   const skin = useSettings((s) => s.skin)
 
-  const programs = PROGRAMS.filter((p) => p.onDesktop && DOCKED.has(p.id)).sort(
+  const programs = PROGRAMS.filter((p) => p.onDesktop && RAIL.has(p.id)).sort(
     (a, b) => rank(a.id) - rank(b.id),
   )
 

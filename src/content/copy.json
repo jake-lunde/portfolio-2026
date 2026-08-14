@@ -125,6 +125,7 @@
   "inspect.tool.group": "TOOL",
   "inspect.tool.operate": "OPERATE",
   "inspect.tool.select": "SELECT",
+  "menubar.designSystem": "Design System",
   "now-playing.lastPlayed": "Last played ♪",
   "now-playing.loading": "TUNING…",
   "now-playing.openLink": "OPEN IN APPLE MUSIC ↗",
@@ -142,7 +143,7 @@
     "medieval": "The Keep"
   },
   "program.cv.name": {
-    "base": "RESUME.EXE",
+    "base": "Resume",
     "medieval": "Curriculum Vitæ"
   },
   "program.feedback.name": {
@@ -207,7 +208,7 @@
     "medieval": "Reworkings"
   },
   "program.suggest.name": {
-    "base": "Suggestion Box",
+    "base": "Suggestions",
     "medieval": "Petitions"
   },
   "program.trash.name": {
@@ -237,10 +238,9 @@
   "readme.label.system": "System",
   "readme.now": "Staff Product Designer, Greenlight",
   "readme.system": "Next.js · Motion · MDX",
-  "settings.accentHint": "Coming in a later release",
-  "settings.accentLabel": "Accent emphasis",
   "settings.appearanceHint": "Print stock or terminal night",
   "settings.appearanceLabel": "Appearance",
+  "settings.customize": "Customize LUNDE OS",
   "settings.dark": "Dark",
   "settings.light": "Light",
   "settings.off": "Off",

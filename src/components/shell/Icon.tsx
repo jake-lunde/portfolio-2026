@@ -33,6 +33,7 @@ export type IconName =
   | 'mystery'
   | 'suggest'
   | 'work'
+  | 'palette'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -292,6 +293,21 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M5 12h22v14H5z" />
       <path d="M5 18h22" />
       <rect x="14" y="16.5" width="4" height="3" rx=".5" fill="var(--surface)" />
+    </>
+  ),
+  // palette — DESIGN SYSTEM (menubar). A painter's palette: kidney-shaped
+  // board, thumb hole punched through (fill var(--surface), the same
+  // cutout trick `work`'s clasp and `sliders`' knobs use), four paint
+  // dabs as filled dots (the `note`/`smiley` fill move) standing in for
+  // the tokens the window documents.
+  palette: (
+    <>
+      <path d="M16 4c-6.5 0-12 5-12 11.5 0 3.4 2.4 5.7 5.8 5.7h2a1.8 1.8 0 0 1 1.8 1.8c0 2.4 2.1 4.3 4.6 4.3 6.6 0 9.8-5.5 9.8-11.8C28 9 22.7 4 16 4z" />
+      <ellipse cx="9.3" cy="15" rx="2.1" ry="1.7" fill="var(--surface)" stroke="none" transform="rotate(-15 9.3 15)" />
+      <circle cx="12.5" cy="9" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="19.5" cy="8" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="24" cy="13" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="21.5" cy="20" r="1.5" fill="currentColor" stroke="none" />
     </>
   ),
 }

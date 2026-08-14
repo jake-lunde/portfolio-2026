@@ -9,9 +9,11 @@ import { Icon } from './Icon'
 import { DOCKED, DOCKED_ORDER } from './Dock'
 import styles from './shell.module.css'
 
-/* Desktop launcher. README is the only door left standing. Trash rides
-   the bottom-left corner on desktop, but joins the scrolling grid on
-   mobile.
+/* Desktop launcher. README is the only door left standing. Trash joined
+   the dock rail this round (Dock.tsx: RAIL_ORDER, last tile) — it no
+   longer has a desktop-corner instance of its own, but it still rides
+   the scrolling grid on mobile (.trashGrid, unchanged) since the rail
+   doesn't render there.
 
    THE SPLIT (poolsuite pass, case-rail): the grid used to carry every
    onDesktop program in one reading order. Everything but README now
@@ -74,15 +76,12 @@ export function DesktopIcons() {
   )
 
   return (
-    <>
-      <nav className={styles.icons} aria-label="Programs">
-        {doors.map((p) => iconBtn(p))}
-        {dockedForMobile.map((p) => iconBtn(p, styles.dockedGrid))}
-        {/* trash joins the grid on mobile only (see .trashGrid) */}
-        {trash && iconBtn(trash, styles.trashGrid)}
-      </nav>
-      {/* trash in its bottom-left corner on desktop only (see .trashIcon) */}
-      {trash && iconBtn(trash, styles.trashIcon)}
-    </>
+    <nav className={styles.icons} aria-label="Programs">
+      {doors.map((p) => iconBtn(p))}
+      {dockedForMobile.map((p) => iconBtn(p, styles.dockedGrid))}
+      {/* trash joins the grid on mobile only (see .trashGrid) — on desktop
+          it rides the dock rail instead (Dock.tsx: RAIL_ORDER) */}
+      {trash && iconBtn(trash, styles.trashGrid)}
+    </nav>
   )
 }

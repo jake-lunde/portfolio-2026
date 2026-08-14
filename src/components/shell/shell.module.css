@@ -471,17 +471,9 @@
   text-transform: uppercase;
 }
 
-/* Trash rides alone in the bottom-left corner, clear of the ambient
-   agent strip that hugs the very bottom edge. */
-.trashIcon {
-  position: absolute;
-  left: 16px;
-  bottom: 48px;
-  z-index: 2;
-}
-
-/* the in-grid trash is desktop-hidden; it only appears in the mobile
-   scrolling grid (where the corner trash is hidden instead) */
+/* the in-grid trash is desktop-hidden; on desktop trash rides the dock
+   rail instead (Dock.tsx: RAIL_ORDER, last tile) — this only appears in
+   the mobile scrolling grid, where the rail doesn't render at all */
 .trashGrid {
   display: none;
 }
@@ -1482,13 +1474,9 @@
   }
 
   /* on mobile every icon lives in the one scrolling grid — including
-     trash; the desktop bottom-left corner trash steps aside */
+     trash, which rides the dock rail on desktop instead */
   .trashGrid {
     display: flex;
-  }
-
-  .trashIcon {
-    display: none;
   }
 
   /* the dock (dock.module.css) doesn't render at this width — its
@@ -1538,4 +1526,41 @@
   .wordmark span {
     display: none;
   }
+}
+
+/* ================= NEW (case-rail round 3, NYQUIST) =================
+   Appended-only per this session's coordination rule — do not fold these
+   into the blocks above; edit here instead. */
+
+/* the house mark, immediately left of the wordmark. mask-image is the
+   trick that lets a raster PNG take token ink: background-color paints
+   the square, the mask cuts the mark's silhouette out of it, so it reads
+   in --content and follows light/dark for free. 552:640 source aspect,
+   contained inside the box rather than stretched. vertical-align nudges
+   the mask up from the text baseline toward the wordmark's cap height
+   (13px uppercase display face) — retune here if a type swap drifts it. */
+.mark {
+  display: inline-block;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-right: 7px;
+  vertical-align: -2px;
+  background-color: var(--content);
+  -webkit-mask-image: url('/mark.png');
+  mask-image: url('/mark.png');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* medieval: the scribe engraving swaps in, same mask treatment as the
+   ABOUT stamp's .stampMark (programs.module.css) — same scoping the rest
+   of the shell uses for its medieval-only rules */
+:global([data-skin='medieval']) .mark {
+  -webkit-mask-image: url('/mark-medieval.png');
+  mask-image: url('/mark-medieval.png');
 }
