@@ -187,7 +187,7 @@ export const CASES: CaseDef[] = [
       /* Jake's own line, straight off the Figma box-art template */
       tagline: 'life organized effortlessly.',
       thesis:
-        'The all-in-one family organizer, on Greenlight’s first device. I was its first skeptic. I ended up being its design team.',
+        'The all-in-one family organizer, on Greenlight’s first hardware. I was its first skeptic, then ended up leading its design team.',
       requirements: [
         { label: 'Design : eng', value: '1 : 10' },
         { label: 'Nationwide', value: '7 months from zero' },

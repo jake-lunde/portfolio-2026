@@ -74,28 +74,42 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-5);
   padding: var(--space-3) var(--space-3) var(--space-3);
   border-top: var(--border-width-default) solid var(--border);
 }
 
-.title {
-  margin: 0;
-  font-size: var(--type-body-size);
-  font-weight: var(--weight-bold);
-  line-height: var(--type-body-leading);
+.textBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-/* the on-air pip — a mark, which is exactly what the expressive accent's
-   marks-only license is for */
-.pip {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-circle);
-  background: var(--accent-expressive-mark);
-  vertical-align: 2px;
-  margin-left: var(--space-1);
+.title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--type-heading-1-family);
+  font-size: var(--type-heading-1-size);
+  font-weight: var(--type-heading-1-weight);
+  line-height: var(--type-heading-1-leading);
+}
+
+/* the NEW pill — the expressive accent under its marks-only license,
+   with the audited on-accent ink */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent-expressive);
+  color: var(--on-accent-expressive);
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  line-height: var(--type-label-leading);
 }
 
 .thesis {
@@ -111,12 +125,23 @@
   overflow: hidden;
 }
 
+/* the sill: CTA pair over the meta line. margin-top:auto keeps it seated
+   when the user stretches the window taller than the content */
 .foot {
   margin-top: auto;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: var(--space-3);
+}
+
+.ctas {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.ctas > * {
+  flex: 1;
 }
 
 .meta {
@@ -127,15 +152,3 @@
   white-space: nowrap;
 }
 
-.play {
-  padding: var(--button-sm-padding-y) var(--button-sm-padding-x);
-  font-family: var(--type-label-family);
-  font-size: var(--button-sm-font-size);
-  font-weight: var(--button-weight);
-  letter-spacing: var(--button-sm-tracking);
-  border: var(--button-sm-border) solid var(--content);
-  border-radius: var(--button-radius);
-  background: var(--content);
-  color: var(--surface);
-  cursor: pointer;
-}
