@@ -183,13 +183,9 @@
   overflow: visible;
 }
 
-/* plate 01 — the pitch deck as one horizontally scrolling slide.
-   #000 is the slide fill sampled from the source deck frame (GL
-   artifact, not LUNDE OS chrome — guardrail §5 derivation). */
+/* plate 01 — transparent wireframe groups sitting directly on the
+   plate; the group's deck annotation lives in the cap row above */
 .deck {
-  background: #000;
-  border: 1px solid rgba(231, 225, 210, 0.14); /* hairline from the plate's paper tone */
-  border-radius: 3px;
   position: relative;
   z-index: 1;
 }
@@ -207,9 +203,9 @@
 
 .deckStage img {
   position: absolute;
-  inset: 24px 24px 10px;
-  width: calc(100% - 48px);
-  height: calc(100% - 34px);
+  inset: 6px 0 10px;
+  width: 100%;
+  height: calc(100% - 16px);
   object-fit: contain;
   opacity: 0; /* opacity-only swap — instant, scrub feel */
 }
@@ -229,7 +225,7 @@
 .deckSlide {
   flex: 0 0 100%;
   height: 260px;
-  padding: 20px 20px 8px;
+  padding: 6px 0 8px;
   scroll-snap-align: center;
 }
 
@@ -245,12 +241,58 @@
   display: flex;
   justify-content: space-between;
   gap: var(--spacing-component-md);
-  padding: 8px 24px 14px;
+  padding: 10px 0 0;
   font-family: var(--mono);
   font-size: var(--text-label);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(231, 225, 210, 0.6);
+}
+
+/* the active group's annotation — one clipped line beside FIG; when it
+   overflows, a slow tick walks it across, faded at each edge */
+.capTicker {
+  display: block; /* a real box — inline spans can't clip or measure overflow */
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.capTicker[data-fade] {
+  /* right edge only — the left stays hard (Jake's s56 ruling) */
+  mask-image: linear-gradient(
+    90deg,
+    #000 0,
+    #000 calc(100% - 18px),
+    transparent 100%
+  );
+}
+
+.capTickerLine {
+  display: inline-block;
+}
+
+.capTicker[data-fade] .capTickerLine {
+  /* linear on purpose — a ticker crawl, not a spring gesture */
+  animation: tickerWalk var(--tick-dur) linear 0.4s infinite alternate;
+}
+
+@keyframes tickerWalk {
+  0%,
+  4% {
+    transform: translateX(0);
+  }
+  92%,
+  100% {
+    transform: translateX(var(--tick-shift));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capTicker[data-fade] .capTickerLine {
+    animation: none;
+  }
 }
 
 /* three moves */

@@ -1,10 +1,9 @@
 # HANDOFF — current state (code-adjacent only; rotates per CLAUDE.md §4.4)
 
-> **Projects · tasks · rulings live in the jaique vault** —
-> `/Users/jake/jaique`, start at `Atlas/Maps/LUNDE OS Map.md`
-> (law: CLAUDE.md §3.6). Notion is RETIRED (s49). Session notes: vault
-> `Calendar/Notes/`. Older HANDOFF notes: `HANDOFF-ARCHIVE.md`. Jake's
-> ideas doc (Google Drive "Portfolio 2026 / Updates and Ideas") — re-read
+> **Projects · tasks · rulings → jaique vault** (`/Users/jake/jaique`,
+> start `Atlas/Maps/LUNDE OS Map.md`; law CLAUDE.md §3.6). Notion RETIRED.
+> Session notes: vault `Calendar/Notes/`; older notes `HANDOFF-ARCHIVE.md`.
+> Jake's ideas doc (Drive "Portfolio 2026 / Updates and Ideas") — re-read
 > at session start; his freshest silent edits are his real priorities.
 
 ## Current state
@@ -12,18 +11,17 @@
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`;
   push to main = deploy; verify via Vercel MCP + content-marker `curl -sL`
   — GitHub status stays "pending" while Chromatic runs; apex 308s to www).
-  **Production = s53 VOICE PASS (`0660624`) on s52 VHS signal + s51 deck
-  zero-list + s46 token commit route + INSPECT + ASK MY AI + SHIPPED.SW.**
+  **Production = main `fcdffa4`: s54 FH media + pitch scrub (PR #9
+  merged) on s53 voice pass + s52 VHS signal + earlier stack.**
 - **⚠️ Shared-checkout law:** no concurrent sessions on one working tree;
   `git branch --show-current` before EVERY commit; worktrees are the
   pattern; leave the main checkout on main.
 - **Build law:** dev server and `npm run build` share `.next` —
   `preview_stop → build → preview_start`; corruption → `rm -rf .next`.
-- **AI chat guardrails:** daily blob counter `AI_CHAT_DAILY_MAX` (250) ·
-  per-IP 20/day · 8-msg session cap · 5s cooldown (per-instance,
-  accepted) · kill switch `AI_CHAT_OFF` · true backstop = workspace spend
-  limit (Jake-confirm task in vault). Dep: `@anthropic-ai/sdk`.
-  `/machine` 307→`/readme`.
+- **AI chat guardrails:** blob counter `AI_CHAT_DAILY_MAX` (250) ·
+  per-IP 20/day · 8-msg cap · 5s cooldown · kill switch `AI_CHAT_OFF` ·
+  true backstop = workspace spend limit (Jake-confirm task in vault).
+  Dep: `@anthropic-ai/sdk`. `/machine` 307→`/readme`.
 - **Token commit route:** `/api/token-commit` → branch `inspect-tune`,
   stacking PRs; gate = CI `tokens-sync.yml`. Blocked on
   `GITHUB_COPY_TOKEN` scopes (vault task).
@@ -36,33 +34,27 @@
   `--accent-on-inverse` · reduced-motion by emulation · medieval airbrush
   wash contrast · token-debt leftovers (ruling = vault task) ·
   `family-hub 2/` + `".claude/* 2.*"` dups (Jake deletes).
-- **Cleanup owed:** remote deletes Jake must run (classifier blocks
-  them): `git push origin --delete case-family-hub suggestion-box
-  film-vhs-signal`; `medieval-sfx*` on confirm. Locals swept s50; ~14
-  stale merged (`worktree-agent-*`, `blue-update-test`, old `feat/*`)
-  await ruling.
+- **Cleanup owed (Jake runs; classifier blocks):** `git push origin
+  --delete case-family-hub suggestion-box film-vhs-signal`
+  (+`medieval-sfx*` on confirm); ~14 stale merged locals await ruling.
 
-## Latest session — S54 FH MEDIA (2026-08-13)
+## Latest session — S56 FIG.A STRIP (2026-08-14)
 
-- **PR #9 OPEN (`fh-plate-media`):** Family Hub moves 1–3 vision-deck
-  stills + Plate 01 `PitchDeck` scroller (nine Figma groups, one 825px
-  canvas; deck footer live-coded; #000 slide fill sampled from frame).
-  Verified dev + mobile, build green, voice pass merged on top.
-  Classifier blocks `gh pr merge` — Jake merges, then deletes branch +
-  worktree `.claude/worktrees/fh-media`. Plates 04/05/06/08/10 still
-  placeholders. Note: vault `2026-08-13 s54.md`. ⚠️ Local
-  `fh-plate-media` carries stray dup commit `1da6d84` (shared-checkout
-  bite; same fix is on main as `1d6e9be`) — force-delete is safe.
-- **s53 follow-up LIVE (chunk-verified):** cases.ts shelf blurbs missed
-  by the voice pass (Invest box thesis + 2 progress phases) fixed on
-  main `1d6e9be`.
+- **PR #10 OPEN (`fh-figa-strip`):** Plate 01 stripped — nine pitch
+  groups re-exported transparent at 2x (⚠️ Figma MCP asset export bakes
+  the canvas gray into node PNGs; use REST `/v1/images` + `FIGMA_PAT`
+  for alpha). Deck annotations now live text in the plate cap row beside
+  FIG. A (slow ticker + 18px edge fades on overflow; reduced-motion
+  safe); intro group keeps baked text. Deck #000 box gone; `Plate.cap`
+  is ReactNode; PitchDeck renders its own Plate; carousel reports its
+  slide. Verified desktop + mobile probes; build green. Note: vault
+  `2026-08-14 s56.md`. Flag: "it's morning state" typo is deck-verbatim.
+- **⚠️ Stranded working-tree edit:** family-hub.mdx hero meta (role /
+  partners / GLOW DS wording) changed under the session, uncommitted on
+  the `fh-figa-strip` checkout — Jake routes it (branch or main).
 
-## Prior session — S53 VOICE PASS (2026-08-13)
+## Prior session — S54 FH MEDIA (2026-08-13)
 
-- **voice-pass MERGED `0660624`:** `VOICE.md` (repo root) is LAW for every
-  written word on the site + agent chat with Jake (machine caps included);
-  CLAUDE.md §2 points at it. Both case MDX reworded; copy.json
-  de-em-dashed. Rulings: truth over punch; "green light" banned; survey
-  quotes verbatim. Debt: hardcoded program strings still pre-voice.
-- **⚠️ Web Analytics still NEVER ENABLED** (vault: "optimize analytics").
-  Session note: vault `Calendar/Notes/2026-08-13 s53.md`. s52 → archive.
+- **PR #9 MERGED (`3478b0a`):** FH moves 1–3 stills + Plate 01 scrub.
+  Plates 04/05/06/08/10 still placeholders. Jake owes: delete
+  `fh-plate-media` (dup `1da6d84`, force-delete safe) + its worktree.

@@ -1,5 +1,15 @@
 # HANDOFF ARCHIVE — LUNDE OS
 
+## Rotated 2026-08-14 (s56) — s53 session block
+
+S53 VOICE PASS (2026-08-13): voice-pass MERGED `0660624`: `VOICE.md`
+(repo root) is LAW for every written word on the site + agent chat with
+Jake (machine caps included); CLAUDE.md §2 points at it. Both case MDX
+reworded; copy.json de-em-dashed. Rulings: truth over punch; "green
+light" banned; survey quotes verbatim. Debt: hardcoded program strings
+still pre-voice. ⚠️ Web Analytics never enabled (vault: "optimize
+analytics"). Session note: vault `Calendar/Notes/2026-08-13 s53.md`.
+
 ## Rotated 2026-08-13 (s52) — s51 session block
 
 S51 BACKLOG TRIO: cc-feed zero-list SHIPPED (`0386e89`, prod-tested) —
