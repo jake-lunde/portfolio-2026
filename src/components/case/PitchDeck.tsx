@@ -22,7 +22,7 @@ const BASE = '/case/family-hub/pitch'
 const SLIDES: Array<[file: string, w: number, h: number, label: string, alt: string]> = [
   ['01-ingredients', 1819, 642, '', 'Deck intro: “Greenlight helps your family plan, stay organized, and connected,” with the family, their needs, and the feature list'],
   ['02-mobile', 608, 609, 'Mobile view can provide a helpful home tab widget with the ability to dive into a more detailed planning view', 'The mobile companion, a home-screen widget plus a detailed planning view, shown on two phones'],
-  ['03-ambient', 1085, 609, 'Home display is in it’s morning state, providing just what the family needs at a glance to get their day started (optimize for distance viewing/glanceability)', 'The home display in its morning ambient state: just what the family needs at a glance to start the day'],
+  ['03-ambient', 1085, 609, 'Home display is in its morning state, providing just what the family needs at a glance to get their day started (optimize for distance viewing/glanceability)', 'The home display in its morning ambient state: just what the family needs at a glance to start the day'],
   ['04-day', 1085, 609, 'Happening Now / Day View', 'Happening Now, the day view'],
   ['05-week', 1085, 609, 'This Week', 'This Week, the week view'],
   ['06-month', 1085, 609, 'This Month', 'This Month, the full month view'],

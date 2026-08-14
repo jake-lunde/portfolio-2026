@@ -260,10 +260,10 @@
 }
 
 .capTicker[data-fade] {
+  /* right edge only — the left stays hard (Jake's s56 ruling) */
   mask-image: linear-gradient(
     90deg,
-    transparent 0,
-    #000 18px,
+    #000 0,
     #000 calc(100% - 18px),
     transparent 100%
   );
@@ -275,15 +275,15 @@
 
 .capTicker[data-fade] .capTickerLine {
   /* linear on purpose — a ticker crawl, not a spring gesture */
-  animation: tickerWalk var(--tick-dur) linear 1.2s infinite alternate;
+  animation: tickerWalk var(--tick-dur) linear 0.4s infinite alternate;
 }
 
 @keyframes tickerWalk {
   0%,
-  12% {
+  4% {
     transform: translateX(0);
   }
-  88%,
+  92%,
   100% {
     transform: translateX(var(--tick-shift));
   }
