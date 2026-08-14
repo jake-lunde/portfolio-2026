@@ -20,8 +20,7 @@
   `preview_stop → build → preview_start`; corruption → `rm -rf .next`.
 - **AI chat guardrails:** blob counter `AI_CHAT_DAILY_MAX` (250) ·
   per-IP 20/day · 8-msg cap · 5s cooldown · kill switch `AI_CHAT_OFF` ·
-  true backstop = workspace spend limit (Jake-confirm task in vault).
-  Dep: `@anthropic-ai/sdk`. `/machine` 307→`/readme`.
+  backstop = workspace spend limit (vault task). `/machine` 307→`/readme`.
 - **Token commit route:** `/api/token-commit` → branch `inspect-tune`,
   stacking PRs; gate = CI `tokens-sync.yml`. Blocked on
   `GITHUB_COPY_TOKEN` scopes (vault task).
