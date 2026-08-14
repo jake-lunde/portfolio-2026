@@ -2328,3 +2328,12 @@ deck reported throughout. Zero-visual-change law held.**
   (printed art never dressed; pass-4 no-filter law holds); medieval
   strikes it. Taste dials in shelf.module.css `.filmVhs`. NTSCplayer
   RULED OUT (desktop mpv app, GPL shaders, no license) — look, not code.
+
+## S53 VOICE PASS (2026-08-13) — rotated out s57
+
+- **voice-pass MERGED `0660624`:** `VOICE.md` (repo root) is LAW for every
+  written word on the site + agent chat with Jake (machine caps included);
+  CLAUDE.md §2 points at it. Both case MDX reworded; copy.json
+  de-em-dashed. Rulings: truth over punch; "green light" banned; survey
+  quotes verbatim. Debt: hardcoded program strings still pre-voice.
+- Session note: vault `Calendar/Notes/2026-08-13 s53.md`.

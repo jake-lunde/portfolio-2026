@@ -38,7 +38,7 @@ export function EditPanel({ engine }: { engine: Engine }) {
   const skin = useSettings((s) => s.skin)
   const focused = useWindows((s) => s.focused)
   const [keyInput, setKeyInput] = useState('')
-  const [rejected, setRejected] = useState(false)
+  const [fail, setFail] = useState<'badkey' | 'throttled' | null>(null)
 
   const {
     phase,
@@ -66,9 +66,9 @@ export function EditPanel({ engine }: { engine: Engine }) {
     e.preventDefault()
     const entered = keyInput
     setKeyInput('')
-    setRejected(false)
+    setFail(null)
     const ok = await authenticate(entered)
-    if (!ok) setRejected(true)
+    if (ok !== true) setFail(ok)
   }
 
   return (
@@ -106,9 +106,15 @@ export function EditPanel({ engine }: { engine: Engine }) {
             <button type="submit" className={styles.resetAll}>
               <CopyText k="inspect.edit.auth" />
             </button>
-            {rejected && (
+            {fail && (
               <p className={styles.saveNote} data-fail="" role="alert">
-                <CopyText k="inspect.edit.badkey" />
+                <CopyText
+                  k={
+                    fail === 'throttled'
+                      ? 'inspect.edit.throttled'
+                      : 'inspect.edit.badkey'
+                  }
+                />
               </p>
             )}
           </form>

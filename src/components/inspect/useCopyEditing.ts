@@ -156,16 +156,16 @@ export function useCopyEditing(active: boolean) {
     }
   }, [active, phase, loadBase])
 
-  /* ---- key prompt submit. Returns false on a rejected key so the panel
-     can say so; every other outcome is carried by `phase`. ---- */
+  /* ---- key prompt submit. Returns the failure kind on a refused key so
+     the panel can say which; every other outcome is carried by `phase`. ---- */
   const authenticate = useCallback(
-    async (entered: string): Promise<boolean> => {
+    async (entered: string): Promise<true | 'badkey' | 'throttled'> => {
       const verdict = await verifyEditKey(entered)
       if (verdict === 'unconfigured') {
         setPhase('unconfigured')
         return true
       }
-      if (!verdict) return false
+      if (verdict !== true) return verdict
       setPhase(await loadBase())
       return true
     },

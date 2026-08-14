@@ -36,15 +36,19 @@ export function clearEditKey(): void {
   } catch {}
 }
 
-/** Trade a typed key for an armed session. `true` on accept, `false` on a
-    rejected key, `'unconfigured'` when the deployment has no key at all. */
-export async function verifyEditKey(entered: string): Promise<boolean | 'unconfigured'> {
+/** Trade a typed key for an armed session. `true` on accept, `'badkey'` on
+    a rejected key, `'throttled'` when the verify endpoint has rate-limited
+    this IP, `'unconfigured'` when the deployment has no key at all. */
+export async function verifyEditKey(
+  entered: string,
+): Promise<true | 'badkey' | 'throttled' | 'unconfigured'> {
   const res = await fetch('/api/copy-commit/verify', {
     method: 'POST',
     headers: { 'x-edit-key': entered },
   })
   if (res.status === 501) return 'unconfigured'
-  if (!res.ok) return false
+  if (res.status === 429) return 'throttled'
+  if (!res.ok) return 'badkey'
   writeEditKey(entered)
   return true
 }
