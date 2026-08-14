@@ -19,7 +19,7 @@ import { Screensaver } from './Screensaver'
 import { Window } from './Window'
 import { Boot } from './Boot'
 import { InspectMount } from '@/components/inspect/InspectMount'
-import { useInspect } from '@/store/inspect'
+import { useInspect, type InspectTool } from '@/store/inspect'
 import { KnightSpeakLayer } from '@/content/KnightSpeakLayer'
 import styles from './shell.module.css'
 
@@ -27,18 +27,19 @@ import styles from './shell.module.css'
    hydration the store owns everything and the URL follows the focused
    window via history.replaceState (view-state, not navigation).
 
-   `initialInspect` is the /inspect deep link: INSPECT.MODE is a tool mode
-   rather than a window now, so the path cannot open it the way every
-   other path opens a program — it opens README onto the canvas and arms
-   the tool over the top. After that the mode is orthogonal to the URL and
-   the focus-sync below carries on as normal. */
+   `initialInspect` is the /inspect and /edit deep link: INSPECT.MODE is a
+   tool mode rather than a window now, so the path cannot open it the way
+   every other path opens a program — it opens README onto the canvas and
+   arms the tool over the top. The value is WHICH TOOL the link asks for,
+   because /edit lands holding the copy editor. After that the mode is
+   orthogonal to the URL and the focus-sync below carries on as normal. */
 
 export function Desktop({
   initialWindows,
-  initialInspect = false,
+  initialInspect = null,
 }: {
   initialWindows: string[]
-  initialInspect?: boolean
+  initialInspect?: InspectTool | null
 }) {
   const desktopRef = useRef<HTMLDivElement>(null)
   const stored = useWindows((s) => s.windows)
@@ -50,9 +51,11 @@ export function Desktop({
     const mobileRoot =
       window.innerWidth <= 720 && initialWindows.length === 1 && initialWindows[0] === 'readme'
     useWindows.getState().setInitial(mobileRoot ? [] : initialWindows)
-    // the tool needs a canvas between its two docks — same floor the
-    // menubar toggle and InspectShell keep
-    if (initialInspect && window.innerWidth > 900) useInspect.getState().setOn(true)
+    /* the tool needs a canvas between its two docks — same floor the
+       menubar toggle and InspectShell keep. /edit below 900px simply does
+       not arm: the editor is Jake's desk tool and he is at a desk. */
+    if (initialInspect && window.innerWidth > 900)
+      useInspect.getState().setOn(true, initialInspect)
     setHydrated(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

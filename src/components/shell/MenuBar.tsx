@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSettings } from '@/store/settings'
 import { useInspect } from '@/store/inspect'
-import { t } from '@/content/copy'
 import { OS_VERSION } from '@/lib/version'
 import { SkinSwitch } from './SkinSwitch'
 import { FableMark } from './FableMark'
@@ -109,22 +108,8 @@ export function MenuBar() {
   const hydrate = useSettings((s) => s.hydrate)
   const inspecting = useInspect((s) => s.on)
   const toggleInspect = useInspect((s) => s.toggle)
-  /* EDIT.MODE (SYS-99) and INSPECT.MODE cannot both hold the desktop.
-     InspectShell already stands down when the editor arms, but as the
-     SECOND mover that showed as a flash: panels appeared, the desktop
-     compressed, and everything snapped back inside a frame with no word
-     of why. The refusal belongs on the control, before the flip. */
-  const [editing, setEditing] = useState(false)
 
   useEffect(() => hydrate(), [hydrate])
-
-  useEffect(() => {
-    const read = () => setEditing(!!document.body.dataset.editmode)
-    read()
-    const obs = new MutationObserver(read)
-    obs.observe(document.body, { attributes: true, attributeFilter: ['data-editmode'] })
-    return () => obs.disconnect()
-  }, [])
 
   return (
     /* the menubar is the tool's own toolbar while INSPECT.MODE is up, so
@@ -150,24 +135,18 @@ export function MenuBar() {
             it, so the mark had nothing left to identify — it was decoration
             on a word that was already the label. Word only.
 
+            The copy editor used to refuse this button while it held the
+            desktop (SYS-99). It is INSPECT's third tool now, so there is
+            nothing left to refuse and no busy state to explain.
+
             Hidden below 900px, where there would be no canvas left
             between the docks (see .inspectBtn). */}
         <button
           className={`${styles.menuBtn} ${styles.inspectBtn}`}
           data-inspect-toggle=""
-          onClick={() => {
-            if (editing) return
-            toggleInspect()
-          }}
+          onClick={toggleInspect}
           aria-pressed={inspecting}
-          aria-disabled={editing || undefined}
-          data-busy={editing || undefined}
-          title={editing ? t('inspect.editbusy', skin) : undefined}
-          aria-label={
-            editing
-              ? t('inspect.editbusy', skin)
-              : `Inspect mode ${inspecting ? 'on' : 'off'}`
-          }
+          aria-label={`Inspect mode ${inspecting ? 'on' : 'off'}`}
         >
           INSPECT
         </button>
