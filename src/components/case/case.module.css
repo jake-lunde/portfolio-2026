@@ -990,3 +990,174 @@
 .moatWhy b {
   color: var(--accent-expressive);
 }
+
+/* INDEX + read-o-meter (CaseIndex.tsx) — the case's sidecar contents on
+   the left margin, mirroring the evolution rail's OS-window vocabulary,
+   and a segmented progress strip pinned under the title bar. */
+
+.idxRoot {
+  display: contents;
+}
+
+.meterSlot {
+  position: sticky;
+  top: 0;
+  z-index: 7;
+  height: 0;
+  /* bleed over .case's own padding — keep in step with .case (10px 30px) */
+  margin: -10px -30px 0;
+}
+
+.meter {
+  display: flex;
+  gap: 3px;
+  /* Jake's call: sit the bar a breath below the title bar, not flush */
+  padding: 10px 12px 8px;
+  background: var(--surface);
+  border-bottom: var(--border-width-subtle) solid var(--border);
+}
+
+.meterSeg {
+  flex: 1;
+  height: 6px;
+  /* empty track keeps the accent's hue — mixed down against the
+     surface (derived, not invented — same move as the crt borders) */
+  background: color-mix(in srgb, var(--accent) 20%, var(--surface));
+}
+
+/* segments flip, they don't fade — a 1992 loading bar is discrete */
+.meterSeg[data-on] {
+  background: var(--accent);
+}
+
+.idxSlot {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 12px;
+  width: 34px;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* same berth rule as the evolution rail (Jake's call there: better
+   overlapping the plates than absent) — and the same threshold, so the
+   two rails arrive together on FAMILY.HUB */
+@container (min-width: 640px) {
+  .idxSlot {
+    display: block;
+  }
+}
+
+.idx {
+  position: sticky;
+  top: 34px; /* clears the meter band */
+  pointer-events: auto;
+  display: inline-flex;
+  flex-direction: column;
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: 6px 6px 0 rgba(23, 21, 13, 0.14);
+  /* arrives only once the reader starts scrolling; visibility keeps the
+     hidden rail out of the tab order and off the pointer */
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    visibility 0s 0.25s;
+}
+
+[data-theme='dark'] .idx {
+  border-color: var(--border);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
+}
+
+.idxSlot[data-in] .idx {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition-delay: 0s;
+}
+
+.idxTitle {
+  display: none;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 5px 8px;
+  border-bottom: var(--border-width-default) solid var(--content);
+  background: var(--surface);
+}
+
+[data-theme='dark'] .idxTitle {
+  border-bottom-color: var(--border);
+}
+
+.idxRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: var(--text-ui);
+  letter-spacing: 0.08em;
+  color: var(--content-muted);
+  text-align: left;
+}
+
+.idxRow:first-of-type {
+  padding-top: 7px;
+}
+
+.idxRow:last-of-type {
+  padding-bottom: 7px;
+}
+
+.idxRow:hover {
+  color: var(--content);
+}
+
+/* read sections keep full ink; the active number takes the accent */
+.idxRow[data-done] {
+  color: var(--content);
+}
+
+.idxRow[data-on] {
+  color: var(--content);
+}
+
+.idxRow[data-on] .idxNo {
+  color: var(--accent);
+}
+
+/* labels pop with the panel on hover/focus — no tween, like a menu */
+.idxLabel {
+  display: none;
+  white-space: nowrap;
+}
+
+.idx:hover .idxTitle,
+.idx:focus-within .idxTitle,
+.idx:hover .idxLabel,
+.idx:focus-within .idxLabel {
+  display: block;
+}
+
+.idxRow:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .idx {
+    transition: none;
+  }
+}
