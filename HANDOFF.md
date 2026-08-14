@@ -11,8 +11,8 @@
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`;
   push to main = deploy; verify via Vercel MCP + content-marker `curl -sL`
   — GitHub status stays "pending" while Chromatic runs; apex 308s to www).
-  **Production = main `6613397`: s56 fig. a strip (PR #10) on s54 FH
-  media + s53 voice pass + s52 VHS signal + earlier stack.**
+  **Production = main `826065b`: s57 edit-in-inspect (PR #11) on s56
+  fig. a strip + s54 FH media + s53 voice pass + earlier stack.**
 - **⚠️ Shared-checkout law:** no concurrent sessions on one working tree;
   `git branch --show-current` before EVERY commit; worktrees are the
   pattern; leave the main checkout on main.
@@ -28,8 +28,8 @@
   reminder; PreToolUse blocks generated edits, forbidden commits, prettier.
 - **Skins:** classic (light/dark) + medieval live; underwater stub. Copy
   layer + EDIT.MODE live — merge copy.json at KEY level; never force-push
-  (Jake's EDIT.MODE commits land on main under you). EDIT becomes
-  INSPECT's third tool when `edit-in-inspect` merges (below).
+  (Jake's EDIT.MODE commits land on main under you). EDIT is INSPECT's
+  third tool since s57 (below).
 - **Known debts:** SpecSheet motion quote-strings · first-load JS perf ·
   `--accent-on-inverse` · reduced-motion by emulation · medieval airbrush
   wash contrast · token-debt leftovers (ruling = vault task) ·
@@ -38,16 +38,17 @@
   --delete case-family-hub suggestion-box film-vhs-signal fh-figa-strip`
   (+`medieval-sfx*` on confirm); ~14 stale merged locals await ruling.
 
-## Latest session — S57 EDIT X INSPECT (2026-08-14)
+## Latest session — S57 EDIT X INSPECT (2026-08-14) — SHIPPED
 
-- **PR #11 OPEN (`edit-in-inspect`):** EDIT.MODE folded into INSPECT as
-  a third tool. `src/programs/editmode/` deleted; engine now
+- **LIVE, main `826065b` (PR #11):** EDIT.MODE folded into INSPECT as a
+  third tool. `src/programs/editmode/` deleted; engine now
   `inspect/useCopyEditing.ts` + `EditPanel.tsx` (right dock). `/edit` =
   deep link arming the tool (≥900px gate; mobile editing gone, accepted).
   Same `EDIT_MODE_KEY`; verify endpoint throttles 10 fails/hr/IP → 429.
   SOURCE row links case MDX to GitHub's editor (`CaseDef.source`).
-  Dev-verified + tsc/build/tests green. Jake merges. Case chrome strings
-  stay outside the copy layer — ruling + details in vault s57 note.
+  CDN-verified (/edit serves noindex). Case chrome strings stay outside
+  the copy layer — ruling + details in vault s57 note. Main checkout
+  restored to main; s56 branch leftovers resolved by PR #10 content.
 
 ## Prior session — S56 FIG.A STRIP (2026-08-14) — SHIPPED
 
