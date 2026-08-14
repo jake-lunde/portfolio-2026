@@ -1,10 +1,9 @@
 # HANDOFF — current state (code-adjacent only; rotates per CLAUDE.md §4.4)
 
-> **Projects · tasks · rulings live in the jaique vault** —
-> `/Users/jake/jaique`, start at `Atlas/Maps/LUNDE OS Map.md`
-> (law: CLAUDE.md §3.6). Notion is RETIRED (s49). Session notes: vault
-> `Calendar/Notes/`. Older HANDOFF notes: `HANDOFF-ARCHIVE.md`. Jake's
-> ideas doc (Google Drive "Portfolio 2026 / Updates and Ideas") — re-read
+> **Projects · tasks · rulings → jaique vault** (`/Users/jake/jaique`,
+> start `Atlas/Maps/LUNDE OS Map.md`; law CLAUDE.md §3.6). Notion RETIRED.
+> Session notes: vault `Calendar/Notes/`; older notes `HANDOFF-ARCHIVE.md`.
+> Jake's ideas doc (Drive "Portfolio 2026 / Updates and Ideas") — re-read
 > at session start; his freshest silent edits are his real priorities.
 
 ## Current state
