@@ -11,8 +11,8 @@
 - **Live:** https://lunde.co (Vercel `portfolio-2026`, team `lunde-os`;
   push to main = deploy; verify via Vercel MCP + content-marker `curl -sL`
   — GitHub status stays "pending" while Chromatic runs; apex 308s to www).
-  **Production = main `fcdffa4`: s54 FH media + pitch scrub (PR #9
-  merged) on s53 voice pass + s52 VHS signal + earlier stack.**
+  **Production = main `6613397`: s56 fig. a strip (PR #10) on s54 FH
+  media + s53 voice pass + s52 VHS signal + earlier stack.**
 - **⚠️ Shared-checkout law:** no concurrent sessions on one working tree;
   `git branch --show-current` before EVERY commit; worktrees are the
   pattern; leave the main checkout on main.
@@ -38,20 +38,18 @@
   --delete case-family-hub suggestion-box film-vhs-signal`
   (+`medieval-sfx*` on confirm); ~14 stale merged locals await ruling.
 
-## Latest session — S56 FIG.A STRIP (2026-08-14)
+## Latest session — S56 FIG.A STRIP (2026-08-14) — SHIPPED
 
-- **PR #10 OPEN (`fh-figa-strip`):** Plate 01 stripped — nine pitch
-  groups re-exported transparent at 2x (⚠️ Figma MCP asset export bakes
-  the canvas gray into node PNGs; use REST `/v1/images` + `FIGMA_PAT`
-  for alpha). Deck annotations now live text in the plate cap row beside
-  FIG. A (slow ticker + 18px edge fades on overflow; reduced-motion
-  safe); intro group keeps baked text. Deck #000 box gone; `Plate.cap`
-  is ReactNode; PitchDeck renders its own Plate; carousel reports its
-  slide. Verified desktop + mobile probes; build green. Note: vault
-  `2026-08-14 s56.md`. Flag: "it's morning state" typo is deck-verbatim.
-- **⚠️ Stranded working-tree edit:** family-hub.mdx hero meta (role /
-  partners / GLOW DS wording) changed under the session, uncommitted on
-  the `fh-figa-strip` checkout — Jake routes it (branch or main).
+- **LIVE, main `6613397` (PR #10 + round 2):** Plate 01 stripped —
+  transparent 2x re-exports (⚠️ Figma MCP export bakes the canvas gray
+  into node PNGs; REST `/v1/images` + `FIGMA_PAT` keeps alpha; label
+  text via `/v1/files/:key/nodes`). Deck annotations live in the cap
+  row beside FIG. A — ticker 0.4s lead, right-edge fade only (Jake's
+  ruling), reduced-motion safe; intro group keeps baked text.
+  `Plate.cap` is ReactNode; carousel reports its slide. Round 2: "its"
+  fix, thinking graphic v2, Jake's hero-meta + sec 01 title edits rode
+  along. CDN-verified (08-thinking 22696B). Note: vault s56.
+- Jake owes: remote delete `fh-figa-strip` (classifier); local swept.
 
 ## Prior session — S54 FH MEDIA (2026-08-13)
 
