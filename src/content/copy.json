@@ -171,7 +171,7 @@
     "medieval": "Illuminator"
   },
   "program.progress.name": {
-    "base": "Case Studies",
+    "base": "Work",
     "medieval": "Works"
   },
   "program.projects.name": {
@@ -199,7 +199,7 @@
     "medieval": "The Pigments"
   },
   "program.spec-sheet.name": {
-    "base": "Spec Sheet",
+    "base": "Design System",
     "medieval": "Colophon"
   },
   "program.studio.name": {

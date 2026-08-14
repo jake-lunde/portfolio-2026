@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'motion/react'
 import { useWindows } from '@/store/windows'
-import { resolveWindow } from '@/programs/resolve'
+import { resolveWindow, BOOT_WINDOWS } from '@/programs/resolve'
 import { BASE } from '@/lib/base'
 import { MenuBar } from './MenuBar'
 import { SkillsTicker } from './SkillsTicker'
@@ -13,7 +13,6 @@ import { Wallpaper } from './Wallpaper'
 import { NowPlayingWidget } from './NowPlayingWidget'
 import { MiniPlayer } from './MiniPlayer'
 import { CommandWidget } from './CommandWidget'
-import { DailyWidget } from './DailyWidget'
 import { PhotoWall } from './PhotoWall'
 import { AmbientAgents } from './AmbientAgents'
 import { Screensaver } from './Screensaver'
@@ -48,9 +47,10 @@ export function Desktop({
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    // mobile lands on the launcher, not a full-bleed README
+    // mobile lands on the launcher, not the boot desk (README used to boot
+    // alone; the desk now sets out the player too — resolve.ts BOOT_WINDOWS)
     const mobileRoot =
-      window.innerWidth <= 720 && initialWindows.length === 1 && initialWindows[0] === 'readme'
+      window.innerWidth <= 720 && initialWindows.join(',') === BOOT_WINDOWS.join(',')
     useWindows.getState().setInitial(mobileRoot ? [] : initialWindows)
     /* the tool needs a canvas between its two docks — same floor the
        menubar toggle and InspectShell keep. /edit below 900px simply does
@@ -92,7 +92,9 @@ export function Desktop({
         <NowPlayingWidget />
         <DesktopIcons />
         <Dock />
-        <DailyWidget />
+        {/* DAILY.SYS stood here until the refresh pass — Jake's read was
+            "just doesn't feel super helpful". The component survives at
+            DailyWidget.tsx; remounting it is this one line back. */}
         <MiniPlayer />
         {/* the sticky notes moved into the FEEDBACK window (session 25) */}
         <CommandWidget />

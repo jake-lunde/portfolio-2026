@@ -32,6 +32,7 @@ export type IconName =
   | 'bubble'
   | 'mystery'
   | 'suggest'
+  | 'work'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -281,6 +282,18 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M11 17.5h10" />
     </>
   ),
+  // briefcase — CASE STUDIES → WORK. Handle arc, body, and a lid seam;
+  // the clasp is a cutout (fill var(--surface)) rather than a solid
+  // mark, the same trick `sliders` uses for its knobs, so it reads as a
+  // punched-through hole in the line rather than a dark blob at 32px.
+  work: (
+    <>
+      <path d="M12 9a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3v3" />
+      <path d="M5 12h22v14H5z" />
+      <path d="M5 18h22" />
+      <rect x="14" y="16.5" width="4" height="3" rx=".5" fill="var(--surface)" />
+    </>
+  ),
 }
 
 /* Medieval variants — the same objects re-cut as woodcut/heraldic figures
@@ -492,6 +505,17 @@ const MEDIEVAL_PATHS: Partial<Record<IconName, React.ReactNode>> = {
       <path d="M6 15h20v12H6z" />
       <path d="M6 19.5h20" />
       <path d="M14.6 18h2.8v3h-2.8z" fill="currentColor" stroke="none" />
+    </>
+  ),
+  // WORK → THE SATCHEL: a courier's bag on a shoulder strap, standing in
+  // for the clasped codex (`folder`, "WORKS") that this glyph replaces
+  // in that same slot — same buckle-as-cutout move as the codex's clasp.
+  work: (
+    <>
+      <path d="M7 11c3-5 15-5 18 0" opacity=".6" />
+      <path d="M8 11h16l2 16H6z" />
+      <path d="M8 17h16" />
+      <rect x="14" y="15.5" width="4" height="3" fill="currentColor" stroke="none" />
     </>
   ),
 }

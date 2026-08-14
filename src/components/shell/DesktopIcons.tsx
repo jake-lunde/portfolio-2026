@@ -9,32 +9,31 @@ import { Icon } from './Icon'
 import { DOCKED, DOCKED_ORDER } from './Dock'
 import styles from './shell.module.css'
 
-/* Desktop launcher. Explicit reading order: README · RESUME.EXE · CASE
-   STUDIES. Trash rides the bottom-left corner on desktop, but joins the
-   scrolling grid on mobile.
+/* Desktop launcher. README is the only door left standing. Trash rides
+   the bottom-left corner on desktop, but joins the scrolling grid on
+   mobile.
 
-   THE SPLIT (case-rail POC): the grid used to carry every onDesktop
-   program in one reading order, doors and tail both (README through
-   SETTINGS). The tail — GUESTBOOK, MUSIC, FUN, FEEDBACK, SUGGESTION BOX,
-   SPEC SHEET, SETTINGS — now rides the bottom Dock instead (Dock.tsx): a
-   NeXTSTEP-style rail of uniform tiles, so it reads as one machined row
-   rather than more desktop clutter. DOCKED (Dock.tsx) is the membership
-   test; DOOR_ORDER below is just the three that stayed.
+   THE SPLIT (poolsuite pass, case-rail): the grid used to carry every
+   onDesktop program in one reading order. Everything but README now
+   rides the bottom Dock instead (Dock.tsx): a NeXTSTEP-style rail of
+   uniform tiles, so it reads as one machined row rather than more
+   desktop clutter. DOCKED (Dock.tsx) is the membership test;
+   DOOR_ORDER below is just the one door that stayed.
 
    The dock doesn't render below the shell's mobile floor (720px — the
    same width that turns windows into a full-bleed stack), and a media
    query can't reach into JSX to exclude an id. So the docked programs are
-   ALSO rendered here, in the order they used to hold in the old ORDER
-   array, hidden by default (.dockedGrid) and shown only inside that same
-   media query — mirroring how .trashGrid already works. Nothing renders
-   twice: on desktop the docked buttons are display:none and the rail is
-   the only copy on screen; below 720px the rail is display:none and the
-   grid is the only copy.
+   ALSO rendered here, in the rail's own reading order, hidden by default
+   (.dockedGrid) and shown only inside that same media query — mirroring
+   how .trashGrid already works. Nothing renders twice: on desktop the
+   docked buttons are display:none and the rail is the only copy on
+   screen; below 720px the rail is display:none and the grid is the only
+   copy.
 
    README is the single identity door (session 41 retired ABOUT THIS
    MACHINE): the machine's own opinion now hangs off a CTA inside it. */
 
-const DOOR_ORDER = ['readme', 'cv', 'progress']
+const DOOR_ORDER = ['readme']
 
 const doorRank = (id: string) => {
   const i = DOOR_ORDER.indexOf(id)

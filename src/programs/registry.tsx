@@ -103,12 +103,13 @@ export const PROGRAMS: ProgramDef[] = [
     // SHIPPED.SW — the shelf of boxed case studies. The id stays `progress`
     // (it names the copy keys, the window store and the deep link, not the
     // program) and so does the name: `program.progress.name` drives BOTH
-    // the desktop icon and the titlebar, so the split lives inside — the
-    // window is "Case Studies", the masthead in it is SHIPPED.SW.
+    // the dock tile and the titlebar, so the split lives inside — the
+    // window is "Work" (Jake's refresh pass; "Case Studies" retired with
+    // the desktop grid), the masthead in it is SHIPPED.SW.
     id: 'progress',
-    name: 'Case Studies',
+    name: 'Work',
     meta: 'IDX-16',
-    icon: 'folder',
+    icon: 'work',
     component: dynamic(() => import('@/programs/shelf/Shelf')),
     // the boxes are real cuboids (preserve-3d) — the unfocused-window
     // recede is a `filter`, and filter flattens 3D. See `noRecede` above.
@@ -138,6 +139,24 @@ export const PROGRAMS: ProgramDef[] = [
     pos: { x: 250, y: 48 },
     onDesktop: true,
     path: '/cases',
+  },
+  {
+    /* THE PLAYER — Family Hub's film loop standing open on the desk at
+       boot (resolve.ts BOOT_WINDOWS), poolsuite-style: screen, file
+       strip, overview, PLAY. A teaser for `case:family-hub`, so no icon
+       and no deep link — the desk sets it out, PLAY opens the real thing.
+       Squarish and a notch under README's 520 by design (Jake: "closer
+       to a square... a little smaller than the ReadMe"). */
+    id: 'hub-player',
+    name: 'Family Hub',
+    meta: 'REEL-02',
+    icon: 'folder',
+    component: dynamic(() => import('@/programs/projects/HubPlayer')),
+    /* 520 + y56 + ~33 chrome bottoms out at ~609 — clear of the dock rail
+       (~87px on the floor) on a 720 viewport, the shortest desk we set */
+    size: { w: 460, h: 520 },
+    pos: { x: 600, y: 56 },
+    onDesktop: false,
   },
   {
     id: 'now-playing',
@@ -325,7 +344,7 @@ export const PROGRAMS: ProgramDef[] = [
   },
   {
     id: 'spec-sheet',
-    name: 'Spec Sheet',
+    name: 'Design System',
     meta: 'SYS-14',
     icon: 'swatch',
     component: dynamic(() => import('@/programs/specsheet/SpecSheet')),

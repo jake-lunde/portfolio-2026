@@ -79,8 +79,13 @@ export function resolveWindow(id: string): ResolvedWindow | null {
 
 /* Deep link → initial open windows (deterministic, SSR-safe). */
 
+/* What the desk is set with on a cold load: the Family Hub player running
+   behind README (order is z-order — last id boots focused). Desktop.tsx
+   compares against this to keep mobile landing on the launcher instead. */
+export const BOOT_WINDOWS = ['hub-player', 'readme']
+
 export function windowsForPath(path: string[]): string[] {
-  if (path.length === 0) return ['readme'] // first-run window
+  if (path.length === 0) return BOOT_WINDOWS // first-run desk
   if (path[0] === 'readme') return ['readme']
   /* /inspect and /edit are the two paths with no window behind them:
      INSPECT.MODE is a tool mode, not a program, so the link puts something

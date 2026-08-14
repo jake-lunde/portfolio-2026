@@ -1,16 +1,23 @@
-/* ================= DOCK (POC, case-rail) =================
-   NeXTSTEP-style bottom rail: one uniform row of tiles for the programs
-   the desktop grid no longer carries at desktop widths (see Dock.tsx /
-   DesktopIcons.tsx for the split). Fixed to the viewport rather than the
-   desktop's own inset, so it holds its seat even while INSPECT.MODE
-   compresses the canvas — moot in practice, since the rail stands down
-   entirely while that tool is up (see below), same as the wanderer. */
+/* ================= DOCK (poolsuite pass, case-rail) =================
+   NeXTSTEP-style bottom rail: one uniform row of tiles for every
+   program the desktop grid no longer carries (see Dock.tsx /
+   DesktopIcons.tsx for the split). Fixed to the viewport rather than
+   the desktop's own inset, so it holds its seat even while
+   INSPECT.MODE compresses the canvas — moot in practice, since the
+   rail stands down entirely while that tool is up (see below), same
+   as the wanderer. */
 
+/* FULL-WIDTH, and that width is load-bearing: windows sit ABOVE the rail
+   (z below), so at boot README's foot lands on the dock zone. A content-
+   width strip half-covered by a window reads as a broken float; a bar
+   running the whole floor reads as the machine's own furniture with a
+   window over it — the Win95/NeXT answer. Tiles stay centered in it. */
 .rail {
   position: fixed;
-  left: 50%;
-  bottom: var(--space-5);
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  justify-content: center;
   /* windows open at z:10 and only ever climb from there (useWindows.open
      bumps zTop by 1 per open/focus, never resets) — 6 sits above every
      other piece of desktop furniture (icons/widgets at 2-4, the wanderer
@@ -21,11 +28,14 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-3);
   background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lift);
+  /* the rail stands on the screen floor, not floats above it: squared
+     off, no lift, no bottom edge (the viewport edge is the bottom edge) */
+  border: none;
+  border-top: var(--border-width-default) solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* INSPECT.MODE turns the desktop into the tool's own canvas — the same
@@ -36,17 +46,29 @@
   display: none;
 }
 
+/* uniform tile: icon over a permanent caption, poolsuite-style — labels
+   are always on, never a hover reveal. Width is fixed across every tile
+   so the row reads as one machined strip regardless of label length;
+   `ch` at the caption font (mono, so it is an exact glyph-cell width,
+   not a guess). The longest label in the roster is SUGGESTION BOX — 14
+   characters, which at 0.16em tracking spends ~2.7 extra cells across
+   the line (measured: 95.8px against 17ch = 91.8) — so 18ch. Measured,
+   not assumed: 14ch shipped first and SUGGESTION BOX overran its tile
+   into DESIGN SYSTEM's. */
 .tile {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: 18ch;
   flex: none;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-2) 0 var(--space-1);
   color: var(--content);
   border-radius: var(--radius-md);
   background: transparent;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
 }
 
 .tile:hover {
@@ -57,39 +79,32 @@
   transform: translateY(1px);
 }
 
-/* running indicator — centred under the icon, inside the tile's own
-   bottom margin (icon is 32px in a 52px tile: a 10px band top and bottom,
-   the 4px dot sits centred in the lower one, 3px clear on either side) */
-.led {
-  position: absolute;
-  left: 50%;
-  bottom: 3px;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: var(--radius-circle);
-  background: var(--accent);
-  pointer-events: none;
-}
-
-/* the hover/focus title hint, NeXT-style — reserves no layout of its own
-   (absolute, pointer-events:none) and never changes the tile's footprint */
 .label {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + var(--space-2));
-  transform: translateX(-50%);
-  z-index: 1;
-  pointer-events: none;
   white-space: nowrap;
-  padding: 4px 7px;
-  background: var(--surface-raised);
-  border: var(--border-width-subtle) solid var(--border);
   color: var(--content);
   font-family: var(--type-caption-family);
   font-size: var(--type-caption-size);
   letter-spacing: var(--type-caption-tracking);
   text-transform: uppercase;
+  line-height: 1;
+}
+
+/* fixed-height slot under the label, always present, so a program
+   starting/stopping never nudges the row (no CLS) — the dot only
+   appears inside it while running */
+.ledSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 4px;
+}
+
+.led {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-circle);
+  background: var(--accent);
+  pointer-events: none;
 }
 
 /* below the shell's mobile floor (shell.module.css: the same width that

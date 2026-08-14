@@ -1,0 +1,141 @@
+/* THE PLAYER (HubPlayer.tsx) — screen / file strip / info, top to bottom,
+   filling a squarish window. All ink is tokens or derived from tokens in
+   place (the dot screen's color-mix); the strip is inverse chrome per the
+   house rule that on-inverse text is --content-inverse. */
+
+.player {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  color: var(--content);
+}
+
+/* --------- the screen --------- */
+
+.screen {
+  position: relative;
+  /* the poolsuite screen is nearly 4:3 — squarer than the film, so the
+     loop crops rather than letterboxes */
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  flex: none;
+}
+
+.screen video,
+.screen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* the print push under the dot screen: constant, GPU-composited, never
+     animated — the 60fps law is untouched */
+  filter: contrast(1.12) saturate(1.15);
+}
+
+/* the dot screen: a printed halftone standing in for true dither (see the
+   component note). Ink is --content mixed to alpha, so every skin prints
+   its own screen; the cell is 3px — visible as print at arm's length,
+   not a moiré. */
+.dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--content) 55%, transparent) 28%,
+    transparent 32%
+  );
+  background-size: 3px 3px;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* --------- the file strip --------- */
+
+.strip {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-3);
+  background: var(--surface-inverse);
+  color: var(--content-inverse);
+  font-family: var(--type-mono-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--type-caption-tracking);
+  white-space: nowrap;
+}
+
+/* --------- the info panel --------- */
+
+.info {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-3);
+  border-top: var(--border-width-default) solid var(--border);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--type-body-size);
+  font-weight: var(--weight-bold);
+  line-height: var(--type-body-leading);
+}
+
+/* the on-air pip — a mark, which is exactly what the expressive accent's
+   marks-only license is for */
+.pip {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-circle);
+  background: var(--accent-expressive-mark);
+  vertical-align: 2px;
+  margin-left: var(--space-1);
+}
+
+.thesis {
+  margin: 0;
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-leading);
+  color: var(--content-muted);
+  /* the panel is fixed geometry; a thesis that grows a line clamps rather
+     than pushing PLAY off the sill */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.foot {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.meta {
+  font-family: var(--type-mono-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--content-muted);
+  white-space: nowrap;
+}
+
+.play {
+  padding: var(--button-sm-padding-y) var(--button-sm-padding-x);
+  font-family: var(--type-label-family);
+  font-size: var(--button-sm-font-size);
+  font-weight: var(--button-weight);
+  letter-spacing: var(--button-sm-tracking);
+  border: var(--button-sm-border) solid var(--content);
+  border-radius: var(--button-radius);
+  background: var(--content);
+  color: var(--surface);
+  cursor: pointer;
+}
