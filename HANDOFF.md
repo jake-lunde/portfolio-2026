@@ -19,11 +19,10 @@
   pattern; leave the main checkout on main.
 - **Build law:** dev server and `npm run build` share `.next` —
   `preview_stop → build → preview_start`; corruption → `rm -rf .next`.
-- **AI chat guardrails:** daily blob counter `AI_CHAT_DAILY_MAX` (250) ·
-  per-IP 20/day · 8-msg session cap · 5s cooldown (per-instance,
-  accepted) · kill switch `AI_CHAT_OFF` · true backstop = workspace spend
-  limit (Jake-confirm task in vault). Dep: `@anthropic-ai/sdk`.
-  `/machine` 307→`/readme`.
+- **AI chat guardrails:** blob counter `AI_CHAT_DAILY_MAX` (250) ·
+  per-IP 20/day · 8-msg cap · 5s cooldown · kill switch `AI_CHAT_OFF` ·
+  true backstop = workspace spend limit (Jake-confirm task in vault).
+  Dep: `@anthropic-ai/sdk`. `/machine` 307→`/readme`.
 - **Token commit route:** `/api/token-commit` → branch `inspect-tune`,
   stacking PRs; gate = CI `tokens-sync.yml`. Blocked on
   `GITHUB_COPY_TOKEN` scopes (vault task).
@@ -36,11 +35,9 @@
   `--accent-on-inverse` · reduced-motion by emulation · medieval airbrush
   wash contrast · token-debt leftovers (ruling = vault task) ·
   `family-hub 2/` + `".claude/* 2.*"` dups (Jake deletes).
-- **Cleanup owed:** remote deletes Jake must run (classifier blocks
-  them): `git push origin --delete case-family-hub suggestion-box
-  film-vhs-signal`; `medieval-sfx*` on confirm. Locals swept s50; ~14
-  stale merged (`worktree-agent-*`, `blue-update-test`, old `feat/*`)
-  await ruling.
+- **Cleanup owed (Jake runs; classifier blocks):** `git push origin
+  --delete case-family-hub suggestion-box film-vhs-signal`
+  (+`medieval-sfx*` on confirm); ~14 stale merged locals await ruling.
 
 ## Latest session — S56 FIG.A STRIP (2026-08-14)
 
@@ -60,7 +57,6 @@
 ## Prior session — S54 FH MEDIA (2026-08-13)
 
 - **PR #9 MERGED (`3478b0a`):** FH moves 1–3 stills + Plate 01 scrub.
-  Plates 04/05/06/08/10 still placeholders. Jake still owes: delete
-  `fh-plate-media` branch (stray dup `1da6d84` — force-delete safe) +
-  worktree `.claude/worktrees/fh-media`. Note: vault `2026-08-13 s54.md`.
-  s53 → archive.
+  Plates 04/05/06/08/10 still placeholders. Jake owes: delete
+  `fh-plate-media` (stray dup `1da6d84` — force-delete safe) + worktree
+  `.claude/worktrees/fh-media`. Note: vault s54. s53 → archive.
