@@ -133,7 +133,10 @@
   justify-content: center;
   padding: 3px;
   background: var(--surface);
-  border: var(--border-width-subtle) solid var(--border);
+  /* transparent at rest (round 4, Jake: the "?" wore its box all the
+     time while the other glyph buttons sat quiet) — the width stays so
+     hover never shifts a pixel; .fableBtn:hover below inks it */
+  border: var(--border-width-subtle) solid transparent;
   color: var(--content);
   font-family: var(--mono);
   font-size: var(--text-label);
