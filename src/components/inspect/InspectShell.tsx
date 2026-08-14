@@ -8,6 +8,8 @@ import { inspectElement, type Inspection } from '@/lib/inspect'
 import { resetAll } from '@/lib/tune'
 import { LayersPanel } from './LayersPanel'
 import { InspectorPanel } from './InspectorPanel'
+import { EditPanel } from './EditPanel'
+import { useCopyEditing } from './useCopyEditing'
 import styles from './inspectShell.module.css'
 
 /* INSPECT.MODE — SYS-21, second draft. It used to be a window on the
@@ -27,11 +29,14 @@ import styles from './inspectShell.module.css'
      reaches through and OPERATES it. Same modifier, inverted meaning,
      which is the Figma bargain and the reason it reads as a tool.
    · that bargain is now a NAMED PAIR rather than a hidden modifier.
-     SELECT and OPERATE are the two tools, one of them is always in the
+     SELECT and OPERATE are the pair, one of them is always in the
      hand, the header says which — and ALT borrows the other one for the
      length of a click, in both directions. DevTools' picker toggle, and
      the reason a visitor who never finds the ALT key can still use the
-     site with the tool up. The store holds the state (store/inspect.ts);
+     site with the tool up. EDIT is a THIRD segment in the same switch and
+     it stands outside that bargain: it used to be its own mode, fighting
+     this one for the desktop, and ALT never reaches for it (see
+     useCopyEditing.ts). The store holds the state (store/inspect.ts);
      everything here reads it through a ref so the listeners never restage.
    · the tool wears the crown. The OS menubar and the skills ticker stand
      down while the mode runs (shell.module.css) and this file draws an
@@ -101,6 +106,39 @@ const GLOBAL_CSS = `
     outline:var(--border-width-strong) solid var(--accent);
     outline-offset:2px;
   }
+
+  /* EDIT (SYS-99). Same reason this sheet cannot be a CSS module: the
+     subject is every [data-copy-id] node on the desktop. Gated on the
+     armed body attribute the tool stamps, which is also what
+     programs.module.css reads to park the focus crawl.
+
+     The docks are made of CopyText too, so they are full of copy ids —
+     and they are instruments, not specimens. data-inspect-self exempts
+     them from the picker already; it exempts them from the caret here
+     (useCopyEditing refuses the click, this stops the outline promising
+     one). */
+  body[data-editmode="on"] [data-copy-id]{
+    cursor:text;
+    outline:var(--border-width-default) dashed color-mix(in srgb, var(--accent) 45%, transparent);
+    outline-offset:2px;
+    transition:none;
+  }
+  body[data-editmode="on"] [data-copy-id]:hover{
+    outline-style:solid;
+  }
+  body[data-editmode="on"] [data-copy-id][contenteditable]{
+    outline:var(--border-width-strong) solid var(--accent);
+  }
+  body[data-editmode="on"] [data-copy-id][data-edit-dirty]{
+    background:color-mix(in srgb, var(--accent) 14%, transparent);
+    box-shadow:inset 0 -2px 0 var(--accent);
+  }
+  body[data-editmode="on"] [data-inspect-self] [data-copy-id]{
+    cursor:auto;
+    outline:none;
+    background:none;
+    box-shadow:none;
+  }
 `
 
 /* Below this the desktop has already shed its widgets and a docked 548px
@@ -126,6 +164,15 @@ export default function InspectShell() {
   const tool = useInspect((s) => s.tool)
   const setTool = useInspect((s) => s.setTool)
 
+  /* THE THIRD TOOL. EDIT.MODE used to be a program at /edit that took the
+     whole desktop and stood this mode down on arrival — two tool modes
+     fighting over one canvas, with a body attribute as the treaty. It is a
+     tool in the same hand now. The engine lives above the panel on
+     purpose: pending edits survive a trip to SELECT to read the contrast
+     on a line you just rewrote, which is the reason to have them in one
+     hand at all (useCopyEditing.ts). */
+  const copyEdit = useCopyEditing(tool === 'edit')
+
   const [report, setReport] = useState<Inspection | null>(null)
   const [picked, setPicked] = useState<HTMLElement | null>(null)
   /** which TOKENS row has its candidate palette open — lifted here because
@@ -136,8 +183,8 @@ export default function InspectShell() {
      an effect: React runs child effects before the parent's, so by the
      time a mount effect here could look, LayersPanel has already moved
      focus into the tree and the opener is gone. Every exit path — the
-     toggle, Escape, the 900px floor, EDIT.MODE taking the desk — ends in
-     the same teardown, so restoring there covers all four. */
+     toggle, Escape and the 900px floor — ends in the same teardown, so
+     restoring there covers all three. */
   const [opener] = useState<HTMLElement | null>(() =>
     typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null),
   )
@@ -215,13 +262,21 @@ export default function InspectShell() {
     toolRef.current = tool
     document.body.setAttribute('data-inspecttool', tool)
     if (tool !== 'select') hover(null)
-  }, [tool, hover])
+    /* EDIT hands the canvas to the caret, and a picked outline sitting on
+       a node the visitor is now typing into reads as a stuck selection. */
+    if (tool === 'edit') deselect()
+  }, [tool, hover, deselect])
 
   /** True when this pointer event is asking to PICK: the resting tool,
       inverted while ALT is down. One rule, both directions — which is
-      what lets the hint say "alt is always the other tool" and be exact. */
+      what lets the hint say "alt is always the other tool" and be exact.
+
+      EDIT is outside the bargain and never picks. ALT does not reach for
+      it and it does not borrow the other two: a momentary contenteditable
+      is a way to lose a line of copy, not a shortcut. */
   const picking = useCallback(
-    (e: MouseEvent) => (toolRef.current === 'select' ? !e.altKey : e.altKey),
+    (e: MouseEvent) =>
+      toolRef.current === 'edit' ? false : toolRef.current === 'select' ? !e.altKey : e.altKey,
     [],
   )
 
@@ -350,6 +405,16 @@ export default function InspectShell() {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       if (document.querySelector('[role="dialog"]')) return
+      /* And EDIT takes the rung above all three while a copy node has the
+         caret: there Escape puts the LINE back (useCopyEditing). Both
+         handlers sit on `document` in the capture phase, where
+         stopPropagation cannot separate them, so the ladder checks for the
+         caret itself rather than hoping to be second. */
+      if (
+        toolRef.current === 'edit' &&
+        (e.target as HTMLElement | null)?.closest?.('[data-copy-id][contenteditable]')
+      )
+        return
       if (openVarRef.current) {
         e.preventDefault()
         e.stopPropagation()
@@ -384,18 +449,6 @@ export default function InspectShell() {
       haloed.current = null
     }
   }, [pick, deselect, setOn, hover, picking])
-
-  /* ---- EDIT.MODE (SYS-99) and this mode cannot both hold the desktop.
-     The body flag is the contract; watching it settles both orders of
-     arrival, and the editor is the one with unsaved work. ---- */
-  useEffect(() => {
-    const obs = new MutationObserver(() => {
-      if (document.body.dataset.editmode) setOn(false)
-    })
-    obs.observe(document.body, { attributes: true, attributeFilter: ['data-editmode'] })
-    if (document.body.dataset.editmode) setOn(false)
-    return () => obs.disconnect()
-  }, [setOn])
 
   /* ---- a skin or theme flip swaps the whole token set, and both SKIN
      BUILDER's overrides and this panel's own nudges land on the root's
@@ -493,6 +546,17 @@ export default function InspectShell() {
           >
             {t('inspect.tool.operate', skin)}
           </button>
+          {/* third segment, same switch. It sits after the pair rather
+              than beside it because ALT only ever swaps those two. */}
+          <button
+            type="button"
+            className={styles.tool}
+            data-inspect-tool="edit"
+            aria-pressed={tool === 'edit'}
+            onClick={() => setTool('edit')}
+          >
+            {t('inspect.tool.edit', skin)}
+          </button>
         </div>
 
         {/* The light switch, brought inside the tool. Flipping theme
@@ -537,14 +601,21 @@ export default function InspectShell() {
         className={`${styles.panel} ${styles.right}`}
         data-inspect-self=""
         role="complementary"
-        aria-label={t('inspect.panel.inspector', skin)}
+        aria-label={t(
+          tool === 'edit' ? 'inspect.panel.edit' : 'inspect.panel.inspector',
+          skin,
+        )}
       >
-        <InspectorPanel
-          report={report}
-          openVar={openVar}
-          setOpenVar={setOpenVar}
-          onRefresh={refresh}
-        />
+        {tool === 'edit' ? (
+          <EditPanel engine={copyEdit} />
+        ) : (
+          <InspectorPanel
+            report={report}
+            openVar={openVar}
+            setOpenVar={setOpenVar}
+            onRefresh={refresh}
+          />
+        )}
       </aside>
     </>
   )
