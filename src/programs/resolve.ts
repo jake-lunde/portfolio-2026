@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import { getProgram, PROGRAMS } from '@/programs/registry'
 import { CASES, getCase } from '@/programs/projects/cases'
 import { VIZ, getViz } from '@/programs/visualizers/vizRegistry'
+import type { InspectTool } from '@/store/inspect'
 
 export type ResolvedWindow = {
   id: string
@@ -81,10 +82,12 @@ export function resolveWindow(id: string): ResolvedWindow | null {
 export function windowsForPath(path: string[]): string[] {
   if (path.length === 0) return ['readme'] // first-run window
   if (path[0] === 'readme') return ['readme']
-  /* /inspect is the one path with no window behind it: INSPECT.MODE is a
-     tool mode, not a program, so the link puts something ON the canvas and
-     arms the tool over it (see inspectForPath + Desktop). */
-  if (path[0] === 'inspect') return ['readme']
+  /* /inspect and /edit are the two paths with no window behind them:
+     INSPECT.MODE is a tool mode, not a program, so the link puts something
+     ON the canvas and arms the tool over it (see inspectForPath + Desktop).
+     /edit used to open the EDIT.MODE program; the editor is INSPECT's
+     third tool now, so the old link lands in the same mode holding it. */
+  if (path[0] === 'inspect' || path[0] === 'edit') return ['readme']
   if (path[0] === 'projects') {
     // a case deep-link opens the SHELF behind the case window — that is the
     // room this work lives in now. The flat `projects` index stays
@@ -101,10 +104,18 @@ export function windowsForPath(path: string[]): string[] {
   return p ? [p.id] : ['readme']
 }
 
-/** Does this path arm INSPECT.MODE? Separate from windowsForPath because
-    the mode is not a window — the path opens one AND turns the tool on. */
-export function inspectForPath(path: string[]): boolean {
-  return path[0] === 'inspect'
+/** Does this path arm INSPECT.MODE, and with which tool in the hand?
+    Separate from windowsForPath because the mode is not a window — the
+    path opens one AND turns the tool on. `null` means no tool.
+
+    /edit answers EDIT rather than SELECT. It is not in ALL_PATHS and
+    stays out of it: the editor is Jake's, the link is not advertised, and
+    prerendering a page whose only purpose is a password prompt would put
+    it in the sitemap. */
+export function inspectForPath(path: string[]): InspectTool | null {
+  if (path[0] === 'inspect') return 'select'
+  if (path[0] === 'edit') return 'edit'
+  return null
 }
 
 export const ALL_PATHS: string[][] = [

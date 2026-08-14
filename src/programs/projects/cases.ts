@@ -40,6 +40,12 @@ export type CaseDef = {
   year: string
   status: 'live' | 'soon'
   component?: ComponentType
+  /** The MDX file in `content/` this case's prose is written in, if it has
+      been written. Case prose is NOT copy.json: clicking a paragraph with
+      INSPECT's EDIT tool will never reach it, so the tool reads this and
+      points at the file on GitHub instead (components/inspect/EditPanel).
+      Filename only — the folder is fixed. */
+  source?: string
   /** build state, read by the shelf's in-development boxes (WIP-15) */
   progress?: { pct: number; phase: string }
   /** SHIPPED.SW — the case as boxed retail software on the shelf
@@ -127,6 +133,7 @@ export const CASES: CaseDef[] = [
     year: '2024–25',
     status: 'live',
     component: dynamic(() => import('@/programs/projects/CaseInvest')),
+    source: 'greenlight-invest.mdx',
     progress: { pct: 100, phase: 'Shipped. Read it' },
     box: {
       /* the three phones on mint — Jake's own product shot. 2.10:1 into a
@@ -156,6 +163,7 @@ export const CASES: CaseDef[] = [
     year: '2025–26',
     status: 'live',
     component: dynamic(() => import('@/programs/projects/CaseFamilyHub')),
+    source: 'family-hub.mdx',
     progress: { pct: 100, phase: 'Shipped. Read it' },
     box: {
       /* the hub dashboard, seated under the blob mask and the airbrush —

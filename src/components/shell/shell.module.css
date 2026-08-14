@@ -66,8 +66,8 @@
    moon, ?) are identical in size and sit on one tight rhythm (Jake,
    s44b: the ?–sun gap is the spacing law, not the old padded one).
    Hover draws the border the ? wears permanently: one family, one
-   footprint. Label is line-art SVG on currentColor, so aria-pressed
-   accent and data-busy muting recolour it for free. */
+   footprint. Label is line-art SVG on currentColor, so the aria-pressed
+   accent recolours it for free. */
 .menuGlyphBtn {
   display: flex;
   align-items: center;
@@ -100,19 +100,6 @@
   .inspectBtn {
     display: none;
   }
-}
-
-/* EDIT.MODE has the desk. aria-disabled rather than disabled, so the
-   control keeps its focus stop and can still ANSWER the question — the
-   label and the tooltip both say who is holding the floor. */
-.menuBtn[data-busy] {
-  color: var(--content-muted);
-  opacity: var(--interactive-disabled-opacity);
-  cursor: not-allowed;
-}
-
-.menuBtn[data-busy]:hover {
-  border-color: transparent;
 }
 
 /* ---- FABLE mark (the resident AI's seat in the bar) ---- */

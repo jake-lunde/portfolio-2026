@@ -398,19 +398,10 @@ export const PROGRAMS: ProgramDef[] = [
     pos: { x: 420, y: 170 },
     onDesktop: true,
   },
-  {
-    // EDIT.MODE — hidden dev-tool. No desktop icon; reachable only via /edit.
-    id: 'edit-mode',
-    name: 'EDIT.MODE',
-    meta: 'SYS-99',
-    icon: 'clipboard',
-    component: dynamic(() => import('@/programs/editmode/EditMode')),
-    size: { w: 440, h: 380 },
-    pos: { x: 360, y: 90 },
-    chrome: 'crt',
-    onDesktop: false,
-    path: '/edit',
-  },
+  /* EDIT.MODE (SYS-99) was registered here as a hidden program at /edit.
+     It is INSPECT.MODE's third tool now, so it is not a program at all:
+     /edit opens the same desktop /inspect does and puts the copy editor in
+     the hand (see programs/resolve.ts + components/inspect). */
 ]
 
 export function getProgram(id: string): ProgramDef | undefined {

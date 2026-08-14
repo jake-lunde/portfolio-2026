@@ -55,7 +55,7 @@ type Save =
   /** nothing sent yet — the SAVE button is showing */
   | { k: 'idle' }
   /** the inline key prompt, armed against the same secret EDIT.MODE uses */
-  | { k: 'key'; rejected?: true }
+  | { k: 'key'; fail?: 'badkey' | 'throttled' }
   | { k: 'busy' }
   /** committed: the override is on a branch, awaiting review — NOT live */
   | { k: 'done'; number: number; url: string }
@@ -121,7 +121,7 @@ export function InspectorPanel({
       if (head.status === 501) return setSave({ k: 'locked' })
       if (head.status === 401) {
         clearEditKey()
-        return setSave({ k: 'key', rejected: true })
+        return setSave({ k: 'key', fail: 'badkey' })
       }
       if (!head.ok) return setSave({ k: 'error', msg: 'inspect.save.failed' })
       const { sha } = (await head.json()) as { sha: string }
@@ -166,7 +166,7 @@ export function InspectorPanel({
     setKeyInput('')
     const verdict = await verifyEditKey(entered)
     if (verdict === 'unconfigured') return setSave({ k: 'locked' })
-    if (!verdict) return setSave({ k: 'key', rejected: true })
+    if (verdict !== true) return setSave({ k: 'key', fail: verdict })
     await commit()
   }
 
@@ -178,8 +178,14 @@ export function InspectorPanel({
         ? { key: 'inspect.save.locked' }
         : save.k === 'error'
           ? { key: save.msg, fail: true }
-          : save.k === 'key' && save.rejected
-            ? { key: 'inspect.save.badkey', fail: true }
+          : save.k === 'key' && save.fail
+            ? {
+                key:
+                  save.fail === 'throttled'
+                    ? 'inspect.save.throttled'
+                    : 'inspect.save.badkey',
+                fail: true,
+              }
             : blocked
               ? { key: blocked, fail: true }
               : null

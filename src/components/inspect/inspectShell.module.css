@@ -869,3 +869,169 @@
   line-height: var(--type-label-leading);
   color: var(--accent);
 }
+
+/* ================= EDIT (right dock, third tool) =================
+   SYS-99 came in from its own program window, where it drew a floating
+   SAVE.CHANGES panel over the desktop. It is a dock now, so it borrows the
+   inspector's furniture wholesale: .panelHead, .panelBody, .section,
+   .head, .note, .keyRow's input and label, .resetAll for every secondary
+   button, .saveNote for the status line, .tokenRow for a diff row. What
+   is below is only what the copy editor needs that the inspector had no
+   use for. Tokens only, and the one system accent carries every
+   "armed / dirty" signal, same as it did in the program. */
+
+.editGate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-component-xs);
+}
+
+.editGate .keyInput {
+  align-self: stretch;
+  flex: none;
+}
+
+/* the armed line: the accent, a dot, and nothing else on it */
+.editArmed {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  margin: 0 0 var(--spacing-component-xs);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  color: var(--accent);
+}
+
+.editDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* the two things that are not the diff and are not an error: no token on
+   this deployment, no key set at all. Same warning ground the inspector's
+   preview banner wears, for the same reason — it is a state, not a fault. */
+.editNotice {
+  margin: var(--spacing-component-sm) 0 0;
+  padding: var(--spacing-component-sm);
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+  color: var(--content);
+  border: var(--border-width-default) solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.editCount {
+  float: right;
+  color: var(--content-muted);
+}
+
+.editRowHead {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+}
+
+.editKeyName {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: var(--type-micro-size);
+  color: var(--content-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editSlot {
+  flex: none;
+  font-family: var(--mono);
+  font-size: var(--type-micro-size);
+  color: var(--accent);
+}
+
+.editDiff {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-xs);
+  margin-top: var(--spacing-component-xs);
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-leading);
+  overflow-wrap: anywhere;
+}
+
+.editOld {
+  color: var(--content-muted);
+  text-decoration: line-through;
+}
+
+.editArrow {
+  color: var(--content-muted);
+}
+
+/* the new value is underlined in the accent rather than coloured by it:
+   this is body-size prose in the dock and --accent does not hold AA
+   against --surface on every skin (the same reason .prLink is ink) */
+.editNew {
+  color: var(--content);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+/* the one control here that writes to main, so it is the one filled
+   button in the dock */
+.editCommit {
+  width: 100%;
+  margin-top: var(--spacing-component-sm);
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--surface);
+  background: var(--accent);
+  border: var(--border-width-default) solid var(--accent);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.editCommit:disabled {
+  opacity: var(--interactive-disabled-opacity);
+  cursor: not-allowed;
+}
+
+.editCommit:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* SOURCE — the way out to the MDX. Ink with an underline, never the
+   accent: it is small type on --surface and the underline is what carries
+   the affordance (WCAG 1.4.1 wants more than hue anyway). */
+.sourceLink {
+  display: inline-block;
+  margin-top: var(--spacing-component-xs);
+  font-family: var(--mono);
+  font-size: var(--type-micro-size);
+  color: var(--content);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sourceLink:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}

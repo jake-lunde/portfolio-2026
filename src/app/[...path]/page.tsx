@@ -29,6 +29,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (path[0] === 'inspect') {
     return { title: 'INSPECT.MODE', alternates: { canonical: `${BASE}/readme` } }
   }
+  /* /edit is the same desktop again, holding the copy editor instead of
+     the picker. Nothing behind the password prompt is worth indexing. */
+  if (path[0] === 'edit') {
+    return {
+      title: 'INSPECT.MODE',
+      robots: { index: false, follow: false },
+      alternates: { canonical: `${BASE}/readme` },
+    }
+  }
   return {}
 }
 
