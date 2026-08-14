@@ -47,9 +47,8 @@
   deep link arming the tool (≥900px gate; mobile editing gone, accepted).
   Same `EDIT_MODE_KEY`; verify endpoint throttles 10 fails/hr/IP → 429.
   SOURCE row links case MDX to GitHub's editor (`CaseDef.source`).
-  CDN-verified (/edit serves noindex). Case chrome strings stay outside
-  the copy layer — ruling + details in vault s57 note. Main checkout is
-  back on main.
+  CDN-verified. Case chrome strings stay outside the copy layer —
+  ruling + details in vault s57 note.
 
 ## Prior session — S56 FIG.A STRIP (2026-08-14) — SHIPPED
 
@@ -57,6 +56,5 @@
   annotations in the cap row beside FIG. A (⚠️ Figma MCP export bakes
   canvas gray into node PNGs; REST `/v1/images` + `FIGMA_PAT` keeps
   alpha). CDN-verified. Details: vault s56 note + archive.
-- **S54 (PR #9 MERGED `3478b0a`):** FH stills + Plate 01 scrub. Plates
-  04/05/06/08/10 still placeholders. Jake owes: delete `fh-plate-media`
-  (dup `1da6d84`, force-delete safe) + its worktree.
+- **S54 (PR #9 MERGED):** plates 04/05/06/08/10 still placeholders.
+  Jake owes: delete `fh-plate-media` (force-delete safe) + its worktree.
