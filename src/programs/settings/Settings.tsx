@@ -5,6 +5,7 @@ import { useSettings } from '@/store/settings'
 import { WALLPAPER_OPTIONS, wallpaperMask } from '@/components/shell/wallpapers'
 import { sfx } from '@/lib/sound'
 import { CopyText as Copy } from '@/content/CopyText'
+import { CustomizeButton } from '@/components/primitives/CustomizeButton'
 import styles from '../programs.module.css'
 
 const SKINS: Array<{ id: Skin; name: string; disabled?: boolean }> = [
@@ -118,11 +119,7 @@ export default function Settings() {
       </div>
 
       <div className={styles.setRow} style={{ borderBottom: 'none', paddingBottom: 0 }}>
-        <span className={styles.setLabel}>
-          <Copy k="settings.accentLabel" as="span" />
-          <Copy k="settings.accentHint" as="span" className={styles.setHint} />
-        </span>
-        <Copy k="shared.soon" as="span" className={styles.projSoon} />
+        <CustomizeButton />
       </div>
     </div>
   )

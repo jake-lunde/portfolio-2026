@@ -14,6 +14,12 @@ export type ProgramDef = {
       meta slot becomes a button that reveals the text instead of printing
       the doc-id — a program explains itself in chrome, not in its body. */
   explainer?: string
+  /** a titlebar-level action link (e.g. "download the PDF"), rendered in
+      the same meta slot the doc-id / explainer occupy. Set it and it wins
+      over both — a program gets one thing in that slot, never two. The
+      icon rides ahead of the copy string; `download` marks it as a real
+      file download rather than a navigation. */
+  titleAction?: { icon: IconName; copyKey: string; href: string; download?: true }
   icon: IconName
   component: ComponentType
   /** default window geometry (desktop; mobile goes full-bleed) */
@@ -61,8 +67,15 @@ export const PROGRAMS: ProgramDef[] = [
     meta: 'DOC-00',
     icon: 'doc',
     component: dynamic(() => import('@/programs/about/About')),
-    size: { w: 520, h: 700 },
-    pos: { x: 120, y: 60 },
+    /* the dock rail went content-width this round but stayed flush to
+       the floor (bottom: 0) — boot windows now have to clear it instead
+       of a full-width bar clearing itself. Chrome is 46px MEASURED on
+       the live window (the ~33 estimate left the foot kissing the rail
+       at exactly 0px): 48 + 600 + 46 = 694, a 20px berth under the
+       rail's top edge at 714 on an 800-tall viewport, the shortest desk
+       we design for. hub-player clears at ~625 (see its entry below). */
+    size: { w: 520, h: 600 },
+    pos: { x: 120, y: 48 },
     onDesktop: true,
     path: '/readme',
   },
@@ -75,9 +88,9 @@ export const PROGRAMS: ProgramDef[] = [
     // the code, the copy keys and the window store, not the user-facing
     // program.
     id: 'cv',
-    name: 'RESUME.EXE',
+    name: 'Resume',
     meta: 'DOC-01',
-    explainer: 'cv.explainer',
+    titleAction: { icon: 'download', copyKey: 'cv.download', href: '/jake-lunde-resume.pdf', download: true },
     icon: 'resume',
     component: dynamic(() => import('@/programs/cv/CV')),
     size: { w: 520, h: 640 },
@@ -103,12 +116,13 @@ export const PROGRAMS: ProgramDef[] = [
     // SHIPPED.SW — the shelf of boxed case studies. The id stays `progress`
     // (it names the copy keys, the window store and the deep link, not the
     // program) and so does the name: `program.progress.name` drives BOTH
-    // the desktop icon and the titlebar, so the split lives inside — the
-    // window is "Case Studies", the masthead in it is SHIPPED.SW.
+    // the dock tile and the titlebar, so the split lives inside — the
+    // window is "Work" (Jake's refresh pass; "Case Studies" retired with
+    // the desktop grid), the masthead in it is SHIPPED.SW.
     id: 'progress',
-    name: 'Case Studies',
+    name: 'Work',
     meta: 'IDX-16',
-    icon: 'folder',
+    icon: 'work',
     component: dynamic(() => import('@/programs/shelf/Shelf')),
     // the boxes are real cuboids (preserve-3d) — the unfocused-window
     // recede is a `filter`, and filter flattens 3D. See `noRecede` above.
@@ -138,6 +152,24 @@ export const PROGRAMS: ProgramDef[] = [
     pos: { x: 250, y: 48 },
     onDesktop: true,
     path: '/cases',
+  },
+  {
+    /* THE PLAYER — Family Hub's film loop standing open on the desk at
+       boot (resolve.ts BOOT_WINDOWS), poolsuite-style: screen, file
+       strip, overview, PLAY. A teaser for `case:family-hub`, so no icon
+       and no deep link — the desk sets it out, PLAY opens the real thing.
+       Squarish and a notch under README's 520 by design (Jake: "closer
+       to a square... a little smaller than the ReadMe"). */
+    id: 'hub-player',
+    name: 'Family Hub',
+    meta: 'REEL-02',
+    icon: 'folder',
+    component: dynamic(() => import('@/programs/projects/HubPlayer')),
+    /* 520 + y56 + ~33 chrome bottoms out at ~609 — clear of the dock rail
+       (~87px on the floor) on a 720 viewport, the shortest desk we set */
+    size: { w: 460, h: 520 },
+    pos: { x: 600, y: 56 },
+    onDesktop: false,
   },
   {
     id: 'now-playing',
@@ -192,7 +224,7 @@ export const PROGRAMS: ProgramDef[] = [
   },
   {
     id: 'suggest',
-    name: 'Suggestion Box',
+    name: 'Suggestions',
     meta: 'BOX-86',
     icon: 'suggest',
     component: dynamic(() => import('@/programs/suggest/SuggestBox')),
@@ -325,7 +357,7 @@ export const PROGRAMS: ProgramDef[] = [
   },
   {
     id: 'spec-sheet',
-    name: 'Spec Sheet',
+    name: 'Design System',
     meta: 'SYS-14',
     icon: 'swatch',
     component: dynamic(() => import('@/programs/specsheet/SpecSheet')),

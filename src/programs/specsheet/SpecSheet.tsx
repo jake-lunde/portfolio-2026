@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { Stamp } from '@/components/primitives/Stamp'
+import { CustomizeButton } from '@/components/primitives/CustomizeButton'
 import { CopyText as Copy } from '@/content/CopyText'
 import { contrast, grade, resolveVar, toHex } from '@/lib/contrast'
 import { PALETTE, readPicks, type Picks } from '@/lib/buildASkin'
-import { sfx } from '@/lib/sound'
 import { useSettings, type Skin } from '@/store/settings'
-import { useWindows } from '@/store/windows'
 import styles from './specsheet.module.css'
 
 /* SPEC.SHEET — a living design-system doc that documents LUNDE OS itself.
@@ -71,9 +70,6 @@ export default function SpecSheet() {
   const [chips, setChips] = useState<Chip[]>([])
   const [picks, setPicks] = useState<Picks>({})
   const skin = useSettings((s) => s.skin)
-  /* one API for both jobs: open() raises + focuses an already-open window
-     instead of adding a second one (src/store/windows.ts) */
-  const openWindow = useWindows((s) => s.open)
   const accentNames = ACCENT_NAMES[skin] ?? ACCENT_NAMES.classic
   const typeNames = TYPE_NAMES[skin] ?? TYPE_NAMES.classic
 
@@ -126,19 +122,14 @@ export default function SpecSheet() {
           --surface so the rows pass BEHIND it. */}
       <div className={styles.titleRow}>
         <Copy k="spec-sheet.eyebrow" as="p" className={styles.eyebrow} />
-        <button
-          type="button"
-          className={styles.customize}
-          onClick={() => {
-            sfx.open()
-            openWindow('skinbuilder')
-          }}
-        >
-          <Copy k="spec-sheet.build.open" as="span" />
-        </button>
       </div>
 
       <div className={styles.sheetBody}>
+        {/* the sheet's one control, up top where a visitor meets it before
+            any of the specimens below — same primitive Settings opens
+            SKIN BUILDER from (src/components/primitives/CustomizeButton) */}
+        <CustomizeButton />
+
         {/* ---------- color ---------- */}
         <div className={styles.sectionHead}>
           <span className={styles.secNo}>01 —</span>

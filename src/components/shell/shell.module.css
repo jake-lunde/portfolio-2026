@@ -28,7 +28,7 @@
 }
 
 .wordmark span {
-  font-family: var(--mono); /* version string has CJK — pixel has no CJK glyphs */
+  font-family: var(--mono); /* the version string reads as a machine stamp against the display wordmark */
   font-size: var(--text-ui);
   color: var(--content-muted);
   font-weight: var(--weight-regular);
@@ -92,10 +92,22 @@
   text-align: right;
 }
 
-/* INSPECT.MODE's toggle. The tool docks 548px of panels; below 900 there
-   is no canvas left between them, and the desktop has already shed its
-   widgets down there anyway. No toggle, no way in — and InspectShell
-   watches the same width and stands the mode down if it is already up. */
+/* INSPECT.MODE's toggle — round 4: restyled onto .skinTrigger (see
+   MenuBar.tsx for the reasoning), so this block only carries what's
+   still INSPECT-specific: the pressed state and the 900px stand-down.
+   Pressed keeps the toggle's original accent-ink treatment (this file's
+   old `.menuBtn[aria-pressed='true']` rule) translated onto the chip,
+   plus the chip's own hover border so an active INSPECT still reads
+   "open" the way the skin picker's hover does. */
+.inspectBtn[aria-pressed='true'] {
+  color: var(--accent);
+  border-color: var(--content);
+}
+
+/* The tool docks 548px of panels; below 900 there is no canvas left
+   between them, and the desktop has already shed its widgets down there
+   anyway. No toggle, no way in — and InspectShell watches the same
+   width and stands the mode down if it is already up. */
 @media (max-width: 900px) {
   .inspectBtn {
     display: none;
@@ -121,7 +133,10 @@
   justify-content: center;
   padding: 3px;
   background: var(--surface);
-  border: var(--border-width-subtle) solid var(--border);
+  /* transparent at rest (round 4, Jake: the "?" wore its box all the
+     time while the other glyph buttons sat quiet) — the width stays so
+     hover never shifts a pixel; .fableBtn:hover below inks it */
+  border: var(--border-width-subtle) solid transparent;
   color: var(--content);
   font-family: var(--mono);
   font-size: var(--text-label);
@@ -471,18 +486,17 @@
   text-transform: uppercase;
 }
 
-/* Trash rides alone in the bottom-left corner, clear of the ambient
-   agent strip that hugs the very bottom edge. */
-.trashIcon {
-  position: absolute;
-  left: 16px;
-  bottom: 48px;
-  z-index: 2;
+/* the in-grid trash is desktop-hidden; on desktop trash rides the dock
+   rail instead (Dock.tsx: RAIL_ORDER, last tile) — this only appears in
+   the mobile scrolling grid, where the rail doesn't render at all */
+.trashGrid {
+  display: none;
 }
 
-/* the in-grid trash is desktop-hidden; it only appears in the mobile
-   scrolling grid (where the corner trash is hidden instead) */
-.trashGrid {
+/* the docked programs' mobile fallback (Dock.tsx doesn't render below
+   720px) — hidden here above that floor, shown only in the mobile media
+   query below, same mechanism as .trashGrid right above */
+.dockedGrid {
   display: none;
 }
 
@@ -1475,13 +1489,15 @@
   }
 
   /* on mobile every icon lives in the one scrolling grid — including
-     trash; the desktop bottom-left corner trash steps aside */
+     trash, which rides the dock rail on desktop instead */
   .trashGrid {
     display: flex;
   }
 
-  .trashIcon {
-    display: none;
+  /* the dock (dock.module.css) doesn't render at this width — its
+     programs reappear here instead */
+  .dockedGrid {
+    display: flex;
   }
 
   .window {
@@ -1525,4 +1541,92 @@
   .wordmark span {
     display: none;
   }
+}
+
+/* ================= NEW (case-rail round 3, NYQUIST) =================
+   Appended-only per this session's coordination rule — do not fold these
+   into the blocks above; edit here instead. */
+
+/* the house mark, immediately left of the wordmark. mask-image is the
+   trick that lets a raster PNG take token ink: background-color paints
+   the square, the mask cuts the mark's silhouette out of it, so it reads
+   in --content and follows light/dark for free. 552:640 source aspect,
+   contained inside the box rather than stretched. vertical-align nudges
+   the mask up from the text baseline toward the wordmark's cap height
+   (13px uppercase display face) — retune here if a type swap drifts it. */
+.mark {
+  display: inline-block;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-right: 7px;
+  vertical-align: -2px;
+  background-color: var(--content);
+  -webkit-mask-image: url('/mark.png');
+  mask-image: url('/mark.png');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* medieval: the scribe engraving swaps in, same mask treatment as the
+   ABOUT stamp's .stampMark (programs.module.css) — same scoping the rest
+   of the shell uses for its medieval-only rules */
+:global([data-skin='medieval']) .mark {
+  -webkit-mask-image: url('/mark-medieval.png');
+  mask-image: url('/mark-medieval.png');
+}
+
+/* ================= NEW (case-rail round 4, NYQUIST) =================
+   Appended-only per the same coordination rule round 3 set — do not fold
+   these into the blocks above; edit here instead. */
+
+/* ---- COMMAND.CTR trigger + popover (menu bar) ---- */
+/* Same wrapper/anchor recipe as .skinSwitch/.skinMenu: a relatively
+   positioned box holding a trigger button and an absolutely positioned
+   flyout that opens under it. The trigger itself composes with the
+   shared .menuBtn/.menuGlyphBtn classes (sound/theme/palette's exact
+   footprint) — .commandBtn only adds what's new: a positioning context
+   for the LED badge. */
+.commandSwitch {
+  position: relative;
+}
+
+.commandBtn {
+  position: relative; /* anchors .commandLed */
+}
+
+/* the dock's own LED language (Dock.tsx/.led): a 4px var(--accent) dot,
+   rendered only when lit rather than recoloured or faded, so the signal
+   survives colour-blindness the same way the ambient chip's dot shape
+   used to. Corner badge rather than the dock's inline slot, since a
+   34px-tall glyph button has no room for a second row under the glyph. */
+.commandLed {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-circle);
+  background: var(--accent);
+  pointer-events: none;
+}
+
+/* Right-aligned under the trigger, squared corners per the house chrome
+   (the popover is a pure anchor — CommandWidget.tsx's re-homed .ccBar
+   supplies its own border/background, exactly as it did as a floating
+   chip, so the frame isn't drawn twice). z-index matches .skinMenu: menu
+   bar chrome sits above every window (windows start at z 10). Width is
+   capped against the viewport with the same guard .fableBubble uses, so
+   it can never run off a 360px screen from a trigger seated near the
+   bar's right edge. */
+.commandPopover {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  z-index: 5100;
+  width: min(320px, calc(100vw - 24px));
 }

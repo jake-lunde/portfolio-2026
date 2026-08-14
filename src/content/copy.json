@@ -10,6 +10,8 @@
   "aichat.offline": "MY LIVE WIRE ISN’T PLUGGED IN YET. THE CARDS STILL WORK.",
   "aichat.placeholder": "ask your own question…",
   "aichat.send": "ASK",
+  "case.index.aria": "Case study index",
+  "case.index.title": "INDEX",
   "cc.chat.doppler": "Open the suggestion box",
   "cc.chat.fable": "Chat with FABLE",
   "command.explainer": "I set the course and judge what comes back from the crew of AI agents. This is a peek inside what they’re up to, for both you and me.",
@@ -123,6 +125,8 @@
   "inspect.tool.group": "TOOL",
   "inspect.tool.operate": "OPERATE",
   "inspect.tool.select": "SELECT",
+  "menubar.command": "Command Center",
+  "menubar.designSystem": "Design System",
   "now-playing.lastPlayed": "Last played ♪",
   "now-playing.loading": "TUNING…",
   "now-playing.openLink": "OPEN IN APPLE MUSIC ↗",
@@ -140,8 +144,8 @@
     "medieval": "The Keep"
   },
   "program.cv.name": {
-    "base": "RESUME.EXE",
-    "medieval": "Curriculum Vitæ"
+    "base": "Resume",
+    "medieval": "Deeds"
   },
   "program.feedback.name": {
     "base": "Feedback",
@@ -169,7 +173,7 @@
     "medieval": "Illuminator"
   },
   "program.progress.name": {
-    "base": "Case Studies",
+    "base": "Work",
     "medieval": "Works"
   },
   "program.projects.name": {
@@ -197,7 +201,7 @@
     "medieval": "The Pigments"
   },
   "program.spec-sheet.name": {
-    "base": "Spec Sheet",
+    "base": "Design System",
     "medieval": "Colophon"
   },
   "program.studio.name": {
@@ -205,7 +209,7 @@
     "medieval": "Reworkings"
   },
   "program.suggest.name": {
-    "base": "Suggestion Box",
+    "base": "Suggestions",
     "medieval": "Petitions"
   },
   "program.trash.name": {
@@ -235,10 +239,9 @@
   "readme.label.system": "System",
   "readme.now": "Staff Product Designer, Greenlight",
   "readme.system": "Next.js · Motion · MDX",
-  "settings.accentHint": "Coming in a later release",
-  "settings.accentLabel": "Accent emphasis",
   "settings.appearanceHint": "Print stock or terminal night",
   "settings.appearanceLabel": "Appearance",
+  "settings.customize": "Customize LUNDE OS",
   "settings.dark": "Dark",
   "settings.light": "Light",
   "settings.off": "Off",

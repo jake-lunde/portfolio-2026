@@ -32,6 +32,9 @@ export type IconName =
   | 'bubble'
   | 'mystery'
   | 'suggest'
+  | 'work'
+  | 'palette'
+  | 'download'
 
 /* 1.5px line-art icons, 32×32 — drawn to read like figures in an old
    technical manual. currentColor so they follow ink/theme. */
@@ -281,6 +284,45 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M11 17.5h10" />
     </>
   ),
+  // briefcase — CASE STUDIES → WORK. Handle arc, body, and a lid seam;
+  // the clasp is a cutout (fill var(--surface)) rather than a solid
+  // mark, the same trick `sliders` uses for its knobs, so it reads as a
+  // punched-through hole in the line rather than a dark blob at 32px.
+  work: (
+    <>
+      <path d="M12 9a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3v3" />
+      <path d="M5 12h22v14H5z" />
+      <path d="M5 18h22" />
+      <rect x="14" y="16.5" width="4" height="3" rx=".5" fill="var(--surface)" />
+    </>
+  ),
+  // palette — DESIGN SYSTEM (menubar). A painter's palette: kidney-shaped
+  // board, thumb hole punched through (fill var(--surface), the same
+  // cutout trick `work`'s clasp and `sliders`' knobs use), four paint
+  // dabs as filled dots (the `note`/`smiley` fill move) standing in for
+  // the tokens the window documents.
+  palette: (
+    <>
+      <path d="M16 4c-6.5 0-12 5-12 11.5 0 3.4 2.4 5.7 5.8 5.7h2a1.8 1.8 0 0 1 1.8 1.8c0 2.4 2.1 4.3 4.6 4.3 6.6 0 9.8-5.5 9.8-11.8C28 9 22.7 4 16 4z" />
+      <ellipse cx="9.3" cy="15" rx="2.1" ry="1.7" fill="var(--surface)" stroke="none" transform="rotate(-15 9.3 15)" />
+      <circle cx="12.5" cy="9" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="19.5" cy="8" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="24" cy="13" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="21.5" cy="20" r="1.5" fill="currentColor" stroke="none" />
+    </>
+  ),
+  // download — the resume window's export control. A shaft-and-chevron
+  // arrow feeding down into an open tray: the tray's open top (unclosed
+  // path, same trick `folder`'s tab uses) keeps it from reading as a
+  // closed box the arrow can't enter, and the 3px gap to the chevron's
+  // tip keeps the two shapes from touching at 32px.
+  download: (
+    <>
+      <path d="M16 4v14" />
+      <path d="M10.5 13l5.5 5.5L21.5 13" />
+      <path d="M6 21v5a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-5" />
+    </>
+  ),
 }
 
 /* Medieval variants — the same objects re-cut as woodcut/heraldic figures
@@ -492,6 +534,17 @@ const MEDIEVAL_PATHS: Partial<Record<IconName, React.ReactNode>> = {
       <path d="M6 15h20v12H6z" />
       <path d="M6 19.5h20" />
       <path d="M14.6 18h2.8v3h-2.8z" fill="currentColor" stroke="none" />
+    </>
+  ),
+  // WORK → THE SATCHEL: a courier's bag on a shoulder strap, standing in
+  // for the clasped codex (`folder`, "WORKS") that this glyph replaces
+  // in that same slot — same buckle-as-cutout move as the codex's clasp.
+  work: (
+    <>
+      <path d="M7 11c3-5 15-5 18 0" opacity=".6" />
+      <path d="M8 11h16l2 16H6z" />
+      <path d="M8 17h16" />
+      <rect x="14" y="15.5" width="4" height="3" fill="currentColor" stroke="none" />
     </>
   ),
 }

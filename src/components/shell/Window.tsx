@@ -18,6 +18,8 @@ import { useGate } from '@/store/gate'
 import { GateSphere } from '@/components/gate/GateSphere'
 import { WindowChromeProvider } from './windowChrome'
 import { CopyText } from '@/content/CopyText'
+import { TitleAction } from '@/components/primitives/TitleAction'
+import { t } from '@/content/copy'
 import { sfx } from '@/lib/sound'
 import styles from './shell.module.css'
 
@@ -265,13 +267,19 @@ export function Window({ def, z, active, desktopRef }: Props) {
           <span className={styles.title} data-copy-id={`program.${def.id}.name`}>
             {title}
           </span>
-          {/* the right slot: a doc-id, or — if the program registered an
-              explainer key — a button that summons what this window is.
-              WAI-ARIA tooltip pattern (describedby + role=tooltip): it is
-              shown on hover AND focus and dismissed with Escape, which is
-              exactly that pattern; click stays wired for touch, where
-              there is no hover to open it with. */}
-          {def.explainer ? (
+          {/* the right slot: a doc-id, a button that summons what this
+              window is (explainer key), or — highest precedence — a
+              titlebar action link (titleAction, e.g. resume's download).
+              A program gets exactly one of the three; a titleAction
+              replaces both the explainer and the plain meta text. */}
+          {def.titleAction ? (
+            <TitleAction
+              icon={def.titleAction.icon}
+              label={t(def.titleAction.copyKey, skin)}
+              href={def.titleAction.href}
+              download={def.titleAction.download}
+            />
+          ) : def.explainer ? (
             <div
               className={styles.explainer}
               onPointerEnter={(e) => {

@@ -3,29 +3,45 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSettings } from '@/store/settings'
 import { useInspect } from '@/store/inspect'
+import { useWindows } from '@/store/windows'
 import { OS_VERSION } from '@/lib/version'
+import { sfx } from '@/lib/sound'
+import { t } from '@/content/copy'
 import { SkinSwitch } from './SkinSwitch'
 import { FableMark } from './FableMark'
+import { CommandWidget } from './CommandWidget'
+import { Icon } from './Icon'
 import styles from './shell.module.css'
 
-/* Menubar glyphs — the desktop icon language (Icon.tsx: 1.5px line art on
-   currentColor) redrawn on a 16 grid for a 34px bar. Local to this file:
-   these controls are the only place the OS says "sound" or "theme" as a
-   picture. Decorative always — the button's aria-label is the meaning. */
+/* Menubar glyphs — the desktop icon language (Icon.tsx: 32×32 grid,
+   1.5px line art, round caps/joins, on currentColor) redrawn at the same
+   grid and stroke recipe so a menubar glyph weighs exactly what a
+   desktop one does. (Round 4: the original redraw used a 16-unit grid at
+   the same 1.5 strokeWidth, which is proportionally DOUBLE Icon.tsx's
+   weight at a shared 14px display size — that's the "note/sun/moon are
+   heavier than palette" Jake flagged. Fix is the grid, not the number.)
+   Local to this file rather than Icon.tsx PATHS: NoteGlyph needs a prop
+   (the mute slash) Icon.tsx's static PATHS can't carry, and sun/moon are
+   a single glyph swapped by theme state, not a name other programs
+   reference — keeping the trio together here keeps one obvious home for
+   "menubar-only" glyphs. Decorative always — the button's aria-label is
+   the meaning. */
 function NoteGlyph({ muted }: { muted: boolean }) {
   return (
     <svg
-      viewBox="0 0 16 16"
+      viewBox="0 0 32 32"
       width="14"
       height="14"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M7 12.4V3.2c2.2.7 3.3 2 3.3 4" />
-      <circle cx="5.2" cy="12.4" r="1.9" fill="currentColor" stroke="none" />
-      {muted ? <path d="M2.6 2.6l10.8 10.8" /> : null}
+      <path d="M14 24.8V6.4c4.4 1.4 6.6 4 6.6 8" />
+      <circle cx="10.4" cy="24.8" r="3.8" fill="currentColor" stroke="none" />
+      {muted ? <path d="M5.2 5.2l21.6 21.6" /> : null}
     </svg>
   )
 }
@@ -33,16 +49,18 @@ function NoteGlyph({ muted }: { muted: boolean }) {
 function SunGlyph() {
   return (
     <svg
-      viewBox="0 0 16 16"
+      viewBox="0 0 32 32"
       width="14"
       height="14"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
     >
-      <circle cx="8" cy="8" r="3" />
-      <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M12.95 3.05l-1.4 1.4M4.45 11.55l-1.4 1.4" />
+      <circle cx="16" cy="16" r="6" />
+      <path d="M16 2v4M16 26v4M2 16h4M26 16h4M6.1 6.1l2.8 2.8M23.1 23.1l2.8 2.8M25.9 6.1l-2.8 2.8M8.9 23.1l-2.8 2.8" />
     </svg>
   )
 }
@@ -50,15 +68,17 @@ function SunGlyph() {
 function MoonGlyph() {
   return (
     <svg
-      viewBox="0 0 16 16"
+      viewBox="0 0 32 32"
       width="14"
       height="14"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M8 2a4 4 0 0 0 6 6 6 6 0 1 1-6-6Z" />
+      <path d="M16 4a8 8 0 0 0 12 12 12 12 0 1 1-12-12Z" />
     </svg>
   )
 }
@@ -108,6 +128,7 @@ export function MenuBar() {
   const hydrate = useSettings((s) => s.hydrate)
   const inspecting = useInspect((s) => s.on)
   const toggleInspect = useInspect((s) => s.toggle)
+  const openWindow = useWindows((s) => s.open)
 
   useEffect(() => hydrate(), [hydrate])
 
@@ -118,8 +139,13 @@ export function MenuBar() {
     <header className={styles.menubar} data-inspect-self="">
       <div className={styles.menuLeft}>
         <div className={styles.wordmark}>
+          {/* the house mark, in system ink — mask-image lets a raster
+              PNG take var(--content) and follow dark mode for free
+              (see .mark below). Decorative: the wordmark text already
+              names the machine. */}
+          <span className={styles.mark} aria-hidden="true" />
           LUNDE&nbsp;OS
-          <span aria-hidden="true">{OS_VERSION} · 1992年アメリカ製</span>
+          <span aria-hidden="true">{OS_VERSION}</span>
         </div>
         <SkinSwitch />
       </div>
@@ -139,10 +165,19 @@ export function MenuBar() {
             desktop (SYS-99). It is INSPECT's third tool now, so there is
             nothing left to refuse and no busy state to explain.
 
-            Hidden below 900px, where there would be no canvas left
+            Round 4: restyled onto the skin switch's own chip (styles
+            .skinTrigger, reused wholesale rather than duplicated) so the
+            two framed controls at either end of the bar read as one
+            family. Position, toggle behaviour, aria-pressed and the
+            900px stand-down (see .inspectBtn) are untouched — only the
+            box changed. The pressed state keeps its original accent-ink
+            treatment, translated onto the chip (.inspectBtn[aria-pressed]
+            in shell.module.css) rather than SkinSwitch's open/caret
+            language, since INSPECT toggles a mode, it doesn't open a
+            menu. Hidden below 900px, where there would be no canvas left
             between the docks (see .inspectBtn). */}
         <button
-          className={`${styles.menuBtn} ${styles.inspectBtn}`}
+          className={`${styles.skinTrigger} ${styles.inspectBtn}`}
           data-inspect-toggle=""
           onClick={toggleInspect}
           aria-pressed={inspecting}
@@ -173,6 +208,31 @@ export function MenuBar() {
             {theme === 'light' ? <SunGlyph /> : <MoonGlyph />}
           </button>
         )}
+        {/* DESIGN SYSTEM — a straight line to the token doc from anywhere
+            in the OS, on the same glyph-button footprint as sound/theme.
+            Opens the same window (spec-sheet) SETTINGS' customize row and
+            the SPEC.SHEET desktop icon both lead to. */}
+        <button
+          className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
+          onClick={() => {
+            sfx.open()
+            openWindow('spec-sheet')
+          }}
+          aria-label={t('menubar.designSystem', skin)}
+          title={t('menubar.designSystem', skin)}
+        >
+          <Icon name="palette" size={14} />
+        </button>
+        {/* COMMAND.CTR — round 4: Jake's ruling that this is system
+            chrome, not a floating desktop widget. Same glyph-button
+            footprint as sound/theme/palette (menuGlyphBtn), the program's
+            own 'nodes' icon, plus a dock-language LED (see Dock.tsx's
+            .led — 4px, var(--accent), rendered only when lit rather than
+            recoloured) standing in for the desktop chip's old dot. Seat:
+            between DESIGN SYSTEM and the "?", so the two "go somewhere
+            else in the OS" controls bracket it. Full logic lives in
+            CommandWidget.tsx — this file only places it. */}
+        <CommandWidget />
         {/* The mark holds the far-right corner, beside the time (Jake's
             s44 order: INSPECT · sound · theme · ? · clock) — the last
             interactive thing in the bar, where a "?" reads as the door to

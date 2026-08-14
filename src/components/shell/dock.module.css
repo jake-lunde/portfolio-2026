@@ -1,0 +1,127 @@
+/* ================= DOCK (poolsuite pass, case-rail) =================
+   NeXTSTEP-style bottom rail: one uniform row of tiles for every
+   program the desktop grid no longer carries (see Dock.tsx /
+   DesktopIcons.tsx for the split). Fixed to the viewport rather than
+   the desktop's own inset, so it holds its seat even while
+   INSPECT.MODE compresses the canvas — moot in practice, since the
+   rail stands down entirely while that tool is up (see below), same
+   as the wanderer. */
+
+/* CONTENT-WIDTH (round 3 — Jake reversed round 2's full-width call): the
+   strip contains its tiles rather than running the whole floor. Windows
+   sitting above the rail (z below) is no longer the strip's problem to
+   solve by spanning the viewport — boot windows are sized/positioned to
+   clear the dock zone instead (registry.tsx: readme's size/pos, see its
+   comment). Centered via left:50%/translateX, still flush to the floor
+   (bottom:0) and still squared off — this is furniture standing ON the
+   floor, not a card floating above it. */
+.rail {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: fit-content;
+  justify-content: center;
+  /* windows open at z:10 and only ever climb from there (useWindows.open
+     bumps zTop by 1 per open/focus, never resets) — 6 sits above every
+     other piece of desktop furniture (icons/widgets at 2-4, the wanderer
+     at 3) and strictly below the floor a window can ever occupy, so an
+     open window always wins over the rail without the rail having to
+     watch window z-index at all. */
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-3);
+  background: var(--surface-raised);
+  /* the rail stands on the screen floor, not floats above it: squared
+     off, no lift, no bottom edge (the viewport edge is the bottom edge) —
+     border rides top/left/right only */
+  border: var(--border-width-default) solid var(--border);
+  border-bottom: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* INSPECT.MODE turns the desktop into the tool's own canvas — the same
+   furniture rule the wanderer follows (shell.module.css): the rail steps
+   aside rather than floating over docked panels it has no relationship
+   to. */
+:global(body[data-inspectmode='on']) .rail {
+  display: none;
+}
+
+/* uniform tile: icon over a permanent caption, poolsuite-style — labels
+   are always on, never a hover reveal. Width is fixed across every tile
+   so the row reads as one machined strip regardless of label length;
+   `ch` at the caption font (mono, so it is an exact glyph-cell width,
+   not a guess). Recomputed for round 3: SUGGESTION BOX is gone
+   (renamed Suggestions, and spec-sheet left the rail entirely), so the
+   longest remaining label is SUGGESTIONS — 11 characters. The last real
+   measurement (17ch = 91.8px) gives 91.8 / 17 ≈ 5.4px per ch at this
+   font/tracking; 0.16em tracking spends ~0.19ch extra per character, so
+   11 glyph-cells + (11 × 0.19 ≈ 2.09ch) tracking ≈ 13.09ch effective ≈
+   70.7px required. 14ch (75.6px) is the next whole cell that clears it,
+   with ~4.9px to spare — GUESTBOOK, the runner-up at 9 characters, only
+   needs ~10.71ch (~57.8px), nowhere close. */
+.tile {
+  position: relative;
+  width: 14ch;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) 0 var(--space-1);
+  color: var(--content);
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+}
+
+.tile:hover {
+  background: var(--interactive-default-hover);
+}
+
+.tile:active svg {
+  transform: translateY(1px);
+}
+
+.label {
+  white-space: nowrap;
+  color: var(--content);
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--type-caption-tracking);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* fixed-height slot under the label, always present, so a program
+   starting/stopping never nudges the row (no CLS) — the dot only
+   appears inside it while running */
+.ledSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 4px;
+}
+
+.led {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-circle);
+  background: var(--accent);
+  pointer-events: none;
+}
+
+/* below the shell's mobile floor (shell.module.css: the same width that
+   turns windows into a full-bleed stack) the rail doesn't render at all —
+   the docked programs reappear in the desktop icon grid instead, see
+   DesktopIcons.tsx's .dockedGrid */
+@media (max-width: 720px) {
+  .rail {
+    display: none;
+  }
+}

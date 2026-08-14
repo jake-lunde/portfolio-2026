@@ -1,0 +1,149 @@
+/* THE CUSTOMIZE BUTTON, round 5 — a tiny abstracted OS window that
+   re-inks itself (see CustomizeButton.tsx for the whole ruling). All
+   chrome ink is tokens; the only literals are the sampled skin accents,
+   which arrive inline from the component with their derivation note.
+
+   Geometry the crossfading scenes must mirror is pinned in two custom
+   properties here (--head-h, --viz-h) and consumed by base and scene
+   alike — one number, never two drifting copies. */
+
+.customize {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: var(--border-width-default) solid var(--border);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--content);
+  cursor: pointer;
+  text-align: center;
+}
+
+.customize:hover {
+  border-color: var(--content);
+}
+
+.customize:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* --------- the nested window --------- */
+
+.frame {
+  --head-h: 12px;
+  --viz-h: 30px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* the titlebar — base coat and scene strip share every measure */
+.head,
+.headSkin {
+  flex: none;
+  height: var(--head-h);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 5px;
+}
+
+/* the abstract window controls, punched out of the strip in surface ink */
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-circle);
+  background: var(--surface);
+}
+
+/* the chart area — fixed height so scene and base register exactly */
+.viz {
+  flex: none;
+  height: var(--viz-h);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-top: var(--space-1);
+}
+
+.vizRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.bar {
+  width: 7px;
+  display: block;
+}
+
+/* --------- the crossfading scenes --------- */
+/* Absolute over the frame's top (titlebar + chart only — the chip zone
+   below is never covered), same column layout as the base coat, opacity
+   as the ONLY animated property. Four scenes on one keyframe, delays
+   staggered 3s apart across the 12s cycle: each holds a quarter, with a
+   ~360ms fade at each end. Scene 1 doubles the base coat's inks, so the
+   wrap lands invisibly. */
+
+.scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: sceneHold 12s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes sceneHold {
+  0% {
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 1;
+  }
+  28% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* --------- the dialog button --------- */
+/* content on surface, always — no cycling ink ever runs beneath it, so
+   its contrast is structural rather than audited per frame */
+
+.labelChip {
+  align-self: center;
+  margin: var(--space-2) 0 var(--space-2);
+  padding: var(--button-sm-padding-y) var(--button-sm-padding-x);
+  border: var(--border-width-subtle) solid var(--content);
+  font-family: var(--type-label-family);
+  font-size: var(--button-sm-font-size);
+  font-weight: var(--button-weight);
+  letter-spacing: var(--button-sm-tracking);
+  text-transform: uppercase;
+  line-height: var(--leading-none);
+}
+
+.customize:hover .labelChip {
+  background: var(--content);
+  color: var(--surface);
+}
+
+/* reduced motion: the scenes stand down entirely and the base coat —
+   classic's shipped pair — holds the frame, static */
+@media (prefers-reduced-motion: reduce) {
+  .scene {
+    animation: none;
+    opacity: 0;
+  }
+}

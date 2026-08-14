@@ -1,39 +1,21 @@
-/* ================= COMMAND.CTR — AMBIENT CHIP ================= */
-/* Recovered from the pre-33f574b shell.module.css block (.ccWidget etc.)
-   and reworked: the old chip removed itself entirely when nothing was
-   live, so there was nothing to see and nothing to click. It is now
-   permanent, with two states that differ by TEXT + DOT SHAPE + ELEVATION
-   before they differ by colour or motion — so the state survives
-   greyscale, colour-blindness and prefers-reduced-motion.
-
-   Placement follows the sibling ambient widgets (NowPlayingWidget,
-   DailyWidget, MiniPlayer): absolute inside .desktop at z-index 2 —
-   above the wallpaper, under every window (windows start at z 10).
-   Top-centre is the one free lane: desktop icons own top-left, the
-   now-playing card + photo wall own the right column (right: 20px),
-   DAILY.SYS and the mini-player own bottom-right, trash and the ambient
-   agent strip own the bottom edge. Hidden at 900px on the same
-   breakpoint every other ambient widget uses. */
+/* ================= COMMAND.CTR — MENU BAR POPOVER ================= */
+/* Round 4: this used to be a permanent floating desktop chip (recovered
+   from the pre-33f574b shell.module.css block); Jake's ruling moved it
+   into the menu bar as chrome instead — see CommandWidget.tsx and
+   shell.module.css's .commandSwitch/.commandBtn/.commandLed/
+   .commandPopover, which now own placement, the trigger and anchoring.
+   What survives here is the CONTENT this file always owned: two states
+   that differ by TEXT + DOT SHAPE + ELEVATION before they differ by
+   colour or motion, so the state survives greyscale, colour-blindness
+   and prefers-reduced-motion. The old desktop-lane placement math and
+   its responsive squeeze/hide/mobile-card breakpoints are gone with the
+   floating chip — the popover doesn't compete with desktop icons for a
+   lane, and it renders at every width the trigger does. */
 
 .ccWidget {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  /* transform, not `translate`, matches the house style — nothing here
-     animates this element's transform, so Motion can't clobber it */
-  transform: translateX(-50%);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* The chip is centred, so its half-width is what can collide with the
-     icon grid on the left (right edge 20 + 3×88 + 2×10 = 304px). Keeping
-     310px of clearance on a desktop W wide means W − 620 — derived, not
-     guessed, and it lands on the old 280px at the 901px worst case. */
-  max-width: min(560px, calc(100% - 620px));
-
-  /* halo stops, derived from the skin's expressive accent rather than
-     baked — the 0% stop keeps the fade pink instead of fading to grey */
+  /* halo stop for the LIVE dot's pulse, derived from the skin's
+     expressive accent rather than baked — the 0% stop keeps the fade
+     pink instead of fading to grey */
   --cc-halo: color-mix(in srgb, var(--accent-expressive) 55%, transparent);
 }
 
@@ -51,11 +33,18 @@
   gap: var(--spacing-component-xs);
   max-width: 100%;
   /* right padding reserves the hover arrow's lane so it never lands on
-     the leading edge's ellipsis; mobile gives it back (no hover there) */
+     the leading edge's ellipsis; hover:none gives it back (no hover
+     there, and the CTA line takes over as the way-in cue instead) */
   padding: 5px 24px 5px 10px;
   background: var(--surface);
   border: var(--border-width-subtle) solid var(--border);
   text-align: left;
+}
+
+@media (hover: none) {
+  .ccBar {
+    padding: 5px 10px;
+  }
 }
 
 /* the two stacked rows share a left edge (the button's own padding) —
@@ -241,7 +230,11 @@
 /* Desktop says it on approach: the CTA line is gone (Jake, s44 — the
    whole chip is the target and the aria-label spells the destination)
    and an arrow surfaces at the right edge on hover or keyboard focus.
-   The spelled-out line below is mobile-only, where hover doesn't exist. */
+   The spelled-out line below is hover:none only, where an arrow that
+   only ever shows on hover would never show at all. (Round 4: this used
+   to key off a 720px mobile-card breakpoint; the popover isn't a
+   viewport-width card any more, so the real thing that mattered —
+   whether a pointer can hover at all — is what gates it now.) */
 
 .ccCta {
   display: none;
@@ -251,6 +244,12 @@
   letter-spacing: var(--tracking-14);
   color: var(--interactive-default-content-hover);
   white-space: nowrap;
+}
+
+@media (hover: none) {
+  .ccCta {
+    display: block;
+  }
 }
 
 .ccArrow {
@@ -307,61 +306,10 @@
   border: 0;
 }
 
-/* ---------- squeezed ---------- */
-/* Between 900px and ~1240px the derived max-width has already taken the
-   chip below the width the leading edge needs to say anything useful —
-   drop it rather than serve an ellipsised label. With the CTA line gone
-   from desktop entirely that leaves the action row empty, so the row
-   goes with it: the chip compresses to the glance line + hover arrow. */
-
-@media (max-width: 1240px) {
-  .ccEdge,
-  .ccRowAction {
-    display: none;
-  }
-}
-
-/* ---------- 720–900: no lane ---------- */
-/* The ambient-widget cut: the centred lane's derived max-width has gone
-   negative but the desktop still floats windows, so there is nowhere for
-   the chip to stand. It returns below 720 as part of the launcher. */
-@media (max-width: 900px) {
-  .ccWidget {
-    display: none;
-  }
-}
-
-/* ---------- mobile: a card above the launcher grid ---------- */
-/* Below 720 the desktop is a scrolling launcher (shell.module.css moves
-   .icons down to clear this — the two constants travel together). The
-   chip spans the grid's own 12px rails, and the way in is the spelled-out
-   CTA on its own centred line — hover doesn't exist here (Jake, s44). */
-@media (max-width: 720px) {
-  .ccWidget {
-    display: flex;
-    top: 14px;
-    left: 12px;
-    right: 12px;
-    transform: none;
-    max-width: none;
-    /* a card, not a floating chip: the bar spans the grid's rails */
-    align-items: stretch;
-  }
-
-  .ccBar {
-    padding: 5px 10px;
-  }
-
-  .ccArrow {
-    display: none;
-  }
-
-  .ccRowAction {
-    display: flex;
-    justify-content: center;
-  }
-
-  .ccCta {
-    display: block;
-  }
-}
+/* the three breakpoints that used to live here (a ~1240px content
+   squeeze, a 900px "no lane" hide, and a 720px mobile card) all managed
+   the floating chip's fight with the desktop icon grid for room. The
+   popover doesn't fight anything for a lane — shell.module.css's
+   .commandPopover caps its own width against the viewport instead (the
+   same min(px, calc(100vw - Npx)) guard .fableBubble uses) — so none of
+   that survives the move. See the file header. */
