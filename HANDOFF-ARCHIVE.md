@@ -1,5 +1,26 @@
 # HANDOFF ARCHIVE — LUNDE OS
 
+## Rotated 2026-08-14 (s58) — s56/s57 blocks + final CURRENT STATE
+> (s58 = the handoff reallocation: session narrative now lives on the
+> vault's LUNDE OS Map; HANDOFF.md became near-static invariants only.)
+
+S57 EDIT X INSPECT (2026-08-14) SHIPPED — main `826065b` (PR #11):
+EDIT.MODE folded into INSPECT as a third tool. `src/programs/editmode/`
+deleted; engine now `inspect/useCopyEditing.ts` + `EditPanel.tsx` (right
+dock). `/edit` = deep link arming the tool (≥900px gate; mobile editing
+gone, accepted). Same `EDIT_MODE_KEY`; verify endpoint throttles 10
+fails/hr/IP → 429. SOURCE row links case MDX to GitHub's editor
+(`CaseDef.source`). CDN-verified (/edit serves noindex). Case chrome
+strings stay outside the copy layer — ruling in vault s57 note.
+
+S56 FIG.A STRIP (2026-08-14) SHIPPED — main `6613397` (PR #10 + round
+2): Plate 01 stripped; annotations in the cap row beside FIG. A (⚠️
+Figma MCP export bakes canvas gray into node PNGs; REST `/v1/images` +
+`FIGMA_PAT` keeps alpha). CDN-verified. Details: vault s56 note.
+S54 (PR #9 MERGED `3478b0a`): FH stills + Plate 01 scrub. Plates
+04/05/06/08/10 still placeholders. Jake owes: delete `fh-plate-media`
+(dup `1da6d84`, force-delete safe) + its worktree.
+
 ## Rotated 2026-08-14 (s56) — s53 session block
 
 S53 VOICE PASS (2026-08-13): voice-pass MERGED `0660624`: `VOICE.md`

@@ -1,11 +1,13 @@
 # LUNDE OS — Law (slim edition, 2026-07-19)
 
 > The binding rules only. Full original brief archived at
-> `docs/BRIEF-ARCHIVE.md` (reference, not law). Code-adjacent state:
-> `HANDOFF.md` (≤60 lines by protocol §4). Projects/tasks/rulings: the
-> **jaique vault** (`/Users/jake/jaique`, §3.6). Crew doctrine: `CREW.md`.
-> Token architecture: `tokens/ARCHITECTURE.md`. Read HANDOFF.md at
-> session start; open the vault's LUNDE OS Map when task context matters.
+> `docs/BRIEF-ARCHIVE.md` (reference, not law). Code-adjacent invariants:
+> `HANDOFF.md` (near-static, ≤40 lines by protocol §4.4). Current state,
+> session narrative, projects/tasks/rulings: the **jaique vault**
+> (`/Users/jake/jaique`, §3.6) — start `Atlas/Maps/LUNDE OS Map.md`,
+> Current state box. Crew doctrine: `CREW.md`. Token architecture:
+> `tokens/ARCHITECTURE.md`. Read HANDOFF.md + the Map's Current state
+> box at session start.
 
 ## 1. What this is
 
@@ -92,13 +94,20 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
    context). Fable turns = orchestration/taste/review only; execution runs
    Opus-led. Batch asks. (Economics: CREW.md §4.)
 4. **End of session — always**: (a) session note → vault
-   `Calendar/Notes/YYYY-MM-DD sNN.md`; (b) update touched vault
-   efforts/tasks (status, Shipped lines, new tasks from Jake's dictation;
-   commit the vault); (c) refresh `HANDOFF.md` CURRENT STATE — ≤60 lines,
-   code-adjacent facts ONLY (prod state, gotchas, branch state, debts);
-   Jake-facing tasks/rulings go to the vault, never HANDOFF; older notes
-   → `HANDOFF-ARCHIVE.md`. A session that doesn't write itself down
-   didn't happen; a HANDOFF that scrolls burns every future session.
+   `Calendar/Notes/YYYY-MM-DD sNN.md` — before claiming sNN, list the
+   Notes folder and take today's highest N + 1 (concurrent sessions
+   race on the number); (b) update touched vault efforts/tasks AND the
+   **Current state box** on `Atlas/Maps/LUNDE OS Map.md` (latest-session
+   links, debts, cleanup owed — pointers to session notes, not re-told
+   narrative); commit the vault. Prod SHAs are never written down
+   anywhere — prod = `origin/main` HEAD by definition; (c) repo
+   `HANDOFF.md` holds near-static code-adjacent invariants ONLY
+   (checkout/build law, guardrails, hooks) and is the sole handoff
+   cloud sessions can read — touch it only when an invariant changes,
+   keep it ≤40 lines, session narrative never returns to it (rotated
+   blocks → `HANDOFF-ARCHIVE.md`). Jake-facing tasks/rulings go to the
+   vault, never HANDOFF. A session that doesn't write itself down
+   didn't happen.
 
 ## 5. Guardrails
 
