@@ -35,7 +35,8 @@
   wash contrast · token-debt leftovers (ruling = vault task) ·
   `family-hub 2/` + `".claude/* 2.*"` dups (Jake deletes).
 - **Cleanup owed (Jake runs; classifier blocks):** `git push origin
-  --delete case-family-hub suggestion-box film-vhs-signal fh-figa-strip`
+  --delete case-family-hub suggestion-box film-vhs-signal fh-figa-strip
+  edit-in-inspect`
   (+`medieval-sfx*` on confirm); ~14 stale merged locals await ruling.
 
 ## Latest session — S57 EDIT X INSPECT (2026-08-14) — SHIPPED
@@ -47,8 +48,8 @@
   Same `EDIT_MODE_KEY`; verify endpoint throttles 10 fails/hr/IP → 429.
   SOURCE row links case MDX to GitHub's editor (`CaseDef.source`).
   CDN-verified (/edit serves noindex). Case chrome strings stay outside
-  the copy layer — ruling + details in vault s57 note. Main checkout
-  restored to main; s56 branch leftovers resolved by PR #10 content.
+  the copy layer — ruling + details in vault s57 note. Main checkout is
+  back on main.
 
 ## Prior session — S56 FIG.A STRIP (2026-08-14) — SHIPPED
 
