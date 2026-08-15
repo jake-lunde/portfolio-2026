@@ -114,7 +114,7 @@ export function Screensaver() {
             className={styles.lou}
             style={reduced ? { left: '50%', top: '55%', transform: 'translate(-50%,-50%)' } : undefined}
           >
-            <LouSprite px={PX} />
+            <LouSprite px={PX} walking={!reduced} />
           </div>
           <p className={styles.wake}>ANY INPUT WAKES THE MACHINE</p>
         </div>
