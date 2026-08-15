@@ -1,4 +1,5 @@
 import styles from './Icon.module.css'
+import { PIXEL } from './pixelIcons'
 
 export type IconName =
   | 'doc'
@@ -551,6 +552,11 @@ const MEDIEVAL_PATHS: Partial<Record<IconName, React.ReactNode>> = {
 
 export function Icon({ name, size = 32 }: { name: IconName; size?: number }) {
   const medieval = MEDIEVAL_PATHS[name]
+  // the 32px tier draws bitmap art (pixelIcons.ts) when a grid exists;
+  // the 14px chrome tier and undrawn names keep the line art. Integer
+  // scale only — at sub-32 sizes the grid would land on half-pixels and
+  // smear, which is exactly what crispEdges can't fix.
+  const pixel = size >= 32 ? PIXEL[name] : undefined
   return (
     <svg
       width={size}
@@ -564,7 +570,14 @@ export function Icon({ name, size = 32 }: { name: IconName; size?: number }) {
       aria-hidden="true"
       className={medieval ? styles.hasMedieval : undefined}
     >
-      <g className={styles.glyphClassic}>{PATHS[name]}</g>
+      {pixel ? (
+        <g className={styles.glyphClassic} shapeRendering="crispEdges" stroke="none">
+          {pixel.paper && <path d={pixel.paper} fill="var(--surface)" />}
+          <path d={pixel.ink} fill="currentColor" />
+        </g>
+      ) : (
+        <g className={styles.glyphClassic}>{PATHS[name]}</g>
+      )}
       {medieval && <g className={styles.glyphMedieval}>{medieval}</g>}
     </svg>
   )
