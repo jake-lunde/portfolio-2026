@@ -1,5 +1,6 @@
 import styles from './Icon.module.css'
-import { PIXEL } from './pixelIcons'
+import { PIXEL, type PixelGlyph } from './pixelIcons'
+import { MEDIEVAL_PIXEL } from './medievalPixelIcons'
 
 export type IconName =
   | 'doc'
@@ -550,13 +551,43 @@ const MEDIEVAL_PATHS: Partial<Record<IconName, React.ReactNode>> = {
   ),
 }
 
+/* A bitmap glyph: the rest frame, and — when the icon has a hover cycle —
+   the frames beside it as a strip, one per 32 units, that Icon.module.css
+   steps across under any hovered button/link (see `.frames` there). */
+function PixelArt({ glyph, className }: { glyph: PixelGlyph; className?: string }) {
+  return (
+    <g className={className} shapeRendering="crispEdges" stroke="none" fill="currentColor">
+      <path d={glyph.ink} className={glyph.frames ? styles.rest : undefined} />
+      {glyph.frames && (
+        <g
+          className={styles.frames}
+          style={
+            {
+              '--px-n': glyph.frames.length,
+              '--px-shift': `${-32 * (glyph.frames.length - 1)}px`,
+            } as React.CSSProperties
+          }
+        >
+          {glyph.frames.map((d, i) => (
+            <path key={i} d={d} transform={`translate(${i * 32} 0)`} />
+          ))}
+        </g>
+      )}
+    </g>
+  )
+}
+
 export function Icon({ name, size = 32 }: { name: IconName; size?: number }) {
-  const medieval = MEDIEVAL_PATHS[name]
-  // the 32px tier draws bitmap art (pixelIcons.ts) when a grid exists;
+  // the 32px tier draws bitmap art when a grid exists — the classic set
+  // (pixelIcons.ts) and the medieval woodblock plates (medievalPixelIcons.ts);
   // the 14px chrome tier and undrawn names keep the line art. Integer
   // scale only — at sub-32 sizes the grid would land on half-pixels and
   // smear, which is exactly what crispEdges can't fix.
   const pixel = size >= 32 ? PIXEL[name] : undefined
+  const medievalPixel = size >= 32 ? MEDIEVAL_PIXEL[name] : undefined
+  // the medieval <g>: the woodblock plate where one is cut, else the line
+  // art variant; either swaps in purely by [data-skin] (Icon.module.css)
+  const medieval = medievalPixel ? <PixelArt glyph={medievalPixel} /> : MEDIEVAL_PATHS[name]
   return (
     <svg
       width={size}
@@ -570,32 +601,7 @@ export function Icon({ name, size = 32 }: { name: IconName; size?: number }) {
       aria-hidden="true"
       className={medieval ? styles.hasMedieval : undefined}
     >
-      {pixel ? (
-        <g className={styles.glyphClassic} shapeRendering="crispEdges" stroke="none" fill="currentColor">
-          {/* rest frame; when the icon has a hover cycle the frames ride
-              beside it as a strip, one frame per 32 units, and
-              Icon.module.css steps the strip across under any hovered
-              button/link — see `.frames` there */}
-          <path d={pixel.ink} className={pixel.frames ? styles.rest : undefined} />
-          {pixel.frames && (
-            <g
-              className={styles.frames}
-              style={
-                {
-                  '--px-n': pixel.frames.length,
-                  '--px-shift': `${-32 * (pixel.frames.length - 1)}px`,
-                } as React.CSSProperties
-              }
-            >
-              {pixel.frames.map((d, i) => (
-                <path key={i} d={d} transform={`translate(${i * 32} 0)`} />
-              ))}
-            </g>
-          )}
-        </g>
-      ) : (
-        <g className={styles.glyphClassic}>{PATHS[name]}</g>
-      )}
+      {pixel ? <PixelArt glyph={pixel} className={styles.glyphClassic} /> : <g className={styles.glyphClassic}>{PATHS[name]}</g>}
       {medieval && <g className={styles.glyphMedieval}>{medieval}</g>}
     </svg>
   )
