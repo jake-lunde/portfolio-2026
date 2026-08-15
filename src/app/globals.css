@@ -157,9 +157,14 @@ b {
 
 /* ---------- classic-Mac scrollbars ---------- */
 
-* {
-  scrollbar-width: auto;
-  scrollbar-color: var(--accent) var(--surface);
+/* Firefox only. Chrome/Safari honour the standard properties in preference to
+   ::-webkit-scrollbar-*, so setting them unguarded silently kills every rule
+   below and hands macOS back its overlay scrollbar. */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: auto;
+    scrollbar-color: var(--surface-raised) var(--surface);
+  }
 }
 
 ::-webkit-scrollbar {
@@ -167,37 +172,67 @@ b {
   height: 14px;
 }
 
+/* The track is a channel, not a slab: two dotted rails on the long edges,
+   surface between them. 1.5px on, 1.5px off — the same hairline rhythm the
+   window chrome uses. */
 ::-webkit-scrollbar-track {
   background-color: var(--surface);
-  /* System-7 dither: 2px checkerboard of hairline ink */
-  background-image: repeating-conic-gradient(var(--border) 0% 25%, transparent 0% 50%);
-  background-size: 4px 4px;
-  border-left: 1.5px solid var(--content);
+  background-image:
+    repeating-linear-gradient(to bottom, var(--content-muted) 0 1.5px, transparent 1.5px 3px),
+    repeating-linear-gradient(to bottom, var(--content-muted) 0 1.5px, transparent 1.5px 3px);
+  background-size: 1px 3px;
+  background-position:
+    left top,
+    right top;
+  background-repeat: repeat-y;
+  border: none;
 }
 
 ::-webkit-scrollbar-track:horizontal {
-  border-left: none;
-  border-top: 1.5px solid var(--content);
+  background-image:
+    repeating-linear-gradient(to right, var(--content-muted) 0 1.5px, transparent 1.5px 3px),
+    repeating-linear-gradient(to right, var(--content-muted) 0 1.5px, transparent 1.5px 3px);
+  background-size: 3px 1px;
+  background-position:
+    left top,
+    left bottom;
+  background-repeat: repeat-x;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  border: 1.5px solid var(--content);
-  box-shadow: inset 1px 1px 0 rgba(231, 225, 210, 0.35);
+  background: var(--surface-raised);
+  border: var(--border-width-thick) solid var(--content);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-expressive);
 }
 
+/* Bare glyphs — the arrows lost their button boxes, so they read as marks on
+   the surface rather than a second run of chrome. */
 ::-webkit-scrollbar-button {
-  background-color: var(--surface-raised);
-  border: 1.5px solid var(--content);
+  /* Chrome reserves no room for a button without an explicit display */
+  display: block;
+  background-color: transparent;
+  border: none;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 8px 8px;
-  height: 14px;
+  background-size: 7px 7px;
+  height: 10px;
   width: 14px;
+}
+
+::-webkit-scrollbar-button:horizontal {
+  height: 14px;
+  width: 10px;
+}
+
+/* One glyph per end — drop the second half of the double-button pair */
+::-webkit-scrollbar-button:start:increment,
+::-webkit-scrollbar-button:end:decrement {
+  display: none;
 }
 
 ::-webkit-scrollbar-button:vertical:decrement {
@@ -218,16 +253,6 @@ b {
 
 ::-webkit-scrollbar-corner {
   background: var(--surface);
-}
-
-[data-theme='dark'] ::-webkit-scrollbar-track,
-[data-theme='dark'] ::-webkit-scrollbar-button {
-  border-color: var(--border);
-}
-
-[data-theme='dark'] ::-webkit-scrollbar-thumb {
-  border-color: var(--border);
-  box-shadow: none;
 }
 
 [data-theme='dark'] ::-webkit-scrollbar-button:vertical:decrement {
