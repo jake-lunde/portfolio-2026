@@ -9,6 +9,7 @@ import { clearEditKey, readEditKey } from '@/lib/editKey'
 import { labelFor, type ChainEntry, type Inspection } from '@/lib/inspect'
 import { themeFor } from '@/lib/tokenEdit'
 import type { useCopyEditing } from './useCopyEditing'
+import { InfoTip } from './InfoTip'
 import {
   CANDIDATES,
   isNudged,
@@ -60,7 +61,24 @@ import styles from './inspectShell.module.css'
    Rewrites pile up in PENDING at the top of the panel, beside the token
    banner, because both are the same sentence: something on this desktop is
    changed and not saved yet. The two land differently — copy goes straight
-   to main, a token re-cast goes to a PR — and the buttons say so. */
+   to main, a token re-cast goes to a PR — and the buttons say so.
+
+   ---- round 3, and it is about scale ----
+
+   Jake: "inspector and layers at the top feel good. Once we get into the
+   middle it still feels muddy." Two things came out of that.
+
+   Every section head is a BAR now: a raised fill running edge to edge of
+   the dock with the label in ink, so the eye can find where one reading
+   ends and the next begins without reading a word (inspectShell.module
+   .css). The markup underneath it changed shape to allow it: bar, then a
+   .sectionBody carrying the inset the panel body used to carry.
+
+   And the notes moved. The sort, which is the rule from here on: prose
+   that explains the TOOL hangs off the bar's info glyph and shows on
+   hover or focus (InfoTip.tsx); readings that describe the PICK stay
+   inline where they can be seen without asking. So SOURCE's "pointers to
+   search for" is on hover and the core-primitive warning is not. */
 
 /* Constant ids, never useId: this panel mounts inside a tree that reshapes
    at the SSR handover, and a generated id mismatches across it (see memory).
@@ -203,7 +221,12 @@ export function InspectorPanel({
      case component behind it) into it would end that. */
   const winId = picked?.closest<HTMLElement>('[data-window-id]')?.dataset.windowId
   const mdx = winId?.startsWith('case:') ? getCase(winId.slice(5))?.source : undefined
-  const sourceRows = report?.source ?? []
+  /* The TEXT row matches a string against the build's index, and for case
+     prose it lands on exactly the file the MDX row already names. Two rows,
+     one file, so the matched one gives way to the one that knows. */
+  const sourceRows = (report?.source ?? []).filter(
+    (row) => !(row.kind === 'text' && !!mdx && row.text === `content/${mdx}`),
+  )
 
   const springKey = report?.spring ? `inspect.spring.${report.spring.name}` : null
 
@@ -456,54 +479,60 @@ export function InspectorPanel({
             copy edit goes to main. */}
         {showPending && (
           <section className={styles.pending}>
-            <h3 className={styles.head}>
-              <CopyText k="inspect.section.pending" />
+            {/* the count sits beside the heading rather than inside it: a
+                heading takes its accessible name from its contents, and a
+                bare number is not part of what this block is called */}
+            <div className={styles.bar}>
+              <h3 className={styles.head}>
+                <CopyText k="inspect.section.pending" />
+              </h3>
               <span className={styles.editCount}>{copy.edits.length}</span>
-            </h3>
+            </div>
 
-            <ul className={styles.rows}>
-              {copy.edits.map((e) => (
-                <li key={e.key} className={styles.tokenRow}>
-                  <div className={styles.editRowHead}>
-                    <span className={styles.editKeyName} title={e.key}>
-                      {e.key}
-                    </span>
-                    <span className={styles.editSlot}>{e.slot.toUpperCase()}</span>
-                    <button
-                      type="button"
-                      className={styles.resetAll}
-                      onClick={() => copy.revert(e.key)}
-                      aria-label={`${t('inspect.revert', skin)} ${e.key}`}
-                    >
-                      <span aria-hidden="true">↺</span>
-                    </button>
-                  </div>
-                  <div className={styles.editDiff}>
-                    <span className={styles.editOld}>{e.oldValue || '∅'}</span>
-                    <span className={styles.editArrow} aria-hidden="true">
-                      →
-                    </span>
-                    <span className={styles.editNew}>{e.newValue || '∅'}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div className={`${styles.sectionBody} ${styles.pendingBody}`}>
+              <ul className={styles.rows}>
+                {copy.edits.map((e) => (
+                  <li key={e.key} className={styles.tokenRow}>
+                    <div className={styles.editRowHead}>
+                      <span className={styles.editKeyName} title={e.key}>
+                        {e.key}
+                      </span>
+                      <span className={styles.editSlot}>{e.slot.toUpperCase()}</span>
+                      <button
+                        type="button"
+                        className={styles.resetAll}
+                        onClick={() => copy.revert(e.key)}
+                        aria-label={`${t('inspect.revert', skin)} ${e.key}`}
+                      >
+                        <span aria-hidden="true">↺</span>
+                      </button>
+                    </div>
+                    <div className={styles.editDiff}>
+                      <span className={styles.editOld}>{e.oldValue || '∅'}</span>
+                      <span className={styles.editArrow} aria-hidden="true">
+                        →
+                      </span>
+                      <span className={styles.editNew}>{e.newValue || '∅'}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
 
-            {copy.tokenMissing && (
-              <p className={styles.saveNote} data-fail="">
-                <CopyText k="inspect.edit.notoken" />
-              </p>
-            )}
-
-            {/* mounted for the whole life of the block, empty or not — the
-                same rule the SAVE banner's region follows */}
-            <div role="status">
-              {copyStatus && (
-                <p className={styles.saveNote} data-fail={copyFail || undefined}>
-                  <CopyText k={copyStatus.key} />
-                  {copyStatus.count !== undefined ? ` ${copyStatus.count}` : ''}
+              {copy.tokenMissing && (
+                <p className={styles.saveNote} data-fail="">
+                  <CopyText k="inspect.edit.notoken" />
                 </p>
               )}
+
+              {/* mounted for the whole life of the block, empty or not — the
+                  same rule the SAVE banner's region follows */}
+              <div role="status">
+                {copyStatus && (
+                  <p className={styles.saveNote} data-fail={copyFail || undefined}>
+                    <CopyText k={copyStatus.key} />
+                    {copyStatus.count !== undefined ? ` ${copyStatus.count}` : ''}
+                  </p>
+                )}
             </div>
 
             <button
@@ -524,6 +553,7 @@ export function InspectorPanel({
                 <CopyText k="inspect.edit.revertall" />
               </button>
             )}
+            </div>
           </section>
         )}
 
@@ -550,367 +580,400 @@ export function InspectorPanel({
 
             {/* ---- PATH ---- */}
             <section className={styles.section}>
-              <h3 className={styles.head}>
-                <CopyText k="inspect.section.path" />
-              </h3>
-              <ol className={styles.path}>
-                {pathRows(report.chain).map((row, i) =>
-                  row.kind === 'gap' ? (
-                    <li key={`gap${i}`} className={styles.pathStep} style={indentOf(row.depth)}>
-                      <span className={styles.pathGap}>
-                        {row.count > 1 ? `… (${row.count})` : '…'}
-                      </span>
-                    </li>
-                  ) : (
-                    <li key={`node${i}`} className={styles.pathStep} style={indentOf(row.depth)}>
-                      {row.here ? (
-                        // the terminus is the reading itself, so it is a
-                        // label rather than a control: re-picking what is
-                        // already picked is a button that does nothing
-                        <span className={styles.pathHere} aria-current="true">
-                          {row.label}
+              <div className={styles.bar}>
+                <h3 className={styles.head}>
+                  <CopyText k="inspect.section.path" />
+                </h3>
+                <InfoTip k="inspect.path.note" />
+              </div>
+              <div className={styles.sectionBody}>
+                <ol className={styles.path}>
+                  {pathRows(report.chain).map((row, i) =>
+                    row.kind === 'gap' ? (
+                      <li key={`gap${i}`} className={styles.pathStep} style={indentOf(row.depth)}>
+                        <span className={styles.pathGap}>
+                          {row.count > 1 ? `… (${row.count})` : '…'}
                         </span>
-                      ) : (
-                        <button
-                          type="button"
-                          className={styles.pathBtn}
-                          onClick={() => onPick(row.el)}
-                        >
-                          {row.label}
-                        </button>
-                      )}
-                    </li>
-                  ),
-                )}
-              </ol>
+                      </li>
+                    ) : (
+                      <li key={`node${i}`} className={styles.pathStep} style={indentOf(row.depth)}>
+                        {row.here ? (
+                          // the terminus is the reading itself, so it is a
+                          // label rather than a control: re-picking what is
+                          // already picked is a button that does nothing
+                          <span className={styles.pathHere} aria-current="true">
+                            {row.label}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            className={styles.pathBtn}
+                            onClick={() => onPick(row.el)}
+                          >
+                            {row.label}
+                          </button>
+                        )}
+                      </li>
+                    ),
+                  )}
+                </ol>
+              </div>
             </section>
 
             {/* ---- SOURCE ---- */}
             {(sourceRows.length > 0 || mdx) && (
               <section className={styles.section}>
-                <h3 className={styles.head}>
-                  <CopyText k="inspect.section.source" />
-                </h3>
-                <ul className={styles.sourceRows}>
-                  {sourceRows.map((row) => (
-                    <li key={`${row.kind}|${row.text}`} className={styles.sourceRow}>
-                      <span className={styles.sourceKind}>
-                        <CopyText k={`inspect.source.${row.kind}`} />
-                      </span>
-                      <span className={styles.sourcePath}>{row.text}</span>
-                      {row.via && (
-                        <span className={styles.sourceVia}>
-                          <CopyText k="inspect.source.via" /> {row.via}
+                <div className={styles.bar}>
+                  <h3 className={styles.head}>
+                    <CopyText k="inspect.section.source" />
+                  </h3>
+                  <InfoTip k="inspect.source.note" />
+                </div>
+                <div className={styles.sectionBody}>
+                  <ul className={styles.sourceRows}>
+                    {sourceRows.map((row) => (
+                      <li key={`${row.kind}|${row.text}`} className={styles.sourceRow}>
+                        <span className={styles.sourceKind}>
+                          <CopyText k={`inspect.source.${row.kind}`} />
                         </span>
-                      )}
-                    </li>
-                  ))}
-                  {/* the prose in a case window is a file on disk, and the
-                      COPY block will never offer to edit it */}
-                  {mdx && (
-                    <li className={styles.sourceRow}>
-                      <span className={styles.sourceKind}>
-                        <CopyText k="inspect.source.mdx" />
-                      </span>
-                      <span className={styles.sourcePath}>{`content/${mdx}`}</span>
-                    </li>
-                  )}
-                </ul>
-                <CopyText k="inspect.source.note" as="p" className={styles.sourceNote} />
+                        <span className={styles.sourcePath}>{row.text}</span>
+                        {row.via && (
+                          <span className={styles.sourceVia}>
+                            <CopyText k="inspect.source.via" /> {row.via}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                    {/* the prose in a case window is a file on disk, and the
+                        COPY block will never offer to edit it */}
+                    {mdx && (
+                      <li className={styles.sourceRow}>
+                        <span className={styles.sourceKind}>
+                          <CopyText k="inspect.source.mdx" />
+                        </span>
+                        <span className={styles.sourcePath}>{`content/${mdx}`}</span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
               </section>
             )}
 
             {/* ---- COPY: the words themselves, editable in place ---- */}
             {copyKey && (
               <section className={styles.section}>
-                <h3 className={styles.head}>
-                  <CopyText k="inspect.section.copy" />
-                </h3>
-                <ul className={styles.sourceRows}>
-                  <li className={styles.sourceRow}>
-                    <span className={styles.sourceKind}>
-                      <CopyText k="inspect.copy.key" />
-                    </span>
-                    <span className={styles.sourcePath}>{`copy.json › ${copyKey}`}</span>
-                    {copyVia && (
-                      <span className={styles.sourceVia}>
-                        <CopyText k="inspect.source.via" /> {copyVia}
+                <div className={styles.bar}>
+                  <h3 className={styles.head}>
+                    <CopyText k="inspect.section.copy" />
+                  </h3>
+                  {/* the ESC/ENTER keys used to print under the caret while
+                      it was in the line. They explain the tool, so they
+                      moved in here with the rest of the section's note */}
+                  <InfoTip k="inspect.copy.note" />
+                </div>
+                <div className={styles.sectionBody}>
+                  <ul className={styles.sourceRows}>
+                    <li className={styles.sourceRow}>
+                      <span className={styles.sourceKind}>
+                        <CopyText k="inspect.copy.key" />
                       </span>
-                    )}
-                  </li>
-                  <li className={styles.sourceRow}>
-                    <span className={styles.sourceKind}>
-                      <CopyText k="inspect.copy.slot" />
-                    </span>
-                    <span className={styles.sourcePath}>{copySlot.toUpperCase()}</span>
-                  </li>
-                  <li className={styles.sourceRow}>
-                    <span className={styles.sourceKind}>
-                      <CopyText k="inspect.copy.value" />
-                    </span>
-                    <span className={styles.sourcePath}>{copyValue}</span>
-                  </li>
-                </ul>
+                      <span className={styles.sourcePath}>{`copy.json › ${copyKey}`}</span>
+                      {copyVia && (
+                        <span className={styles.sourceVia}>
+                          <CopyText k="inspect.source.via" /> {copyVia}
+                        </span>
+                      )}
+                    </li>
+                    <li className={styles.sourceRow}>
+                      <span className={styles.sourceKind}>
+                        <CopyText k="inspect.copy.slot" />
+                      </span>
+                      <span className={styles.sourcePath}>{copySlot.toUpperCase()}</span>
+                    </li>
+                    <li className={styles.sourceRow}>
+                      <span className={styles.sourceKind}>
+                        <CopyText k="inspect.copy.value" />
+                      </span>
+                      <span className={styles.sourcePath}>{copyValue}</span>
+                    </li>
+                  </ul>
 
-                {copy.phase === 'checking' && (
-                  <p className={styles.note}>
-                    <CopyText k="inspect.edit.checking" />
-                  </p>
-                )}
+                  {copy.phase === 'checking' && (
+                    <p className={styles.note}>
+                      <CopyText k="inspect.edit.checking" />
+                    </p>
+                  )}
 
-                {copy.phase === 'unconfigured' && (
-                  <p className={styles.editNotice}>
-                    <CopyText k="inspect.edit.unconfigured" />
-                  </p>
-                )}
+                  {copy.phase === 'unconfigured' && (
+                    <p className={styles.editNotice}>
+                      <CopyText k="inspect.edit.unconfigured" />
+                    </p>
+                  )}
 
-                {(copy.phase === 'locked' || copy.phase === 'armed') && (
-                  <>
-                    <button
-                      type="button"
-                      className={`${styles.resetAll} ${styles.copyEdit}`}
-                      /* while the caret is in the node, the press that
-                         reaches this button would blur it first and the
-                         label would have flipped back to EDIT under the
-                         pointer. Keeping the focus keeps the button the
-                         one the visitor aimed at. */
-                      onMouseDown={(e) => {
-                        if (editingHere) e.preventDefault()
-                      }}
-                      onClick={() => {
-                        if (editingHere) copy.endEdit()
-                        else if (copy.phase === 'armed' && copyHost) copy.beginEdit(copyHost)
-                        else setGate({ for: 'copy' })
-                      }}
-                    >
-                      <CopyText k={editingHere ? 'inspect.copy.done' : 'inspect.copy.edit'} />
-                    </button>
+                  {(copy.phase === 'locked' || copy.phase === 'armed') && (
+                    <>
+                      <button
+                        type="button"
+                        className={`${styles.resetAll} ${styles.copyEdit}`}
+                        /* while the caret is in the node, the press that
+                           reaches this button would blur it first and the
+                           label would have flipped back to EDIT under the
+                           pointer. Keeping the focus keeps the button the
+                           one the visitor aimed at. */
+                        onMouseDown={(e) => {
+                          if (editingHere) e.preventDefault()
+                        }}
+                        onClick={() => {
+                          if (editingHere) copy.endEdit()
+                          else if (copy.phase === 'armed' && copyHost) copy.beginEdit(copyHost)
+                          else setGate({ for: 'copy' })
+                        }}
+                      >
+                        <CopyText k={editingHere ? 'inspect.copy.done' : 'inspect.copy.edit'} />
+                      </button>
 
-                    {gate?.for === 'copy' && keyGate()}
-
-                    {editingHere && (
-                      <p className={styles.note}>
-                        <CopyText k="inspect.edit.hint" />
-                      </p>
-                    )}
-                  </>
-                )}
+                      {gate?.for === 'copy' && keyGate()}
+                    </>
+                  )}
+                </div>
               </section>
             )}
 
             {/* ---- TOKENS ---- */}
             <section className={styles.section}>
-              <h3 className={styles.head}>
-                <CopyText k="inspect.section.tokens" />
-              </h3>
-              {report.tokens.length === 0 ? (
-                <p className={styles.note}>
-                  <CopyText k="inspect.inherited" />
-                </p>
-              ) : (
-                <ul className={styles.rows}>
-                  {report.tokens.map((row) => (
-                    <li key={row.property} className={styles.tokenRow}>
-                      <span className={styles.prop}>{row.property}</span>
-                      <ul className={styles.vars}>
-                        {row.resolved.map((r) => {
-                          // springs are core BY DESIGN — motion has no
-                          // semantic tier, so they are not a violation
-                          const rawCore = r.tier === 'core' && !r.varName.startsWith('--spring-')
-                          // a semantic role that resolves to a colour is
-                          // the one thing here that can be re-cast
-                          const tunable = r.tier === 'semantic' && !!r.rgb
-                          const key = `${row.property}|${r.varName}`
-                          const open = openVar === key
-                          const held = isNudged(r.varName)
-                          return (
-                            <li
-                              key={r.varName}
-                              className={styles.var}
-                              data-warn={rawCore || undefined}
-                              data-held={held || undefined}
-                            >
-                              <span className={styles.varName}>{r.varName}</span>
-                              <span className={styles.tier} data-tier={r.tier}>
-                                {r.tier.toUpperCase()}
-                              </span>
-                              {r.hex &&
-                                (tunable ? (
-                                  <button
-                                    type="button"
-                                    className={styles.swatchBtn}
-                                    style={{ background: r.hex }}
-                                    aria-expanded={open}
-                                    aria-label={`${t('inspect.nudge', skin)} ${r.varName}`}
-                                    onClick={() => setOpenVar(open ? null : key)}
-                                  />
-                                ) : (
-                                  <span
-                                    className={styles.swatch}
-                                    style={{ background: r.hex }}
-                                    aria-hidden="true"
-                                  />
-                                ))}
-                              <span className={styles.value}>{r.value || '—'}</span>
-                              {rawCore && (
-                                <span className={styles.warnText}>
-                                  <CopyText k="inspect.corewarn" />
+              <div className={styles.bar}>
+                <h3 className={styles.head}>
+                  <CopyText k="inspect.section.tokens" />
+                </h3>
+                <InfoTip k="inspect.tokens.note" />
+              </div>
+              <div className={styles.sectionBody}>
+                {/* a finding about the pick, not a footnote about the tool:
+                    it stays on the panel where the rows would have been */}
+                {report.tokens.length === 0 ? (
+                  <p className={styles.note}>
+                    <CopyText k="inspect.inherited" />
+                  </p>
+                ) : (
+                  <ul className={styles.rows}>
+                    {report.tokens.map((row) => (
+                      <li key={row.property} className={styles.tokenRow}>
+                        <span className={styles.prop}>{row.property}</span>
+                        <ul className={styles.vars}>
+                          {row.resolved.map((r) => {
+                            // springs are core BY DESIGN — motion has no
+                            // semantic tier, so they are not a violation
+                            const rawCore = r.tier === 'core' && !r.varName.startsWith('--spring-')
+                            // a semantic role that resolves to a colour is
+                            // the one thing here that can be re-cast
+                            const tunable = r.tier === 'semantic' && !!r.rgb
+                            const key = `${row.property}|${r.varName}`
+                            const open = openVar === key
+                            const held = isNudged(r.varName)
+                            return (
+                              <li
+                                key={r.varName}
+                                className={styles.var}
+                                data-warn={rawCore || undefined}
+                                data-held={held || undefined}
+                              >
+                                <span className={styles.varName}>{r.varName}</span>
+                                <span className={styles.tier} data-tier={r.tier}>
+                                  {r.tier.toUpperCase()}
                                 </span>
-                              )}
+                                {r.hex &&
+                                  (tunable ? (
+                                    <button
+                                      type="button"
+                                      className={styles.swatchBtn}
+                                      style={{ background: r.hex }}
+                                      aria-expanded={open}
+                                      aria-label={`${t('inspect.nudge', skin)} ${r.varName}`}
+                                      onClick={() => setOpenVar(open ? null : key)}
+                                    />
+                                  ) : (
+                                    <span
+                                      className={styles.swatch}
+                                      style={{ background: r.hex }}
+                                      aria-hidden="true"
+                                    />
+                                  ))}
+                                <span className={styles.value}>{r.value || '—'}</span>
+                                {rawCore && (
+                                  <span className={styles.warnText}>
+                                    <CopyText k="inspect.corewarn" />
+                                  </span>
+                                )}
 
-                              {open && (
-                                <div
-                                  className={styles.palette}
-                                  role="group"
-                                  aria-label={`${t('inspect.nudge', skin)} ${r.varName}`}
-                                >
-                                  {CANDIDATES.map((c) => {
-                                    const would = wouldGrade(c.hex, row.property, report.colors)
-                                    return (
+                                {open && (
+                                  <div
+                                    className={styles.palette}
+                                    role="group"
+                                    aria-label={`${t('inspect.nudge', skin)} ${r.varName}`}
+                                  >
+                                    {CANDIDATES.map((c) => {
+                                      const would = wouldGrade(c.hex, row.property, report.colors)
+                                      return (
+                                        <button
+                                          key={c.token}
+                                          type="button"
+                                          className={styles.candidate}
+                                          data-fail={would?.fails || undefined}
+                                          onClick={() => {
+                                            // the verdict the row is showing
+                                            // rides along — SAVE refuses on it
+                                            nudge(r.varName, c, would)
+                                            after()
+                                          }}
+                                        >
+                                          <span
+                                            className={styles.swatch}
+                                            style={{ background: c.hex }}
+                                            aria-hidden="true"
+                                          />
+                                          <span className={styles.candidateName}>{c.token}</span>
+                                          {would && (
+                                            <span className={styles.candidateGrade}>
+                                              {would.grade}
+                                            </span>
+                                          )}
+                                        </button>
+                                      )
+                                    })}
+                                    {held && (
                                       <button
-                                        key={c.token}
                                         type="button"
                                         className={styles.candidate}
-                                        data-fail={would?.fails || undefined}
+                                        data-reset=""
                                         onClick={() => {
-                                          // the verdict the row is showing
-                                          // rides along — SAVE refuses on it
-                                          nudge(r.varName, c, would)
+                                          reset(r.varName)
                                           after()
                                         }}
                                       >
-                                        <span
-                                          className={styles.swatch}
-                                          style={{ background: c.hex }}
-                                          aria-hidden="true"
-                                        />
-                                        <span className={styles.candidateName}>{c.token}</span>
-                                        {would && (
-                                          <span className={styles.candidateGrade}>
-                                            {would.grade}
-                                          </span>
-                                        )}
+                                        <CopyText k="inspect.revert" />
                                       </button>
-                                    )
-                                  })}
-                                  {held && (
-                                    <button
-                                      type="button"
-                                      className={styles.candidate}
-                                      data-reset=""
-                                      onClick={() => {
-                                        reset(r.varName)
-                                        after()
-                                      }}
-                                    >
-                                      <CopyText k="inspect.revert" />
-                                    </button>
-                                  )}
-                                </div>
-                              )}
-                            </li>
-                          )
-                        })}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                                    )}
+                                  </div>
+                                )}
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </section>
 
             {/* ---- CONTRAST ---- */}
             <section className={styles.section}>
-              <h3 className={styles.head}>
-                <CopyText k="inspect.section.contrast" />
-              </h3>
-              <div className={styles.contrast}>
-                <span className={styles.pair}>
-                  {report.colors.fgHex && (
-                    <span
-                      className={styles.swatch}
-                      style={{ background: report.colors.fgHex }}
-                      aria-hidden="true"
-                    />
-                  )}
-                  <span className={styles.value}>{report.colors.fgHex ?? '—'}</span>
-                </span>
-                <CopyText k="inspect.on" className={styles.on} />
-                <span className={styles.pair}>
-                  {report.colors.bgHex && (
-                    <span
-                      className={styles.swatch}
-                      style={{ background: report.colors.bgHex }}
-                      aria-hidden="true"
-                    />
-                  )}
-                  <span className={styles.value}>{report.colors.bgHex ?? '—'}</span>
-                </span>
-                {report.colors.ratio !== null && (
-                  <span className={styles.ratio}>{report.colors.ratio.toFixed(2)}:1</span>
-                )}
-                {report.colors.grade && (
-                  <span
-                    className={styles.gradeChip}
-                    data-fail={report.colors.grade === 'FAIL' || undefined}
-                  >
-                    {report.colors.grade}
+              <div className={styles.bar}>
+                <h3 className={styles.head}>
+                  <CopyText k="inspect.section.contrast" />
+                </h3>
+                <InfoTip k="inspect.contrast.note" />
+              </div>
+              <div className={styles.sectionBody}>
+                <div className={styles.contrast}>
+                  <span className={styles.pair}>
+                    {report.colors.fgHex && (
+                      <span
+                        className={styles.swatch}
+                        style={{ background: report.colors.fgHex }}
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span className={styles.value}>{report.colors.fgHex ?? '—'}</span>
                   </span>
-                )}
+                  <CopyText k="inspect.on" className={styles.on} />
+                  <span className={styles.pair}>
+                    {report.colors.bgHex && (
+                      <span
+                        className={styles.swatch}
+                        style={{ background: report.colors.bgHex }}
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span className={styles.value}>{report.colors.bgHex ?? '—'}</span>
+                  </span>
+                  {report.colors.ratio !== null && (
+                    <span className={styles.ratio}>{report.colors.ratio.toFixed(2)}:1</span>
+                  )}
+                  {report.colors.grade && (
+                    <span
+                      className={styles.gradeChip}
+                      data-fail={report.colors.grade === 'FAIL' || undefined}
+                    >
+                      {report.colors.grade}
+                    </span>
+                  )}
+              </div>
               </div>
             </section>
 
             {/* ---- TYPE ---- */}
             <section className={styles.section}>
-              <h3 className={styles.head}>
-                <CopyText k="inspect.section.type" />
-              </h3>
-              <dl className={styles.facts}>
-                <dt>family</dt>
-                <dd>{report.type.family}</dd>
-                <dt>size</dt>
-                <dd>{report.type.size}</dd>
-                <dt>weight</dt>
-                <dd>{report.type.weight}</dd>
-                <dt>tracking</dt>
-                <dd>{report.type.tracking}</dd>
-                <dt>leading</dt>
-                <dd>{report.type.leading}</dd>
-              </dl>
-              {report.typeVars.length > 0 && (
-                <div className={styles.chips}>
-                  {report.typeVars.map((name) => (
-                    <span key={name} className={styles.roleChip}>
-                      {name}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <div className={styles.bar}>
+                <h3 className={styles.head}>
+                  <CopyText k="inspect.section.type" />
+                </h3>
+                <InfoTip k="inspect.type.note" />
+              </div>
+              <div className={styles.sectionBody}>
+                <dl className={styles.facts}>
+                  <dt>family</dt>
+                  <dd>{report.type.family}</dd>
+                  <dt>size</dt>
+                  <dd>{report.type.size}</dd>
+                  <dt>weight</dt>
+                  <dd>{report.type.weight}</dd>
+                  <dt>tracking</dt>
+                  <dd>{report.type.tracking}</dd>
+                  <dt>leading</dt>
+                  <dd>{report.type.leading}</dd>
+                </dl>
+                {report.typeVars.length > 0 && (
+                  <div className={styles.chips}>
+                    {report.typeVars.map((name) => (
+                      <span key={name} className={styles.roleChip}>
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </section>
 
             {/* ---- MOTION ---- */}
             <section className={styles.section}>
-              <h3 className={styles.head}>
-                <CopyText k="inspect.section.motion" />
-              </h3>
-              {report.spring && springKey ? (
-                <>
-                  <p className={styles.springLine}>
-                    <span className={styles.springName}>{report.spring.name.toUpperCase()}</span>
-                    <span className={styles.value}>
-                      stiffness {report.spring.stiffness} · damping {report.spring.damping}
-                      {report.spring.mass ? ` · mass ${report.spring.mass}` : ''}
-                    </span>
+              <div className={styles.bar}>
+                <h3 className={styles.head}>
+                  <CopyText k="inspect.section.motion" />
+                </h3>
+                <InfoTip k="inspect.motion.note" />
+              </div>
+              <div className={styles.sectionBody}>
+                {report.spring && springKey ? (
+                  <>
+                    <p className={styles.springLine}>
+                      <span className={styles.springName}>{report.spring.name.toUpperCase()}</span>
+                      <span className={styles.value}>
+                        stiffness {report.spring.stiffness} · damping {report.spring.damping}
+                        {report.spring.mass ? ` · mass ${report.spring.mass}` : ''}
+                      </span>
+                    </p>
+                    <CopyText k={springKey} as="p" className={styles.note} />
+                    {report.spring.inherited && (
+                      <CopyText k="inspect.springvia" as="p" className={styles.note} />
+                    )}
+                  </>
+                ) : (
+                  <p className={styles.note}>
+                    <CopyText k="inspect.nospring" />
                   </p>
-                  <CopyText k={springKey} as="p" className={styles.note} />
-                  {report.spring.inherited && (
-                    <CopyText k="inspect.springvia" as="p" className={styles.note} />
-                  )}
-                </>
-              ) : (
-                <p className={styles.note}>
-                  <CopyText k="inspect.nospring" />
-                </p>
-              )}
+                )}
+              </div>
             </section>
           </div>
         )}

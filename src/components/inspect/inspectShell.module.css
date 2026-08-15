@@ -266,9 +266,14 @@
      voice rather than in machine mono.
    · HEADS, mono at 13px — .panelHead. Furniture labels: which dock am I
      looking at. Ink, not muted, so they outrank everything under them.
-   · DATA, mono at 11px and below — every reading, unchanged, plus the
-     section heads at 9px muted and tracked wide, which is what keeps
-     PATH / TOKENS / CONTRAST reading as dividers rather than as titles.
+   · DATA, mono at 11px and below — every reading, unchanged.
+
+   The section heads used to be a fourth voice inside DATA: 9px, muted,
+   tracked wide, no ground. Jake read that as muddy, and he was right, so
+   they left the ramp and became BARS instead (see .bar). Same mono face,
+   same wide tracking, stepped up to 11px in ink on a raised fill: the
+   scale barely moves and the treatment does all the work, which is what
+   keeps them under the 13px panel head rather than competing with it.
 
    Sizes come from the ramp per property, the way the rest of this file
    already composes them; the only call-site override is --weight-bold on
@@ -289,15 +294,24 @@
   border-bottom: var(--border-width-default) solid var(--border);
 }
 
+/* No padding of its own any more. The inspector's section bars run edge to
+   edge of the dock, which they cannot do from inside a padded box, so the
+   inset moved down one level: every block that is not a bar carries it
+   (.sectionBody, .ident, .emptyState, and the two banners' margins). The
+   left dock asks for the old inset back through .treeBody. */
 .panelBody {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--spacing-component-sm);
+  padding: 0;
 }
 
 /* ================= LAYERS (left) ================= */
+
+.treeBody {
+  padding: var(--spacing-component-sm);
+}
 
 .tree {
   display: flex;
@@ -384,6 +398,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-component-sm);
+  padding: var(--spacing-component-md);
 }
 
 .empty,
@@ -415,7 +430,9 @@
 .preview {
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--spacing-component-md);
+  /* the body stopped carrying an inset (see .panelBody), so the two
+     banners hold themselves off the dock's edges */
+  margin: var(--spacing-component-md);
   padding: var(--spacing-component-sm);
   border: var(--border-width-default) solid var(--status-warning-base);
   background: color-mix(in srgb, var(--status-warning-base) 12%, transparent);
@@ -577,7 +594,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--spacing-component-xs);
-  padding-bottom: var(--spacing-component-md);
+  padding: var(--spacing-component-md);
   border-bottom: var(--border-width-default) solid var(--content);
 }
 
@@ -630,7 +647,7 @@
 }
 
 .reskin {
-  margin: var(--spacing-component-sm) 0 0;
+  margin: var(--spacing-component-sm) var(--spacing-component-md) 0;
   font-family: var(--type-micro-family);
   font-size: var(--type-micro-size);
   font-weight: var(--type-micro-weight);
@@ -640,27 +657,146 @@
   color: var(--accent-expressive-text);
 }
 
-/* the tiers need room to be tiers: a head that is only 4px clear of the
-   rows above it is a row */
+/* ---- the section bars ----
+
+   Jake, round 3: "once we get into the middle it still feels muddy in
+   scale. PATH, SOURCE, COPY, TOKENS, CONTRAST, TYPE, MOTION could be
+   bigger or treated differently. Maybe a background fill across those that
+   tells you when the next section starts, one step darker than surface."
+
+   That is what this is. The head used to be 9px muted text with nothing
+   under it, floating in the same column as the readings, so seven sections
+   looked like one long list with faint labels in it. It is a bar now:
+   --surface-raised (the panel body is --surface, and raised is exactly one
+   step darker in every skin and mode, so no token had to be minted), a
+   hairline rule under it in --border, and ink instead of muted.
+
+   Full bleed, edge to edge of the dock, which is the whole point: a fill
+   that stops short of the edges reads as a chip, and a chip does not tell
+   you a new section started. The dock's inset moved into .sectionBody so
+   this could span (see .panelBody).
+
+   Size: the label STEP, 11px, up one from the old caption step. Micro
+   keeps the face, the bold weight and the wide tracking, which is what
+   holds it apart from the 11px mono readings underneath at the same size.
+   Three tiers, still legible as three: 18px display crown, 13px bold
+   panel head on the same raised fill with the heavier rule, 11px tracked
+   caps here. */
 .section {
-  margin-top: var(--spacing-component-xl);
+  margin-top: var(--spacing-component-md);
 }
 
-/* SECTION HEADS. Micro's face, weight and tracking at the caption STEP
-   (9px): one notch above the 8px chips that share the micro rule, so the
-   dividers separate from the data they sit in, and well under both the
-   13px panel head above and the 11px readings below. Muted — there is no
-   secondary content role in this token set, and muted is the dim ink the
-   rest of the panel already uses for anything that is not a value. */
+.bar {
+  /* the tip below hangs off this, and it spans the bar rather than the
+     button, so it can never be clipped by the dock's edge */
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  padding: var(--spacing-component-xs) var(--spacing-component-md);
+  background: var(--surface-raised);
+  border-bottom: var(--border-width-subtle) solid var(--border);
+}
+
 .head {
-  margin: 0 0 var(--spacing-component-sm);
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
   font-family: var(--type-micro-family);
-  font-size: var(--type-caption-size);
+  font-size: var(--type-label-size);
   font-weight: var(--type-micro-weight);
   letter-spacing: var(--type-micro-tracking);
-  line-height: var(--type-micro-leading);
+  line-height: var(--type-label-leading);
   text-transform: uppercase;
+  color: var(--content);
+}
+
+/* Bar to content, then content to the next bar: 12 above, 12 below, and
+   another 12 of clear surface before the next fill starts. A section's
+   readings sit nearer their own head than the next one, which is the
+   whole job of the rhythm. */
+.sectionBody {
+  padding: var(--spacing-component-md);
+}
+
+/* ---- the info affordance ----
+   One glyph, one behaviour, on every bar that carries a note. Hover shows
+   it, focus shows it, Escape puts it away (InfoTip.tsx). */
+.tipBtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-component-lg);
+  height: var(--spacing-component-lg);
+  padding: 0;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  line-height: var(--type-micro-leading);
   color: var(--content-muted);
+  background: none;
+  border: var(--border-width-default) solid var(--border);
+  border-radius: 0;
+  cursor: help;
+}
+
+.tipBtn:hover {
+  color: var(--content);
+  border-color: var(--content);
+}
+
+.tipBtn:focus-visible {
+  color: var(--content);
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+  color: var(--content);
+  background: var(--surface-raised);
+  /* Closed, and it stays in the DOM closed: the button describes itself by
+     this node, so display:none and visibility:hidden would both take the
+     sentence away from a screen reader. A box with no height and no border
+     also cannot add phantom scroll to the bottom of the dock, which an
+     absolutely positioned one at full height would. */
+  height: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(calc(var(--spacing-component-xs) * -1));
+  transition:
+    opacity var(--duration-fade) ease-out,
+    transform var(--duration-fade) ease-out;
+}
+
+.tip[data-open] {
+  height: auto;
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
+  border: var(--border-width-default) solid var(--border);
+  overflow: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tip {
+    transition: none;
+    transform: none;
+  }
 }
 
 /* ---- PATH: the chain from the top, one row per level ----
@@ -766,16 +902,6 @@
 }
 
 .sourceVia {
-  color: var(--content-muted);
-}
-
-.sourceNote {
-  margin: var(--spacing-component-sm) 0 0;
-  font-family: var(--type-caption-family);
-  font-size: var(--type-caption-size);
-  font-weight: var(--type-caption-weight);
-  letter-spacing: var(--type-caption-tracking);
-  line-height: var(--type-caption-leading);
   color: var(--content-muted);
 }
 
@@ -1055,7 +1181,8 @@
    SYS-99 came in from its own program window, where it drew a floating
    SAVE.CHANGES panel over the desktop, and then from a third dock of its
    own. It is a block on the reading now, so it borrows the inspector's
-   furniture wholesale: .section and .head for the block, .sourceRows /
+   furniture wholesale: .section, .bar, .head and .sectionBody for the
+   block, .sourceRows /
    .sourceRow / .sourceKind / .sourcePath for the key, slot and value,
    .keyRow for the gate, .resetAll for every secondary button, .saveNote
    for a status line, .tokenRow for a diff row. What is below is only what
@@ -1069,13 +1196,21 @@
    rewrite is a thing you meant, a live token override is a thing you are
    only trying on. */
 
+/* The card holds no padding of its own now: PENDING wears the same bar the
+   inspector's sections do, and a bar inset from the card's border by a
+   padding would read as a chip rather than a head. The inset moved to
+   .pendingBody, exactly as it did for the sections. */
 .pending {
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--spacing-component-md);
-  padding: var(--spacing-component-sm);
+  margin: var(--spacing-component-md);
   border: var(--border-width-default) solid var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.pendingBody {
+  display: flex;
+  flex-direction: column;
 }
 
 /* the gate: a stacked block so a refused key answers under the field it
@@ -1109,8 +1244,15 @@
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
+/* the count rides the bar beside the label rather than floating inside the
+   heading, where it would have been read out as part of the heading's name */
 .editCount {
-  float: right;
+  flex: none;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
   color: var(--content-muted);
 }
 

@@ -429,7 +429,10 @@ export function LayersPanel({
       <h2 className={styles.panelHead}>
         <CopyText k="inspect.panel.layers" />
       </h2>
-      <div className={styles.panelBody}>
+      {/* the tree asks for the inset back: the inspector's body gave up its
+          padding so its section bars could run edge to edge, and the two
+          docks share the class (inspectShell.module.css) */}
+      <div className={`${styles.panelBody} ${styles.treeBody}`}>
         <div
           ref={treeRef}
           role="tree"
