@@ -96,11 +96,22 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
 4. **End of session — always**: (a) session note → vault
    `Calendar/Notes/YYYY-MM-DD sNN.md` — before claiming sNN, list the
    Notes folder and take today's highest N + 1 (concurrent sessions
-   race on the number); (b) update touched vault efforts/tasks AND the
-   **Current state box** on `Atlas/Maps/LUNDE OS Map.md` (latest-session
-   links, debts, cleanup owed — pointers to session notes, not re-told
-   narrative); commit the vault. Prod SHAs are never written down
-   anywhere — prod = `origin/main` HEAD by definition; (c) repo
+   race on the number); (b) **every session belongs to an effort** —
+   the feature page in `Efforts/On|Ongoing|Simmering|Sleeping/<emoji>
+   Name (E).md`. Find the one the work served; if the session started a
+   new feature, mint the page in `Efforts/On` (Jake's ruling 2026-08-14,
+   s64) from `x/Templates/Template, Properties, Effort (Kit).md` with
+   `up: [[LUNDE OS Map]]`, a `## Sessions` ledger, `## Shipped`,
+   `## Tasks`, and add it to the Map's Efforts box. Link both ways: the
+   session note carries `effort:` in frontmatter + a line under the
+   title; the effort's `## Sessions` gets `- [[YYYY-MM-DD sNN|sNN — what
+   happened]]`. Debts Jake dictates become task notes in
+   `Efforts/Notes/<Name>/` (`up:` the effort, `status: scoped`) — never
+   mint tasks he didn't ask for. Then update touched efforts/tasks AND
+   the **Current state box** on `Atlas/Maps/LUNDE OS Map.md`
+   (latest-session links, debts, cleanup owed — pointers to session
+   notes, not re-told narrative); commit the vault. Prod SHAs are never
+   written down anywhere — prod = `origin/main` HEAD by definition; (c) repo
    `HANDOFF.md` holds near-static code-adjacent invariants ONLY
    (checkout/build law, guardrails, hooks) and is the sole handoff
    cloud sessions can read — touch it only when an invariant changes,
