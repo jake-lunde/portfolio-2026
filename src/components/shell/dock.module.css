@@ -3,9 +3,9 @@
    program the desktop grid no longer carries (see Dock.tsx /
    DesktopIcons.tsx for the split). Fixed to the viewport rather than
    the desktop's own inset, so it holds its seat even while
-   INSPECT.MODE compresses the canvas — moot in practice, since the
-   rail stands down entirely while that tool is up (see below), same
-   as the wanderer. */
+   INSPECT.MODE compresses the canvas. It keeps that seat while the
+   tool is up: the rail is desktop furniture, and INSPECT inspects
+   furniture. It only re-centers over the narrower canvas (see below). */
 
 /* CONTENT-WIDTH (round 3 — Jake reversed round 2's full-width call): the
    strip contains its tiles rather than running the whole floor. Windows
@@ -43,12 +43,20 @@
   box-shadow: none;
 }
 
-/* INSPECT.MODE turns the desktop into the tool's own canvas — the same
-   furniture rule the wanderer follows (shell.module.css): the rail steps
-   aside rather than floating over docked panels it has no relationship
-   to. */
+/* INSPECT.MODE turns the desktop into the tool's own canvas, and this
+   rail is part of what the canvas is made of. It used to stand down
+   entirely, which meant the one tool built to explain the desktop
+   couldn't be pointed at nine of its programs.
+
+   So it stays, and moves: the canvas loses --inspect-left off its left
+   edge and --inspect-right off its right, so a rail centered on the
+   VIEWPORT sits off-center over the canvas and runs under the right
+   dock. Shifting by half the difference between the two insets puts it
+   back on the canvas's own middle. Both properties are declared on the
+   same body flag this rule is gated on (globals.css), and the fallbacks
+   name the same numbers every other consumer carries. */
 :global(body[data-inspectmode='on']) .rail {
-  display: none;
+  left: calc(50% + (var(--inspect-left, 244px) - var(--inspect-right, 304px)) / 2);
 }
 
 /* uniform tile: icon over a permanent caption, poolsuite-style — labels
