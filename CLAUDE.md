@@ -94,9 +94,11 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
    context). Fable turns = orchestration/taste/review only; execution runs
    Opus-led. Batch asks. (Economics: CREW.md §4.)
 4. **End of session — always**: (a) session note → vault
-   `Calendar/Notes/YYYY-MM-DD sNN.md` — before claiming sNN, list the
-   Notes folder and take today's highest N + 1 (concurrent sessions
-   race on the number); (b) **every session belongs to an effort** —
+   `Calendar/Notes/YYYY-MM-DD sNN.md` — claim sNN at session START with
+   `node scripts/session-claim.mjs [--effort "<page>"] [--title "…"]`
+   (atomic; stubs the note; never list-and-add-one — concurrent sessions
+   raced on the number). At end, replace the stub's "in progress" line
+   with the narrative; (b) **every session belongs to an effort** —
    the feature page in `Efforts/On|Ongoing|Simmering|Sleeping/<emoji>
    Name (E).md`. Find the one the work served; if the session started a
    new feature, mint the page in `Efforts/On` (Jake's ruling 2026-08-14,
