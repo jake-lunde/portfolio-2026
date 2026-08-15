@@ -5,7 +5,7 @@ import { useSettings } from '@/store/settings'
 import { t } from '@/content/copy'
 import { CopyText } from '@/content/CopyText'
 import { clearEditKey, readEditKey, verifyEditKey } from '@/lib/editKey'
-import type { Inspection } from '@/lib/inspect'
+import type { ChainEntry, Inspection } from '@/lib/inspect'
 import { themeFor } from '@/lib/tokenEdit'
 import {
   CANDIDATES,
@@ -51,6 +51,69 @@ import styles from './inspectShell.module.css'
 const KEY_ID = 'inspect-save-key'
 const NOTE_ID = 'inspect-save-note'
 
+/* ---- PATH ----
+
+   Jake's complaint, verbatim: pick a line of text inside something on the
+   home page and there is no breakdown of the layers from the top. The
+   chain was already being computed for every reading (lib/inspect.ts) and
+   nothing rendered it — the left dock shows where a thing sits in the
+   desktop, but only once you have found it there, and a pick that lands
+   six levels inside a window told you nothing about the six.
+
+   So: the whole chain, top-down, one row per level, every ancestor a
+   button that re-picks it. The reading order is the DOM's own, which is
+   the opposite of what the chain arrives in.
+
+   The one judgement call is what to leave out. labelFor() gives a bare
+   tag name to anything with no copy id, no module class and no window id
+   — an anonymous wrapper, and a column of "div / div / div" is noise. But
+   silently dropping them makes the path LIE about how deep a thing sits,
+   so a run of them collapses into one dimmed step carrying its count
+   instead. The pick's own row is always drawn, named or not: it is the
+   terminus and it is the thing being reported on. */
+
+const PATH_INDENT = 8
+const PATH_INDENT_MAX = 10
+
+type PathRow =
+  | { kind: 'node'; el: HTMLElement; label: string; depth: number; here: boolean }
+  /** `count` anonymous wrappers, folded into one step */
+  | { kind: 'gap'; count: number; depth: number }
+
+function pathRows(chain: ChainEntry[]): PathRow[] {
+  const top = chain.slice().reverse()
+  const out: PathRow[] = []
+  let depth = 0
+  let run = 0
+
+  top.forEach((entry, i) => {
+    const here = i === top.length - 1
+    const named = entry.label !== entry.el.tagName.toLowerCase()
+    if (!named && !here) {
+      run += 1
+      return
+    }
+    if (run > 0) {
+      out.push({ kind: 'gap', count: run, depth })
+      depth += 1
+      run = 0
+    }
+    out.push({ kind: 'node', el: entry.el, label: entry.label, depth, here })
+    depth += 1
+  })
+
+  return out
+}
+
+/** The indent is a depth counted at runtime, so it is an inline style —
+    the same exemption the tree rows take (see inspectShell.module.css).
+    Capped, or a deep pick walks the label off the dock. */
+function indentOf(depth: number) {
+  return {
+    paddingLeft: `calc(var(--spacing-component-xs) + ${Math.min(depth, PATH_INDENT_MAX) * PATH_INDENT}px)`,
+  }
+}
+
 type Save =
   /** nothing sent yet — the SAVE button is showing */
   | { k: 'idle' }
@@ -69,12 +132,15 @@ export function InspectorPanel({
   openVar,
   setOpenVar,
   onRefresh,
+  onPick,
 }: {
   report: Inspection | null
   /** which candidate palette is open, keyed `property|--var` */
   openVar: string | null
   setOpenVar: (v: string | null) => void
   onRefresh: () => void
+  /** PATH rows re-pick through the same flow the canvas and the tree use */
+  onPick: (el: HTMLElement) => void
 }) {
   const skin = useSettings((s) => s.skin)
   const theme = useSettings((s) => s.theme)
@@ -315,6 +381,68 @@ export function InspectorPanel({
               <p className={styles.reskin}>
                 <CopyText k="inspect.reskinned" />
               </p>
+            )}
+
+            {/* ---- PATH ---- */}
+            <section className={styles.section}>
+              <h3 className={styles.head}>
+                <CopyText k="inspect.section.path" />
+              </h3>
+              <ol className={styles.path}>
+                {pathRows(report.chain).map((row, i) =>
+                  row.kind === 'gap' ? (
+                    <li key={`gap${i}`} className={styles.pathStep} style={indentOf(row.depth)}>
+                      <span className={styles.pathGap}>
+                        {row.count > 1 ? `… (${row.count})` : '…'}
+                      </span>
+                    </li>
+                  ) : (
+                    <li key={`node${i}`} className={styles.pathStep} style={indentOf(row.depth)}>
+                      {row.here ? (
+                        // the terminus is the reading itself, so it is a
+                        // label rather than a control: re-picking what is
+                        // already picked is a button that does nothing
+                        <span className={styles.pathHere} aria-current="true">
+                          {row.label}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          className={styles.pathBtn}
+                          onClick={() => onPick(row.el)}
+                        >
+                          {row.label}
+                        </button>
+                      )}
+                    </li>
+                  ),
+                )}
+              </ol>
+            </section>
+
+            {/* ---- SOURCE ---- */}
+            {report.source.length > 0 && (
+              <section className={styles.section}>
+                <h3 className={styles.head}>
+                  <CopyText k="inspect.section.source" />
+                </h3>
+                <ul className={styles.sourceRows}>
+                  {report.source.map((row) => (
+                    <li key={`${row.kind}|${row.text}`} className={styles.sourceRow}>
+                      <span className={styles.sourceKind}>
+                        <CopyText k={`inspect.source.${row.kind}`} />
+                      </span>
+                      <span className={styles.sourcePath}>{row.text}</span>
+                      {row.via && (
+                        <span className={styles.sourceVia}>
+                          <CopyText k="inspect.source.via" /> {row.via}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <CopyText k="inspect.source.note" as="p" className={styles.sourceNote} />
+              </section>
             )}
 
             {/* ---- TOKENS ---- */}

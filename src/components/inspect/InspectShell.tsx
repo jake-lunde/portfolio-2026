@@ -158,8 +158,6 @@ function scrub(attr: string) {
 
 export default function InspectShell() {
   const skin = useSettings((s) => s.skin)
-  const theme = useSettings((s) => s.theme)
-  const toggleTheme = useSettings((s) => s.toggleTheme)
   const setOn = useInspect((s) => s.setOn)
   const tool = useInspect((s) => s.tool)
   const setTool = useInspect((s) => s.setTool)
@@ -559,24 +557,12 @@ export default function InspectShell() {
           </button>
         </div>
 
-        {/* The light switch, brought inside the tool. Flipping theme
-            mid-nudge is the whole AA-judging workflow — pick a role, cast
-            a candidate, flip, watch the grade re-judge — and the bar that
-            used to hold it is not on screen any more. Same store action
-            and the same accessible name as the menubar's, and shown on
-            the same terms: classic is the only skin with two modes. */}
-        {skin === 'classic' && (
-          <button
-            type="button"
-            className={styles.crownBtn}
-            data-inspect-theme=""
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
-          >
-            {theme === 'light' ? 'LGT' : 'DRK'}
-          </button>
-        )}
-
+        {/* A theme switch stood here, on the argument that flipping mid-nudge
+            is the AA-judging workflow. Jake's call: the tool inspects the
+            desktop it was opened on, and a second light switch inside the
+            crown was one control too many for a bar that only has to say
+            which tool is in the hand and how to put it down. The menubar's
+            switch is still the switch. */}
         <button
           type="button"
           className={styles.crownBtn}
@@ -614,6 +600,7 @@ export default function InspectShell() {
             openVar={openVar}
             setOpenVar={setOpenVar}
             onRefresh={refresh}
+            onPick={pick}
           />
         )}
       </aside>
