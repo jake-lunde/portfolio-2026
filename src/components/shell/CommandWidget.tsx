@@ -21,11 +21,22 @@ import styles from './commandWidget.module.css'
    button on the exact footprint sound/theme/palette share
    (shellStyles.menuGlyphBtn), the program's own 'nodes' icon, plus a
    status LED (Dock.tsx's own language: a 4px var(--accent) dot,
-   rendered only when lit, never just recoloured). Click toggles a
-   popover anchored under the button; the popover's CONTENT below —
-   state, CAST, leading edge, way in — is the same chip this file drew
-   before the move, re-homed rather than redesigned. Data flow and
-   polling are untouched; only where it renders and how it opens moved.
+   rendered only when lit, never just recoloured). The popover's
+   CONTENT below — state, CAST, leading edge, way in — is the same chip
+   this file drew before the move, re-homed rather than redesigned. Data
+   flow and polling are untouched; only where it renders and how it
+   opens moved.
+
+   s66, Jake's rule for how it opens ("right now, the interaction is a
+   little funky"): HOVER reveals, CLICK escalates. Resting the pointer
+   on the glyph brings the mini up under it; clicking the glyph OR the
+   mini opens the full deck. So the mini is a hover card, never a
+   toggle, and there is no click that only shows the mini. Focus follows
+   the same rule for the keyboard (focusing the glyph reveals, Tab walks
+   into the mini, blur out closes). Touch has no hover, so a tap on the
+   glyph goes straight to the deck. Hover-out closes on a short grace
+   timer, since the pointer has to cross the 5px gap between glyph and
+   card and a raw pointerleave would slam the door on the way down.
 
    One row, one target, four things in it: the state, the CAST (Jake's
    monogram at the head of the line, then the five units, the one named
@@ -47,6 +58,11 @@ import styles from './commandWidget.module.css'
 
    The feed only ever ages the chip *downwards*: if it is empty, stale or
    unreachable the popover still renders and still opens the deck. */
+
+/* How long the mini survives after the pointer leaves glyph + card. Long
+   enough to cross the gap between them on a diagonal, short enough that
+   the card does not linger over the desktop once you have moved on. */
+const HOVER_GRACE_MS = 220
 
 type Ev = {
   t: number
@@ -92,9 +108,31 @@ export function CommandWidget() {
   const [updated, setUpdated] = useState(0)
   const [live, setLive] = useState(false)
   // the popover — new in round 4, everything above is the pre-existing
-  // poll/data-flow, untouched
+  // poll/data-flow, untouched. Since s66 it is hover/focus-driven, not a
+  // click toggle (see the header comment).
   const [panelOpen, setPanelOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const closeTimer = useRef<number | null>(null)
+
+  const cancelClose = () => {
+    if (closeTimer.current !== null) {
+      window.clearTimeout(closeTimer.current)
+      closeTimer.current = null
+    }
+  }
+  const reveal = () => {
+    cancelClose()
+    setPanelOpen(true)
+  }
+  const conceal = (delay = HOVER_GRACE_MS) => {
+    cancelClose()
+    closeTimer.current = window.setTimeout(() => {
+      closeTimer.current = null
+      setPanelOpen(false)
+    }, delay)
+  }
+  // a pending close must not fire into an unmounted widget
+  useEffect(() => cancelClose, [])
 
   useEffect(() => {
     let dead = false
@@ -131,24 +169,22 @@ export function CommandWidget() {
   // the full program is open — no reason to keep the popover up too
   const deckOpen = windows.some((w) => w.id === 'command')
 
-  // close on outside pointer / Escape — the same recipe as SkinSwitch's flyout
+  // Escape closes the card. Outside-pointer closing went with the click
+  // toggle: hover-out already does that job.
   useEffect(() => {
     if (!panelOpen) return
-    const onDown = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setPanelOpen(false)
-    }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setPanelOpen(false)
+      if (e.key === 'Escape') {
+        cancelClose()
+        setPanelOpen(false)
+      }
     }
-    window.addEventListener('pointerdown', onDown)
     window.addEventListener('keydown', onKey)
-    return () => {
-      window.removeEventListener('pointerdown', onDown)
-      window.removeEventListener('keydown', onKey)
-    }
+    return () => window.removeEventListener('keydown', onKey)
   }, [panelOpen])
 
   const openDeck = () => {
+    cancelClose()
     setPanelOpen(false)
     sfx.open()
     openWindow('command')
@@ -161,16 +197,29 @@ export function CommandWidget() {
   const label = `${t('menubar.command', skin)}${live ? ' (live)' : ''}`
 
   return (
-    <div className={shellStyles.commandSwitch} ref={ref}>
+    <div
+      className={shellStyles.commandSwitch}
+      ref={ref}
+      /* hover reveals; touch has no hover, so a touch pointer skips the
+         reveal and its tap goes straight through the button to the deck */
+      onPointerEnter={(e) => {
+        if (e.pointerType !== 'touch') reveal()
+      }}
+      onPointerLeave={() => conceal()}
+      /* the keyboard's hover: focus anywhere inside (glyph or card)
+         reveals, focus leaving the whole switch closes at once */
+      onFocus={reveal}
+      onBlur={(e) => {
+        if (!ref.current?.contains(e.relatedTarget as Node | null)) {
+          cancelClose()
+          setPanelOpen(false)
+        }
+      }}
+    >
       <button
         type="button"
         className={`${shellStyles.menuBtn} ${shellStyles.menuGlyphBtn} ${shellStyles.commandBtn}`}
-        onClick={() => {
-          sfx.tap()
-          setPanelOpen((v) => !v)
-        }}
-        aria-haspopup="true"
-        aria-expanded={panelOpen}
+        onClick={openDeck}
         aria-label={label}
         title={label}
       >
