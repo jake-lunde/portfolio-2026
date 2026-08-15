@@ -6,17 +6,29 @@ import type { IconName } from './Icon'
    rather than stroke weight. Authored as ASCII grids so the art is
    reviewable in source:
 
-     '#' ink    (currentColor — follows theme like the line art does)
-     'o' paper  (var(--surface) — the white matte classic icons used to
-                 mask the desktop pattern behind them)
-     '.' transparent
+     '#' ink       (currentColor — follows theme like the line art does)
+     'o' interior  (compiles to nothing — the icons land on the surface
+                    with no matte, Jake's call in the motion pass; the
+                    mark stays because it keeps a closed shape readable
+                    and flood-fillable in source)
+     '.' outside
 
    Grids compile once at module load into rect-run <path> data. The line
    art in Icon.tsx stays the small-size tier (14px chrome) and the
    fallback for anything not yet drawn here; medieval variants are a
-   different skin's language and keep their woodcut strokes. */
+   different skin's language and keep their woodcut strokes.
 
-export type PixelGlyph = { ink: string; paper?: string }
+   MOTION. Bitmap art wants frame animation, not tweens: FRAMES (below
+   the grids) derives a short cycle from each base grid — the lid lifts,
+   the wheel ticks, the note bounces — as whole 32×32 frames, stepped on
+   hover by Icon.module.css (a sprite strip under a steps() transform).
+   Frames are generated (shift / stamp / fill) rather than hand-copied,
+   so the base grid stays the one place the drawing lives; where a frame
+   needs new pixels (a wink, a flash) they are stamped as small patches
+   next to the generator. */
+
+export type PixelGlyph = { ink: string; frames?: string[] }
+type Grid = string[]
 
 function runs(rows: string[], match: (ch: string) => boolean): string {
   let d = ''
@@ -34,10 +46,46 @@ function runs(rows: string[], match: (ch: string) => boolean): string {
   return d
 }
 
-function px(rows: string[]): PixelGlyph {
-  const paper = runs(rows, (c) => c === 'o')
-  return { ink: runs(rows, (c) => c === '#'), paper: paper || undefined }
+const ink = (rows: Grid) => runs(rows, (c) => c === '#')
+
+/* Grid ops for FRAMES. Every op returns a new grid; none touch the base. */
+const cells = (g: Grid) => g.map((r) => [...r])
+const join = (c: string[][]) => c.map((r) => r.join(''))
+type Region = [x0: number, y0: number, x1: number, y1: number]
+const ALL: Region = [0, 0, 31, 31]
+
+/** Move the cells inside `region` by (dx, dy). Cells that land outside
+    `bounds` (default: the grid) are dropped — that is how the suggestion
+    slips into its slot: the box lid is the bound. */
+function shift(g: Grid, dx: number, dy: number, region: Region = ALL, bounds: Region = ALL): Grid {
+  const c = cells(g)
+  const [x0, y0, x1, y1] = region
+  const [bx0, by0, bx1, by1] = bounds
+  const moved: [number, number, string][] = []
+  for (let y = y0; y <= y1; y++)
+    for (let x = x0; x <= x1; x++)
+      if (c[y][x] !== '.') {
+        moved.push([x + dx, y + dy, c[y][x]])
+        c[y][x] = '.'
+      }
+  for (const [x, y, ch] of moved)
+    if (x >= bx0 && x <= bx1 && y >= by0 && y <= by1 && x >= 0 && x < 32 && y >= 0 && y < 32) c[y][x] = ch
+  return join(c)
 }
+/** Set every cell of the rectangle to `ch` ('#' ink, 'o' clear). */
+function fill(g: Grid, x0: number, y0: number, x1: number, y1: number, ch = '#'): Grid {
+  const c = cells(g)
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) c[y][x] = ch
+  return join(c)
+}
+/** Stamp a small patch at (x, y): '#' ink, 'o' clear, ' ' leave alone. */
+function put(g: Grid, x: number, y: number, rows: string[]): Grid {
+  const c = cells(g)
+  rows.forEach((r, j) => [...r].forEach((ch, i) => (ch !== ' ' ? (c[y + j][x + i] = ch) : null)))
+  return join(c)
+}
+const dot = (g: Grid, x: number, y: number) => fill(g, x, y, x, y)
+const bounce = (g: Grid) => [g, shift(g, 0, -1), shift(g, 0, -2), shift(g, 0, -1)]
 
 const GRIDS: Partial<Record<IconName, string[]>> = {
   // README — the classic dog-eared sheet, text set as dash groups the way
@@ -76,37 +124,40 @@ const GRIDS: Partial<Record<IconName, string[]>> = {
     '................................',
     '................................',
   ],
-  // WORK — the font suitcase, monogrammed J instead of the foundry A.
+  // WORK — the machine itself: a compact Mac with a window and an arrow
+  // on its screen. The suitcase-with-brackets it replaces read as a
+  // toolbox; this is the designer at the computer, which is the work.
+  // Hover drags the window bigger (FRAMES.work).
   work: [
     '................................',
     '................................',
     '................................',
-    '................................',
-    '................................',
-    '................................',
-    '................................',
-    '.............######.............',
-    '............#......#............',
-    '............#......#............',
-    '............#......#............',
-    '....########################....',
-    '....#oooooooooooooooooooooo#....',
-    '....#oooooooooooooooooooooo#....',
-    '....#oooooooooooooooooooooo#....',
-    '....#oooooooooooooooooooooo#....',
-    '....########################....',
-    '....#oooooooooooooooooooooo#....',
-    '....#oooooooooo##oooooooooo#....',
-    '....#ooooo#ooo#oo#ooo#ooooo#....',
-    '....#oooo#oooo#oo#oooo#oooo#....',
-    '....#ooo#oooo#oooo#oooo#ooo#....',
-    '....#ooo#oooo######oooo#ooo#....',
-    '....#oooo#ooo#oooo#ooo#oooo#....',
-    '....#ooooo#oo#oooo#oo#ooooo#....',
-    '....#ooooooo###oo###ooooooo#....',
-    '....#oooooooooooooooooooooo#....',
-    '....#oooooooooooooooooooooo#....',
-    '....########################....',
+    '.....######################.....',
+    '.....#oooooooooooooooooooo#.....',
+    '.....#oooooooooooooooooooo#.....',
+    '.....#oo################oo#.....',
+    '.....#oo#oooooooooooooo#oo#.....',
+    '.....#oo#o######ooooooo#oo#.....',
+    '.....#oo#o#oooo#ooooooo#oo#.....',
+    '.....#oo#o#oooo#ooooooo#oo#.....',
+    '.....#oo#o######ooooooo#oo#.....',
+    '.....#oo#oooooo##oooooo#oo#.....',
+    '.....#oo#oooooo###ooooo#oo#.....',
+    '.....#oo#ooooooooo#oooo#oo#.....',
+    '.....#oo#oooooooooooooo#oo#.....',
+    '.....#oo#oooooooooooooo#oo#.....',
+    '.....#oo################oo#.....',
+    '.....#oooooooooooooooooooo#.....',
+    '.....#oooooooooooooooooooo#.....',
+    '.....#oooooooooooooooooooo#.....',
+    '.....#ooooooooo########ooo#.....',
+    '.....#oooooooooooooooooooo#.....',
+    '.....#oooooooooooooooooooo#.....',
+    '.....#oooooooooooooooooooo#.....',
+    '.....#oooooooooooooooooooo#.....',
+    '.....######################.....',
+    '.......#oooooooooooooooo#.......',
+    '.......##################.......',
     '................................',
     '................................',
     '................................',
@@ -255,20 +306,21 @@ const GRIDS: Partial<Record<IconName, string[]>> = {
     '................................',
     '................................',
   ],
-  // SUGGESTIONS — a note mid-drop into the slotted box, speed dashes
-  // riding alongside.
+  // SUGGESTIONS — a note held above the slotted box (the drop itself is
+  // the hover cycle, FRAMES.suggest; the speed dashes it used to carry
+  // read as specks at 1× and are gone).
   suggest: [
     '................................',
     '................................',
     '................................',
     '.............#####..............',
     '.............#ooo##.............',
-    '..#..........#oooo##...#........',
-    '..#..........#ooooo##..#........',
+    '.............#oooo##............',
+    '.............#ooooo##...........',
     '.............#o###o##...........',
     '.............#ooooo##...........',
-    '..#..........#o##oo##..#........',
-    '..#..........#ooooo##..#........',
+    '.............#o##oo##...........',
+    '.............#ooooo##...........',
     '.............#ooooo##...........',
     '.............#######............',
     '................................',
@@ -328,8 +380,10 @@ const GRIDS: Partial<Record<IconName, string[]>> = {
     '................................',
   ],
   // TRASH — the can, close to the original: arched handle, lidded band,
-  // ribbed body.
+  // ribbed body. Sits one row lower than the first draw so the lid has
+  // headroom to lift (FRAMES.trash).
   trash: [
+    '................................',
     '................................',
     '.............######.............',
     '............#......#............',
@@ -359,7 +413,6 @@ const GRIDS: Partial<Record<IconName, string[]>> = {
     '.......#ooo#oo#oo#oo#ooo#.......',
     '.......#oooooooooooooooo#.......',
     '........################........',
-    '................................',
     '................................',
     '................................',
   ],
@@ -1011,6 +1064,135 @@ const GRIDS: Partial<Record<IconName, string[]>> = {
   ],
 }
 
+/* Hover cycles, one per icon that earned one (the dock, README's door,
+   the two drawers' contents). Each returns the frame list in play order;
+   the strip loops, so a cycle either ping-pongs ([a, b, c, b]) or ends
+   where a fresh one would start (the print finishing, the drip landing).
+   Frame 0 need not equal the rest grid — steps' playhead, the iPod's
+   thumb — the rest state is the base grid, shown whenever the icon is
+   not under the pointer. Coordinates below are the base grids'; change a
+   drawing and its generator moves with it only if the parts stay put. */
+const FRAMES: Partial<Record<IconName, (g: Grid) => Grid[]>> = {
+  // the dog-ear lifts: fold size 6 → 7 → 8 → 7 (page cols 8..23, top row 2)
+  doc: (g) => {
+    const fold = (f: number) => {
+      let d = fill(g, 14, 2, 23, 10, 'o')
+      d = fill(d, 8, 2, 23 - f, 2)
+      d = fill(d, 24 - f, 3, 24 - f, 2 + f)
+      for (let k = 1; k < f; k++) d = dot(d, 24 - f + k, 2 + k)
+      d = fill(d, 24 - f, 2 + f, 23, 2 + f)
+      d = fill(d, 23, 2 + f, 23, 10)
+      return d
+    }
+    return [g, fold(7), fold(8), fold(7)]
+  },
+  // the arrow drags the window out and back: 6×4 → 8×5 → 10×6 → 8×5
+  // (screen interior cols 9..22, rows 7..16; window origin (10, 8))
+  work: (g) => {
+    const win = (w: number, h: number) => {
+      const x1 = 10 + w - 1
+      const y1 = 8 + h - 1
+      let d = fill(g, 9, 7, 22, 16, 'o')
+      d = fill(d, 10, 8, x1, 8) // solid title bar
+      d = fill(d, 10, y1, x1, y1)
+      d = fill(d, 10, 8, 10, y1)
+      d = fill(d, x1, 8, x1, y1)
+      return put(d, x1, y1, ['#', '##', '###', 'ooo#']) // arrow, tip on the corner
+    }
+    return [g, win(8, 5), win(10, 6), win(8, 5)]
+  },
+  // the printer sets the CV a line pair at a time: 1 → 3 → 5 → 7 lines
+  // (text rows 7, 10, … 25 between the perforations, cols 11..20)
+  resume: (g) => {
+    const rows = [7, 10, 13, 16, 19, 22, 25]
+    const upTo = (n: number) => rows.reduce((d, y, i) => (i >= n ? fill(d, 11, y, 20, y, 'o') : d), g)
+    return [upTo(1), upTo(3), upTo(5), g]
+  },
+  // the right-hand page is signed, one line a beat, then a fresh page
+  book: (g) => {
+    const lines: [number, number, number][] = [
+      [11, 19, 25],
+      [14, 19, 25],
+      [17, 19, 25],
+      [20, 21, 25],
+    ]
+    const upTo = (n: number) =>
+      lines.reduce((d, [y, x0, x1], i) => (i >= n ? fill(d, x0, y, x1, y, 'o') : d), g)
+    return [upTo(0), upTo(1), upTo(2), upTo(3), g]
+  },
+  // the thumb ticks round the wheel: top, right, bottom, left
+  // (ring cols 10..22, rows 15..26; centre button 15..16 × 20..21)
+  ipod: (g) => [
+    fill(g, 15, 15, 16, 16),
+    fill(g, 21, 20, 22, 21),
+    fill(g, 15, 25, 16, 26),
+    fill(g, 10, 20, 11, 21),
+  ],
+  // a wink: right eye (cols 20..21, rows 11..13) closes to a line for one beat
+  smiley: (g) => [g, g, g, fill(fill(g, 20, 11, 21, 12, 'o'), 19, 13, 22, 13)],
+  // the note drops through the slot: down 3, 6, 9 — anything below the
+  // lid (row 14) is inside the box and gone; then a fresh note
+  suggest: (g) => [g, ...[3, 6, 9].map((dy) => shift(g, 0, dy, [13, 3, 20, 12], [0, 0, 31, 14]))],
+  // the faders move: knob left-cols (base 9 / 17 / 11) → 12 / 15 / 13 →
+  // 14 / 12 / 16 and back. Rails at rows 10, 15, 20 span cols 7..24.
+  sliders: (g) => {
+    const rail = (d: Grid, r: number, kx: number) =>
+      put(fill(fill(d, 7, r - 1, 24, r + 1, 'o'), 7, r, 24, r), kx, r - 1, ['#####', '#o#o#', '#####'])
+    const set = (a: number, b: number, c: number) => rail(rail(rail(g, 10, a), 15, b), 20, c)
+    const mid = set(12, 15, 13)
+    return [g, mid, set(14, 12, 16), mid]
+  },
+  // the lid (handle + band, rows 0..8) lifts 1, 2, 1
+  trash: (g) => [g, shift(g, 0, -1, [0, 0, 31, 8]), shift(g, 0, -2, [0, 0, 31, 8]), shift(g, 0, -1, [0, 0, 31, 8])],
+  // bounces on the beam
+  music: bounce,
+  // the piece hops
+  puzzle: bounce,
+  // the flash fires for a beat: an arc of light over the bulb (cols 22..24, rows 9..10)
+  camera: (g) => {
+    const lit = [
+      [23, 7],
+      [21, 8],
+      [25, 8],
+      [20, 9],
+      [26, 9],
+    ].reduce((d, [x, y]) => dot(d, x, y), g)
+    return [lit, g, g, g]
+  },
+  // the playhead steps across the four columns (cells at cols 6 + 5k,
+  // rows 7 + 5j; interiors lit)
+  steps: (g) => [0, 1, 2, 3].map((k) => [7, 12, 17, 22].reduce((d, y) => fill(d, 7 + 5 * k, y + 1, 8 + 5 * k, y + 2), g)),
+  // the drip falls (drop at cols 5..6, rows 25..26): 0, +2, +4, then a new one
+  brush: (g) => [g, shift(g, 0, 2, [5, 25, 6, 26]), shift(g, 0, 4, [5, 25, 6, 26])],
+  // the scope sweeps: the trace draws in left to right across the screen
+  // interior (cols 7..24, rows 9..18) in four beats, then sweeps again
+  wave: (g) => [11, 15, 19].map((cut) => fill(g, cut + 1, 9, 24, 18, 'o')).concat([g]),
+  // the record spins: the two highlight streaks turn a quarter each beat
+  // about (16, 16); the outline stays (it is not quite round enough to
+  // rotate on its own)
+  disc: (g) => {
+    const streaks: [number, number][] = [
+      [11, 7],
+      [10, 8],
+      [9, 9],
+      [22, 8],
+      [23, 9],
+    ]
+    const body = streaks.reduce((d, [x, y]) => fill(d, x, y, x, y, 'o'), g)
+    const turn = ([x, y]: [number, number]): [number, number] => [32 - y, x]
+    return [0, 1, 2, 3].map((k) =>
+      streaks.reduce((d, p) => {
+        let q = p
+        for (let i = 0; i < k; i++) q = turn(q)
+        return dot(d, q[0], q[1])
+      }, body),
+    )
+  },
+}
+
 export const PIXEL: Partial<Record<IconName, PixelGlyph>> = Object.fromEntries(
-  Object.entries(GRIDS).map(([name, rows]) => [name, px(rows!)]),
+  Object.entries(GRIDS).map(([name, rows]) => {
+    const frames = FRAMES[name as IconName]?.(rows!).map(ink)
+    return [name, { ink: ink(rows!), frames }]
+  }),
 ) as Partial<Record<IconName, PixelGlyph>>
