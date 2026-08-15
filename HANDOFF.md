@@ -20,6 +20,9 @@
 - **⚠️ Shared-checkout law:** no concurrent sessions on one working
   tree; `git branch --show-current` before EVERY commit; worktrees are
   the pattern; leave the main checkout on main.
+- **Branch law (Jake, s31):** every feature starts on its own branch;
+  main takes only reviewed, ship-ready commits — it must stay shippable
+  on short notice.
 - **Build law:** dev server and `npm run build` share `.next` —
   `preview_stop → build → preview_start`; corruption → `rm -rf .next`.
 - **AI chat guardrails:** blob counter `AI_CHAT_DAILY_MAX` (250) ·

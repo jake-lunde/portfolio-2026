@@ -73,6 +73,13 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
    portfolio hub = `Atlas/Maps/LUNDE OS Map.md`; the vault is its own
    local git repo — commit there, separately). Notion is RETIRED
    (2026-08-12) — never write to it. COMMAND.CTR deck reporting per §4.
+7. **One home per fact.** How Jake wants the work done (rulings, taste,
+   tasks, narrative, who he is) → the vault. How the machine behaves
+   (gotchas, mechanics, tool quirks) → Claude's memory files. Checkout/
+   build invariants → `HANDOFF.md`. Binding law → this file. A fact
+   lives in exactly one of them; when you find it in two, delete the
+   copy outside its home and leave a pointer only if the reader would
+   otherwise never look there.
 
 ## 4. Session protocol (applies to WHOEVER orchestrates)
 
@@ -103,7 +110,13 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
    waits on Jake) — then replace the "in progress" line with the
    narrative. Those fields ARE the handoff: the Map's Current state box
    and every effort's `## Sessions` are Dataview views over them (plus
-   task `up`/`status`); nobody hand-writes either; (b) **every session
+   task `up`/`status`); nobody hand-writes either. **Delegate the
+   write-up**: the orchestrator writes a ≤8-line brief (what landed ·
+   ruled · open · PRs · task status changes), runs
+   `node scripts/session-writeup.mjs --session NN --brief "…"`, hands
+   the printed prompt to a Sonnet subagent, reviews `git -C ~/jaique
+   diff`, commits. Judgment stays with the orchestrator; the agent does
+   the reading and the prose; (b) **every session
    belongs to an effort** — the feature page in
    `Efforts/On|Ongoing|Simmering|Sleeping/<emoji> Name (E).md`. Find the
    one the work served; if the session started a new feature, mint the
