@@ -45,6 +45,9 @@ export type ProgramDef = {
   /** a drawer: window ids (program id or `viz:<id>`) this folder holds.
       Read by src/programs/folder/Folder.tsx via the window's own id. */
   folder?: string[]
+  /** how a drawer shows its contents: a tape rack or a cartridge shelf
+      (src/components/shell/mediaSprites.ts). Unset = plain icon grid. */
+  case?: 'rack' | 'shelf'
   /** route path that deep-links to this window */
   path?: string
 }
@@ -293,9 +296,11 @@ export const PROGRAMS: ProgramDef[] = [
     icon: 'music',
     component: FolderWindow,
     folder: ['studio', 'viz:scrobbles', 'sequencer'],
+    case: 'rack',
     // drawers hug: 88px icon tracks + 8px gaps + 22px inset either side, so
-    // the contents sit on ONE row and never wrap to a lopsided orphan
-    size: { w: 356, h: 214 },
+    // the contents sit on ONE row and never wrap to a lopsided orphan; the
+    // height fits one row of media in its slot (Folder.tsx) plus the label
+    size: { w: 356, h: 232 },
     pos: { x: 250, y: 96 },
     onDesktop: true,
     path: '/music',
@@ -307,7 +312,8 @@ export const PROGRAMS: ProgramDef[] = [
     icon: 'smiley',
     component: FolderWindow,
     folder: ['booth', 'puzzle', 'paint', 'visualizers'],
-    size: { w: 444, h: 214 },
+    case: 'shelf',
+    size: { w: 420, h: 220 },
     pos: { x: 290, y: 128 },
     onDesktop: true,
     path: '/fun',
