@@ -423,8 +423,17 @@ export function effectiveColors(el: HTMLElement): EffectiveColors {
 /* CSS-module classes ship as `File_class__hash`. The middle is the name
    the author wrote and the head is the module it came from, and between
    them they are the only readable thing on the node. The head used to be
-   thrown away; SOURCE reads it now, so both groups are captured. */
-const MODULE_CLASS_RE = /^([A-Za-z0-9]+)_([A-Za-z0-9-]+)__[A-Za-z0-9-]+$/
+   thrown away; SOURCE reads it now, so both groups are captured.
+
+   The hash may contain UNDERSCORES, and it often starts with one. This
+   pattern refused them, so roughly one class in eight fell through to the
+   raw bundler name — the panel reported `div.inspectShell_head__wB_7b`
+   where it meant `div.head`, and SOURCE would have walked up to an
+   ancestor for a file the node had all along. Only the authored middle
+   stays underscore-free, which is what keeps the split unambiguous:
+   group two stops at the first underscore, and the `__` after it is the
+   separator by construction. */
+const MODULE_CLASS_RE = /^([A-Za-z0-9]+)_([A-Za-z0-9-]+)__[A-Za-z0-9_-]+$/
 
 function readableClass(el: HTMLElement): string | null {
   const raw = el.getAttribute('class')
