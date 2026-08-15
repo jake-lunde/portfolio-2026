@@ -101,7 +101,7 @@ export default function About() {
             LUNDE
           </h1>
           <div className={styles.stampRole}>
-            DESIGN ENGINEER <span aria-hidden="true">設計技師</span>
+            DESIGN ENGINEER <span aria-hidden="true">✂⌘✶☺</span>
           </div>
           <div className={styles.stampYear} aria-hidden="true">
             <span>19</span>
@@ -120,7 +120,8 @@ export default function About() {
       </div>
       <Copy k="readme.eyebrow" as="p" className={styles.aboutEyebrow} />
       <p>
-        Oh hey, welcome to my site! I&rsquo;m Jake, a designer with over ten years of work in consumer and B2B products, digital and physical. Until recently I&rsquo;d be contributing from discovery to handoff, but now I span the whole product development lifecycle, even shipping production code. My affinity for tools has allowed me to become a design
+        Oh hey, welcome to my site! I&rsquo;m Jake, a designer with over ten years of work in consumer and B2B products, digital and physical. Until recently I&rsquo;d be contributing from discovery to handoff, but now I span the whole product development lifecycle, even shipping production code.</p>
+       <p>My affinity for tools has allowed me to become a design
         engineer. Currently I&rsquo;m leading design on
         Greenlight&rsquo;s{' '}
         <a href="https://greenlight.com/family-hub" target="_blank" rel="noreferrer">
