@@ -132,18 +132,7 @@ export default function About() {
       <p>
         Not to be grandiose, but this site is my testament: <span className="hl-pink">LUNDE&nbsp;OS</span>{' '}. It's a small operating system I will continue designing and orchestrating
         iteratively. I&rsquo;ve dreaded updating my website for years, but new
-        tools have truly made it a joy. I hope you like it. Open{' '}
-        <a
-          href={`${BASE}/cases`}
-          onClick={(e) => {
-            e.preventDefault()
-            sfx.open()
-            open('progress')
-          }}
-        >
-          Case Studies
-        </a>{' '}
-        to read the work.
+        tools have truly made it a joy. I hope you like it.
       </p>
       <ul className={styles.aboutList}>
         <li>
