@@ -120,7 +120,7 @@ export default function About() {
       </div>
       <Copy k="readme.eyebrow" as="p" className={styles.aboutEyebrow} />
       <p>
-        Oh hey, welcome to my site! I&rsquo;m Jake, a designer with over ten years of work in consumer and B2B products, digital and physical. Until recently I&rsquo;d be contributing from discovery to handoff, but now I span the whole product development lifecycle, even shipping production code.</p>
+        I&rsquo;m Jake, an AI-native designer with over ten years of work in consumer and B2B products, digital and physical. Until recently I&rsquo;d be contributing from discovery to handoff, but now I span the whole product development lifecycle, even shipping production code.</p>
        <p>My affinity for tools has allowed me to become a design
         engineer. Currently I&rsquo;m leading design on
         Greenlight&rsquo;s{' '}
