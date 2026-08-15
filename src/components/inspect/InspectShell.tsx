@@ -8,7 +8,6 @@ import { inspectElement, type Inspection } from '@/lib/inspect'
 import { resetAll } from '@/lib/tune'
 import { LayersPanel } from './LayersPanel'
 import { InspectorPanel } from './InspectorPanel'
-import { EditPanel } from './EditPanel'
 import { useCopyEditing } from './useCopyEditing'
 import styles from './inspectShell.module.css'
 
@@ -33,9 +32,10 @@ import styles from './inspectShell.module.css'
      hand, the header says which — and ALT borrows the other one for the
      length of a click, in both directions. DevTools' picker toggle, and
      the reason a visitor who never finds the ALT key can still use the
-     site with the tool up. EDIT is a THIRD segment in the same switch and
-     it stands outside that bargain: it used to be its own mode, fighting
-     this one for the desktop, and ALT never reaches for it (see
+     site with the tool up. There were three for a while: EDIT.MODE came
+     in from its own program and stood as a third segment. Jake struck it.
+     Rewriting a line is something you do to a PICK, so it lives in the
+     inspector's COPY block and the switch is a pair again (see
      useCopyEditing.ts). The store holds the state (store/inspect.ts);
      everything here reads it through a ref so the listeners never restage.
    · the tool wears the crown. The OS menubar and the skills ticker stand
@@ -107,37 +107,29 @@ const GLOBAL_CSS = `
     outline-offset:2px;
   }
 
-  /* EDIT (SYS-99). Same reason this sheet cannot be a CSS module: the
-     subject is every [data-copy-id] node on the desktop. Gated on the
-     armed body attribute the tool stamps, which is also what
-     programs.module.css reads to park the focus crawl.
+  /* COPY EDITING (SYS-99). Same reason this sheet cannot be a CSS module:
+     the subject is a [data-copy-id] node anywhere on the desktop.
 
-     The docks are made of CopyText too, so they are full of copy ids —
-     and they are instruments, not specimens. data-inspect-self exempts
-     them from the picker already; it exempts them from the caret here
-     (useCopyEditing refuses the click, this stops the outline promising
-     one). */
-  body[data-editmode="on"] [data-copy-id]{
+     Two rules, and they are both about a STATE the visitor is in rather
+     than a mode they picked up. Every copy node used to wear a dashed
+     outline the moment the third tool came out — mode chrome, promising a
+     caret on hundreds of nodes at once. What is left says only "the caret
+     is HERE" and "this line is rewritten and not saved yet", and the
+     second one has to survive the pick moving on, or a pending rewrite
+     goes invisible the moment you look at the next thing.
+
+     The caret rule out-specifies the SELECT crosshair above by coming
+     later at equal weight, which is what keeps the pointer honest inside
+     the one node you are typing in. */
+  body[data-inspectmode="on"] [data-copy-id][contenteditable]{
     cursor:text;
-    outline:var(--border-width-default) dashed color-mix(in srgb, var(--accent) 45%, transparent);
+    outline:var(--border-width-strong) solid var(--accent);
     outline-offset:2px;
     transition:none;
   }
-  body[data-editmode="on"] [data-copy-id]:hover{
-    outline-style:solid;
-  }
-  body[data-editmode="on"] [data-copy-id][contenteditable]{
-    outline:var(--border-width-strong) solid var(--accent);
-  }
-  body[data-editmode="on"] [data-copy-id][data-edit-dirty]{
+  body[data-inspectmode="on"] [data-copy-id][data-edit-dirty]{
     background:color-mix(in srgb, var(--accent) 14%, transparent);
     box-shadow:inset 0 -2px 0 var(--accent);
-  }
-  body[data-editmode="on"] [data-inspect-self] [data-copy-id]{
-    cursor:auto;
-    outline:none;
-    background:none;
-    box-shadow:none;
   }
 `
 
@@ -158,20 +150,17 @@ function scrub(attr: string) {
 
 export default function InspectShell() {
   const skin = useSettings((s) => s.skin)
-  const theme = useSettings((s) => s.theme)
-  const toggleTheme = useSettings((s) => s.toggleTheme)
   const setOn = useInspect((s) => s.setOn)
   const tool = useInspect((s) => s.tool)
   const setTool = useInspect((s) => s.setTool)
 
-  /* THE THIRD TOOL. EDIT.MODE used to be a program at /edit that took the
-     whole desktop and stood this mode down on arrival — two tool modes
-     fighting over one canvas, with a body attribute as the treaty. It is a
-     tool in the same hand now. The engine lives above the panel on
-     purpose: pending edits survive a trip to SELECT to read the contrast
-     on a line you just rewrote, which is the reason to have them in one
-     hand at all (useCopyEditing.ts). */
-  const copyEdit = useCopyEditing(tool === 'edit')
+  /* LIVE COPY EDITING, running for as long as the tool is up. It was a
+     program at /edit that took the whole desktop, then a third segment in
+     the switch above; it is an affordance on a pick now, and the inspector
+     drives it one node at a time. The engine sits here rather than in the
+     panel so the pending rewrites outlive any single pick — the whole
+     point of one hand (useCopyEditing.ts). */
+  const copyEdit = useCopyEditing()
 
   const [report, setReport] = useState<Inspection | null>(null)
   const [picked, setPicked] = useState<HTMLElement | null>(null)
@@ -262,21 +251,13 @@ export default function InspectShell() {
     toolRef.current = tool
     document.body.setAttribute('data-inspecttool', tool)
     if (tool !== 'select') hover(null)
-    /* EDIT hands the canvas to the caret, and a picked outline sitting on
-       a node the visitor is now typing into reads as a stuck selection. */
-    if (tool === 'edit') deselect()
-  }, [tool, hover, deselect])
+  }, [tool, hover])
 
   /** True when this pointer event is asking to PICK: the resting tool,
       inverted while ALT is down. One rule, both directions — which is
-      what lets the hint say "alt is always the other tool" and be exact.
-
-      EDIT is outside the bargain and never picks. ALT does not reach for
-      it and it does not borrow the other two: a momentary contenteditable
-      is a way to lose a line of copy, not a shortcut. */
+      what lets the hint say "alt is always the other tool" and be exact. */
   const picking = useCallback(
-    (e: MouseEvent) =>
-      toolRef.current === 'edit' ? false : toolRef.current === 'select' ? !e.altKey : e.altKey,
+    (e: MouseEvent) => (toolRef.current === 'select' ? !e.altKey : e.altKey),
     [],
   )
 
@@ -292,9 +273,14 @@ export default function InspectShell() {
          docks and the menubar both — it is painted above everything by
          design. Swallowing its dismiss click and eating its Escape left
          the visitor sealed in with no way back to the tool OR the site.
-         A modal is a door; doors stay operable. */
+         A modal is a door; doors stay operable;
+       · the ONE node holding the caret. Picking is picking now, so a click
+         on the canvas takes what is under it — except inside the line the
+         visitor is mid-rewrite, where a click means "put the caret here"
+         and swallowing it would re-pick the node they are already in. */
     const exempt = (el: Element | null) =>
-      !el || !!el.closest('[data-inspect-self], [role="dialog"]')
+      !el ||
+      !!el.closest('[data-inspect-self], [role="dialog"], [data-copy-id][contenteditable]')
 
     const onDown = (e: PointerEvent) => {
       downAt.current = { x: e.clientX, y: e.clientY }
@@ -405,16 +391,12 @@ export default function InspectShell() {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       if (document.querySelector('[role="dialog"]')) return
-      /* And EDIT takes the rung above all three while a copy node has the
-         caret: there Escape puts the LINE back (useCopyEditing). Both
-         handlers sit on `document` in the capture phase, where
-         stopPropagation cannot separate them, so the ladder checks for the
-         caret itself rather than hoping to be second. */
-      if (
-        toolRef.current === 'edit' &&
-        (e.target as HTMLElement | null)?.closest?.('[data-copy-id][contenteditable]')
-      )
-        return
+      /* And a copy node holding the caret takes the rung above all three:
+         there Escape puts the LINE back (useCopyEditing). Both handlers
+         sit on `document` in the capture phase, where stopPropagation
+         cannot separate them, so the ladder checks for the caret itself
+         rather than hoping to be second. */
+      if ((e.target as HTMLElement | null)?.closest?.('[data-copy-id][contenteditable]')) return
       if (openVarRef.current) {
         e.preventDefault()
         e.stopPropagation()
@@ -546,37 +528,14 @@ export default function InspectShell() {
           >
             {t('inspect.tool.operate', skin)}
           </button>
-          {/* third segment, same switch. It sits after the pair rather
-              than beside it because ALT only ever swaps those two. */}
-          <button
-            type="button"
-            className={styles.tool}
-            data-inspect-tool="edit"
-            aria-pressed={tool === 'edit'}
-            onClick={() => setTool('edit')}
-          >
-            {t('inspect.tool.edit', skin)}
-          </button>
         </div>
 
-        {/* The light switch, brought inside the tool. Flipping theme
-            mid-nudge is the whole AA-judging workflow — pick a role, cast
-            a candidate, flip, watch the grade re-judge — and the bar that
-            used to hold it is not on screen any more. Same store action
-            and the same accessible name as the menubar's, and shown on
-            the same terms: classic is the only skin with two modes. */}
-        {skin === 'classic' && (
-          <button
-            type="button"
-            className={styles.crownBtn}
-            data-inspect-theme=""
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
-          >
-            {theme === 'light' ? 'LGT' : 'DRK'}
-          </button>
-        )}
-
+        {/* A theme switch stood here, on the argument that flipping mid-nudge
+            is the AA-judging workflow. Jake's call: the tool inspects the
+            desktop it was opened on, and a second light switch inside the
+            crown was one control too many for a bar that only has to say
+            which tool is in the hand and how to put it down. The menubar's
+            switch is still the switch. */}
         <button
           type="button"
           className={styles.crownBtn}
@@ -601,21 +560,17 @@ export default function InspectShell() {
         className={`${styles.panel} ${styles.right}`}
         data-inspect-self=""
         role="complementary"
-        aria-label={t(
-          tool === 'edit' ? 'inspect.panel.edit' : 'inspect.panel.inspector',
-          skin,
-        )}
+        aria-label={t('inspect.panel.inspector', skin)}
       >
-        {tool === 'edit' ? (
-          <EditPanel engine={copyEdit} />
-        ) : (
-          <InspectorPanel
-            report={report}
-            openVar={openVar}
-            setOpenVar={setOpenVar}
-            onRefresh={refresh}
-          />
-        )}
+        <InspectorPanel
+          report={report}
+          picked={picked}
+          copy={copyEdit}
+          openVar={openVar}
+          setOpenVar={setOpenVar}
+          onRefresh={refresh}
+          onPick={pick}
+        />
       </aside>
     </>
   )

@@ -432,10 +432,11 @@ export const PROGRAMS: ProgramDef[] = [
     pos: { x: 420, y: 170 },
     onDesktop: true,
   },
-  /* EDIT.MODE (SYS-99) was registered here as a hidden program at /edit.
-     It is INSPECT.MODE's third tool now, so it is not a program at all:
-     /edit opens the same desktop /inspect does and puts the copy editor in
-     the hand (see programs/resolve.ts + components/inspect). */
+  /* EDIT.MODE (SYS-99) was registered here as a hidden program at /edit,
+     then briefly INSPECT's third tool. It is neither: rewriting a line is
+     an affordance on a pick inside INSPECT, so /edit opens the same
+     desktop /inspect does and Jake picks the words he came for (see
+     programs/resolve.ts + components/inspect). */
 ]
 
 export function getProgram(id: string): ProgramDef | undefined {

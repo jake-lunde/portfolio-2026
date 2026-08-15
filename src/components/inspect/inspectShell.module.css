@@ -141,15 +141,20 @@
   }
 }
 
+/* The tool's own name, and the top of the panel type hierarchy — see the
+   note above .panelHead for the three tiers and the two families. It was
+   an 11px mono label, the same size and family as the section heads and
+   the data rows below it, so the crown announced the tool in the voice of
+   a footnote. Display family now, at the heading-3 STEP (18px): heading-2
+   for the face, the weight and the leading, heading-3 for the size, which
+   is the composition the ident hero takes too. 18px × 1.3 leading is
+   23.4px in a 34px bar, so nothing wraps and nothing clips. CAPS stay —
+   this is machine chrome. */
 .crownTitle {
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  /* the role renders at 400 by design; a bolder mono label is sanctioned
-     as a call-site override (see tokens.generated.css) and the window
-     titlebar takes the same one */
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--type-label-tracking);
-  line-height: var(--type-label-leading);
+  font-family: var(--type-heading-2-family);
+  font-size: var(--type-heading-3-size);
+  font-weight: var(--type-heading-2-weight);
+  line-height: var(--type-heading-2-leading);
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -212,7 +217,11 @@
   background: var(--surface);
 }
 
-/* ---- the loose controls: theme, and the way out ---- */
+/* ---- the way out ----
+   Shared furniture: the exit button is the only control wearing this now
+   (a theme switch stood beside it until Jake took it out), and the class
+   stays plural-shaped because the crown is where a loose control belongs
+   if another one is ever earned. */
 
 .crownBtn {
   flex: none;
@@ -244,17 +253,38 @@
   outline-offset: calc(var(--border-width-strong) * -1);
 }
 
+/* ================= the panel type hierarchy =================
+
+   The docks used to be four mono sizes within 3px of each other — 8px
+   panel head, 8px section head, 9px note, 11px data — which is one tier
+   wearing four hats. Nothing announced itself and nothing receded.
+
+   Three tiers now, and two families:
+
+   · HERO, display face — the crown's title and .identName, the thing
+     picked. Identity is the one place this tool speaks in the OS's own
+     voice rather than in machine mono.
+   · HEADS, mono at 13px — .panelHead. Furniture labels: which dock am I
+     looking at. Ink, not muted, so they outrank everything under them.
+   · DATA, mono at 11px and below — every reading, unchanged, plus the
+     section heads at 9px muted and tracked wide, which is what keeps
+     PATH / TOKENS / CONTRAST reading as dividers rather than as titles.
+
+   Sizes come from the ramp per property, the way the rest of this file
+   already composes them; the only call-site override is --weight-bold on
+   a mono label, which the role sanctions (tokens.generated.css). */
+
 .panelHead {
   flex: none;
   margin: 0;
   padding: var(--spacing-component-sm) var(--spacing-component-md);
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  font-weight: var(--type-micro-weight);
-  letter-spacing: var(--type-micro-tracking);
-  line-height: var(--type-micro-leading);
+  font-family: var(--type-label-family);
+  font-size: var(--type-body-sm-size);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--type-label-tracking);
+  line-height: var(--type-label-leading);
   text-transform: uppercase;
-  color: var(--content-muted);
+  color: var(--content);
   background: var(--surface-raised);
   border-bottom: var(--border-width-default) solid var(--border);
 }
@@ -301,6 +331,13 @@
 .row[data-window] {
   color: var(--content);
   text-transform: uppercase;
+}
+
+/* furniture stands at the same depth as a window and is not one: the dock
+   rail, the icon grid, the widgets. Ink, so it reads as a top-level
+   object, and no caps — the caps are what say "this one is an artboard". */
+.row[data-furniture] {
+  color: var(--content);
 }
 
 .row[data-focused] {
@@ -531,23 +568,27 @@
   text-underline-offset: 2px;
 }
 
-/* ---- ident ---- */
+/* ---- ident: the one big moment in the dock ----
+   Stacked rather than laid out on a baseline row, because the name is no
+   longer a value beside its label — it is the headline, and the label is
+   the caption over it. */
 .ident {
   display: flex;
-  align-items: baseline;
-  gap: var(--spacing-component-sm);
-  flex-wrap: wrap;
-  padding-bottom: var(--spacing-component-sm);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-component-xs);
+  padding-bottom: var(--spacing-component-md);
   border-bottom: var(--border-width-default) solid var(--content);
 }
 
 .identLabel,
-.head,
 .tier,
 .gradeChip,
 .roleChip,
 .candidateName,
-.candidateGrade {
+.candidateGrade,
+.sourceKind,
+.sourceVia {
   font-family: var(--type-micro-family);
   font-size: var(--type-micro-size);
   font-weight: var(--type-micro-weight);
@@ -560,22 +601,32 @@
   color: var(--accent);
 }
 
-.identName,
+/* HERO. Display family with the size stepped down one role: heading-2
+   for the face, weight and leading, heading-3 for the size (18px), which
+   is the same composition the crown title takes so the tool's name and
+   the thing it is naming read as one voice. Ink, and it wraps — a picked
+   element's identity can be long and truncating it would be the one
+   place in this panel a reading is allowed to go missing. */
+.identName {
+  font-family: var(--type-heading-2-family);
+  font-size: var(--type-heading-3-size);
+  font-weight: var(--type-heading-2-weight);
+  line-height: var(--type-heading-2-leading);
+  color: var(--content);
+  overflow-wrap: anywhere;
+}
+
 .prop,
 .varName,
 .value,
 .ratio,
-.facts {
+.facts,
+.sourcePath {
   font-family: var(--type-mono-family);
   font-size: var(--type-mono-size);
   font-weight: var(--type-mono-weight);
   letter-spacing: var(--type-mono-tracking);
   line-height: var(--type-mono-leading);
-}
-
-.identName {
-  color: var(--content);
-  overflow-wrap: anywhere;
 }
 
 .reskin {
@@ -589,12 +640,142 @@
   color: var(--accent-expressive-text);
 }
 
+/* the tiers need room to be tiers: a head that is only 4px clear of the
+   rows above it is a row */
 .section {
-  margin-top: var(--spacing-component-lg);
+  margin-top: var(--spacing-component-xl);
 }
 
+/* SECTION HEADS. Micro's face, weight and tracking at the caption STEP
+   (9px): one notch above the 8px chips that share the micro rule, so the
+   dividers separate from the data they sit in, and well under both the
+   13px panel head above and the 11px readings below. Muted — there is no
+   secondary content role in this token set, and muted is the dim ink the
+   rest of the panel already uses for anything that is not a value. */
 .head {
   margin: 0 0 var(--spacing-component-sm);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+/* ---- PATH: the chain from the top, one row per level ----
+   A vertical breadcrumb rather than a slashed line: the depth is the
+   point, and the indent is the only thing that can show it. Caption
+   mono, quieter than the 11px readings — this is orientation, not data.
+   Every step is a button except the last, which is the reading. */
+.path {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
+.pathStep {
+  display: flex;
+  min-width: 0;
+  /* padding-left is the indent, set per row from its depth */
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+.pathBtn,
+.pathHere,
+.pathGap {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+}
+
+.pathBtn {
+  padding: 0;
+  text-align: left;
+  color: var(--content-muted);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.pathBtn:hover {
+  color: var(--content);
+}
+
+.pathBtn:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* the terminus wears the same figure/ground flip the picked tree row
+   does — paper on the accent fill, house-wide */
+.pathHere {
+  padding: 0 var(--spacing-component-xs);
+  color: var(--surface);
+  background: var(--accent);
+}
+
+/* a run of anonymous wrappers, folded but never hidden: the path is
+   allowed to be shorter than the DOM, not to claim a thing sits higher
+   than it does */
+.pathGap {
+  color: var(--content-muted);
+}
+
+/* ---- SOURCE: where to go and edit this ----
+   Plain text, deliberately not links — these are strings to paste into a
+   repo search, and a link would promise a file that resolves. Selectable
+   for exactly that reason. */
+.sourceRows {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-component-xs);
+  margin: 0;
+  padding: 0;
+}
+
+.sourceRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-xs);
+}
+
+.sourceKind {
+  flex: none;
+  padding: 0 var(--spacing-component-xs);
+  color: var(--content-muted);
+  border: var(--border-width-default) solid var(--border);
+}
+
+.sourcePath {
+  color: var(--content);
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.sourceVia {
+  color: var(--content-muted);
+}
+
+.sourceNote {
+  margin: var(--spacing-component-sm) 0 0;
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
   color: var(--content-muted);
 }
 
@@ -870,53 +1051,51 @@
   color: var(--accent);
 }
 
-/* ================= EDIT (right dock, third tool) =================
+/* ================= COPY (in the inspector) =================
    SYS-99 came in from its own program window, where it drew a floating
-   SAVE.CHANGES panel over the desktop. It is a dock now, so it borrows the
-   inspector's furniture wholesale: .panelHead, .panelBody, .section,
-   .head, .note, .keyRow's input and label, .resetAll for every secondary
-   button, .saveNote for the status line, .tokenRow for a diff row. What
-   is below is only what the copy editor needs that the inspector had no
-   use for. Tokens only, and the one system accent carries every
-   "armed / dirty" signal, same as it did in the program. */
+   SAVE.CHANGES panel over the desktop, and then from a third dock of its
+   own. It is a block on the reading now, so it borrows the inspector's
+   furniture wholesale: .section and .head for the block, .sourceRows /
+   .sourceRow / .sourceKind / .sourcePath for the key, slot and value,
+   .keyRow for the gate, .resetAll for every secondary button, .saveNote
+   for a status line, .tokenRow for a diff row. What is below is only what
+   the copy side needs that the inspector had no use for. Tokens only, and
+   the one system accent carries every "this is changed" signal, same as it
+   did in the program.
 
-.editGate {
+   PENDING mirrors .preview, deliberately: two banners at the top of the
+   panel saying the same kind of thing. The border is the accent rather
+   than the warning ink, which is the one difference between them — a
+   rewrite is a thing you meant, a live token override is a thing you are
+   only trying on. */
+
+.pending {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-component-xs);
+  margin-bottom: var(--spacing-component-md);
+  padding: var(--spacing-component-sm);
+  border: var(--border-width-default) solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-.editGate .keyInput {
-  align-self: stretch;
-  flex: none;
-}
-
-/* the armed line: the accent, a dot, and nothing else on it */
-.editArmed {
+/* the gate: a stacked block so a refused key answers under the field it
+   was typed into rather than beside it */
+.gate {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-component-xs);
-  margin: 0 0 var(--spacing-component-xs);
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  font-weight: var(--type-micro-weight);
-  letter-spacing: var(--type-micro-tracking);
-  line-height: var(--type-micro-leading);
-  color: var(--accent);
+  flex-direction: column;
 }
 
-.editDot {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
+/* the two secondary buttons that stand alone on a line rather than in a
+   row of actions */
+.copyEdit,
+.revertAll {
+  align-self: flex-start;
+  margin-top: var(--spacing-component-sm);
 }
 
-/* the two things that are not the diff and are not an error: no token on
-   this deployment, no key set at all. Same warning ground the inspector's
-   preview banner wears, for the same reason — it is a state, not a fault. */
+/* the one thing that is not the diff and is not an error: no key set at
+   all on this deployment. Same treatment the pending block wears, for the
+   same reason — it is a state, not a fault. */
 .editNotice {
   margin: var(--spacing-component-sm) 0 0;
   padding: var(--spacing-component-sm);
@@ -1014,24 +1193,6 @@
 }
 
 .editCommit:focus-visible {
-  outline: var(--border-width-strong) solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* SOURCE — the way out to the MDX. Ink with an underline, never the
-   accent: it is small type on --surface and the underline is what carries
-   the affordance (WCAG 1.4.1 wants more than hue anyway). */
-.sourceLink {
-  display: inline-block;
-  margin-top: var(--spacing-component-xs);
-  font-family: var(--mono);
-  font-size: var(--type-micro-size);
-  color: var(--content);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.sourceLink:focus-visible {
   outline: var(--border-width-strong) solid var(--accent);
   outline-offset: 2px;
 }

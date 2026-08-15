@@ -95,8 +95,8 @@ export function windowsForPath(path: string[]): string[] {
   /* /inspect and /edit are the two paths with no window behind them:
      INSPECT.MODE is a tool mode, not a program, so the link puts something
      ON the canvas and arms the tool over it (see inspectForPath + Desktop).
-     /edit used to open the EDIT.MODE program; the editor is INSPECT's
-     third tool now, so the old link lands in the same mode holding it. */
+     /edit used to open the EDIT.MODE program, then INSPECT's third tool;
+     it lands in plain INSPECT now (see inspectForPath). */
   if (path[0] === 'inspect' || path[0] === 'edit') return ['readme']
   if (path[0] === 'projects') {
     // a case deep-link opens the SHELF behind the case window — that is the
@@ -118,13 +118,13 @@ export function windowsForPath(path: string[]): string[] {
     Separate from windowsForPath because the mode is not a window — the
     path opens one AND turns the tool on. `null` means no tool.
 
-    /edit answers EDIT rather than SELECT. It is not in ALL_PATHS and
-    stays out of it: the editor is Jake's, the link is not advertised, and
-    prerendering a page whose only purpose is a password prompt would put
-    it in the sitemap. */
+    /edit lands where /inspect lands. It used to name a third tool; copy
+    editing is an affordance on a pick now (components/inspect), so the old
+    bookmark opens the tool and Jake picks the line he came for. It stays
+    out of ALL_PATHS: the link is not advertised, and prerendering a page
+    whose only purpose is Jake's desk would put it in the sitemap. */
 export function inspectForPath(path: string[]): InspectTool | null {
-  if (path[0] === 'inspect') return 'select'
-  if (path[0] === 'edit') return 'edit'
+  if (path[0] === 'inspect' || path[0] === 'edit') return 'select'
   return null
 }
 

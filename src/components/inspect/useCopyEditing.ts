@@ -5,30 +5,31 @@ import { useSettings } from '@/store/settings'
 import { resolveCopy, type CopySlot } from '@/content/copy'
 import { clearEditKey, readEditKey, verifyEditKey } from '@/lib/editKey'
 
-/* THE COPY EDITOR'S ENGINE — SYS-99, lifted out of the EDIT.MODE program.
+/* THE COPY EDITOR'S ENGINE — SYS-99, and no longer a mode of its own.
  *
- * It used to be a window that took the whole desktop and refused to share
- * it with INSPECT.MODE. It is INSPECT's third tool now, so the machinery
- * had to leave the component: this hook owns the phase machine, the
- * document-level capture delegation over every [data-copy-id] node, the
- * dirty map, and the commit to copy.json on main. The panel that renders
- * it is EditPanel.tsx and it renders nothing on its own.
+ * It was a window that took the whole desktop, then it was INSPECT's third
+ * tool. Jake's call, and it is the right one: there is ONE tool mode, you
+ * pick a thing, and if that thing is copy you rewrite it where it stands.
+ * So this hook holds no mode. It runs for as long as INSPECT is up, and
+ * the inspector's COPY block drives it one pick at a time: beginEdit puts
+ * the caret in THAT node, endEdit takes it back, and the dirty map
+ * accumulates across every pick until Jake commits it.
  *
  * The secret key is verified server-side (timing-safe) and only ever held
  * in sessionStorage on the client: never rendered, never logged. The
  * storage slot lives in lib/editKey.ts because the token SAVE in the
- * inspector arms against the same secret, and one arming covers both.
+ * inspector arms against the same secret, and one arming covers both —
+ * one gate, one key, two kinds of proposal.
  *
- * TWO KINDS OF "OFF", and they are not the same:
+ * ENDING AN EDIT IS NOT DROPPING IT. endEdit, a blur, a click on the next
+ * thing: the node stops being editable and the rewrite STAYS, marked on
+ * the canvas and listed in PENDING. Reading the contrast on a line you
+ * just rewrote is the reason the two live in one panel at all, and losing
+ * the rewrite for it would be a punishment for using the tool.
  *
- * · `active` false — the visitor picked up SELECT or OPERATE. The capture
- *   listeners come off and every node gives back its contenteditable, so
- *   the site is a site again. Pending edits STAY: switching to SELECT to
- *   read the contrast on a line you just rewrote is the reason the three
- *   tools share a hand at all, and losing the rewrite for it would be a
- *   punishment for using the tool.
- * · unmount — the mode itself is down. Every touched node reverts to the
- *   text it had, and the desktop carries no mark of ours.
+ * UNMOUNT is the one thing that puts the words back. The mode is down, so
+ * every touched node reverts to the text it had and the desktop carries no
+ * mark of ours.
  */
 
 export type CopyEdit = { key: string; slot: CopySlot; oldValue: string; newValue: string }
@@ -55,37 +56,27 @@ function resolveFromContent(content: string, key: string, slot: CopySlot): strin
   }
 }
 
-/** Place the caret at the clicked point when we make a node editable. */
-function caretToPoint(x: number, y: number) {
+/** The caret lands at the END of the line. The click that started this
+    landed on a button in the dock, not on the word the visitor means to
+    fix, so there is no point to place it at — and a caret at offset 0
+    reads as "type in front of everything", which is rarely the intent. */
+function caretToEnd(el: HTMLElement) {
   const sel = window.getSelection()
   if (!sel) return
-  type WithCaretRange = Document & { caretRangeFromPoint?: (x: number, y: number) => Range | null }
-  type WithCaretPos = Document & {
-    caretPositionFromPoint?: (x: number, y: number) => { offsetNode: Node; offset: number } | null
-  }
-  const range =
-    (document as WithCaretRange).caretRangeFromPoint?.(x, y) ??
-    (() => {
-      const p = (document as WithCaretPos).caretPositionFromPoint?.(x, y)
-      if (!p) return null
-      const r = document.createRange()
-      r.setStart(p.offsetNode, p.offset)
-      r.collapse(true)
-      return r
-    })()
-  if (range) {
-    sel.removeAllRanges()
-    sel.addRange(range)
-  }
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  range.collapse(false)
+  sel.removeAllRanges()
+  sel.addRange(range)
 }
 
 const nodesFor = (key: string) =>
   Array.from(document.querySelectorAll<HTMLElement>(`[data-copy-id="${CSS.escape(key)}"]`))
 
 /** The tool's own chrome is made of CopyText too, so the docks are full of
-    [data-copy-id] nodes. Editing the SAVE button's own label mid-commit is
-    not a feature — the panels are instruments, not specimens, and they say
-    so with the same attribute the picker exempts them by. */
+    [data-copy-id] nodes. Editing the COMMIT button's own label mid-commit
+    is not a feature — the panels are instruments, not specimens, and they
+    say so with the same attribute the picker exempts them by. */
 const editable = (el: HTMLElement | null | undefined): el is HTMLElement =>
   !!el && !el.closest('[data-inspect-self]')
 
@@ -95,22 +86,26 @@ function uncapture(n: HTMLElement) {
   n.removeAttribute('spellcheck')
 }
 
-export function useCopyEditing(active: boolean) {
+export function useCopyEditing() {
   const skin = useSettings((s) => s.skin)
 
   const [phase, setPhase] = useState<CopyPhase>('checking')
   const [edits, setEdits] = useState<Record<string, CopyEdit>>({})
+  const [editing, setEditing] = useState<HTMLElement | null>(null)
   const [baseSha, setBaseSha] = useState<string | null>(null)
   const [committing, setCommitting] = useState(false)
   const [status, setStatus] = useState<CopyStatus>(null)
   const [conflict, setConflict] = useState(false)
   const [tokenMissing, setTokenMissing] = useState(false)
 
-  // the document-level handlers bind once per arming and read through refs
+  // the handlers bind per edit and read through refs
   const skinRef = useRef(skin)
   useEffect(() => {
     skinRef.current = skin
   }, [skin])
+  /** the node holding the caret, readable synchronously — a blur has to
+      hand the same node back that beginEdit took, and state is a frame late */
+  const editingRef = useRef<HTMLElement | null>(null)
 
   /* ---- fetch the current sha/content; report where the UI should land ---- */
   const loadBase = useCallback(async (): Promise<CopyPhase> => {
@@ -137,9 +132,9 @@ export function useCopyEditing(active: boolean) {
     return 'armed'
   }, [])
 
-  /* ---- picking the tool up: reuse a cached key if there is one ---- */
+  /* ---- entering the mode: reuse a cached key if there is one ---- */
   useEffect(() => {
-    if (!active || phase !== 'checking') return
+    if (phase !== 'checking') return
     let alive = true
     ;(async () => {
       if (!readEditKey()) {
@@ -154,16 +149,17 @@ export function useCopyEditing(active: boolean) {
     return () => {
       alive = false
     }
-  }, [active, phase, loadBase])
+  }, [phase, loadBase])
 
-  /* ---- key prompt submit. Returns the failure kind on a refused key so
-     the panel can say which; every other outcome is carried by `phase`. ---- */
+  /* ---- key prompt submit. Every outcome is named, because the gate is
+     shared with the token SAVE and that side has its own thing to do with
+     each of them (see InspectorPanel). ---- */
   const authenticate = useCallback(
-    async (entered: string): Promise<true | 'badkey' | 'throttled'> => {
+    async (entered: string): Promise<true | 'badkey' | 'throttled' | 'unconfigured'> => {
       const verdict = await verifyEditKey(entered)
       if (verdict === 'unconfigured') {
         setPhase('unconfigured')
-        return true
+        return 'unconfigured'
       }
       if (verdict !== true) return verdict
       setPhase(await loadBase())
@@ -186,9 +182,16 @@ export function useCopyEditing(active: boolean) {
     const oldValue = el.dataset.editOld ?? ''
     const newValue = el.textContent ?? ''
     const slot = resolveCopy(key, skinRef.current)?.slot ?? 'base'
-    // keep duplicate nodes of the same key visually in sync
+    /* Keep duplicate nodes of the same key visually in sync — one key can
+       render in two places at once (a program's name is on its desktop
+       icon AND on its dock tile). Each of them records its OWN old text
+       before it takes the new one, or the teardown below has nothing to
+       put back and the rewrite outlives the mode on every node except the
+       one that was typed in. */
     for (const n of nodesFor(key)) {
-      if (n !== el && n.textContent !== newValue) n.textContent = newValue
+      if (n === el || n.textContent === newValue) continue
+      if (n.dataset.editOld === undefined) n.dataset.editOld = n.textContent ?? ''
+      n.textContent = newValue
     }
     setEdits((prev) => {
       const next = { ...prev }
@@ -203,87 +206,92 @@ export function useCopyEditing(active: boolean) {
     })
   }, [])
 
-  /* ---- arm / stand down: document-level delegation ---- */
-  useEffect(() => {
-    if (!active || phase !== 'armed') return
-    document.body.setAttribute('data-editmode', 'on')
+  /* ---- the caret: one node at a time, and only the picked one ---- */
 
-    const onClick = (e: MouseEvent) => {
-      const t = e.target as HTMLElement | null
-      const el = t?.closest<HTMLElement>('[data-copy-id]')
-      if (!editable(el)) return
-      // don't follow links / trigger buttons while editing
-      e.preventDefault()
-      e.stopPropagation()
-      if (el.getAttribute('contenteditable') !== 'plaintext-only') {
-        el.setAttribute('contenteditable', 'plaintext-only')
-        el.spellcheck = false
-        if (el.dataset.editOld === undefined) el.dataset.editOld = el.textContent ?? ''
-      }
+  const endEdit = useCallback(() => {
+    const el = editingRef.current
+    if (el) uncapture(el)
+    editingRef.current = null
+    setEditing(null)
+  }, [])
+
+  const beginEdit = useCallback(
+    (el: HTMLElement) => {
+      if (!editable(el) || !el.dataset.copyId) return
+      if (editingRef.current && editingRef.current !== el) endEdit()
+      el.setAttribute('contenteditable', 'plaintext-only')
+      el.spellcheck = false
+      if (el.dataset.editOld === undefined) el.dataset.editOld = el.textContent ?? ''
+      editingRef.current = el
+      setEditing(el)
       el.focus()
-      caretToPoint(e.clientX, e.clientY)
-    }
+      caretToEnd(el)
+    },
+    [endEdit],
+  )
 
-    const onInput = (e: Event) => {
-      const el = (e.target as HTMLElement)?.closest<HTMLElement>('[data-copy-id]')
-      if (editable(el)) commitEdit(el)
-    }
+  /* The listeners live for the length of ONE edit and two of them sit on
+     the node itself: `input` bubbles, and a handler bound to the node
+     cannot fire for anything else on the desktop.
+
+     KEYDOWN is the exception and it stays on the document in the CAPTURE
+     phase, because it has to beat the shell. Escape belongs to a dozen
+     other consumers down there — the host Window's close, INSPECT's own
+     ladder, the skin flyout — and the only way to put the LINE back
+     instead of closing the window around it is to take the key before any
+     of them see it. INSPECT's ladder checks for the caret itself rather
+     than hoping to be second (InspectShell), since two capture listeners
+     on the same node cannot be ordered by stopPropagation. */
+  useEffect(() => {
+    const el = editing
+    if (!el) return
+
+    const onInput = () => commitEdit(el)
+    const onBlur = () => endEdit()
 
     const onKeyDown = (e: KeyboardEvent) => {
-      const el = (e.target as HTMLElement)?.closest<HTMLElement>('[data-copy-id]')
-      if (!editable(el) || el.getAttribute('contenteditable') !== 'plaintext-only') return
+      if (!(e.target as HTMLElement | null)?.closest?.('[data-copy-id][contenteditable]')) return
       if (e.key === 'Escape') {
-        // stop the host Window's Escape-to-close, and the tool's own
-        // Escape ladder, from also firing (see InspectShell)
         e.preventDefault()
         e.stopPropagation()
         el.textContent = el.dataset.editOld ?? ''
         commitEdit(el)
         el.blur()
       } else if (e.key === 'Enter' && !e.shiftKey) {
+        // plaintext-only still takes a newline, and a copy string has no
+        // second line to give — the key ends the edit instead
         e.preventDefault()
         e.stopPropagation()
         el.blur()
       }
     }
 
-    document.addEventListener('click', onClick, true)
-    document.addEventListener('input', onInput, true)
+    el.addEventListener('input', onInput)
+    el.addEventListener('blur', onBlur)
     document.addEventListener('keydown', onKeyDown, true)
-
     return () => {
-      document.removeEventListener('click', onClick, true)
-      document.removeEventListener('input', onInput, true)
+      el.removeEventListener('input', onInput)
+      el.removeEventListener('blur', onBlur)
       document.removeEventListener('keydown', onKeyDown, true)
-      document.body.removeAttribute('data-editmode')
-      /* Hand every captured node back. The TEXT stays where the visitor
-         left it and so does the dirty mark: this runs on a tool switch as
-         well as on the way out, and a pending edit is still pending. The
-         unmount effect below is the one that puts the words back. */
-      for (const n of document.querySelectorAll<HTMLElement>('[data-copy-id][contenteditable]')) {
-        uncapture(n)
-      }
     }
-  }, [active, phase, commitEdit])
+  }, [editing, commitEdit, endEdit])
 
   /* ---- skin switch: re-rendered nodes get new text, so a stale editOld
      from the previous skin would corrupt old-values and Esc-revert. Drop
-     capture state on clean nodes (they re-capture on next click); dirty
-     rows keep the slot recorded at edit time. ---- */
+     capture state on clean nodes (they take it again on the next edit);
+     dirty rows keep the slot recorded at edit time. ---- */
   useEffect(() => {
-    if (!active || phase !== 'armed') return
     for (const n of document.querySelectorAll<HTMLElement>('[data-copy-id]')) {
       if (n.dataset.editOld !== undefined && !n.getAttribute('data-edit-dirty')) {
         delete n.dataset.editOld
         uncapture(n)
       }
     }
-  }, [skin, active, phase])
+  }, [skin])
 
   /* ---- the mode is down: the desktop gets its words back ---- */
   useEffect(
     () => () => {
-      document.body.removeAttribute('data-editmode')
       for (const n of document.querySelectorAll<HTMLElement>('[data-copy-id]')) {
         if (n.dataset.editOld !== undefined) {
           if (n.getAttribute('data-edit-dirty')) n.textContent = n.dataset.editOld
@@ -315,22 +323,19 @@ export function useCopyEditing(active: boolean) {
     [edits],
   )
 
-  /* ---- DISARM: drop the key, put every word back, ask again next time ---- */
-  const disarm = useCallback(() => {
-    for (const n of document.querySelectorAll<HTMLElement>('[data-copy-id]')) {
-      if (n.dataset.editOld !== undefined) {
-        if (n.getAttribute('data-edit-dirty')) n.textContent = n.dataset.editOld
-        delete n.dataset.editOld
-        n.removeAttribute('data-edit-dirty')
-        uncapture(n)
-      }
+  /* ---- put every pending line back. The key stays armed: undoing a
+     session's rewrites is not the same act as handing the key in. ---- */
+  const revertAll = useCallback(() => {
+    for (const n of document.querySelectorAll<HTMLElement>('[data-copy-id][data-edit-dirty]')) {
+      /* editOld stays and stays TRUE: the node may still hold the caret,
+         and Escape reads that attribute to put the line back. Same rule
+         revert() follows for one key. */
+      if (n.dataset.editOld !== undefined) n.textContent = n.dataset.editOld
+      n.removeAttribute('data-edit-dirty')
     }
     setEdits({})
     setConflict(false)
     setStatus(null)
-    setBaseSha(null)
-    setPhase('locked')
-    clearEditKey()
   }, [])
 
   /* ---- commit ---- */
@@ -396,14 +401,18 @@ export function useCopyEditing(active: boolean) {
   return {
     phase,
     edits: Object.values(edits),
+    /** the node holding the caret right now, or null */
+    editing,
     committing,
     status,
     conflict,
     tokenMissing,
     canCommit: !!baseSha && !tokenMissing,
     authenticate,
+    beginEdit,
+    endEdit,
     revert,
-    disarm,
+    revertAll,
     commit,
   }
 }

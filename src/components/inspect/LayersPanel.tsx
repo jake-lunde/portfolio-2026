@@ -18,6 +18,12 @@ import styles from './inspectShell.module.css'
    expands into its own markup. So the tree tells the same story the z
    index does, and picking a row on it lights the element on the canvas.
 
+   Under the windows sits the FURNITURE: the dock rail, the icon grid,
+   the widgets, the wallpaper — everything else the desktop root holds.
+   It reads as a quieter tier because it is one, but it walks the same
+   way and reveals the same way, which is what makes a dock tile as
+   inspectable as a paragraph inside a window.
+
    What counts as a layer: an element with an IDENTITY (a copy id, a named
    spring, a readable CSS-module class) or one with children. Everything
    else is a text-carrying wrapper and would only make the tree longer,
@@ -39,8 +45,10 @@ type Row = {
   key: string
   el: HTMLElement | null
   label: string
-  /** 0 = DESKTOP, 1 = a window, 2+ = its markup */
+  /** 0 = DESKTOP, 1 = a window or a piece of furniture, 2+ = its markup */
   depth: number
+  /** a depth-1 row that is NOT a window — the quieter tier */
+  furniture?: boolean
   expandable: boolean
   expanded: boolean
   posinset: number
@@ -55,8 +63,13 @@ function usable(el: Element): boolean {
 }
 
 /** Identity or issue — anything else is packaging. */
-function meaningful(el: Element): boolean {
+function meaningful(el: Element, picked: HTMLElement | null): boolean {
   if (!usable(el)) return false
+  /* The pick is never a judgement call: the visitor selected it, so it
+     gets a row whatever it is made of. Without this a picked leaf — a
+     bare span carrying a line of text — reveals to nothing, and the tree
+     quietly disagrees with the panel about what is selected. */
+  if (el === picked) return true
   if (el.childElementCount > 0) return true
   const node = el as HTMLElement
   if (node.dataset?.copyId || node.dataset?.spring) return true
@@ -67,30 +80,37 @@ type Kid = { i: number; el: HTMLElement }
 
 /** Children worth showing, carrying their index in the parent so a key
     stays stable while siblings come and go around them. */
-function kidsOf(el: HTMLElement): Kid[] {
+function kidsOf(el: HTMLElement, picked: HTMLElement | null): Kid[] {
   const out: Kid[] = []
   const kids = el.children
   for (let i = 0; i < kids.length && out.length < MAX_CHILDREN; i++) {
-    if (meaningful(kids[i])) out.push({ i, el: kids[i] as HTMLElement })
+    if (meaningful(kids[i], picked)) out.push({ i, el: kids[i] as HTMLElement })
   }
   return out
 }
 
-/** The key path from a window row down to `el`, so picking on the canvas
-    can open the tree to it. Null when the element lives on the desktop
-    itself rather than inside a window. */
+/** The key path from the tree's root down to `el`, so picking on the
+    canvas can open the tree to it.
+
+    Two roots, because the canvas has two tiers. Inside a window the path
+    starts at that window's row. Everywhere else it starts at DESKTOP —
+    which is what makes a dock tile, a desktop icon or a widget reveal at
+    all. It used to return null for anything outside a window, so half
+    the desktop picked fine on the canvas and lit nothing in the tree.
+    Null now means only what it should: not on the canvas. */
 function pathTo(el: HTMLElement): string[] | null {
   const win = el.closest<HTMLElement>('[data-window-id]')
-  if (!win) return null
+  const root = win ?? document.querySelector<HTMLElement>('[data-desktop-root]')
+  if (!root || !root.contains(el)) return null
   const steps: number[] = []
   let node: Element = el
-  while (node !== win) {
+  while (node !== root) {
     const parent = node.parentElement
     if (!parent) return null
     steps.unshift(Array.prototype.indexOf.call(parent.children, node))
     node = parent
   }
-  let acc = `win:${win.dataset.windowId}`
+  let acc = win ? `win:${win.dataset.windowId}` : DESKTOP_KEY
   const keys = [acc]
   for (const i of steps) {
     acc = `${acc}>${i}`
@@ -121,6 +141,8 @@ export function LayersPanel({
   const [tick, setTick] = useState(0)
   const treeRef = useRef<HTMLDivElement>(null)
   const wantFocus = useRef(false)
+  /** the row key a canvas pick is still waiting to be shown at */
+  const wantReveal = useRef<string | null>(null)
 
   /* Keying the re-read on the windows array was too narrow by half: the
      tree is a view of the LIVE DOM, and the DOM churns constantly without
@@ -157,6 +179,7 @@ export function LayersPanel({
     if (!picked) return
     const keys = pathTo(picked)
     if (!keys) return
+    wantReveal.current = keys[keys.length - 1]
     setExpanded((prev) => {
       // every ancestor opens; the row itself does not have to
       const next = new Set(prev)
@@ -179,13 +202,24 @@ export function LayersPanel({
     // z descending: the top of the list is the top of the pile
     const stack = windows.slice().sort((a, b) => b.z - a.z)
 
+    /* The furniture tier: every other meaningful child of the desktop
+       root. Windows are held out because they get the tier above; the
+       tool's own docks are already held out by usable(). */
+    const furniture = desktop
+      ? kidsOf(desktop, picked).filter((k) => !k.el.hasAttribute('data-window-id'))
+      : []
+
+    // windows and furniture are siblings under DESKTOP, so ARIA counts them
+    // as one set even though they read as two tiers
+    const branches = stack.length + furniture.length
+
     out.push({
       key: DESKTOP_KEY,
       el: desktop,
       label: t('inspect.desktop', skin),
       depth: 0,
-      expandable: stack.length > 0,
-      expanded: open && stack.length > 0,
+      expandable: branches > 0,
+      expanded: open && branches > 0,
       posinset: 1,
       setsize: 1,
     })
@@ -198,7 +232,13 @@ export function LayersPanel({
     const walk = (kids: Kid[], depth: number, prefix: string) => {
       kids.forEach(({ i, el: kid }, n) => {
         const key = `${prefix}>${i}`
-        const sub = depth < MAX_DEPTH ? kidsOf(kid) : []
+        /* Past MAX_DEPTH a window's internals stop being layers and start
+           being implementation — except on the ONE branch holding what is
+           actually selected. Cutting there doesn't tidy the tree, it
+           amputates the path to the pick, and the reveal then has nothing
+           to reveal. So the cap lifts along that branch and nowhere else. */
+        const onPath = !!picked && kid !== picked && kid.contains(picked)
+        const sub = depth < MAX_DEPTH || onPath ? kidsOf(kid, picked) : []
         const canOpen = sub.length > 0
         const isOpen = canOpen && expanded.has(key)
         out.push({
@@ -219,7 +259,7 @@ export function LayersPanel({
       const el = document.querySelector<HTMLElement>(`[data-window-id="${CSS.escape(w.id)}"]`)
       if (!el) return
       const key = `win:${w.id}`
-      const kids = kidsOf(el)
+      const kids = kidsOf(el, picked)
       const canOpen = kids.length > 0
       const isOpen = canOpen && expanded.has(key)
       out.push({
@@ -233,18 +273,65 @@ export function LayersPanel({
         expandable: canOpen,
         expanded: isOpen,
         posinset: n + 1,
-        setsize: stack.length,
+        setsize: branches,
+      })
+      if (isOpen) walk(kids, 2, key)
+    })
+
+    /* Keyed off the desktop root the same way pathTo roots a desktop
+       path, so a canvas pick on a dock tile reveals to exactly this row
+       rather than to a key nobody wrote. */
+    furniture.forEach(({ i, el }, n) => {
+      const key = `${DESKTOP_KEY}>${i}`
+      const kids = kidsOf(el, picked)
+      const canOpen = kids.length > 0
+      const isOpen = canOpen && expanded.has(key)
+      out.push({
+        key,
+        el,
+        label: labelFor(el),
+        depth: 1,
+        furniture: true,
+        expandable: canOpen,
+        expanded: isOpen,
+        posinset: stack.length + n + 1,
+        setsize: branches,
       })
       if (isOpen) walk(kids, 2, key)
     })
 
     return out
-  }, [windows, expanded, skin, tick])
+  }, [windows, expanded, skin, tick, picked])
 
   // the roving tabindex must always land somewhere real
   useEffect(() => {
     if (!rows.some((r) => r.key === activeKey)) setActiveKey(rows[0]?.key ?? DESKTOP_KEY)
   }, [rows, activeKey])
+
+  /* The second half of the reveal. Opening the ancestors is not enough:
+     the row can still be a screenful below the fold, and the roving
+     tabindex is still parked wherever the last keyboard walk left it, so
+     arrowing after a canvas pick jumped somewhere unrelated.
+
+     It has to happen here rather than in the effect that expands, because
+     the row does not exist until the tree has re-read the DOM and
+     re-rendered — a frame later at best, later than that when the pick
+     opened a window's markup. Until it exists the want is KEPT, and the
+     next re-read tries again.
+
+     Scrolled, never focused: the pointer is out on the canvas and pulling
+     the caret into the dock mid-click is a jump, not a reveal. */
+  useEffect(() => {
+    const key = wantReveal.current
+    if (!key) return
+    const row = treeRef.current?.querySelector<HTMLElement>(
+      `[data-row-key="${CSS.escape(key)}"]`,
+    )
+    if (!row) return
+    wantReveal.current = null
+    setActiveKey(key)
+    row.scrollIntoView({ block: 'nearest' })
+  }, [rows, picked])
 
   useEffect(() => {
     if (!wantFocus.current) return
@@ -353,7 +440,9 @@ export function LayersPanel({
         >
           {rows.map((row) => {
             const isPicked = !!row.el && row.el === picked
-            const isWindow = row.depth === 1
+            // furniture shares the depth but not the chrome: a dock rail is
+            // not an artboard, so it gets no window affordances
+            const isWindow = row.depth === 1 && !row.furniture
             return (
               <div
                 key={row.key}
@@ -368,6 +457,7 @@ export function LayersPanel({
                 className={styles.row}
                 data-picked={isPicked || undefined}
                 data-window={isWindow || undefined}
+                data-furniture={row.furniture || undefined}
                 data-focused={(isWindow && row.el?.dataset.windowId === focused) || undefined}
                 style={{ paddingLeft: `calc(var(--spacing-component-xs) + ${row.depth * 12}px)` }}
                 onPointerEnter={() => onHover(row.el)}

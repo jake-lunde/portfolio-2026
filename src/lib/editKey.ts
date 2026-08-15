@@ -1,12 +1,13 @@
 'use client'
 
-/* THE ARMING KEY — one shared secret, one storage slot, two modes.
+/* THE ARMING KEY — one shared secret, one storage slot, two proposals.
  *
- * EDIT.MODE (copy) and INSPECT.MODE's token SAVE both authenticate against
- * the same EDIT_MODE_KEY, verified server-side and timing-safe by
- * /api/copy-commit/verify. Arming once should therefore cover both, which
- * only works if they agree on where the key is parked — hence this module
- * rather than a string duplicated in two components.
+ * The inspector's live copy edit and its token SAVE both authenticate
+ * against the same EDIT_MODE_KEY, verified server-side and timing-safe by
+ * /api/copy-commit/verify. Arming once therefore covers both, which only
+ * works if they agree on where the key is parked — hence this module
+ * rather than a string duplicated in two components. The gate itself is
+ * one form in one place now (components/inspect/InspectorPanel).
  *
  * The key lives in sessionStorage: it dies with the tab, is never rendered,
  * never logged, and never leaves the machine except as the x-edit-key header

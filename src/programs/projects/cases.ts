@@ -41,10 +41,11 @@ export type CaseDef = {
   status: 'live' | 'soon'
   component?: ComponentType
   /** The MDX file in `content/` this case's prose is written in, if it has
-      been written. Case prose is NOT copy.json: clicking a paragraph with
-      INSPECT's EDIT tool will never reach it, so the tool reads this and
-      points at the file on GitHub instead (components/inspect/EditPanel).
-      Filename only — the folder is fixed. */
+      been written. Case prose is NOT copy.json: picking a paragraph in
+      INSPECT will never offer to rewrite it, so the panel reads this and
+      prints the file as a SOURCE pointer instead
+      (components/inspect/InspectorPanel). Filename only — the folder is
+      fixed. */
   source?: string
   /** build state, read by the shelf's in-development boxes (WIP-15) */
   progress?: { pct: number; phase: string }
