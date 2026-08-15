@@ -571,9 +571,27 @@ export function Icon({ name, size = 32 }: { name: IconName; size?: number }) {
       className={medieval ? styles.hasMedieval : undefined}
     >
       {pixel ? (
-        <g className={styles.glyphClassic} shapeRendering="crispEdges" stroke="none">
-          {pixel.paper && <path d={pixel.paper} fill="var(--surface)" />}
-          <path d={pixel.ink} fill="currentColor" />
+        <g className={styles.glyphClassic} shapeRendering="crispEdges" stroke="none" fill="currentColor">
+          {/* rest frame; when the icon has a hover cycle the frames ride
+              beside it as a strip, one frame per 32 units, and
+              Icon.module.css steps the strip across under any hovered
+              button/link — see `.frames` there */}
+          <path d={pixel.ink} className={pixel.frames ? styles.rest : undefined} />
+          {pixel.frames && (
+            <g
+              className={styles.frames}
+              style={
+                {
+                  '--px-n': pixel.frames.length,
+                  '--px-shift': `${-32 * (pixel.frames.length - 1)}px`,
+                } as React.CSSProperties
+              }
+            >
+              {pixel.frames.map((d, i) => (
+                <path key={i} d={d} transform={`translate(${i * 32} 0)`} />
+              ))}
+            </g>
+          )}
         </g>
       ) : (
         <g className={styles.glyphClassic}>{PATHS[name]}</g>

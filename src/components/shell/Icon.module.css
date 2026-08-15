@@ -15,3 +15,45 @@
 :global([data-skin='medieval']) .glyphMedieval {
   display: inline;
 }
+
+/* Pixel hover cycles (pixelIcons.ts FRAMES). The frames sit in a strip,
+   frame k at x = 32k inside the 32-unit viewBox, so all but one are
+   clipped away; hovering (or keyboard-focusing) any button or link the
+   icon lives in swaps the rest frame for the strip and steps it left
+   one frame per beat. steps(n, jump-none) holds every frame — first and
+   last included — for an equal share, so a 4-frame cycle is 4 equal
+   beats and the loop seam is frame 3 → frame 0, exactly the ping-pong or
+   restart each generator was authored for. The beat is the fade token:
+   slower than Lu's trot (110ms) because these are lids and pages, not
+   legs. Transform only, so a hovered dock never repaints the shell.
+   Reduced motion: the rest frame, always. */
+.frames {
+  display: none;
+}
+
+:is(button, a):is(:hover, :focus-visible) .rest {
+  display: none;
+}
+
+:is(button, a):is(:hover, :focus-visible) .frames {
+  display: inline;
+  animation: pxCycle calc(var(--duration-fade) * var(--px-n)) steps(var(--px-n), jump-none) infinite;
+}
+
+@keyframes pxCycle {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--px-shift));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(button, a):is(:hover, :focus-visible) .rest {
+    display: inline;
+  }
+  :is(button, a):is(:hover, :focus-visible) .frames {
+    display: none;
+  }
+}
