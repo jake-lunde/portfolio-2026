@@ -15,8 +15,9 @@ import type { IconName } from './Icon'
 
    Grids compile once at module load into rect-run <path> data. The line
    art in Icon.tsx stays the small-size tier (14px chrome) and the
-   fallback for anything not yet drawn here; medieval variants are a
-   different skin's language and keep their woodcut strokes.
+   fallback for anything not yet drawn here. The medieval skin has its own
+   bitmap tier — medievalPixelIcons.ts, woodblock plates on the same grid
+   contract — picked by [data-skin] the way the line-art variants were.
 
    MOTION. Bitmap art wants frame animation, not tweens: FRAMES (below
    the grids) derives a short cycle from each base grid — the lid lifts,
@@ -28,7 +29,7 @@ import type { IconName } from './Icon'
    next to the generator. */
 
 export type PixelGlyph = { ink: string; frames?: string[] }
-type Grid = string[]
+export type Grid = string[]
 
 export function runs(rows: string[], match: (ch: string) => boolean): string {
   let d = ''
@@ -48,7 +49,9 @@ export function runs(rows: string[], match: (ch: string) => boolean): string {
 
 const ink = (rows: Grid) => runs(rows, (c) => c === '#')
 
-/* Grid ops for FRAMES. Every op returns a new grid; none touch the base. */
+/* Grid ops for FRAMES. Every op returns a new grid; none touch the base.
+   Exported for the medieval tier (medievalPixelIcons.ts), which builds its
+   cycles from the same ops. */
 const cells = (g: Grid) => g.map((r) => [...r])
 const join = (c: string[][]) => c.map((r) => r.join(''))
 type Region = [x0: number, y0: number, x1: number, y1: number]
@@ -57,7 +60,7 @@ const ALL: Region = [0, 0, 31, 31]
 /** Move the cells inside `region` by (dx, dy). Cells that land outside
     `bounds` (default: the grid) are dropped — that is how the suggestion
     slips into its slot: the box lid is the bound. */
-function shift(g: Grid, dx: number, dy: number, region: Region = ALL, bounds: Region = ALL): Grid {
+export function shift(g: Grid, dx: number, dy: number, region: Region = ALL, bounds: Region = ALL): Grid {
   const c = cells(g)
   const [x0, y0, x1, y1] = region
   const [bx0, by0, bx1, by1] = bounds
@@ -73,18 +76,18 @@ function shift(g: Grid, dx: number, dy: number, region: Region = ALL, bounds: Re
   return join(c)
 }
 /** Set every cell of the rectangle to `ch` ('#' ink, 'o' clear). */
-function fill(g: Grid, x0: number, y0: number, x1: number, y1: number, ch = '#'): Grid {
+export function fill(g: Grid, x0: number, y0: number, x1: number, y1: number, ch = '#'): Grid {
   const c = cells(g)
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) c[y][x] = ch
   return join(c)
 }
 /** Stamp a small patch at (x, y): '#' ink, 'o' clear, ' ' leave alone. */
-function put(g: Grid, x: number, y: number, rows: string[]): Grid {
+export function put(g: Grid, x: number, y: number, rows: string[]): Grid {
   const c = cells(g)
   rows.forEach((r, j) => [...r].forEach((ch, i) => (ch !== ' ' ? (c[y + j][x + i] = ch) : null)))
   return join(c)
 }
-const dot = (g: Grid, x: number, y: number) => fill(g, x, y, x, y)
+export const dot = (g: Grid, x: number, y: number) => fill(g, x, y, x, y)
 const bounce = (g: Grid) => [g, shift(g, 0, -1), shift(g, 0, -2), shift(g, 0, -1)]
 
 const GRIDS: Partial<Record<IconName, string[]>> = {
