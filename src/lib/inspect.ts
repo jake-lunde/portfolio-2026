@@ -61,7 +61,13 @@ export type ChainEntry = { el: HTMLElement; label: string }
 /** Where in the repo this element is written — a pointer to search for,
     never a resolved path. See sourceOf() for what each kind claims. */
 export type SourceRow = {
-  kind: 'styles' | 'copy' | 'program'
+  /** `mdx` is the one kind this file does not produce: case prose lives in
+      a file named on the case registry, and reading that registry from
+      here would drag next/dynamic and every case component into an engine
+      that is meant to be DOM and arithmetic. The panel adds that row
+      (components/inspect/InspectorPanel); the shape is shared so it prints
+      through the same markup as the rest. */
+  kind: 'styles' | 'program' | 'mdx'
   /** the pointer as the panel prints it, e.g. `dock.module.css › .tile` */
   text: string
   /** the label of the ancestor it was read off, when it wasn't the pick */
@@ -494,10 +500,13 @@ export function ancestorChain(el: HTMLElement): ChainEntry[] {
      bundler wrote, and the bundler names that prefix after the file, or
      after the FOLDER when the file is an index.module.css. Two modules
      with the same basename in different folders also print the same;
-   · a copy id is a key, and the panel says which file keys live in. It
-     does not know whether the key resolved from base or from a skin slot;
    · a window id is a registry entry, and a program's markup lives in
      whatever component that entry points at, which this cannot see.
+
+   Copy is NOT here, though it used to be. A copy key gets a block of its
+   own in the panel with its slot, its current value and a way to rewrite
+   it, and printing the same key twice was the panel saying one thing in
+   two voices.
 
    Four style rows is the cap. A node with more module classes than that
    is a node whose fifth class is not what anyone came here to find. */
@@ -542,16 +551,6 @@ export function sourceOf(el: HTMLElement): SourceRow[] {
     }
   }
   for (const text of styles) rows.push({ kind: 'styles', text, via })
-
-  const copyHost = el.closest<HTMLElement>('[data-copy-id]')
-  const copyId = copyHost?.dataset.copyId
-  if (copyHost && copyId) {
-    rows.push({
-      kind: 'copy',
-      text: `copy.json › ${copyId}`,
-      via: copyHost === el ? null : labelFor(copyHost),
-    })
-  }
 
   const win = el.closest<HTMLElement>('[data-window-id]')
   const winId = win?.dataset.windowId

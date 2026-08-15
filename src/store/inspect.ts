@@ -24,19 +24,18 @@ import { create } from 'zustand'
  * unrelated modifiers: the header always says which one is resting in
  * your hand, and the key always says what happens if you reach past it.
  *
- * EDIT is the third tool and it sits OUTSIDE that bargain. It used to be
- * EDIT.MODE, a hidden program at /edit that took the whole desktop and
- * refused to share it with this one (SYS-99). Two tool modes fighting
- * over one desktop was never the shape: they are three tools in one hand
- * now. ALT does not reach for EDIT and EDIT does not borrow the others —
- * a momentary contenteditable would be a way to lose a line of copy.
+ * There were three for a while. EDIT.MODE (SYS-99) came in from its own
+ * program at /edit and stood here as a third segment, and Jake struck it:
+ * live copy editing is a thing you do TO A PICK, not a hand you have to
+ * put on first. It is an affordance in the inspector now — pick anything,
+ * rewrite it in place if it is copy, follow SOURCE if it is not (see
+ * components/inspect/useCopyEditing.ts).
  *
  * The tool is NOT sticky across entries: every way into the mode lands in
  * SELECT, because entering the tool is the act of pointing at something.
- * The one exception is a deep link that asks for a tool by name (/edit —
- * see programs/resolve.ts), which is why setOn takes one.
+ * setOn still takes one so a deep link can name it.
  */
-export type InspectTool = 'select' | 'operate' | 'edit'
+export type InspectTool = 'select' | 'operate'
 
 type InspectState = {
   on: boolean

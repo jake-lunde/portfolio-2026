@@ -1051,53 +1051,51 @@
   color: var(--accent);
 }
 
-/* ================= EDIT (right dock, third tool) =================
+/* ================= COPY (in the inspector) =================
    SYS-99 came in from its own program window, where it drew a floating
-   SAVE.CHANGES panel over the desktop. It is a dock now, so it borrows the
-   inspector's furniture wholesale: .panelHead, .panelBody, .section,
-   .head, .note, .keyRow's input and label, .resetAll for every secondary
-   button, .saveNote for the status line, .tokenRow for a diff row. What
-   is below is only what the copy editor needs that the inspector had no
-   use for. Tokens only, and the one system accent carries every
-   "armed / dirty" signal, same as it did in the program. */
+   SAVE.CHANGES panel over the desktop, and then from a third dock of its
+   own. It is a block on the reading now, so it borrows the inspector's
+   furniture wholesale: .section and .head for the block, .sourceRows /
+   .sourceRow / .sourceKind / .sourcePath for the key, slot and value,
+   .keyRow for the gate, .resetAll for every secondary button, .saveNote
+   for a status line, .tokenRow for a diff row. What is below is only what
+   the copy side needs that the inspector had no use for. Tokens only, and
+   the one system accent carries every "this is changed" signal, same as it
+   did in the program.
 
-.editGate {
+   PENDING mirrors .preview, deliberately: two banners at the top of the
+   panel saying the same kind of thing. The border is the accent rather
+   than the warning ink, which is the one difference between them — a
+   rewrite is a thing you meant, a live token override is a thing you are
+   only trying on. */
+
+.pending {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-component-xs);
+  margin-bottom: var(--spacing-component-md);
+  padding: var(--spacing-component-sm);
+  border: var(--border-width-default) solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-.editGate .keyInput {
-  align-self: stretch;
-  flex: none;
-}
-
-/* the armed line: the accent, a dot, and nothing else on it */
-.editArmed {
+/* the gate: a stacked block so a refused key answers under the field it
+   was typed into rather than beside it */
+.gate {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-component-xs);
-  margin: 0 0 var(--spacing-component-xs);
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  font-weight: var(--type-micro-weight);
-  letter-spacing: var(--type-micro-tracking);
-  line-height: var(--type-micro-leading);
-  color: var(--accent);
+  flex-direction: column;
 }
 
-.editDot {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
+/* the two secondary buttons that stand alone on a line rather than in a
+   row of actions */
+.copyEdit,
+.revertAll {
+  align-self: flex-start;
+  margin-top: var(--spacing-component-sm);
 }
 
-/* the two things that are not the diff and are not an error: no token on
-   this deployment, no key set at all. Same warning ground the inspector's
-   preview banner wears, for the same reason — it is a state, not a fault. */
+/* the one thing that is not the diff and is not an error: no key set at
+   all on this deployment. Same treatment the pending block wears, for the
+   same reason — it is a state, not a fault. */
 .editNotice {
   margin: var(--spacing-component-sm) 0 0;
   padding: var(--spacing-component-sm);
@@ -1195,24 +1193,6 @@
 }
 
 .editCommit:focus-visible {
-  outline: var(--border-width-strong) solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* SOURCE — the way out to the MDX. Ink with an underline, never the
-   accent: it is small type on --surface and the underline is what carries
-   the affordance (WCAG 1.4.1 wants more than hue anyway). */
-.sourceLink {
-  display: inline-block;
-  margin-top: var(--spacing-component-xs);
-  font-family: var(--mono);
-  font-size: var(--type-micro-size);
-  color: var(--content);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.sourceLink:focus-visible {
   outline: var(--border-width-strong) solid var(--accent);
   outline-offset: 2px;
 }

@@ -162,8 +162,9 @@ export function MenuBar() {
             on a word that was already the label. Word only.
 
             The copy editor used to refuse this button while it held the
-            desktop (SYS-99). It is INSPECT's third tool now, so there is
-            nothing left to refuse and no busy state to explain.
+            desktop (SYS-99). It rides inside INSPECT now, as an affordance
+            on a pick, so there is nothing left to refuse and no busy state
+            to explain.
 
             Round 4: restyled onto the skin switch's own chip (styles
             .skinTrigger, reused wholesale rather than duplicated) so the

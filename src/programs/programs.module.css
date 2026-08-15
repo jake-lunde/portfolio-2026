@@ -228,14 +228,17 @@
   }
 }
 
-/* EDIT.MODE types into the line in place — a moving target can't be
-   clicked into, so the crawl parks and the ghost copy steps out. */
-:global(body[data-editmode='on']) .focusCrawl {
+/* INSPECT is up: this line is a specimen, and a moving target can be
+   neither picked nor typed into. The crawl parks and the ghost copy steps
+   out. It used to be gated on EDIT.MODE's own body attribute, which went
+   away with the third tool — picking wants the line to hold still for
+   exactly the same reason editing did. */
+:global(body[data-inspectmode='on']) .focusCrawl {
   animation: none;
   transform: none;
 }
 
-:global(body[data-editmode='on']) .focusGhost {
+:global(body[data-inspectmode='on']) .focusGhost {
   display: none;
 }
 
