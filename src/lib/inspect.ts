@@ -58,6 +58,16 @@ export type EffectiveColors = {
 
 export type ChainEntry = { el: HTMLElement; label: string }
 
+/** Where in the repo this element is written — a pointer to search for,
+    never a resolved path. See sourceOf() for what each kind claims. */
+export type SourceRow = {
+  kind: 'styles' | 'copy' | 'program'
+  /** the pointer as the panel prints it, e.g. `dock.module.css › .tile` */
+  text: string
+  /** the label of the ancestor it was read off, when it wasn't the pick */
+  via: string | null
+}
+
 export type TypeInfo = {
   family: string
   size: string
@@ -86,6 +96,8 @@ export type Inspection = {
   typeVars: string[]
   spring: SpringInfo | null
   reskinned: boolean
+  /** the SOURCE block: which files to open to change this thing */
+  source: SourceRow[]
 }
 
 /* ---------------------------------------------------------------- probes */
@@ -408,9 +420,11 @@ export function effectiveColors(el: HTMLElement): EffectiveColors {
 
 /* ------------------------------------------------------- identity + chain */
 
-/* CSS-module classes ship as `Component_class__hash`. The middle is the
-   name the author wrote, and it's the only readable thing on the node. */
-const MODULE_CLASS_RE = /^[A-Za-z0-9]+_([A-Za-z0-9-]+)__[A-Za-z0-9-]+$/
+/* CSS-module classes ship as `File_class__hash`. The middle is the name
+   the author wrote and the head is the module it came from, and between
+   them they are the only readable thing on the node. The head used to be
+   thrown away; SOURCE reads it now, so both groups are captured. */
+const MODULE_CLASS_RE = /^([A-Za-z0-9]+)_([A-Za-z0-9-]+)__[A-Za-z0-9-]+$/
 
 function readableClass(el: HTMLElement): string | null {
   const raw = el.getAttribute('class')
@@ -420,7 +434,7 @@ function readableClass(el: HTMLElement): string | null {
   // one on the node — keep looking before settling for whatever leads
   for (const cls of classes) {
     const m = cls.match(MODULE_CLASS_RE)
-    if (m) return m[1]
+    if (m) return m[2]
   }
   return classes[0] ?? null
 }
@@ -458,6 +472,83 @@ export function ancestorChain(el: HTMLElement): ChainEntry[] {
     node = node.parentElement
   }
   return out
+}
+
+/* ------------------------------------------------------------- source */
+
+/* SOURCE answers the question the rest of the panel leaves hanging: fine,
+   so where do I go to change it? Everything here is a POINTER — a string
+   to paste into a repo search — and not a resolved path, because none of
+   it can be resolved from the browser:
+
+   · the module file name is reconstructed from the class prefix the
+     bundler wrote, and the bundler names that prefix after the file, or
+     after the FOLDER when the file is an index.module.css. Two modules
+     with the same basename in different folders also print the same;
+   · a copy id is a key, and the panel says which file keys live in. It
+     does not know whether the key resolved from base or from a skin slot;
+   · a window id is a registry entry, and a program's markup lives in
+     whatever component that entry points at, which this cannot see.
+
+   Four style rows is the cap. A node with more module classes than that
+   is a node whose fifth class is not what anyone came here to find. */
+
+const SOURCE_MAX = 4
+
+/** Every module stylesheet this node's own classList names, printed as a
+    file and the authored class inside it. */
+function moduleRowsOn(el: HTMLElement): string[] {
+  const raw = el.getAttribute('class')
+  if (!raw) return []
+  const out: string[] = []
+  for (const cls of raw.split(/\s+/).filter(Boolean)) {
+    const m = cls.match(MODULE_CLASS_RE)
+    if (!m) continue
+    const text = `${m[1]}.module.css › .${m[2]}`
+    if (!out.includes(text)) out.push(text)
+    if (out.length === SOURCE_MAX) break
+  }
+  return out
+}
+
+export function sourceOf(el: HTMLElement): SourceRow[] {
+  const rows: SourceRow[] = []
+
+  /* An unclassed wrapper is still being styled by something upstream, and
+     the nearest ancestor carrying a module class is the honest next stop.
+     The row says so rather than presenting a parent's file as the pick's
+     own. */
+  let styles = moduleRowsOn(el)
+  let via: string | null = null
+  if (styles.length === 0) {
+    let node = el.parentElement
+    while (node) {
+      const found = moduleRowsOn(node)
+      if (found.length > 0) {
+        styles = found
+        via = labelFor(node)
+        break
+      }
+      node = node.parentElement
+    }
+  }
+  for (const text of styles) rows.push({ kind: 'styles', text, via })
+
+  const copyHost = el.closest<HTMLElement>('[data-copy-id]')
+  const copyId = copyHost?.dataset.copyId
+  if (copyHost && copyId) {
+    rows.push({
+      kind: 'copy',
+      text: `copy.json › ${copyId}`,
+      via: copyHost === el ? null : labelFor(copyHost),
+    })
+  }
+
+  const win = el.closest<HTMLElement>('[data-window-id]')
+  const winId = win?.dataset.windowId
+  if (winId) rows.push({ kind: 'program', text: `registry.tsx › '${winId}'`, via: null })
+
+  return rows
 }
 
 /* ---------------------------------------------------------------- motion */
@@ -533,5 +624,6 @@ export function inspectElement(el: HTMLElement): Inspection {
     typeVars,
     spring: springFor(el),
     reskinned: isReskinned(el),
+    source: sourceOf(el),
   }
 }
