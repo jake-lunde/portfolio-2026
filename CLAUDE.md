@@ -6,8 +6,9 @@
 > session narrative, projects/tasks/rulings: the **jaique vault**
 > (`/Users/jake/jaique`, §3.6) — start `Atlas/Maps/LUNDE OS Map.md`,
 > Current state box. Crew doctrine: `CREW.md`. Token architecture:
-> `tokens/ARCHITECTURE.md`. Read HANDOFF.md + the Map's Current state
-> box at session start.
+> `tokens/ARCHITECTURE.md`. At session start read HANDOFF.md and run
+> `node scripts/vault-state.mjs` (the Map's Current state box, which is
+> Dataview over vault frontmatter, rendered for the terminal).
 
 ## 1. What this is
 
@@ -97,22 +98,26 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
    `Calendar/Notes/YYYY-MM-DD sNN.md` — claim sNN at session START with
    `node scripts/session-claim.mjs [--effort "<page>"] [--title "…"]`
    (atomic; stubs the note; never list-and-add-one — concurrent sessions
-   raced on the number). At end, replace the stub's "in progress" line
-   with the narrative; (b) **every session belongs to an effort** —
-   the feature page in `Efforts/On|Ongoing|Simmering|Sleeping/<emoji>
-   Name (E).md`. Find the one the work served; if the session started a
-   new feature, mint the page in `Efforts/On` (Jake's ruling 2026-08-14,
-   s64) from `x/Templates/Template, Properties, Effort (Kit).md` with
-   `up: [[LUNDE OS Map]]`, a `## Sessions` ledger, `## Shipped`,
-   `## Tasks`, and add it to the Map's Efforts box. Link both ways: the
-   session note carries `effort:` in frontmatter + a line under the
-   title; the effort's `## Sessions` gets `- [[YYYY-MM-DD sNN|sNN — what
-   happened]]`. Debts Jake dictates become task notes in
-   `Efforts/Notes/<Name>/` (`up:` the effort, `status: scoped`) — never
-   mint tasks he didn't ask for. Then update touched efforts/tasks AND
-   the **Current state box** on `Atlas/Maps/LUNDE OS Map.md`
-   (latest-session links, debts, cleanup owed — pointers to session
-   notes, not re-told narrative); commit the vault. Prod SHAs are never
+   raced on the number). At end, fill the frontmatter the stub left
+   blank — `summary:` (one line, what landed) and `open:` (list of what
+   waits on Jake) — then replace the "in progress" line with the
+   narrative. Those fields ARE the handoff: the Map's Current state box
+   and every effort's `## Sessions` are Dataview views over them (plus
+   task `up`/`status`); nobody hand-writes either; (b) **every session
+   belongs to an effort** — the feature page in
+   `Efforts/On|Ongoing|Simmering|Sleeping/<emoji> Name (E).md`. Find the
+   one the work served; if the session started a new feature, mint the
+   page in `Efforts/On` (Jake's ruling 2026-08-14, s64) from
+   `x/Templates/Template, Properties, Effort (Kit).md` with
+   `up: [[LUNDE OS Map]]`, the `## Sessions` Dataview block (copy from
+   any effort page), `## Shipped`, `## Tasks`, and add it to the Map's
+   Efforts box. The link is the session note's `effort:` frontmatter
+   (every effort the session touched) + a line under the title. Debts
+   Jake dictates become task notes in `Efforts/Notes/<Name>/` (`up:` the
+   effort, `status: scoped`) — never mint tasks he didn't ask for. Then
+   update touched efforts/tasks (Shipped, Rulings, task `status`) and the
+   Map box's hand-kept **Standing** bullets only if a debt changed;
+   commit the vault. Prod SHAs are never
    written down anywhere — prod = `origin/main` HEAD by definition; (c) repo
    `HANDOFF.md` holds near-static code-adjacent invariants ONLY
    (checkout/build law, guardrails, hooks) and is the sole handoff

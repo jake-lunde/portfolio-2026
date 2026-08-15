@@ -11,8 +11,9 @@
      node scripts/session-claim.mjs --effort "🖼️ Icon Design Update (E)" --title "the icons learn to move"
      node scripts/session-claim.mjs --dry            # show what would be claimed, write nothing
 
-   Prints the claimed id, the note path, and the ledger line to paste
-   into the effort's `## Sessions` at end of session. Never commits the
+   Prints the claimed id and the note path. The effort's `## Sessions`
+   and the Map's Current state box are Dataview views over this note's
+   frontmatter, so there is nothing to paste anywhere. Never commits the
    vault (that stays an end-of-session act, CLAUDE.md §4.4).
 
    Vault path: $JAIQUE_VAULT or ~/jaique. */
@@ -68,11 +69,15 @@ const branch = (() => {
 const effort = flag('effort')?.replace(/^\[\[|\]\]$/g, '').trim() || ''
 const title = flag('title')?.trim() || ''
 
-const stub = (id) => {
+// Frontmatter feeds the Dataview views on the LUNDE OS Map (Current state
+// box) and every effort page's ## Sessions, and scripts/vault-state.mjs
+// reads the same fields for the terminal. Fill `summary` and `open` at
+// session end; that IS the handoff now.
+const stub = (id, n) => {
   const effortFm = effort ? `effort:\n  - "[[${effort}]]"\n` : 'effort:\n'
   const effortLine = effort ? `Effort: [[${effort}]]\n\n` : ''
   return (
-    `---\n${effortFm}---\n` +
+    `---\nsession: ${n}\ndate: ${date}\nsummary: ""\nopen: []\n${effortFm}---\n` +
     `# ${date} ${id}${title ? ` — ${title}` : ''}\n\n` +
     effortLine +
     `_Session in progress — claimed ${date} ${clock}` +
@@ -101,11 +106,11 @@ for (let tries = 0; tries < 50; tries++, n++) {
     if (e.code === 'EEXIST') continue
     throw e
   }
-  writeSync(fd, stub(id))
+  writeSync(fd, stub(id, n))
   closeSync(fd)
   console.log(`claimed ${id}`)
   console.log(`note    ${path}`)
-  console.log(`ledger  - [[${date} ${id}|${id} — ${title || '<what happened>'}]]`)
+  console.log(`at end  fill \`summary:\` (one line) and \`open:\` (list of what waits on Jake) in the frontmatter, then the narrative`)
   if (!effort) console.log(`effort  (none given — set \`effort:\` in the note before session end)`)
   process.exit(0)
 }
