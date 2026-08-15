@@ -1,5 +1,7 @@
 import { TOKEN_TIERS } from './tokens.generated'
 import { SPRING_TOKENS } from './motion.generated'
+import { TEXT_INDEX } from './textIndex.generated'
+import { normalizeText, TEXT_KEY_LEN, TEXT_MIN_LEN } from './textNormalize'
 import { parseColor, hexToRgb, toHex, contrast, grade, type RGB } from './contrast'
 
 /* INSPECT.MODE's engine — SYS-21. Pure DOM + arithmetic, no React, so the
@@ -67,7 +69,7 @@ export type SourceRow = {
       that is meant to be DOM and arithmetic. The panel adds that row
       (components/inspect/InspectorPanel); the shape is shared so it prints
       through the same markup as the rest. */
-  kind: 'styles' | 'program' | 'mdx'
+  kind: 'styles' | 'program' | 'mdx' | 'text'
   /** the pointer as the panel prints it, e.g. `dock.module.css › .tile` */
   text: string
   /** the label of the ancestor it was read off, when it wasn't the pick */
@@ -529,8 +531,92 @@ function moduleRowsOn(el: HTMLElement): string[] {
   return out
 }
 
+/* ---- TEXT: which file writes these actual words ----
+
+   Jake, round 3: "there are still lines I can't find sources for. The
+   first paragraph in README, I see the path but no copy and no file. I
+   need that for ALL text."
+
+   Nothing on a text node survives the bundler, so the pointer cannot be
+   read off the DOM at all. It is built the other way round: at build time
+   scripts/build-text-index.mjs keys every string the source renders, and
+   here the pick's own text is keyed the same way and looked up
+   (src/lib/textNormalize.ts holds the one set of rules).
+
+   The match is by CONTENT, which is the honest limit: the same sentence
+   written in two files answers with two files, and the SOURCE note says
+   so rather than picking one and sounding certain.
+
+   This keeps the file's promise of DOM and arithmetic. The index is a
+   generated data module, the same kind of import as the token tiers and
+   the spring table above it. */
+
+/** Up to this many paths print in full; past it the row counts the rest. */
+const TEXT_PATHS_MAX = 3
+/** How far to climb looking for the run a fragment was indexed inside. */
+const TEXT_CLIMB_MAX = 4
+
+function lookupText(raw: string | null | undefined): string[] {
+  if (!raw) return []
+  const normalized = normalizeText(raw)
+  if (normalized.length < TEXT_MIN_LEN) return []
+  return TEXT_INDEX[normalized.slice(0, TEXT_KEY_LEN)] ?? []
+}
+
+/** Every file that writes the words this element is showing. */
+export function textSourceOf(el: HTMLElement): string[] {
+  const own = lookupText(el.textContent)
+  if (own.length > 0) return own
+
+  /* A node whose whole run missed can still carry an indexed line as one
+     of its own text children, with the rest of it made of other elements. */
+  for (const node of Array.from(el.childNodes)) {
+    if (node.nodeType !== Node.TEXT_NODE) continue
+    const hit = lookupText(node.nodeValue)
+    if (hit.length > 0) return hit
+  }
+
+  /* And the other direction: a span inside a paragraph holds a fragment
+     of a line that was indexed as the paragraph's whole run. Climb while
+     the ancestor still opens with the pick's own words, so the walk can
+     never wander up to a container and answer with something else. */
+  const mine = normalizeText(el.textContent ?? '')
+  if (mine.length >= TEXT_MIN_LEN) {
+    let node = el.parentElement
+    for (let step = 0; node && step < TEXT_CLIMB_MAX; step++) {
+      const whole = normalizeText(node.textContent ?? '')
+      if (!whole.startsWith(mine)) break
+      const hit = lookupText(whole)
+      if (hit.length > 0) return hit
+      node = node.parentElement
+    }
+  }
+
+  return []
+}
+
 export function sourceOf(el: HTMLElement): SourceRow[] {
   const rows: SourceRow[] = []
+
+  /* TEXT first: for a pick made of words it is the row that answers the
+     question, and STYLES and PROGRAM are the follow-ups.
+
+     Held back entirely when the pick sits on a copy key. The COPY block
+     below already names copy.json and offers to rewrite the line, and a
+     TEXT row beside it would point at the component that only renders
+     what that key says. One truth per line. */
+  if (!el.closest('[data-copy-id]')) {
+    const paths = textSourceOf(el)
+    if (paths.length > 0) {
+      const shown = paths.slice(0, TEXT_PATHS_MAX)
+      const rest = paths.length - shown.length
+      rows.push({
+        kind: 'text',
+        text: rest > 0 ? `${shown.join(' · ')} +${rest}` : shown.join(' · '),
+        via: null,
+      })
+    }
+  }
 
   /* An unclassed wrapper is still being styled by something upstream, and
      the nearest ancestor carrying a module class is the honest next stop.
