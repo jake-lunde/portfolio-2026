@@ -3,42 +3,43 @@
 import { useEffect, useRef } from 'react'
 
 /* Pixel Lou — Jake's toy poodle, hand-placed from the ref photos:
-   cream curls, dark eyes/nose, a hint of tongue. Faces right; flip with
-   CSS scaleX(-1). Rendered once to a canvas, scaled crisp. */
+   round head poof, drooping ear, curled plume tail, dark button eye and
+   nose, a hint of muzzle stain. Faces right; flip with CSS scaleX(-1).
+   Rendered once to a canvas, scaled crisp. */
 
 const C = '#F3ECDA' // cream curls
-const S = '#D9C7A4' // curl shading
+const S = '#D9C7A4' // curl shading / far legs
 const K = '#17150D' // eye / nose
-const P = '#F2A6C2' // tongue
 
-// 26 × 20 — . transparent
+// 28 × 21 — . transparent
 const MAP = [
-  '.................ccccc....',
-  '................ccccccc...',
-  '...............scccccccc..',
-  '...............ccccccccc..',
-  '.....ccc.......cccccccccc.',
-  '....ccccc......cckccccnnn.',
-  '.....ccc.......sccccccnnn.',
-  '......c...cccccssccccccp..',
-  '.........ccccccccsscccc...',
-  '......ccccccccccccsscc....',
-  '.....cccccccccccccccc.....',
-  '....scccccccccccccccc.....',
-  '....ccccccccccccccccc.....',
-  '....cccccccccccccccc......',
-  '.....ccs..ccs...ccs.......',
-  '.....ccc..ccc...ccc.......',
-  '.....ccc..ccc...ccc.......',
-  '.....ccc..ccc...ccc.......',
-  '....sccc..sccc..sccc......',
-  '..........................',
+  '...................cccccc...',
+  '.....ccc.........cccccccccc.',
+  '....ccccc.......ccscccccccc.',
+  '...ccc.cc.......csscccccccc.',
+  '...cc..cc......ccssccccccccc',
+  '....c.cc.......ccssccckccccc',
+  '.....cc........ccssccccccsnn',
+  '.....cc..ccccc..ccscccccssnn',
+  '.....ccccccccccccccccccccc..',
+  '....ccccccccccccccsscccc....',
+  '...cccccccccccccccccss......',
+  '...ccccccccccccccccs........',
+  '...cccccsccccccccc..........',
+  '...cccccccccccccccc.........',
+  '....ccccccccccccccc.........',
+  '....ccs..ss...ccc.ss........',
+  '....ccc..ss...ccc.ss........',
+  '....ccc..ss...ccc.ss........',
+  '....ccc.......ccc...........',
+  '....cccc......cccc..........',
+  '............................',
 ]
 
-const COLORS: Record<string, string> = { c: C, s: S, k: K, n: K, p: P }
+const COLORS: Record<string, string> = { c: C, s: S, k: K, n: K }
 
-export const LOU_W = 26
-export const LOU_H = 20
+export const LOU_W = 28
+export const LOU_H = 21
 
 export function LouSprite({ px = 5 }: { px?: number }) {
   const ref = useRef<HTMLCanvasElement>(null)
