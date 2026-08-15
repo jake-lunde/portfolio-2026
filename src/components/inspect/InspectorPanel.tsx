@@ -6,7 +6,14 @@ import { resolveCopy, t } from '@/content/copy'
 import { CopyText } from '@/content/CopyText'
 import { getCase } from '@/programs/projects/cases'
 import { clearEditKey, readEditKey } from '@/lib/editKey'
-import { labelFor, type ChainEntry, type Inspection } from '@/lib/inspect'
+import {
+  labelFor,
+  sourceText,
+  type ChainEntry,
+  type Inspection,
+  type SourcePart,
+} from '@/lib/inspect'
+import { editUrl } from '@/lib/repo'
 import { themeFor } from '@/lib/tokenEdit'
 import type { useCopyEditing } from './useCopyEditing'
 import { InfoTip } from './InfoTip'
@@ -86,6 +93,45 @@ import styles from './inspectShell.module.css'
    gate is ONE form serving both proposals, so it can hold a constant id. */
 const KEY_ID = 'inspect-key'
 const NOTE_ID = 'inspect-save-note'
+
+/** The one file every string on the desktop that has a key comes from. */
+const COPY_PATH = 'src/content/copy.json'
+
+/* ---- a SOURCE pointer, printed ----
+
+   Round 1 shipped these as plain text and Jake said no links, because a
+   pointer that cannot be resolved should not pretend to open anything.
+   The pointers resolve now, and his editing loop is GitHub itself: open
+   the file on main, type, and GitHub hands back a branch and a PR that
+   Vercel builds a preview for. So the file half of every row is a link
+   into that editor and the rest of the pointer stays plain text.
+
+   Selectable either way. A path is still a thing to copy and paste into a
+   repo search, and taking that away to gain a link would be a trade. */
+function SourcePointer({ parts }: { parts: SourcePart[] }) {
+  return (
+    <span className={styles.sourcePath}>
+      {parts.map((part, i) =>
+        part.path ? (
+          <a
+            key={i}
+            className={styles.sourceLink}
+            href={editUrl(part.path)}
+            target="_blank"
+            rel="noreferrer"
+            /* the visible text is a basename where the row prints one, so
+               the name announced is the whole path it stands for */
+            aria-label={part.text === part.path ? undefined : part.path}
+          >
+            {part.text}
+          </a>
+        ) : (
+          <span key={i}>{part.text}</span>
+        ),
+      )}
+    </span>
+  )
+}
 
 /* ---- PATH ----
 
@@ -225,7 +271,7 @@ export function InspectorPanel({
      prose it lands on exactly the file the MDX row already names. Two rows,
      one file, so the matched one gives way to the one that knows. */
   const sourceRows = (report?.source ?? []).filter(
-    (row) => !(row.kind === 'text' && !!mdx && row.text === `content/${mdx}`),
+    (row) => !(row.kind === 'text' && !!mdx && sourceText(row) === `content/${mdx}`),
   )
 
   const springKey = report?.spring ? `inspect.spring.${report.spring.name}` : null
@@ -632,11 +678,11 @@ export function InspectorPanel({
                 <div className={styles.sectionBody}>
                   <ul className={styles.sourceRows}>
                     {sourceRows.map((row) => (
-                      <li key={`${row.kind}|${row.text}`} className={styles.sourceRow}>
+                      <li key={`${row.kind}|${sourceText(row)}`} className={styles.sourceRow}>
                         <span className={styles.sourceKind}>
                           <CopyText k={`inspect.source.${row.kind}`} />
                         </span>
-                        <span className={styles.sourcePath}>{row.text}</span>
+                        <SourcePointer parts={row.parts} />
                         {row.via && (
                           <span className={styles.sourceVia}>
                             <CopyText k="inspect.source.via" /> {row.via}
@@ -651,7 +697,10 @@ export function InspectorPanel({
                         <span className={styles.sourceKind}>
                           <CopyText k="inspect.source.mdx" />
                         </span>
-                        <span className={styles.sourcePath}>{`content/${mdx}`}</span>
+                        <SourcePointer
+                          parts={[{ text: `content/${mdx}`, path: `content/${mdx}` }]}
+                        />
+
                       </li>
                     )}
                   </ul>
@@ -677,7 +726,14 @@ export function InspectorPanel({
                       <span className={styles.sourceKind}>
                         <CopyText k="inspect.copy.key" />
                       </span>
-                      <span className={styles.sourcePath}>{`copy.json › ${copyKey}`}</span>
+                      {/* the file opens in the editor like any SOURCE row,
+                          and the key beside it is the line to find in there */}
+                      <SourcePointer
+                        parts={[
+                          { text: 'copy.json', path: COPY_PATH },
+                          { text: ` › ${copyKey}`, path: null },
+                        ]}
+                      />
                       {copyVia && (
                         <span className={styles.sourceVia}>
                           <CopyText k="inspect.source.via" /> {copyVia}

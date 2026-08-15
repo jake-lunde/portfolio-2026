@@ -869,9 +869,10 @@
 }
 
 /* ---- SOURCE: where to go and edit this ----
-   Plain text, deliberately not links — these are strings to paste into a
-   repo search, and a link would promise a file that resolves. Selectable
-   for exactly that reason. */
+   Round 1 was plain text, because a pointer that could not be resolved had
+   no business promising to open anything. The paths resolve now, so the
+   file half of a row is a link into GitHub's editor. Still selectable: the
+   string is worth copying out whether or not it is worth clicking. */
 .sourceRows {
   list-style: none;
   display: flex;
@@ -903,6 +904,29 @@
 
 .sourceVia {
   color: var(--content-muted);
+}
+
+/* A path that resolved. Ink rather than accent, the same call .prLink
+   makes: a dense mono column running in a second colour reads as a warning
+   the panel did not mean. The affordance is the underline, dotted in
+   --border so a stack of rows stays quiet, firming up to solid ink on
+   hover and on focus. */
+.sourceLink {
+  color: var(--content);
+  text-decoration: underline dotted;
+  text-decoration-color: var(--border);
+  text-underline-offset: 2px;
+}
+
+.sourceLink:hover,
+.sourceLink:focus-visible {
+  text-decoration: underline solid;
+  text-decoration-color: var(--content);
+}
+
+.sourceLink:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* ---- TOKENS ---- */
