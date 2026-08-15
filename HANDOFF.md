@@ -33,5 +33,5 @@
   prettier.
 - **Skins & copy:** classic (light/dark) + medieval live; underwater
   stub. Copy layer live — merge `copy.json` at KEY level; never
-  force-push (Jake's EDIT.MODE commits land on main under you). EDIT =
-  INSPECT's third tool since s57.
+  force-push: live copy edits are a per-pick affordance in INSPECT's
+  inspector (COPY block) and still commit straight to main under you.
