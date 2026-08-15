@@ -120,9 +120,8 @@ export default function About() {
       </div>
       <Copy k="readme.eyebrow" as="p" className={styles.aboutEyebrow} />
       <p>
-        I&rsquo;m a product designer shipping production code — a design
-        engineer. Over ten years of product work in consumer
-        products, digital and physical, most recently leading design on
+        Oh hey, welcome to my site! I&rsquo;m Jake, a designer with over ten years of work in consumer and B2B products, digital and physical. Until recently I&rsquo;d be contributing from discovery to handoff, but now I span the whole product development lifecycle, even shipping production code. My affinity for tools has allowed me to become a design
+        engineer. Currently I&rsquo;m leading design on
         Greenlight&rsquo;s{' '}
         <a href="https://greenlight.com/family-hub" target="_blank" rel="noreferrer">
           Family Hub
@@ -130,9 +129,8 @@ export default function About() {
         and our investing product for kids.
       </p>
       <p>
-        This site is the argument: <span className="hl-pink">LUNDE&nbsp;OS</span>{' '}
-        is a small operating system I will continue designing and orchestrating
-        iteratively. I&rsquo;ve dreaded updating my website for years — new
+        Not to be grandiose, but this site is my testament: <span className="hl-pink">LUNDE&nbsp;OS</span>{' '}. It's a small operating system I will continue designing and orchestrating
+        iteratively. I&rsquo;ve dreaded updating my website for years, but new
         tools have truly made it a joy. I hope you like it. Open{' '}
         <a
           href={`${BASE}/cases`}
