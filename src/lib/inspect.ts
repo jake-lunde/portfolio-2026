@@ -1,6 +1,6 @@
 import { TOKEN_TIERS } from './tokens.generated'
 import { SPRING_TOKENS } from './motion.generated'
-import { TEXT_INDEX } from './textIndex.generated'
+import { MODULE_PATHS, TEXT_INDEX } from './textIndex.generated'
 import { normalizeText, TEXT_KEY_LEN, TEXT_MIN_LEN } from './textNormalize'
 import { parseColor, hexToRgb, toHex, contrast, grade, type RGB } from './contrast'
 
@@ -60,8 +60,15 @@ export type EffectiveColors = {
 
 export type ChainEntry = { el: HTMLElement; label: string }
 
-/** Where in the repo this element is written — a pointer to search for,
-    never a resolved path. See sourceOf() for what each kind claims. */
+/** One printed piece of a SOURCE row. A piece carrying a `path` is a file
+    the panel can open at GitHub's editor (src/lib/repo.ts); a piece with
+    none is the part of the pointer that names something INSIDE the file,
+    like a class or a window id, or the count of the files that did not
+    fit. */
+export type SourcePart = { text: string; path: string | null }
+
+/** Where in the repo this element is written. See sourceOf() for what each
+    kind claims and how sure it is. */
 export type SourceRow = {
   /** `mdx` is the one kind this file does not produce: case prose lives in
       a file named on the case registry, and reading that registry from
@@ -70,10 +77,15 @@ export type SourceRow = {
       (components/inspect/InspectorPanel); the shape is shared so it prints
       through the same markup as the rest. */
   kind: 'styles' | 'program' | 'mdx' | 'text'
-  /** the pointer as the panel prints it, e.g. `dock.module.css › .tile` */
-  text: string
+  /** the pointer in printing order, e.g. `dock.module.css` + ` › .tile` */
+  parts: SourcePart[]
   /** the label of the ancestor it was read off, when it wasn't the pick */
   via: string | null
+}
+
+/** A row's pointer as one string, for keys and for comparing two rows. */
+export function sourceText(row: SourceRow): string {
+  return row.parts.map((p) => p.text).join('')
 }
 
 export type TypeInfo = {
@@ -494,16 +506,16 @@ export function ancestorChain(el: HTMLElement): ChainEntry[] {
 /* ------------------------------------------------------------- source */
 
 /* SOURCE answers the question the rest of the panel leaves hanging: fine,
-   so where do I go to change it? Everything here is a POINTER — a string
-   to paste into a repo search — and not a resolved path, because none of
-   it can be resolved from the browser:
+   so where do I go to change it? A row that lands on one repo path becomes
+   a link into GitHub's editor, so the answer is a click rather than a
+   search. What the browser knows on its own is only ever a NAME:
 
    · the module file name is reconstructed from the class prefix the
-     bundler wrote, and the bundler names that prefix after the file, or
-     after the FOLDER when the file is an index.module.css. Two modules
-     with the same basename in different folders also print the same;
-   · a window id is a registry entry, and a program's markup lives in
-     whatever component that entry points at, which this cannot see.
+     bundler wrote, and the folder it sits in comes from MODULE_PATHS in
+     the build's index. Two modules sharing a basename resolve to two
+     candidates and the row prints both;
+   · a window id is a registry entry, so the row links the registry rather
+     than the program's own component, which this cannot see.
 
    Copy is NOT here, though it used to be. A copy key gets a block of its
    own in the panel with its slot, its current value and a way to rewrite
@@ -515,17 +527,47 @@ export function ancestorChain(el: HTMLElement): ChainEntry[] {
 
 const SOURCE_MAX = 4
 
+/** The file every window on the desktop is declared in. */
+const REGISTRY_PATH = 'src/programs/registry.tsx'
+
+/** Candidates printed when one basename belongs to more than one file. */
+const MODULE_PATHS_MAX = 3
+
+/** The file half of a STYLES row: the name, resolved to where it lives if
+    the build could see it. A miss prints the bare name, which is what this
+    row printed before there was a map at all. */
+function modulePathParts(file: string): SourcePart[] {
+  const paths = MODULE_PATHS[file] ?? []
+  if (paths.length === 0) return [{ text: file, path: null }]
+  if (paths.length === 1) return [{ text: file, path: paths[0] }]
+
+  /* Ambiguous, so every candidate prints in full. Guessing one would be the
+     panel sounding sure about the one thing it cannot check. */
+  const parts: SourcePart[] = []
+  for (const path of paths.slice(0, MODULE_PATHS_MAX)) {
+    if (parts.length > 0) parts.push({ text: ' · ', path: null })
+    parts.push({ text: path, path })
+  }
+  const rest = paths.length - MODULE_PATHS_MAX
+  if (rest > 0) parts.push({ text: ` +${rest}`, path: null })
+  return parts
+}
+
 /** Every module stylesheet this node's own classList names, printed as a
     file and the authored class inside it. */
-function moduleRowsOn(el: HTMLElement): string[] {
+function moduleRowsOn(el: HTMLElement): SourcePart[][] {
   const raw = el.getAttribute('class')
   if (!raw) return []
-  const out: string[] = []
+  const out: SourcePart[][] = []
+  const seen = new Set<string>()
   for (const cls of raw.split(/\s+/).filter(Boolean)) {
     const m = cls.match(MODULE_CLASS_RE)
     if (!m) continue
-    const text = `${m[1]}.module.css › .${m[2]}`
-    if (!out.includes(text)) out.push(text)
+    const file = `${m[1]}.module.css`
+    const tail = ` › .${m[2]}`
+    if (seen.has(file + tail)) continue
+    seen.add(file + tail)
+    out.push([...modulePathParts(file), { text: tail, path: null }])
     if (out.length === SOURCE_MAX) break
   }
   return out
@@ -608,13 +650,14 @@ export function sourceOf(el: HTMLElement): SourceRow[] {
   if (!el.closest('[data-copy-id]')) {
     const paths = textSourceOf(el)
     if (paths.length > 0) {
-      const shown = paths.slice(0, TEXT_PATHS_MAX)
-      const rest = paths.length - shown.length
-      rows.push({
-        kind: 'text',
-        text: rest > 0 ? `${shown.join(' · ')} +${rest}` : shown.join(' · '),
-        via: null,
-      })
+      const parts: SourcePart[] = []
+      for (const path of paths.slice(0, TEXT_PATHS_MAX)) {
+        if (parts.length > 0) parts.push({ text: ' · ', path: null })
+        parts.push({ text: path, path })
+      }
+      const rest = paths.length - TEXT_PATHS_MAX
+      if (rest > 0) parts.push({ text: ` +${rest}`, path: null })
+      rows.push({ kind: 'text', parts, via: null })
     }
   }
 
@@ -636,11 +679,20 @@ export function sourceOf(el: HTMLElement): SourceRow[] {
       node = node.parentElement
     }
   }
-  for (const text of styles) rows.push({ kind: 'styles', text, via })
+  for (const parts of styles) rows.push({ kind: 'styles', parts, via })
 
   const win = el.closest<HTMLElement>('[data-window-id]')
   const winId = win?.dataset.windowId
-  if (winId) rows.push({ kind: 'program', text: `registry.tsx › '${winId}'`, via: null })
+  if (winId) {
+    rows.push({
+      kind: 'program',
+      parts: [
+        { text: 'registry.tsx', path: REGISTRY_PATH },
+        { text: ` › '${winId}'`, path: null },
+      ],
+      via: null,
+    })
+  }
 
   return rows
 }

@@ -16,7 +16,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import ts from 'typescript'
@@ -36,16 +36,27 @@ const { normalizeText, textKey, TEXT_KEY_LEN, TEXT_MIN_LEN } = await import(
 )
 
 /* The generated module re-exports TEXT_KEY_LEN from the normalizer, which
-   is a relative import a data: URL cannot follow. The index itself is a
-   plain object literal, so it is read as text and parsed. */
+   is a relative import a data: URL cannot follow. Each table in it is a
+   plain object literal, so they are read as text and parsed. The slice is
+   bounded at the closing brace in column zero: the file holds more than
+   one table now, and an open-ended slice would swallow the next one. */
 const generated = src('src/lib/textIndex.generated.ts')
-const TEXT_INDEX = JSON.parse(
-  generated
-    .slice(generated.indexOf('{', generated.indexOf('TEXT_INDEX')))
-    .trim()
-    // the file keeps the house trailing comma; JSON does not take one
-    .replace(/,\s*}$/, '}'),
-)
+
+function table(name) {
+  const open = generated.indexOf('{', generated.indexOf(`export const ${name}`))
+  const close = generated.indexOf('\n}', open)
+  assert.ok(open > 0 && close > open, `no ${name} in the generated index`)
+  return JSON.parse(
+    generated
+      .slice(open, close + 2)
+      .trim()
+      // the file keeps the house trailing comma; JSON does not take one
+      .replace(/,\s*}$/, '}'),
+  )
+}
+
+const TEXT_INDEX = table('TEXT_INDEX')
+const MODULE_PATHS = table('MODULE_PATHS')
 
 /* ------------------------------------------------------------ the seam */
 
@@ -117,6 +128,37 @@ test('every value is a repo-relative path, listed once', () => {
     assert.equal(new Set(files).size, files.length, `duplicate file for ${key}`)
     for (const file of files) {
       assert.ok(/^(src|content)\//.test(file), `not a source path: ${file}`)
+    }
+  }
+})
+
+/* A server route's strings never reach a node anybody can pick, so a
+   pointer at one is a wrong answer waiting to be given. */
+test('no server route is in the index', () => {
+  for (const [key, files] of Object.entries(TEXT_INDEX)) {
+    for (const file of files) {
+      assert.ok(!file.startsWith('src/app/api/'), `${key} points at a server route`)
+    }
+  }
+})
+
+/* ------------------------------------------------------ module stylesheets */
+
+/* SOURCE links a STYLES row by looking its basename up here, so a key that
+   is not a basename, or a path that no longer exists, is a row that quietly
+   stops resolving. The failure is as silent as the string index's. */
+test('every module stylesheet maps to files that exist and match the name', () => {
+  const entries = Object.entries(MODULE_PATHS)
+  assert.ok(entries.length > 0, 'no module stylesheets were indexed')
+  for (const [name, files] of entries) {
+    assert.ok(name.endsWith('.module.css'), `not a stylesheet name: ${name}`)
+    assert.ok(!name.includes('/'), `a key is a basename, not a path: ${name}`)
+    assert.ok(Array.isArray(files) && files.length > 0, `no file for ${name}`)
+    assert.equal(new Set(files).size, files.length, `duplicate file for ${name}`)
+    for (const file of files) {
+      assert.ok(file.startsWith('src/'), `not a source path: ${file}`)
+      assert.ok(file.endsWith(`/${name}`), `${file} is not named ${name}`)
+      assert.ok(existsSync(resolve(here, '..', file)), `missing file: ${file}`)
     }
   }
 })

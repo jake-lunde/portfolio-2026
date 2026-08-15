@@ -113,7 +113,7 @@
   "inspect.section.tokens": "TOKENS",
   "inspect.section.type": "TYPE",
   "inspect.source.mdx": "MDX",
-  "inspect.source.note": "POINTERS TO SEARCH FOR. THE TOOL CANNOT RESOLVE A PATH FROM THE BROWSER. TEXT IS MATCHED BY THE WORDS THEMSELVES, SO A LINE WRITTEN IN TWO FILES LISTS BOTH.",
+  "inspect.source.note": "THE FILES BEHIND THIS PICK. TEXT IS MATCHED BY THE WORDS THEMSELVES, SO A LINE WRITTEN IN TWO FILES LISTS BOTH. A PATH OPENS GITHUB'S EDITOR ON MAIN, WHERE AN EDIT BECOMES A BRANCH AND A PULL REQUEST.",
   "inspect.source.program": "PROGRAM",
   "inspect.source.styles": "STYLES",
   "inspect.source.text": "TEXT",

@@ -13,6 +13,7 @@ import {
   type TokenTree,
 } from '@/lib/tokenEdit'
 import { PALETTE } from '@/lib/palette'
+import { REPO_SLUG as DEFAULT_REPO } from '@/lib/repo'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -37,7 +38,7 @@ export const dynamic = 'force-dynamic'
    The secret and GITHUB_COPY_TOKEN never ship to the client and are never
    logged or echoed; GitHub's own error bodies are never forwarded either. */
 
-const REPO_SLUG = process.env.GITHUB_COPY_REPO ?? 'jake-lunde/portfolio-2026'
+const REPO_SLUG = process.env.GITHUB_COPY_REPO ?? DEFAULT_REPO
 const BASE_BRANCH = 'main'
 /** One long-lived branch, like the Figma bridge's — a fresh branch per nudge
     would litter the repo with one-line PRs nobody closes. */

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { timingSafeEqual } from 'node:crypto'
+import { REPO_SLUG } from '@/lib/repo'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -13,7 +14,7 @@ export const dynamic = 'force-dynamic'
    logged or echoed in an error body. Commit auth: GITHUB_COPY_TOKEN
    (server-only). Repo: GITHUB_COPY_REPO ("owner/repo") or the fallback. */
 
-const REPO = process.env.GITHUB_COPY_REPO ?? 'jake-lunde/portfolio-2026'
+const REPO = process.env.GITHUB_COPY_REPO ?? REPO_SLUG
 const FILE_PATH = 'src/content/copy.json'
 const BRANCH = 'main'
 const GH = 'https://api.github.com'
