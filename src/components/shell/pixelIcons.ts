@@ -30,7 +30,7 @@ import type { IconName } from './Icon'
 export type PixelGlyph = { ink: string; frames?: string[] }
 type Grid = string[]
 
-function runs(rows: string[], match: (ch: string) => boolean): string {
+export function runs(rows: string[], match: (ch: string) => boolean): string {
   let d = ''
   rows.forEach((row, y) => {
     let x = 0

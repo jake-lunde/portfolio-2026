@@ -6,12 +6,33 @@
    replaces. Since the motion pass the 3× sits in a button, so hovering
    it runs the icon's cycle, and every frame of that cycle is laid out
    under it at 2× — the strip is the thing to judge for stray pixels.
+   Below the icons: the folder media (mediaSprites.ts) at 1× and 3× with
+   an icon on the label, the way Folder.tsx composes them.
    Delete or keep at Jake's pleasure. */
 
 import { Icon, type IconName } from '@/components/shell/Icon'
 import { PIXEL } from '@/components/shell/pixelIcons'
+import { MEDIA, type MediaKind } from '@/components/shell/mediaSprites'
 
 const NAMES = Object.keys(PIXEL) as IconName[]
+const MEDIA_PROOF: [MediaKind, IconName][] = [
+  ['tape', 'ipod'],
+  ['cart', 'camera'],
+]
+
+function Sprite({ kind, icon, scale }: { kind: MediaKind; icon: IconName; scale: number }) {
+  const m = MEDIA[kind]
+  return (
+    <span style={{ position: 'relative', display: 'block', width: m.w * scale, height: m.h * scale }}>
+      <svg width={m.w * scale} height={m.h * scale} viewBox={`0 0 ${m.w} ${m.h}`} aria-hidden="true">
+        <path d={m.ink} fill="currentColor" shapeRendering="crispEdges" />
+      </svg>
+      <span style={{ position: 'absolute', left: m.label.x * scale, top: m.label.y * scale, lineHeight: 0 }}>
+        <Icon name={icon} size={32 * scale} />
+      </span>
+    </span>
+  )
+}
 
 function Frame({ d, size }: { d: string; size: number }) {
   return (
@@ -64,6 +85,25 @@ export default function IconProof() {
             </div>
           )
         })}
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, marginTop: 40 }}>
+        {MEDIA_PROOF.map(([kind, icon]) => (
+          <div
+            key={kind}
+            data-media={kind}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: 16, border: '1px solid var(--border)' }}
+          >
+            <button
+              type="button"
+              style={{ display: 'inline-flex', padding: 0, background: 'none', border: 0, color: 'inherit' }}
+              aria-label={`${kind} at 3×, hover to play the label`}
+            >
+              <Sprite kind={kind} icon={icon} scale={3} />
+            </button>
+            <Sprite kind={kind} icon={icon} scale={1} />
+            <code style={{ fontFamily: 'var(--mono)', fontSize: 11 }}>{kind}</code>
+          </div>
+        ))}
       </div>
     </main>
   )

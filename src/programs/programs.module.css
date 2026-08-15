@@ -635,6 +635,102 @@
   transform: translateY(1px);
 }
 
+/* Media in a slot (Folder.tsx `case`). The slot is the rack/shelf's share
+   of the item: a front lip across the bottom hides the last 8px of the
+   sprite at rest — the tape's reels, the cart's connector — and hover
+   pulls the media up past it (transform only, tap-length, house ease),
+   :active seats it back for the click. The rack adds slot dividers so
+   three tapes read as a rack, not three tapes; the shelf is just the lip.
+   Headroom above the sprite keeps the eject inside the button. */
+.slot {
+  position: relative;
+  display: block;
+  padding-top: 8px;
+}
+
+.slot::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 8px;
+  background: var(--surface-raised);
+  border-top: var(--border-width-default) solid var(--content);
+}
+
+.folderGrid[data-case='rack'] .slot {
+  padding-inline: 8px;
+}
+
+/* the rack's lip is lower: it hides the tape's bottom band, not its reels */
+.folderGrid[data-case='rack'] .slot::after {
+  height: 6px;
+}
+
+.folderGrid[data-case='rack'] .slot::before {
+  content: '';
+  position: absolute;
+  inset: 12px 0 0;
+  border-left: var(--border-width-subtle) solid var(--border);
+}
+
+.folderGrid[data-case='rack'] .folderItem:last-child .slot::before {
+  border-right: var(--border-width-subtle) solid var(--border);
+}
+
+.folderGrid[data-case='shelf'] .slot {
+  padding-inline: 16px;
+}
+
+/* one shelf, not four trays: the carts' tracks close up and each lip
+   bleeds across the item padding so the line runs unbroken */
+.folderGrid[data-case='shelf'] {
+  column-gap: 0;
+}
+
+.folderGrid[data-case='shelf'] .slot::after {
+  left: -4px;
+  right: -4px;
+}
+
+.media {
+  position: relative;
+  display: block;
+  color: var(--content);
+  transition: transform var(--duration-tap) ease;
+}
+
+.mediaSprite {
+  display: block;
+}
+
+.mediaLabel {
+  position: absolute;
+  display: block;
+  line-height: 0;
+}
+
+.folderItem:hover .media,
+.folderItem:focus-visible .media {
+  transform: translateY(-8px);
+}
+
+.folderItem:active .media {
+  transform: translateY(0);
+}
+
+/* the sprite is the thing that presses, not the icon inside it */
+.folderItem:active .media svg {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media {
+    transition: none;
+  }
+}
+
 .folderLabel {
   font-family: var(--mono);
   font-size: var(--text-label);
