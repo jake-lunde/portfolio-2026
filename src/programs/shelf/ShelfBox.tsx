@@ -188,7 +188,8 @@ export function ShelfBox({
      keeping the video out of the SSR payload keeps the shell lean and the
      first paint the printed art, which is the poster frame anyway. */
   useEffect(() => setLive(true), [])
-  const film = shipped && box?.video && live && !reduced ? box.video : null
+  const filmSrc = box?.shelfVideo ?? box?.video
+  const film = shipped && filmSrc && live && !reduced ? filmSrc : null
 
   /* WHAT THE PLATE PRINTS AT REST (pass 10): the art, on all four boxes.
      The self-hosted films made the pass-9 loader's job disappear — a native

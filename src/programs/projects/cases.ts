@@ -117,6 +117,11 @@ export type CaseDef = {
         cover it was never able to have. The art below is its poster; the
         whole thing is skipped under reduced motion. */
     video?: string
+    /** shelf-only override of `video` — ShelfBox falls back to `video` when
+        this is absent. HubPlayer (the desktop's own boot-open player) always
+        reads `video` directly, so this lets the shelf cover run a different
+        cut without touching what's already running on the desktop. */
+    shelfVideo?: string
     /** THE BACK PANEL'S SYSTEM REQUIREMENTS — exactly three rows.
 
         Not a list that happens to be short: a ledger, and the ledger is
@@ -187,8 +192,13 @@ export const CASES: CaseDef[] = [
          reduced-motion cover, and the face any failure rests on. */
       art: { src: '/case/family-hub/box-art.webp', w: 1200, h: 727 },
       og: { src: '/case/family-hub/og.jpg', w: 1200, h: 727 },
-      /* the launch film, the same cut plate 11 runs in the case study */
+      /* the launch film, the same cut plate 11 runs in the case study —
+         and what the desktop's HubPlayer always plays */
       video: '/case/family-hub/box-film.mp4',
+      /* the shelf's own cut — the 3D product demo, baked through the same
+         ntsc-rs dub (scripts/ntsc-bake.mjs) so it matches the other covers'
+         look. Shelf-only: HubPlayer keeps `video` above untouched. */
+      shelfVideo: '/case/family-hub/shelf-film.mp4',
       /* the reference cover — this is the one Jake drew, so it wears the
          treatment he drew it in */
       coverVariant: 'figma',
