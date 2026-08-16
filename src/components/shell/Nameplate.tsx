@@ -16,13 +16,19 @@ import styles from './shell.module.css'
    rule. This is that box, smaller, and it stays on the desk instead of
    hiding behind the Apple menu.
 
-   Two layouts, one markup. On the desktop it is a narrow plaque sitting
-   in the icon column right under README, 116px, a hair past the icons,
-   so it reads as furniture of that column and not a widget set down on
-   the desk. Narrow on purpose: README boots at x 140 (registry.tsx) and
-   anything wider than that strip would slide under the window. Below
-   720px the launcher has no windows, so the plaque opens out into the
-   wide About box proper, full width above the grid.
+   Layout is Jake's mockup (s74): his portrait up top, dithered in the
+   system accent, JAKE LUNDE centred under it in the display face, a
+   rule, then the ROLE and CONTACT rows. Tall and narrow, so it lives on
+   the right rail, bottom corner, under the pinned photo, the one column
+   on the desk that already holds a picture. Below 720px the launcher has
+   no windows, so the plaque turns sideways into the wide About box,
+   portrait on the left, full width above the grid.
+
+   The portrait is /plaque-portrait.png, an alpha mask cut from Jake's
+   /nameplate.png dither (blue pixels opaque, paper transparent), painted
+   in --accent through mask-image so it takes theme and skin for free,
+   the same trick as the house mark. Re-cut it from a new dither with
+   scripts/plaque-portrait.py if the photo ever changes.
 
    Every string is a copy key (nameplate.*), so EDIT.MODE can retitle the
    plaque like everything else. No skin slots: the medieval voice leaves
@@ -45,7 +51,8 @@ export function Nameplate() {
   return (
     <aside className={styles.nameplate} aria-label="About this machine">
       <div className={styles.plateHead}>
-        <span className={styles.plateMark} aria-hidden="true" />
+        {/* decorative: the plaque names him in text right under it */}
+        <span className={styles.platePortrait} aria-hidden="true" />
         <Copy k="nameplate.name" as="div" className={styles.plateName} />
       </div>
       <dl className={styles.plateRows}>
