@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { Stamp } from '@/components/primitives/Stamp'
 import { metric } from '@/lib/metrics'
@@ -107,8 +107,11 @@ export default function Puzzle() {
   const [done, setDone] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [board, setBoard] = useState<Record<string, Score[]>>({})
+  const [wrapW, setWrapW] = useState(BOARD_W)
   const zTop = useRef(20)
-  const drag = useRef<{ id: number; ox: number; oy: number } | null>(null)
+  const drag = useRef<{ id: number; ox: number; oy: number; s: number } | null>(null)
+  const wrapRef = useRef<HTMLDivElement | null>(null)
+  const boardRef = useRef<HTMLDivElement | null>(null)
   const edges = useRef<{ h: number[][]; v: number[][] } | null>(null)
   const posterRef = useRef<HTMLCanvasElement | null>(null)
   const startedAt = useRef<number | null>(null)
@@ -123,6 +126,26 @@ export default function Puzzle() {
       setPuzzleIdx(0)
     }
   }, [skin])
+
+  // the board is fixed 600×480 geometry; on a phone there isn't that much
+  // room, so measure the space the window actually gives us and scale the
+  // whole board down to fit. One transform, no per-frame layout — piece
+  // coordinates stay in board units and pointer deltas divide by the
+  // measured scale so a drag still tracks the finger 1:1.
+  useLayoutEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    setWrapW(el.clientWidth || BOARD_W)
+    const ro = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width
+      if (w > 0) setWrapW(w)
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const scale = Math.min(1, wrapW / BOARD_W)
+  const boardOffset = Math.max(0, (wrapW - BOARD_W * scale) / 2)
 
   const puzzle = puzzles[puzzleIdx] ?? puzzles[0]
 
@@ -229,16 +252,20 @@ export default function Puzzle() {
     }
     ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
     ;(e.currentTarget as HTMLElement).dataset.dragging = '1'
-    drag.current = { id, ox: e.clientX - p.x, oy: e.clientY - p.y }
+    // read the live scale off the DOM so any ancestor transform (the
+    // window's own open animation included) is folded in
+    const rect = boardRef.current?.getBoundingClientRect()
+    const s = rect && rect.width > 0 ? rect.width / BOARD_W : 1
+    drag.current = { id, ox: e.clientX - p.x * s, oy: e.clientY - p.y * s, s }
     zTop.current += 1
     setPieces((cur) => cur!.map((x) => (x.id === id ? { ...x, z: zTop.current } : x)))
   }
 
   const onMove = (e: React.PointerEvent) => {
     if (!drag.current) return
-    const { id, ox, oy } = drag.current
-    const x = e.clientX - ox
-    const y = e.clientY - oy
+    const { id, ox, oy, s } = drag.current
+    const x = (e.clientX - ox) / s
+    const y = (e.clientY - oy) / s
     setPieces((cur) => cur!.map((p) => (p.id === id ? { ...p, x, y } : p)))
   }
 
@@ -283,7 +310,11 @@ export default function Puzzle() {
 
   const onUp = () => {
     if (!drag.current || !pieces) return
-    const { id } = drag.current
+    const { id, s } = drag.current
+    // SNAP is a screen-pixel tolerance; scaled down, board units cover less
+    // screen, so widen it to keep a thumb as accurate as a mouse (capped
+    // well short of half a piece so neighbours never compete)
+    const snap = Math.min(SNAP / s, PS * 0.35)
     const el = document.getElementById(`pz-${id}`) as HTMLElement | null
     if (el) delete el.dataset.dragging
     drag.current = null
@@ -292,7 +323,7 @@ export default function Puzzle() {
         if (p.id !== id) return p
         const tx = TARGET_X + p.c * PS - PAD
         const ty = TARGET_Y + p.r * PS - PAD
-        if (Math.abs(p.x - tx) < SNAP && Math.abs(p.y - ty) < SNAP) {
+        if (Math.abs(p.x - tx) < snap && Math.abs(p.y - ty) < snap) {
           sfx.tap()
           return { ...p, x: tx, y: ty, locked: true, z: 5 }
         }
@@ -344,53 +375,60 @@ export default function Puzzle() {
         </button>
       </div>
 
-      <div
-        className={styles.board}
-        style={{ width: BOARD_W, height: BOARD_H }}
-        onPointerMove={onMove}
-        onPointerUp={onUp}
-      >
+      <div className={styles.boardWrap} ref={wrapRef} style={{ height: BOARD_H * scale }}>
         <div
-          className={styles.tray}
-          style={{ left: TARGET_X, top: TARGET_Y, width: IMG_W, height: IMG_H }}
-          aria-hidden="true"
-        />
-        {pieces?.map((p) => (
-          <canvas
-            key={`${puzzle.id}-${p.id}`}
-            id={`pz-${p.id}`}
-            width={PS + PAD * 2}
-            height={PS + PAD * 2}
-            className={styles.piece}
-            data-locked={p.locked || undefined}
-            style={{ left: p.x, top: p.y, zIndex: p.z }}
-            onPointerDown={(e) => onDown(e, p.id)}
-            role="button"
-            aria-label={`Puzzle piece row ${p.r + 1}, column ${p.c + 1}${p.locked ? ', placed' : ''}`}
+          className={styles.board}
+          ref={boardRef}
+          style={{
+            width: BOARD_W,
+            height: BOARD_H,
+            transform: `translateX(${boardOffset}px) scale(${scale})`,
+          }}
+          onPointerMove={onMove}
+          onPointerUp={onUp}
+        >
+          <div
+            className={styles.tray}
+            style={{ left: TARGET_X, top: TARGET_Y, width: IMG_W, height: IMG_H }}
+            aria-hidden="true"
           />
-        ))}
-        {done && (
-          <div className={styles.doneOverlay}>
-            {!reduced &&
-              Array.from({ length: 26 }).map((_, i) => (
-                <motion.span
-                  key={i}
-                  className={styles.confetti}
-                  style={{
-                    left: `${8 + ((i * 37) % 84)}%`,
-                    background: i % 3 === 0 ? 'var(--accent-expressive)' : i % 3 === 1 ? 'var(--accent)' : 'var(--content)',
-                  }}
-                  initial={{ y: -30, opacity: 1, rotate: 0 }}
-                  animate={{ y: BOARD_H + 40, opacity: [1, 1, 0.6], rotate: 260 + ((i * 53) % 240) }}
-                  transition={{ duration: 1.6 + (i % 5) * 0.22, ease: 'easeIn', delay: (i % 7) * 0.08 }}
-                />
-              ))}
-            <div className={styles.doneCard}>
-              <Stamp tone="pink">Assembled</Stamp>
-              <span className={styles.doneTime}>{fmtSecs(elapsed)}</span>
+          {pieces?.map((p) => (
+            <canvas
+              key={`${puzzle.id}-${p.id}`}
+              id={`pz-${p.id}`}
+              width={PS + PAD * 2}
+              height={PS + PAD * 2}
+              className={styles.piece}
+              data-locked={p.locked || undefined}
+              style={{ left: p.x, top: p.y, zIndex: p.z }}
+              onPointerDown={(e) => onDown(e, p.id)}
+              role="button"
+              aria-label={`Puzzle piece row ${p.r + 1}, column ${p.c + 1}${p.locked ? ', placed' : ''}`}
+            />
+          ))}
+          {done && (
+            <div className={styles.doneOverlay}>
+              {!reduced &&
+                Array.from({ length: 26 }).map((_, i) => (
+                  <motion.span
+                    key={i}
+                    className={styles.confetti}
+                    style={{
+                      left: `${8 + ((i * 37) % 84)}%`,
+                      background: i % 3 === 0 ? 'var(--accent-expressive)' : i % 3 === 1 ? 'var(--accent)' : 'var(--content)',
+                    }}
+                    initial={{ y: -30, opacity: 1, rotate: 0 }}
+                    animate={{ y: BOARD_H + 40, opacity: [1, 1, 0.6], rotate: 260 + ((i * 53) % 240) }}
+                    transition={{ duration: 1.6 + (i % 5) * 0.22, ease: 'easeIn', delay: (i % 7) * 0.08 }}
+                  />
+                ))}
+              <div className={styles.doneCard}>
+                <Stamp tone="pink">Assembled</Stamp>
+                <span className={styles.doneTime}>{fmtSecs(elapsed)}</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className={styles.scores} aria-label="Best times">
