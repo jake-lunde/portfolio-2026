@@ -30,11 +30,9 @@ export function Nameplate() {
      layer owns the caps register, the URL scheme wants the address. */
   const email = t('nameplate.email', skin)
 
-  /* Jake has not handed over a LinkedIn URL yet, so nameplate.linkedinUrl
-     ships EMPTY and line 2 simply ends at the email. Fill that key in
-     copy.json and the link appears with no code change. The https guard
-     is cheap insurance: copy.json is committable from INSPECT's COPY
-     block, and a copy field is no place for a javascript: URL. */
+  /* The LinkedIn link renders only for an https URL: copy.json is
+     committable from INSPECT's COPY block, and a copy field is no place
+     for a javascript: URL. Blank the key and line 2 ends at the email. */
   const linkedin = t('nameplate.linkedinUrl', skin).trim()
   const hasLinkedin = linkedin.startsWith('https://')
 
@@ -44,8 +42,6 @@ export function Nameplate() {
       <div className={styles.plateLines}>
         <Copy k="nameplate.line1" as="div" className={styles.plateName} />
         <div className={styles.plateMeta}>
-          <Copy k="nameplate.availability" as="span" />
-          <span aria-hidden="true">{' · '}</span>
           <a className={styles.plateLink} href={`mailto:${email.toLowerCase()}`}>
             <Copy k="nameplate.email" as="span" />
           </a>
