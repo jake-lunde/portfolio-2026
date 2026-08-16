@@ -128,6 +128,33 @@ export function inspectForPath(path: string[]): InspectTool | null {
   return null
 }
 
+/** Does this path name something the machine can actually open?
+
+    ALL_PATHS below is the PRERENDER + sitemap list and it is deliberately
+    smaller than the set of live routes: /edit is left out on purpose, and
+    most programs carry a deep link without earning a static page. So a
+    path that opens a real window is not a 404 merely because nobody
+    prerendered it, and the catch-all asks THIS rather than ALL_PATHS
+    before it calls notFound(). Everything that answers `false` used to
+    get the desk under a 200; it gets a real 404 now (src/app/not-found).
+
+    Mirrors windowsForPath above: same fallbacks, same legacy alias. When
+    a path stops opening a window, it stops being known here too. */
+export function isKnownPath(path: string[]): boolean {
+  if (path.length === 0) return true
+  if (path[0] === 'inspect' || path[0] === 'edit') return path.length === 1
+  if (path[0] === 'projects') {
+    if (path.length === 1) return true
+    return path.length === 2 && !!getCase(path[1])
+  }
+  if (path[0] === 'visualizers') {
+    if (path.length === 1) return true
+    const slug = path[1] === 'flowers' ? 'models' : path[1] // legacy alias
+    return path.length === 2 && !!getViz(slug)?.component
+  }
+  return PROGRAMS.some((p) => p.path === `/${path.join('/')}`)
+}
+
 export const ALL_PATHS: string[][] = [
   [],
   ['readme'],

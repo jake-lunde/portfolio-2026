@@ -75,6 +75,18 @@ export type CaseDef = {
         beat before the first frame, permanently under reduced motion
         (no film mounts there) and on any playback failure. */
     art?: { src: string; w: number; h: number }
+    /** THE LINK PREVIEW for this case's route (/projects/<slug>), read by
+        generateMetadata in src/app/[...path]/page.tsx. Absent → the route
+        inherits the root desktop capture (src/app/opengraph-image.jpg).
+
+        It exists as its own field, and as a JPEG, for one reason: the
+        cover above is WebP, and WebP is the format LinkedIn's scraper
+        still drops. Convention: /case/<slug>/og.jpg, transcoded from
+        box-art.webp at native size (`sips -s format jpeg`) — no crop, so
+        it stays the same picture. Swappable placeholder like every image
+        here, with one string attached: it does NOT regenerate itself, so
+        re-run the transcode when the box art changes. */
+    og?: { src: string; w: number; h: number }
     /** the box-art template's publisher mark, printed small at the top-left
         the way a 1992 sleeve carried its house logo. Convention:
         /case/<slug>/mark.svg for a case that has its own; the house mark
@@ -143,6 +155,7 @@ export const CASES: CaseDef[] = [
          its first frame, the reduced-motion cover, and the face any
          playback failure rests on. */
       art: { src: '/case/greenlight-invest/box-art.webp', w: 1200, h: 571 },
+      og: { src: '/case/greenlight-invest/og.jpg', w: 1200, h: 571 },
       video: '/case/greenlight-invest/box-film.mp4',
       coverVariant: 'stripe',
       tagline: 'know why, not just what.',
@@ -173,6 +186,7 @@ export const CASES: CaseDef[] = [
          film's poster, as on Invest — the beat before the first frame, the
          reduced-motion cover, and the face any failure rests on. */
       art: { src: '/case/family-hub/box-art.webp', w: 1200, h: 727 },
+      og: { src: '/case/family-hub/og.jpg', w: 1200, h: 727 },
       /* the launch film, the same cut plate 11 runs in the case study */
       video: '/case/family-hub/box-film.mp4',
       /* the reference cover — this is the one Jake drew, so it wears the
