@@ -16,13 +16,12 @@ import styles from './shell.module.css'
    rule. This is that box, smaller, and it stays on the desk instead of
    hiding behind the Apple menu.
 
-   Layout is Jake's mockup (s74): his portrait up top, dithered in the
-   system accent, JAKE LUNDE centred under it in the display face, a
-   rule, then the ROLE and CONTACT rows. Tall and narrow, so it lives on
-   the right rail, bottom corner, under the pinned photo, the one column
-   on the desk that already holds a picture. Below 720px the launcher has
-   no windows, so the plaque turns sideways into the wide About box,
-   portrait on the left, full width above the grid.
+   Layout is Jake's mockup (s74): his portrait on the left, dithered in
+   the system accent and framed in it, then JAKE LUNDE in the display
+   face with the ROLE and CONTACT rows under it. It sits top centre under
+   the ticker, the seat COMMAND.CTR's widget held before it moved into
+   the menu bar; the boot windows start below it (registry.tsx). Below
+   720px the same card runs full width above the launcher grid.
 
    The portrait is /plaque-portrait.png, an alpha mask cut from Jake's
    /nameplate.png dither (blue pixels opaque, paper transparent), painted
@@ -51,10 +50,11 @@ export function Nameplate() {
   return (
     <aside className={styles.nameplate} aria-label="About this machine">
       <div className={styles.plateHead}>
-        {/* decorative: the plaque names him in text right under it */}
+        {/* decorative: the card names him in text right beside it */}
         <span className={styles.platePortrait} aria-hidden="true" />
-        <Copy k="nameplate.name" as="div" className={styles.plateName} />
       </div>
+      <div className={styles.plateBody}>
+      <Copy k="nameplate.name" as="div" className={styles.plateName} />
       <dl className={styles.plateRows}>
         <Copy k="nameplate.label.role" as="dt" className={styles.plateLabel} />
         <Copy k="nameplate.role" as="dd" className={styles.plateValue} />
@@ -65,9 +65,7 @@ export function Nameplate() {
           </a>
           {hasLinkedin && (
             <>
-              <span className={styles.plateSep} aria-hidden="true">
-                {' · '}
-              </span>
+              <span aria-hidden="true">{' · '}</span>
               <a className={styles.plateLink} href={linkedin} target="_blank" rel="noreferrer">
                 <Copy k="nameplate.linkedin" as="span" />
                 <span aria-hidden="true">{' ↗'}</span>
@@ -76,6 +74,7 @@ export function Nameplate() {
           )}
         </dd>
       </dl>
+      </div>
     </aside>
   )
 }

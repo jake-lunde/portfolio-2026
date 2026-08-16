@@ -76,9 +76,12 @@ export const PROGRAMS: ProgramDef[] = [
        the live window (the ~33 estimate left the foot kissing the rail
        at exactly 0px): 48 + 600 + 46 = 694, a 20px berth under the
        rail's top edge at 714 on an 800-tall viewport, the shortest desk
-       we design for. hub-player clears at ~625 (see its entry below). */
-    size: { w: 520, h: 600 },
-    pos: { x: 120, y: 48 },
+       we design for. hub-player clears at ~625 (see its entry below).
+       s74: y 48 → 108 and h 600 → 540 so the window starts under the
+       ABOUT THIS MACHINE card (shell/Nameplate.tsx, top centre, 93px
+       tall from y 8): 108 + 540 + 46 = 694, the same 20px berth. */
+    size: { w: 520, h: 540 },
+    pos: { x: 120, y: 108 },
     onDesktop: true,
     path: '/readme',
   },
@@ -171,9 +174,11 @@ export const PROGRAMS: ProgramDef[] = [
     /* 585 total (Jake's Figma pass: heading-1 title + CTA pair grew the
        info panel) + y40 + desk offset bottoms ~680 — a ~34px berth under
        the rail's top edge at 714 on an 800-tall viewport, the shortest
-       desk we design for (same floor README's berth math uses) */
-    size: { w: 460, h: 585 },
-    pos: { x: 600, y: 40 },
+       desk we design for (same floor README's berth math uses).
+       s74: y 40 → 108 and h 585 → 521 so the window starts under the
+       ABOUT THIS MACHINE card (see README's entry); bottoms ~684. */
+    size: { w: 460, h: 521 },
+    pos: { x: 600, y: 108 },
     onDesktop: false,
   },
   {
