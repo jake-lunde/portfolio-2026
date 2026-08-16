@@ -1469,10 +1469,13 @@
 
 @media (max-width: 720px) {
   .icons {
-    /* clears the COMMAND.CTR chip, which docks in-flow above the grid on
-       mobile (commandWidget.module.css: top 14 + ~48px of two-row chip +
-       breathing room — the two constants travel together) */
-    top: 76px;
+    /* clears the nameplate, which takes the band above the grid on mobile
+       (see .nameplate at the foot of this file: top 14 + up to four
+       wrapped lines at the 360px floor + breathing room, the two
+       constants travel together). COMMAND.CTR used to dock in this band
+       and set the old 76px; it moved into the menu bar in case-rail
+       round 4 and left the band empty. */
+    top: 88px;
     left: 12px;
     right: 12px;
     bottom: 12px;
@@ -1629,4 +1632,109 @@
   right: 0;
   z-index: 5100;
   width: min(320px, calc(100vw - 24px));
+}
+
+/* ================= NAMEPLATE (identity on the desk) =================
+   Appended per the same coordination rule the two sections above set.
+
+   The asset tag screwed to the bezel (Nameplate.tsx says why it exists).
+   Flat, not raised: a hairline in --border on the desktop's own
+   --surface, no print shadow, so it reads as part of the case while the
+   polaroids and the mini player keep the raised-card language. The
+   opaque fill is what separates it from the wallpaper pattern behind it
+   (.wallpaper, z-index 1, 7% ink).
+
+   Desktop seat: the right rail every other right-hand widget stands in
+   (right: 20px, same as .npWidget and .photoWall), and 104px off the
+   floor because the floor is taken. The dock rail runs about 87px tall
+   (dock.module.css: an 8 + 32 icon + 4 + 9 label + 4 + 4 LED-slot + 4
+   tile inside the rail's own 8/12 padding and top border), and the
+   wandering agent's introduction tops out near 91px (.introCard sits at
+   bottom 42 and runs three mono lines). 104 clears both with a hair to
+   spare, and the plate is mounted after the photo wall so it wins the
+   paint if a visitor ever pins a full column down into it.
+
+   Right-anchored and inside the desktop, so INSPECT.MODE's canvas
+   compression reflows it for free like every other right-hand widget
+   (see .desktop near the top of this file). */
+.nameplate {
+  position: absolute;
+  right: 20px;
+  bottom: 104px;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  max-width: min(420px, calc(100% - 40px));
+  padding: 6px 9px;
+  background: var(--surface);
+  border: var(--border-width-subtle) solid var(--border);
+  font-family: var(--mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-08);
+  line-height: var(--leading-snug);
+  /* the copy already ships in caps; this holds the register if a COPY
+     edit ever types the line back in lowercase */
+  text-transform: uppercase;
+}
+
+/* the screw head holding the plate on. Decorative, aria-hidden in the
+   markup: a 7px disc with a hairline slot cut diagonally across it, both
+   drawn from --border so it reads as hardware and never as ink. */
+.plateScrew {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-top: 2px;
+  border-radius: var(--radius-circle);
+  border: var(--border-width-subtle) solid var(--border);
+  background: linear-gradient(
+    45deg,
+    transparent 0 44%,
+    var(--border) 44% 56%,
+    transparent 56% 100%
+  );
+}
+
+.plateLines {
+  min-width: 0;
+}
+
+/* the name carries full ink; the availability line recedes to muted.
+   That is the same flush pairing CommandWidget's .ccStamp measured
+   against --surface (5.62:1 classic light, 6.50:1 dark, 4.99:1
+   medieval), so both lines clear AA at this size. */
+.plateName {
+  color: var(--content);
+}
+
+.plateMeta {
+  color: var(--content-muted);
+}
+
+.plateLink {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.plateLink:hover,
+.plateLink:focus-visible {
+  text-decoration: underline;
+}
+
+/* Mobile: the desk lands on the launcher with every window shut, so the
+   plate has to say the name on first paint. It takes the band above the
+   icon grid, full width, wrapping instead of growing. Worst case at the
+   360px floor is four wrapped lines (each line runs to about 400px at
+   9px Geist Mono with 0.08em tracking), which stands 61px tall from
+   top: 14px. .icons starts at 88px in the mobile block above; the two
+   numbers travel together. */
+@media (max-width: 720px) {
+  .nameplate {
+    top: 14px;
+    right: 12px;
+    bottom: auto;
+    left: 12px;
+    max-width: none;
+  }
 }
