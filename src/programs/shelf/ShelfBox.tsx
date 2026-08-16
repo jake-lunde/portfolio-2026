@@ -25,8 +25,9 @@ import styles from './shelf.module.css'
    And the progress meter is gone: an unshipped box printed a phase line, a
    bar, a shrink-wrap hint and a button asking the reader to nudge Jake, which
    is four registers spent apologising, where a carton would print COMING SOON
-   and stop. `progress` still feeds the IN PROGRESS window and /api/nudge is
-   untouched — the shelf simply no longer asks.
+   and stop. `progress` stays in cases.ts — it is what tells a shipped box
+   from an unshipped one — but the endpoint behind that button is gone (pass
+   13, Jake's ruling): the shelf was its only caller.
 
    The FRONTS came back almost unchanged: figma, catalog and nocturne are
    pixel-for-pixel what pass 11 shipped, and every edit landed on stripe (see

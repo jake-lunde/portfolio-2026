@@ -24,11 +24,29 @@
      ⚠️ merge task: fold this into the token architecture as a real face
      role rather than a raw next/font variable. */
   --boxart-face: var(--font-boxart), var(--sans);
+  /* THE CARTRIDGE COVER'S THREE (pass 13, off Jake's Figma pass — loaded in
+     app/layout.tsx). Three more ROLES rather than three more faces named at
+     the point of use, for the same reason `--boxart-face` is one: the cover
+     asks for the job and the skin answers. Each falls back through
+     `--boxart-face`, so a face that fails to load lands on the sans the
+     covers already used rather than on the browser default.
+       title — the wordmark above the picture (Boldonse)
+       label — the house credit and the age line (Barlow Condensed)
+       mark  — the pill and the starburst seal (Cal Sans) */
+  --boxart-title-face: var(--font-boldonse), var(--boxart-face);
+  --boxart-label-face: var(--font-barlow-condensed), var(--boxart-face);
+  --boxart-mark-face: var(--font-cal-sans), var(--boxart-face);
 }
 
-/* a scriptorium does not set its tomes in a 2023 grotesque */
+/* a scriptorium does not set its tomes in a 2023 grotesque — and it prints
+   the cartridge's three in nothing at all. The fallbacks are not enough here:
+   a stack answers with its FIRST loaded face, so each of the three has to be
+   struck back to the display face by name. */
 :global([data-skin='medieval']) .wrap {
   --boxart-face: var(--display);
+  --boxart-title-face: var(--display);
+  --boxart-label-face: var(--display);
+  --boxart-mark-face: var(--display);
 }
 
 /* ---------------- (no masthead) ----------------
@@ -1243,9 +1261,10 @@
     0% 50%, 13.2% 42.7%, 3.8% 30.9%, 18.8% 29.2%, 14.6% 14.6%, 29.2% 18.8%,
     30.9% 3.8%, 42.7% 13.2%
   );
-  font-family: var(--boxart-face);
+  /* the seal is set in the pill's face — Cal Sans, one cut at 400 */
+  font-family: var(--boxart-mark-face);
   font-size: calc(var(--box-w) * 0.029); /* ~7px at 246 */
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-regular);
   line-height: var(--leading-tight);
   text-align: center;
   text-transform: uppercase;
@@ -1263,7 +1282,10 @@
   left: var(--cover-pad);
   right: var(--cover-pad);
   bottom: 4px;
-  font-family: var(--boxart-face);
+  /* the age line runs in the house credit's face — Barlow Condensed, which
+     is drawn for exactly this: six pixels of capitals that still count as
+     letters. */
+  font-family: var(--boxart-label-face);
   font-size: calc(var(--box-w) * 0.024); /* ~6px at 246 */
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-02);
@@ -1474,6 +1496,7 @@
    round it reads is a layout question, not a markup one. */
 .vStripe .frontEyebrow {
   order: 1;
+  font-family: var(--boxart-label-face);
   font-size: calc(var(--box-w) * 0.042);
   font-weight: var(--weight-regular);
   text-transform: uppercase;
@@ -1483,10 +1506,18 @@
 /* as large as the zone will carry, which is the whole point of a cartridge
    box: the wordmark is the artwork above the picture. It takes the raised
    PAPER rather than the full inverse ink — 10:1 on this ground, and the half
-   step down from white is what stops a heavy title glaring. */
+   step down from white is what stops a heavy title glaring.
+
+   BOLDONSE, at 400 (pass 13). Pass 12 asked for `--weight-bold` because the
+   sans was standing in and a stand-in reads thin at this size; the real face
+   has exactly one cut and it is already a display heavy, so the literal
+   Regular is what the comp says AND what the file ships. Asking for 700 here
+   would only get a synthesised bold, which on a face this dense closes the
+   counters. */
 .vStripe .title {
+  font-family: var(--boxart-title-face);
   font-size: calc(var(--box-w) * 0.122);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-regular);
   line-height: var(--leading-normal);
   color: var(--surface-raised);
   margin-top: 14px;
@@ -1503,9 +1534,13 @@
 .vStripe .tagline {
   order: -1;
   align-self: center;
+  /* CAL SANS, one cut at 400 — semibold by drawing rather than by weight,
+     which is why the pill no longer asks for `--weight-semibold`: there is
+     nothing above 400 to get except a synthesised one. */
+  font-family: var(--boxart-mark-face);
   font-style: normal;
   font-size: calc(var(--box-w) * 0.033); /* ~8px at 246 */
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-regular);
   line-height: var(--leading-tight);
   padding: 4px 8px;
   border-radius: 999px;
@@ -2089,12 +2124,11 @@
 }
 
 /* ---------------- (no foot) ----------------
-   The 40px strip under the row — a nudge hint, and a pink stamp saying the
-   encouragement line wasn't wired to storage yet — is struck (pass 7,
-   Jake's ruling). It explained a button that lives on the back of two boxes
-   and disables itself when it can't work, and it announced one box's refusal
-   under all four. The refusal moved to `.nudgeError`, beside the button that
-   earned it; the height went back to the window. */
+   The 40px strip under the row — a hint and a pink storage-status stamp —
+   was struck in pass 7 (Jake's ruling), and the button it explained went
+   with the whole encouragement line in pass 13: an unshipped box says
+   COMING SOON and stops. Nothing stands under the row; the height is the
+   window's. */
 
 .empty {
   display: block;
@@ -2108,7 +2142,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .playBtn,
-  .nudgeBtn,
   .tag,
   .cancelBtn {
     transition: none;

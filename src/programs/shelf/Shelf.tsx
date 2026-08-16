@@ -26,13 +26,16 @@ import styles from './shelf.module.css'
    registered twice. Optional `box` data (cases.ts) fills the back panel;
    without it the box still stands, just barer.
 
-   PASS 12 TOOK THE NUDGE OFF THE SHELF (Jake's Figma pass). An unshipped box
-   used to carry a progress meter and a TELL HIM TO FINISH IT button on its
-   back, which meant this window held a session-scoped pressed set, an
-   optimistic count, a honeypot field and a per-box refusal — a whole
-   apparatus so that a carton could ask to be encouraged. The panel prints
-   COMING SOON now. /api/nudge and the IN PROGRESS window are untouched: the
-   mechanism still exists, this window just no longer reaches for it. */
+   PASS 12 TOOK THE NUDGE OFF THE SHELF (Jake's Figma pass) AND PASS 13 TOOK
+   IT OUT OF THE REPO. An unshipped box used to carry a progress meter and a
+   TELL HIM TO FINISH IT button on its back, which meant this window held a
+   session-scoped pressed set, an optimistic count, a honeypot field and a
+   per-box refusal — a whole apparatus so that a carton could ask to be
+   encouraged. The panel prints COMING SOON now, and with the shelf as its
+   only caller, `/api/nudge` and the `progress.nudge*` strings went with it
+   (Jake's ruling): an endpoint nothing reaches is a blob store waiting to
+   collect writes nobody reads. `progress` itself stays in cases.ts — it is
+   what decides shipped from unshipped. */
 
 /* THE RESTING TURN IS GONE (pass 4, Jake's ruling: head-on at rest).
 

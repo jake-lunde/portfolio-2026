@@ -249,7 +249,7 @@ export const CASES: CaseDef[] = [
       requirements: [
         { label: 'Design : eng', value: '1 : 10' },
         { label: 'Nationwide', value: '7 months from no code' },
-        { label: 'Concept appeal', value: '80%, before price' },
+        { label: 'Hardware version', value: '1.0' },
       ],
       /* The verbatim, elided rather than rewritten: the words are the
          parent's and in her order, the ellipsis marks where "and a shared
