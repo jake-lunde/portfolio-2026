@@ -209,6 +209,14 @@ export function MenuBar() {
           onFocus={() => setHintUp(true)}
           onBlur={() => setHintUp(false)}
         >
+          {/* data-inspect-toggle is load-bearing, and looks like it isn't:
+              no CSS reads it — the 900px stand-down sits on the wrapper —
+              so nothing on screen changes if it goes. What breaks is the
+              way out. On teardown InspectShell returns focus to whatever
+              opened the mode, and when that opener is gone or was never
+              anything but the body it falls back to this attribute as the
+              landing. Drop it and that path focuses nothing: a keyboard
+              user leaves INSPECT at the top of the document. */}
           <button
             className={`${styles.skinTrigger} ${styles.inspectBtn}`}
             data-inspect-toggle=""
