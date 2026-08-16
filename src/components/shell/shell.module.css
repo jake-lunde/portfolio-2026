@@ -685,11 +685,7 @@
 .photoWall {
   position: absolute;
   right: 20px;
-  /* 320, was 336: the ABOUT THIS MACHINE plaque stands 257px up from the
-     bottom corner of this rail (.nameplate), and on an 800-tall viewport
-     the two met edge to edge. 16px up buys the gap; NOW PLAYING above
-     (top 34, ~230 tall when it shows) still clears. */
-  top: 320px;
+  top: 336px;
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -1638,26 +1634,30 @@
   width: min(320px, calc(100vw - 24px));
 }
 
-/* ================= NAMEPLATE (About This Machine, the plaque) =========
+/* ================= NAMEPLATE (About This Machine, the card) ===========
 
    Identity on the desk. Jake's reference is Mac OS 9's About This
-   Computer box (s74), his mockup the layout: portrait, name, a rule,
-   bold label rows. See Nameplate.tsx.
+   Computer box (s74), his mockup the layout: portrait on the left in its
+   own cell, framed in the accent; name, then ROLE and CONTACT rows on the
+   right. See Nameplate.tsx.
 
-   Desktop: the right rail's bottom corner, under the pinned photo, the
-   same 20px inset .photoWall and .npWidget keep, so the column reads as
-   one rail: photo pinned above, plaque screwed on below. Flat on the
-   desk, hairline frame, no shadow: the print-shadowed widgets are things
-   set down on the desk; a plaque is part of it. Absolute inside the
-   desktop, so INSPECT.MODE's canvas compression moves it with the rest.
-   Width is the portrait's: 172px source drawn at 136px (0.79x, Jake's
-   mockup ratio) plus the head's padding. */
+   Desktop: top centre, under the ticker, the seat COMMAND.CTR's widget
+   held before it moved into the menu bar (case-rail round 4). The boot
+   windows start below it (registry.tsx: both at y 108, the card ends at 101)
+   so nothing covers it on first paint. Flat on the desk, hairline frame,
+   no shadow: the print-shadowed widgets are things set down on the desk;
+   a plate is part of it. Absolute inside the desktop, so INSPECT.MODE's
+   canvas compression moves it with the rest. */
 .nameplate {
   position: absolute;
-  right: 20px;
-  bottom: 22px;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 2;
-  width: 168px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  width: max-content;
+  max-width: min(520px, calc(100% - 40px));
   background: var(--surface);
   border: var(--border-width-subtle) solid var(--border);
   font-family: var(--mono);
@@ -1670,28 +1670,25 @@
   color: var(--content);
 }
 
-/* the header band: portrait over name, on the raised surface like the
-   About box's header sits over its body, with the rule under it */
+/* the portrait cell: raised surface, a rule on its right, like the About
+   box's header sits apart from its body */
 .plateHead {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 12px 15px 10px;
+  padding: 8px;
   background: var(--surface-raised);
-  border-bottom: var(--border-width-subtle) solid var(--border);
+  border-right: var(--border-width-subtle) solid var(--border);
 }
 
 /* Jake's dither as an alpha mask painted in the system accent (the .mark
-   trick from the menu bar): 172x150 source drawn at 136x119. The frame
-   is an outline, not a border: the mask clips everything inside the box,
-   borders included, and an outline paints outside it. mask-image scales
-   with smoothing, which at 0.79x softens the dither a touch; the frame
-   reads as a print either way. */
+   trick from the menu bar): 172x150 source drawn at half size, framed
+   in the same ink. The frame is an outline, not a border: the mask clips
+   everything inside the box, borders included, and an outline paints
+   outside it. */
 .platePortrait {
   flex: none;
-  width: 136px;
-  height: 119px;
+  width: 86px;
+  height: 75px;
   outline: var(--border-width-default) solid var(--accent);
   background-color: var(--accent);
   -webkit-mask-image: url('/plaque-portrait.png');
@@ -1702,33 +1699,38 @@
   mask-size: 100% 100%;
 }
 
+.plateBody {
+  display: grid;
+  gap: 2px 0;
+  align-content: center;
+  padding: 8px 14px 9px 12px;
+  min-width: 0;
+}
+
 /* the name is the one line in the display face, the wordmark's own size,
-   so plaque and menu bar say the machine's name in the same voice */
+   so card and menu bar say the machine's name in the same voice */
 .plateName {
   font-family: var(--display);
   font-size: var(--text-ui);
   letter-spacing: var(--tracking-08);
   line-height: var(--leading-tight);
-  text-align: center;
-  min-width: 0;
+  margin-bottom: 4px;
 }
 
 .plateRows {
   margin: 0;
-  padding: 8px 12px 8px;
   display: grid;
   gap: 1px 0;
 }
 
 /* label rows: the About box sets its labels bold; here they are the
-   muted micro line above the value, since the plaque has no room for two
-   columns. --content-muted on --surface is the flush pairing
-   CommandWidget's .ccStamp measured (5.62:1 classic light, 6.50:1 dark,
-   4.99:1 medieval), so the labels clear AA even at 8px. */
+   muted micro line above the value. --content-muted on --surface is the
+   flush pairing CommandWidget's .ccStamp measured (5.62:1 classic light,
+   6.50:1 dark, 4.99:1 medieval), so the labels clear AA even at 8px. */
 .plateLabel {
   font-size: var(--text-micro);
   color: var(--content-muted);
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .plateLabel:first-child {
@@ -1737,7 +1739,7 @@
 
 .plateValue {
   margin: 0;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .plateLink {
@@ -1750,37 +1752,18 @@
   text-decoration: underline;
 }
 
-/* the two contact links stack on the plaque, so the separator between
-   them is a wide-layout thing */
-.plateSep {
-  display: none;
-}
-
-.plateValue > .plateLink {
-  display: block;
-}
-
-/* Phone (the launcher, every window shut): the plaque turns sideways
-   into the About box proper, full width above the icon grid, portrait
-   and name as a header band on the left, the two rows beside it. About
-   90px tall from top: 14px; .icons starts at 118px in the mobile block
-   above and the two numbers travel together. */
+/* Phone (the launcher, every window shut): the same card, full width
+   above the icon grid, values allowed to wrap. About 95px tall from
+   top: 14px; .icons starts at 118px in the mobile block above and the two
+   numbers travel together. */
 @media (max-width: 720px) {
   .nameplate {
     top: 14px;
     left: 12px;
     right: 12px;
-    bottom: auto;
+    transform: none;
     width: auto;
-    display: grid;
-    grid-template-columns: auto 1fr;
-  }
-
-  .plateHead {
-    border-bottom: 0;
-    border-right: var(--border-width-subtle) solid var(--border);
-    gap: 6px;
-    padding: 8px 10px;
+    max-width: none;
   }
 
   .platePortrait {
@@ -1788,28 +1771,8 @@
     height: 59px;
   }
 
-  .plateName {
-    font-size: var(--text-caption);
-  }
-
-  .plateRows {
-    grid-template-columns: auto 1fr;
-    gap: 3px 10px;
-    align-content: center;
-    padding: 8px 10px;
-  }
-
-  .plateLabel,
-  .plateLabel:first-child {
-    margin-top: 0;
-    align-self: baseline;
-  }
-
-  .plateSep {
-    display: inline;
-  }
-
-  .plateValue > .plateLink {
-    display: inline;
+  .plateValue {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
