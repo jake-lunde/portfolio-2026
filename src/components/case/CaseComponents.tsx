@@ -1,4 +1,5 @@
 import styles from './case.module.css'
+import { CopyText } from '@/content/CopyText'
 
 /* Static case-study vocabulary (§7 anatomy). Interactive islands live
    in their own 'use client' files. */
@@ -84,9 +85,17 @@ export function Plate({
   )
 }
 
-/* dashed placeholder — every image surface is swappable later (§11) */
+/* dashed placeholder: every image surface is swappable later (§11).
+   The status line is a copy key (case.placeholder.pending) so it reads
+   in the machine's voice per skin. CopyText is a client island, which is
+   how CaseIndex reads copy from these server-rendered files too. */
 export function Placeholder({ children }: { children: React.ReactNode }) {
-  return <div className={styles.placeholder}>{children}</div>
+  return (
+    <div className={styles.placeholder}>
+      <div>{children}</div>
+      <CopyText k="case.placeholder.pending" as="div" className={styles.placeholderStatus} />
+    </div>
+  )
 }
 
 export function Moves({ children }: { children: React.ReactNode }) {

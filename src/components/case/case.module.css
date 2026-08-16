@@ -164,6 +164,7 @@
   border-radius: 3px;
   min-height: 150px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -174,6 +175,15 @@
   text-transform: uppercase;
   padding: 22px;
   line-height: var(--leading-relaxed); /* 1.8 → 1.7 */
+  gap: 10px;
+}
+
+/* the "asset pending" status line — smaller and more muted than the
+   placeholder's own label, same dashed-frame ink family */
+.placeholderStatus {
+  font-size: var(--text-label);
+  letter-spacing: 0.16em;
+  color: rgba(231, 225, 210, 0.35);
 }
 
 .plate svg {
