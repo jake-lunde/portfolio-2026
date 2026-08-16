@@ -6,16 +6,30 @@ import { pinPhoto } from '@/components/shell/PhotoWall'
 import { metric } from '@/lib/metrics'
 import { sfx } from '@/lib/sound'
 import { useSettings } from '@/store/settings'
+import { NtscModule, type NtscFilter } from '@/lib/ntsc/ntsc'
+import boothPreset from '@/lib/ntsc/presets/booth.json'
+import crtPreset from '@/lib/ntsc/presets/crt.json'
 import styles from './booth.module.css'
 
 /* Photo Booth — the webcam through a parallel-1992 signal chain.
    Every frame runs a real pixel pipeline (no CSS-filter shortcuts):
-   VHS (channel shift + noise + scanlines), DITHER (4×4 Bayer, ink on
-   paper), DUOTONE (plate → pink), CRT (scanline + vignette), CLEAN —
-   plus a medieval-only pair: ILLUMINATED (posterize to the manuscript
-   palette + ink edge lines) and WOODBLOCK (contrast-stretched line-cut
-   with midtone hatching). Snap = 3-2-1 countdown → polaroid card →
-   download. Camera stops the moment the window closes. */
+   VHS and CRT go through ntsc-rs (s75) — the actual NTSC composite
+   signal model compiled to wasm (src/lib/ntsc/ntsc.ts): VHS is a
+   camcorder tape on a tired deck (LP, tracking, head switching, snow),
+   CRT is the same signal off the air, no tape, under a scanline +
+   vignette phosphor pass. DITHER (4×4 Bayer, ink on paper), DUOTONE
+   (plate → pink), CLEAN — plus a medieval-only pair: ILLUMINATED
+   (posterize to the manuscript palette + ink edge lines) and WOODBLOCK
+   (contrast-stretched line-cut with midtone hatching). Snap = 3-2-1
+   countdown → polaroid card → download. Camera stops the moment the
+   window closes.
+
+   The wasm (~190 KB) fetches when the program mounts, so it is usually
+   warm before the camera is; until it lands — or if the fetch fails —
+   VHS/CRT run the pre-s75 JS approximations (`processFrame`), so the
+   chips never go dark. */
+
+const NTSC_WASM = '/ntsc/lunde_ntsc.wasm'
 
 type Filter = 'vhs' | 'dither' | 'duotone' | 'crt' | 'clean' | 'illum' | 'woodblock'
 type Phase = 'off' | 'starting' | 'live' | 'denied' | 'shot'
@@ -129,6 +143,25 @@ function processFrame(src: ImageData, mode: Filter, t: number): ImageData {
   return out
 }
 
+/* the CRT chip's phosphor — scanline + vignette, in place. Runs over the
+   ntsc-rs composite frame (s75) and stays the JS fallback's CRT look. */
+function phosphor(img: ImageData) {
+  const o = img.data
+  for (let y = 0; y < H; y++) {
+    const dy = (y - H / 2) / (H / 2)
+    const dark = y % 2 === 0
+    for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4
+      const dx = (x - W / 2) / (W / 2)
+      const v = 1 - (dx * dx + dy * dy) * 0.35
+      const s = dark ? 0.72 : 1
+      o[i] *= v * s
+      o[i + 1] *= v * 1.02 * s
+      o[i + 2] *= v * 0.95 * s
+    }
+  }
+}
+
 const CLASSIC_FILTERS: Filter[] = ['vhs', 'dither', 'duotone', 'crt', 'clean']
 const MEDIEVAL_FILTERS: Filter[] = ['illum', 'woodblock', 'clean']
 
@@ -162,6 +195,31 @@ export default function PhotoBooth() {
   const [pinned, setPinned] = useState(false)
   const prevSkin = useRef(skin)
   filterRef.current = filter
+  /* the signal path — one filter each for the two presets, created once
+     the module lands; null until then (fallback in the draw loop) */
+  const ntscRef = useRef<{ vhs: NtscFilter; crt: NtscFilter } | null>(null)
+  const frameNo = useRef(0)
+
+  // warm the wasm on mount; failure just leaves the JS approximation in place
+  useEffect(() => {
+    let live = true
+    NtscModule.instantiate(fetch(NTSC_WASM))
+      .then((mod) => {
+        if (!live) return
+        const vhs = mod.create(boothPreset)
+        const crt = mod.create(crtPreset)
+        vhs.resize(W, H)
+        crt.resize(W, H)
+        ntscRef.current = { vhs, crt }
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+      ntscRef.current?.vhs.dispose()
+      ntscRef.current?.crt.dispose()
+      ntscRef.current = null
+    }
+  }, [])
 
   // skin swap changes the whole filter list — reset to its first entry
   useEffect(() => {
@@ -197,8 +255,19 @@ export default function PhotoBooth() {
       wg.drawImage(video, 0, 0, W, H)
       wg.restore()
       const mode = filterRef.current
+      const ntsc = ntscRef.current
       if (mode === 'clean') {
         g.drawImage(workRef.current!, 0, 0)
+      } else if (ntsc && (mode === 'vhs' || mode === 'crt')) {
+        // the real signal path: pixels into wasm memory, through the
+        // deck, and back out as an ImageData over that same memory
+        // (a fresh view every frame — ntsc.ts's memory law)
+        const f = mode === 'vhs' ? ntsc.vhs : ntsc.crt
+        f.frame().set(wg.getImageData(0, 0, W, H).data)
+        f.apply(frameNo.current++)
+        const out = new ImageData(f.frame(), W, H)
+        if (mode === 'crt') phosphor(out)
+        g.putImageData(out, 0, 0)
       } else {
         const frame = wg.getImageData(0, 0, W, H)
         g.putImageData(processFrame(frame, mode, (performance.now() - t0) / 1000), 0, 0)

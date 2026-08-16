@@ -37,3 +37,9 @@ build-storybook.log
 
 # figma plugin build output (built locally, loaded via manifest)
 /figma-plugin/dist/
+
+# ntsc-bake sources — the baked box-film.mp4 ships, the original stays local
+public/case/**/*.src.mp4
+
+# rust build output for the ntsc-rs wasm bridge (the .wasm itself is committed)
+native/ntsc/target/
