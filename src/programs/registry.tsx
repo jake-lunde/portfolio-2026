@@ -78,7 +78,10 @@ export const PROGRAMS: ProgramDef[] = [
        rail's top edge at 714 on an 800-tall viewport, the shortest desk
        we design for. hub-player clears at ~625 (see its entry below). */
     size: { w: 520, h: 600 },
-    pos: { x: 120, y: 48 },
+    /* x 140, not 120: the ABOUT THIS MACHINE plaque lives in the icon
+       column under README (shell/Nameplate.tsx) and needs the strip
+       left of this window to be 120px wide */
+    pos: { x: 140, y: 48 },
     onDesktop: true,
     path: '/readme',
   },

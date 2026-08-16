@@ -5,62 +5,70 @@ import { CopyText as Copy } from '@/content/CopyText'
 import { t } from '@/content/copy'
 import styles from './shell.module.css'
 
-/* The machine's asset tag.
+/* ABOUT THIS MACHINE, the plaque.
 
    Who Jake is used to be one double-click deep: it lived inside README,
    on the stamp. A stranger who closed that window, or who arrived on a
    phone (the desk opens on the launcher with every window shut, see
    Desktop.tsx), got a desktop full of programs and no name on any of
-   them. Not a hero banner and not a bio: every real machine carries a
-   little engraved plate on its bezel saying who it belongs to and where
-   to write, so this one does too. Two lines, hairline frame, mono caps,
-   flat on the desktop rather than raised like the print-shadowed
-   widgets, because a plate is screwed to the case, not set on it.
+   them. Jake's reference (s74) is Mac OS 9's About This Computer box:
+   the mark and the name as a header band, then bold-label rows under a
+   rule. This is that box, smaller, and it stays on the desk instead of
+   hiding behind the Apple menu.
+
+   Two layouts, one markup. On the desktop it is a narrow plaque sitting
+   in the icon column right under README, 116px, a hair past the icons,
+   so it reads as furniture of that column and not a widget set down on
+   the desk. Narrow on purpose: README boots at x 140 (registry.tsx) and
+   anything wider than that strip would slide under the window. Below
+   720px the launcher has no windows, so the plaque opens out into the
+   wide About box proper, full width above the grid.
 
    Every string is a copy key (nameplate.*), so EDIT.MODE can retitle the
-   plate the same way it retitles everything else. No skin slots: the
-   medieval voice leaves proper nouns, job titles and addresses alone
-   (knightspeak.ts says so by design), so an asset tag reads the same in
-   every skin, which is what an asset tag should do. */
+   plaque like everything else. No skin slots: the medieval voice leaves
+   proper nouns, job titles and addresses alone (knightspeak.ts says so
+   by design), so the plaque reads the same in every skin. */
 
 export function Nameplate() {
   const skin = useSettings((s) => s.skin)
 
-  /* the mailto follows whatever the plate shows, lowercased: the copy
-     layer owns the caps register, the URL scheme wants the address. */
+  /* the mailto follows whatever the plaque shows, lowercased: the copy
+     layer owns the caps register, the URL scheme wants the address */
   const email = t('nameplate.email', skin)
 
-  /* The LinkedIn link renders only for an https URL: copy.json is
+  /* the LinkedIn link renders only for an https URL: copy.json is
      committable from INSPECT's COPY block, and a copy field is no place
-     for a javascript: URL. Blank the key and line 2 ends at the email. */
+     for a javascript: URL. Blank the key and the row ends at the email. */
   const linkedin = t('nameplate.linkedinUrl', skin).trim()
   const hasLinkedin = linkedin.startsWith('https://')
 
   return (
-    <aside className={styles.nameplate} aria-label="Who this machine belongs to">
-      <span className={styles.plateScrew} aria-hidden="true" />
-      <div className={styles.plateLines}>
-        <Copy k="nameplate.line1" as="div" className={styles.plateName} />
-        <div className={styles.plateMeta}>
+    <aside className={styles.nameplate} aria-label="About this machine">
+      <div className={styles.plateHead}>
+        <span className={styles.plateMark} aria-hidden="true" />
+        <Copy k="nameplate.name" as="div" className={styles.plateName} />
+      </div>
+      <dl className={styles.plateRows}>
+        <Copy k="nameplate.label.role" as="dt" className={styles.plateLabel} />
+        <Copy k="nameplate.role" as="dd" className={styles.plateValue} />
+        <Copy k="nameplate.label.contact" as="dt" className={styles.plateLabel} />
+        <dd className={styles.plateValue}>
           <a className={styles.plateLink} href={`mailto:${email.toLowerCase()}`}>
             <Copy k="nameplate.email" as="span" />
           </a>
           {hasLinkedin && (
             <>
-              <span aria-hidden="true">{' · '}</span>
-              <a
-                className={styles.plateLink}
-                href={linkedin}
-                target="_blank"
-                rel="noreferrer"
-              >
+              <span className={styles.plateSep} aria-hidden="true">
+                {' · '}
+              </span>
+              <a className={styles.plateLink} href={linkedin} target="_blank" rel="noreferrer">
                 <Copy k="nameplate.linkedin" as="span" />
                 <span aria-hidden="true">{' ↗'}</span>
               </a>
             </>
           )}
-        </div>
-      </div>
+        </dd>
+      </dl>
     </aside>
   )
 }
