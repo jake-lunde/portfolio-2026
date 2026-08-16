@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useReducedMotion } from 'motion/react'
 import { useWindows } from '@/store/windows'
 import { useSettings } from '@/store/settings'
@@ -11,20 +11,26 @@ import { CopyText as Copy } from '@/content/CopyText'
 import { t } from '@/content/copy'
 import styles from '../programs.module.css'
 
-/* FOCUS runs longer than the label column leaves room for, and wrapping
-   broke the list's grid. So it crawls, on the skills ticker's mechanic:
-   a duplicated track sliding translateX(-50%) on a linear loop. Speed,
-   not duration, is what matches — the menu-bar ticker walks its line at
-   roughly 35px/s, so this one is timed off its measured width.
-   It only engages when the text actually overflows its rail; reduced
-   motion gets the ticker's static treatment (one line, ellipsis), with
-   the whole string still in the DOM for screen readers and on hover. */
+/* A data value runs longer than the label column leaves room for, and
+   wrapping breaks the list's grid — the second line lands under the
+   LABEL, which reads as a typo. So a value that outgrows its rail
+   crawls instead, on the skills ticker's mechanic: a duplicated track
+   sliding translateX(-50%) on a linear loop. Speed, not duration, is
+   what matches — the menu-bar ticker walks its line at roughly 35px/s,
+   so each rail is timed off its own measured width.
+   Overflow is measured, never guessed at a breakpoint: on a phone most
+   rows crawl, in a wide window only FOCUS does, and a resize re-decides.
+   Reduced motion gets the ticker's static treatment (one line,
+   ellipsis), with the whole string still in the DOM for screen readers
+   and on hover. */
 
 const CRAWL_PX_PER_SEC = 35
 const CRAWL_GAP = '\u00a0\u00a0✦\u00a0\u00a0' // nbsp: the loop's seam must not collapse
 
-function FocusLine() {
-  const skin = useSettings((s) => s.skin)
+/** One value cell. `ghost` is the same words as `children` in plain
+    text — the loop's second copy, scenery only, so a link in the real
+    half is never duplicated into the tab order. */
+function DataValue({ children, ghost }: { children: ReactNode; ghost: string }) {
   const reduced = useReducedMotion()
   const railRef = useRef<HTMLSpanElement>(null)
   const halfRef = useRef<HTMLSpanElement>(null)
@@ -47,35 +53,35 @@ function FocusLine() {
     ro.observe(rail)
     ro.observe(half)
     return () => ro.disconnect()
-  }, [skin])
+    // a skin swaps the words (this dep) and the face (the observer sees it)
+  }, [ghost])
 
   const crawl = over && !reduced
-  const line = t('readme.focus', skin)
 
   return (
     <span
       ref={railRef}
-      className={styles.focusRail}
-      title={over && !crawl ? line : undefined}
+      className={styles.dataRail}
+      title={over && !crawl ? ghost : undefined}
     >
       <span
         className={
-          crawl ? `${styles.focusTrack} ${styles.focusCrawl}` : styles.focusTrack
+          crawl ? `${styles.dataTrack} ${styles.dataCrawl}` : styles.dataTrack
         }
         style={crawl ? { animationDuration: `${dur}s` } : undefined}
       >
-        <span ref={halfRef} className={styles.focusHalf}>
-          <Copy k="readme.focus" as="span" />
+        <span ref={halfRef} className={styles.dataHalf}>
+          {children}
           {crawl ? <span aria-hidden="true">{CRAWL_GAP}</span> : null}
         </span>
         {/* the second copy is scenery: it closes the loop, and it is the
             same words, so it stays out of the accessibility tree */}
         {crawl ? (
           <span
-            className={`${styles.focusHalf} ${styles.focusGhost}`}
+            className={`${styles.dataHalf} ${styles.dataGhost}`}
             aria-hidden="true"
           >
-            {line}
+            {ghost}
             {CRAWL_GAP}
           </span>
         ) : null}
@@ -84,8 +90,13 @@ function FocusLine() {
   )
 }
 
+const EMAIL = 'jakelunde@me.com'
+
 export default function About() {
   const open = useWindows((s) => s.open)
+  // the ghost copies are plain strings, so this reads the same skin the
+  // copy layer does
+  const skin = useSettings((s) => s.skin)
 
   return (
     <div className={styles.about}>
@@ -137,23 +148,31 @@ export default function About() {
       <ul className={styles.aboutList}>
         <li>
           <Copy k="readme.label.now" as="span" className={styles.k} />
-          <Copy k="readme.now" as="span" />
+          <DataValue ghost={t('readme.now', skin)}>
+            <Copy k="readme.now" as="span" />
+          </DataValue>
         </li>
-        <li className={styles.focusRow}>
+        <li>
           <Copy k="readme.label.focus" as="span" className={styles.k} />
-          <FocusLine />
+          <DataValue ghost={t('readme.focus', skin)}>
+            <Copy k="readme.focus" as="span" />
+          </DataValue>
         </li>
         <li>
           <Copy k="readme.label.contact" as="span" className={styles.k} />
-          <a href="mailto:jakelunde@me.com">jakelunde@me.com</a>
+          <DataValue ghost={EMAIL}>
+            <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+          </DataValue>
         </li>
         <li>
           <Copy k="readme.label.system" as="span" className={styles.k} />
           {/* version from the shared constant, stack list still editable —
               this line used to hardcode v0.1 while the menu bar said v0.2 */}
-          <span>
+          <DataValue
+            ghost={`LUNDE OS ${OS_VERSION} — ${t('readme.system', skin)}`}
+          >
             LUNDE OS {OS_VERSION} — <Copy k="readme.system" as="span" />
-          </span>
+          </DataValue>
         </li>
       </ul>
       {/* README used to end with CLAUDE introducing itself and an ASK MY AI
