@@ -240,6 +240,15 @@
   letter-spacing: 0.02em;
 }
 
+/* ---------- build ---------- */
+/* Section 05 rides the MOTION table's rail (.motion/.motionRow/.motionK/
+   .motionV): same label column, same hairline between rows. The one thing
+   it needs on top: these values are sentences, not a single spec line, so
+   the wrapped lines get the body leading instead of the default. */
+.buildV {
+  line-height: var(--leading-body); /* 1.7 exact */
+}
+
 /* ---------- components ---------- */
 .components {
   display: grid;

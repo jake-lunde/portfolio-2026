@@ -98,11 +98,15 @@ test('a key is never longer than the key length', () => {
 
 /* ------------------------------------------------------- the index itself */
 
+/* Pinned to README's opening paragraph, which is written straight into
+   About.tsx and so is exactly the case the index exists for. Jake rewrites
+   this prose from time to time. When he does, the index is rebuilt and
+   this fixture moves with it. Re-copy the paragraph's rendered text. */
 test('the README paragraph Jake asked about points at its own file', () => {
   // the pick's textContent, exactly as the browser reports it
   const picked =
-    'I’m a product designer shipping production code — a design engineer. ' +
-    'Over ten years of product work in consumer products, digital and physical.'
+    'I’m Jake, and I’ve been designing solutions for humans and businesses ' +
+    'for over 10 years.'
   assert.deepEqual(TEXT_INDEX[textKey(picked)], ['src/programs/about/About.tsx'])
 })
 

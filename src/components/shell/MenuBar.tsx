@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useSettings } from '@/store/settings'
 import { useInspect } from '@/store/inspect'
 import { useWindows } from '@/store/windows'
 import { OS_VERSION } from '@/lib/version'
+import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
 import { t } from '@/content/copy'
 import { SkinSwitch } from './SkinSwitch'
@@ -119,6 +121,11 @@ function Clock() {
   )
 }
 
+/* A constant, never useId(): programs are dynamic imports in a tree that
+   reshapes at the SSR handover, and a generated id mismatches across it.
+   The menu bar renders once, so one literal is safe. */
+const INSPECT_HINT_ID = 'inspect-chip-hint'
+
 export function MenuBar() {
   const theme = useSettings((s) => s.theme)
   const sound = useSettings((s) => s.sound)
@@ -129,8 +136,12 @@ export function MenuBar() {
   const inspecting = useInspect((s) => s.on)
   const toggleInspect = useInspect((s) => s.toggle)
   const openWindow = useWindows((s) => s.open)
+  const reduced = useReducedMotion()
+  const [hintUp, setHintUp] = useState(false)
 
   useEffect(() => hydrate(), [hydrate])
+
+  const inspectHint = t('inspect.chip.hint', skin)
 
   return (
     /* the menubar is the tool's own toolbar while INSPECT.MODE is up, so
@@ -176,16 +187,57 @@ export function MenuBar() {
             in shell.module.css) rather than SkinSwitch's open/caret
             language, since INSPECT toggles a mode, it doesn't open a
             menu. Hidden below 900px, where there would be no canvas left
-            between the docks (see .inspectBtn). */}
-        <button
-          className={`${styles.skinTrigger} ${styles.inspectBtn}`}
-          data-inspect-toggle=""
-          onClick={toggleInspect}
-          aria-pressed={inspecting}
-          aria-label={`Inspect mode ${inspecting ? 'on' : 'off'}`}
+            between the docks (the whole switch goes, see .inspectSwitch). */}
+        {/* s67: the chip is one seven-letter word, and a stranger has no
+            way to guess it opens a live token and spring reader. It gets
+            COMMAND.CTR's reveal from one seat over (CommandWidget.tsx,
+            s66): hover or focus raises a hint card under the chip,
+            absolutely positioned so nothing in the bar moves. The card
+            stays down while the tool is up, where INSPECT's own header
+            already explains itself. The card is decoration. The sentence
+            reaches assistive tech through the hidden span the button
+            names in aria-describedby, whether the card is up or not. No
+            `title` on top of it: the native tooltip would draw the same
+            words a second time, half a second late. */}
+        <div
+          className={styles.inspectSwitch}
+          /* touch has no hover, so a tap goes straight through to the mode */
+          onPointerEnter={(e) => {
+            if (e.pointerType !== 'touch') setHintUp(true)
+          }}
+          onPointerLeave={() => setHintUp(false)}
+          onFocus={() => setHintUp(true)}
+          onBlur={() => setHintUp(false)}
         >
-          INSPECT
-        </button>
+          <button
+            className={`${styles.skinTrigger} ${styles.inspectBtn}`}
+            data-inspect-toggle=""
+            onClick={toggleInspect}
+            aria-pressed={inspecting}
+            aria-label={`Inspect mode ${inspecting ? 'on' : 'off'}`}
+            aria-describedby={INSPECT_HINT_ID}
+          >
+            INSPECT
+          </button>
+          <span id={INSPECT_HINT_ID} className={styles.srOnly}>
+            {inspectHint}
+          </span>
+          <AnimatePresence>
+            {hintUp && !inspecting && (
+              <motion.span
+                className={styles.inspectHint}
+                aria-hidden="true"
+                initial={reduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                transition={SPRINGS.mini}
+                data-spring="mini"
+              >
+                {inspectHint}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
         {/* sound + theme dropped their three-letter names for glyphs
             (Jake, s44): a music note that takes a slash when muted, and
             the current theme as sun or moon. State still reads without
