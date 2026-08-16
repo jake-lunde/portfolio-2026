@@ -107,9 +107,16 @@
 /* The tool docks 548px of panels; below 900 there is no canvas left
    between them, and the desktop has already shed its widgets down there
    anyway. No toggle, no way in — and InspectShell watches the same
-   width and stands the mode down if it is already up. */
+   width and stands the mode down if it is already up.
+
+   The selector carries the toggle's own attribute for weight, not for
+   targeting: round 4 put .skinTrigger on this button, and .skinTrigger's
+   `display: inline-flex` is declared further down the file at the same
+   one-class specificity, so a bare `.inspectBtn` here lost on source
+   order and the chip stayed up on the phone, overlapping the skin pill.
+   A media query adds no weight of its own — the extra attribute does. */
 @media (max-width: 900px) {
-  .inspectBtn {
+  .inspectBtn[data-inspect-toggle] {
     display: none;
   }
 }

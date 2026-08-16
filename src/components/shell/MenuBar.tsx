@@ -176,7 +176,12 @@ export function MenuBar() {
             in shell.module.css) rather than SkinSwitch's open/caret
             language, since INSPECT toggles a mode, it doesn't open a
             menu. Hidden below 900px, where there would be no canvas left
-            between the docks (see .inspectBtn). */}
+            between the docks (see .inspectBtn).
+
+            data-inspect-toggle is load-bearing twice over: InspectShell
+            finds this button through it to hand focus back on teardown,
+            and the 900px stand-down hangs off it for the specificity it
+            needs to outweigh .skinTrigger. Don't drop it. */}
         <button
           className={`${styles.skinTrigger} ${styles.inspectBtn}`}
           data-inspect-toggle=""
