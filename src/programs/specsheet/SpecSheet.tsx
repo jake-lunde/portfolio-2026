@@ -6,6 +6,7 @@ import { CustomizeButton } from '@/components/primitives/CustomizeButton'
 import { CopyText as Copy } from '@/content/CopyText'
 import { contrast, grade, resolveVar, toHex } from '@/lib/contrast'
 import { PALETTE, readPicks, type Picks } from '@/lib/buildASkin'
+import { REPO_SLUG, REPO_URL } from '@/lib/repo'
 import { useSettings, type Skin } from '@/store/settings'
 import styles from './specsheet.module.css'
 
@@ -64,6 +65,21 @@ const MOTION: Array<[string, string]> = [
   ['Window open', 'spring · stiffness 480 · damping 34 · mass 0.7'],
   ['Window close', 'opacity + scale 0.97 · duration 0.14s'],
   ['Drag', 'momentum off · elastic 0.12'],
+]
+
+/* ---- how the system is actually made ----
+   The sheet documents what LUNDE OS looks like; this section says what
+   built it, and ends on the repo so the claim has an artifact behind it.
+   Label plus copy key, rendered on the MOTION table's own rail (that
+   label/value grid is the sheet's row shape, not a motion-only one).
+   The prose lives in the copy layer so it can be rewritten from inside
+   the machine; the labels are the machine's caps, like MOTION's. */
+const BUILD: Array<[string, string]> = [
+  ['TOKENS', 'spec-sheet.build.row.tokens'],
+  ['FIGMA', 'spec-sheet.build.row.figma'],
+  ['CATALOG', 'spec-sheet.build.row.catalog'],
+  ['GATE', 'spec-sheet.build.row.gate'],
+  ['PROGRAMS', 'spec-sheet.build.row.programs'],
 ]
 
 export default function SpecSheet() {
@@ -244,6 +260,34 @@ export default function SpecSheet() {
               </button>
             </div>
             <span className={styles.partNo}>CMP-02 · Button · primary</span>
+          </div>
+        </div>
+
+        {/* ---------- build ---------- */}
+        <div className={styles.sectionHead}>
+          <span className={styles.secNo}>05 —</span>
+          <Copy k="spec-sheet.section.build" as="span" className={styles.secLabel} />
+        </div>
+        <div className={styles.motion}>
+          {BUILD.map(([label, key]) => (
+            <div key={key} className={styles.motionRow}>
+              <span className={styles.motionK}>{label}</span>
+              <Copy
+                k={key}
+                as="span"
+                className={`${styles.motionV} ${styles.buildV}`}
+              />
+            </div>
+          ))}
+          {/* the artifact itself, last, so the section ends on the thing a
+              visitor can go read rather than on a claim about it */}
+          <div className={styles.motionRow}>
+            <span className={styles.motionK}>SOURCE</span>
+            <span className={`${styles.motionV} ${styles.buildV}`}>
+              <a href={REPO_URL} target="_blank" rel="noreferrer">
+                {`github.com/${REPO_SLUG}`} ↗
+              </a>
+            </span>
           </div>
         </div>
 

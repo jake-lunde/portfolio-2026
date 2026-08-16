@@ -6,6 +6,7 @@ import { useWindows } from '@/store/windows'
 import { useSettings } from '@/store/settings'
 import { sfx } from '@/lib/sound'
 import { BASE } from '@/lib/base'
+import { REPO_URL } from '@/lib/repo'
 import { OS_VERSION } from '@/lib/version'
 import { CopyText as Copy } from '@/content/CopyText'
 import { t } from '@/content/copy'
@@ -167,11 +168,18 @@ export default function About() {
         <li>
           <Copy k="readme.label.system" as="span" className={styles.k} />
           {/* version from the shared constant, stack list still editable —
-              this line used to hardcode v0.1 while the menu bar said v0.2 */}
+              this line used to hardcode v0.1 while the menu bar said v0.2.
+              The row ends on the repo, because a README that claims a stack
+              should hand over the thing itself. The ghost copy is the same
+              words in plain text (the link lives only in the real half, so
+              the crawl never doubles it into the tab order). */}
           <DataValue
-            ghost={`LUNDE OS ${OS_VERSION} — ${t('readme.system', skin)}`}
+            ghost={`LUNDE OS ${OS_VERSION} · ${t('readme.system', skin)} · ${t('readme.source', skin)} ↗`}
           >
-            LUNDE OS {OS_VERSION} — <Copy k="readme.system" as="span" />
+            LUNDE OS {OS_VERSION} · <Copy k="readme.system" as="span" /> ·{' '}
+            <a href={REPO_URL} target="_blank" rel="noreferrer">
+              <Copy k="readme.source" as="span" /> ↗
+            </a>
           </DataValue>
         </li>
       </ul>

@@ -18,6 +18,11 @@
 /** owner/name, the same shape parseRepo() takes. */
 export const REPO_SLUG = 'jake-lunde/portfolio-2026'
 
+/** The repo's front door. README's SYSTEM row and SPEC.SHEET's build
+    section both point a visitor here, so the site's claim to production
+    code has one artifact behind it. */
+export const REPO_URL = `https://github.com/${REPO_SLUG}`
+
 /** The branch the site ships from, and the one the editor opens against. */
 export const REPO_BRANCH = 'main'
 

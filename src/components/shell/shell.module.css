@@ -104,12 +104,65 @@
   border-color: var(--content);
 }
 
+/* The chip is a seven-letter word and nothing else, so it sits in a
+   positioning box that can hang a hint card under it without the bar
+   reflowing. Same wrapper recipe as .commandSwitch and .skinSwitch. */
+.inspectSwitch {
+  position: relative;
+  display: flex;
+}
+
+/* Left-anchored under the chip: INSPECT leads the bar's right-hand group,
+   so a right-anchored card would drift away from its own trigger. Scenery
+   only, with pointer-events off, so crossing it can never trip the wrapper's
+   pointerleave, and the sentence a screen reader gets is the hidden span
+   the button names in aria-describedby. */
+.inspectHint {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 5100; /* matches .commandPopover: bar chrome sits over every window */
+  width: max-content;
+  max-width: min(240px, calc(100vw - 24px));
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: var(--shadow-print);
+  color: var(--content);
+  font-family: var(--mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-14);
+  line-height: var(--leading-body);
+  pointer-events: none;
+}
+
+/* a full-weight --content edge glares in dark. Same climb-down
+   .window and .explainerPanel make */
+[data-theme='dark'] .inspectHint {
+  border-color: var(--border);
+}
+
+/* text that carries meaning rather than decoration: hidden without
+   display:none, which screen readers skip (commandWidget's .ccSr recipe) */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* The tool docks 548px of panels; below 900 there is no canvas left
    between them, and the desktop has already shed its widgets down there
    anyway. No toggle, no way in — and InspectShell watches the same
-   width and stands the mode down if it is already up. */
+   width and stands the mode down if it is already up. The whole switch
+   goes, not just the chip, so the bar's gap closes with it. */
 @media (max-width: 900px) {
-  .inspectBtn {
+  .inspectSwitch {
     display: none;
   }
 }
