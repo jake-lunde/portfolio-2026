@@ -1820,7 +1820,7 @@
   flex-direction: column;
   gap: calc(var(--box-w) * 0.016);
   margin: 0;
-  padding: 9px 10px 0;
+  padding: 9px 10px;
   line-height: var(--leading-tight);
   /* the contents list numbers itself — see `.listed` */
   counter-reset: contents;
