@@ -8,9 +8,9 @@ export const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
    have to name the host because they are read off-site: metadataBase in
    the root layout, plus robots.ts and sitemap.ts.
 
-   ⚠️ The apex 308s to www.lunde.co, so every absolute URL written from
-   here takes one redirect on the way. Scrapers follow it and the bare
-   domain is the one Jake gives out, which is why it stays. If a preview
-   ever comes back image-less, flipping this one string to the www host is
-   the first thing to try. */
-export const SITE = 'https://lunde.co'
+   The apex 308s to www.lunde.co (Vercel's primary domain is the www
+   host), so absolute URLs name www: an og:image that redirects is the
+   classic reason a LinkedIn or Slack unfurl comes back image-less, and
+   a canonical should be the URL the server actually answers on. Jake
+   still gives out the bare domain; the redirect carries people there. */
+export const SITE = 'https://www.lunde.co'
