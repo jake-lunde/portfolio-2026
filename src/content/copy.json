@@ -135,6 +135,7 @@
   "inspect.type.note": "WHAT THE BROWSER COMPUTED, NOT WHAT THE STYLESHEET ASKED FOR. THE CHIPS ARE THE TYPE ROLES THIS PICK READS FROM.",
   "menubar.command": "Command Center",
   "menubar.designSystem": "Design System",
+  "notfound.line": "NO SUCH FILE. THE DESK IS STILL HERE.",
   "now-playing.lastPlayed": "Last played ♪",
   "now-playing.loading": "TUNING…",
   "now-playing.openLink": "OPEN IN APPLE MUSIC ↗",

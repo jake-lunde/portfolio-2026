@@ -10,6 +10,7 @@ import {
 } from 'next/font/google'
 import localFont from 'next/font/local'
 import { Analytics } from '@vercel/analytics/next'
+import { SITE } from '@/lib/base'
 import './globals.css'
 
 const sans = Geist({
@@ -97,13 +98,54 @@ const medievalBody = Eagle_Lake({
   preload: false,
 })
 
+/* LINK PREVIEW — what a recruiter sees when the URL lands in Slack, in a
+   LinkedIn post, or in iMessage. Until this shipped there was no og: or
+   twitter: at all and lunde.co pasted as a bare blue link.
+
+   Jake's public title is Staff Product Designer; design engineer is the
+   second half of the sentence, not the headline, so it lives in the
+   description and in the per-case lines (src/app/[...path]/page.tsx).
+
+   THE IMAGE is src/app/opengraph-image.jpg, wired by Next's file
+   convention: og:image AND twitter:image, with the alt text alongside it
+   in opengraph-image.alt.txt. A 1200×630 capture of the booted classic
+   desktop, and a SWAPPABLE PLACEHOLDER by image law: drop a new 1200×630
+   file at the same path and every route's preview follows.
+
+   ⚠️ WHY `openGraph` HERE CARRIES NO title, description OR url. A child
+   segment's `openGraph` REPLACES this object outright rather than merging
+   into it — set a title here and every deep link inherits the home page's
+   card. Leave those three out and Next fills og:title and og:description
+   from each route's own `title`/`description` instead, so a program page
+   describes itself while still inheriting the site name, the locale and
+   the image above. Same reason `twitter` holds nothing but the card type.
+   og:url is the one casualty: it cannot be per-route without re-declaring
+   the whole object per route, so routes state their canonical URL through
+   `alternates.canonical` instead, which is the tag that carries the
+   weight (see src/app/[...path]/page.tsx). */
+const DESCRIPTION =
+  'LUNDE OS: the portfolio of Jake Lunde, a staff product designer who ships production code. The site is the work.'
+const TITLE = 'Jake Lunde · Staff Product Designer'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE),
   title: {
-    default: 'Jake Lunde — Design Engineer',
-    template: '%s — Jake Lunde',
+    default: TITLE,
+    template: '%s · Jake Lunde',
   },
-  description:
-    'LUNDE OS: the portfolio of Jake Lunde, a staff product designer who ships production code. The site is the work.',
+  description: DESCRIPTION,
+  /* no `alternates` here on purpose — a canonical set at the root leaks
+     to every child that doesn't override it, and they would all claim to
+     be the home page. Each route states its own (app/page.tsx below and
+     the catch-all's generateMetadata). */
+  openGraph: {
+    type: 'website',
+    siteName: 'LUNDE OS',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
 }
 
 export const viewport: Viewport = {
