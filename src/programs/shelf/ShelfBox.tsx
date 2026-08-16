@@ -11,11 +11,26 @@ import type { CaseDef, CoverVariant } from '@/programs/projects/cases'
 import { useSettings } from '@/store/settings'
 import { Box3D } from './Box3D'
 import { CoverFilm } from './CoverFilm'
-import { InstallBar } from './InstallBar'
 import styles from './shelf.module.css'
 
-/* One box on the shelf. Back is the panel every 1992 box had — a thesis,
-   a review blurb, system requirements, and the button.
+/* One box on the shelf. Back is the panel every 1992 box had — an edition
+   line, a thesis, a data block on the foot, and the button.
+
+   PASS 12 IS JAKE'S FIGMA PASS ON ALL EIGHT FACES. The back stopped being a
+   stack and became two groups with the slack in the middle: edition, name and
+   thesis at the head, the ledger standing on the foot under a solid accent
+   rule. Three things went with the rewrite. The review blurb is off the panel
+   — two quoted registers (thesis and blurb) on a 246px board were one voice
+   too many. The shelf index is off the title, which now prints the name only.
+   And the progress meter is gone: an unshipped box printed a phase line, a
+   bar, a shrink-wrap hint and a button asking the reader to nudge Jake, which
+   is four registers spent apologising, where a carton would print COMING SOON
+   and stop. `progress` still feeds the IN PROGRESS window and /api/nudge is
+   untouched — the shelf simply no longer asks.
+
+   The FRONTS came back almost unchanged: figma, catalog and nocturne are
+   pixel-for-pixel what pass 11 shipped, and every edit landed on stripe (see
+   the note over `.vStripe` in the CSS).
 
    PASS 5 EMPTIED THAT PANEL OUT. It had grown four data rows, three
    screenshot thumbs and a version line under a thesis and a quote, which
@@ -131,29 +146,13 @@ const spoken = (s: string) => s.replace(/[←→]/g, '').trim()
 
 export function ShelfBox({
   c,
-  index,
-  count,
-  sent,
-  busy,
-  durable,
-  error,
   fine,
   revealed,
   overlayOpen,
   onReveal,
-  onNudge,
   onPlay,
 }: {
   c: CaseDef
-  index: number
-  count: number
-  sent: boolean
-  busy: boolean
-  durable: boolean
-  /** this box's own nudge came back with a refusal — printed under the
-      button that caused it, which is where pass 7 moved it from the shelf
-      footer it used to share with a hint nobody needed */
-  error: string | null
   /** hover-capable machine — measured once by the shelf */
   fine: boolean
   /** this box is the one whose tag is out */
@@ -161,7 +160,6 @@ export function ShelfBox({
   /** the launch layer is up, covering the shelf — see `leave` below */
   overlayOpen: boolean
   onReveal: (slug: string) => void
-  onNudge: (slug: string) => void
   onPlay: (slug: string, trigger: HTMLElement) => void
 }) {
   const reduced = useReducedMotion()
@@ -180,7 +178,6 @@ export function ShelfBox({
 
   const backId = `shelf-${c.slug}-back`
   const box = c.box
-  const pct = c.progress?.pct ?? 0
   const shipped = c.status === 'live' && Boolean(c.component)
 
   /* The cover film mounts on the client only. The shelf window is on screen
@@ -420,10 +417,16 @@ export function ShelfBox({
                 parameters, so it can never come adrift of it. */}
             {cover.frame && <span className={styles.frame} aria-hidden="true" />}
 
-            {/* the cartridge box's rainbow rules, sitting flush on the top
-                edge of the picture — the one place on this shelf where ink is
-                a literal rather than a token (see shelf.module.css) */}
+            {/* the cartridge box's rainbow rules, printed down the binding
+                edge — the one place on this shelf where ink is a literal
+                rather than a token (see shelf.module.css) */}
             {cover.band && <span className={styles.band} aria-hidden="true" />}
+
+            {/* the starburst seal, over the corner of the picture. It is a
+                shape and a promise together, so it is drawn by the cover that
+                has words for it and by nothing else — an empty seal is a
+                sticker with no offer on it. */}
+            {box?.burst && <span className={styles.burst}>{box.burst}</span>}
 
             {/* the airbrush — Jake's Figma "Ellipse 2", a conic sweep blurred
                 over the art at soft-light. Every 90s cover had one; pass 6
@@ -461,8 +464,8 @@ export function ShelfBox({
                 in a strip beneath it, which is the whole difference between a
                 box and a card with a caption. */}
             <span className={styles.type}>
-              <span className={styles.frontEyebrow}>{c.org}</span>
-              <span className={styles.title}>{c.name}</span>
+              <span className={styles.frontEyebrow}>{box?.coverEyebrow ?? c.org}</span>
+              <span className={styles.title}>{box?.coverTitle ?? c.name}</span>
               {box?.tagline && <span className={styles.tagline}>{box.tagline}</span>}
             </span>
 
@@ -475,6 +478,11 @@ export function ShelfBox({
                 {cover.foot === 'org' ? c.org : c.year}
               </span>
             )}
+
+            {/* the smallest print on the box, along the bottom edge — the age
+                rating, the count, the line a carton carries because cartons
+                carry one. Ordered last so it sits over everything else. */}
+            {box?.footnote && <span className={styles.footnote}>{box.footnote}</span>}
           </motion.button>
         }
         back={
@@ -488,100 +496,74 @@ export function ShelfBox({
             animate={faceFade(true)}
             transition={{ duration: reduced ? 0.14 : 0 }}
           >
+            {/* TWO GROUPS, ONE GAP (pass 12). The panel used to be a single
+                top-packed stack, which left whatever room was going over as
+                a ragged tail under the last row. Now the prose sits at the
+                head, the ledger stands on the foot, and the slack between
+                them is the panel's only whitespace — the same way a real
+                carton prints its blurb at the top and its data block down
+                by the barcode. */}
             <div className={styles.backInner}>
-              <p className={styles.backTitle}>
-                <span className={styles.backNo}>{c.no}</span> {c.name}
-              </p>
+              <div className={styles.backLead}>
+                {/* the version, rehoused. It used to be printed on the front,
+                    under the name — pass 4's box art has no room for a serial
+                    number and no reason to carry one, so it moved here, above
+                    the title, where a box prints its edition. */}
+                <p className={styles.backVersion}>
+                  <Copy k="shelf.versionLabel" as="span" /> {version(c.year)}
+                </p>
 
-              {/* the version, rehoused. It used to be printed on the front,
-                  under the name — pass 4's box art has no room for a serial
-                  number and no reason to carry one, so it moved here, where
-                  the rest of the box's small print already lives. */}
-              <p className={styles.backVersion}>
-                <Copy k="shelf.versionLabel" as="span" /> {version(c.year)}
-              </p>
+                {/* the name alone. The shelf index used to be printed in
+                    front of it in the expressive ink, which was a second
+                    label for a box that is already the third one along. */}
+                <p className={styles.backTitle}>{c.name}</p>
 
-              {box?.thesis && <p className={styles.thesis}>{box.thesis}</p>}
+                {box?.thesis && <p className={styles.thesis}>{box.thesis}</p>}
+              </div>
 
               {box?.requirements?.length ? (
-                <>
-                  <Copy k="shelf.requirements" as="h4" className={styles.backHead} />
+                <div className={styles.backLedger}>
+                  {/* SYSTEM REQUIREMENTS is what a box that shipped prints;
+                      INCLUDED is what a box that hasn't prints, because a
+                      carton with nothing to require still lists what is in
+                      it. Same block, two headings. */}
+                  <Copy
+                    k={shipped ? 'shelf.requirements' : 'shelf.included'}
+                    as="h4"
+                    className={styles.backHead}
+                  />
                   {/* Each row is its own element (dl > div > dt+dd is valid
                       HTML and keeps the description-list semantics). It has
                       to be: a shared grid column is sized to the WIDEST
                       label in the set, so one long row used to eat width
                       from every other row and the values wrapped. Row by
                       row, each line only has to clear the panel on its own
-                      — which is what makes the one-line rule keepable. */}
+                      — which is what makes the one-line rule keepable.
+
+                      A row with no value is a contents line rather than a
+                      ledger line: the label takes the width and the panel
+                      numbers it in CSS (a counter, so the numbering can
+                      never disagree with the list). */}
                   <dl className={styles.reqs}>
                     {box.requirements.map((r) => (
-                      <div key={r.label}>
+                      <div key={r.label} className={r.value ? undefined : styles.listed}>
                         <dt>{r.label}</dt>
-                        <dd>{r.value}</dd>
+                        {r.value && <dd>{r.value}</dd>}
                       </div>
                     ))}
                   </dl>
-                </>
-              ) : null}
-
-              {box?.blurb && (
-                <blockquote className={styles.blurb}>
-                  <p>&ldquo;{box.blurb.quote}&rdquo;</p>
-                  <footer>{box.blurb.source}</footer>
-                </blockquote>
-              )}
-
-              {/* an unshipped box has no hero act to offer, so the nudge
-                  stays down here in the body with the thing it's about — the
-                  progress meter — rather than pretending to be PLAY */}
-              {!shipped && (
-                <div className={styles.meter}>
-                  <p className={styles.phase}>{c.progress?.phase}</p>
-                  <InstallBar
-                    pct={pct}
-                    role="meter"
-                    label={`${c.name}: ${pct}% — ${c.progress?.phase ?? ''}`}
-                    delay={0.05 * (index + 1)}
-                  />
-                  <Copy k="shelf.wrappedHint" as="p" className={styles.wrappedHint} />
-                  <div className={styles.nudgeRow}>
-                    <button
-                      type="button"
-                      className={styles.nudgeBtn}
-                      onClick={() => onNudge(c.slug)}
-                      disabled={!durable || sent || busy}
-                      aria-label={`Encourage Jake to work on ${c.name}`}
-                    >
-                      {sent ? (
-                        <Copy k="progress.nudged" as="span" />
-                      ) : (
-                        <Copy k="progress.nudge" as="span" />
-                      )}
-                    </button>
-                    {count > 0 && (
-                      <span className={styles.count} aria-label={`${count} nudges so far`}>
-                        · {count}
-                      </span>
-                    )}
-                  </div>
-                  {/* the refusal, printed with the button that earned it.
-                      Pass 7 deleted the shelf footer this used to live in —
-                      an error about ONE box announced under FOUR of them was
-                      the whole reason it needed a footer at all. */}
-                  {error && (
-                    <p className={styles.nudgeError} role="alert">
-                      {error}
-                    </p>
-                  )}
                 </div>
-              )}
+              ) : null}
             </div>
 
-            {/* PLAY is the whole reason the box turns over: full width, its
-                own register at the foot of the panel, nothing sharing the
-                row with it — and now nothing beneath it either. */}
-            {shipped && (
-              <div className={styles.heroAction}>
+            {/* THE FOOT IS ALWAYS A BUTTON-SHAPED THING (pass 12). PLAY is
+                the whole reason a shipped box turns over: full width, its own
+                register, nothing sharing the row. An unshipped one prints the
+                same register set to COMING SOON and disabled — a box on the
+                shelf with its foot cut off read as a panel that had failed to
+                load rather than as a box that isn't out yet. */}
+            <div className={styles.heroAction}>
+              {shipped ? (
                 <button
                   type="button"
                   className={styles.playBtn}
@@ -589,8 +571,12 @@ export function ShelfBox({
                 >
                   <Copy k="shelf.play" as="span" />
                 </button>
-              </div>
-            )}
+              ) : (
+                <button type="button" className={`${styles.playBtn} ${styles.comingSoon}`} disabled>
+                  <Copy k="shelf.comingSoon" as="span" />
+                </button>
+              )}
+            </div>
           </motion.div>
         }
       />

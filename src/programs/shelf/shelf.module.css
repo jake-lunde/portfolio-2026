@@ -31,14 +31,6 @@
   --boxart-face: var(--display);
 }
 
-.hp {
-  position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-}
-
 /* ---------------- (no masthead) ----------------
    The "SHIPPED.SW · parallel 1992" strip that stood here for three passes
    is gone, struck by Jake in pass 4 along with the store framing that was
@@ -764,7 +756,7 @@
 
   /* --- the furniture: which of the optional layers show --- */
   --wash-display: block;
-  --band-h: 13px;
+  --band-w: 8px;
   --stamp-top: 66%;
 
   /* COLOUR ONLY — the grain and the sheen are `.face`'s background-image and
@@ -1193,24 +1185,90 @@
 
    It is decorative and aria-hidden, so it carries no contrast duty of its
    own; nothing is ever printed on it. */
+/* PASS 12 STANDS IT UP. The band used to lie across the face, flush on the
+   top edge of a full-width picture — which only worked while the picture was
+   full width. Jake's pass insets the plate on all four sides, and a rule
+   ending in mid-paper either side of it is a stripe floating in the paper,
+   which is exactly what it was drawn not to be. So it runs down the BINDING
+   edge instead, full height, the way a cartridge sleeve carried its rainbow
+   round the spine — and it now reads as the edge of the box rather than as a
+   line inside the composition.
+
+   Red at the foot, blue at the head: the sweep runs `to top` so the warm end
+   sits where the box meets the shelf. */
 .band {
   position: absolute;
   left: 0;
-  right: 0;
-  /* it sits flush on the top edge of the picture, which is what makes it
-     read as the rule between the type and the art rather than a stripe
-     floating in the paper. The plate is bottom-anchored on this cover, so
-     its height is also the band's offset. */
-  bottom: var(--plate-h);
-  height: var(--band-h);
+  top: 0;
+  bottom: 0;
+  width: var(--band-w);
   background: linear-gradient(
-    to right,
+    to top,
     #cf2a27 0 20%,
     #e8721c 20% 40%,
     #edc12a 40% 60%,
     #2f8f5b 60% 80%,
     #2b4c9b 80% 100%
   );
+  pointer-events: none;
+}
+
+/* THE STARBURST SEAL — the sticker a toy box wore over the corner of its
+   photograph, promising the thing the buyer was actually worried about. It is
+   a 16-point star, and the points come from `clip-path` rather than from an
+   SVG for one reason: the shape has to stretch. Jake's is 85×46 — a squashed
+   seal, not a round one — and percentage clip points scale with the box, so
+   the wide oval survives the narrow breakpoint without a second rule.
+
+   ⚠️ THE INK IS THE BAND'S RED, and it is a literal for the same reason the
+   band's five are (see above): this is printed card from 1982, not chrome.
+   The type on it takes `--content-inverse` — a token, because it is TYPE —
+   and cream on #cf2a27 measures 5.4:1. */
+.burst {
+  position: absolute;
+  right: 0;
+  bottom: var(--cover-pad);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--box-w) * 0.346);
+  height: calc(var(--box-w) * 0.186);
+  padding: 0 12%;
+  background: #cf2a27;
+  clip-path: polygon(
+    50% 0%, 57.3% 13.2%, 69.1% 3.8%, 70.8% 18.8%, 85.4% 14.6%, 81.2% 29.2%,
+    96.2% 30.9%, 86.8% 42.7%, 100% 50%, 86.8% 57.3%, 96.2% 69.1%, 81.2% 70.8%,
+    85.4% 85.4%, 70.8% 81.2%, 69.1% 96.2%, 57.3% 86.8%, 50% 100%, 42.7% 86.8%,
+    30.9% 96.2%, 29.2% 81.2%, 14.6% 85.4%, 18.8% 70.8%, 3.8% 69.1%, 13.2% 57.3%,
+    0% 50%, 13.2% 42.7%, 3.8% 30.9%, 18.8% 29.2%, 14.6% 14.6%, 29.2% 18.8%,
+    30.9% 3.8%, 42.7% 13.2%
+  );
+  font-family: var(--boxart-face);
+  font-size: calc(var(--box-w) * 0.029); /* ~7px at 246 */
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--content-inverse);
+  /* struck slightly off true, the way a sticker lands */
+  transform: rotate(-5.5deg);
+  pointer-events: none;
+}
+
+/* the smallest print on the box, along the bottom edge — an age rating, a
+   count, the line a carton carries because cartons carry one. Set at the
+   scale a real one is: unmissable as a register, unread until you look. */
+.footnote {
+  position: absolute;
+  left: var(--cover-pad);
+  right: var(--cover-pad);
+  bottom: 4px;
+  font-family: var(--boxart-face);
+  font-size: calc(var(--box-w) * 0.024); /* ~6px at 246 */
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-02);
+  text-transform: uppercase;
+  color: var(--cover-ink);
   pointer-events: none;
 }
 
@@ -1368,48 +1426,100 @@
 
    The ink inverts with the ground, by token, exactly as nocturne's does —
    including the board's fibre and its light, or the grain would be dark ink
-   on a dark ground and there would be no material at all. */
+   on a dark ground and there would be no material at all.
+
+   PASS 12 IS JAKE'S OWN PASS ON IT, and it is the only front on the shelf he
+   moved. It stopped being a software box and became a TOY box: the picture
+   pulled in off all four edges into a keylined window, the rainbow stood up
+   on the binding edge (see `.band`), the lettering centred, a green pill
+   carrying the promise above the name, a starburst seal over the corner of
+   the photograph and an age line along the foot. The register the type block
+   prints in changed with it — a cartridge sold to a parent leads with what
+   the thing IS ("Investing for Kids") and credits the house in small type
+   under it ("by Greenlight"), which is why the cover's title and eyebrow are
+   their own strings in cases.ts rather than the case's name and org.
+
+   THE PLATE'S KEYLINE IS THE BAND'S YELLOW. Fourth literal on this file's
+   list and the same ruling as the other three: the frame round the picture on
+   a 1982 cartridge sleeve was printed in one of the sleeve's own rainbow
+   inks, and there is no semantic role for "the third stripe". */
 .vStripe {
   --cover-ground: color-mix(in srgb, var(--surface-inverse) 92%, var(--content-inverse));
   --cover-ink: var(--content-inverse);
   --board-ink: var(--content-inverse);
   --board-lit: var(--content-inverse);
-  /* the plate's hard border was `--content`, which on this ground is the
-     ground. Same construction nocturne uses: the inverse ink pulled back
-     toward the cover's own ground so the frame reads as a printed rule and
-     not as a light box round the picture. */
-  --cover-rule: color-mix(in srgb, var(--content-inverse) 60%, var(--cover-ground));
-  --plate-top: auto;
-  --plate-bottom: 0px;
-  --plate-h: calc(var(--box-w) * 9 / 16);
+  --cover-rule: #edc12a;
+  /* inset on all four sides now — 15.5px of board either side of a 212×120
+     window. The picture is a crop rather than a true 16:9, which is the
+     trade a framed window makes: the film gives up a sliver top and bottom
+     and gains a printed edge on every side. */
+  --plate-top: 51.8%;
+  --plate-bottom: auto;
+  --plate-x: calc(var(--box-w) * 0.063);
+  --plate-h: calc(var(--box-w) * 0.488);
   --plate-frame: var(--border-width-default);
   --plate-mask: none;
   --wash-display: none;
-  --type-top: 0px;
-  --type-bottom: calc(var(--plate-h) + var(--band-h) + var(--cover-pad));
-  --type-justify: center;
+  --type-top: 16px;
+  --type-bottom: auto;
+  --type-justify: flex-start;
+  --type-align: center;
+  --type-text: center;
   --stamp-top: 26%;
 }
 
+/* the house, credited under the name in small caps — the order a toy box
+   used, and the reverse of the order a software box used. `order` rather
+   than a second DOM node: the type block is one flex column and which way
+   round it reads is a layout question, not a markup one. */
 .vStripe .frontEyebrow {
+  order: 1;
   font-size: calc(var(--box-w) * 0.042);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-16);
+  font-weight: var(--weight-regular);
   text-transform: uppercase;
+  margin-top: 2px;
 }
 
 /* as large as the zone will carry, which is the whole point of a cartridge
-   box: the wordmark is the artwork above the picture */
+   box: the wordmark is the artwork above the picture. It takes the raised
+   PAPER rather than the full inverse ink — 10:1 on this ground, and the half
+   step down from white is what stops a heavy title glaring. */
 .vStripe .title {
-  font-size: calc(var(--box-w) * 0.14);
+  font-size: calc(var(--box-w) * 0.122);
   font-weight: var(--weight-bold);
-  line-height: var(--leading-tight);
-  margin-top: 6px;
+  line-height: var(--leading-normal);
+  color: var(--surface-raised);
+  margin-top: 14px;
 }
 
+/* THE PROMISE, IN A PILL, ABOVE THE NAME. It is quoted because a toy box
+   quotes it — the line is the pitch in the buyer's own words, not a subtitle.
+
+   ⚠️ Two literals, and the same ruling the category bar makes below: the
+   green is the band's own fourth stripe, and the ink is the bar's near-black,
+   reused rather than re-derived. Cream on this green measures 3.0:1 and would
+   have forced a muddier green; the dark ink measures 4.6:1 and lets the
+   stripe stay the stripe. */
 .vStripe .tagline {
-  align-self: flex-start;
-  margin-top: 8px;
+  order: -1;
+  align-self: center;
+  font-style: normal;
+  font-size: calc(var(--box-w) * 0.033); /* ~8px at 246 */
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #2f8f5b;
+  color: #1a120a;
+  margin-top: 0;
+}
+
+.vStripe .tagline::before {
+  content: '“';
+}
+
+.vStripe .tagline::after {
+  content: '”';
 }
 
 /* CATALOG — the application box (Photoshop 5.5, 1999). A light ground with
@@ -1550,23 +1660,42 @@
   outline-offset: -2px;
 }
 
+/* TWO GROUPS AND THE SLACK BETWEEN THEM (pass 12). The panel was a single
+   top-packed stack, which spent its spare room as a ragged tail under the
+   last row; now the prose stands at the head and the data block stands on the
+   foot, exactly as a carton prints its blurb up by the title and its
+   specifications down by the barcode. `space-between` rather than a fixed
+   offset, because the two boxes with a four-line thesis and the two with a
+   five-row ledger have to reach the same two edges.
+
+   ⚠️ THE SIDE PADDING MOVED DOWN A LEVEL. The heading bar bleeds to both
+   edges of the board, so the 10px cannot live on this element any more — each
+   group carries its own. */
 .backInner {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 10px 10px 8px;
+  padding: 10px 0 0;
 }
 
+.backLead {
+  padding: 0 10px;
+}
+
+/* the shelf index used to be printed in front of the name in the expressive
+   ink — a second label for a box whose position on the shelf is already the
+   first one. The name alone now, and printed at a size you read across a
+   room rather than at the panel's small-print scale. */
 .backTitle {
   font-family: var(--display);
-  font-size: var(--type-body-sm-size);
+  font-size: var(--type-heading-2-size); /* 22px */
   line-height: var(--leading-tight);
   margin: 0 0 6px;
-}
-
-.backNo {
-  color: var(--accent-expressive-text);
 }
 
 /* the version, rehoused off the front in pass 4. Quiet — it is small print
@@ -1591,16 +1720,34 @@
   font-size: var(--type-label-size); /* 11px — prose at box scale */
   line-height: var(--leading-snug);
   color: var(--content);
-  margin: 0 0 7px;
+  margin: 0;
 }
 
+/* the data block, standing on the foot of the panel. It carries no padding
+   of its own: the heading bar bleeds and the rows are inset, so the two
+   disagree by design and each states its own. */
+.backLedger {
+  flex-shrink: 0;
+}
+
+/* THE HEADING IS A PRINTED RULE NOW (pass 12), not a quiet caption. It ran
+   as grey small print above the ledger, which on a panel of grey small print
+   announced nothing; a solid bar bleeding to both edges of the board is what
+   a box back actually did with its one section heading, and it is what splits
+   the panel into prose and data without a second register of type.
+
+   Accent on the board, the light ink on the accent — the same block PLAY is
+   printed in at the foot, which is the point: the bar and the button are the
+   panel's two solids and they are printed in the same ink. */
 .backHead {
-  font-family: var(--type-caption-family);
-  font-size: var(--type-caption-size);
-  letter-spacing: var(--tracking-16);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--type-micro-tracking);
   text-transform: uppercase;
-  color: var(--board-quiet);
-  margin: 0 0 3px;
+  background: var(--accent);
+  color: var(--content-inverse);
+  padding: 3px 10px;
+  margin: 0;
 }
 
 /* SYSTEM REQUIREMENTS — three rows, one line each, printed at box scale.
@@ -1637,8 +1784,11 @@
   display: flex;
   flex-direction: column;
   gap: calc(var(--box-w) * 0.016);
-  margin: 0 0 9px;
+  margin: 0;
+  padding: 9px 10px 0;
   line-height: var(--leading-tight);
+  /* the contents list numbers itself — see `.listed` */
+  counter-reset: contents;
 }
 
 .reqs > div {
@@ -1650,8 +1800,8 @@
 
 .reqs dt {
   font-family: var(--type-micro-family);
-  font-size: calc(var(--box-w) * 0.042); /* ~10px at 246 */
-  font-weight: var(--type-micro-weight);
+  font-size: var(--type-label-size); /* 11px */
+  font-weight: var(--weight-regular);
   letter-spacing: var(--tracking-08);
   text-transform: uppercase;
   color: var(--board-quiet);
@@ -1661,79 +1811,29 @@
 .reqs dd {
   margin: 0;
   font-family: var(--sans);
-  font-size: calc(var(--box-w) * 0.052); /* ~13px at 246 */
+  font-size: var(--type-label-size); /* 11px */
+  line-height: var(--leading-snug);
   text-align: right;
   color: var(--content);
   white-space: nowrap;
 }
 
-.blurb {
-  margin: 0 0 6px;
-  padding-left: 7px;
-  border-left: var(--border-width-strong) solid var(--accent);
+/* A CONTENTS LINE, not a ledger line. A box with nothing to report still
+   lists what is in it, and a list of contents is numbered — by a counter, so
+   the numbering can never disagree with the list the way a hand-typed "3."
+   in cases.ts eventually would. The label takes the whole width and is the
+   one row on this panel allowed to wrap: it is prose-length by nature, and
+   medieval sets ~20% wider, where `nowrap` would push it off the board. */
+.listed {
+  counter-increment: contents;
 }
 
-.blurb p {
-  font-family: var(--sans);
-  font-size: var(--type-label-size);
-  line-height: var(--leading-snug); /* see the note on .thesis */
-  margin: 0;
+.listed dt {
+  white-space: normal;
 }
 
-.blurb footer {
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  letter-spacing: var(--tracking-08);
-  text-transform: uppercase;
-  color: var(--board-quiet);
-  margin-top: 3px;
-}
-
-/* (pass 5: `.shots` — three 16:9 thumbs under the blurb — deleted with the
-   `shots` data. The front face plays the product film now; a strip of
-   stills on the back was the same offer, smaller and worse, and it was
-   what pushed the panel into scrolling.) */
-
-.meter {
-  margin-top: 6px;
-}
-
-.phase {
-  font-family: var(--sans); /* prose, not a label */
-  font-size: var(--type-micro-size);
-  line-height: var(--leading-normal);
-  color: var(--board-quiet);
-  margin: 0 0 5px;
-  overflow-wrap: anywhere;
-}
-
-.wrappedHint {
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  letter-spacing: var(--tracking-08);
-  color: var(--board-quiet);
-  margin: 5px 0 0;
-}
-
-/* the refusal, printed where it happened. It is the only thing the struck
-   shelf footer was carrying that was worth keeping, and it is worth more
-   here: an error about ONE box announced under FOUR of them was the reason
-   that footer needed an aria-live region at all. */
-.nudgeError {
-  font-family: var(--type-label-family);
-  font-size: var(--type-micro-size);
-  letter-spacing: var(--tracking-02);
-  line-height: var(--leading-snug);
-  color: var(--board-accent);
-  margin: 6px 0 0;
-}
-
-/* the nudge sits with the meter it belongs to, inside the scrolling body */
-.nudgeRow {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-component-sm);
-  margin-top: 8px;
+.listed dt::before {
+  content: counter(contents) '. ';
 }
 
 /* PLAY's own register: the last thing on the panel, full width, nothing
@@ -1747,7 +1847,6 @@
 /* ---------------- buttons ---------------- */
 
 .playBtn,
-.nudgeBtn,
 .cancelBtn {
   font-family: var(--type-label-family);
   font-size: var(--type-label-size); /* 11px */
@@ -1761,7 +1860,6 @@
 }
 
 [data-theme='dark'] .playBtn,
-[data-theme='dark'] .nudgeBtn,
 [data-theme='dark'] .cancelBtn {
   border-color: var(--border);
 }
@@ -1776,37 +1874,36 @@
   color: var(--surface);
 }
 
-.playBtn:hover,
-.nudgeBtn:hover:not(:disabled),
+/* COMING SOON — the same register, ghosted. A box that hasn't shipped still
+   has to end in a button-shaped block, or the panel reads as one that failed
+   to load; what it must NOT do is look pressable. So it keeps the geometry
+   and gives up the ink: the board's own paper behind, the border colour in
+   front, disabled in the markup so nothing focuses it. The faint ink is the
+   point rather than an oversight — WCAG exempts an inactive control, and a
+   COMING SOON you can read at PLAY's contrast is an offer. */
+.playBtn.comingSoon {
+  background: var(--surface-raised);
+  color: var(--border);
+  border-color: var(--border);
+  cursor: default;
+}
+
+.playBtn:hover:not(:disabled),
 .cancelBtn:hover {
   background: var(--accent);
   color: var(--surface);
 }
 
 /* physical press — transform only */
-.playBtn:active,
-.nudgeBtn:active:not(:disabled),
+.playBtn:active:not(:disabled),
 .cancelBtn:active {
   transform: translateY(1px);
 }
 
 .playBtn:focus-visible,
-.nudgeBtn:focus-visible,
 .cancelBtn:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
-}
-
-.nudgeBtn:disabled {
-  opacity: var(--interactive-disabled-opacity);
-  cursor: default;
-}
-
-.count {
-  font-family: var(--type-caption-family);
-  font-size: var(--type-caption-size);
-  letter-spacing: var(--tracking-08);
-  color: var(--content-muted);
 }
 
 /* ---------------- bars (carried from IN PROGRESS) ---------------- */
@@ -2156,6 +2253,13 @@
   font-size: calc(var(--box-w) * 0.05);
 }
 
+/* the cartridge's title takes the raised paper on its near-black ground; a
+   tome is printed on the board and takes the board's ink like every other
+   one. Colour is the one thing a cover may never choose for itself. */
+:global([data-skin='medieval']) .vStripe .title {
+  color: var(--cover-ink);
+}
+
 /* The one piece of LETTERING the scriptorium does overrule. A textura set in
    spaced capitals is a wall rather than a title, and at two lines of it the
    tome's type block grew up into the shop sticker — measured, the two
@@ -2166,12 +2270,31 @@
   letter-spacing: var(--tracking-02);
 }
 
-/* the three structured layers have no parchment equivalent at all, so they
-   are not reset — they are struck */
+/* the structured layers have no parchment equivalent at all, so they are not
+   reset — they are struck. Pass 12 adds two: a starburst sticker and an age
+   line are 1982 retail, and a tome carries neither. */
 :global([data-skin='medieval']) .band,
 :global([data-skin='medieval']) .frame,
-:global([data-skin='medieval']) .footline {
+:global([data-skin='medieval']) .footline,
+:global([data-skin='medieval']) .burst,
+:global([data-skin='medieval']) .footnote {
   display: none;
+}
+
+/* and the promise comes out of its pill. A green lozenge with quote marks
+   printed in it is a toy box; the tomes have carried the line as plain
+   lettering since pass 4 and go on doing so. */
+:global([data-skin='medieval']) .vStripe .tagline {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--cover-ink-quiet);
+  font-style: italic;
+}
+
+:global([data-skin='medieval']) .vStripe .tagline::before,
+:global([data-skin='medieval']) .vStripe .tagline::after {
+  content: none;
 }
 
 /* the printing clears the wrapped binding — 5px of board + the usual 12px */

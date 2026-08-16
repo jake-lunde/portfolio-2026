@@ -275,6 +275,14 @@
   "settings.wallpaperHint": "Desktop pattern: classic-Mac spirit, print-archive ink",
   "settings.wallpaperLabel": "Wallpaper",
   "shared.soon": "Soon",
+  "shelf.comingSoon": {
+    "base": "COMING SOON",
+    "medieval": "NOT YET BOUND"
+  },
+  "shelf.included": {
+    "base": "INCLUDED",
+    "medieval": "CONTAINED WITHIN"
+  },
   "shelf.indev": {
     "base": "IN DEVELOPMENT",
     "medieval": "STILL BEING ILLUMINATED"
