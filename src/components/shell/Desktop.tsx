@@ -87,7 +87,17 @@ export function Desktop({
       <SkillsTicker />
       {/* the root of INSPECT.MODE's layer tree — the canvas has to be
           nameable from outside this module (LayersPanel finds it here) */}
-      <main ref={desktopRef} className={styles.desktop} data-desktop-root="">
+      {/* `data-desk-recede` makes the desk's own contents behave like an
+          inactive window: while ANY window holds focus the icons, the
+          card, the wall and the audio widgets drop back (see .deskObject
+          in shell.module.css). The store nulls `focused` only when the
+          last window closes, so a cleared desk brings them all up. */}
+      <main
+        ref={desktopRef}
+        className={styles.desktop}
+        data-desktop-root=""
+        data-desk-recede={focused ? 'on' : 'off'}
+      >
         <Wallpaper />
         <NowPlayingWidget />
         <DesktopIcons />

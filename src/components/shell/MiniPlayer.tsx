@@ -58,7 +58,7 @@ export function MiniPlayer() {
     <AnimatePresence>
       {visible && current && (
         <motion.aside
-          className={styles.miniPlayer}
+          className={`${styles.miniPlayer} ${styles.deskObject}`}
           aria-label="Studio mini player"
           initial={reduced ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}

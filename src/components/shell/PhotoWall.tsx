@@ -82,7 +82,9 @@ export function PhotoWall() {
 
   return (
     <>
-      <div className={styles.photoWall} aria-label="Pinned photos">
+      {/* .deskObject only on the wall, never on the zoomed twin below —
+          the print you clicked open is the thing you are reading */}
+      <div className={`${styles.photoWall} ${styles.deskObject}`} aria-label="Pinned photos">
         <AnimatePresence>
           {display.map(
             (photo, i) =>

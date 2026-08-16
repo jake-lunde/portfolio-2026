@@ -866,7 +866,7 @@
    the windows and below the menubar and ticker, which own the top strip.
    Bottom-left, but lifted: the wanderer (AmbientAgents) parks its avatar
    in that corner and its intro card tops out near 91px, so the notice
-   sits at the same 104px floor the nameplate keeps on the right. */
+   sits on a 104px floor and clears it. */
 .notFound {
   position: fixed;
   left: 20px;
@@ -1434,6 +1434,58 @@
   }
 }
 
+/* ================= DESK RECEDE (the objects on the desk) ==============
+
+   Jake, s77: the desk's contents fade the way an inactive window fades.
+   The desk is a surface with things on it, and a window you are reading
+   outranks all of them — so the icons, the ABOUT THIS MACHINE card, the
+   pinned polaroids and the two audio widgets take the SAME treatment as
+   the stack above: the same 0.3, the same 0.2s ease-out, the same
+   `filter` rather than `opacity` (so it composes with Motion's inline
+   opacity instead of losing to it), and the same recovery on hover or
+   focus-within. Desk and stack fade as one system, not two.
+
+   The gate is `data-desk-recede`, which Desktop.tsx sets from the window
+   store's `focused` — and the store only nulls that when the LAST window
+   closes. So a clear desk shows everything at full strength and opening
+   anything sends it back. That is what puts the card in the dead centre:
+   the reward for putting the desk away.
+
+   Off the list on purpose: the wallpaper (it IS the desk, not a thing on
+   it), the dock rail (system chrome like the menu bar — it is how you get
+   a window back, so it can never be the dim thing you are hunting for)
+   and the wandering crew, which is transient and walks over the windows
+   anyway. Members opt in by wearing `.deskObject`.
+
+   Desktop only, and never under INSPECT.MODE — same two reasons the
+   window recede gives above: mobile is a full-bleed stack with no hover
+   to recover with, and the tool turns the desk into a canvas where
+   everything is equally THERE. */
+@media (min-width: 721px) {
+  .deskObject {
+    transition: filter 0.2s ease-out;
+  }
+
+  .desktop[data-desk-recede='on'] .deskObject {
+    filter: opacity(0.3);
+  }
+
+  .desktop[data-desk-recede='on'] .deskObject:hover,
+  .desktop[data-desk-recede='on'] .deskObject:focus-within {
+    filter: opacity(1);
+  }
+
+  :global(body[data-inspectmode='on']) .desktop[data-desk-recede='on'] .deskObject {
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deskObject {
+    transition: none;
+  }
+}
+
 /* `chrome: 'bare'` — the iPod. No titlebar, no frame, no resize grip: the
    program draws its own housing and floats free on the desktop, so the
    window element itself has to disappear completely. It also keeps full
@@ -1723,18 +1775,24 @@
    own cell, framed in the accent; name, then ROLE and CONTACT rows on the
    right. See Nameplate.tsx.
 
-   Desktop: top centre, under the ticker, the seat COMMAND.CTR's widget
-   held before it moved into the menu bar (case-rail round 4). The boot
-   windows start below it (registry.tsx: both at y 108, the card ends at 101)
-   so nothing covers it on first paint. Flat on the desk, hairline frame,
-   no shadow: the print-shadowed widgets are things set down on the desk;
-   a plate is part of it. Absolute inside the desktop, so INSPECT.MODE's
-   canvas compression moves it with the rest. */
+   Desktop: the DEAD CENTRE of the desk (Jake, s77). It held the top
+   strip for one round — COMMAND.CTR's old seat — and the boot windows
+   had to be shortened to start under it, which cost Latest Work its
+   buttons (registry.tsx). The centre asks nothing of them: it is the
+   spot every window covers, so the card is what you find when you put
+   the desk away, and the recede block below fades it with the rest of
+   the desk's contents while anything is open.
+
+   Flat on the desk, hairline frame, no shadow: the print-shadowed
+   widgets are things set down on the desk; a plate is part of it.
+   Absolute inside the desktop, so INSPECT.MODE's canvas compression
+   moves it with the rest. z-index 2 keeps it under the windows (z 10)
+   and over the wallpaper. */
 .nameplate {
   position: absolute;
-  top: 8px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   z-index: 2;
   display: grid;
   grid-template-columns: auto 1fr;

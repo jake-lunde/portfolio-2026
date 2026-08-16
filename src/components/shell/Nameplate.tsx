@@ -18,10 +18,12 @@ import styles from './shell.module.css'
 
    Layout is Jake's mockup (s74): his portrait on the left, dithered in
    the system accent and framed in it, then JAKE LUNDE in the display
-   face with the ROLE and CONTACT rows under it. It sits top centre under
-   the ticker, the seat COMMAND.CTR's widget held before it moved into
-   the menu bar; the boot windows start below it (registry.tsx). Below
-   720px the same card runs full width above the launcher grid.
+   face with the ROLE and CONTACT rows under it. It sits in the DEAD
+   CENTRE of the desk (Jake, s77) — the spot every window covers, so the
+   card is what a visitor finds when they put the desk away, and it
+   recedes with the rest of the desk's contents while anything is open
+   (shell.module.css: .nameplate, then .deskObject). Below 720px the same
+   card runs full width above the launcher grid, where no window opens.
 
    The portrait is /plaque-portrait.png, an alpha mask cut from Jake's
    /nameplate.png dither (blue pixels opaque, paper transparent), painted
@@ -48,7 +50,10 @@ export function Nameplate() {
   const hasLinkedin = linkedin.startsWith('https://')
 
   return (
-    <aside className={styles.nameplate} aria-label="About this machine">
+    <aside
+      className={`${styles.nameplate} ${styles.deskObject}`}
+      aria-label="About this machine"
+    >
       <div className={styles.plateHead}>
         {/* decorative: the card names him in text right beside it */}
         <span className={styles.platePortrait} aria-hidden="true" />
