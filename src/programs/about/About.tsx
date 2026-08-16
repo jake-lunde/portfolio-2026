@@ -120,9 +120,9 @@ export default function About() {
       </div>
       <Copy k="readme.eyebrow" as="p" className={styles.aboutEyebrow} />
       <p>
-        I&rsquo;m Jake, an AI-native designer with over ten years of work in consumer and B2B products, digital and physical. Until recently I&rsquo;d be contributing from discovery to handoff, but now I span the whole product development lifecycle, even shipping production code.</p>
-       <p>My affinity for tools has allowed me to become a design
-        engineer. Currently I&rsquo;m leading design on
+        I&rsquo;m Jake, and I&rsquo;ve been designing solutions for humans and businesses for over 10 years. Until recently design has contributed prototypes, flows and motion specs, but today we have the tools to take more ownership and sell the vision. That&rsquo;s what I&rsquo;m doing at Greenlight.</p>
+       <p>As an AI native, I've finally stepped into a design
+        engineer role, even shipping production code. Currently I&rsquo;m leading design on
         Greenlight&rsquo;s{' '}
         <a href="https://greenlight.com/family-hub" target="_blank" rel="noreferrer">
           Family Hub
@@ -130,8 +130,8 @@ export default function About() {
         and our investing product for kids.
       </p>
       <p>
-        Not to be grandiose, but this site is my testament: <span className="hl-pink">LUNDE&nbsp;OS</span>{' '}. It's a small operating system I will continue designing and orchestrating
-        iteratively. I&rsquo;ve dreaded updating my website for years, but new
+        Not to be grandiose, but this site is my testament. It's a small operating system I will continue designing and orchestrating
+        that will never be complete. I&rsquo;ve dreaded updating my website for years, but new
         tools have truly made it a joy. I hope you like it.
       </p>
       <ul className={styles.aboutList}>
