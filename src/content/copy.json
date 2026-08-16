@@ -242,14 +242,6 @@
     "medieval": "Scrying"
   },
   "progress.empty": "Nothing on the bench. Suspicious.",
-  "progress.nudge": {
-    "base": "TELL HIM TO FINISH IT",
-    "medieval": "IMPLORE"
-  },
-  "progress.nudged": {
-    "base": "JAKE HAS BEEN ENCOURAGED",
-    "medieval": "HEARD"
-  },
   "projects.indexLabel": "Index · Selected work",
   "projects.itemsSuffix": "items",
   "readme.eyebrow": "",
@@ -275,6 +267,14 @@
   "settings.wallpaperHint": "Desktop pattern: classic-Mac spirit, print-archive ink",
   "settings.wallpaperLabel": "Wallpaper",
   "shared.soon": "Soon",
+  "shelf.comingSoon": {
+    "base": "COMING SOON",
+    "medieval": "NOT YET BOUND"
+  },
+  "shelf.included": {
+    "base": "INCLUDED",
+    "medieval": "CONTAINED WITHIN"
+  },
   "shelf.indev": {
     "base": "IN DEVELOPMENT",
     "medieval": "STILL BEING ILLUMINATED"
@@ -326,10 +326,6 @@
   "shelf.versionLabel": {
     "base": "VERSION",
     "medieval": "EDITION"
-  },
-  "shelf.wrappedHint": {
-    "base": "Still shrink-wrapped.",
-    "medieval": "The pages are yet uncut."
   },
   "shell.explainer.label": {
     "base": "WHAT IS THIS",

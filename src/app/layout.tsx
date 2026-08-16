@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import {
+  Barlow_Condensed,
+  Boldonse,
+  Cal_Sans,
   Geist,
   Geist_Mono,
   Eagle_Lake,
@@ -65,6 +68,51 @@ const boxArtSerif = Instrument_Serif({
   style: ['normal', 'italic'],
   subsets: ['latin'],
   variable: '--font-boxart-serif',
+  display: 'swap',
+  preload: false,
+})
+
+/* BOX ART ONLY — THE CARTRIDGE COVER'S THREE FACES (pass 13). Jake's Figma
+   pass sets `01 greenlight-invest / stripe` in three faces this repo did not
+   load, so pass 12 printed all of it in the sans at his sizes. These are the
+   real ones, straight off the comp:
+
+   · Boldonse       — the wordmark above the picture. ONE cut, and it is a
+                      display heavy at 400: the cover asks for
+                      `--weight-regular`, not bold, because a synthesised
+                      bold on a face this dense closes the counters.
+   · Barlow Condensed — the house credit under the name and the age line
+                      along the foot. Nine weights exist; 400 is the only one
+                      either of them asks for, so 400 is the only one shipped.
+   · Cal Sans       — the quoted promise in its pill and the starburst seal.
+                      Also one cut at 400, already semibold-ish by drawing.
+
+   Same rules as the two faces above: NOT token faces, nothing outside
+   src/programs/shelf may reach for them, never preloaded — one cover's
+   lettering does not get to block the shell — and medieval strikes all three
+   back to `--display` (a scriptorium prints no starbursts).
+   ⚠️ merge task: these fold into the token architecture with the other two,
+   as `boxart` face roles rather than raw next/font variables. */
+const boxArtTitle = Boldonse({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-boldonse',
+  display: 'swap',
+  preload: false,
+})
+
+const boxArtLabel = Barlow_Condensed({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-barlow-condensed',
+  display: 'swap',
+  preload: false,
+})
+
+const boxArtMark = Cal_Sans({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-cal-sans',
   display: 'swap',
   preload: false,
 })
@@ -163,7 +211,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable} ${boxArt.variable} ${boxArtSerif.variable} ${medievalDisplay.variable} ${medievalBody.variable}`}
+      className={`${sans.variable} ${mono.variable} ${pixel.variable} ${cjk.variable} ${boxArt.variable} ${boxArtSerif.variable} ${boxArtTitle.variable} ${boxArtLabel.variable} ${boxArtMark.variable} ${medievalDisplay.variable} ${medievalBody.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
