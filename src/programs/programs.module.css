@@ -166,6 +166,12 @@
   --k-w: 92px; /* the label column the values are set against */
   font-family: var(--mono);
   font-size: var(--type-body-sm-size); /* 12px → 13px */
+  /* every value is one nowrap line, and a line wider than the viewport is
+     exactly what mobile Safari/Chrome inflate — that boost is why FOCUS
+     came back from Jake's phone a size larger than the rows beside it.
+     Hold the ramp: the list sets its size and keeps it. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   letter-spacing: 0.02em;
   line-height: var(--leading-loose); /* 2 → 1.9 */
   margin: 22px 0 0;
@@ -183,17 +189,17 @@
   min-width: var(--k-w);
 }
 
-/* FOCUS crawls rather than wraps — the menu-bar ticker's mechanic, held
-   to one line (see About.tsx). The row refuses to break so the rail can
+/* Values crawl rather than wrap — the menu-bar ticker's mechanic, each
+   held to one line (see About.tsx). Rows refuse to break so a rail can
    never drop below its label, whatever a skin does to the label's width;
    the rail is the window the line runs in, top-aligned so its single
    line sits on the row's baseline even though clipping would otherwise
    sink it. Static, it ellipsizes. */
-.focusRow {
+.aboutList li {
   white-space: nowrap;
 }
 
-.focusRail {
+.dataRail {
   display: inline-block;
   vertical-align: top;
   max-width: calc(100% - var(--k-w));
@@ -202,24 +208,24 @@
   text-overflow: ellipsis;
 }
 
-.focusTrack {
+.dataTrack {
   display: inline;
 }
 
 /* two halves side by side, walked one half-width per cycle: the seam
    never lands. Duration is set per-instance from the measured width. */
-.focusCrawl {
+.dataCrawl {
   display: flex;
   width: max-content;
-  animation: focusCrawl 12s linear infinite;
+  animation: dataCrawl 12s linear infinite;
 }
 
-.focusHalf {
+.dataHalf {
   flex: 0 0 auto;
   white-space: nowrap;
 }
 
-@keyframes focusCrawl {
+@keyframes dataCrawl {
   from {
     transform: translateX(0);
   }
@@ -233,12 +239,12 @@
    out. It used to be gated on EDIT.MODE's own body attribute, which went
    away with the third tool — picking wants the line to hold still for
    exactly the same reason editing did. */
-:global(body[data-inspectmode='on']) .focusCrawl {
+:global(body[data-inspectmode='on']) .dataCrawl {
   animation: none;
   transform: none;
 }
 
-:global(body[data-inspectmode='on']) .focusGhost {
+:global(body[data-inspectmode='on']) .dataGhost {
   display: none;
 }
 
