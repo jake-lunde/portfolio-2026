@@ -84,9 +84,18 @@ export function Plate({
   )
 }
 
-/* dashed placeholder — every image surface is swappable later (§11) */
+/* dashed placeholder — every image surface is swappable later (§11).
+   The status line is copy key `case.placeholder.pending` ("ASSET
+   PENDING"), hardcoded here rather than read via t(): this file is a
+   server component (see module comment above) with no skin context, and
+   t() needs one. Keep this string in sync with copy.json's base value. */
 export function Placeholder({ children }: { children: React.ReactNode }) {
-  return <div className={styles.placeholder}>{children}</div>
+  return (
+    <div className={styles.placeholder}>
+      <div>{children}</div>
+      <div className={styles.placeholderStatus}>ASSET PENDING</div>
+    </div>
+  )
 }
 
 export function Moves({ children }: { children: React.ReactNode }) {
