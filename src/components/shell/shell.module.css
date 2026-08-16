@@ -1498,10 +1498,13 @@
 
 @media (max-width: 720px) {
   .icons {
-    /* clears the COMMAND.CTR chip, which docks in-flow above the grid on
-       mobile (commandWidget.module.css: top 14 + ~48px of two-row chip +
-       breathing room — the two constants travel together) */
-    top: 76px;
+    /* clears the nameplate, which takes the band above the grid on mobile
+       (see .nameplate at the foot of this file: top 14 + up to four
+       wrapped lines at the 360px floor + breathing room, the two
+       constants travel together). COMMAND.CTR used to dock in this band
+       and set the old 76px; it moved into the menu bar in case-rail
+       round 4 and left the band empty. */
+    top: 92px;
     left: 12px;
     right: 12px;
     bottom: 12px;
@@ -1658,4 +1661,171 @@
   right: 0;
   z-index: 5100;
   width: min(320px, calc(100vw - 24px));
+}
+
+/* ================= NAMEPLATE (About This Machine, the plaque) =========
+
+   Identity on the desk. Jake's reference is Mac OS 9's About This
+   Computer box (s74): mark + name as a header band, a rule, then bold
+   label rows. Two layouts on one markup, see Nameplate.tsx.
+
+   Desktop: a narrow plaque in the icon column, directly under README,
+   left-aligned to the icons and 116px wide (README boots at x 140 for
+   exactly this strip, registry.tsx), so it belongs to that column. Top is derived: .icons starts at 26px and the README tile
+   stands 10 + 32 + 7 + label (~12) + 8 = 69px, so 26 + 69 + 14 of air.
+   Flat on the desk, hairline frame, no shadow: the print-shadowed
+   widgets are things set down on the desk; a plaque is part of it.
+   Inside the desktop, absolute, so INSPECT.MODE's canvas compression
+   moves it with everything else. */
+.nameplate {
+  position: absolute;
+  top: 110px;
+  left: 20px;
+  z-index: 2;
+  width: 116px;
+  background: var(--surface);
+  border: var(--border-width-subtle) solid var(--border);
+  font-family: var(--mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-08);
+  line-height: var(--leading-snug);
+  /* the copy already ships in caps; this holds the register if a COPY
+     edit ever types a line back in lowercase */
+  text-transform: uppercase;
+  color: var(--content);
+}
+
+/* the header band: mark and name, on the raised surface like the About
+   box's white header sits over its grey body, with the rule under it */
+.plateHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 7px 7px 6px;
+  background: var(--surface-raised);
+  border-bottom: var(--border-width-subtle) solid var(--border);
+}
+
+/* the house mark, same mask trick as .mark in the menu bar: a raster PNG
+   painted in --content so it follows theme and skin for free */
+.plateMark {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  background-color: var(--content);
+  -webkit-mask-image: url('/mark.png');
+  mask-image: url('/mark.png');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+:global([data-skin='medieval']) .plateMark {
+  -webkit-mask-image: url('/mark-medieval.png');
+  mask-image: url('/mark-medieval.png');
+}
+
+/* the name is the one line in the display face, the wordmark's own size,
+   so plaque and menu bar say the machine's name in the same voice */
+.plateName {
+  font-family: var(--display);
+  font-size: var(--text-ui);
+  letter-spacing: var(--tracking-08);
+  line-height: var(--leading-tight);
+  min-width: 0;
+}
+
+.plateRows {
+  margin: 0;
+  padding: 6px 7px 7px;
+  display: grid;
+  gap: 1px 0;
+}
+
+/* label rows: the About box sets its labels bold; here they are the
+   muted micro line above the value, since 88px has no room for two
+   columns. --content-muted on --surface is the flush pairing
+   CommandWidget's .ccStamp measured (5.62:1 classic light, 6.50:1 dark,
+   4.99:1 medieval), so the labels clear AA even at 8px. */
+.plateLabel {
+  font-size: var(--text-micro);
+  color: var(--content-muted);
+  margin-top: 5px;
+}
+
+.plateLabel:first-child {
+  margin-top: 0;
+}
+
+.plateValue {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.plateLink {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.plateLink:hover,
+.plateLink:focus-visible {
+  text-decoration: underline;
+}
+
+/* the two contact links stack on the plaque, so the separator between
+   them is a wide-layout thing */
+.plateSep {
+  display: none;
+}
+
+.plateValue > .plateLink {
+  display: block;
+}
+
+/* Phone (the launcher, every window shut): the plaque opens out into the
+   About box proper, full width above the icon grid, mark and name as a
+   header band on the left, the two rows beside it. Three lines at the
+   360px floor, about 62px tall from top: 14px; .icons starts at 92px in
+   the mobile block above and the two numbers travel together. */
+@media (max-width: 720px) {
+  .nameplate {
+    top: 14px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
+  }
+
+  .plateHead {
+    border-bottom: 0;
+    border-right: var(--border-width-subtle) solid var(--border);
+    align-items: center;
+    padding: 8px 10px;
+  }
+
+  .plateRows {
+    grid-template-columns: auto 1fr;
+    gap: 3px 10px;
+    align-content: center;
+    padding: 8px 10px;
+  }
+
+  .plateLabel,
+  .plateLabel:first-child {
+    margin-top: 0;
+    align-self: baseline;
+  }
+
+  .plateSep {
+    display: inline;
+  }
+
+  .plateValue > .plateLink {
+    display: inline;
+  }
 }
