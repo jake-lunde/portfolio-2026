@@ -968,82 +968,12 @@
   opacity: 1;
 }
 
-/* --------- the signal (s52) ---------
-   The film is a tape, so it carries a tape's artifacts: scanlines at the
-   pitch of the global .crt texture but lighter (a box film is watched
-   through shrink-wrap, not a terminal), and a tracking band that rolls
-   through every twelve seconds — a few seconds of roll, then a quiet
-   hold, the way a worn cassette actually misbehaves.
-
-   Jake's vault task pointed at NTSCplayer (ferropop) for this look. That
-   framework is a desktop player — mpv under GPL libretro shaders, no web
-   surface, no license on its own code — so nothing of it is imported;
-   this is the smallest CSS that reads as the same medium.
-
-   The pass-4 law holds: NO FILTER on the photograph. This overlay is a
-   leaf INSIDE the face (same seat as .wash), gated by the film's own
-   data-clear through a sibling selector, so it exists only over playing
-   footage — never over the printed art, and never on an ancestor where
-   it would flatten the box's 3D.
-
-   ⚠️ THE RGBA LITERALS ARE MEDIUM, NOT CHROME. Scanline black and the
-   band's white lift with cyan/magenta fringes are NTSC signal physics —
-   the chroma subcarrier bleeding at a luma edge — not interface colour.
-   There is no semantic role for "composite artifact"; same law as the
-   airbrush hexes above. The roll animates transform only. Reduced motion
-   needs no query here: ShelfBox never mounts the film (or this leaf)
-   under it. */
-.filmVhs {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 2px,
-    rgba(0, 0, 0, 0.09) 3px
-  );
-}
-
-.coverFrame[data-clear] + .filmVhs {
-  opacity: 1;
-}
-
-.filmVhs::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -22%;
-  height: 22%;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(64, 224, 208, 0.05) 30%,
-    rgba(255, 255, 255, 0.09) 50%,
-    rgba(255, 0, 128, 0.05) 70%,
-    transparent
-  );
-  animation: filmTracking 12s linear infinite;
-}
-
-/* 0→32% is the roll (roughly four seconds), the rest is the hold. The
-   travel is in the band's own heights: 22% tall, so clearing a plate and
-   its own height twice over is 555% of self. */
-@keyframes filmTracking {
-  0% {
-    transform: translateY(0);
-  }
-  32% {
-    transform: translateY(555%);
-  }
-  100% {
-    transform: translateY(555%);
-  }
-}
+/* --------- the signal (s52 → s75) ---------
+   The tape's artifacts used to be a CSS leaf here (scanlines + a tracking
+   roll, `.filmVhs`). Since s75 they are baked into box-film.mp4 itself by
+   ntsc-rs (scripts/ntsc-bake.mjs; src/lib/ntsc/ntsc.ts) — the pass-4 law
+   (NO FILTER on the photograph) holds by construction: only the footage
+   went through the deck. */
 
 /* THE FALLBACK FRONT — no art, or art that failed to load. The plate
    composes itself from tokens at the same geometry and under the same
@@ -2114,14 +2044,10 @@
   border-width: var(--border-width-strong);
 }
 
-/* A tome carries no tape signal — the film still plays (it is the work),
-   but the NTSC dressing is the classic machine's idiom, not the
-   scriptorium's. Same trade PhotoBooth makes when it swaps vhs/crt for
-   illum/woodblock by skin. */
-:global([data-skin='medieval']) .filmVhs {
-  display: none;
-}
-
+/* A tome carries no tape signal — but since s75 the signal is baked into
+   the film file itself, so the scriptorium sees the dub too. Standing
+   debt for Jake's ruling: a clean bake per skin would double the
+   payload; a CSS un-dressing is impossible. */
 /* the board a scriptorium would have used: thicker, and edged in the ink
    itself rather than a mix of it — the same thick-board rule the covers and
    the tag chip already follow */

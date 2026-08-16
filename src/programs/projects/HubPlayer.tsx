@@ -19,13 +19,13 @@ import styles from './player.module.css'
    PLAY opens `case:family-hub` — the real, gated case study — through
    the same store path every other launcher uses.
 
-   The screen treatment is a dot screen, not the booth's true dither:
-   PhotoBooth's per-pixel canvas passes are priced for a still, and a
-   60fps loop cannot pay per-frame ink. A printed halftone overlay plus a
-   small contrast push reads as the same 1992 print language at zero
-   per-frame cost (transform/opacity/filter-constant only). Ink derives
-   from --content via color-mix — no minted color. Reduced motion mounts
-   the poster under the same screen, the shelf's own law. */
+   The screen carries no treatment of its own (s75, Jake: "remove the
+   extra filter"). It used to wear a printed halftone dot screen and a
+   small contrast push standing in for a per-frame pass the loop could
+   not afford; since s75 the film file itself is the ntsc-rs dub
+   (scripts/ntsc-bake.mjs), so the tape is in the pixels and anything
+   layered over it read as a second filter. Reduced motion mounts the
+   poster, bare, the shelf's own law. */
 
 const SLUG = 'family-hub'
 
@@ -43,15 +43,14 @@ export function HubPlayer() {
 
   return (
     <div className={styles.player}>
-      {/* the screen: film under the dot screen. aria-hidden — the info
-          panel below carries every word a reader needs. */}
+      {/* the screen: the baked film, bare. aria-hidden — the info panel
+          below carries every word a reader needs. */}
       <div className={styles.screen} aria-hidden="true">
         {box.video && !reduced ? (
           <video src={box.video} poster={box.art?.src} autoPlay muted loop playsInline />
         ) : (
           box.art && <img src={box.art.src} alt="" decoding="async" />
         )}
-        <span className={styles.dots} />
       </div>
 
       {/* the file strip — the reel names itself the way a 1992 player

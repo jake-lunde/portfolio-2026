@@ -1,0 +1,5 @@
+# simd128 is what ntsc-rs's own web build targets; the scalar fallback both
+# runs slower and (as of rev af9833b) mis-decodes chroma. Every current
+# browser + Node 22 support it. relaxed-simd left off for Safari.
+[target.wasm32-unknown-unknown]
+rustflags = ["-Ctarget-feature=+simd128"]

@@ -1,0 +1,20 @@
+[package]
+name = "lunde-ntsc"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "ntsc-rs core compiled to a plain C-ABI wasm module for LUNDE OS (PhotoBooth live filter + film bake)"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# the real signal model — MIT OR ISC OR Apache-2.0
+ntsc-rs = { git = "https://github.com/ntsc-rs/ntsc-rs", rev = "af9833b4bb81f195f7fe4a3667211f2a94139a42", default-features = false, features = ["std"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

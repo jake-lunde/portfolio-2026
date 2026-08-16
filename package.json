@@ -19,7 +19,9 @@
     "plugin:build": "node figma-plugin/build.mjs",
     "plugin:watch": "node figma-plugin/build.mjs --watch",
     "test": "node --test figma-plugin/test/*.test.mjs test/*.test.mjs",
-    "cv:build": "node scripts/build-cv.mjs"
+    "cv:build": "node scripts/build-cv.mjs",
+    "ntsc:build": "sh scripts/ntsc-build.sh",
+    "ntsc:bake": "node --experimental-strip-types --no-warnings scripts/ntsc-bake.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",

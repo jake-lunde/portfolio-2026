@@ -1,7 +1,6 @@
 /* THE PLAYER (HubPlayer.tsx) — screen / file strip / info, top to bottom,
-   filling a squarish window. All ink is tokens or derived from tokens in
-   place (the dot screen's color-mix); the strip is inverse chrome per the
-   house rule that on-inverse text is --content-inverse. */
+   filling a squarish window. All ink is tokens; the strip is inverse
+   chrome per the house rule that on-inverse text is --content-inverse. */
 
 .player {
   height: 100%;
@@ -28,26 +27,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* the print push under the dot screen: constant, GPU-composited, never
-     animated — the 60fps law is untouched */
-  filter: contrast(1.12) saturate(1.15);
-}
-
-/* the dot screen: a printed halftone standing in for true dither (see the
-   component note). Ink is --content mixed to alpha, so every skin prints
-   its own screen; the cell is 3px — visible as print at arm's length,
-   not a moiré. */
-.dots {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--content) 55%, transparent) 28%,
-    transparent 32%
-  );
-  background-size: 3px 3px;
-  mix-blend-mode: multiply;
-  pointer-events: none;
+  /* no print push, no dot screen (s75): the film file is already the
+     ntsc-rs dub — see the component note */
 }
 
 /* --------- the file strip --------- */
