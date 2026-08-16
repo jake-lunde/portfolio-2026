@@ -811,13 +811,13 @@
    desktop element (src/app/not-found.tsx mounts it as a sibling of the
    shell), so `fixed` rather than the widgets' `absolute`; the z sits above
    the windows and below the menubar and ticker, which own the top strip.
-   Bottom-left is the one corner of the desk nothing else claims: icons top
-   -left, now-playing top-right, DAILY.SYS and the mini player bottom-right,
-   the dock centred. */
+   Bottom-left, but lifted: the wanderer (AmbientAgents) parks its avatar
+   in that corner and its intro card tops out near 91px, so the notice
+   sits at the same 104px floor the nameplate keeps on the right. */
 .notFound {
   position: fixed;
   left: 20px;
-  bottom: 22px;
+  bottom: 104px;
   z-index: 4980;
   max-width: min(320px, calc(100vw - 40px));
   padding: 9px 12px;
