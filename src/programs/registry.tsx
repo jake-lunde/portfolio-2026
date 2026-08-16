@@ -77,11 +77,13 @@ export const PROGRAMS: ProgramDef[] = [
        at exactly 0px): 48 + 600 + 46 = 694, a 20px berth under the
        rail's top edge at 714 on an 800-tall viewport, the shortest desk
        we design for. hub-player clears at ~625 (see its entry below).
-       s74: y 48 → 108 and h 600 → 540 so the window starts under the
-       ABOUT THIS MACHINE card (shell/Nameplate.tsx, top centre, 93px
-       tall from y 8): 108 + 540 + 46 = 694, the same 20px berth. */
-    size: { w: 520, h: 540 },
-    pos: { x: 120, y: 108 },
+       s74 pushed this to y 108 / h 540 to start under the ABOUT THIS
+       MACHINE card, which then sat at the top of the desk; s77 moved the
+       card to the dead centre (shell.module.css, .nameplate — it is the
+       thing you find when you put every window away, so nothing needs to
+       clear it any more) and the window takes its berth back. */
+    size: { w: 520, h: 600 },
+    pos: { x: 120, y: 48 },
     onDesktop: true,
     path: '/readme',
   },
@@ -175,10 +177,14 @@ export const PROGRAMS: ProgramDef[] = [
        info panel) + y40 + desk offset bottoms ~680 — a ~34px berth under
        the rail's top edge at 714 on an 800-tall viewport, the shortest
        desk we design for (same floor README's berth math uses).
-       s74: y 40 → 108 and h 585 → 521 so the window starts under the
-       ABOUT THIS MACHINE card (see README's entry); bottoms ~684. */
-    size: { w: 460, h: 521 },
-    pos: { x: 600, y: 108 },
+       s74 shrank this to y 108 / h 521 to clear the ABOUT THIS MACHINE
+       card and the 64px came straight out of the info panel: the body
+       needed 536 and had 486, so the PLAY/CASE STUDY pair fell below the
+       fold and you had to scroll a boot window to find its buttons.
+       s77 moved the card to the dead centre (see README's entry) and the
+       585 comes back — body 550 against the 536 the panel measures. */
+    size: { w: 460, h: 585 },
+    pos: { x: 600, y: 40 },
     onDesktop: false,
   },
   {

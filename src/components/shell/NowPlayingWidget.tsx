@@ -78,7 +78,9 @@ export function NowPlayingWidget() {
         <motion.button
           layoutId="np-card"
           type="button"
-          className={styles.npWidget}
+          /* .deskObject: recedes with the desk while a window holds
+             focus, never on the zoomed card below (that IS the read) */
+          className={`${styles.npWidget} ${styles.deskObject}`}
           onClick={() => setZoomed(true)}
           transition={spring}
           data-spring="zoom"
