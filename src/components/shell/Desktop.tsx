@@ -13,6 +13,7 @@ import { Wallpaper } from './Wallpaper'
 import { NowPlayingWidget } from './NowPlayingWidget'
 import { MiniPlayer } from './MiniPlayer'
 import { PhotoWall } from './PhotoWall'
+import { Nameplate } from './Nameplate'
 import { AmbientAgents } from './AmbientAgents'
 import { Screensaver } from './Screensaver'
 import { Window } from './Window'
@@ -99,6 +100,12 @@ export function Desktop({
             that it's system chrome, not a floating widget. It now lives
             in the menu bar; see MenuBar.tsx and CommandWidget.tsx. */}
         <PhotoWall />
+        {/* the machine says whose it is. Jake's name and title used to be
+            one double-click deep inside README, which meant a stranger who
+            closed that window, or who landed on the mobile launcher where
+            no window opens at all, never saw it. Mounted after the wall so
+            it paints over a full column of pins. */}
+        <Nameplate />
         <AmbientAgents />
         <AnimatePresence>
           {windows.map((w) => {

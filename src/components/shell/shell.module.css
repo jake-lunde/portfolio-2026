@@ -1522,10 +1522,13 @@
 
 @media (max-width: 720px) {
   .icons {
-    /* clears the COMMAND.CTR chip, which docks in-flow above the grid on
-       mobile (commandWidget.module.css: top 14 + ~48px of two-row chip +
-       breathing room — the two constants travel together) */
-    top: 76px;
+    /* clears the nameplate, which takes the band above the grid on mobile
+       (see .nameplate at the foot of this file: top 14 + the About box
+       with its portrait, about 90px, + breathing room, the two constants
+       travel together). COMMAND.CTR used to dock in this band
+       and set the old 76px; it moved into the menu bar in case-rail
+       round 4 and left the band empty. */
+    top: 118px;
     left: 12px;
     right: 12px;
     bottom: 12px;
@@ -1682,4 +1685,147 @@
   right: 0;
   z-index: 5100;
   width: min(320px, calc(100vw - 24px));
+}
+
+/* ================= NAMEPLATE (About This Machine, the card) ===========
+
+   Identity on the desk. Jake's reference is Mac OS 9's About This
+   Computer box (s74), his mockup the layout: portrait on the left in its
+   own cell, framed in the accent; name, then ROLE and CONTACT rows on the
+   right. See Nameplate.tsx.
+
+   Desktop: top centre, under the ticker, the seat COMMAND.CTR's widget
+   held before it moved into the menu bar (case-rail round 4). The boot
+   windows start below it (registry.tsx: both at y 108, the card ends at 101)
+   so nothing covers it on first paint. Flat on the desk, hairline frame,
+   no shadow: the print-shadowed widgets are things set down on the desk;
+   a plate is part of it. Absolute inside the desktop, so INSPECT.MODE's
+   canvas compression moves it with the rest. */
+.nameplate {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  width: max-content;
+  max-width: min(520px, calc(100% - 40px));
+  background: var(--surface);
+  border: var(--border-width-subtle) solid var(--border);
+  font-family: var(--mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-08);
+  line-height: var(--leading-snug);
+  /* the copy already ships in caps; this holds the register if a COPY
+     edit ever types a line back in lowercase */
+  text-transform: uppercase;
+  color: var(--content);
+}
+
+/* the portrait cell: raised surface, a rule on its right, like the About
+   box's header sits apart from its body */
+.plateHead {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background: var(--surface-raised);
+  border-right: var(--border-width-subtle) solid var(--border);
+}
+
+/* Jake's dither as an alpha mask painted in the system accent (the .mark
+   trick from the menu bar): 172x150 source drawn at half size, framed
+   in the same ink. The frame is an outline, not a border: the mask clips
+   everything inside the box, borders included, and an outline paints
+   outside it. */
+.platePortrait {
+  flex: none;
+  width: 86px;
+  height: 75px;
+  outline: var(--border-width-default) solid var(--accent);
+  background-color: var(--accent);
+  -webkit-mask-image: url('/plaque-portrait.png');
+  mask-image: url('/plaque-portrait.png');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+.plateBody {
+  display: grid;
+  gap: 2px 0;
+  align-content: center;
+  padding: 8px 14px 9px 12px;
+  min-width: 0;
+}
+
+/* the name is the one line in the display face, the wordmark's own size,
+   so card and menu bar say the machine's name in the same voice */
+.plateName {
+  font-family: var(--display);
+  font-size: var(--text-ui);
+  letter-spacing: var(--tracking-08);
+  line-height: var(--leading-tight);
+  margin-bottom: 4px;
+}
+
+.plateRows {
+  margin: 0;
+  display: grid;
+  gap: 1px 0;
+}
+
+/* label rows: the About box sets its labels bold; here they are the
+   muted micro line above the value. --content-muted on --surface is the
+   flush pairing CommandWidget's .ccStamp measured (5.62:1 classic light,
+   6.50:1 dark, 4.99:1 medieval), so the labels clear AA even at 8px. */
+.plateLabel {
+  font-size: var(--text-micro);
+  color: var(--content-muted);
+  margin-top: 4px;
+}
+
+.plateLabel:first-child {
+  margin-top: 0;
+}
+
+.plateValue {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.plateLink {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.plateLink:hover,
+.plateLink:focus-visible {
+  text-decoration: underline;
+}
+
+/* Phone (the launcher, every window shut): the same card, full width
+   above the icon grid, values allowed to wrap. About 95px tall from
+   top: 14px; .icons starts at 118px in the mobile block above and the two
+   numbers travel together. */
+@media (max-width: 720px) {
+  .nameplate {
+    top: 14px;
+    left: 12px;
+    right: 12px;
+    transform: none;
+    width: auto;
+    max-width: none;
+  }
+
+  .platePortrait {
+    width: 68px;
+    height: 59px;
+  }
+
+  .plateValue {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }
