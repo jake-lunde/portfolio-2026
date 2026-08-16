@@ -38,13 +38,24 @@
   border-color: var(--border);
 }
 
-.board {
+/* the board keeps its 600×480 pixel geometry at every width — the wrap
+   measures the room it actually has and scales the whole thing down to
+   fit (see Puzzle.tsx). Wrap holds the scaled height so nothing below
+   it jumps; the board itself is taken out of flow. */
+.boardWrap {
   position: relative;
+  width: 100%;
+}
+
+.board {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
   background: var(--surface);
   border: 1.5px solid var(--content);
   overflow: hidden;
   touch-action: none;
-  max-width: 100%;
 }
 
 [data-theme='dark'] .board {
