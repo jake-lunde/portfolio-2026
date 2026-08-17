@@ -26,10 +26,17 @@ type WindowsState = {
      dragged the grip to their own size must get THAT size back, not the
      one the program shipped with. */
   holds: Record<string, Size | null>
+  /* ZOOMED IS PER WINDOW AND IT LIVES HERE, not in Window.tsx where it
+     started. A window can now be opened ALREADY maximised — PLAY hands
+     the reader a case study and Jake's ruling is that a case arrives full
+     screen (LaunchOverlay) — and the thing that opens a window is never
+     the window. Same shape as `sizes`: absent means "as it opens". */
+  zoomed: Record<string, boolean>
   open: (id: string) => void
   close: (id: string) => void
   focus: (id: string) => void
   setSize: (id: string, size: Size) => void
+  setZoomed: (id: string, v: boolean) => void
   requestSize: (id: string, size: Size) => void
   releaseSize: (id: string) => void
   setInitial: (ids: string[]) => void
@@ -41,6 +48,7 @@ export const useWindows = create<WindowsState>((set, get) => ({
   focused: null,
   sizes: {},
   holds: {},
+  zoomed: {},
 
   setInitial: (ids) =>
     set({
@@ -69,10 +77,14 @@ export const useWindows = create<WindowsState>((set, get) => ({
   },
 
   close: (id) => {
-    const { windows, focused } = get()
+    const { windows, focused, zoomed } = get()
     const rest = windows.filter((w) => w.id !== id)
     const top = rest.length ? rest.reduce((a, b) => (a.z > b.z ? a : b)).id : null
-    set({ windows: rest, focused: focused === id ? top : focused })
+    // a closed window forgets it was maximised: the next open is a fresh
+    // arrival, and only whoever opens it gets to say how it arrives
+    const nextZoom = { ...zoomed }
+    delete nextZoom[id]
+    set({ windows: rest, focused: focused === id ? top : focused, zoomed: nextZoom })
   },
 
   focus: (id) => {
@@ -87,6 +99,8 @@ export const useWindows = create<WindowsState>((set, get) => ({
   },
 
   setSize: (id, size) => set((s) => ({ sizes: { ...s.sizes, [id]: size } })),
+
+  setZoomed: (id, v) => set((s) => ({ zoomed: { ...s.zoomed, [id]: v } })),
 
   /* Borrow, then give back. The guard is load-bearing rather than tidy:
      React runs an effect twice on the same value under StrictMode, and a

@@ -40,7 +40,11 @@ export function Window({ def, z, active, desktopRef }: Props) {
   const reduced = useReducedMotion()
   const skin = useSettings((s) => s.skin)
   const ref = useRef<HTMLElement>(null)
-  const [zoomed, setZoomed] = useState(false)
+  /* zoom is store state, not component state: a window can be opened
+     already maximised (LaunchOverlay does exactly that with a case study),
+     and the opener is never the window. useWindows.close forgets it. */
+  const zoomed = useWindows((s) => s.zoomed[def.id] ?? false)
+  const setZoomed = useWindows((s) => s.setZoomed)
   const [explaining, setExplaining] = useState(false)
 
   // window title + a11y labels follow the active skin's vocabulary
@@ -243,7 +247,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
             // free-floating drag is a desktop affordance only
             if (window.innerWidth > 720) dragControls.start(e)
           }}
-          onDoubleClick={() => setZoomed((v) => !v)}
+          onDoubleClick={() => setZoomed(def.id, !zoomed)}
         >
           <div className={styles.titleControls}>
             <button
@@ -259,7 +263,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
             <button
               className={styles.ctrl}
               aria-label={zoomed ? `Restore ${title}` : `Zoom ${title}`}
-              onClick={() => setZoomed((v) => !v)}
+              onClick={() => setZoomed(def.id, !zoomed)}
             >
               +
             </button>
