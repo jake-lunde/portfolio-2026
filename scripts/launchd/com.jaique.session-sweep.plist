@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  LaunchAgent for scripts/session-sweep.mjs, the write-up safety net
+  (CLAUDE.md §4.4). Ticks every 30 min; the SessionEnd hook also kickstarts
+  it the moment a session ends. Cheap when nothing is ready.
+
+  Install:
+    cp scripts/launchd/com.jaique.session-sweep.plist ~/Library/LaunchAgents/
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.jaique.session-sweep.plist
+  Uninstall:
+    launchctl bootout gui/$(id -u)/com.jaique.session-sweep
+    rm ~/Library/LaunchAgents/com.jaique.session-sweep.plist
+  Logs: ~/.local/state/lunde-session-sweep/{runs.log,launchd.out.log,launchd.err.log}
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.jaique.session-sweep</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node</string>
+    <string>/Users/jake/Documents/github/portfolio-2026/scripts/session-sweep.mjs</string>
+  </array>
+
+  <key>StartInterval</key>
+  <integer>1800</integer>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/jake/.local/state/lunde-session-sweep/launchd.out.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/jake/.local/state/lunde-session-sweep/launchd.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>HOME</key>
+    <string>/Users/jake</string>
+  </dict>
+</dict>
+</plist>
