@@ -528,6 +528,7 @@ export const TEXT_INDEX: Record<string, string[]> = {
   "returned · idle": ["src/programs/command/CommandCenter.tsx"],
   "ride readout": ["src/programs/visualizers/RideViz.tsx"],
   "rings out: rivals, threats": ["src/components/shell/crewDialog.ts"],
+  "role=\"dialog\"], [role=\"menu": ["src/programs/shelf/ShelfMode.tsx"],
   "routing ticket to a unit": ["src/components/shell/crewDialog.ts"],
   "run · − ft · mph": ["src/programs/visualizers/SlopesViz.tsx"],
   "running the session": ["src/components/shell/crew.ts"],

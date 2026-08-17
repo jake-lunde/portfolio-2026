@@ -90,12 +90,27 @@ export function ShelfMode() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
+      /* ESCAPE BELONGS TO THE DOOR IN FRONT OF THE VISITOR, and the mode
+         is the room behind all of them. The menu bar stays live while the
+         mode runs, so its skin flyout is open on top of the plank often
+         enough to matter, and a dialog can be up from before the mode was
+         entered. Both listen for Escape on the window underneath this
+         handler and neither swallows it, so without this test one press
+         would close the thing in front AND put the desk back.
+
+         Presence in the document is the test, not focus: these overlays
+         are conditionally mounted and several of them never take focus at
+         all (the zoomed print keeps the caret on the print). Same rule and
+         same reasoning as INSPECT's own ladder — see the note in
+         components/inspect/InspectShell.tsx. */
+      if (document.querySelector('[role="dialog"], [role="menu"]')) return
       leave()
     }
     /* On `window`, so it fires wherever focus sits. The launch overlay
        eats the first Escape on the React tree (LaunchOverlay stops the
-       native event at the root container), which keeps the ladder
-       reading overlay → mode. */
+       native event at the root container) and the test above catches it
+       even when focus has fallen off the button that opened it, which
+       keeps the ladder reading overlay → mode. */
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [leave])
