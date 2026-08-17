@@ -1387,28 +1387,31 @@
    Desktop only: on mobile the windows are a full-bleed stack with nothing
    behind them and no hover to recover with.
 
-   Two exemptions, both by declaration on the program (registry.tsx):
+   One exemption, by declaration on the program (registry.tsx):
    `chrome: 'bare'` (.windowBare) — the iPod, an appliance sitting on the
-   desk rather than a document competing for attention — and `noRecede`
-   (.windowNoRecede), for a program that owns a 3D context. `filter` is a
-   grouping property: it forces `transform-style: flat` on every
-   descendant, so the shelf's cuboid boxes would collapse to cardboard
-   cut-outs the moment the window lost focus. */
+   desk rather than a document competing for attention.
+
+   There were two. `noRecede` exempted a program that owned a 3D context,
+   because `filter` is a grouping property and flattens every descendant:
+   the shelf's cuboid boxes collapsed to cardboard cut-outs the moment
+   their window lost focus. The shelf does not live in a window any more
+   (store/shelfMode.ts) and it was the only caller, so the hatch is
+   retired and this rule has one `:not()` fewer to carry. */
 @media (min-width: 721px) {
   .window > .titlebar,
   .window > .windowBody {
     transition: filter 0.2s ease-out;
   }
 
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede) > .titlebar,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede) > .windowBody {
+  .window:not(.windowActive):not(.windowBare) > .titlebar,
+  .window:not(.windowActive):not(.windowBare) > .windowBody {
     filter: opacity(0.3);
   }
 
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):hover > .titlebar,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):hover > .windowBody,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):focus-within > .titlebar,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):focus-within > .windowBody {
+  .window:not(.windowActive):not(.windowBare):hover > .titlebar,
+  .window:not(.windowActive):not(.windowBare):hover > .windowBody,
+  .window:not(.windowActive):not(.windowBare):focus-within > .titlebar,
+  .window:not(.windowActive):not(.windowBare):focus-within > .windowBody {
     filter: opacity(1);
   }
 
@@ -1417,12 +1420,8 @@
      THERE — a dimmed window would read as a disabled layer and would
      also lie to the inspector about what the eye is reading. The extra
      :not() chain is only there to out-specify the rule above. */
-  :global(body[data-inspectmode='on'])
-    .window:not(.windowActive):not(.windowBare):not(.windowNoRecede)
-    > .titlebar,
-  :global(body[data-inspectmode='on'])
-    .window:not(.windowActive):not(.windowBare):not(.windowNoRecede)
-    > .windowBody {
+  :global(body[data-inspectmode='on']) .window:not(.windowActive):not(.windowBare) > .titlebar,
+  :global(body[data-inspectmode='on']) .window:not(.windowActive):not(.windowBare) > .windowBody {
     filter: none;
   }
 }
@@ -1539,12 +1538,6 @@
   .desktop[data-shelf-mode='on'] .deskLayer {
     transform: perspective(980px) translateZ(-62.55px);
     opacity: 0.3;
-  }
-
-  /* one dim, not two: the desk is receding as a whole object now, so its
-     members stop dimming individually (see the .deskObject rule above) */
-  .desktop[data-shelf-mode='on'] .deskObject {
-    filter: none;
   }
 }
 

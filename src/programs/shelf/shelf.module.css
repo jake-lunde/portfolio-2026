@@ -866,8 +866,9 @@
    `mask-image` is a GROUPING property, exactly like `filter`: it flattens
    the element it sits on. That is harmless here, on a leaf inside a face,
    and would be fatal one level up — a mask on the face, the cuboid or the
-   tilt layer would collapse the whole solid. Same law as `.side`, `.track`
-   and the registry's `noRecede`.
+   tilt layer would collapse the whole solid. Same law as `.side` and
+   `.track` — and the same law that kept the shell's `filter` recede off
+   the shelf's window for as long as the shelf had one.
 
    `will-change: transform` promotes it: two embeds riding a 3D transform
    that a spring rewrites every frame is exactly the case where an

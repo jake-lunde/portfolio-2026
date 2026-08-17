@@ -21,9 +21,6 @@ export type ResolvedWindow = {
   titleAction?: ProgramDef['titleAction']
   /** requires macrodata refinement (the sphere) before the body shows */
   gated?: boolean
-  /** keeps full opacity when unfocused — the program owns a 3D context and
-      the recede is a `filter`, which flattens one (see registry.tsx) */
-  noRecede?: true
 }
 
 /* A window id is a program id, `case:<slug>`, or `viz:<id>`. */
@@ -68,9 +65,10 @@ export function resolveWindow(id: string): ResolvedWindow | null {
   /* A registry entry with no component is not a window and never resolves
      to one: WORK (`progress`) keeps an entry for its icon, its name and
      its deep link, and opens a mode of the desk instead (registry.tsx).
-     Geometry is optional for exactly that reason, and this guard is what
-     makes it safe — anything that gets past here has both. */
-  if (!p?.component || !p.size || !p.pos) return null
+     Geometry and the doc-id are optional for exactly that reason, and
+     this guard is what makes it safe — anything that gets past here has
+     all four. */
+  if (!p?.component || !p.size || !p.pos || !p.meta) return null
   return {
     id,
     name: p.name,
@@ -82,7 +80,6 @@ export function resolveWindow(id: string): ResolvedWindow | null {
     path: p.path ?? null,
     explainer: p.explainer,
     titleAction: p.titleAction,
-    noRecede: p.noRecede,
     gated: id === 'projects',
   }
 }

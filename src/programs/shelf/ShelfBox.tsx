@@ -93,9 +93,10 @@ import styles from './shelf.module.css'
    The feather is a `mask-image` on the plate that holds the art. Mask is a
    grouping property, exactly like filter: it flattens the element it sits
    on. Inside a face — a leaf of the 3D tree — that costs nothing. On an
-   ancestor of a face it would collapse the whole cuboid. Same law as the
-   registry's `noRecede` (the shell's unfocused `filter: opacity()`) and
-   medieval's #lunde-roughen: never a grouping property above a face.
+   ancestor of a face it would collapse the whole cuboid. Same law that
+   kept the shell's unfocused `filter: opacity()` off this program's
+   window for as long as it had one, and the same law as medieval's
+   #lunde-roughen: never a grouping property above a face.
 
    Pass 3 took the writing off the box; pass 4 moved the handle below it. A
    small tag hangs UNDER the box, outside the cuboid so it never turns with

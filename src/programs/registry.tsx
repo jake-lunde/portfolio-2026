@@ -9,7 +9,9 @@ export type ProgramDef = {
   name: string // desktop label + window title
   /** overrides the desktop icon label only (window title stays `name`) */
   desktopLabel?: string
-  meta: string // mono doc-id in the titlebar, e.g. "SPEC-01"
+  /** mono doc-id in the titlebar, e.g. "SPEC-01". Optional for the same
+      reason `component` is: WORK has no titlebar to print one in. */
+  meta?: string
   /** copy key for a "what is this" explainer. Set it and the titlebar's
       meta slot becomes a button that reveals the text instead of printing
       the doc-id — a program explains itself in chrome, not in its body. */
@@ -33,19 +35,13 @@ export type ProgramDef = {
   pos?: { x: number; y: number } // offsets from desktop top-left, deterministic for SSR
   /** `bare` = no titlebar, no resize grip: the program IS the chrome (see the iPod) */
   chrome?: 'paper' | 'crt' | 'bare'
-  /** Opt out of the unfocused-window recede.
-
-      The recede is `filter: opacity()` on the window's children, and
-      `filter` is a GROUPING property: it forces `transform-style` to
-      `flat` on everything beneath it. A program that builds real 3D — the
-      shelf's cuboid boxes (src/programs/shelf/Box3D.tsx) — would go flat
-      the instant the window lost focus, and pop back on hover. There is no
-      way to have both, so the program declares which it needs.
-
-      `bare` chrome opts out for a different reason (an appliance on the
-      desk shouldn't dim); this is the same escape hatch, different cause.
-      Set it only when a program owns a 3D context. */
-  noRecede?: true
+  /* `noRecede` STOOD HERE and it is retired. It was the escape hatch for
+     a program that owned a 3D context — the shell's unfocused-window
+     recede is a `filter`, filter flattens 3D, and the shelf's cuboids
+     went flat the instant their window lost focus. The shelf left the
+     window (store/shelfMode.ts) and it was the only caller, so the hatch
+     went with it. `chrome: 'bare'` still opts the iPod out, for its own
+     reason: an appliance on the desk shouldn't dim. */
   /** show an icon on the desktop */
   onDesktop?: boolean
   /** a drawer: window ids (program id or `viz:<id>`) this folder holds.
@@ -141,15 +137,15 @@ export const PROGRAMS: ProgramDef[] = [
        route, exactly as it did when it named a frame. What is gone is
        `component` (there is no body to put on paper), the geometry — the
        760×459 derivation and its pop-clearance arithmetic moved to
-       shelf.module.css, which is where the numbers now live — and
-       `noRecede`, which existed because the shell's unfocused-window
-       `filter` flattens 3D. The mode does not have that problem by
-       construction: the boxes sit in their own layer ABOVE the desk, so
-       the desk can recede on a plain transform and the boxes keep their
-       preserve-3d chain. */
+       shelf.module.css, which is where the numbers now live — the doc-id,
+       which only ever printed in a titlebar, and `noRecede`, which
+       existed because the shell's unfocused-window `filter` flattens 3D
+       and took the whole field down with it (see the type above). The
+       mode does not have that problem by construction: the boxes sit in
+       their own layer ABOVE the desk, so the desk can recede — and now
+       blur — while the boxes keep their preserve-3d chain. */
     id: 'progress',
     name: 'Work',
-    meta: 'IDX-16',
     icon: 'work',
     onDesktop: true,
     path: '/cases',

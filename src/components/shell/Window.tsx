@@ -183,7 +183,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
       tabIndex={-1}
       aria-label={title}
       data-window-id={def.id}
-      className={`${styles.window} ${active ? styles.windowActive : ''} ${zoomed ? styles.windowZoomed : ''} ${bare ? styles.windowBare : ''} ${def.noRecede ? styles.windowNoRecede : ''}`}
+      className={`${styles.window} ${active ? styles.windowActive : ''} ${zoomed ? styles.windowZoomed : ''} ${bare ? styles.windowBare : ''}`}
       style={{
         /* clamp the resting x so a window's right edge never opens off
            glass on narrow desktops — CSS min(), not innerWidth, so SSR
