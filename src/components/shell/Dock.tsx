@@ -93,10 +93,12 @@ export function Dock() {
        live while the shelf is up, so a tile that only dismissed the mode
        would be asking for the same click twice — and a dock tile has
        always meant "give me this program", never "close what you were
-       doing first". `restoreFocus: false`: the window this is about to
-       open takes focus, and pulling it back to the tile would drop the
-       reader behind the thing they just asked for. */
-    if (shelfOn) leaveShelf({ restoreFocus: false })
+       doing first". `restoreFocus: false`: measured, focus stays on the
+       dock tile through this path, so this just stops it jumping back to
+       the WORK tile once the program below opens. `silent: true`: the
+       open below plays its own sound; without this the leave's close
+       sound would double up with it in one press. */
+    if (shelfOn) leaveShelf({ restoreFocus: false, silent: true })
     sfx.open()
     // open() already focuses rather than re-opening a running program
     // (useWindows.open) — the dock leans on that, it does not special-case it

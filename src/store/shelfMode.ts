@@ -40,8 +40,11 @@ type ShelfModeState = {
   /** `restoreFocus: false` when something else has taken focus already —
       PLAY hands it to the case window, and pulling it back would drop the
       reader behind the window they just opened (same rule Shelf's
-      finishPlay has always followed) */
-  leave: (opts?: { restoreFocus?: boolean }) => void
+      finishPlay has always followed). `silent: true` when the caller is
+      about to make its own sound right after — the dock's tile-switch
+      path plays `sfx.open()` for the tile it's opening, and a close sound
+      first would be two sounds in one press. */
+  leave: (opts?: { restoreFocus?: boolean; silent?: boolean }) => void
   toggle: (from?: HTMLElement | null) => void
 }
 
@@ -61,10 +64,10 @@ export const useShelfMode = create<ShelfModeState>((set, get) => ({
     set({ on: true })
   },
 
-  leave: ({ restoreFocus = true } = {}) => {
+  leave: ({ restoreFocus = true, silent = false } = {}) => {
     if (!get().on) return
     if (!restoreFocus) trigger = null
-    sfx.close()
+    if (!silent) sfx.close()
     set({ on: false })
   },
 
