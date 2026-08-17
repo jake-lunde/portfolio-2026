@@ -296,8 +296,8 @@
     "medieval": "UNROLLING…"
   },
   "shelf.mode.exit": {
-    "base": "← DESKTOP",
-    "medieval": "← THE DESK"
+    "base": "← BACK",
+    "medieval": "← BACK"
   },
   "shelf.mode.label": {
     "base": "The shelf of case studies",
