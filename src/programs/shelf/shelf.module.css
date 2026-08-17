@@ -125,43 +125,30 @@
      camera (z 87 → scale 1.098) while the lift has already raised it, and
      18px of padding left it 5.3px outside.
 
-     BOTTOM STAYS 20. It is not a clearance number — it is the first term of
+     THE BOTTOM IS THE SHADOW'S ROOM NOW. It used to be the first term of
      the plank derivation (20 + 22 tag + 22 gap = 64, the painted board's
-     height) and the popped box's lowest point lands at y 353 of 426, well
-     inside it. Moving it would move the shelf the boxes stand on.
-
-     ⚠️ The window grew to match: 760 × 459 (registry.tsx has the arithmetic).
-     Change any number here and that one is wrong. */
+     height); the plank is gone and so is the tag, so what has to fit under
+     a box is its own drop shadow — 40px of drop plus a 44px ellipse plus
+     11px of blur, call it 96. On a desk the row does not clip at all
+     (`.deckRow`, overflow visible) and this number is only composition; on
+     a phone the row is a scroller and a scroller always clips vertically,
+     so the narrow block at the foot of this file spends the 96 for real. */
   padding: 34px 40px 20px;
   display: flex;
-  /* flex-END, not centre, and the plank below depends on it: bottom
-     alignment makes the box's base a fixed distance from the row's bottom
-     edge (20 padding + 22 tag + 22 gap = 64), which is the only reason the
-     board can be painted at exactly the height the boxes stand on. Centring
-     leaves a few pixels of slack that move whenever the window does. */
+  /* flex-END, not centre: bottom alignment keeps every box's base on one
+     line, which is what makes four boxes read as four objects standing on
+     the same surface rather than four pictures pasted at four heights. */
   align-items: flex-end;
 
-  /* ---- THE SHELF BOARD ----
-     A painted plank rather than an element, for two reasons. It is a
-     BACKGROUND, so it sits behind the boxes and behind their contact
-     shadows — the shadows fall ON the board, which is the whole point of
-     having one. And a background's positioning area on a scroller is the
-     padding box, which does NOT scroll with the content: the plank spans
-     the visible shelf and the boxes slide ALONG it. A board that scrolled
-     with the stock would be a conveyor belt, not furniture.
+  /* ---- NO SHELF BOARD ----
+     A painted plank stood here — two bands anchored to the row's bottom,
+     64px tall, with the boxes' contact shadows falling on it. Jake struck
+     it: "lose the shelf, it doesn't read, and instead give the drop shadow
+     a little more distance". At desk width the board was a hairline the
+     length of the screen, which is a line, not furniture. The boxes float
+     over the receded desk now and the shadow is what says how high (see
+     `.shadowWrap` below, which took the distance the board gave up). */
 
-     Two bands off one token: a lit top lip where the board catches the
-     light, and the front edge below it. Anchored `left bottom`, 64px tall,
-     so its surface lands exactly under the boxes' bases. */
-  background-image: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--content) 9%, var(--surface)) 0 3px,
-    color-mix(in srgb, var(--content) 24%, var(--surface)) 3px 15px,
-    transparent 15px
-  );
-  background-repeat: no-repeat;
-  background-position: left bottom;
-  background-size: 100% 64px;
   /* 32, up from pass 7's 24 (which was up from 16). Pass 7's 24 was never
      WRONG — measured over the whole tilt range, two boxes both fully in
      frame still kept 12.60px of daylight between them at full pop. It was
@@ -527,13 +514,20 @@
    opacity animation with it. */
 .shadowWrap {
   position: absolute;
-  left: 4%;
-  right: 4%;
-  /* the ellipse's dark core has to clear the box's own base — sat any
-     higher and the strongest part of the shadow hides behind the board it
-     is meant to ground */
-  bottom: -24px;
-  height: 34px;
+  /* -12% either side, not 4%: a shadow thrown from further up is WIDER
+     than the thing throwing it, and one that stops short of the box's own
+     edges reads as a smudge under it rather than as height. */
+  left: -12%;
+  right: -12%;
+  /* THE BOXES FLOAT NOW (Jake: "lose the shelf ... give the drop shadow a
+     little more distance"). Every number here is the contact shadow's,
+     moved: -24 → -40 of drop, 34 → 44 of ellipse, 6 → 11 of blur, and the
+     core stirred back from 62% to 44% of the ink. That is the physics
+     rather than a taste pass — distance makes a shadow larger, softer and
+     weaker, all three at once, and changing only the offset would have
+     read as the same contact shadow slid down the wall. */
+  bottom: -40px;
+  height: 44px;
   pointer-events: none;
 }
 
@@ -542,11 +536,11 @@
   inset: 0;
   background: radial-gradient(
     ellipse at 50% 50%,
-    color-mix(in srgb, var(--content) 62%, transparent) 0%,
-    color-mix(in srgb, var(--content) 34%, transparent) 38%,
+    color-mix(in srgb, var(--content) 44%, transparent) 0%,
+    color-mix(in srgb, var(--content) 24%, transparent) 38%,
     transparent 70%
   );
-  filter: blur(6px);
+  filter: blur(11px);
   will-change: transform;
 }
 
@@ -589,8 +583,20 @@
 /* --------- cardboard thickness ---------
    Each strip is pinned to its own edge and swung about it, then pushed
    back half a depth so the four of them span -d/2 → +d/2 (the gap between
-   the front and back faces). No borders: the front and back faces already
-   draw the silhouette, and a border here would double every seam.
+   the front and back faces).
+
+   THE STROKE GOES ROUND THE WHOLE SOLID (Jake: "can we put the black
+   stroke on the whole box? right now it's only on the front face"), and
+   the way it does that is by drawing each edge EXACTLY ONCE. A cuboid has
+   twelve edges: the front face's border draws four, the back face's
+   border draws four, and the four that are left run front-to-back at the
+   corners. Each of those four is shared by two strips, so a plain border
+   on all four strips would draw eight lines for four edges and double
+   every seam — which is what the old note here was protecting against.
+   So the spine and the edge take the job for all four (their top and
+   bottom rims ARE those corner edges once the strip is swung into place)
+   and the top and bottom strips take none. Twelve edges, twelve lines,
+   one silhouette.
 
    Colour is one token mixed four ways — light from the upper left, so the
    top is nearly the face's own ground and the underside is the darkest.
@@ -614,6 +620,20 @@
      projects a hit region well past the board, and it was eating clicks
      meant for the flip tag above. Nothing here is ever a target. */
   pointer-events: none;
+}
+
+/* the two upright strips carry the four corner edges — see the note above.
+   Same ink and same width as `.face`, so the box is stroked in one line
+   weight however it is turned. */
+.spine,
+.edge {
+  border-top: var(--border-width-default) solid var(--content);
+  border-bottom: var(--border-width-default) solid var(--content);
+}
+
+[data-theme='dark'] .spine,
+[data-theme='dark'] .edge {
+  border-color: var(--border);
 }
 
 .spine {
@@ -866,8 +886,9 @@
    `mask-image` is a GROUPING property, exactly like `filter`: it flattens
    the element it sits on. That is harmless here, on a leaf inside a face,
    and would be fatal one level up — a mask on the face, the cuboid or the
-   tilt layer would collapse the whole solid. Same law as `.side`, `.track`
-   and the registry's `noRecede`.
+   tilt layer would collapse the whole solid. Same law as `.side` and
+   `.track` — and the same law that kept the shell's `filter` recede off
+   the shelf's window for as long as the shelf had one.
 
    `will-change: transform` promotes it: two embeds riding a 3D transform
    that a spring rewrites every frame is exactly the case where an
@@ -2170,7 +2191,9 @@
   animation: none;
 }
 
-:global([data-skin='medieval']) .face {
+:global([data-skin='medieval']) .face,
+:global([data-skin='medieval']) .spine,
+:global([data-skin='medieval']) .edge {
   border-width: var(--border-width-strong);
 }
 
@@ -2178,19 +2201,6 @@
    the film file itself, so the scriptorium sees the dub too. Standing
    debt for Jake's ruling: a clean bake per skin would double the
    payload; a CSS un-dressing is impossible. */
-/* the board a scriptorium would have used: thicker, and edged in the ink
-   itself rather than a mix of it — the same thick-board rule the covers and
-   the tag chip already follow */
-:global([data-skin='medieval']) .row {
-  background-image: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--content) 14%, var(--surface)) 0 4px,
-    var(--content) 4px 6px,
-    color-mix(in srgb, var(--content) 32%, var(--surface)) 6px 22px,
-    transparent 22px
-  );
-}
-
 /* the tag is a parchment slip pinned beneath the tome — same thick board
    rule as the covers. The 22px band already reserves the extra pixel. */
 :global([data-skin='medieval']) .tag {
@@ -2397,12 +2407,16 @@
        is the lift and the tilt rather than the drift that causes it.
 
        Bottom stays 14 — the plank derivation, exactly as on the desktop. */
-    padding: 26px 22px 14px;
+    /* 96 at the foot, and it is not a gutter: a horizontal scroller clips
+       BOTH axes (overflow-x: auto forces overflow-y to a scroller too), so
+       on a phone this padding is the only thing standing between the drop
+       shadow and a hard cut across it. 40 drop + 44 ellipse + 11 blur = 95.
+       The desk does not need it — `.deckRow` overflows visible — and the
+       room is free here, since the mode is full-bleed and the slack was
+       going to fall under the row anyway. */
+    padding: 26px 22px 96px;
     gap: var(--space-5);
     scroll-padding-left: 22px;
-    /* the plank rides up with the smaller gutter: 14 padding + 22 tag +
-       22 gap = 58, the same derivation as the desktop's 64 */
-    background-size: 100% 58px;
   }
 
   .plinth {
@@ -2430,5 +2444,172 @@
 
   .overlay {
     padding: 14px;
+  }
+}
+
+/* ================= SHELF.MODE — the shelf standing on the desk ========
+
+   Jake's ruling ("Hide Others"): the shelf is not in a window any more.
+   Pressing WORK sends the desk back (shell.module.css, `.deskLayer`) and
+   the four boxes come up HERE, in a layer of their own above it. Keeping
+   the two apart is what retires the registry's `noRecede` hatch: the
+   desk's recede is a grouping property, grouping flattens 3D, and nothing
+   groups the boxes any more because they are not inside the thing that
+   recedes. See programs/shelf/ShelfMode.tsx for the rest of the ruling.
+
+   ⚠️ The inset tracks `.desktop` in shell.module.css. The mode covers the
+   desk, not the machine: the menu bar and the ticker stay up. */
+
+.mode {
+  position: fixed;
+  inset: calc(var(--menubar-h) + 21px) 0 0 0;
+  display: flex;
+  flex-direction: column;
+  /* THE LAYER TAKES NO POINTER. The dock rail sits under it and has to
+     stay live — pressing WORK again is one of the three ways out — so
+     hits fall through to the desk, where `.deskCatcher` answers them.
+     The plank and the launch dialog take the pointer back below. */
+  pointer-events: none;
+  /* the reader is not tabbing to a region; it is where focus LANDS when
+     the mode opens, and a ring around the whole desk would be a lie about
+     what is focusable (same treatment `.overlay` gets above) */
+  outline: none;
+}
+
+/* INSPECT.MODE docks two panels and the desk gives up the width for them.
+   The plank is furniture ON that desk, so it follows the canvas rather
+   than hanging over a tool panel. Same variables, same fallbacks, as the
+   shell's own rule. */
+:global(body[data-inspectmode='on']) .mode {
+  left: var(--inspect-left, 244px);
+  right: var(--inspect-right, 304px);
+  top: var(--menubar-h);
+}
+
+/* the rise wrapper (Motion writes a transform here) — it fills the layer
+   so the launch overlay's inset(0) is the whole desk rather than the band
+   the boxes happen to occupy. On the desk the licence gate has the room
+   it spent pass 11 borrowing from a 760px window. */
+.deck {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* the shelf's own wrapper, on a desk instead of in a window body */
+.deckWrap {
+  flex: 1;
+  min-height: 0;
+}
+
+/* the launch layer is the one thing in here that takes the pointer
+   besides the plank: it is a dialog, and it covers the desk while it
+   runs */
+.deckWrap .overlay {
+  pointer-events: auto;
+}
+
+@media (min-width: 721px) {
+  /* the plank sits in the middle of the desk. Below the mobile floor the
+     shelf keeps the window's own top-down stacking, where slack belongs
+     under the row and not around it (see the note on `.row`). */
+  .deckWrap {
+    justify-content: center;
+  }
+
+  /* ---- FOUR BOXES, FLOATING, IN THE MIDDLE OF THE DESK ----
+     The row is as wide as the glass and the stock stands in the middle of
+     it. There is no board under them any more (Jake struck it — see the
+     note on `.row`), so what frames the mode is the boxes themselves and
+     the desk they are lifted off.
+
+     ALL FOUR, ALWAYS, AND IT SCALES RATHER THAN SCROLLS. Four across is
+     4 × 246 + 3 × 32 = 1080 plus the row's two 40px gutters = 1160, which
+     fits any desk 1280 and up. Narrower than that, every box metric takes
+     `--deck-scale` (measured in ShelfMode.tsx: (width − 80) / 1080, capped
+     at 1) and the row shrinks to fit — seeing all four is the point, and a
+     shelf that scrolls on a desk is the window this mode replaced. The
+     gutters do not scale: they are the composition's own margin rather
+     than part of the stock.
+
+     `overflow: visible` retires two problems at once. The pop was cut by
+     the row's own padding edge in a window (pass 9's arithmetic, on
+     `.row`), and the drop shadow now hangs 95px below a box's base — on a
+     desk there is nothing to clip against, so neither has to be measured.
+
+     THE ROW TAKES NO POINTER, THE BOXES DO. With the board gone the row
+     is an invisible band across the desk, and a click on the daylight
+     between two boxes has to mean what it looks like it means: bare desk,
+     put it back. So the hit target is each slot, and the row lets
+     everything else fall through to `.deskCatcher` (shell.module.css).
+     Mobile keeps the row itself live — down there it is a scroller and a
+     finger has to be able to drag it. */
+  .deckRow {
+    width: 100%;
+    justify-content: center;
+    overflow: visible;
+    scroll-snap-type: none;
+    gap: calc(var(--spacing-layout-lg) * var(--deck-scale, 1));
+    pointer-events: none;
+  }
+
+  .deckRow > .slot {
+    pointer-events: auto;
+  }
+
+  .deckRow .plinth {
+    --box-w: calc(246px * var(--deck-scale, 1));
+    --box-h: calc(328px * var(--deck-scale, 1));
+    --box-d: calc(42px * var(--deck-scale, 1));
+  }
+}
+
+/* ---------------- the mode on a phone ----------------
+   Full-bleed, exactly as a window is below the shell's mobile floor: the
+   layer paints the desk's own surface, takes the pointer itself (there is
+   no rail down here to protect) and the row keeps the carousel it has
+   always had — a finger drags the stock along the plank. */
+@media (max-width: 720px) {
+  .mode {
+    background: var(--surface);
+    pointer-events: auto;
+  }
+}
+
+/* THE ONE CONTROL, AND IT IS MOBILE-ONLY. On a desk the ways out are
+   Escape, the bare desk and the WORK tile; a close box here would be the
+   titlebar Jake struck. On a phone the mode is full-bleed, the dock rail
+   does not render and there is no bare desk to click, so the way back has
+   to be visible. */
+.modeExit {
+  display: none;
+  font-family: var(--type-label-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--button-weight);
+  letter-spacing: var(--tracking-16);
+  line-height: var(--leading-none);
+  text-transform: uppercase;
+  padding: 8px 10px;
+  margin: 12px 0 0 12px;
+  align-self: flex-start;
+  background: var(--surface-raised);
+  color: var(--content);
+  border: var(--border-width-default) solid var(--border);
+  cursor: pointer;
+}
+
+.modeExit:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.modeExit:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 720px) {
+  .modeExit {
+    display: block;
   }
 }

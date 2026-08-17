@@ -93,17 +93,19 @@ import styles from './shelf.module.css'
    The feather is a `mask-image` on the plate that holds the art. Mask is a
    grouping property, exactly like filter: it flattens the element it sits
    on. Inside a face — a leaf of the 3D tree — that costs nothing. On an
-   ancestor of a face it would collapse the whole cuboid. Same law as the
-   registry's `noRecede` (the shell's unfocused `filter: opacity()`) and
-   medieval's #lunde-roughen: never a grouping property above a face.
+   ancestor of a face it would collapse the whole cuboid. Same law that
+   kept the shell's unfocused `filter: opacity()` off this program's
+   window for as long as it had one, and the same law as medieval's
+   #lunde-roughen: never a grouping property above a face.
 
-   Pass 3 took the writing off the box; pass 4 moved the handle below it. A
-   small tag hangs UNDER the box, outside the cuboid so it never turns with
-   it, and it is the accessible control: the aria-expanded / aria-controls
-   wiring lives there and focus returns to it. The front face is still a
-   button (the whole cover is a hit target, which is what a pointer expects
-   of a box you can pick up) but it is out of the tab order and carries no
-   state — one control announcing the flip, not two.
+   Pass 3 took the writing off the box; pass 4 moved the handle below it; a
+   small tag hung UNDER the box, outside the cuboid so it never turned with
+   it, and it was the accessible control. Jake has taken the chips off for
+   now (`flipTag`), so the announced control moved onto the COVER: same
+   aria-expanded / aria-controls pair, same focus home, on the thing the
+   reader was already reaching for. Exactly one control announces the flip
+   either way — the front face is a plain hit target with no tab stop
+   while the chip is drawn, and the chip's job in full while it isn't.
 
    useId is unsafe in programs (dynamic imports rehydrate into a reshaped
    tree), so ids derive from the slug — stable across SSR and client. */
@@ -152,6 +154,7 @@ export function ShelfBox({
   overlayOpen,
   onReveal,
   onPlay,
+  flipTag = true,
 }: {
   c: CaseDef
   /** hover-capable machine — measured once by the shelf */
@@ -162,6 +165,14 @@ export function ShelfBox({
   overlayOpen: boolean
   onReveal: (slug: string) => void
   onPlay: (slug: string, trigger: HTMLElement) => void
+  /** DRAW THE FLIP CHIP UNDER THE BOX, or don't (Jake, "lose the flip
+      buttons for now"). Off, the whole apparatus stays — the turn, the
+      back panel, the walk-away, the Escape rung — and the COVER becomes
+      the announced control that carries the tab stop and the
+      aria-expanded/aria-controls pair the chip used to. It has to go
+      somewhere: PLAY is printed on the back panel, so a box with no way
+      to turn from the keyboard is a case study with no way in. */
+  flipTag?: boolean
 }) {
   const reduced = useReducedMotion()
   const skin = useSettings((s) => s.skin)
@@ -170,12 +181,19 @@ export function ShelfBox({
   /** the key art did not load — the composed number takes the plate back */
   const [artFailed, setArtFailed] = useState(false)
   const tag = useRef<HTMLButtonElement>(null)
+  const front = useRef<HTMLButtonElement>(null)
   const back = useRef<HTMLDivElement>(null)
   const slot = useRef<HTMLDivElement>(null)
   /** the value the focus effect last acted on — see the note there */
   const settled = useRef(flipped)
   /** this unflip was the pointer leaving, not a control being pressed */
   const walkedAway = useRef(false)
+
+  /** whichever control announces the flip — the chip under the box, or
+      the cover itself when the chip is off (see `flipTag`). The unflip
+      focus effect and every "put focus back" path ask for it by job
+      rather than by name, so neither has to know which one is drawn. */
+  const handle = flipTag ? tag : front
 
   const backId = `shelf-${c.slug}-back`
   const box = c.box
@@ -235,7 +253,7 @@ export function ShelfBox({
       const active = document.activeElement
       if (active instanceof HTMLElement && slot.current?.contains(active)) active.blur()
     } else {
-      tag.current?.focus({ preventScroll: true })
+      handle.current?.focus({ preventScroll: true })
     }
   }, [flipped])
 
@@ -297,6 +315,39 @@ export function ShelfBox({
     turn(false, true)
   }
 
+  /* A FINGER HAS NOWHERE TO WALK AWAY TO (Jake's ruling). The pointer
+     rule above is the mouse's way back: leave the slot and the box turns
+     over. Touch has no leave — the pointer stops existing at the end of
+     the tap — and with the flip chip off there is no visible control to
+     press either, so a turned box on a phone was a box the reader was
+     stuck behind. So while a box is turned on a coarse pointer, the next
+     tap ANYWHERE but the CTA turns it back: the panel itself, the desk,
+     or another box, which then turns over as usual because its own click
+     lands after this one.
+
+     `pointerdown`, captured on the document, is what makes that last case
+     one gesture instead of two — it runs before the click that flips the
+     neighbour, so the two never fight over the same tap. The CTA is the
+     one exemption (PLAY is the reason the panel exists), and the overlay
+     is the other: while it is up the tap belongs to the dialog, and
+     turning the box behind it would land a cancel on a cover.
+
+     Quiet, and via `walkedAway`: the reader tapped somewhere else, so
+     nothing here was pressed and focus has no business jumping back onto
+     the cover. */
+  useEffect(() => {
+    if (flipTag || fine || !flipped || overlayOpen) return
+    const away = (e: PointerEvent) => {
+      const t = e.target
+      if (t instanceof Element && t.closest('[data-shelf-cta]')) return
+      walkedAway.current = true
+      turn(false, true)
+    }
+    document.addEventListener('pointerdown', away, true)
+    return () => document.removeEventListener('pointerdown', away, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flipTag, fine, flipped, overlayOpen])
+
   const tagKey = flipped ? 'shelf.tag.front' : 'shelf.tag.back'
 
   /* The tag is OUT when you have reached for this box, and it stays out
@@ -343,11 +394,21 @@ export function ShelfBox({
         fine={fine}
         front={
           <motion.button
+            ref={front}
             type="button"
             className={`${styles.face} ${styles.frontFace} ${cover.className}`}
-            // the cover is a hit target, not a second announced control:
-            // the tag owns the state and the tab stop
-            tabIndex={-1}
+            /* WITH THE CHIP DRAWN the cover is a hit target and nothing
+               else: the tag owns the state and the tab stop, and a second
+               announced control for one flip is two labels on one object.
+               With the chip off (Jake) this IS the control — tab stop,
+               state and name — and the name is stated rather than
+               computed, because the cover's own text is a title, an
+               eyebrow and a tagline, which read as three labels in a row
+               to anyone listening instead of looking. */
+            tabIndex={flipTag ? -1 : undefined}
+            aria-expanded={flipTag ? undefined : flipped}
+            aria-controls={flipTag ? undefined : backId}
+            aria-label={flipTag ? undefined : `${c.name} — ${spoken(t('shelf.tag.back', skin))}`}
             inert={flipped}
             onClick={() => turn(true)}
             initial={faceFade(false)}
@@ -492,6 +553,16 @@ export function ShelfBox({
             id={backId}
             className={`${styles.face} ${styles.backFace}`}
             tabIndex={-1}
+            /* THE NAME LIVES WHERE THE READER IS. The cover carries it
+               while the cover is up, and the cover is `inert` the moment
+               the box turns — so a screen reader landing on this panel
+               would otherwise be told nothing at all, while the only
+               labelled thing in the box sat behind it announcing a FLIP
+               nobody can reach. A named group is the cheapest correct
+               wiring: the panel says which box it is on arrival, and the
+               expanded/collapsed state stays on the control that owns it. */
+            role="group"
+            aria-label={c.name}
             inert={!flipped}
             initial={faceFade(true)}
             animate={faceFade(true)}
@@ -568,12 +639,20 @@ export function ShelfBox({
                 <button
                   type="button"
                   className={styles.playBtn}
+                  /* the one thing a tap on a turned box does NOT turn it
+                     back for — see the pointerdown effect above */
+                  data-shelf-cta=""
                   onClick={(e) => onPlay(c.slug, e.currentTarget)}
                 >
                   <Copy k="shelf.play" as="span" />
                 </button>
               ) : (
-                <button type="button" className={`${styles.playBtn} ${styles.comingSoon}`} disabled>
+                <button
+                  type="button"
+                  className={`${styles.playBtn} ${styles.comingSoon}`}
+                  data-shelf-cta=""
+                  disabled
+                >
                   <Copy k="shelf.comingSoon" as="span" />
                 </button>
               )}
@@ -598,6 +677,7 @@ export function ShelfBox({
           purpose: focus reveals it on the way in, which is the standard
           skip-link bargain and strictly better than a control that keyboard
           users cannot reach at all. */}
+      {flipTag && (
       <motion.div
         className={styles.tagRow}
         initial={false}
@@ -618,6 +698,7 @@ export function ShelfBox({
           <Copy k={tagKey} as="span" />
         </button>
       </motion.div>
+      )}
     </div>
   )
 }

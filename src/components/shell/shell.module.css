@@ -1387,28 +1387,31 @@
    Desktop only: on mobile the windows are a full-bleed stack with nothing
    behind them and no hover to recover with.
 
-   Two exemptions, both by declaration on the program (registry.tsx):
+   One exemption, by declaration on the program (registry.tsx):
    `chrome: 'bare'` (.windowBare) — the iPod, an appliance sitting on the
-   desk rather than a document competing for attention — and `noRecede`
-   (.windowNoRecede), for a program that owns a 3D context. `filter` is a
-   grouping property: it forces `transform-style: flat` on every
-   descendant, so the shelf's cuboid boxes would collapse to cardboard
-   cut-outs the moment the window lost focus. */
+   desk rather than a document competing for attention.
+
+   There were two. `noRecede` exempted a program that owned a 3D context,
+   because `filter` is a grouping property and flattens every descendant:
+   the shelf's cuboid boxes collapsed to cardboard cut-outs the moment
+   their window lost focus. The shelf does not live in a window any more
+   (store/shelfMode.ts) and it was the only caller, so the hatch is
+   retired and this rule has one `:not()` fewer to carry. */
 @media (min-width: 721px) {
   .window > .titlebar,
   .window > .windowBody {
     transition: filter 0.2s ease-out;
   }
 
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede) > .titlebar,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede) > .windowBody {
+  .window:not(.windowActive):not(.windowBare) > .titlebar,
+  .window:not(.windowActive):not(.windowBare) > .windowBody {
     filter: opacity(0.3);
   }
 
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):hover > .titlebar,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):hover > .windowBody,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):focus-within > .titlebar,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):focus-within > .windowBody {
+  .window:not(.windowActive):not(.windowBare):hover > .titlebar,
+  .window:not(.windowActive):not(.windowBare):hover > .windowBody,
+  .window:not(.windowActive):not(.windowBare):focus-within > .titlebar,
+  .window:not(.windowActive):not(.windowBare):focus-within > .windowBody {
     filter: opacity(1);
   }
 
@@ -1417,12 +1420,8 @@
      THERE — a dimmed window would read as a disabled layer and would
      also lie to the inspector about what the eye is reading. The extra
      :not() chain is only there to out-specify the rule above. */
-  :global(body[data-inspectmode='on'])
-    .window:not(.windowActive):not(.windowBare):not(.windowNoRecede)
-    > .titlebar,
-  :global(body[data-inspectmode='on'])
-    .window:not(.windowActive):not(.windowBare):not(.windowNoRecede)
-    > .windowBody {
+  :global(body[data-inspectmode='on']) .window:not(.windowActive):not(.windowBare) > .titlebar,
+  :global(body[data-inspectmode='on']) .window:not(.windowActive):not(.windowBare) > .windowBody {
     filter: none;
   }
 }
@@ -1484,6 +1483,107 @@
   .deskObject {
     transition: none;
   }
+}
+
+/* ================= SHELF.MODE: the desk goes back ====================
+
+   Jake's ruling ("Hide Others"): pressing WORK opens no window. The desk
+   goes back and the four case boxes come up on a plank that spans the
+   screen (programs/shelf/ShelfMode.tsx). Everything on the desk recedes
+   IN PLACE — no sliding aside, no Exposé — and it recedes as ONE layer on
+   ONE composited transform, which is the only way a desk of windows, four
+   cuboids and a video on each of them all hold 60fps at once.
+
+   THE RECEDE RUNS ON THE SHELF'S OWN CAMERA, and that is the move rather
+   than a flourish. The row's perspective is 980px (shelf.module.css,
+   `.row`) — the same lens the hover pop travels toward — so the desk
+   borrows it: `perspective(980px) translateZ(-62.55px)` projects to
+   980 / (980 + 62.55) = 0.940, the "about 0.94" Jake asked for, arrived
+   at by moving the desk away from a camera that already exists rather
+   than by picking a scale factor out of the air. For the beat the plank
+   takes to arrive, the desk and the boxes are one 3D scene.
+
+   The dim is 0.3 because 0.3 is the house number: it is exactly what an
+   unfocused window and a receded desk object already fade to, above. The
+   `.deskObject` rule stands down while the mode is up (see below) so the
+   two never multiply — 0.3 of 0.3 is a desk nobody can see.
+
+   THE RAIL IS NOT IN HERE, and that is deliberate: it is chrome, it never
+   dims (see the desk-recede note above), and pressing WORK on it is one of
+   the three ways out. Desktop.tsx renders it as a sibling of this layer.
+
+   ⚠️ A transform makes an element the containing block for every
+   `position: fixed` descendant, so it is declared ONLY while the mode is
+   on. At rest this box carries no transform, no opacity and no stacking
+   context: it is a pass-through wrapper and the desk behaves exactly as
+   it did before the layer existed. */
+.deskLayer {
+  position: absolute;
+  inset: 0;
+  /* THE BLUR IS NOT IN HERE, and that is the one deliberate omission. A
+     blur RADIUS that changes has to be re-rasterised every frame, over
+     the whole desk; a blur that is simply on can be rasterised once and
+     the transform and the dim applied to that texture at composite time.
+     So the radius snaps at the first frame and the motion is carried by
+     the two properties that are free. (Measured, honestly, as far as it
+     could be: a software-rendered headless run cannot separate a
+     composited blur's cost from its own baseline — both with and without
+     it sat at ~40ms a frame — so the cheap construction wins over the
+     one that would need a GPU to prove.) */
+  transition:
+    transform var(--duration-theme) ease-out,
+    opacity var(--duration-theme) ease-out;
+}
+
+/* Contained for as long as the mode runs, on every screen: windows climb
+   z forever (useWindows.open) and the catcher below has to cover them
+   without out-numbering them. `isolation` rather than a z-index of its
+   own, so the rail keeps its seat above a receded desk and gets it back
+   the moment the mode ends. */
+.desktop[data-shelf-mode='on'] .deskLayer {
+  isolation: isolate;
+}
+
+@media (min-width: 721px) {
+  /* AND THE FRAMES BEHIND GO SOFT (Jake). A blur on this element used to
+     be unthinkable: `filter` is a grouping property, it flattens every 3D
+     descendant, and the shelf's cuboids used to stand inside this layer
+     in a window — which is exactly what the registry's retired `noRecede`
+     hatch was for. The boxes are in their own layer above the desk now,
+     so nothing under this filter is 3D and the blur costs nothing but the
+     pixels it softens. 5px, measured rather than picked: enough that a
+     titlebar stops being readable text at 0.3 opacity, little enough that
+     the desk is still recognisably the reader's own desk. */
+  .desktop[data-shelf-mode='on'] .deskLayer {
+    transform: perspective(980px) translateZ(-62.55px);
+    opacity: 0.3;
+    filter: blur(5px);
+  }
+}
+
+/* Jake's ruling: reduced motion crossfades, it does not scale. The dim
+   stays — it is the thing that says the desk stood down — and so does the
+   blur, which arrives whole on every path anyway. */
+@media (prefers-reduced-motion: reduce) {
+  .deskLayer {
+    transition: opacity var(--duration-theme) ease-out;
+  }
+
+  .desktop[data-shelf-mode='on'] .deskLayer {
+    transform: none;
+  }
+}
+
+/* THE BARE DESK, while the shelf is up. A click here leaves the mode
+   (Desktop.tsx mounts it only then). It sits above the receded desk —
+   which is its own stacking context for as long as the mode runs, so a
+   window at z 900 cannot climb over it — and below the dock rail at z 6,
+   which is what lets the WORK tile stay lit and live while everything
+   behind it is out of reach. */
+.deskCatcher {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
 }
 
 /* `chrome: 'bare'` — the iPod. No titlebar, no frame, no resize grip: the
