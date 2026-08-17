@@ -147,7 +147,7 @@ export const TEXT_INDEX: Record<string, string[]> = {
   "daily.sys": ["src/components/shell/DailyWidget.tsx"],
   "data visualization": ["src/components/shell/SkillsTicker.tsx"],
   "data-inspect-self], [role=\"dialog\"], [data-copy-": ["src/components/inspect/InspectShell.tsx"],
-  "data-shelf-plank], [role=\"dialog": ["src/programs/shelf/ShelfMode.tsx"],
+  "data-shelf-stock], [role=\"dialog": ["src/programs/shelf/ShelfMode.tsx"],
   "dates redacted": ["src/programs/fieldnotes/FieldNotes.tsx"],
   "dead last with parents, table stakes in the cate": ["src/components/case/ResearchBars.tsx"],
   "decide it": ["content/greenlight-invest.mdx"],

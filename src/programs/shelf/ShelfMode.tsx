@@ -11,27 +11,29 @@ import Shelf from './Shelf'
 import styles from './shelf.module.css'
 
 /* SHELF.MODE — the shelf as a mode of the desk (Jake, "Hide Others").
-   Press WORK and the desk goes back; the four boxes come up on a plank
-   that spans the screen. No titlebar and no close box: the plank is the
-   frame, and the way out is Escape, a click on the bare desk, or WORK
-   again (the dock tile stays lit while the mode is on).
+   Press WORK and the desk goes back; the four boxes come up over it, all
+   of them, lifted off the desk on their own shadows. No titlebar and no
+   close box and (since Jake struck the board) no shelf either: the boxes
+   are the frame, and the way out is Escape, a click on the bare desk, or
+   WORK again (the dock tile stays lit while the mode is on).
 
    TWO LAYERS, AND KEEPING THEM SEPARATE IS THE WHOLE TRICK. The desk
    recedes inside `.deskLayer` (shell.module.css) on one composited
-   transform; the boxes stand HERE, in a layer above it. That is why the
-   registry's old `noRecede` escape hatch is gone: the shell's recede is a
-   `filter`/`opacity` group, grouping flattens 3D, and the boxes are real
-   cuboids — but nothing groups them any more, because they are not inside
-   the thing that recedes. Their preserve-3d chain is untouched.
+   transform, dims, and blurs; the boxes stand HERE, in a layer above it.
+   That is why the registry's `noRecede` escape hatch could be retired,
+   and why the desk may take a `filter` at all: grouping flattens 3D, the
+   boxes are real cuboids, and nothing groups them any more because they
+   are not inside the thing that recedes. Their preserve-3d chain is
+   untouched.
 
    THIS LAYER DOES NOT TAKE THE POINTER (desktop). It is `pointer-events:
-   none` and hands `auto` back to the plank and to the launch dialog only,
+   none` and hands `auto` back to the boxes and to the launch dialog only,
    so the dock rail underneath stays live — it is chrome, it never dims,
    and pressing WORK on it is one of the three ways out. The bare-desk
    click is caught by `.deskCatcher`, which Desktop.tsx mounts INSIDE the
    desktop between the receded desk and the rail (shell.module.css has the
    z-order). Below the mobile floor the layer is full-bleed and opaque, so
-   it does take the pointer there, and a tap off the plank leaves.
+   it does take the pointer there, and a tap off the boxes leaves.
 
    ⚠️ The inset below tracks `.desktop`'s in shell.module.css. The mode
    covers the desk, not the machine: the menu bar and the ticker stay up. */
@@ -41,7 +43,7 @@ import styles from './shelf.module.css'
     and every box metric scales by `--deck-scale` (shelf.module.css) —
     the row never scrolls on a desk, because seeing all four is the point
     (Jake's ruling). 1080 is that number less the gutters, which do not
-    scale: they are the plank's own margin, not part of the stock. */
+    scale: they are the composition's own margin, not part of the stock. */
 const DECK_FIT = 1080
 const DECK_GUTTERS = 80
 
@@ -74,7 +76,7 @@ export function ShelfMode() {
     return () => ro.disconnect()
   }, [])
 
-  /* FOCUS GOES INTO THE PLANK AND COMES BACK OUT. The desk is `inert`
+  /* FOCUS GOES INTO THE SHELF AND COMES BACK OUT. The desk is `inert`
      while the mode runs (Desktop.tsx), so focus has to land somewhere on
      this side of it: the region itself, from which Tab reaches the first
      box. On the way out it goes back to whatever summoned the mode — the
@@ -92,7 +94,7 @@ export function ShelfMode() {
       if (e.key !== 'Escape') return
       /* ESCAPE BELONGS TO THE DOOR IN FRONT OF THE VISITOR, and the mode
          is the room behind all of them. The menu bar stays live while the
-         mode runs, so its skin flyout is open on top of the plank often
+         mode runs, so its skin flyout is open on top of the boxes often
          enough to matter, and a dialog can be up from before the mode was
          entered. Both listen for Escape on the window underneath this
          handler and neither swallows it, so without this test one press
@@ -115,12 +117,12 @@ export function ShelfMode() {
     return () => window.removeEventListener('keydown', onKey)
   }, [leave])
 
-  /* A click on the bare desk leaves; a click on the plank, on a box, or on
-     the launch dialog standing over them does not. Asked as a question
-     about the target rather than by layering invisible boxes, because the
-     plank moves with the glass and a hit-test rectangle would not. */
+  /* A click on the bare desk leaves; a click on a box, or on the launch
+     dialog standing over them, does not. Asked as a question about the
+     target rather than by layering invisible boxes, because the stock
+     moves with the glass and a hit-test rectangle would not. */
   const clickedOff = (target: EventTarget | null) =>
-    !(target instanceof Element) || !target.closest('[data-shelf-plank], [role="dialog"]')
+    !(target instanceof Element) || !target.closest('[data-shelf-stock], [role="dialog"]')
 
   return (
     <motion.div
@@ -133,7 +135,7 @@ export function ShelfMode() {
       aria-label={t('shelf.mode.label', skin)}
       onClick={(e) => {
         // desktop hands this layer no pointer at all (see the header) —
-        // this is the mobile tap-off-the-plank exit
+        // this is the mobile tap-off-the-boxes exit
         if (clickedOff(e.target)) leave()
       }}
     >
@@ -148,24 +150,24 @@ export function ShelfMode() {
         <Copy k="shelf.mode.exit" as="span" />
       </button>
 
-      {/* THE BOXES RISE, AND NOTHING ABOVE THEM EVER TAKES AN OPACITY.
-          Grouping properties — opacity, filter, mask — flatten 3D, which
-          is the whole reason the shelf carried `noRecede` in the registry
-          for as long as it lived in a window. So the full-motion entrance
-          is a transform and only a transform: fading this element in
-          would collapse four cuboids into cardboard for the length of the
-          fade and pop them back at the end. Under reduced motion there is
-          nothing to protect — ShelfBox has already flattened the solid to
-          a stack of faces — so that path is the crossfade Jake asked for,
-          with no scale and no travel. */}
+      {/* THE ARRIVAL IS PER BOX, NOT PER DECK — they come in one at a
+          time, left to right (Jake). That lives in Shelf.tsx, on the
+          slots, because a stagger is a fact about four objects rather
+          than about the tray they sit on. What is left here is the way
+          OUT: short, and a tween rather than the spring, because the
+          subject of a leave is the desk coming back and a spring settling
+          here would hold the boxes on screen for twice as long as the
+          desk takes to return.
+
+          NOTHING ABOVE THE BOXES EVER TAKES AN OPACITY at full motion.
+          Grouping properties — opacity, filter, mask — flatten 3D, so a
+          fade on this element would collapse four cuboids into cardboard
+          for its whole duration. Under reduced motion there is nothing to
+          protect (ShelfBox has already flattened the solid), so that path
+          fades. */}
       <motion.div
         className={styles.deck}
-        initial={reduced ? { opacity: 0 } : { y: 28 }}
-        animate={reduced ? { opacity: 1 } : { y: 0 }}
-        /* the way out is short and it is a tween, not the spring: the
-           subject of the leave is the desk coming back, and a spring
-           settling here would hold the plank on screen for twice as long
-           as the desk takes to return */
+        initial={false}
         exit={reduced ? { opacity: 0 } : { y: 26, transition: { duration: 0.14 } }}
         transition={reduced ? { duration: 0.12 } : SPRINGS.rise}
       >
