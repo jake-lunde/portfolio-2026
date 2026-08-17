@@ -134,7 +134,11 @@ export function Desktop({
             `inert` is the keyboard half of the mode: the receded desk
             cannot be tabbed into, and a click on it lands on the catcher
             below rather than on a window nobody can read. */}
-        <div className={styles.deskLayer} inert={shelfMode || undefined}>
+        {/* `data-desk-layer` is how INSPECT's LAYERS tree knows to step
+            past this box: it is a mechanism, not a layer, and the desk's
+            furniture reads at the tier it always read at
+            (inspect/LayersPanel.tsx). */}
+        <div className={styles.deskLayer} data-desk-layer="" inert={shelfMode || undefined}>
           <Wallpaper />
           <NowPlayingWidget />
           <DesktopIcons />

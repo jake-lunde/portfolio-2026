@@ -204,10 +204,30 @@ export function LayersPanel({
 
     /* The furniture tier: every other meaningful child of the desktop
        root. Windows are held out because they get the tier above; the
-       tool's own docks are already held out by usable(). */
-    const furniture = desktop
-      ? kidsOf(desktop, picked).filter((k) => !k.el.hasAttribute('data-window-id'))
+       tool's own docks are already held out by usable().
+
+       THE TREE STEPS STRAIGHT PAST THE DESK LAYER. SHELF.MODE recedes
+       everything on the desk as one composited layer (Desktop.tsx,
+       `[data-desk-layer]`), so the wallpaper, the icons, the widgets and
+       the windows all sit one div deeper than they used to. That div is a
+       mechanism, not a layer: left in, this tier would read as a single
+       anonymous box, and opening it would list every window a second time
+       under the tier that already has them. So the walk hops it — and the
+       KEYS still name the real DOM path, index for index, which is what
+       keeps a canvas pick revealing to the row it belongs to (pathTo
+       above counts the same children). The rail is outside the layer, so
+       it comes from the root as it always did. */
+    const layer = desktop?.querySelector<HTMLElement>(':scope > [data-desk-layer]') ?? null
+    const layerAt = layer ? Array.prototype.indexOf.call(desktop!.children, layer) : -1
+    const onDesk = layer
+      ? kidsOf(layer, picked).map((k) => ({ ...k, key: `${DESKTOP_KEY}>${layerAt}>${k.i}` }))
       : []
+    const atRoot = desktop
+      ? kidsOf(desktop, picked)
+          .filter((k) => k.el !== layer)
+          .map((k) => ({ ...k, key: `${DESKTOP_KEY}>${k.i}` }))
+      : []
+    const furniture = [...onDesk, ...atRoot].filter((k) => !k.el.hasAttribute('data-window-id'))
 
     // windows and furniture are siblings under DESKTOP, so ARIA counts them
     // as one set even though they read as two tiers
@@ -281,8 +301,7 @@ export function LayersPanel({
     /* Keyed off the desktop root the same way pathTo roots a desktop
        path, so a canvas pick on a dock tile reveals to exactly this row
        rather than to a key nobody wrote. */
-    furniture.forEach(({ i, el }, n) => {
-      const key = `${DESKTOP_KEY}>${i}`
+    furniture.forEach(({ key, el }, n) => {
       const kids = kidsOf(el, picked)
       const canOpen = kids.length > 0
       const isOpen = canOpen && expanded.has(key)
