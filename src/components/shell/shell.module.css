@@ -1520,6 +1520,16 @@
 .deskLayer {
   position: absolute;
   inset: 0;
+  /* THE BLUR IS NOT IN HERE, and that is the one deliberate omission. A
+     blur RADIUS that changes has to be re-rasterised every frame, over
+     the whole desk; a blur that is simply on can be rasterised once and
+     the transform and the dim applied to that texture at composite time.
+     So the radius snaps at the first frame and the motion is carried by
+     the two properties that are free. (Measured, honestly, as far as it
+     could be: a software-rendered headless run cannot separate a
+     composited blur's cost from its own baseline — both with and without
+     it sat at ~40ms a frame — so the cheap construction wins over the
+     one that would need a GPU to prove.) */
   transition:
     transform var(--duration-theme) ease-out,
     opacity var(--duration-theme) ease-out;
@@ -1535,14 +1545,25 @@
 }
 
 @media (min-width: 721px) {
+  /* AND THE FRAMES BEHIND GO SOFT (Jake). A blur on this element used to
+     be unthinkable: `filter` is a grouping property, it flattens every 3D
+     descendant, and the shelf's cuboids used to stand inside this layer
+     in a window — which is exactly what the registry's retired `noRecede`
+     hatch was for. The boxes are in their own layer above the desk now,
+     so nothing under this filter is 3D and the blur costs nothing but the
+     pixels it softens. 5px, measured rather than picked: enough that a
+     titlebar stops being readable text at 0.3 opacity, little enough that
+     the desk is still recognisably the reader's own desk. */
   .desktop[data-shelf-mode='on'] .deskLayer {
     transform: perspective(980px) translateZ(-62.55px);
     opacity: 0.3;
+    filter: blur(5px);
   }
 }
 
 /* Jake's ruling: reduced motion crossfades, it does not scale. The dim
-   stays — it is the thing that says the desk stood down. */
+   stays — it is the thing that says the desk stood down — and so does the
+   blur, which arrives whole on every path anyway. */
 @media (prefers-reduced-motion: reduce) {
   .deskLayer {
     transition: opacity var(--duration-theme) ease-out;
