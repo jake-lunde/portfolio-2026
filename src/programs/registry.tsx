@@ -21,10 +21,16 @@ export type ProgramDef = {
       file download rather than a navigation. */
   titleAction?: { icon: IconName; copyKey: string; href: string; download?: true }
   icon: IconName
-  component: ComponentType
+  /** what the window puts on the paper. OPTIONAL, and the exception is
+      the rule that proves it: WORK (`progress`) opens a MODE OF THE DESK
+      rather than a frame (store/shelfMode.ts), so it registers an icon, a
+      name and a deep link and no window at all. An entry with no
+      component cannot be opened — resolveWindow returns null for it — and
+      that is what makes its missing geometry safe. */
+  component?: ComponentType
   /** default window geometry (desktop; mobile goes full-bleed) */
-  size: { w: number; h: number }
-  pos: { x: number; y: number } // offsets from desktop top-left, deterministic for SSR
+  size?: { w: number; h: number }
+  pos?: { x: number; y: number } // offsets from desktop top-left, deterministic for SSR
   /** `bare` = no titlebar, no resize grip: the program IS the chrome (see the iPod) */
   chrome?: 'paper' | 'crt' | 'bare'
   /** Opt out of the unfocused-window recede.
@@ -121,43 +127,30 @@ export const PROGRAMS: ProgramDef[] = [
     path: '/projects',
   },
   {
-    // SHIPPED.SW — the shelf of boxed case studies. The id stays `progress`
-    // (it names the copy keys, the window store and the deep link, not the
-    // program) and so does the name: `program.progress.name` drives BOTH
-    // the dock tile and the titlebar, so the split lives inside — the
-    // window is "Work" (Jake's refresh pass; "Case Studies" retired with
-    // the desktop grid), the masthead in it is SHIPPED.SW.
+    /* WORK — the shelf of boxed case studies, and the one entry here that
+       opens NO WINDOW. Jake's ruling ("Hide Others"): the shelf boxes are
+       the signature object on this site and a 760×459 frame cut two of
+       them off, so pressing WORK now sends the desk back and stands all
+       four boxes on a plank across the screen. It is a MODE OF THE DESK —
+       no titlebar, no close box, the plank is the frame. The mode lives in
+       store/shelfMode.ts; the plank is programs/shelf/ShelfMode.tsx.
+
+       The entry stays because the entry is the IDENTITY: the icon, the
+       dock tile, the deep link and the copy key. `program.progress.name`
+       still drives the tile and the id still names the copy keys and the
+       route, exactly as it did when it named a frame. What is gone is
+       `component` (there is no body to put on paper), the geometry — the
+       760×459 derivation and its pop-clearance arithmetic moved to
+       shelf.module.css, which is where the numbers now live — and
+       `noRecede`, which existed because the shell's unfocused-window
+       `filter` flattens 3D. The mode does not have that problem by
+       construction: the boxes sit in their own layer ABOVE the desk, so
+       the desk can recede on a plain transform and the boxes keep their
+       preserve-3d chain. */
     id: 'progress',
     name: 'Work',
     meta: 'IDX-16',
     icon: 'work',
-    component: dynamic(() => import('@/programs/shelf/Shelf')),
-    // the boxes are real cuboids (preserve-3d) — the unfocused-window
-    // recede is a `filter`, and filter flattens 3D. See `noRecede` above.
-    noRecede: true,
-    // measured, one row deep: 760 leaves 676px of shelf after the 40px
-    // gutters — two 246px boxes, a 32px gap and 160px of the third, cut by
-    // the right edge on purpose. 459 = 426 row + 33 of window chrome
-    // (32 titlebar + the border), measured on the live window rather than
-    // added up. The row is 34 above + 328 box + 22 gap + 22 flip tag + 20
-    // below = 426 (the last 64 of which is the painted shelf plank the
-    // boxes stand on). Pass 4 moved the tag BELOW the box and DELETED the
-    // 54px SHIPPED.SW masthead (−56 against pass 3's 552); pass 7 struck
-    // the 40px foot under the row, so the window is exactly the shelf and
-    // nothing else — no band above the boxes, no strip below them.
-    //
-    // PASS 9 GREW IT BY THE CLEARANCE, NOT BY TASTE. A hovered box pops
-    // 38px toward a 980px camera, lifts 6 and tilts ±10, and the row clips
-    // at its own padding edge — so the shipped 18/20 gutters were cutting
-    // the top corner by 5.31px and box one's left edge by 15.61px
-    // (projected over every vertex, tilt pair and scroll stop; the working
-    // is in shelf.module.css on `.row`). 34/40 clears both with 11.33 and
-    // 4.39 to spare, and the window follows: +16 tall, +40 wide. The extra
-    // width is spent entirely on the two gutters, which is why the shelf
-    // still shows two whole boxes and a cut third — 160px of it, against
-    // the 156 the 720px window showed.
-    size: { w: 760, h: 459 },
-    pos: { x: 250, y: 48 },
     onDesktop: true,
     path: '/cases',
   },
