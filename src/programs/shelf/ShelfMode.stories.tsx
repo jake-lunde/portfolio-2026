@@ -4,8 +4,10 @@ import shell from '@/components/shell/shell.module.css'
 
 /* SHELF.MODE — the shelf as a mode of the desk (Jake's "Hide Others"
    ruling; the mechanism is in ShelfMode.tsx). Pressing WORK opens no
-   window: the desk recedes on the shelf's own 980px camera and all four
-   boxes come up on a plank that spans the screen.
+   window: the desk recedes on the shelf's own 980px camera, dims and
+   blurs, and all four boxes come up over it — floating, since Jake struck
+   the board they used to stand on, with the drop shadow carrying the
+   height instead.
 
    TWO THINGS MAKE THIS STORYABLE AT ALL, and both are worth knowing before
    you edit it:
@@ -93,7 +95,7 @@ const meta = {
     receded: {
       control: 'boolean',
       description:
-        'The desk behind: on = the shipped recede (perspective(980px) translateZ(-62.55px) + 0.3), off = the same plank over a desk that never moved.',
+        'The desk behind: on = the shipped recede (perspective(980px) translateZ(-62.55px), 0.3 and a 5px blur), off = the same boxes over a desk that never moved.',
     },
     width: { control: 'text', description: 'How wide the room is. Under 1160px the row scales rather than scrolls.' },
   },
@@ -108,13 +110,14 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/* The shipped moment: four boxes on a plank that spans the desk, the desk
-   itself 62.55px further from the same camera the hover pop travels
-   toward. Hover a box — the tilt and the 38px pop are live here, and on a
-   desk they have the whole room to grow into (no clipping edge). */
+/* The shipped moment: four boxes lifted off a desk that has gone 62.55px
+   further from the same camera the hover pop travels toward. They arrive
+   one at a time, left to right (the stagger lives in Shelf.tsx). Hover a
+   box — the tilt and the 38px pop are live here, and on a desk they have
+   the whole room to grow into, no clipping edge and no board to sit on. */
 export const OnTheDesk: Story = {}
 
-/* The plank with the recede switched off. Not a state the mode can be in —
+/* The boxes with the recede switched off. Not a state the mode can be in —
    it is here to show what the desk contributes, which is the half of the
    effect nobody sees because it happens behind the thing they are looking
    at. */
