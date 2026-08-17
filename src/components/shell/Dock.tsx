@@ -70,6 +70,7 @@ export function Dock() {
   const windows = useWindows((s) => s.windows)
   const shelfOn = useShelfMode((s) => s.on)
   const toggleShelf = useShelfMode((s) => s.toggle)
+  const leaveShelf = useShelfMode((s) => s.leave)
   const skin = useSettings((s) => s.skin)
 
   const programs = PROGRAMS.filter((p) => p.onDesktop && RAIL.has(p.id)).sort(
@@ -87,6 +88,15 @@ export function Dock() {
       toggleShelf(from)
       return
     }
+    /* ANY OTHER TILE PUTS THE DESK BACK AND OPENS ITSELF, in one press
+       (Jake). The rail is the one piece of furniture that stays lit and
+       live while the shelf is up, so a tile that only dismissed the mode
+       would be asking for the same click twice — and a dock tile has
+       always meant "give me this program", never "close what you were
+       doing first". `restoreFocus: false`: the window this is about to
+       open takes focus, and pulling it back to the tile would drop the
+       reader behind the thing they just asked for. */
+    if (shelfOn) leaveShelf({ restoreFocus: false })
     sfx.open()
     // open() already focuses rather than re-opening a running program
     // (useWindows.open) — the dock leans on that, it does not special-case it
