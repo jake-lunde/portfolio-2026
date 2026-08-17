@@ -2,6 +2,7 @@
 
 import { PROGRAMS } from '@/programs/registry'
 import { useWindows } from '@/store/windows'
+import { useShelfMode } from '@/store/shelfMode'
 import { useSettings } from '@/store/settings'
 import { programName } from '@/lib/skinVocab'
 import { sfx } from '@/lib/sound'
@@ -67,13 +68,25 @@ const rank = (id: string) => {
 export function Dock() {
   const open = useWindows((s) => s.open)
   const windows = useWindows((s) => s.windows)
+  const shelfOn = useShelfMode((s) => s.on)
+  const toggleShelf = useShelfMode((s) => s.toggle)
   const skin = useSettings((s) => s.skin)
 
   const programs = PROGRAMS.filter((p) => p.onDesktop && RAIL.has(p.id)).sort(
     (a, b) => rank(a.id) - rank(b.id),
   )
 
-  const launch = (id: string) => {
+  /* WORK IS THE ONE TILE THAT DOES NOT OPEN A WINDOW. It brings the shelf
+     up on the desk instead (store/shelfMode.ts), it lights the same way a
+     running program lights, and pressing it again puts the desk back —
+     which is the one place the rail's "a second click re-focuses, it does
+     not stop the program" rule genuinely inverts. The tile passes itself
+     along so focus can come home to it on the way out. */
+  const launch = (id: string, from: HTMLElement) => {
+    if (id === 'progress') {
+      toggleShelf(from)
+      return
+    }
     sfx.open()
     // open() already focuses rather than re-opening a running program
     // (useWindows.open) — the dock leans on that, it does not special-case it
@@ -84,7 +97,7 @@ export function Dock() {
     <nav className={styles.rail} aria-label="Dock">
       {programs.map((p) => {
         const name = programName(p.id, p.desktopLabel ?? p.name, skin)
-        const running = windows.some((w) => w.id === p.id)
+        const running = p.id === 'progress' ? shelfOn : windows.some((w) => w.id === p.id)
         return (
           <button
             key={p.id}
@@ -97,7 +110,7 @@ export function Dock() {
                and a second click here doesn't stop the program, it
                re-focuses it — a false promise a toggle role would make. */
             aria-label={running ? `${name} (running)` : name}
-            onClick={() => launch(p.id)}
+            onClick={(e) => launch(p.id, e.currentTarget)}
           >
             <Icon name={p.icon} />
             <span className={styles.label} data-copy-id={`program.${p.id}.name`} aria-hidden="true">

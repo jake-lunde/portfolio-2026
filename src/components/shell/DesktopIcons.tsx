@@ -2,6 +2,7 @@
 
 import { PROGRAMS } from '@/programs/registry'
 import { useWindows } from '@/store/windows'
+import { useShelfMode } from '@/store/shelfMode'
 import { useSettings } from '@/store/settings'
 import { programName } from '@/lib/skinVocab'
 import { sfx } from '@/lib/sound'
@@ -49,6 +50,7 @@ const dockedRank = (id: string) => {
 
 export function DesktopIcons() {
   const open = useWindows((s) => s.open)
+  const toggleShelf = useShelfMode((s) => s.toggle)
   const skin = useSettings((s) => s.skin)
   const desktopPrograms = PROGRAMS.filter((p) => p.onDesktop)
   const trash = desktopPrograms.find((p) => p.id === 'trash')
@@ -61,13 +63,24 @@ export function DesktopIcons() {
     .filter((p) => DOCKED.has(p.id))
     .sort((a, b) => dockedRank(a.id) - dockedRank(b.id))
 
-  const launch = (id: string) => {
+  /* WORK opens no window from here either — it brings the shelf up on the
+     desk (store/shelfMode.ts, and Dock.tsx has the same fork). This grid
+     is the mobile launcher in practice, where the mode is full-bleed. */
+  const launch = (id: string, from: HTMLElement) => {
+    if (id === 'progress') {
+      toggleShelf(from)
+      return
+    }
     sfx.open()
     open(id)
   }
 
   const iconBtn = (p: (typeof desktopPrograms)[number], extra = '') => (
-    <button key={p.id} className={`${styles.iconBtn} ${extra}`} onClick={() => launch(p.id)}>
+    <button
+      key={p.id}
+      className={`${styles.iconBtn} ${extra}`}
+      onClick={(e) => launch(p.id, e.currentTarget)}
+    >
       <Icon name={p.icon} />
       <span className={styles.iconLabel} data-copy-id={`program.${p.id}.name`}>
         {programName(p.id, p.desktopLabel ?? p.name, skin)}
