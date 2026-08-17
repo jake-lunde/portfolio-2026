@@ -47,17 +47,29 @@ import styles from './shelf.module.css'
 const DECK_FIT = 1080
 const DECK_GUTTERS = 80
 
+/** THE PHONE'S NUMBERS. The stack draws the desk's own 246px box and
+    scales it whole to the column (shelf.module.css, the mobile block), so
+    what it needs is the ratio between the screen less its two 16px
+    gutters and that box. 16 is `--spacing-layout-sm`, named here because
+    JS cannot read a token that CSS has not applied to anything yet. */
+const BOX_BASE = 246
+const STACK_GUTTERS = 32
+
 export function ShelfMode() {
   const reduced = useReducedMotion()
   const skin = useSettings((s) => s.skin)
   const leaveMode = useShelfMode((s) => s.leave)
   const region = useRef<HTMLDivElement>(null)
-  const [scale, setScale] = useState(1)
+  /* Two scales, one measurement, and CSS picks: `deck` shrinks four boxes
+     to fit one row across a desk, `stack` grows one box to the width of a
+     phone. Neither breakpoint has to know the other exists. */
+  const [scale, setScale] = useState({ deck: 1, stack: 1 })
 
-  /* THE ROW SCALES, IT DOES NOT SCROLL. Measured rather than declared in a
-     breakpoint: the desk is whatever width the glass is, and a shelf that
-     shows three and a half boxes at 1100px would be the exact failure this
-     mode was built to fix. Every box metric is a multiple of this number
+  /* THE ROW SCALES, IT DOES NOT SCROLL — and on a phone the stack scales
+     the other way, up. Measured rather than declared in a breakpoint: the
+     desk is whatever width the glass is, and a shelf that shows three and
+     a half boxes at 1100px would be the exact failure this mode was built
+     to fix. Every box metric is a multiple of this number
      (shelf.module.css, `.deckRow .plinth`), and the cover type is already a
      multiple of `--box-w`, so the artwork shrinks with the board for free.
      Layout effect: the first paint is at the right size, never a resize the
@@ -68,7 +80,11 @@ export function ShelfMode() {
     const measure = () => {
       const w = el.clientWidth
       if (!w) return
-      setScale(Math.min(1, Math.round(((w - DECK_GUTTERS) / DECK_FIT) * 1000) / 1000))
+      const round = (n: number) => Math.round(n * 1000) / 1000
+      setScale({
+        deck: Math.min(1, round((w - DECK_GUTTERS) / DECK_FIT)),
+        stack: round((w - STACK_GUTTERS) / BOX_BASE),
+      })
     }
     measure()
     const ro = new ResizeObserver(measure)
@@ -128,7 +144,7 @@ export function ShelfMode() {
     <motion.div
       ref={region}
       className={styles.mode}
-      style={{ ['--deck-scale' as string]: scale }}
+      style={{ ['--deck-scale' as string]: scale.deck, ['--stack-scale' as string]: scale.stack }}
       data-shelf-mode=""
       tabIndex={-1}
       role="region"

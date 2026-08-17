@@ -36,6 +36,17 @@
   --boxart-title-face: var(--font-boldonse), var(--boxart-face);
   --boxart-label-face: var(--font-barlow-condensed), var(--boxart-face);
   --boxart-mark-face: var(--font-cal-sans), var(--boxart-face);
+
+  /* THE BOARD, ONCE. `.plinth` draws with these and the mobile stack
+     reserves flow height from them (see the foot of this file), and the
+     two must never be able to disagree — a box scaled to 1.39 in a slot
+     sized from a stale 328 overlaps the box under it by the difference.
+     Depth stays on `.plinth`: nothing outside the solid has an opinion
+     about how thick it is. */
+  --box-w-base: 246px;
+  --box-h-base: 328px;
+  /* what hangs below a box: 40 of drop + 44 of ellipse (`.shadowWrap`) */
+  --stack-shadow: 84px;
 }
 
 /* a scriptorium does not set its tomes in a 2023 grotesque — and it prints
@@ -128,11 +139,11 @@
      THE BOTTOM IS THE SHADOW'S ROOM NOW. It used to be the first term of
      the plank derivation (20 + 22 tag + 22 gap = 64, the painted board's
      height); the plank is gone and so is the tag, so what has to fit under
-     a box is its own drop shadow — 40px of drop plus a 44px ellipse plus
-     11px of blur, call it 96. On a desk the row does not clip at all
+     a box is its own drop shadow. On a desk the row does not clip at all
      (`.deckRow`, overflow visible) and this number is only composition; on
-     a phone the row is a scroller and a scroller always clips vertically,
-     so the narrow block at the foot of this file spends the 96 for real. */
+     a phone the row IS a scroller — every scroller clips both axes — and
+     the stack pays for the shadow per box instead, in the slot's own
+     reserved height (see the mobile block at the foot of this file). */
   padding: 34px 40px 20px;
   display: flex;
   /* flex-END, not centre: bottom alignment keeps every box's base on one
@@ -267,8 +278,8 @@
   position: relative;
   width: var(--box-w);
   height: var(--box-h);
-  --box-w: 246px;
-  --box-h: 328px;
+  --box-w: var(--box-w-base);
+  --box-h: var(--box-h-base);
   --box-d: 42px;
   /* link 3 of 3 in the camera chain — see the warning on `.row` */
   transform-style: preserve-3d;
@@ -2385,63 +2396,20 @@
 }
 
 /* ---------------- narrow ----------------
-   Same shelf, same gesture — a finger drags the row instead of a wheel.
-   The box shrinks to 208px so a 360px viewport (316px of content after the
-   22px gutters) shows one whole box and 110px of the next: the cut
-   survives the smallest screen we build for. */
+   THE CAROUSEL IS GONE FROM THE PHONE and this block went with it. It
+   held a second, smaller shelf — a 208×277×34 box, tighter gutters, its
+   own clearance arithmetic — so that a 360px screen still showed one
+   whole box and the cut edge of the next. Jake's ruling replaced the
+   scrolling row with a vertical stack of full-width boxes (see the mobile
+   block at the foot of this file), and a stack draws the box at its own
+   size and scales the whole thing to the column: every number in here was
+   either overridden by that or describing a shelf nobody can reach.
+
+   The launch dialog is the one thing that stayed. It is a dialog over the
+   whole screen on any device, and on a narrow one its 20px of padding is
+   most of the room the sphere has to work in. */
 
 @media (max-width: 420px) {
-  .row {
-    /* THE SAME CLEARANCE ARITHMETIC AT THE SMALLER BOARD (pass 9). A finger
-       cannot hover, so nothing here ever pops — but a phone can be a
-       fine-pointer machine at 420px and the breakpoint is a width, not a
-       device, so the geometry is measured at 360 anyway. Same projection,
-       208×277×34 box, 360px frame:
-
-         top    shipped 14px → CUT by 5.68px      pass 9 26px → clear 6.73px
-         sides  shipped 14px → CUT by 0.53px      pass 9 22px → clear 8.19px
-
-       The sides were nearly clean here already: the frame is narrow enough
-       that box one sits close to the vanishing point and barely drifts. The
-       top is the same failure as the desktop's, at the same size, because it
-       is the lift and the tilt rather than the drift that causes it.
-
-       Bottom stays 14 — the plank derivation, exactly as on the desktop. */
-    /* 96 at the foot, and it is not a gutter: a horizontal scroller clips
-       BOTH axes (overflow-x: auto forces overflow-y to a scroller too), so
-       on a phone this padding is the only thing standing between the drop
-       shadow and a hard cut across it. 40 drop + 44 ellipse + 11 blur = 95.
-       The desk does not need it — `.deckRow` overflows visible — and the
-       room is free here, since the mode is full-bleed and the slack was
-       going to fall under the row anyway. */
-    padding: 26px 22px 96px;
-    gap: var(--space-5);
-    scroll-padding-left: 22px;
-  }
-
-  .plinth {
-    --box-w: 208px;
-    --box-h: 277px; /* 3:4, rounded */
-    --box-d: 34px;
-  }
-
-  /* only the margins move, and they move ONCE: --cover-pad is the printing
-     margin every layer on the cover stands on, so the type block, the
-     category bar and the stripe cover's plate clearance all come in together.
-     Every type size is a multiple of --box-w, so the lettering has already
-     shrunk with the board — that is the point of deriving it from the
-     artwork instead of the UI scale. */
-  .frontFace {
-    --cover-pad: 10px;
-  }
-
-  .mark {
-    top: 9px;
-    left: 10px;
-    width: 22px;
-    height: 22px;
-  }
-
   .overlay {
     padding: 14px;
   }
@@ -2559,8 +2527,8 @@
   }
 
   .deckRow .plinth {
-    --box-w: calc(246px * var(--deck-scale, 1));
-    --box-h: calc(328px * var(--deck-scale, 1));
+    --box-w: calc(var(--box-w-base) * var(--deck-scale, 1));
+    --box-h: calc(var(--box-h-base) * var(--deck-scale, 1));
     --box-d: calc(42px * var(--deck-scale, 1));
   }
 }
@@ -2574,6 +2542,58 @@
   .mode {
     background: var(--surface);
     pointer-events: auto;
+  }
+
+  /* ---- ON A PHONE THE SHELF STACKS (Jake's ruling) ----
+     A carousel is a shelf you walk along, and a phone has no room to walk:
+     one box and the sliver of another, and the reader had to know to drag
+     sideways to find out there were four. So the row turns ninety degrees
+     — one column, four boxes, each of them as wide as the screen allows —
+     and the gesture becomes the one every phone already teaches.
+
+     THE BOX IS DRAWN AT ITS OWN SIZE AND SCALED UP WHOLE. `--stack-scale`
+     is measured in ShelfMode.tsx: (width − two gutters) / 246, so a 375px
+     screen draws the desk's own 246px box and grows it by 1.39 to 343.
+     Scaled rather than re-laid-out, because a cover is a composition and
+     not a stack of independent measurements — the printing margin, the
+     publisher's mark, the seal and the type all keep their proportions to
+     the board, which is exactly what the old narrow breakpoint could not
+     promise (it re-specified three of them by hand and still drifted).
+
+     A transform buys nothing from layout, though, so the slot RESERVES
+     what the scale spends: 328 of box (the `.plinth` height — the two
+     numbers move together) plus 84 of shadow (40 of drop, 44 of ellipse),
+     all of it scaled. That is what keeps four boxes from overlapping and
+     the last one's shadow from being cut off at the end of the scroll. */
+  .deckRow {
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    /* the cross axis is horizontal now: centre the column, do not stand
+       the boxes on a baseline that no longer runs that way */
+    align-items: center;
+    gap: var(--spacing-layout-sm);
+    padding: var(--spacing-layout-sm);
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-type: none;
+  }
+
+  .deckRow > .slot {
+    /* the drawn width; the scale below is what fills the column */
+    width: var(--box-w-base);
+    height: calc((var(--box-h-base) + var(--stack-shadow)) * var(--stack-scale, 1));
+    scroll-snap-align: none;
+  }
+
+  /* the scale goes HERE and not on the slot: the slot's transform belongs
+     to Motion, which writes the staggered arrival into it every frame (see
+     Shelf.tsx). This element is the box's own root and it is already part
+     of the preserve-3d chain, so scaling it grows the whole solid — faces,
+     depth and all — instead of flattening it. */
+  .deckRow .boxSlot {
+    transform: scale(var(--stack-scale, 1));
+    transform-origin: top center;
   }
 }
 
