@@ -315,6 +315,39 @@ export function ShelfBox({
     turn(false, true)
   }
 
+  /* A FINGER HAS NOWHERE TO WALK AWAY TO (Jake's ruling). The pointer
+     rule above is the mouse's way back: leave the slot and the box turns
+     over. Touch has no leave — the pointer stops existing at the end of
+     the tap — and with the flip chip off there is no visible control to
+     press either, so a turned box on a phone was a box the reader was
+     stuck behind. So while a box is turned on a coarse pointer, the next
+     tap ANYWHERE but the CTA turns it back: the panel itself, the desk,
+     or another box, which then turns over as usual because its own click
+     lands after this one.
+
+     `pointerdown`, captured on the document, is what makes that last case
+     one gesture instead of two — it runs before the click that flips the
+     neighbour, so the two never fight over the same tap. The CTA is the
+     one exemption (PLAY is the reason the panel exists), and the overlay
+     is the other: while it is up the tap belongs to the dialog, and
+     turning the box behind it would land a cancel on a cover.
+
+     Quiet, and via `walkedAway`: the reader tapped somewhere else, so
+     nothing here was pressed and focus has no business jumping back onto
+     the cover. */
+  useEffect(() => {
+    if (flipTag || fine || !flipped || overlayOpen) return
+    const away = (e: PointerEvent) => {
+      const t = e.target
+      if (t instanceof Element && t.closest('[data-shelf-cta]')) return
+      walkedAway.current = true
+      turn(false, true)
+    }
+    document.addEventListener('pointerdown', away, true)
+    return () => document.removeEventListener('pointerdown', away, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flipTag, fine, flipped, overlayOpen])
+
   const tagKey = flipped ? 'shelf.tag.front' : 'shelf.tag.back'
 
   /* The tag is OUT when you have reached for this box, and it stays out
@@ -520,6 +553,16 @@ export function ShelfBox({
             id={backId}
             className={`${styles.face} ${styles.backFace}`}
             tabIndex={-1}
+            /* THE NAME LIVES WHERE THE READER IS. The cover carries it
+               while the cover is up, and the cover is `inert` the moment
+               the box turns — so a screen reader landing on this panel
+               would otherwise be told nothing at all, while the only
+               labelled thing in the box sat behind it announcing a FLIP
+               nobody can reach. A named group is the cheapest correct
+               wiring: the panel says which box it is on arrival, and the
+               expanded/collapsed state stays on the control that owns it. */
+            role="group"
+            aria-label={c.name}
             inert={!flipped}
             initial={faceFade(true)}
             animate={faceFade(true)}
@@ -596,12 +639,20 @@ export function ShelfBox({
                 <button
                   type="button"
                   className={styles.playBtn}
+                  /* the one thing a tap on a turned box does NOT turn it
+                     back for — see the pointerdown effect above */
+                  data-shelf-cta=""
                   onClick={(e) => onPlay(c.slug, e.currentTarget)}
                 >
                   <Copy k="shelf.play" as="span" />
                 </button>
               ) : (
-                <button type="button" className={`${styles.playBtn} ${styles.comingSoon}`} disabled>
+                <button
+                  type="button"
+                  className={`${styles.playBtn} ${styles.comingSoon}`}
+                  data-shelf-cta=""
+                  disabled
+                >
                   <Copy k="shelf.comingSoon" as="span" />
                 </button>
               )}
