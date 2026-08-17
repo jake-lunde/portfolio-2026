@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { AnimatePresence } from 'motion/react'
 import { useWindows } from '@/store/windows'
+import { useShelfMode } from '@/store/shelfMode'
 import { resolveWindow, BOOT_WINDOWS } from '@/programs/resolve'
 import { BASE } from '@/lib/base'
 import { MenuBar } from './MenuBar'
@@ -23,6 +25,15 @@ import { useInspect, type InspectTool } from '@/store/inspect'
 import { KnightSpeakLayer } from '@/content/KnightSpeakLayer'
 import styles from './shell.module.css'
 
+/* SHELF.MODE — WORK opens a mode of the desk, not a window (Jake, "Hide
+   Others"; store/shelfMode.ts). Code-split like a program: the boxes, the
+   cover films and the launch overlay have no business in the shell bundle
+   for a visitor who never presses WORK. Server-rendered when the deep
+   link asks for it, so /cases still arrives with the shelf on it. */
+const ShelfMode = dynamic(() =>
+  import('@/programs/shelf/ShelfMode').then((m) => m.ShelfMode),
+)
+
 /* The OS. Server pages hand us the windows a deep link opens; after
    hydration the store owns everything and the URL follows the focused
    window via history.replaceState (view-state, not navigation).
@@ -37,13 +48,18 @@ import styles from './shell.module.css'
 export function Desktop({
   initialWindows,
   initialInspect = null,
+  initialShelfMode = false,
 }: {
   initialWindows: string[]
   initialInspect?: InspectTool | null
+  /** the /cases deep link: SHELF.MODE is not a window either, so the path
+      cannot open it the way a path opens a program (resolve.ts) */
+  initialShelfMode?: boolean
 }) {
   const desktopRef = useRef<HTMLDivElement>(null)
   const stored = useWindows((s) => s.windows)
   const storedFocus = useWindows((s) => s.focused)
+  const storedShelf = useShelfMode((s) => s.on)
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
@@ -52,6 +68,7 @@ export function Desktop({
     const mobileRoot =
       window.innerWidth <= 720 && initialWindows.join(',') === BOOT_WINDOWS.join(',')
     useWindows.getState().setInitial(mobileRoot ? [] : initialWindows)
+    if (initialShelfMode) useShelfMode.getState().enter()
     /* the tool needs a canvas between its two docks — same floor the
        menubar toggle and InspectShell keep. /edit below 900px simply does
        not arm: the editor is Jake's desk tool and he is at a desk. */
@@ -67,16 +84,20 @@ export function Desktop({
   const focused = hydrated
     ? storedFocus
     : initialWindows[initialWindows.length - 1] ?? null
+  const shelfMode = hydrated ? storedShelf : initialShelfMode
 
-  // keep the URL pointing at the focused window (deep-linkable state)
+  /* Keep the URL pointing at what the reader is looking at (deep-linkable
+     state). SHELF.MODE wins over the focused window while it is up — it
+     covers the desk, so it IS what they are looking at, and leaving puts
+     the window's own path back. */
   useEffect(() => {
     if (!hydrated) return
     const def = focused ? resolveWindow(focused) : null
-    const path = BASE + (def?.path ?? '/')
+    const path = BASE + (shelfMode ? '/cases' : (def?.path ?? '/'))
     if (window.location.pathname !== path) {
       window.history.replaceState(null, '', path)
     }
-  }, [hydrated, focused])
+  }, [hydrated, focused, shelfMode])
 
   return (
     <>
@@ -96,43 +117,72 @@ export function Desktop({
         ref={desktopRef}
         className={styles.desktop}
         data-desktop-root=""
-        data-desk-recede={focused ? 'on' : 'off'}
+        data-desk-recede={focused && !shelfMode ? 'on' : 'off'}
+        data-shelf-mode={shelfMode ? 'on' : 'off'}
       >
-        <Wallpaper />
-        <NowPlayingWidget />
-        <DesktopIcons />
+        {/* EVERYTHING ON THE DESK, IN ONE LAYER — and the dock rail
+            deliberately outside it. SHELF.MODE sends this box back on the
+            shelf's own 980px camera (shell.module.css, `.deskLayer`), and
+            a recede is a thing done TO the desk: the rail is chrome, it is
+            how you get a window back, and it is one of the three ways out
+            of the mode, so it can never be part of what receded. Same
+            exclusion the desk-recede rule already makes for it.
+
+            At rest this element declares nothing — no transform, no
+            opacity, no stacking context — so it is a pass-through wrapper
+            and the desk behaves exactly as it did before it existed.
+            `inert` is the keyboard half of the mode: the receded desk
+            cannot be tabbed into, and a click on it lands on the catcher
+            below rather than on a window nobody can read. */}
+        <div className={styles.deskLayer} inert={shelfMode || undefined}>
+          <Wallpaper />
+          <NowPlayingWidget />
+          <DesktopIcons />
+          {/* DAILY.SYS stood here until the refresh pass — Jake's read was
+              "just doesn't feel super helpful". The component survives at
+              DailyWidget.tsx; remounting it is this one line back. */}
+          <MiniPlayer />
+          {/* COMMAND.CTR stood here until case-rail round 4 — Jake's call
+              that it's system chrome, not a floating widget. It now lives
+              in the menu bar; see MenuBar.tsx and CommandWidget.tsx. */}
+          <PhotoWall />
+          {/* the machine says whose it is. Jake's name and title used to be
+              one double-click deep inside README, which meant a stranger who
+              closed that window, or who landed on the mobile launcher where
+              no window opens at all, never saw it. Mounted after the wall so
+              it paints over a full column of pins. */}
+          <Nameplate />
+          <AmbientAgents />
+          <AnimatePresence>
+            {windows.map((w) => {
+              const def = resolveWindow(w.id)
+              if (!def) return null
+              return (
+                <Window
+                  key={w.id}
+                  def={def}
+                  z={w.z}
+                  active={focused === w.id}
+                  desktopRef={desktopRef}
+                />
+              )
+            })}
+          </AnimatePresence>
+        </div>
+        {/* the bare desk, while the shelf is up: a click here leaves the
+            mode. It sits above the receded desk and below the rail (see
+            .deskCatcher), which is what lets the WORK tile stay lit and
+            live while everything behind it is out of reach. */}
+        {shelfMode && (
+          <div
+            className={styles.deskCatcher}
+            aria-hidden="true"
+            onClick={() => useShelfMode.getState().leave()}
+          />
+        )}
         <Dock />
-        {/* DAILY.SYS stood here until the refresh pass — Jake's read was
-            "just doesn't feel super helpful". The component survives at
-            DailyWidget.tsx; remounting it is this one line back. */}
-        <MiniPlayer />
-        {/* COMMAND.CTR stood here until case-rail round 4 — Jake's call
-            that it's system chrome, not a floating widget. It now lives
-            in the menu bar; see MenuBar.tsx and CommandWidget.tsx. */}
-        <PhotoWall />
-        {/* the machine says whose it is. Jake's name and title used to be
-            one double-click deep inside README, which meant a stranger who
-            closed that window, or who landed on the mobile launcher where
-            no window opens at all, never saw it. Mounted after the wall so
-            it paints over a full column of pins. */}
-        <Nameplate />
-        <AmbientAgents />
-        <AnimatePresence>
-          {windows.map((w) => {
-            const def = resolveWindow(w.id)
-            if (!def) return null
-            return (
-              <Window
-                key={w.id}
-                def={def}
-                z={w.z}
-                active={focused === w.id}
-                desktopRef={desktopRef}
-              />
-            )
-          })}
-        </AnimatePresence>
       </main>
+      <AnimatePresence>{shelfMode && <ShelfMode key="shelf-mode" />}</AnimatePresence>
       <Boot />
       <Screensaver />
       {/* INSPECT.MODE's docks — code-split, and mounted OUTSIDE the

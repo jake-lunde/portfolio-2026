@@ -1486,6 +1486,92 @@
   }
 }
 
+/* ================= SHELF.MODE: the desk goes back ====================
+
+   Jake's ruling ("Hide Others"): pressing WORK opens no window. The desk
+   goes back and the four case boxes come up on a plank that spans the
+   screen (programs/shelf/ShelfMode.tsx). Everything on the desk recedes
+   IN PLACE — no sliding aside, no Exposé — and it recedes as ONE layer on
+   ONE composited transform, which is the only way a desk of windows, four
+   cuboids and a video on each of them all hold 60fps at once.
+
+   THE RECEDE RUNS ON THE SHELF'S OWN CAMERA, and that is the move rather
+   than a flourish. The row's perspective is 980px (shelf.module.css,
+   `.row`) — the same lens the hover pop travels toward — so the desk
+   borrows it: `perspective(980px) translateZ(-62.55px)` projects to
+   980 / (980 + 62.55) = 0.940, the "about 0.94" Jake asked for, arrived
+   at by moving the desk away from a camera that already exists rather
+   than by picking a scale factor out of the air. For the beat the plank
+   takes to arrive, the desk and the boxes are one 3D scene.
+
+   The dim is 0.3 because 0.3 is the house number: it is exactly what an
+   unfocused window and a receded desk object already fade to, above. The
+   `.deskObject` rule stands down while the mode is up (see below) so the
+   two never multiply — 0.3 of 0.3 is a desk nobody can see.
+
+   THE RAIL IS NOT IN HERE, and that is deliberate: it is chrome, it never
+   dims (see the desk-recede note above), and pressing WORK on it is one of
+   the three ways out. Desktop.tsx renders it as a sibling of this layer.
+
+   ⚠️ A transform makes an element the containing block for every
+   `position: fixed` descendant, so it is declared ONLY while the mode is
+   on. At rest this box carries no transform, no opacity and no stacking
+   context: it is a pass-through wrapper and the desk behaves exactly as
+   it did before the layer existed. */
+.deskLayer {
+  position: absolute;
+  inset: 0;
+  transition:
+    transform var(--duration-theme) ease-out,
+    opacity var(--duration-theme) ease-out;
+}
+
+/* Contained for as long as the mode runs, on every screen: windows climb
+   z forever (useWindows.open) and the catcher below has to cover them
+   without out-numbering them. `isolation` rather than a z-index of its
+   own, so the rail keeps its seat above a receded desk and gets it back
+   the moment the mode ends. */
+.desktop[data-shelf-mode='on'] .deskLayer {
+  isolation: isolate;
+}
+
+@media (min-width: 721px) {
+  .desktop[data-shelf-mode='on'] .deskLayer {
+    transform: perspective(980px) translateZ(-62.55px);
+    opacity: 0.3;
+  }
+
+  /* one dim, not two: the desk is receding as a whole object now, so its
+     members stop dimming individually (see the .deskObject rule above) */
+  .desktop[data-shelf-mode='on'] .deskObject {
+    filter: none;
+  }
+}
+
+/* Jake's ruling: reduced motion crossfades, it does not scale. The dim
+   stays — it is the thing that says the desk stood down. */
+@media (prefers-reduced-motion: reduce) {
+  .deskLayer {
+    transition: opacity var(--duration-theme) ease-out;
+  }
+
+  .desktop[data-shelf-mode='on'] .deskLayer {
+    transform: none;
+  }
+}
+
+/* THE BARE DESK, while the shelf is up. A click here leaves the mode
+   (Desktop.tsx mounts it only then). It sits above the receded desk —
+   which is its own stacking context for as long as the mode runs, so a
+   window at z 900 cannot climb over it — and below the dock rail at z 6,
+   which is what lets the WORK tile stay lit and live while everything
+   behind it is out of reach. */
+.deskCatcher {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
 /* `chrome: 'bare'` — the iPod. No titlebar, no frame, no resize grip: the
    program draws its own housing and floats free on the desktop, so the
    window element itself has to disappear completely. It also keeps full
