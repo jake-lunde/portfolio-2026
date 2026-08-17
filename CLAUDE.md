@@ -116,7 +116,11 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
    `node scripts/session-writeup.mjs --session NN --brief "…"`, hands
    the printed prompt to a Sonnet subagent, reviews `git -C ~/jaique
    diff`, commits. Judgment stays with the orchestrator; the agent does
-   the reading and the prose; (b) **every session
+   the reading and the prose. Safety net: `scripts/session-sweep.mjs`
+   (SessionEnd hook + launchd tick) auto-writes any note still carrying
+   the claim sentinel from its transcript and marks it `auto: true`; the
+   deliberate write-up overwrites it. A miss is recorded, not excused;
+   (b) **every session
    belongs to an effort** — the feature page in
    `Efforts/On|Ongoing|Simmering|Sleeping/<emoji> Name (E).md`. Find the
    one the work served; if the session started a new feature, mint the
