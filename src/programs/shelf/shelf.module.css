@@ -2432,3 +2432,161 @@
     padding: 14px;
   }
 }
+
+/* ================= SHELF.MODE — the shelf standing on the desk ========
+
+   Jake's ruling ("Hide Others"): the shelf is not in a window any more.
+   Pressing WORK sends the desk back (shell.module.css, `.deskLayer`) and
+   the four boxes come up HERE, in a layer of their own above it. Keeping
+   the two apart is what retires the registry's `noRecede` hatch: the
+   desk's recede is a grouping property, grouping flattens 3D, and nothing
+   groups the boxes any more because they are not inside the thing that
+   recedes. See programs/shelf/ShelfMode.tsx for the rest of the ruling.
+
+   ⚠️ The inset tracks `.desktop` in shell.module.css. The mode covers the
+   desk, not the machine: the menu bar and the ticker stay up. */
+
+.mode {
+  position: fixed;
+  inset: calc(var(--menubar-h) + 21px) 0 0 0;
+  display: flex;
+  flex-direction: column;
+  /* THE LAYER TAKES NO POINTER. The dock rail sits under it and has to
+     stay live — pressing WORK again is one of the three ways out — so
+     hits fall through to the desk, where `.deskCatcher` answers them.
+     The plank and the launch dialog take the pointer back below. */
+  pointer-events: none;
+  /* the reader is not tabbing to a region; it is where focus LANDS when
+     the mode opens, and a ring around the whole desk would be a lie about
+     what is focusable (same treatment `.overlay` gets above) */
+  outline: none;
+}
+
+/* INSPECT.MODE docks two panels and the desk gives up the width for them.
+   The plank is furniture ON that desk, so it follows the canvas rather
+   than hanging over a tool panel. Same variables, same fallbacks, as the
+   shell's own rule. */
+:global(body[data-inspectmode='on']) .mode {
+  left: var(--inspect-left, 244px);
+  right: var(--inspect-right, 304px);
+  top: var(--menubar-h);
+}
+
+/* the rise wrapper (Motion writes a transform here) — it fills the layer
+   so the launch overlay's inset(0) is the whole desk rather than the band
+   the boxes happen to occupy. On the desk the licence gate has the room
+   it spent pass 11 borrowing from a 760px window. */
+.deck {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* the shelf's own wrapper, on a desk instead of in a window body */
+.deckWrap {
+  flex: 1;
+  min-height: 0;
+}
+
+/* the launch layer is the one thing in here that takes the pointer
+   besides the plank: it is a dialog, and it covers the desk while it
+   runs */
+.deckWrap .overlay {
+  pointer-events: auto;
+}
+
+@media (min-width: 721px) {
+  /* the plank sits in the middle of the desk. Below the mobile floor the
+     shelf keeps the window's own top-down stacking, where slack belongs
+     under the row and not around it (see the note on `.row`). */
+  .deckWrap {
+    justify-content: center;
+  }
+
+  /* ---- THE PLANK SPANS THE DESK ----
+     The row is as wide as the glass and the stock stands in the middle of
+     it, so the painted board runs edge to edge behind the boxes: on the
+     desk the plank IS the frame (no titlebar, no close box — Jake).
+
+     ALL FOUR, ALWAYS, AND IT SCALES RATHER THAN SCROLLS. Four across is
+     4 × 246 + 3 × 32 = 1080 plus the row's two 40px gutters = 1160, which
+     fits any desk 1280 and up. Narrower than that, every box metric takes
+     `--deck-scale` (measured in ShelfMode.tsx: (width − 80) / 1080, capped
+     at 1) and the row shrinks to fit — seeing all four is the point, and a
+     shelf that scrolls on a desk is the window this mode replaced. The
+     gutters and the tag band do NOT scale: the gutters are the plank's own
+     margin rather than part of the stock, and the tag is 9px type that
+     would stop being readable. That keeps the board 64px tall at every
+     scale (20 bottom padding + 22 tag + 22 gap), which is why the painted
+     plank still lands exactly under the boxes' feet.
+
+     `overflow: visible` retires the clearance problem instead of solving
+     it again: the pop was cut by the row's own padding edge in a window
+     (pass 9's arithmetic, on `.row`), and on a desk there is nothing to
+     clip against. The 34/40/20 padding stays — it is the composition
+     now, not a measurement. */
+  .deckRow {
+    width: 100%;
+    justify-content: center;
+    overflow: visible;
+    scroll-snap-type: none;
+    gap: calc(var(--spacing-layout-lg) * var(--deck-scale, 1));
+    pointer-events: auto;
+  }
+
+  .deckRow .plinth {
+    --box-w: calc(246px * var(--deck-scale, 1));
+    --box-h: calc(328px * var(--deck-scale, 1));
+    --box-d: calc(42px * var(--deck-scale, 1));
+  }
+}
+
+/* ---------------- the mode on a phone ----------------
+   Full-bleed, exactly as a window is below the shell's mobile floor: the
+   layer paints the desk's own surface, takes the pointer itself (there is
+   no rail down here to protect) and the row keeps the carousel it has
+   always had — a finger drags the stock along the plank. */
+@media (max-width: 720px) {
+  .mode {
+    background: var(--surface);
+    pointer-events: auto;
+  }
+}
+
+/* THE ONE CONTROL, AND IT IS MOBILE-ONLY. On a desk the ways out are
+   Escape, the bare desk and the WORK tile; a close box here would be the
+   titlebar Jake struck. On a phone the mode is full-bleed, the dock rail
+   does not render and there is no bare desk to click, so the way back has
+   to be visible. */
+.modeExit {
+  display: none;
+  font-family: var(--type-label-family);
+  font-size: var(--type-caption-size);
+  font-weight: var(--button-weight);
+  letter-spacing: var(--tracking-16);
+  line-height: var(--leading-none);
+  text-transform: uppercase;
+  padding: 8px 10px;
+  margin: 12px 0 0 12px;
+  align-self: flex-start;
+  background: var(--surface-raised);
+  color: var(--content);
+  border: var(--border-width-default) solid var(--border);
+  cursor: pointer;
+}
+
+.modeExit:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.modeExit:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 720px) {
+  .modeExit {
+    display: block;
+  }
+}
