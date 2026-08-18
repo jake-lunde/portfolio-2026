@@ -24,6 +24,9 @@
   text-align: center;
 }
 
+/* Motion scales this row (not the boxes) through the rise — GateSphere's
+   RISE_SCALE — about its own centre, so this gap is what holds the risen
+   boxes apart. Anything that changes the pitch here changes the rise. */
 .slots {
   display: flex;
   gap: 8px;
