@@ -170,10 +170,14 @@ b {
 }
 
 /* The channel's furniture, hoisted so the vertical bar, the horizontal bar
-   and the corner all draw the same ground. Each layer picks up
-   --content-muted where it gets used, not where it gets written, so a skin
-   swap re-colours all three for free. */
-:root {
+   and the corner all draw the same ground. A var() inside a custom property
+   resolves where the property is DECLARED, not where it is used, so these are
+   declared on every element that re-scopes the tokens (the same boundaries
+   tokens.generated.css uses: the root, a skin, a theme) — a nested
+   `data-skin` preview then dithers in its own ink, not the page's. */
+:root,
+[data-skin],
+[data-theme] {
   --sb-rail-v: repeating-linear-gradient(to bottom, var(--content-muted) 0 1.5px, transparent 1.5px 3px);
   --sb-rail-h: repeating-linear-gradient(to right, var(--content-muted) 0 1.5px, transparent 1.5px 3px);
   /* 1px checkerboard, the System 7 dither, held to the 18% strength --border
