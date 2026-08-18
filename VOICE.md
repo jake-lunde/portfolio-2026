@@ -46,8 +46,24 @@ Simple, accessible, effective beats original. Truth beats punch.
 - Narrator-from-a-distance ("Nobody designed this"): put the reader in
   the scene.
 - Meta-joiners ("The rest of this essay..."): delete, let it move.
-- The phrase "green light" in any prose. It collides with the company
-  name. Say "approval," "the go-ahead," "the yes."
+
+## Words and phrases
+
+Specific words Jake has flagged as confusing or off. One line each: the
+word, why, what to say instead. Add to this list; do not argue with it.
+It applies to section labels, table headers and machine strings, not
+only prose.
+
+- "green light" — collides with the company name. Say "approval," "the
+  go-ahead," "the yes."
+- "sound" as a label meaning correct ("Sound: …") — reads as audio. Say
+  "right," or label the section "Keep."
+- "spine" as a metaphor for structure ("this page is the spine of the
+  case study") — say "structure," "outline," or name the thing ("the
+  table the case study is built on").
+- Crit jargon as headings ("Push," "Sound," "Took"). Section labels are
+  plain words a stranger reads once. The review shape is Checks · Keep ·
+  Change · Wrong · Next.
 
 ## Rulings (from the redline session, 2026-08-13)
 
