@@ -1536,9 +1536,17 @@
 }
 
 /* as large as the zone will carry, which is the whole point of a cartridge
-   box: the wordmark is the artwork above the picture. It takes the raised
-   PAPER rather than the full inverse ink — 10:1 on this ground, and the half
-   step down from white is what stops a heavy title glaring.
+   box: the wordmark is the artwork above the picture.
+
+   THE INK IS PINNED to `--cover-ink` (this variant's `--content-inverse`,
+   set above), not a role that flips with the mode. The photograph under it
+   is one fixed image that never repaints for dark mode, so the title
+   sitting on top of it can't either: `--surface-raised` used to carry it
+   and reads a half-step off white in light but swings to near-black in
+   classic dark (#ded7c4 → #14181a), which silhouettes the wordmark on its
+   own boxart. `--content-inverse` is the role built to hold that argument —
+   authored to the same cream in every skin and mode, the same ruling the
+   FIGMA cover makes for `--surface-inverse` above, upside down.
 
    BOLDONSE, at 400 (pass 13). Pass 12 asked for `--weight-bold` because the
    sans was standing in and a stand-in reads thin at this size; the real face
@@ -1551,7 +1559,7 @@
   font-size: calc(var(--box-w) * 0.122);
   font-weight: var(--weight-regular);
   line-height: var(--leading-normal);
-  color: var(--surface-raised);
+  color: var(--cover-ink);
   margin-top: 14px;
 }
 
@@ -2305,13 +2313,6 @@
 
 :global([data-skin='medieval']) .vFigma .frontEyebrow {
   font-size: calc(var(--box-w) * 0.05);
-}
-
-/* the cartridge's title takes the raised paper on its near-black ground; a
-   tome is printed on the board and takes the board's ink like every other
-   one. Colour is the one thing a cover may never choose for itself. */
-:global([data-skin='medieval']) .vStripe .title {
-  color: var(--cover-ink);
 }
 
 /* The one piece of LETTERING the scriptorium does overrule. A textura set in
