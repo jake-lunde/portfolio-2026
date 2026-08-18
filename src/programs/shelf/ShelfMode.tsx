@@ -55,6 +55,52 @@ const DECK_GUTTERS = 80
 const BOX_BASE = 246
 const STACK_GUTTERS = 32
 
+/** HOW MUCH OF THE SECOND BOX HAS TO STAND IN FRAME, in the box's own
+    drawn pixels — every other term of the height bound below is measured,
+    this one is the judgement. 48 of the board's 328: the top edge, the
+    cover's printing margin and the credit line above the artwork, cut
+    just before the title starts (~46). Under 40 the strip reads as more
+    shadow under box one rather than as another box; over 56 it starts to
+    read as a second box you failed to open. It is spent in drawn pixels
+    and therefore scales with the stock, so the proportion holds on every
+    phone rather than only on the one it was picked against. */
+const STACK_PEEK = 48
+
+/** THE STACK IS BOUNDED BY HEIGHT AS WELL AS BY WIDTH (Jake, 2026-08-17:
+    "the right size is one where we dont have the illusion of
+    completeness, so make sure you can see the next box in view
+    vertically when scrolling"). Width alone filled a 375×667 phone with
+    exactly one box: a slot reserves 412 of board and shadow, the width
+    scale of 1.394 spends 574 of the scroller's 572, and box two began
+    34px BELOW the fold — four case studies behind a screen that looked
+    finished. So the height gets a scale of its own and the smaller of the
+    two wins. Gutters may grow past 16 when height rules; that is the
+    ruling, not a regression.
+
+    MEASURED, NOT DECLARED, DOWN TO THE LAST TERM. The scroller's client
+    height, the first slot's offset into it (the row's padding today,
+    whatever stands above the stock tomorrow), the reserve a slot spends
+    and the gap between two of them all come off the CSS that pays them —
+    a second copy of 328 or 84 in this file is exactly the drift the
+    board's own comment warns about (shelf.module.css, `--box-h-base`).
+
+    On a desk this returns Infinity and the width rule stands alone: the
+    row is a row there and no rule reads `--stack-scale` at all. The
+    breakpoint stays in CSS, where it belongs — the row's own flex
+    direction is how this asks which shelf it is looking at. */
+function stackHeightScale(row: HTMLElement | null) {
+  if (!row) return Infinity
+  const cs = getComputedStyle(row)
+  if (cs.flexDirection !== 'column') return Infinity
+  const first = row.firstElementChild
+  if (!(first instanceof HTMLElement)) return Infinity
+  const px = (v: string) => parseFloat(v) || 0
+  const slot = px(cs.getPropertyValue('--box-h-base')) + px(cs.getPropertyValue('--stack-shadow'))
+  const room = row.clientHeight - first.offsetTop - px(cs.rowGap)
+  if (!slot || room <= 0) return Infinity
+  return room / (slot + STACK_PEEK)
+}
+
 export function ShelfMode() {
   const reduced = useReducedMotion()
   const skin = useSettings((s) => s.skin)
@@ -66,29 +112,40 @@ export function ShelfMode() {
   const [scale, setScale] = useState({ deck: 1, stack: 1 })
 
   /* THE ROW SCALES, IT DOES NOT SCROLL — and on a phone the stack scales
-     the other way, up. Measured rather than declared in a breakpoint: the
+     the other way, up, until the screen's HEIGHT says stop (see
+     `stackHeightScale`). Measured rather than declared in a breakpoint: the
      desk is whatever width the glass is, and a shelf that shows three and
      a half boxes at 1100px would be the exact failure this mode was built
      to fix. Every box metric is a multiple of this number
      (shelf.module.css, `.deckRow .plinth`), and the cover type is already a
      multiple of `--box-w`, so the artwork shrinks with the board for free.
      Layout effect: the first paint is at the right size, never a resize the
-     reader watches happen. */
+     reader watches happen — which is why the row is measured here, in the
+     same pass, rather than in an effect after the browser has painted.
+     Both elements are observed: the layer answers for the width, the row
+     for the height it has left after the BACK chip above it, and a
+     rotation moves both at once. */
   useLayoutEffect(() => {
     const el = region.current
     if (!el) return
+    const row = el.querySelector<HTMLElement>('[data-shelf-row]')
     const measure = () => {
       const w = el.clientWidth
       if (!w) return
-      const round = (n: number) => Math.round(n * 1000) / 1000
+      /* DOWN, NEVER UP. Both numbers are fits — four boxes into a desk,
+         one box into what the phone has left over the next one — and a
+         third decimal rounded up spends a fraction of a pixel that
+         neither of them has. */
+      const fit = (n: number) => Math.floor(n * 1000) / 1000
       setScale({
-        deck: Math.min(1, round((w - DECK_GUTTERS) / DECK_FIT)),
-        stack: round((w - STACK_GUTTERS) / BOX_BASE),
+        deck: Math.min(1, fit((w - DECK_GUTTERS) / DECK_FIT)),
+        stack: fit(Math.min((w - STACK_GUTTERS) / BOX_BASE, stackHeightScale(row))),
       })
     }
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(el)
+    if (row) ro.observe(row)
     return () => ro.disconnect()
   }, [])
 

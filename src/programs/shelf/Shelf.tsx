@@ -185,8 +185,19 @@ export default function Shelf({
           SLOTS, because with the board gone the row is an invisible band
           across the desk and the gap between two boxes has to mean what it
           looks like: bare desk. It stays on the row as well for the phone,
-          where the row is a full-bleed scroller a finger drags. */}
-      <ul className={`${styles.row} ${styles.deckRow}`} ref={row} data-shelf-stock="">
+          where the row is a full-bleed scroller a finger drags.
+
+          `data-shelf-row` is the mode's measuring hook: on a phone the
+          stack's scale is bounded by the room this scroller has left as
+          well as by the width (ShelfMode.tsx). Its own attribute rather
+          than the click test above, because the two answer different
+          questions and the slots carry that one too. */}
+      <ul
+        className={`${styles.row} ${styles.deckRow}`}
+        ref={row}
+        data-shelf-stock=""
+        data-shelf-row=""
+      >
         {CASES.map((c, i) => (
           /* THEY COME IN ONE AT A TIME (Jake). Each box rises a little,
              grows the last 8% into place, and waits a beat longer than the
