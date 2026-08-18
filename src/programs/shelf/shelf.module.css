@@ -2552,8 +2552,14 @@
      and the gesture becomes the one every phone already teaches.
 
      THE BOX IS DRAWN AT ITS OWN SIZE AND SCALED UP WHOLE. `--stack-scale`
-     is measured in ShelfMode.tsx: (width − two gutters) / 246, so a 375px
-     screen draws the desk's own 246px box and grows it by 1.39 to 343.
+     is measured in ShelfMode.tsx and it is the SMALLER of two bounds:
+     the width (screen less two gutters, over 246) and the height — the
+     largest scale that still leaves the top of the second box standing in
+     the scroller's first screenful (Jake: "the right size is one where we
+     dont have the illusion of completeness"). On a 375×667 phone the width
+     alone asked for 1.394 and put box two 34px past the fold, so the
+     height rules there and the gutters grow past 16 to pay for it; on a
+     taller phone the width already leaves the peek and nothing changes.
      Scaled rather than re-laid-out, because a cover is a composition and
      not a stack of independent measurements — the printing margin, the
      publisher's mark, the seal and the type all keep their proportions to
@@ -2564,7 +2570,12 @@
      what the scale spends: 328 of box (the `.plinth` height — the two
      numbers move together) plus 84 of shadow (40 of drop, 44 of ellipse),
      all of it scaled. That is what keeps four boxes from overlapping and
-     the last one's shadow from being cut off at the end of the scroll. */
+     the last one's shadow from being cut off at the end of the scroll.
+     The 84 is not padding and cannot be trimmed to buy scale: it is where
+     the shadow is actually drawn (`.shadowWrap` hangs from −40 to −84 and
+     blurs 11 past that), so a shorter reserve puts a box on top of the
+     shadow of the box above it — and the drop IS how high the stock reads
+     as floating. The gap below is the only clear air in the column. */
   .deckRow {
     flex: 1;
     min-height: 0;
