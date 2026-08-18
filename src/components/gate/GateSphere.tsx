@@ -21,6 +21,38 @@ import styles from './gate.module.css'
 const N = 92
 const PERSPECTIVE = 2.6
 
+/* THE RISE grows the ROW, not the boxes. Scaling each box in place left
+   a 54px box sitting on the row's fixed 44px pitch, so the boxes climbed
+   into each other on the way up — worse at the spring's overshoot, and
+   worse again where a risen box met one still waiting on its stagger.
+   Scaling `.slots` takes the 8px gaps up with the letters, so the pitch
+   can never fall behind the growth and an overlap is arithmetically off
+   the table. The ripple survives as the per-box lift below. */
+const RISE_SCALE = 1.5
+/* The drop a box travels, in screen pixels — divided by whatever scale
+   the row settles on, since the box lifts INSIDE that scale and would
+   otherwise travel 1.5× as far as it used to. */
+const RISE_DROP = 26
+/* `rise` is the loosest spring in the vocabulary (ζ ≈ 0.58) and swings
+   ~4% past its target on the way, so the row's widest frame is wider
+   than its resting one. Rounded up to 6% for headroom. */
+const RISE_OVERSHOOT = 1.06
+
+/* How big the row can afford to grow. Full size wherever there is room —
+   every desktop window, and the shelf's licence panel at its 420px cap —
+   and only smaller where there isn't: that same panel on a 360px phone
+   leaves the gate 332px wide, and `.gate` clips, so the row takes the
+   room it has rather than pressing its boxes against the chamber wall. */
+function fitScale(row: HTMLElement | null) {
+  const gate = row?.parentElement
+  if (!row || !gate) return RISE_SCALE
+  const pad = getComputedStyle(gate)
+  const room = gate.clientWidth - parseFloat(pad.paddingLeft) - parseFloat(pad.paddingRight)
+  const rest = row.getBoundingClientRect().width // measured at rest: scale is 1 until now
+  if (!room || !rest) return RISE_SCALE
+  return Math.min(RISE_SCALE, room / (rest * RISE_OVERSHOOT))
+}
+
 type Letter = { char: string; x: number; y: number; z: number }
 type Flight = { key: number; char: string; fromX: number; fromY: number; slot: number }
 type Phase = 'input' | 'rising' | 'verdict'
@@ -66,6 +98,8 @@ export function GateSphere() {
   const [slots, setSlots] = useState<(string | null)[]>(() => Array(CODE.length).fill(null))
   const [flights, setFlights] = useState<Flight[]>([])
   const [phase, setPhase] = useState<Phase>('input')
+  const [riseScale, setRiseScale] = useState(RISE_SCALE)
+  const slotsRef = useRef<HTMLDivElement>(null)
   const [verdict, setVerdict] = useState<'granted' | 'denied' | null>(null)
   const [typing, setTyping] = useState(false)
   const flightKey = useRef(0)
@@ -191,6 +225,9 @@ export function GateSphere() {
     if (phase !== 'input') return
     if (flights.length > 0) return
     if (slots.some((s) => s === null || s === '·')) return
+    // measured here, in the same beat as the phase, so the row renders
+    // once and the spring never has to retarget mid-rise
+    setRiseScale(fitScale(slotsRef.current))
     setPhase('rising')
   }, [slots, flights, phase])
 
@@ -232,7 +269,15 @@ export function GateSphere() {
       <p className={styles.gateHead}>{config.header}</p>
 
       {/* slots */}
-      <div className={styles.slots} role="group" aria-label="Passcode letters">
+      <motion.div
+        ref={slotsRef}
+        className={styles.slots}
+        role="group"
+        aria-label="Passcode letters"
+        data-spring="rise"
+        animate={phase === 'rising' && !reduced ? { scale: riseScale } : { scale: 1 }}
+        transition={SPRINGS.rise}
+      >
         {slots.map((s, i) => (
           <span key={i} className={styles.slotCol}>
             <motion.span
@@ -241,8 +286,8 @@ export function GateSphere() {
               data-filled={(s && s !== '·') || undefined}
               animate={
                 phase === 'rising' && !reduced
-                  ? { scale: 1.5, y: 26, transition: { delay: i * 0.07, ...SPRINGS.rise } }
-                  : { scale: 1, y: 0 }
+                  ? { y: RISE_DROP / riseScale, transition: { delay: i * 0.07, ...SPRINGS.rise } }
+                  : { y: 0 }
               }
             >
               {s && s !== '·' ? s : ''}
@@ -254,7 +299,7 @@ export function GateSphere() {
             )}
           </span>
         ))}
-      </div>
+      </motion.div>
 
       {/* the sphere */}
       <div
