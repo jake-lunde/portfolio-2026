@@ -327,6 +327,13 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
 }
 
+/* EVERY NAME THE SET CARRIES, in the order PATHS declares them. Derived
+   rather than written out: a hand-kept list beside a hand-kept record is two
+   places to add an icon and one place to forget. The catalog draws its icon
+   grid off this (Icon.stories.tsx), and anything that wants to offer a choice
+   of glyph can too. */
+export const ICON_NAMES = Object.keys(PATHS) as IconName[]
+
 /* Medieval variants — the same objects re-cut as woodcut/heraldic figures
    from a parallel 1392. Same 32×32 grid + 1.5px stroke so they sit in the
    grid identically; only the ones a program shows on the desktop are drawn,
