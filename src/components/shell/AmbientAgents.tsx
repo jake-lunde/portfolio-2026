@@ -40,7 +40,10 @@ import styles from './shell.module.css'
    out, in text, inside COMMAND.CTR. */
 
 type Flash = { key: number; agent: string; x: number; y: number }
-type Phase = 'gone' | 'opening' | 'up' | 'ducking' | 'closing'
+/* opening → rising → up → exiting → ducking → closing → gone. The hatch
+   is only up for the two transitions at either end; `up` is a unit
+   standing on a desk with no hole under it at all. */
+type Phase = 'gone' | 'opening' | 'rising' | 'up' | 'exiting' | 'ducking' | 'closing'
 type Align = 'left' | 'center' | 'right'
 /** desk-relative centre of the hatch, plus which way the unit faces */
 type Spot = { x: number; y: number; face: 1 | -1; align: Align }
@@ -50,14 +53,15 @@ const HOLE_W = 52
 const FLEE_RADIUS = 64
 const INTRO_RADIUS = 84 // they notice you a little before they'd spook
 const INTRO_MS = 5200
-/* THE HATCH IS NEVER OPEN ON ITS OWN. It scales up as the unit pushes out
-   of it and shuts as they drop back through, so the two moves read as one
-   gesture — an empty hole sitting on the desk waiting for somebody is a
-   different, worse idea (Jake, s88). The lead is just enough to break the
-   surface before a head comes through it. */
-const HOLE_LEAD = 90
-const HOLE_SHUT = 150 // ... and it starts closing this long into the drop
-const RISE_MS = 420 // the climb out lands about here
+/* THE HATCH IS A DOOR, NOT A PLACE (Jake, s88). It exists for exactly two
+   moments — the climb out and the drop back — and is shut the whole time
+   the unit is standing on the desk, which is most of the visit. So it
+   scales open, shuts behind them, and then opens again underneath them on
+   the way out. The lead is enough to break the surface before a head
+   comes through it. */
+const HOLE_LEAD = 90 // hatch opens this far ahead of the body moving
+const HOLE_SHUT = 150 // ... and shuts this far into the drop back
+const RISE_SETTLE = 520 // the climb's spring is done about here
 const DUCK_MS = 260 // dropping back in is quicker than climbing out
 const DWELL_MIN = 5200
 const DWELL_VAR = 3800
@@ -245,29 +249,34 @@ export function AmbientAgents() {
     const turn = (face: 1 | -1) => setSpot((s) => (s ? { ...s, face } : s))
 
     const duck = (hold = false) => {
-      if (phaseRef.current !== 'up' && phaseRef.current !== 'opening') return
+      const p = phaseRef.current
+      if (p !== 'up' && p !== 'rising' && p !== 'opening') return
       clear()
       setIntro(null)
       if (!hold) setBubble(null)
-      setPhase('ducking')
-      at(HOLE_SHUT, () => {
+      // the hatch re-opens under them first, then they drop through it
+      setPhase('exiting')
+      at(HOLE_LEAD, () => setPhase('ducking'))
+      at(HOLE_LEAD + HOLE_SHUT, () => {
         setPhase('closing')
         setBubble(null)
       })
-      at(DUCK_MS + HOLE_SHUT, () => {
+      at(HOLE_LEAD + DUCK_MS + HOLE_SHUT, () => {
         setPhase('gone')
         setSpot(null)
         spotRef.current = null
         atRef.current = null
       })
-      again(DUCK_MS + HOLE_SHUT + GAP_MIN + Math.random() * GAP_VAR)
+      again(HOLE_LEAD + DUCK_MS + HOLE_SHUT + GAP_MIN + Math.random() * GAP_VAR)
     }
     duckRef.current = duck
 
-    // out of the hatch, a beat of standing, then the turn and the line
-    const standing = HOLE_LEAD + RISE_MS
+    // out of the hatch, the hatch shuts behind them, a beat of standing,
+    // then the turn and the line
+    const standing = HOLE_LEAD + RISE_SETTLE
     const dwell = DWELL_MIN + Math.random() * DWELL_VAR
-    at(HOLE_LEAD, () => setPhase('up'))
+    at(HOLE_LEAD, () => setPhase('rising'))
+    at(standing, () => setPhase('up'))
     at(standing + 800, () => turn(-found.face as 1 | -1))
     at(standing + 1150, () => {
       setBubble(line(id))
@@ -384,8 +393,10 @@ export function AmbientAgents() {
     return unsub
   }, [])
 
-  const open = phase !== 'gone' && phase !== 'closing'
-  const risen = phase === 'up'
+  // the door is up for the two transitions only; the body is up from the
+  // moment it starts climbing until the moment it starts dropping
+  const open = phase === 'opening' || phase === 'rising' || phase === 'exiting' || phase === 'ducking'
+  const risen = phase === 'rising' || phase === 'up' || phase === 'exiting'
 
   return (
     <>

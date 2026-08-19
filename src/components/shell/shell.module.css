@@ -978,11 +978,18 @@
   opacity: 1;
 }
 
-/* THE SHAFT. Its bottom edge is the hatch's waist, and the sprite hangs
-   4px past it, so the shape is cut by the hole rather than perched on top
-   of it — these avatars are abstract shapes with no legs to stand on, and
-   the cut is the only thing that says "in". Jake asked them to ride
-   higher than the first pass, which sank them to the shoulders. */
+/* THE SHAFT. Its bottom edge is the hatch's waist: the climb is one
+   translate against a clip, no masks and no reflow.
+
+   THE SPRITE HANGS NOTHING PAST IT, and that is measured rather than
+   taste. `mask-size: contain` centres the art in a 34px box, and the two
+   casts are drawn differently — the classic shapes leave 4–5px of empty
+   box under the ink, the medieval cuts leave zero (checked, all twelve).
+   Any hang at all therefore slices the medieval units while they are
+   standing on a desk with no hole under them, which reads as a bug rather
+   than as depth. So the box bottom IS the waist: nothing is ever cut
+   except during the climb and the drop, which is the only time there is a
+   hole to justify it. */
 .riser {
   position: absolute;
   left: -17px;
@@ -995,7 +1002,7 @@
 .rider {
   position: absolute;
   left: 0;
-  bottom: -4px;
+  bottom: 0;
   width: 34px;
   height: 34px;
   will-change: transform;
