@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Icon, type IconName } from './Icon'
+import { Icon, ICON_NAMES } from './Icon'
 
 /* 32×32 line-art icons, currentColor. Classic is the default glyph set;
    a MEDIEVAL_PATHS subset swaps in per-icon via [data-skin='medieval']
@@ -16,44 +16,10 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/* `PATHS` (classic) and `MEDIEVAL_PATHS` are module-private in Icon.tsx —
-   only the `IconName` union is exported. There's no runtime constant to
-   derive this list from, so it's hand-enumerated here, in the exact
-   order the union declares it, to stay a straightforward diff against
-   Icon.tsx if a name is ever added or removed. */
-const ICON_NAMES: IconName[] = [
-  'doc',
-  'printer',
-  'resume',
-  'folder',
-  'note',
-  'ipod',
-  'music',
-  'reel',
-  'wave',
-  'book',
-  'sliders',
-  'rings',
-  'camera',
-  'puzzle',
-  'brush',
-  'chip',
-  'trash',
-  'bike',
-  'flower',
-  'disc',
-  'plane',
-  'mountain',
-  'star',
-  'nodes',
-  'steps',
-  'clipboard',
-  'swatch',
-  'smiley',
-  'bubble',
-  'mystery',
-  'suggest',
-]
+/* The name list comes from Icon.tsx now (ICON_NAMES, derived from PATHS'
+   own keys). It used to be hand-enumerated here, and it had already drifted:
+   the catalog was drawing 31 glyphs while the component carried 34. A list
+   kept beside a record is a list that goes stale, so the record exports it. */
 
 export const Doc: Story = {}
 
