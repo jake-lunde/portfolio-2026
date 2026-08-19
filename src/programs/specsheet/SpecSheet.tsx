@@ -6,6 +6,7 @@ import { Stamp } from '@/components/primitives/Stamp'
 import { CustomizeButton } from '@/components/primitives/CustomizeButton'
 import { Bubble, Feed, IdentityHeader } from '@/components/chat/Chat'
 import { Metrics, PullQuote, Stat } from '@/components/case/CaseComponents'
+import { CaseFooter } from '@/components/case/CaseFooter'
 import { avatarFor } from '@/components/shell/crew'
 import { Icon, type IconName } from '@/components/shell/Icon'
 import { Box3D, useFinePointer } from '@/programs/shelf/Box3D'
@@ -86,6 +87,7 @@ const SECTIONS = [
   'motion',
   'components',
   'icons',
+  'shell',
   'chat',
   'shelf',
   'plate',
@@ -200,6 +202,23 @@ const ICON_NAMES: IconName[] = [
   'bubble',
   'mystery',
   'suggest',
+]
+
+/* ---- the machine's own chrome ----
+   Every part in this table is running around this window as the sheet is
+   read: the strip along the top, the pattern behind it, the crew walking
+   the bottom of the desk. They are the one group of components the sheet
+   cannot stage, because a second menu bar inside a window is a second
+   machine, with its own skin switch and its own clock, arguing with the
+   real one. So this section names them and lets the reader look up.
+   Same rail and same copy-layer shape as BUILD below. */
+const SHELL: Array<[string, string]> = [
+  ['MENU BAR', 'spec-sheet.shell.row.menubar'],
+  ['SKIN SWITCH', 'spec-sheet.shell.row.skinswitch'],
+  ['WALLPAPER', 'spec-sheet.shell.row.wallpaper'],
+  ['DESKTOP', 'spec-sheet.shell.row.desktop'],
+  ['COMMAND.CTR', 'spec-sheet.shell.row.command'],
+  ['CREW', 'spec-sheet.shell.row.crew'],
 ]
 
 /* ---- how the system is actually made ----
@@ -490,6 +509,27 @@ export default function SpecSheet() {
           </span>
         </div>
 
+        {/* ---------- shell ---------- */}
+        <SectionHead id="shell" />
+        <div className={styles.componentCell}>
+          <div className={styles.motion}>
+            {SHELL.map(([label, key]) => (
+              <div key={key} className={styles.motionRow}>
+                <span className={styles.motionK}>{label}</span>
+                <Copy
+                  k={key}
+                  as="span"
+                  className={`${styles.motionV} ${styles.buildV}`}
+                />
+              </div>
+            ))}
+          </div>
+          <span className={styles.partNo}>
+            SHL-01 · running around this window right now · staged in here it
+            would be a second machine
+          </span>
+        </div>
+
         {/* ---------- chat ---------- */}
         {/* The real ASK MY AI parts wearing sample lines. Both windows built
             on them (ASK MY AI, SUGGESTION BOX) are this shape in different
@@ -589,8 +629,13 @@ export default function SpecSheet() {
               <Stat big="00.0%" label="Specimen · the shape of a stat, not a number from a project" />
               <Stat big="0 taps" label="Specimen · the secondary size" secondary />
             </Metrics>
+            {/* Wired, not staged: both doors go where they go on a real case,
+                because this is the shipping component and the sheet is
+                standing inside the same machine it opens windows in. */}
+            <CaseFooter next={{ name: 'Family Hub', live: true, slug: 'family-hub' }} />
           </div>
           <span className={styles.partNo}>CSE-01 · PullQuote · Metrics · Stat</span>
+          <span className={styles.partNo}>CSE-02 · CaseFooter · both doors live</span>
         </div>
 
         {/* ---------- build ---------- */}
