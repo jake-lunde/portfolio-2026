@@ -479,9 +479,10 @@
   display: none;
 }
 
-/* The wanderer's walk is plotted against window.innerWidth, so it would
-   stroll straight under the docked panels. It sits this one out. */
-:global(body[data-inspectmode='on']) .wanderer {
+/* INSPECT.MODE compresses the desk between two docked panels, and a
+   hatch measured against the old desk would open under one of them. The
+   crew sits this mode out. */
+:global(body[data-inspectmode='on']) .burrow {
   display: none;
 }
 
@@ -864,9 +865,11 @@
    desktop element (src/app/not-found.tsx mounts it as a sibling of the
    shell), so `fixed` rather than the widgets' `absolute`; the z sits above
    the windows and below the menubar and ticker, which own the top strip.
-   Bottom-left, but lifted: the wanderer (AmbientAgents) parks its avatar
-   in that corner and its intro card tops out near 91px, so the notice
-   sits on a 104px floor and clears it. */
+   Bottom-left, but lifted: this notice is furniture like everything else
+   on the desk, and the ambient agents will not open a hatch on top of
+   furniture — they probe the point first (AmbientAgents.tsx). The 104px
+   floor stays because their intro card tops out near 91px and nothing is
+   won by crowding it. */
 .notFound {
   position: fixed;
   left: 20px;
@@ -938,21 +941,79 @@
 
 /* ================= AMBIENT AGENTS ================= */
 
-.wanderer {
+.burrow {
+  /* a zero-size anchor pinned to the centre of the hatch: everything
+     below hangs off that one point, so placing a unit is two numbers */
   position: absolute;
-  left: 0;
-  bottom: 6px;
+  width: 0;
+  height: 0;
   z-index: 3;
   pointer-events: none;
+}
+
+/* THE HATCH — an ellipse of the dark under the desk. `--surface-inverse`
+   is the one role in this token set that is dark in every skin and both
+   modes (classic light #131811, classic dark #090c0a, medieval #17110b),
+   which is exactly what a hole needs: ink would have inverted with the
+   theme and painted a glowing saucer on the dark desk, with the unit —
+   also ink — dissolving into it. (Hatching was tried first, from the
+   resize grip's vocabulary. At 48×14 a hatched ellipse reads as a
+   striped saucer.) */
+.hole {
+  position: absolute;
+  left: -24px;
+  top: -7px;
+  width: 48px;
+  height: 14px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--surface-inverse);
+  opacity: 0.92;
+}
+
+/* on a dark desk the fill is only a shade under the surface it sits in,
+   so the edge has to be drawn rather than inferred */
+[data-theme='dark'] .hole {
+  border: var(--border-width-subtle) solid var(--border);
+  opacity: 1;
+}
+
+/* THE SHAFT. Its bottom edge is the hatch's waist: the climb is one
+   translate against a clip, no masks and no reflow.
+
+   THE SPRITE HANGS NOTHING PAST IT, and that is measured rather than
+   taste. `mask-size: contain` centres the art in a 34px box, and the two
+   casts are drawn differently — the classic shapes leave 4–5px of empty
+   box under the ink, the medieval cuts leave zero (checked, all twelve).
+   Any hang at all therefore slices the medieval units while they are
+   standing on a desk with no hole under them, which reads as a bug rather
+   than as depth. So the box bottom IS the waist: nothing is ever cut
+   except during the climb and the drop, which is the only time there is a
+   hole to justify it. */
+.riser {
+  position: absolute;
+  left: -17px;
+  bottom: 0;
+  width: 34px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.rider {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 34px;
+  height: 34px;
   will-change: transform;
 }
 
-.wandererAvatar {
+.agentAvatar {
   display: block;
   width: 34px;
   height: 34px;
   background-color: var(--content);
-  opacity: 0.8;
+  opacity: 0.85;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: contain;
@@ -960,12 +1021,14 @@
   animation: wanderBob 0.8s ease-in-out infinite;
 }
 
-.wandererAvatar[data-inspecting] {
+/* mid-sentence — the same wobble the walker used to do while inspecting
+   something, reused for talking, which is what they do now */
+.agentAvatar[data-talking] {
   animation: wanderInspect 1.4s ease-in-out infinite;
   opacity: 1;
 }
 
-.wandererAvatar[data-fleeing] {
+.agentAvatar[data-fleeing] {
   background-color: var(--accent-expressive);
   animation: wanderFlee 0.22s ease-in-out infinite;
   opacity: 1;
@@ -981,7 +1044,7 @@
   }
 }
 
-.wandererAvatar[data-jumping] {
+.agentAvatar[data-jumping] {
   background-color: var(--accent-expressive);
   animation: wanderJump 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) 1;
   opacity: 1;
@@ -1007,7 +1070,7 @@
 
 .bubble {
   position: absolute;
-  bottom: 40px;
+  bottom: 34px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--surface);
@@ -1025,15 +1088,28 @@
   border-color: var(--border);
 }
 
+/* a hatch can open near a wing, where a centred bubble runs off the desk
+   — same pinning the intro card has always done */
+.bubble[data-align='left'] {
+  left: -20px;
+  transform: none;
+}
+
+.bubble[data-align='right'] {
+  left: auto;
+  right: -20px;
+  transform: none;
+}
+
 /* ---- first contact ---- */
 /* A speech bubble can hold a joke; an introduction needs three lines.
    Same print-shadow housing, wider, and it stays put while the unit
-   finishes talking. Decorative like everything else on the wanderer —
-   the same facts are text inside COMMAND.CTR. */
+   finishes talking. Decorative like everything else the crew does — the
+   same facts are text inside COMMAND.CTR. */
 
 .introCard {
   position: absolute;
-  bottom: 42px;
+  bottom: 36px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -1053,13 +1129,13 @@
 
 /* near a wing there is no room to centre — pin to the edge instead */
 .introCard[data-align='left'] {
-  left: 0;
+  left: -26px;
   transform: none;
 }
 
 .introCard[data-align='right'] {
   left: auto;
-  right: 0;
+  right: -26px;
   transform: none;
 }
 
@@ -1143,7 +1219,7 @@
 }
 
 @media (max-width: 900px) {
-  .wanderer,
+  .burrow,
   .dispatchFlash {
     display: none;
   }
