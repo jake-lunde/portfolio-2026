@@ -11,10 +11,17 @@ import styles from './case.module.css'
    layer — per Jake's s35 correction; no "focused" tier.
 
    s89: the old FIG. D plate (shipped surfaces, a placeholder) folded in
-   here. One tab row now drives two panes — the lo-fi model of the mode
-   and the screens that actually shipped in it, cycling. */
+   here. One viewport, two controls — the mode tabs pick which mode, and
+   the view switch flips between the lo-fi diagram of it and the screens
+   that actually shipped in it, cycling. */
 
 type Mode = 'ambient' | 'active' | 'auth'
+type View = 'diagram' | 'shipped'
+
+const VIEWS: Array<{ id: View; label: string }> = [
+  { id: 'diagram', label: 'Lo-fi' },
+  { id: 'shipped', label: 'Shipped' },
+]
 
 const MODES: Array<{ id: Mode; label: string; blurb: string }> = [
   { id: 'ambient', label: 'Ambient', blurb: 'The screensaver with a job. From across the room you get the time, what’s next, who’s where, the photo stream. It asks nothing of you.' },
@@ -49,7 +56,9 @@ const SHOT_MS = 3000
 
 const INK = '#E7E1D2'
 const W = 560
-const H = 300
+/* 16:9-ish on purpose: the diagram and the shipped screens share one
+   viewport, so their ratios have to match or the plate jumps on toggle */
+const H = 315
 
 function Ambient() {
   return (
@@ -137,6 +146,7 @@ function Auth() {
 
 export function HubModes() {
   const [mode, setMode] = useState<Mode>('ambient')
+  const [view, setView] = useState<View>('diagram')
   const [shot, setShot] = useState(0)
   const [held, setHeld] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -144,81 +154,86 @@ export function HubModes() {
   const reduced = useReducedMotion()
   const current = MODES.find((m) => m.id === mode)!
   const shots = SHOTS[mode]
+  const shipped = view === 'shipped'
 
-  /* the shipped pane advances on its own, but only while it's on screen and
-     nobody's pointing at it — off-screen timers are just battery */
+  /* the shipped screens advance on their own, but only while they're the
+     view you're looking at, on screen, and nobody's pointing at them */
   useEffect(() => {
-    if (reduced || held || !inView || shots.length < 2) return
+    if (!shipped || reduced || held || !inView || shots.length < 2) return
     const t = setInterval(() => setShot((i) => (i + 1) % shots.length), SHOT_MS)
     return () => clearInterval(t)
-  }, [reduced, held, inView, shots.length])
-
-  function pick(id: Mode) {
-    sfx.tap()
-    setMode(id)
-    setShot(0)
-  }
+  }, [shipped, reduced, held, inView, shots.length])
 
   return (
     <div ref={rootRef}>
-      <div className={styles.hubRow}>
-        <div className={styles.hubPane}>
-          <span className={styles.hubPaneLabel}>
-            <span>Lo-fi · the model</span>
-          </span>
-          <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Hub surface, ${current.label} mode. ${current.blurb}`} fontFamily="var(--mono)">
-            <rect x={1} y={1} width={W - 2} height={H - 2} fill="none" stroke={INK} strokeWidth="1.5" opacity="0.6" />
-            {/* keyed remount, fade-in only — no exit animation to get stuck on */}
-            <motion.g
-              key={mode}
-              initial={reduced ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
+      <div className={styles.hubHead}>
+        <div className={styles.hubViews} role="group" aria-label="View">
+          {VIEWS.map((v) => (
+            <button
+              key={v.id}
+              className={styles.hubView}
+              aria-pressed={v.id === view}
+              onClick={() => {
+                sfx.tap()
+                setView(v.id)
+              }}
             >
-              {mode === 'ambient' && <Ambient />}
-              {mode === 'active' && <Active />}
-              {mode === 'auth' && <Auth />}
-            </motion.g>
-          </svg>
+              {v.label}
+            </button>
+          ))}
         </div>
-
-        <div className={styles.hubPane}>
-          <span className={styles.hubPaneLabel}>
-            <span>Shipped</span>
-            <span>
-              {String(shot + 1).padStart(2, '0')} / {String(shots.length).padStart(2, '0')}
-            </span>
+        {shipped && (
+          <span className={styles.hubCount}>
+            {String(shot + 1).padStart(2, '0')} / {String(shots.length).padStart(2, '0')}
           </span>
-          <button
-            type="button"
-            className={styles.hubShip}
-            aria-label={`${current.label} as shipped, screen ${shot + 1} of ${shots.length}. Next screen.`}
-            onClick={() => {
-              sfx.tap()
-              setShot((i) => (i + 1) % shots.length)
-            }}
-            onPointerEnter={() => setHeld(true)}
-            onPointerLeave={() => setHeld(false)}
-            onFocus={() => setHeld(true)}
-            onBlur={() => setHeld(false)}
-          >
-            {shots.map((s, i) => (
-              <motion.img
-                key={s.file}
-                src={`${DIR}/${s.file}.webp`}
-                width={1086}
-                height={610}
-                alt={i === shot ? s.alt : ''}
-                aria-hidden={i === shot ? undefined : true}
-                loading="lazy"
-                draggable={false}
-                animate={{ opacity: i === shot ? 1 : 0 }}
-                transition={{ duration: reduced ? 0 : 0.4, ease: 'easeOut' }}
-              />
-            ))}
-          </button>
-        </div>
+        )}
       </div>
+
+      {shipped ? (
+        <button
+          type="button"
+          className={styles.hubShip}
+          aria-label={`${current.label} as shipped, screen ${shot + 1} of ${shots.length}. Next screen.`}
+          onClick={() => {
+            sfx.tap()
+            setShot((i) => (i + 1) % shots.length)
+          }}
+          onPointerEnter={() => setHeld(true)}
+          onPointerLeave={() => setHeld(false)}
+          onFocus={() => setHeld(true)}
+          onBlur={() => setHeld(false)}
+        >
+          {shots.map((s, i) => (
+            <motion.img
+              key={s.file}
+              src={`${DIR}/${s.file}.webp`}
+              width={1086}
+              height={610}
+              alt={i === shot ? s.alt : ''}
+              aria-hidden={i === shot ? undefined : true}
+              loading="lazy"
+              draggable={false}
+              animate={{ opacity: i === shot ? 1 : 0 }}
+              transition={{ duration: reduced ? 0 : 0.4, ease: 'easeOut' }}
+            />
+          ))}
+        </button>
+      ) : (
+        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Hub surface, ${current.label} mode. ${current.blurb}`} fontFamily="var(--mono)">
+          <rect x={1} y={1} width={W - 2} height={H - 2} fill="none" stroke={INK} strokeWidth="1.5" opacity="0.6" />
+          {/* keyed remount, fade-in only — no exit animation to get stuck on */}
+          <motion.g
+            key={mode}
+            initial={reduced ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+          >
+            {mode === 'ambient' && <Ambient />}
+            {mode === 'active' && <Active />}
+            {mode === 'auth' && <Auth />}
+          </motion.g>
+        </svg>
+      )}
 
       <div className={styles.hubTabs}>
         {MODES.map((m) => {
@@ -228,7 +243,11 @@ export function HubModes() {
               key={m.id}
               className={styles.moatNode}
               aria-pressed={on}
-              onClick={() => pick(m.id)}
+              onClick={() => {
+                sfx.tap()
+                setMode(m.id)
+                setShot(0)
+              }}
               style={{
                 fontFamily: 'var(--mono)',
                 fontSize: 11,

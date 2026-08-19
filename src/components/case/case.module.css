@@ -1172,34 +1172,56 @@
   }
 }
 
-/* HUB MODES (HubModes.tsx) — FIG. C merged FIG. D into itself (s89): the
-   lo-fi model of each mode sits beside the screens that actually shipped
-   in it, and one tab row drives both. The shipped pane is deliberately
-   the smaller of the two — it's evidence for the diagram, not a gallery. */
+/* HUB MODES (HubModes.tsx) — FIG. C merged FIG. D into itself (s89): one
+   viewport, two controls. The mode tabs at the bottom pick the mode; the
+   view switch at the top flips that mode's lo-fi diagram for the screens
+   that actually shipped in it. Both share a ratio so nothing jumps. */
 
-.hubRow {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: var(--spacing-component-lg);
-  align-items: start;
-}
-
-.hubPane {
+.hubHead {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-component-md);
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
 }
 
-.hubPaneLabel {
+.hubViews {
+  display: flex;
+  gap: 14px;
+}
+
+/* text switches, not buttons — the mode tabs below are the heavy control
+   and two boxed rows would read as one confused toolbar */
+.hubView {
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  padding: 2px 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
   color: rgba(231, 225, 210, 0.45);
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  cursor: pointer;
+}
+
+.hubView[aria-pressed='true'] {
+  color: rgba(231, 225, 210, 0.9);
+  border-bottom-color: var(--accent-expressive);
+}
+
+.hubView:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+.hubCount {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: rgba(231, 225, 210, 0.45);
 }
 
 /* the cycling shipped screen — a button so keyboard and click can step it
@@ -1208,7 +1230,7 @@
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 1086 / 610;
+  aspect-ratio: 560 / 315;
   padding: 0;
   border: 1px solid rgba(231, 225, 210, 0.4);
   background: rgba(19, 24, 17, 0.6);
@@ -1221,7 +1243,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .hubShip:focus-visible {
@@ -1239,10 +1261,6 @@
 }
 
 @media (max-width: 640px) {
-  .hubRow {
-    grid-template-columns: 1fr;
-  }
-
   .hubTabs {
     grid-template-columns: 1fr;
   }

@@ -66,17 +66,19 @@ export function Plate({
   children,
 }: {
   cap?: React.ReactNode /* filled plates drop their "Plate NN" label (Jake's s55 rule); placeholders keep it, and live plates may put dynamic text here */
-  fig: string
+  fig?: string /* optional since s89 — a plate that carries its own controls doesn't need the specimen label too */
   caption?: string
   children: React.ReactNode
 }) {
   return (
     <figure className={styles.figure}>
       <div className={styles.plate}>
-        <div className={styles.plateCap}>
-          {cap && (typeof cap === 'string' ? <span>{cap}</span> : cap)}
-          <span className={styles.fig}>{fig}</span>
-        </div>
+        {(cap || fig) && (
+          <div className={styles.plateCap}>
+            {cap && (typeof cap === 'string' ? <span>{cap}</span> : cap)}
+            {fig && <span className={styles.fig}>{fig}</span>}
+          </div>
+        )}
         {children}
         <div className="halftone" aria-hidden="true" />
       </div>
