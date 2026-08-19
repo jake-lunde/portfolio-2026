@@ -402,12 +402,15 @@ export function AmbientAgents() {
     <>
       {!reduced && spot && (
         <div className={styles.burrow} style={{ left: spot.x, top: spot.y }} aria-hidden="true">
+          {/* the door is on `widget` and the body on `rise`: the climb
+              is allowed its bounce, the hole is not (Jake, s88 — `rise`
+              overshot the ellipse to 1.09 and read as rubber) */}
           <motion.span
             className={styles.hole}
             initial={{ scale: 0 }}
             animate={{ scale: open ? 1 : 0 }}
-            transition={SPRINGS.rise}
-            data-spring="rise"
+            transition={SPRINGS.widget}
+            data-spring="widget"
           />
 
           <span className={styles.riser}>
