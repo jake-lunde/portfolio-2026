@@ -61,22 +61,22 @@ export function Lead({ children }: { children: React.ReactNode }) {
 
 export function Plate({
   cap,
-  fig,
+  tag,
   caption,
   children,
 }: {
   cap?: React.ReactNode /* filled plates drop their "Plate NN" label (Jake's s55 rule); placeholders keep it, and live plates may put dynamic text here */
-  fig?: string /* optional since s89 — a plate that carries its own controls doesn't need the specimen label too */
+  tag?: string /* right-hand cap slot: a date, a ticker, a technique. The FIG. specimen letters came off in s89 — plates are numbered by their cap, if at all */
   caption?: string
   children: React.ReactNode
 }) {
   return (
     <figure className={styles.figure}>
       <div className={styles.plate}>
-        {(cap || fig) && (
+        {(cap || tag) && (
           <div className={styles.plateCap}>
             {cap && (typeof cap === 'string' ? <span>{cap}</span> : cap)}
-            {fig && <span className={styles.fig}>{fig}</span>}
+            {tag && <span className={styles.tag}>{tag}</span>}
           </div>
         )}
         {children}

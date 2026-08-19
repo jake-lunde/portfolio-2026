@@ -146,9 +146,11 @@
   z-index: 1;
 }
 
-.plateCap .fig {
+/* the cap's right-hand tag — a date, a ticker, the technique on show.
+   Held right even when the cap label beside it is dropped. */
+.plateCap .tag {
   color: var(--accent-expressive);
-  margin-left: auto; /* keeps FIG right-aligned when the cap label is dropped */
+  margin-left: auto;
 }
 
 .figcap {
@@ -851,30 +853,48 @@
 
 .railFoot {
   display: flex;
-  gap: 3px;
-  padding: 7px 8px 5px;
+  gap: 4px;
+  padding: 8px;
   border-top: var(--border-width-subtle) solid var(--border);
 }
 
+/* the ladder as steps, not a fill bar (Jake's s89 call): nine squares,
+   each one a rung you can click to. A bar reads as "how far through" —
+   squares read as "which one", which is what the rail is for now. */
 .railTick {
-  flex: 1;
-  height: 5px;
+  flex: none;
+  width: 9px;
+  height: 9px;
   padding: 0;
-  border: none;
-  background: var(--border);
+  border: var(--border-width-subtle) solid var(--border);
+  background: transparent;
   cursor: pointer;
 }
 
 .railTick:hover {
+  border-color: var(--content-muted);
   background: var(--content-muted);
 }
 
 .railTick[data-done] {
+  border-color: var(--accent);
   background: var(--accent);
 }
 
 .railTick[data-on] {
+  border-color: var(--accent-expressive);
   background: var(--accent-expressive);
+}
+
+/* compact: no art, so the rail stops claiming a picture's worth of
+   margin and rides as a chip — bar, ladder, label */
+.railSlot[data-compact] {
+  width: 244px;
+}
+
+.rail[data-compact] .railFoot {
+  border-top: none;
+  padding-bottom: 2px;
 }
 
 .railLabel {

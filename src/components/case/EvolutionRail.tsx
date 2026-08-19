@@ -12,6 +12,17 @@ import styles from './case.module.css'
    recordings, and a break-out finale where the device hangs in a
    kitchen. The persuasion-ladder thesis made literal.
 
+   s89 model change: the page owns imagery, the rail owns position.
+   Every section of this case carries its own figure, so a rail that
+   always shows art is a second picture competing with the first — most
+   visibly in §03, where both were playing the same product. The art is
+   opt-in per stage now (`open`), and the rail spends the rest of the
+   scroll as a compact map: title bar, the ladder as squares, one label.
+   It opens four times — the sketch before the case has shown you
+   anything, the hi-fi prototype that IS §04's argument, and the two
+   break-out beats where the device leaves the artboard. Quiet through
+   the middle, which is exactly where the page is loudest.
+
    Stage switching rides IntersectionObserver on the case's own beats
    (hero → sections → footer), never scroll-linked animation: safe in a
    hidden tab and under prefers-reduced-motion. The scroller is the
@@ -36,18 +47,20 @@ type Stage = {
   /** Jake's screen recording of the real prototype — plays while the
       stage is up, still frame (poster) under reduced motion */
   video?: string
+  /** this stage earns the art; the rest ride as the compact map */
+  open?: true
 }
 
 const STAGES: Stage[] = [
-  { v: 'v0.1', label: 'Sketch', ratio: '1089 / 490', alt: 'Concept collage: a big pink clock, weather, calendar and home glyphs, family portrait avatars, one checked-off chore — all gently afloat.' },
+  { v: 'v0.1', label: 'Sketch', open: true, ratio: '1089 / 490', alt: 'Concept collage: a big pink clock, weather, calendar and home glyphs, family portrait avatars, one checked-off chore — all gently afloat.' },
   { file: 'poster-poc.webp', video: 'demo-poc', v: 'v0.2', label: 'Proof of Concept', ratio: '16 / 9', alt: 'Screen recording of the first clickable prototype: clicking through the dark dashboard, the family agenda blocked in as bright color bars.' },
   { file: 'poster-poc.webp', video: 'demo-poc', v: 'v0.3', label: 'Proof of Concept', ratio: '16 / 9', alt: 'The proof-of-concept demo rolls on: into the month calendar, the whole household on one grid.' },
   { file: 'poster-wireframes.webp', video: 'demo-wireframes', v: 'v0.4', label: 'Lo-Fi Explorations', ratio: '1280 / 712', alt: 'Screen recording of the lo-fi build in Greenlight green: the morning brief and school-run map in motion.' },
   { file: 'poster-wireframes.webp', video: 'demo-wireframes', v: 'v0.5', label: 'Lo-Fi Explorations', ratio: '1280 / 712', alt: 'The lo-fi demo rolls on: the ambient morning screen, 8:32 AM.' },
-  { file: 'poster-hifi.webp', video: 'demo-hifi', v: 'v0.6', label: 'Hi-Fi Prototype', ratio: '16 / 9', alt: 'Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape.' },
+  { file: 'poster-hifi.webp', video: 'demo-hifi', v: 'v0.6', label: 'Hi-Fi Prototype', open: true, ratio: '16 / 9', alt: 'Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape.' },
   { file: 'stage-06.webp', v: 'v0.7', label: 'Color Explorations', ratio: '1440 / 800', alt: 'Color exploration: chats, chores and calendar as calm cards, color only where it means something.' },
-  { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', ratio: '10 / 7', scene: 'wall', alt: 'The launch build under test: the device hung on a plain wall.', },
-  { file: 'stage-08.webp', v: 'v1.0', label: 'Ship', ratio: '10 / 7', scene: 'kitchen', alt: 'Family Hub live in situ: the device on a kitchen wall, plant on the counter.' },
+  { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', open: true, ratio: '10 / 7', scene: 'wall', alt: 'The launch build under test: the device hung on a plain wall.', },
+  { file: 'stage-08.webp', v: 'v1.0', label: 'Ship', open: true, ratio: '10 / 7', scene: 'kitchen', alt: 'Family Hub live in situ: the device on a kitchen wall, plant on the counter.' },
 ]
 
 /* The story's beats don't map 1:1 onto the ladder — Jake's cut: the
@@ -280,6 +293,7 @@ export function EvolutionRail() {
   }, [])
 
   const cur = STAGES[stage]
+  const showArt = Boolean(cur.open)
 
   const jumpTo = (i: number) => {
     const marks = marksRef.current
@@ -299,11 +313,17 @@ export function EvolutionRail() {
   }
 
   return (
-    <div className={styles.railSlot} ref={ref} data-zoom={zoomed && !minimized ? 'true' : undefined}>
+    <div
+      className={styles.railSlot}
+      ref={ref}
+      data-zoom={zoomed && !minimized && Boolean(STAGES[stage].open) ? 'true' : undefined}
+      data-compact={!minimized && !STAGES[stage].open ? 'true' : undefined}
+    >
       <aside
         className={styles.rail}
         aria-label="Progress viewer: the Family Hub being built, stage by stage"
         data-min={minimized ? 'true' : undefined}
+        data-compact={!minimized && !showArt ? 'true' : undefined}
       >
         <div
           className={styles.railBar}
@@ -327,7 +347,7 @@ export function EvolutionRail() {
           >
             −
           </button>
-          {!minimized && (
+          {!minimized && showArt && (
             <button
               className={styles.railCtrl}
               aria-label={zoomed ? 'Restore the progress viewer size' : 'Zoom the progress viewer'}
@@ -345,6 +365,7 @@ export function EvolutionRail() {
         </div>
         {!minimized && (
           <>
+            {showArt && (
             <div
               className={styles.railView}
               role="img"
@@ -407,6 +428,7 @@ export function EvolutionRail() {
                 )}
               </div>
             </div>
+            )}
             <div className={styles.railFoot}>
               {STAGES.map((s, i) => (
                 <button
@@ -422,7 +444,8 @@ export function EvolutionRail() {
             </div>
             <div className={styles.railLabel} aria-hidden="true">
               {cur.v} · {cur.label}
-              {cur.video && !reduced ? ' · demo' : ''}
+              {/* only claim a demo when the art is actually up to play one */}
+              {showArt && cur.video && !reduced ? ' · demo' : ''}
             </div>
           </>
         )}
