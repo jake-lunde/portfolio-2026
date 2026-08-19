@@ -241,7 +241,7 @@
 }
 
 /* ---------- build ---------- */
-/* Section 05 rides the MOTION table's rail (.motion/.motionRow/.motionK/
+/* The BUILD section rides the MOTION table's rail (.motion/.motionRow/.motionK/
    .motionV): same label column, same hairline between rows. The one thing
    it needs on top: these values are sentences, not a single spec line, so
    the wrapped lines get the body leading instead of the default. */
@@ -278,21 +278,165 @@
   color: var(--content-muted);
 }
 
-.demoBtn {
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size); /* 10px → 11px */
-  letter-spacing: var(--tracking-16); /* diverges from label's tracking-14 — exact match to original 0.16em */
-  text-transform: uppercase;
-  color: var(--surface);
-  background: var(--accent);
-  border: 1.5px solid var(--accent);
-  padding: 7px 16px;
-  cursor: pointer;
+/* CMP-02/03 used to be a button drawn here in CSS. It is the real Button
+   primitive now (src/components/primitives/Button), so the sheet cannot
+   show a control the app does not ship. The one thing the stage still owns
+   is width: `.track` fills its container, so the meter needs one. */
+.meterHolder {
+  display: block;
+  width: 100%;
+  max-width: 180px;
 }
 
-.demoBtn:hover {
-  background: var(--content);
-  border-color: var(--content);
+/* ---------- scale ---------- */
+/* Each specimen is drawn WITH the token it names, so the picture and the
+   resolved number beside it come from the same place. */
+.scaleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px 18px;
+}
+
+.scaleItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.scaleBar {
+  display: block;
+  height: 10px;
+  background: var(--content-muted);
+}
+
+/* 56×36, not a square: --radius-circle is 50%, which draws an ellipse on a
+   rectangle, and that is exactly why --radius-thinking exists as an
+   absolute overshoot. On a square the two tokens would look identical. */
+.scaleTile {
+  display: block;
+  width: 56px;
+  height: 36px;
+  border: var(--border-width-default) solid var(--content);
+  background: var(--surface-raised);
+}
+
+.scaleRule {
+  display: block;
+  width: 56px;
+  border-top-style: solid;
+  border-top-color: var(--content);
+}
+
+.scaleCap {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-08);
+  color: var(--content-muted);
+}
+
+/* ---------- icons ---------- */
+/* One cell per glyph, no labels: 31 names under 31 32px icons would read as
+   a word list. The set itself is the specimen, and each cell carries the
+   name as a title for anyone who wants it. */
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  border: var(--border-width-default) solid var(--content);
+  background: var(--surface);
+}
+
+[data-theme='dark'] .iconGrid {
+  border-color: var(--border);
+}
+
+.iconCell {
+  display: grid;
+  place-items: center;
+  padding: 10px 4px;
+  color: var(--content);
+  border-right: var(--border-width-subtle) solid var(--border);
+  border-bottom: var(--border-width-subtle) solid var(--border);
+}
+
+/* ---------- chat ---------- */
+/* .feed is `flex: 1 1 auto; min-height: 0` — it needs a column parent, which
+   the real windows give it. No height here on purpose: in a window the feed
+   scrolls, and a scrolled feed on a spec sheet would hide half the specimen
+   behind a scrollbar. Unbounded, the column sizes to the whole exchange. */
+.chatStage {
+  display: flex;
+  flex-direction: column;
+  border: var(--border-width-subtle) dashed var(--border);
+  padding: 14px 16px;
+}
+
+/* ---------- shelf ---------- */
+/* Perspective applies to an element's CHILDREN, so the camera lives here,
+   one level above the box, at the same 980px the shelf row uses. The origin
+   is pushed off to the left because a box parked dead in front of the lens
+   shows one rectangle and none of its own thickness; on the real shelf a box
+   is almost never the one in the middle. */
+.boxStage {
+  display: grid;
+  place-items: center;
+  perspective: 980px;
+  perspective-origin: 18% 42%;
+  padding: 20px 0 34px;
+  border: var(--border-width-subtle) dashed var(--border);
+}
+
+/* The box's three numbers. Box3D derives all six faces from --box-w /
+   --box-h / --box-d, and `.plinth` (shelf.module.css) declares them off
+   --box-w-base, which is set on the shelf's own `.wrap` — not an ancestor
+   here. So the sheet declares its own set: the shelf's 3:4 face and its
+   17% depth, printed small enough to sit in a 600px window beside a
+   caption. Two classes deep so it outranks `.plinth`'s single class
+   whichever order the two modules land in. */
+.boxStage .boxMetrics {
+  --box-w: 168px;
+  --box-h: 224px;
+  --box-d: 29px;
+}
+
+.boxStage .boxFace {
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-size: var(--type-heading-3-size);
+  color: var(--content);
+}
+
+.shelfControls {
+  display: flex;
+  justify-content: center;
+}
+
+/* ---------- plate ---------- */
+/* The window supplies this ground in the app (.windowBody.crt). The sheet
+   has to supply it here, or the plate would float on the sheet's paper and
+   show chrome the real thing never shows. */
+.plateStage {
+  background: var(--surface-inverse);
+  padding: 6px 4px;
+}
+
+.plateLine {
+  font-family: var(--type-mono-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-14);
+  text-transform: uppercase;
+  color: var(--content-inverse);
+  margin: 0;
+}
+
+/* ---------- case study ---------- */
+/* The case parts are authored for a 780px column; in a 600px window they
+   need the gutters they would have had there. */
+.caseStage {
+  border: var(--border-width-subtle) dashed var(--border);
+  padding: 8px 18px 4px;
 }
 
 .foot {
