@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useGate } from '@/store/gate'
 import { useSettings } from '@/store/settings'
@@ -102,6 +102,7 @@ export function GateSphere() {
   const slotsRef = useRef<HTMLDivElement>(null)
   const [verdict, setVerdict] = useState<'granted' | 'denied' | null>(null)
   const [typing, setTyping] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
   const flightKey = useRef(0)
   const prevCodeRef = useRef(CODE)
 
@@ -149,10 +150,14 @@ export function GateSphere() {
       const { yaw, pitch } = rot.current
       const cy = Math.cos(yaw), sy = Math.sin(yaw)
       const cp = Math.cos(pitch), sp = Math.sin(pitch)
-      const rect = wrap.getBoundingClientRect()
-      const R = Math.min(rect.width, rect.height) * 0.36
-      const cx = rect.width / 2
-      const cz = rect.height / 2
+      // layout size, not the client rect: while the sphere recedes
+      // (scale .55 behind the verdict, or the typed field) the rect
+      // shrinks with it and the orb would drift into the top-left corner
+      const w = wrap.clientWidth
+      const h = wrap.clientHeight
+      const R = Math.min(w, h) * 0.36
+      const cx = w / 2
+      const cz = h / 2
 
       letters.current.forEach((l, i) => {
         const el = letterEls.current[i]
@@ -262,10 +267,46 @@ export function GateSphere() {
     setSlots(Array.from({ length: CODE.length }, (_, i) => clean[i] ?? null))
   }
 
+  // what the input shows: the letters already in the slots, gaps closed
+  const typedValue = slots.filter((s): s is string => !!s && s !== '·').join('')
+
+  // the typed path replaces the sphere; ESC or BACK brings it back. The
+  // field focuses itself without scrolling (autoFocus would drag the
+  // window body, and the desktop behind it, to the caret)
+  const focusField = useCallback((el: HTMLInputElement | null) => el?.focus({ preventScroll: true }), [])
+  const startTyping = (seed = '') => {
+    typed(typedValue + seed)
+    setTyping(true)
+  }
+
+  // on a keyboard, just start typing — the first letter opens the field
+  // and lands. Only while this gate is the thing in front (its window or
+  // dialog holds focus, or nothing does) so a letter meant for another
+  // program isn't stolen; editable targets are always left alone.
+  useEffect(() => {
+    if (phase !== 'input' || typing) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.key.length !== 1 || !/[a-z]/i.test(e.key)) return
+      const t = e.target as HTMLElement | null
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return
+      const root = rootRef.current
+      if (!root) return
+      const host = root.closest<HTMLElement>('[data-window-id], [role="dialog"]') ?? root
+      const active = document.activeElement
+      if (active && active !== document.body && !host.contains(active)) return
+      e.preventDefault()
+      startTyping(e.key)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, typing, typedValue])
+
   const slotW = 44
 
   return (
-    <div className={styles.gate}>
+    <div className={styles.gate} ref={rootRef}>
       <p className={styles.gateHead}>{config.header}</p>
 
       {/* slots */}
@@ -301,95 +342,114 @@ export function GateSphere() {
         ))}
       </motion.div>
 
-      {/* the sphere */}
-      <div
-        ref={wrapRef}
-        className={styles.sphere}
-        data-receding={phase !== 'input' || undefined}
-        onPointerDown={(e) => {
-          // NOTE: no pointer capture here — capturing on the wrapper retargets
-          // the click away from the letter buttons and picking silently dies
-          dragging.current = { x: e.clientX, y: e.clientY, t: performance.now() }
-          dragDist.current = 0
-          vel.current = { yaw: 0, pitch: 0 }
-        }}
-        onPointerMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect()
-          cursor.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
-          if (dragging.current) {
-            const dx = e.clientX - dragging.current.x
-            const dy = e.clientY - dragging.current.y
-            const now = performance.now()
-            const dt = Math.max(8, now - dragging.current.t) / 1000
-            dragDist.current += Math.abs(dx) + Math.abs(dy)
-            rot.current.yaw += dx * 0.006
-            rot.current.pitch = Math.max(-1.2, Math.min(1.2, rot.current.pitch + dy * 0.005))
-            // remember release velocity for inertia (clamped so a flick spins, not warps)
-            vel.current.yaw = Math.max(-3, Math.min(3, (dx * 0.006) / dt))
-            vel.current.pitch = Math.max(-2, Math.min(2, (dy * 0.005) / dt))
-            dragging.current = { x: e.clientX, y: e.clientY, t: now }
-          }
-        }}
-        onPointerUp={() => (dragging.current = null)}
-        onPointerLeave={() => {
-          cursor.current = null
-          dragging.current = null
-        }}
-      >
-        {letters.current.map((l, i) => (
-          <button
-            key={i}
-            ref={(el) => {
-              letterEls.current[i] = el
-            }}
-            className={styles.letter}
-            onClick={(e) => pick(i, e)}
-            tabIndex={-1}
-            aria-hidden="true"
-          >
-            {l.char}
-          </button>
-        ))}
-
-        {/* letters in flight */}
-        <AnimatePresence>
-          {flights.map((f) => (
-            <motion.span
-              key={f.key}
-              className={styles.flying}
-              initial={{ left: f.fromX, top: f.fromY, scale: 1.6 }}
-              animate={{
-                left: `calc(50% + ${(f.slot - (CODE.length - 1) / 2) * slotW}px)`,
-                top: -34,
-                scale: 1,
+      {/* the stage: the sphere, or the field standing in its place */}
+      <div className={styles.stage}>
+        <div
+          ref={wrapRef}
+          className={styles.sphere}
+          data-receding={phase !== 'input' || typing || undefined}
+          aria-hidden={typing || undefined}
+          onPointerDown={(e) => {
+            // NOTE: no pointer capture here — capturing on the wrapper retargets
+            // the click away from the letter buttons and picking silently dies
+            dragging.current = { x: e.clientX, y: e.clientY, t: performance.now() }
+            dragDist.current = 0
+            vel.current = { yaw: 0, pitch: 0 }
+          }}
+          onPointerMove={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect()
+            cursor.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
+            if (dragging.current) {
+              const dx = e.clientX - dragging.current.x
+              const dy = e.clientY - dragging.current.y
+              const now = performance.now()
+              const dt = Math.max(8, now - dragging.current.t) / 1000
+              dragDist.current += Math.abs(dx) + Math.abs(dy)
+              rot.current.yaw += dx * 0.006
+              rot.current.pitch = Math.max(-1.2, Math.min(1.2, rot.current.pitch + dy * 0.005))
+              // remember release velocity for inertia (clamped so a flick spins, not warps)
+              vel.current.yaw = Math.max(-3, Math.min(3, (dx * 0.006) / dt))
+              vel.current.pitch = Math.max(-2, Math.min(2, (dy * 0.005) / dt))
+              dragging.current = { x: e.clientX, y: e.clientY, t: now }
+            }
+          }}
+          onPointerUp={() => (dragging.current = null)}
+          onPointerLeave={() => {
+            cursor.current = null
+            dragging.current = null
+          }}
+        >
+          {letters.current.map((l, i) => (
+            <button
+              key={i}
+              ref={(el) => {
+                letterEls.current[i] = el
               }}
-              transition={reduced ? { duration: 0 } : SPRINGS.flight}
-              data-spring="flight"
-              onAnimationComplete={() => landFlight(f)}
+              className={styles.letter}
+              onClick={(e) => pick(i, e)}
+              tabIndex={-1}
+              aria-hidden="true"
             >
-              {f.char}
-            </motion.span>
+              {l.char}
+            </button>
           ))}
-        </AnimatePresence>
+
+          {/* letters in flight */}
+          <AnimatePresence>
+            {flights.map((f) => (
+              <motion.span
+                key={f.key}
+                className={styles.flying}
+                initial={{ left: f.fromX, top: f.fromY, scale: 1.6 }}
+                animate={{
+                  left: `calc(50% + ${(f.slot - (CODE.length - 1) / 2) * slotW}px)`,
+                  top: -34,
+                  scale: 1,
+                }}
+                transition={reduced ? { duration: 0 } : SPRINGS.flight}
+                data-spring="flight"
+                onAnimationComplete={() => landFlight(f)}
+              >
+                {f.char}
+              </motion.span>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        {/* the keyboard path: the field takes the sphere's place */}
+        {typing && phase === 'input' && (
+          <div className={styles.typeField}>
+            <input
+              className={styles.typeInput}
+              ref={focusField}
+              value={typedValue}
+              maxLength={CODE.length}
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              aria-label="Type the passcode"
+              onChange={(e) => typed(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setTyping(false)
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <p className={styles.hintLine}>{config.hint}</p>
 
-      {/* accessible / mobile fallback */}
+      {/* the way between the two paths — the sphere or the keyboard */}
       <div className={styles.typeRow}>
-        {typing ? (
-          <input
-            className={styles.typeInput}
-            autoFocus
-            maxLength={CODE.length}
-            aria-label="Type the passcode"
-            onChange={(e) => typed(e.target.value)}
-          />
-        ) : (
-          <button className={styles.typeToggle} onClick={() => setTyping(true)}>
-            <Copy k="gate.typeToggle" as="span" />
-          </button>
-        )}
+        <Button
+          tone="system"
+          size="sm"
+          className={styles.typeBtn}
+          onClick={() => (typing ? setTyping(false) : startTyping())}
+          aria-pressed={typing}
+        >
+          {typing ? <Copy k="gate.typeBack" as="span" /> : <Copy k="gate.typeToggle" as="span" />}
+        </Button>
       </div>
 
       {/* classic-Mac verdict */}
