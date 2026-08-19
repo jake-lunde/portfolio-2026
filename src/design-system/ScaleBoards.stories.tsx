@@ -1,6 +1,7 @@
 import { useEffect, useReducer } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
+import { raw, resolvedLength, scanTokens } from './tokenProbe'
 
 /* SCALE BOARDS — spacing, border width, radius, drawn at true size.
  *
@@ -16,57 +17,9 @@ import type { Meta, StoryObj } from '@storybook/react'
 
 /* ── live reads ───────────────────────────────────────────────────────────── */
 
-function raw(name: string): string {
-  if (typeof document === 'undefined') return ''
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-}
-
-/** Fully-resolved length via a probe element — used when the engine hands back
-    an unsubstituted var() chain. (Same idiom as TokensBoard.resolveLength.) */
-function probeLength(name: string): string {
-  if (typeof document === 'undefined') return ''
-  const probe = document.createElement('span')
-  probe.setAttribute('aria-hidden', 'true')
-  probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none'
-  probe.style.setProperty('width', `var(${name})`)
-  document.body.appendChild(probe)
-  const v = getComputedStyle(probe).width
-  probe.remove()
-  return v
-}
-
-/** What the token is worth, as a literal. */
-function resolved(name: string): string {
-  const v = raw(name)
-  if (v === '') return ''
-  return v.includes('var(') ? probeLength(name) : v
-}
-
-/** Every custom property declared in the loaded stylesheets matching `match`. */
-function scanTokens(match: RegExp): string[] {
-  const found = new Set<string>()
-  if (typeof document === 'undefined') return []
-  const walk = (rules: CSSRuleList) => {
-    for (const rule of Array.from(rules)) {
-      const nested = (rule as CSSGroupingRule).cssRules
-      if (nested) walk(nested)
-      const style = (rule as CSSStyleRule).style
-      if (!style) continue
-      for (let i = 0; i < style.length; i++) {
-        const prop = style.item(i)
-        if (prop.startsWith('--') && match.test(prop)) found.add(prop)
-      }
-    }
-  }
-  for (const sheet of Array.from(document.styleSheets)) {
-    try {
-      walk(sheet.cssRules)
-    } catch {
-      /* cross-origin sheet — nothing of ours lives there */
-    }
-  }
-  return Array.from(found)
-}
+/* raw / resolvedLength / scanTokens live in tokenProbe.ts — TypeRamp had the
+   same two functions letter for letter, which is the drift these boards are
+   built to catch, one level up. */
 
 /** Scanned names, falling back to the known set if stylesheet access is blocked. */
 function namesOr(match: RegExp, fallback: string[], skip?: RegExp): string[] {
@@ -74,7 +27,7 @@ function namesOr(match: RegExp, fallback: string[], skip?: RegExp): string[] {
   return (hits.length ? hits : fallback).filter((n) => raw(n) !== '')
 }
 
-const byValue = (a: string, b: string) => parseFloat(resolved(a)) - parseFloat(resolved(b))
+const byValue = (a: string, b: string) => parseFloat(resolvedLength(a)) - parseFloat(resolvedLength(b))
 
 /** The primitive a semantic token points at: the var() ref if the engine left
     one, otherwise the primitive holding the identical literal. Null = untraceable. */
@@ -245,8 +198,8 @@ function Flag({ children }: { children: ReactNode }) {
 
 function SpacingRow({ token, registry }: { token: string; registry: string[] }) {
   const ref = refOf(token, registry)
-  const value = resolved(token)
-  const base = parseFloat(resolved('--space-1')) || 4
+  const value = resolvedLength(token)
+  const base = parseFloat(resolvedLength('--space-1')) || 4
   const onGrid = value === '' || Math.abs(parseFloat(value) % base) < 0.01
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
@@ -302,7 +255,7 @@ function SpacingBoard() {
               style={{ width: `var(${token})`, height: 'var(--space-6)', background: 'var(--content-muted)' }}
             />
             <div style={{ ...readout, color: inkSoft, fontSize: 'var(--font-size-2xs)' }}>
-              {token.replace('--space-', '')} · {resolved(token)}
+              {token.replace('--space-', '')} · {resolvedLength(token)}
             </div>
           </div>
         ))}
@@ -326,7 +279,7 @@ function BorderBoard() {
       <TierLabel>Semantic</TierLabel>
       <section style={{ ...card, display: 'grid', gap: 'var(--space-4)' }}>
         {BORDER_SEMANTIC.map((token) => {
-          const value = resolved(token)
+          const value = resolvedLength(token)
           return (
             <div key={token} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
               <div style={{ ...readout, width: 210, flex: '0 0 auto' }}>{token}</div>
@@ -359,7 +312,7 @@ function BorderBoard() {
           <div key={token} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
             <div style={{ ...readout, color: inkSoft, width: 210, flex: '0 0 auto' }}>{token}</div>
             <div aria-hidden style={{ height: `var(${token})`, background: 'var(--content-muted)', flex: 1 }} />
-            <div style={{ ...readout, color: inkSoft, width: 60 }}>{resolved(token)}</div>
+            <div style={{ ...readout, color: inkSoft, width: 60 }}>{resolvedLength(token)}</div>
           </div>
         ))}
       </section>
