@@ -1171,3 +1171,79 @@
     transition: none;
   }
 }
+
+/* HUB MODES (HubModes.tsx) — FIG. C merged FIG. D into itself (s89): the
+   lo-fi model of each mode sits beside the screens that actually shipped
+   in it, and one tab row drives both. The shipped pane is deliberately
+   the smaller of the two — it's evidence for the diagram, not a gallery. */
+
+.hubRow {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--spacing-component-lg);
+  align-items: start;
+}
+
+.hubPane {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.hubPaneLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(231, 225, 210, 0.45);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* the cycling shipped screen — a button so keyboard and click can step it
+   by hand, since the auto-advance is the only motion in the plate */
+.hubShip {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1086 / 610;
+  padding: 0;
+  border: 1px solid rgba(231, 225, 210, 0.4);
+  background: rgba(19, 24, 17, 0.6);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.hubShip img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hubShip:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+.hubTabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: var(--spacing-component-md);
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .hubRow {
+    grid-template-columns: 1fr;
+  }
+
+  .hubTabs {
+    grid-template-columns: 1fr;
+  }
+}

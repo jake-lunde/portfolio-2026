@@ -1,14 +1,18 @@
 'use client'
 
-import { useState } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { useEffect, useRef, useState } from 'react'
+import { motion, useInView, useReducedMotion } from 'motion/react'
 import { sfx } from '@/lib/sound'
 import styles from './case.module.css'
 
 /* The shipped interaction model: Ambient (the heads-up screensaver) →
    Active (walk up, full dashboard, filter per member) → Authenticated
    (PIN gate before anything consequential). Two modes plus the auth
-   layer — per Jake's s35 correction; no "focused" tier. */
+   layer — per Jake's s35 correction; no "focused" tier.
+
+   s89: the old FIG. D plate (shipped surfaces, a placeholder) folded in
+   here. One tab row now drives two panes — the lo-fi model of the mode
+   and the screens that actually shipped in it, cycling. */
 
 type Mode = 'ambient' | 'active' | 'auth'
 
@@ -17,6 +21,31 @@ const MODES: Array<{ id: Mode; label: string; blurb: string }> = [
   { id: 'active', label: 'Active', blurb: 'Walk up and it’s a full dashboard. Drill into any feature, open modal views, filter the whole surface down to one family member.' },
   { id: 'auth', label: 'Authenticated', blurb: 'The gate. Adults manage, kids view. A PIN sits between glancing and doing: approvals, money, calendar edits.' },
 ]
+
+const DIR = '/case/family-hub/shipped'
+
+const SHOTS: Record<Mode, Array<{ file: string; alt: string }>> = {
+  ambient: [
+    { file: 'ambient-1', alt: 'Shipped ambient screen: a painting fills the wall edge to edge, the temperature tucked into one corner.' },
+    { file: 'ambient-2', alt: 'Shipped ambient screen: a photo card on a warm ground, the time top left, two chores due today bottom right.' },
+    { file: 'ambient-3', alt: 'Shipped ambient screen: a kid’s crayon drawing hung on a cream mat like a framed picture.' },
+    { file: 'ambient-4', alt: 'Shipped ambient screen: the clock alone, 06:45 PM, split across two deep green panels.' },
+  ],
+  active: [
+    { file: 'active-1', alt: 'Shipped active screen: the July month calendar with the whole household blocked onto one grid.' },
+    { file: 'active-2', alt: 'Shipped active screen: the chores board, a column per day, each kid’s tasks stacked under it.' },
+    { file: 'active-3', alt: 'Shipped active screen: the safety map, family activity down the side, two kids pinned on the street grid.' },
+    { file: 'active-4', alt: 'Shipped active screen: editing a chore, on-screen keyboard up, allowance and repeat settings above it.' },
+    { file: 'active-5', alt: 'Shipped active screen: settings, laid out as two columns of plain labelled rows.' },
+  ],
+  auth: [
+    { file: 'auth-1', alt: 'Shipped authenticated screen: the lock screen, a parent’s avatar beside a grid of icons used as the passcode.' },
+    { file: 'auth-2', alt: 'Shipped authenticated screen: Guardian Mode active, banner across the top, a kid’s investing portfolio underneath.' },
+    { file: 'auth-3', alt: 'Shipped authenticated screen: Parent mode active, the account balances and wallet unlocked behind the banner.' },
+  ],
+}
+
+const SHOT_MS = 3000
 
 const INK = '#E7E1D2'
 const W = 560
@@ -73,7 +102,7 @@ function Active() {
           </text>
         </g>
       ))}
-      <text x={132} y={276} fill={INK} fontSize="9" opacity="0.5" fontFamily="var(--mono)" letterSpacing="1">
+      <text x={160} y={276} fill={INK} fontSize="9" opacity="0.5" fontFamily="var(--mono)" letterSpacing="1">
         ← FILTERED TO OLIVIA
       </text>
     </g>
@@ -108,12 +137,90 @@ function Auth() {
 
 export function HubModes() {
   const [mode, setMode] = useState<Mode>('ambient')
+  const [shot, setShot] = useState(0)
+  const [held, setHeld] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const inView = useInView(rootRef, { amount: 0.35 })
   const reduced = useReducedMotion()
   const current = MODES.find((m) => m.id === mode)!
+  const shots = SHOTS[mode]
+
+  /* the shipped pane advances on its own, but only while it's on screen and
+     nobody's pointing at it — off-screen timers are just battery */
+  useEffect(() => {
+    if (reduced || held || !inView || shots.length < 2) return
+    const t = setInterval(() => setShot((i) => (i + 1) % shots.length), SHOT_MS)
+    return () => clearInterval(t)
+  }, [reduced, held, inView, shots.length])
+
+  function pick(id: Mode) {
+    sfx.tap()
+    setMode(id)
+    setShot(0)
+  }
 
   return (
-    <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14, position: 'relative', zIndex: 1 }}>
+    <div ref={rootRef}>
+      <div className={styles.hubRow}>
+        <div className={styles.hubPane}>
+          <span className={styles.hubPaneLabel}>
+            <span>Lo-fi · the model</span>
+          </span>
+          <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Hub surface, ${current.label} mode. ${current.blurb}`} fontFamily="var(--mono)">
+            <rect x={1} y={1} width={W - 2} height={H - 2} fill="none" stroke={INK} strokeWidth="1.5" opacity="0.6" />
+            {/* keyed remount, fade-in only — no exit animation to get stuck on */}
+            <motion.g
+              key={mode}
+              initial={reduced ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+            >
+              {mode === 'ambient' && <Ambient />}
+              {mode === 'active' && <Active />}
+              {mode === 'auth' && <Auth />}
+            </motion.g>
+          </svg>
+        </div>
+
+        <div className={styles.hubPane}>
+          <span className={styles.hubPaneLabel}>
+            <span>Shipped</span>
+            <span>
+              {String(shot + 1).padStart(2, '0')} / {String(shots.length).padStart(2, '0')}
+            </span>
+          </span>
+          <button
+            type="button"
+            className={styles.hubShip}
+            aria-label={`${current.label} as shipped, screen ${shot + 1} of ${shots.length}. Next screen.`}
+            onClick={() => {
+              sfx.tap()
+              setShot((i) => (i + 1) % shots.length)
+            }}
+            onPointerEnter={() => setHeld(true)}
+            onPointerLeave={() => setHeld(false)}
+            onFocus={() => setHeld(true)}
+            onBlur={() => setHeld(false)}
+          >
+            {shots.map((s, i) => (
+              <motion.img
+                key={s.file}
+                src={`${DIR}/${s.file}.webp`}
+                width={1086}
+                height={610}
+                alt={i === shot ? s.alt : ''}
+                aria-hidden={i === shot ? undefined : true}
+                loading="lazy"
+                draggable={false}
+                animate={{ opacity: i === shot ? 1 : 0 }}
+                transition={{ duration: reduced ? 0 : 0.4, ease: 'easeOut' }}
+              />
+            ))}
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.hubTabs}>
         {MODES.map((m) => {
           const on = m.id === mode
           return (
@@ -121,16 +228,13 @@ export function HubModes() {
               key={m.id}
               className={styles.moatNode}
               aria-pressed={on}
-              onClick={() => {
-                sfx.tap()
-                setMode(m.id)
-              }}
+              onClick={() => pick(m.id)}
               style={{
                 fontFamily: 'var(--mono)',
                 fontSize: 11,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
-                padding: '6px 12px',
+                padding: '8px 12px',
                 background: on ? 'var(--accent-expressive)' : 'transparent',
                 color: on ? '#131811' : '#E7E1D2',
                 border: `1px solid ${on ? 'var(--accent-expressive)' : 'rgba(231,225,210,0.4)'}`,
@@ -142,23 +246,8 @@ export function HubModes() {
         })}
       </div>
 
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Hub surface, ${current.label} mode. ${current.blurb}`} fontFamily="var(--mono)">
-        <rect x={1} y={1} width={W - 2} height={H - 2} fill="none" stroke={INK} strokeWidth="1.5" opacity="0.6" />
-        {/* keyed remount, fade-in only — no exit animation to get stuck on */}
-        <motion.g
-          key={mode}
-          initial={reduced ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
-        >
-          {mode === 'ambient' && <Ambient />}
-          {mode === 'active' && <Active />}
-          {mode === 'auth' && <Auth />}
-        </motion.g>
-      </svg>
-
       <div className={styles.moatWhy} aria-live="polite">
-        <b>{current.label}</b> · {current.blurb}
+        {current.blurb}
       </div>
     </div>
   )
