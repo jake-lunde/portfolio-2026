@@ -24,7 +24,7 @@
   justify-content: center;
   /* windows open at z:10 and only ever climb from there (useWindows.open
      bumps zTop by 1 per open/focus, never resets) — 6 sits above every
-     other piece of desktop furniture (icons/widgets at 2-4, the wanderer
+     other piece of desktop furniture (icons/widgets at 2-4, the crew
      at 3) and strictly below the floor a window can ever occupy, so an
      open window always wins over the rail without the rail having to
      watch window z-index at all. */

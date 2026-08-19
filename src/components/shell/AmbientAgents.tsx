@@ -1,44 +1,143 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { SPRINGS } from '@/lib/motion'
 import { useWindows } from '@/store/windows'
 import { useSettings } from '@/store/settings'
+import { useInspect } from '@/store/inspect'
 import { resolveWindow } from '@/programs/resolve'
 import { CREW_BY_ID, CREW_IDS, CREW_VERBS, agentForWindow, avatarFor, isCrewId } from './crew'
 import { CREW_DIALOG, CREW_INTRO, CREW_LAST_TASK, FLEE_LINES } from './crewDialog'
 import styles from './shell.module.css'
 
-/* The crew, off duty. WANDERER — one unit strolls the desktop's bottom
-   edge, pauses to inspect, mutters campy shift-talk in a speech bubble,
-   and BOLTS if your cursor gets too close (they are unionized about
-   personal space). FLASHES — opening a window summons its responsible
-   unit beside the titlebar for a beat.
+/* The crew, off duty. THE DESK HAS HOLES — a hatch opens on a bare patch
+   of desktop, one unit climbs halfway out of it, stands there a while,
+   turns, mutters a line of shift-talk, and drops back through the same
+   hole. Then the hole closes and the desk is a desk again. FLASHES —
+   opening a window still summons its responsible unit beside the
+   titlebar for a beat.
+
+   They used to WALK the bottom edge, which meant they walked straight
+   into the dock rail (Jake, 2026-08-16). Nobody commutes now: they
+   surface where there is room and leave the way they came.
+
+   WHERE THERE IS ROOM is measured, not guessed. A spot is bare when
+   every corner of the unit's footprint — hatch, shoulders, head —
+   answers `elementFromPoint` with the desk itself. Icons, widgets, the
+   nameplate, the wall, the dock rail and every open window are their
+   own elements, so they rule themselves out for free and keep doing it
+   as the desk changes. A crowded desk simply gets no agents.
 
    FIRST CONTACT — the first time your cursor finds a given unit they do
-   NOT bolt: they stop, turn, and say who they are, what model they run
-   on and what they last worked on (from the live feed when there is
-   one). Nobody should have to guess what these things are. After the
-   introduction that unit reverts to the startle-then-flee behaviour,
-   and the handshake is remembered across visits.
+   NOT bolt: they turn to face you and say who they are, what model they
+   run on and what they last worked on. Nobody should have to guess what
+   these things are. After the introduction that unit reverts to
+   startle-then-bail (there is nowhere to run, so they drop down the
+   hole), and the handshake is remembered across visits.
 
    All of it is decorative and aria-hidden — the same facts are spelled
    out, in text, inside COMMAND.CTR. */
 
 type Flash = { key: number; agent: string; x: number; y: number }
+type Phase = 'gone' | 'opening' | 'up' | 'ducking' | 'closing'
+type Align = 'left' | 'center' | 'right'
+/** desk-relative centre of the hatch, plus which way the unit faces */
+type Spot = { x: number; y: number; face: 1 | -1; align: Align }
 
-const WALK_SPEED = 26 // px/s
-const FLEE_SPEED = 190
 const SIZE = 34
+const HOLE_W = 52
 const FLEE_RADIUS = 64
 const INTRO_RADIUS = 84 // they notice you a little before they'd spook
 const INTRO_MS = 5200
+/* THE HATCH IS NEVER OPEN ON ITS OWN. It scales up as the unit pushes out
+   of it and shuts as they drop back through, so the two moves read as one
+   gesture — an empty hole sitting on the desk waiting for somebody is a
+   different, worse idea (Jake, s88). The lead is just enough to break the
+   surface before a head comes through it. */
+const HOLE_LEAD = 90
+const HOLE_SHUT = 150 // ... and it starts closing this long into the drop
+const RISE_MS = 420 // the climb out lands about here
+const DUCK_MS = 260 // dropping back in is quicker than climbing out
+const DWELL_MIN = 5200
+const DWELL_VAR = 3800
+const GAP_MIN = 4200
+const GAP_VAR = 4600
 const MET_KEY = 'lunde-crew-met'
+
+/* where a hatch may open: clear of the wings, low enough that the intro
+   card has room above it, high enough to keep off the dock rail. The
+   footprint probe below is the real test — these only keep the dice
+   inside the room. */
+const EDGE_PAD = 44
+const TOP_PAD = 116
+const BOTTOM_PAD = 34
+const TRIES = 30
+
+/* THE FOOTPRINT, IN POINTS — offsets from the hatch centre. Every one of
+   them has to land on bare desk or the spot belongs to somebody else.
+   The near rim (the +8 row) is not decoration: the hatch hangs 8px below
+   its own centre, and without those three the crew opened hatches whose
+   front lip bit into the top of the dock rail — the exact complaint this
+   redesign answers. */
+const PROBES: [number, number][] = [
+  [0, 0],
+  [-HOLE_W / 2, 0],
+  [HOLE_W / 2, 0],
+  [0, 8],
+  [-14, 7],
+  [14, 7],
+  [0, -SIZE / 2],
+  [0, -SIZE],
+  [-SIZE / 2 + 2, -SIZE + 6],
+  [SIZE / 2 - 2, -SIZE + 6],
+]
 
 const line = (agent: string): string => {
   const pool = [...(CREW_DIALOG[agent] ?? []), ...(CREW_DIALOG.anybody ?? [])]
   return pool[Math.floor(Math.random() * pool.length)] ?? 'BRB.'
+}
+
+const fleeLine = () => FLEE_LINES[Math.floor(Math.random() * FLEE_LINES.length)]
+
+/** bare desk, or somebody's furniture? `elementFromPoint` answers with
+    the topmost thing that takes a pointer — the wallpaper takes none, so
+    an empty patch answers with the desk layer itself. */
+function isBare(vx: number, vy: number): boolean {
+  return PROBES.every(([dx, dy]) => {
+    const el = document.elementFromPoint(vx + dx, vy + dy)
+    return (
+      !!el &&
+      (el.hasAttribute('data-desk-layer') || el.hasAttribute('data-desktop-root'))
+    )
+  })
+}
+
+/** roll for an empty patch of desk; null means the desk is full today */
+function findSpot(mouse: { x: number; y: number } | null): Spot | null {
+  const desk = document.querySelector('[data-desktop-root]')
+  if (!desk) return null
+  const r = desk.getBoundingClientRect()
+  const w = r.width - EDGE_PAD * 2
+  const h = r.height - TOP_PAD - BOTTOM_PAD
+  if (w < 140 || h < 60) return null
+  for (let i = 0; i < TRIES; i++) {
+    const x = EDGE_PAD + Math.random() * w
+    const y = TOP_PAD + Math.random() * h
+    const vx = r.left + x
+    const vy = r.top + y
+    // never surface under the cursor — that is a jump-scare, not a hello
+    if (mouse && Math.hypot(mouse.x - vx, mouse.y - (vy - SIZE / 2)) < INTRO_RADIUS + 70)
+      continue
+    if (isBare(vx, vy))
+      return {
+        x,
+        y,
+        face: Math.random() < 0.5 ? 1 : -1,
+        align: x < 150 ? 'left' : x > r.width - 150 ? 'right' : 'center',
+      }
+  }
+  return null
 }
 
 /* who you've already been introduced to — a plain id list in
@@ -52,27 +151,40 @@ function readMet(): Set<string> {
   }
 }
 
+/** the floor the desk has to clear before anybody surfaces — the same
+    900px the stylesheet uses to hide them, kept in step by hand because a
+    hatch that is display:none still costs a probe every few seconds */
+const DESKTOP_MIN = 900
+
 export function AmbientAgents() {
   const reduced = useReducedMotion()
   const skin = useSettings((s) => s.skin)
+  // INSPECT.MODE compresses the desk between two docked panels and the
+  // stylesheet hides the crew for the duration; stop probing as well
+  const inspecting = useInspect((s) => s.on)
 
-  /* ---- wanderer ---- */
-  const walkerRef = useRef<HTMLDivElement>(null)
-  const [agentIdx, setAgentIdx] = useState(0)
-  const [inspecting, setInspecting] = useState(false)
+  /* ---- the unit on shift ---- */
+  const [cycle, setCycle] = useState(0)
+  const [agent, setAgent] = useState(CREW_IDS[0])
+  const [spot, setSpot] = useState<Spot | null>(null)
+  const [phase, setPhaseState] = useState<Phase>('gone')
   const [bubble, setBubble] = useState<string | null>(null)
-  const [fleeing, setFleeing] = useState(false)
   const [jumping, setJumping] = useState(false)
-  const [offDuty, setOffDuty] = useState(false)
-  const [intro, setIntro] = useState<{ id: string; align: 'left' | 'center' | 'right' } | null>(null)
-  const pos = useRef(40)
-  const dir = useRef(1)
+  const [bailing, setBailing] = useState(false)
+  const [intro, setIntro] = useState<{ id: string; align: Align } | null>(null)
+
+  const roster = useRef(-1)
   const mouse = useRef<{ x: number; y: number } | null>(null)
-  const scaredOnce = useRef(false) // first scare = startle jump; after that they bolt
   const met = useRef<Set<string>>(new Set())
-  // a ref, not a local: the walk loop restarts whenever a state dep
-  // changes, and an introduction has to outlive that
-  const holdUntil = useRef(0)
+  const spotRef = useRef<Spot | null>(null) // desk coords, for the window watcher
+  const atRef = useRef<{ x: number; y: number } | null>(null) // viewport coords, for the cursor
+  const duckRef = useRef<((hold?: boolean) => void) | null>(null)
+  // handlers fire between renders, so the phase they read has to be a ref
+  const phaseRef = useRef<Phase>('gone')
+  const setPhase = useCallback((p: Phase) => {
+    phaseRef.current = p
+    setPhaseState(p)
+  }, [])
 
   /* "The last task i took on" comes from CREW_LAST_TASK — recorded, real,
      and free. It used to read the live feed for a fresher answer; that cost
@@ -85,142 +197,148 @@ export function AmbientAgents() {
     met.current = readMet()
   }, [])
 
+  /* ONE APPEARANCE PER RUN. The effect is keyed on `cycle` and nothing
+     else: it opens a hatch, plays the beats on timers, and schedules the
+     next cycle on its way out. Every earlier version of this component
+     re-entered its own loop whenever a piece of state changed; a chain of
+     timers cannot be interrupted by a re-render, which is the whole
+     reason the introduction used to need a ref to survive. */
   useEffect(() => {
-    if (reduced || offDuty) return
-    const el = walkerRef.current
-    if (!el) return
-    let raf = 0
-    let last = performance.now()
-    let pauseUntil = 0
-    let fleeUntil = 0
-    let scareCooldown = 0
-    let nextPause = pos.current + 140 + Math.random() * 220
-    let exited = false
+    if (reduced || inspecting) return
+    if (window.innerWidth <= DESKTOP_MIN) {
+      // a phone gets no crew, and no hit-testing loop either
+      const onWide = () => {
+        if (window.innerWidth > DESKTOP_MIN) setCycle((c) => c + 1)
+      }
+      window.addEventListener('resize', onWide)
+      return () => window.removeEventListener('resize', onWide)
+    }
+    let timers: number[] = []
+    const at = (ms: number, fn: () => void) => {
+      timers.push(window.setTimeout(fn, ms))
+    }
+    const clear = () => {
+      timers.forEach(clearTimeout)
+      timers = []
+    }
+    const again = (gap: number) => at(gap, () => setCycle((c) => c + 1))
 
-    const onMouse = (e: PointerEvent) => (mouse.current = { x: e.clientX, y: e.clientY })
-    window.addEventListener('pointermove', onMouse, { passive: true })
-
-    const exitStage = (side: 1 | -1) => {
-      // fully off-screen: go quiet, next unit clocks in after a 5s gap
-      exited = true
-      setOffDuty(true)
-      setFleeing(false)
-      setInspecting(false)
-      setBubble(null)
-      setTimeout(() => {
-        const next = (agentIdx + 1) % CREW_IDS.length
-        // next unit enters from the same wing, walking inward
-        pos.current = side === 1 ? window.innerWidth - SIZE - 4 : -SIZE + 4
-        dir.current = side === 1 ? -1 : 1
-        scaredOnce.current = false
-        setAgentIdx(next)
-        setOffDuty(false)
-        setBubble(line(CREW_IDS[next]))
-        setTimeout(() => setBubble(null), 2400)
-      }, 5000)
+    const found = findSpot(mouse.current)
+    if (!found) {
+      // desk full — try again shortly rather than burning a unit's turn
+      again(2600)
+      return clear
     }
 
-    const tick = (now: number) => {
-      raf = requestAnimationFrame(tick)
-      if (exited) return
-      const dt = Math.min(0.06, (now - last) / 1000)
-      last = now
+    const desk = document.querySelector('[data-desktop-root]')!.getBoundingClientRect()
+    const id = CREW_IDS[(roster.current = (roster.current + 1) % CREW_IDS.length)]
+    let scared = false
+    let calmUntil = 0
 
-      const rect = el.getBoundingClientRect()
-      const cx = rect.left + rect.width / 2
-      const cy = rect.top + rect.height / 2
+    spotRef.current = found
+    atRef.current = { x: desk.left + found.x, y: desk.top + found.y }
+    setAgent(id)
+    setSpot(found)
+    setBailing(false)
+    setPhase('opening')
 
-      // mid-introduction: they hold their ground and finish the sentence
-      if (now < holdUntil.current) return
+    const turn = (face: 1 | -1) => setSpot((s) => (s ? { ...s, face } : s))
+
+    const duck = (hold = false) => {
+      if (phaseRef.current !== 'up' && phaseRef.current !== 'opening') return
+      clear()
+      setIntro(null)
+      if (!hold) setBubble(null)
+      setPhase('ducking')
+      at(HOLE_SHUT, () => {
+        setPhase('closing')
+        setBubble(null)
+      })
+      at(DUCK_MS + HOLE_SHUT, () => {
+        setPhase('gone')
+        setSpot(null)
+        spotRef.current = null
+        atRef.current = null
+      })
+      again(DUCK_MS + HOLE_SHUT + GAP_MIN + Math.random() * GAP_VAR)
+    }
+    duckRef.current = duck
+
+    // out of the hatch, a beat of standing, then the turn and the line
+    const standing = HOLE_LEAD + RISE_MS
+    const dwell = DWELL_MIN + Math.random() * DWELL_VAR
+    at(HOLE_LEAD, () => setPhase('up'))
+    at(standing + 800, () => turn(-found.face as 1 | -1))
+    at(standing + 1150, () => {
+      setBubble(line(id))
+      at(2700, () => setBubble(null))
+    })
+    if (dwell > DWELL_MIN + 2400) {
+      at(standing + 4900, () => {
+        turn(found.face)
+        setBubble(line(id))
+        at(2600, () => setBubble(null))
+      })
+    }
+    at(standing + dwell, () => duck())
+
+    const onMouse = (e: PointerEvent) => {
+      mouse.current = { x: e.clientX, y: e.clientY }
+      const p = atRef.current
+      if (!p || phaseRef.current !== 'up') return
+      const now = performance.now()
+      const d = Math.hypot(e.clientX - p.x, e.clientY - (p.y - SIZE / 2))
 
       /* FIRST CONTACT. Before a unit has ever been met, the cursor
          getting close buys an introduction instead of a startle — they
          turn to face you and say what they are. Once each, remembered. */
-      if (
-        mouse.current &&
-        !met.current.has(CREW_IDS[agentIdx]) &&
-        Math.hypot(mouse.current.x - cx, mouse.current.y - cy) < INTRO_RADIUS
-      ) {
-        const id = CREW_IDS[agentIdx]
+      if (!met.current.has(id) && d < INTRO_RADIUS) {
         met.current.add(id)
         try {
           localStorage.setItem(MET_KEY, JSON.stringify([...met.current]))
         } catch {
           /* private mode — they'll re-introduce themselves next visit */
         }
-        holdUntil.current = now + INTRO_MS
-        scareCooldown = now + INTRO_MS + 1200
-        pauseUntil = now + INTRO_MS
-        dir.current = mouse.current.x > cx ? 1 : -1 // turn toward the cursor
+        clear()
         setBubble(null)
-        if (inspecting) setInspecting(false)
-        setIntro({
-          id,
-          align: pos.current < 150 ? 'left' : pos.current > window.innerWidth - 150 ? 'right' : 'center',
-        })
-        setTimeout(() => setIntro(null), INTRO_MS)
+        turn(e.clientX > p.x ? 1 : -1)
+        setIntro({ id, align: found.align })
+        calmUntil = now + INTRO_MS + 1400
+        at(INTRO_MS, () => setIntro(null))
+        at(INTRO_MS + 500, () => duck())
         return
       }
 
-      // cursor too close?
-      if (
-        mouse.current &&
-        now > scareCooldown &&
-        Math.hypot(mouse.current.x - cx, mouse.current.y - cy) < FLEE_RADIUS
-      ) {
-        if (!scaredOnce.current) {
-          // first offense: a startled hop, held ground
-          scaredOnce.current = true
-          scareCooldown = now + 1500
-          pauseUntil = now + 800
-          setJumping(true)
-          setInspecting(false)
-          setBubble(FLEE_LINES[Math.floor(Math.random() * FLEE_LINES.length)])
-          setTimeout(() => setJumping(false), 650)
-          setTimeout(() => setBubble(null), 1600)
-        } else {
-          // second offense: bolt
-          dir.current = mouse.current.x > cx ? -1 : 1
-          fleeUntil = now + 650
-          scareCooldown = now + 4000
-          pauseUntil = 0
-          setFleeing(true)
-          setInspecting(false)
-          setBubble(FLEE_LINES[Math.floor(Math.random() * FLEE_LINES.length)])
-          setTimeout(() => setBubble(null), 1600)
-        }
+      if (d > FLEE_RADIUS || now < calmUntil) return
+      if (!scared) {
+        // first offense: a startled hop, held ground
+        scared = true
+        calmUntil = now + 1600
+        setBubble(fleeLine())
+        setJumping(true)
+        at(650, () => setJumping(false))
+        at(1600, () => setBubble(null))
+      } else {
+        // second offense: down the hatch, mid-sentence
+        setBubble(fleeLine())
+        setBailing(true)
+        at(340, () => duck(true))
       }
-
-      const isFleeing = now < fleeUntil
-      if (!isFleeing && fleeing) setFleeing(false)
-
-      if (now < pauseUntil && !isFleeing) return
-      if (!isFleeing && inspecting) setInspecting(false)
-
-      pos.current += (isFleeing ? FLEE_SPEED : WALK_SPEED) * dt * dir.current
-
-      // walk (or bolt) fully off-stage before the shift change
-      if (pos.current > window.innerWidth + 6) return exitStage(1)
-      if (pos.current < -SIZE - 6) return exitStage(-1)
-
-      if (!isFleeing && Math.abs(pos.current - nextPause) < 2) {
-        pauseUntil = now + 2200 + Math.random() * 2600
-        nextPause = pos.current + dir.current * (150 + Math.random() * 240)
-        setInspecting(true)
-        if (Math.random() < 0.65) {
-          setBubble(line(CREW_IDS[agentIdx]))
-          setTimeout(() => setBubble(null), 2600)
-        }
-      }
-      el.style.transform = `translateX(${pos.current}px)`
     }
-    raf = requestAnimationFrame(tick)
+
+    // the desk moved under them — the spot they measured is not that spot
+    const onResize = () => duck()
+
+    window.addEventListener('pointermove', onMouse, { passive: true })
+    window.addEventListener('resize', onResize)
     return () => {
-      cancelAnimationFrame(raf)
+      clear()
+      duckRef.current = null
       window.removeEventListener('pointermove', onMouse)
+      window.removeEventListener('resize', onResize)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduced, offDuty, agentIdx, fleeing, inspecting])
+  }, [reduced, inspecting, cycle])
 
   /* ---- dispatch flashes ---- */
   const [flashes, setFlashes] = useState<Flash[]>([])
@@ -239,12 +357,25 @@ export function AmbientAgents() {
           const def = resolveWindow(id)
           if (def) {
             const key = flashKey.current++
-            const agent = agentForWindow(id)
+            const agentId = agentForWindow(id)
             setFlashes((cur) => [
               ...cur.slice(-2),
-              { key, agent, x: def.pos.x + def.size.w - 56, y: Math.max(40, def.pos.y - 4) },
+              { key, agent: agentId, x: def.pos.x + def.size.w - 56, y: Math.max(40, def.pos.y - 4) },
             ])
             setTimeout(() => setFlashes((cur) => cur.filter((f) => f.key !== key)), 1900)
+            /* a window is about to land on top of whoever is standing
+               there. They get out of the way rather than being papered
+               over — same courtesy the spot probe pays the furniture. */
+            const s = spotRef.current
+            if (
+              s &&
+              s.x > def.pos.x - 20 &&
+              s.x < def.pos.x + def.size.w + 20 &&
+              s.y > def.pos.y - 20 &&
+              s.y < def.pos.y + def.size.h + 20
+            ) {
+              duckRef.current?.()
+            }
           }
         }
       }
@@ -253,12 +384,46 @@ export function AmbientAgents() {
     return unsub
   }, [])
 
-  const walkerAgent = CREW_IDS[agentIdx]
+  const open = phase !== 'gone' && phase !== 'closing'
+  const risen = phase === 'up'
 
   return (
     <>
-      {!reduced && !offDuty && (
-        <div ref={walkerRef} className={styles.wanderer} aria-hidden="true">
+      {!reduced && spot && (
+        <div className={styles.burrow} style={{ left: spot.x, top: spot.y }} aria-hidden="true">
+          <motion.span
+            className={styles.hole}
+            initial={{ scale: 0 }}
+            animate={{ scale: open ? 1 : 0 }}
+            transition={SPRINGS.rise}
+            data-spring="rise"
+          />
+
+          <span className={styles.riser}>
+            {/* the climb is on this box and the idle bob is on the sprite
+                inside it: one transform each, so neither clobbers the
+                other (a CSS animation outranks an inline transform, which
+                is how the old walker's turn quietly never happened) */}
+            <motion.span
+              className={styles.rider}
+              initial={{ y: SIZE + 8 }}
+              animate={{ y: risen ? 0 : SIZE + 8, scaleX: spot.face }}
+              transition={SPRINGS.rise}
+              data-spring="rise"
+            >
+              <span
+                className={styles.agentAvatar}
+                data-talking={(risen && bubble && !bailing) || undefined}
+                data-fleeing={bailing || undefined}
+                data-jumping={jumping || undefined}
+                style={{
+                  WebkitMaskImage: `url(${avatarFor(agent, skin)})`,
+                  maskImage: `url(${avatarFor(agent, skin)})`,
+                }}
+              />
+            </motion.span>
+          </span>
+
           <AnimatePresence>
             {intro && (
               <motion.div
@@ -287,6 +452,7 @@ export function AmbientAgents() {
             {bubble && !intro && (
               <motion.span
                 className={styles.bubble}
+                data-align={spot.align}
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
@@ -295,16 +461,6 @@ export function AmbientAgents() {
               </motion.span>
             )}
           </AnimatePresence>
-          <span
-            className={styles.wandererAvatar}
-            data-inspecting={inspecting || undefined}
-            data-fleeing={fleeing || undefined}
-            style={{
-              transform: `scaleX(${dir.current})`,
-              WebkitMaskImage: `url(${avatarFor(walkerAgent, skin)})`,
-              maskImage: `url(${avatarFor(walkerAgent, skin)})`,
-            }}
-          />
         </div>
       )}
 
