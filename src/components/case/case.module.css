@@ -3,8 +3,8 @@
 
 .case {
   padding: 10px 30px 70px;
-  /* the evolution rail positions and container-queries against the
-     article — the window is resizable, so viewport queries can't know */
+  /* the sidecars container-query against the article — the window is
+     resizable, so viewport queries can't know */
   position: relative;
   container-type: inline-size;
 }
@@ -146,9 +146,11 @@
   z-index: 1;
 }
 
-.plateCap .fig {
+/* the cap's right-hand tag — a date, a ticker, the technique on show.
+   Held right even when the cap label beside it is dropped. */
+.plateCap .tag {
   color: var(--accent-expressive);
-  margin-left: auto; /* keeps FIG right-aligned when the cap label is dropped */
+  margin-left: auto;
 }
 
 .figcap {
@@ -587,305 +589,6 @@
   cursor: default;
 }
 
-/* evolution rail — the Family Hub as a nested mini-window riding the
-   right margin (EvolutionRail.tsx). Shown only when the window is wide
-   enough to grant it a margin; the column cedes the room and slides
-   left. Below the threshold the plates carry the imagery instead. */
-.railSlot {
-  display: none;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 16px;
-  width: clamp(280px, 34cqw, 360px);
-  pointer-events: none;
-  z-index: 5;
-  transition: width 0.35s ease;
-}
-
-/* the mini-window's own zoom: roughly double, never the whole window */
-.railSlot[data-zoom] {
-  width: min(720px, calc(100cqw - 48px));
-}
-
-/* container queries measure the CONTENT box (≈ window minus .case's
-   60px side padding). The rail shows from 640 up — Jake's call: better
-   overlapping the plates than absent. The column cedes whatever spare
-   width it has (up to a full clear berth) and eats the rest as overlap. */
-@container (min-width: 640px) {
-  .railSlot {
-    display: block;
-  }
-
-  .hasRail .wrap {
-    margin-right: clamp(0px, calc(100cqw - 780px), 410px);
-  }
-}
-
-.rail {
-  position: sticky;
-  top: 16px;
-  pointer-events: auto;
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
-  box-shadow: 6px 6px 0 rgba(23, 21, 13, 0.14);
-}
-
-[data-theme='dark'] .rail {
-  border-color: var(--border);
-  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
-}
-
-.railBar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  border-bottom: var(--border-width-default) solid var(--content);
-  background: var(--surface);
-}
-
-[data-theme='dark'] .railBar {
-  border-bottom-color: var(--border);
-}
-
-.railTitle {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  flex: 1;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.railVer {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.08em;
-  color: var(--accent);
-}
-
-.railCtrl {
-  width: 11px;
-  height: 11px;
-  flex: 0 0 auto;
-  border: var(--border-width-default) solid currentColor;
-  display: grid;
-  place-items: center;
-  font-size: var(--text-caption);
-  line-height: var(--leading-none);
-  color: inherit;
-  cursor: pointer;
-}
-
-.railCtrl:hover {
-  background: var(--accent-expressive);
-  color: #17150d;
-  border-color: #17150d;
-}
-
-.railCtrl:focus-visible,
-.railTick:focus-visible {
-  outline: 2px solid var(--accent-expressive);
-  outline-offset: 2px;
-}
-
-.railView {
-  /* the artwork's own paper (every export sits on white) — a uniform
-     10px of it on all sides; the stack below matches each stage's
-     exact export ratio so no letterbox ever spoils the margin */
-  padding: 10px;
-  background: #fff;
-  overflow: hidden;
-  transition:
-    padding 0.3s ease,
-    background 0.3s ease;
-}
-
-/* the break-out: the room runs edge to edge, no paper left */
-.railView[data-scene] {
-  padding: 0;
-}
-
-/* demo stages: the recordings sit on their own pure-black surround
-   (sampled #000 corners) — the mat matches so the loop is seamless */
-.railView[data-video] {
-  background: #000;
-}
-
-/* the sketch floats on the screen's own surface, not artboard paper */
-.railView[data-sketch] {
-  background: var(--surface);
-}
-
-/* window-shade: the collapsed bar is one big reopen target */
-.rail[data-min] .railBar {
-  cursor: pointer;
-  border-bottom: none;
-}
-
-.railStack {
-  position: relative;
-  transition: aspect-ratio 0.3s ease;
-}
-
-.railStack > img,
-.railStack > video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0;
-  transition: opacity 0.28s ease-out;
-  /* stacked layers must never eat the pointer — the sketch scene
-     underneath is the only interactive surface in the stack */
-  pointer-events: none;
-}
-
-.railStack > img[data-on],
-.railStack > video[data-on] {
-  opacity: 1;
-}
-
-/* the living sketch — cutouts adrift on slow, staggered loops */
-.railScene {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.28s ease-out;
-}
-
-.railScene[data-on] {
-  opacity: 1;
-}
-
-.railBitWrap {
-  position: absolute;
-}
-
-.railBit {
-  display: block;
-  width: 100%;
-  animation: railDrift var(--dur) ease-in-out var(--delay) infinite alternate;
-}
-
-/* faded out ≠ free: don't run 14 composited loops behind other stages */
-.railScene:not([data-on]) .railBit {
-  animation-play-state: paused;
-}
-
-@keyframes railDrift {
-  to {
-    transform: translate(var(--dx), var(--dy)) rotate(var(--dr));
-  }
-}
-
-/* the finale rooms — wall for on-device testing, kitchen for the ship */
-.railWallScene {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.28s ease-out;
-  pointer-events: none;
-}
-
-.railWallScene[data-on] {
-  opacity: 1;
-}
-
-.railWallScene svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.railDevice {
-  position: absolute;
-  left: 12%;
-  top: 8%;
-  width: 76%;
-  border-radius: 6px;
-  box-shadow:
-    0 12px 26px rgba(23, 21, 13, 0.32),
-    0 3px 8px rgba(23, 21, 13, 0.18);
-  transform: scale(1.04);
-  transition: transform 0.45s ease-out;
-}
-
-.railWallScene[data-on] .railDevice {
-  transform: scale(1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .railWallScene,
-  .railDevice {
-    transition: none;
-  }
-
-  .railDevice {
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .railStack > img,
-  .railStack > video,
-  .railScene {
-    transition: none;
-  }
-
-  .railBit {
-    animation: none;
-  }
-
-  .railSlot {
-    transition: none;
-  }
-}
-
-.railFoot {
-  display: flex;
-  gap: 3px;
-  padding: 7px 8px 5px;
-  border-top: var(--border-width-subtle) solid var(--border);
-}
-
-.railTick {
-  flex: 1;
-  height: 5px;
-  padding: 0;
-  border: none;
-  background: var(--border);
-  cursor: pointer;
-}
-
-.railTick:hover {
-  background: var(--content-muted);
-}
-
-.railTick[data-done] {
-  background: var(--accent);
-}
-
-.railTick[data-on] {
-  background: var(--accent-expressive);
-}
-
-.railLabel {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--content-muted);
-  padding: 0 8px 7px;
-}
-
 /* plate 11 — the launch film. Inline: muted, chromeless, pointer-inert.
    Lightbox: sound on, controls on, portal'd past the window transform. */
 .film {
@@ -1051,9 +754,8 @@
   pointer-events: none;
 }
 
-/* same berth rule as the evolution rail (Jake's call there: better
-   overlapping the plates than absent) — and the same threshold, so the
-   two rails arrive together on FAMILY.HUB */
+/* the sidecar needs a margin to ride in (Jake's old berth call: better
+   overlapping the plates than absent) */
 @container (min-width: 640px) {
   .idxSlot {
     display: block;
@@ -1169,5 +871,219 @@
 @media (prefers-reduced-motion: reduce) {
   .idx {
     transition: none;
+  }
+}
+
+/* HUB MODES (HubModes.tsx) — FIG. C merged FIG. D into itself (s89): one
+   viewport, two controls. The mode tabs at the bottom pick the mode; the
+   view switch at the top flips that mode's lo-fi diagram for the screens
+   that actually shipped in it. Both share a ratio so nothing jumps. */
+
+.hubHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-component-md);
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.hubViews {
+  display: flex;
+  gap: 14px;
+}
+
+/* text switches, not buttons — the mode tabs below are the heavy control
+   and two boxed rows would read as one confused toolbar */
+.hubView {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  color: rgba(231, 225, 210, 0.45);
+  cursor: pointer;
+}
+
+.hubView[aria-pressed='true'] {
+  color: rgba(231, 225, 210, 0.9);
+  border-bottom-color: var(--accent-expressive);
+}
+
+.hubView:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+.hubCount {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: rgba(231, 225, 210, 0.45);
+}
+
+/* the cycling shipped screen — a button so keyboard and click can step it
+   by hand, since the auto-advance is the only motion in the plate */
+.hubShip {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 560 / 315;
+  padding: 0;
+  border: 1px solid rgba(231, 225, 210, 0.4);
+  background: rgba(19, 24, 17, 0.6);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.hubShip img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.hubShip:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+.hubTabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: var(--spacing-component-md);
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .hubTabs {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* the plate carries both panes at every width (s94b — the rail and its
+   loan retired); the case's fidelity switch picks the pane */
+.hubStage [data-pane='shipped'] {
+  display: none;
+}
+
+.hubStage[data-view='shipped'] [data-pane='diagram'] {
+  display: none;
+}
+
+.hubStage[data-view='shipped'] [data-pane='shipped'] {
+  display: block;
+}
+
+
+/* FidelityFrame — one frame, two states, inside a plate. The chip
+   restates the global switch in this pair's own rung labels; panes
+   flip instantly (1992 machines don't crossfade). */
+.fidChip {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+/* text switches, same species as .hubView — plate ink, marks-only accent */
+.fidChipSeg {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  color: rgba(231, 225, 210, 0.45);
+  cursor: pointer;
+}
+
+.fidChipSeg[aria-pressed='true'] {
+  color: rgba(231, 225, 210, 0.9);
+  border-bottom-color: var(--accent-expressive);
+}
+
+.fidChipSeg:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+.fidStage [data-pane='shipped'] {
+  display: none;
+}
+
+.fidStage[data-mode='shipped'] [data-pane='draft'] {
+  display: none;
+}
+
+.fidStage[data-mode='shipped'] [data-pane='shipped'] {
+  display: block;
+}
+
+/* THE LIVING SKETCH (HeroSketch.tsx) — the concept collage in the case
+   header, where PROGRESS.VWR used to greet you (s94b). The cutouts
+   float straight on the screen's own surface, no artboard (Jake's
+   call — same as the rail's old sketch stage). Narrow: full width
+   between the thesis and the meta. Wide: it rides the header's right
+   side, beside the title and thesis. */
+.heroArt {
+  margin-top: 24px;
+}
+
+.hero {
+  position: relative;
+}
+
+@container (min-width: 640px) {
+  .heroArt {
+    position: absolute;
+    top: 44px; /* level with the eyebrow — .hero's own top padding */
+    right: 0;
+    width: clamp(260px, 34cqw, 400px);
+    margin-top: 0;
+  }
+
+  /* the header text clears the art's berth (thesis caps itself at 26ch
+     already; the eyebrow is the one line that spans) */
+  .hero[data-art] .eyebrow {
+    max-width: calc(100% - clamp(260px, 34cqw, 400px) - 24px);
+  }
+}
+
+.sketchScene {
+  position: relative;
+  aspect-ratio: 1089 / 490;
+}
+
+.sketchBitWrap {
+  position: absolute;
+}
+
+.sketchBit {
+  display: block;
+  width: 100%;
+  animation: sketchDrift var(--dur) ease-in-out var(--delay) infinite alternate;
+}
+
+@keyframes sketchDrift {
+  to {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--dr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sketchBit {
+    animation: none;
   }
 }
