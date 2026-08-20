@@ -43,34 +43,10 @@ type Flash = { key: number; agent: string; x: number; y: number }
 /* opening → rising → up → exiting → ducking → closing → gone. The hatch
    is only up for the two transitions at either end; `up` is a unit
    standing on a desk with no hole under it at all. */
-export type Phase = 'gone' | 'opening' | 'rising' | 'up' | 'exiting' | 'ducking' | 'closing'
-export type Align = 'left' | 'center' | 'right'
+type Phase = 'gone' | 'opening' | 'rising' | 'up' | 'exiting' | 'ducking' | 'closing'
+type Align = 'left' | 'center' | 'right'
 /** desk-relative centre of the hatch, plus which way the unit faces */
-export type Spot = { x: number; y: number; face: 1 | -1; align: Align }
-
-/* PINNING A FRAME (s88 follow-ups, task 3). Chromatic needs one frame
-   that looks the same every run; the live cycle is a chain of setTimeouts
-   ending in a roll of the dice, and even a seeded rng can't promise WHICH
-   millisecond a snapshot lands on inside that chain. `frame` skips the
-   cycle entirely and renders exactly this state — no timers, no dice —
-   which is a stronger guarantee than pinning the dice alone. Stories
-   only; the real desk never passes it. */
-type FrameOverride = {
-  phase: Phase
-  spot: Spot
-  agent: string
-  bubble?: string | null
-  intro?: { id: string; align: Align } | null
-}
-
-type AmbientAgentsProps = {
-  /** dice for findSpot/line/fleeLine and the dwell/gap rolls. Defaults to
-      Math.random for the real desk; a story passes a seeded generator so
-      a rare frame that DOES run the cycle rolls the same way every time. */
-  rng?: () => number
-  /** see PINNING A FRAME, above. */
-  frame?: FrameOverride
-}
+type Spot = { x: number; y: number; face: 1 | -1; align: Align }
 
 const SIZE = 34
 const HOLE_W = 52
@@ -89,25 +65,9 @@ const RISE_SETTLE = 520 // the climb's spring is done about here
 const DUCK_MS = 260 // dropping back in is quicker than climbing out
 const DWELL_MIN = 5200
 const DWELL_VAR = 3800
-/* CLOSING THE GAP. A cursor visibly closing on a standing unit buys the
-   dwell timer more time, in bounded increments, instead of letting the
-   timer drop the unit mid-approach — half of what makes first contact
-   reachable (the other half is findSpot hunting near the cursor while
-   anybody is still unmet, below `isBare`). The cap means parking nearby
-   and never arriving can't pin a unit up forever. */
-const DWELL_EXTEND = 260
-const DWELL_EXTEND_MAX = 3200
 const GAP_MIN = 4200
 const GAP_VAR = 4600
 const MET_KEY = 'lunde-crew-met'
-/* a desk that stays full (mobile's stacked windows, INSPECT's two docked
-   panels widened) used to retry every 2.6s forever — up to 30 spots ×
-   10 probes = 300 elementFromPoint calls a shot, for nothing. Doubling
-   the gap on every consecutive miss, capped, keeps the earliest retries
-   quick (the usual case is one window closing a moment later) without
-   burning hit-tests on a desk that has been full for minutes. */
-const FULL_RETRY_BASE = 2600
-const FULL_RETRY_MAX = 30000
 
 /* where a hatch may open: clear of the wings, low enough that the intro
    card has room above it, high enough to keep off the dock rail. The
@@ -137,12 +97,12 @@ const PROBES: [number, number][] = [
   [SIZE / 2 - 2, -SIZE + 6],
 ]
 
-const line = (agent: string, rng: () => number): string => {
+const line = (agent: string): string => {
   const pool = [...(CREW_DIALOG[agent] ?? []), ...(CREW_DIALOG.anybody ?? [])]
-  return pool[Math.floor(rng() * pool.length)] ?? 'BRB.'
+  return pool[Math.floor(Math.random() * pool.length)] ?? 'BRB.'
 }
 
-const fleeLine = (rng: () => number) => FLEE_LINES[Math.floor(rng() * FLEE_LINES.length)]
+const fleeLine = () => FLEE_LINES[Math.floor(Math.random() * FLEE_LINES.length)]
 
 /** bare desk, or somebody's furniture? `elementFromPoint` answers with
     the topmost thing that takes a pointer — the wallpaper takes none, so
@@ -157,46 +117,17 @@ function isBare(vx: number, vy: number): boolean {
   })
 }
 
-/* HUNTING. While anybody is still unmet, findSpot leans its roll toward
-   the cursor's own neighbourhood instead of rolling blind across the
-   whole desk — outside the jump-scare exclusion (the same ring findSpot
-   already keeps clear below), inside a radius a visitor's eye can still
-   cover without hunting for it. Once everyone has been introduced the
-   roll goes back to uniform: familiar faces don't need to be chased
-   down, and spreading out is the more interesting behaviour once first
-   contact isn't the point any more. */
-const CURSOR_BIAS_MIN = INTRO_RADIUS + 70 // == findSpot's own exclusion ring
-const CURSOR_BIAS_MAX = 400
-
-/** roll for an empty patch of desk; null means the desk is full today.
-    `hunt` asks for the cursor-biased roll (see HUNTING above) — a
-    visitor findSpot has never heard a cursor from still gets the
-    uniform roll regardless of what `hunt` says. `rng` is the dice — see
-    AmbientAgentsProps. */
-function findSpot(
-  mouse: { x: number; y: number } | null,
-  hunt: boolean,
-  rng: () => number
-): Spot | null {
+/** roll for an empty patch of desk; null means the desk is full today */
+function findSpot(mouse: { x: number; y: number } | null): Spot | null {
   const desk = document.querySelector('[data-desktop-root]')
   if (!desk) return null
   const r = desk.getBoundingClientRect()
   const w = r.width - EDGE_PAD * 2
   const h = r.height - TOP_PAD - BOTTOM_PAD
   if (w < 140 || h < 60) return null
-  const hunting = hunt && !!mouse
   for (let i = 0; i < TRIES; i++) {
-    let x: number
-    let y: number
-    if (hunting) {
-      const angle = rng() * Math.PI * 2
-      const radius = CURSOR_BIAS_MIN + rng() * (CURSOR_BIAS_MAX - CURSOR_BIAS_MIN)
-      x = Math.min(EDGE_PAD + w, Math.max(EDGE_PAD, mouse!.x - r.left + Math.cos(angle) * radius))
-      y = Math.min(TOP_PAD + h, Math.max(TOP_PAD, mouse!.y - r.top + Math.sin(angle) * radius))
-    } else {
-      x = EDGE_PAD + rng() * w
-      y = TOP_PAD + rng() * h
-    }
+    const x = EDGE_PAD + Math.random() * w
+    const y = TOP_PAD + Math.random() * h
     const vx = r.left + x
     const vy = r.top + y
     // never surface under the cursor — that is a jump-scare, not a hello
@@ -206,7 +137,7 @@ function findSpot(
       return {
         x,
         y,
-        face: rng() < 0.5 ? 1 : -1,
+        face: Math.random() < 0.5 ? 1 : -1,
         align: x < 150 ? 'left' : x > r.width - 150 ? 'right' : 'center',
       }
   }
@@ -224,18 +155,12 @@ function readMet(): Set<string> {
   }
 }
 
-/** the floor the desk has to clear before anybody surfaces — read from
-    the stylesheet's own `--crew-desktop-min` (shell.module.css) rather
-    than hand-copied, so the number lives in exactly one place. Still
-    checked here rather than left to CSS alone: a hatch that is
-    display:none still costs a probe every few seconds. Falls back to 900
-    if the property is ever missing (a stylesheet that hasn't loaded). */
-function desktopMin(): number {
-  const n = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--crew-desktop-min'))
-  return Number.isFinite(n) ? n : 900
-}
+/** the floor the desk has to clear before anybody surfaces — the same
+    900px the stylesheet uses to hide them, kept in step by hand because a
+    hatch that is display:none still costs a probe every few seconds */
+const DESKTOP_MIN = 900
 
-export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps = {}) {
+export function AmbientAgents() {
   const reduced = useReducedMotion()
   const skin = useSettings((s) => s.skin)
   // INSPECT.MODE compresses the desk between two docked panels and the
@@ -253,7 +178,6 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
   const [intro, setIntro] = useState<{ id: string; align: Align } | null>(null)
 
   const roster = useRef(-1)
-  const fullRetries = useRef(0) // consecutive desk-full rolls — see the backoff below
   const mouse = useRef<{ x: number; y: number } | null>(null)
   const pointerWaited = useRef(false)
   const met = useRef<Set<string>>(new Set())
@@ -289,27 +213,6 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
     return () => window.removeEventListener('pointermove', record)
   }, [])
 
-  /* THE DRAG BLIND SPOT. The window watcher below reacts to a new window
-     id, so opening a window sends whoever is standing there down the
-     hatch politely — but dragging or resizing an EXISTING window onto a
-     standing unit fires no store event at all, and the window just slides
-     over them at z-index 3. That contradicts the spot probe's own
-     courtesy to the furniture, so while a unit is up this re-runs the
-     same 10-point isBare footprint on a throttled interval and ducks the
-     moment it stops answering with the desk. Ten elementFromPoint calls a
-     second is nothing, and it catches icon drags for free — no subscribing
-     to window positions required. Runs for the life of the component,
-     same as the pointermove recorder above; it is a no-op read the rest
-     of the time (phaseRef only reads 'up' once every so often). */
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      const at = atRef.current
-      if (phaseRef.current !== 'up' || !at) return
-      if (!isBare(at.x, at.y)) duckRef.current?.()
-    }, 1000)
-    return () => window.clearInterval(id)
-  }, [])
-
   /* ONE APPEARANCE PER RUN. The effect is keyed on `cycle` and nothing
      else: it opens a hatch, plays the beats on timers, and schedules the
      next cycle on its way out. Every earlier version of this component
@@ -317,15 +220,11 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
      timers cannot be interrupted by a re-render, which is the whole
      reason the introduction used to need a ref to survive. */
   useEffect(() => {
-    // a pinned frame (Chromatic stories) skips the cycle outright — see
-    // PINNING A FRAME, above
-    if (frame) return
     if (reduced || inspecting) return
-    const min = desktopMin()
-    if (window.innerWidth <= min) {
+    if (window.innerWidth <= DESKTOP_MIN) {
       // a phone gets no crew, and no hit-testing loop either
       const onWide = () => {
-        if (window.innerWidth > min) setCycle((c) => c + 1)
+        if (window.innerWidth > DESKTOP_MIN) setCycle((c) => c + 1)
       }
       window.addEventListener('resize', onWide)
       return () => window.removeEventListener('resize', onWide)
@@ -349,43 +248,26 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
     }
 
     let timers: number[] = []
-    // the dwell countdown, tracked apart from `timers` above so an
-    // approaching cursor can push it out without touching the turn/bubble
-    // beats scheduled alongside it (see armDuck/extendDuck, below)
-    let duckTimer: number | null = null
-    let duckDeadline = 0
     const at = (ms: number, fn: () => void) => {
       timers.push(window.setTimeout(fn, ms))
     }
     const clear = () => {
       timers.forEach(clearTimeout)
       timers = []
-      if (duckTimer !== null) {
-        clearTimeout(duckTimer)
-        duckTimer = null
-      }
     }
     const again = (gap: number) => at(gap, () => setCycle((c) => c + 1))
 
-    // hunt near the cursor while anybody is still unmet (see HUNTING,
-    // above findSpot) — once the whole crew has been introduced the roll
-    // goes back to uniform
-    const found = findSpot(mouse.current, met.current.size < CREW_IDS.length, rng)
+    const found = findSpot(mouse.current)
     if (!found) {
-      // desk full — retry, backing off geometrically per FULL_RETRY_BASE
-      const backoff = Math.min(FULL_RETRY_BASE * 2 ** fullRetries.current, FULL_RETRY_MAX)
-      fullRetries.current += 1
-      again(backoff)
+      // desk full — try again shortly rather than burning a unit's turn
+      again(2600)
       return clear
     }
-    fullRetries.current = 0
 
     const desk = document.querySelector('[data-desktop-root]')!.getBoundingClientRect()
     const id = CREW_IDS[(roster.current = (roster.current + 1) % CREW_IDS.length)]
     let scared = false
     let calmUntil = 0
-    let lastDist: number | null = null // for CLOSING THE GAP, below
-    let extended = 0
 
     spotRef.current = found
     atRef.current = { x: desk.left + found.x, y: desk.top + found.y }
@@ -415,41 +297,17 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
         spotRef.current = null
         atRef.current = null
       })
-      again(HOLE_LEAD + DUCK_MS + HOLE_SHUT + GAP_MIN + rng() * GAP_VAR)
+      again(HOLE_LEAD + DUCK_MS + HOLE_SHUT + GAP_MIN + Math.random() * GAP_VAR)
     }
     duckRef.current = duck
-
-    // arms (or re-arms) the dwell countdown against `duckDeadline` rather
-    // than a bare `at()`, so extendDuck can push it out mid-flight
-    const armDuck = (delay: number) => {
-      if (duckTimer !== null) clearTimeout(duckTimer)
-      duckDeadline = performance.now() + delay
-      duckTimer = window.setTimeout(() => {
-        duckTimer = null
-        duck()
-      }, delay)
-    }
-    // CLOSING THE GAP (see the const above) — adds time to whatever is
-    // left on the clock rather than replacing it, and refuses once the
-    // cap is spent or the countdown isn't armed (already fleeing, mid
-    // intro, or already gone)
-    const extendDuck = (bump: number) => {
-      if (duckTimer === null || extended >= DWELL_EXTEND_MAX) return
-      const add = Math.min(bump, DWELL_EXTEND_MAX - extended)
-      extended += add
-      armDuck(Math.max(0, duckDeadline - performance.now()) + add)
-    }
 
     // out of the hatch, the hatch shuts behind them, a beat of standing,
     // then the turn and the line
     const standing = HOLE_LEAD + RISE_SETTLE
-    const dwell = DWELL_MIN + rng() * DWELL_VAR
+    const dwell = DWELL_MIN + Math.random() * DWELL_VAR
     at(HOLE_LEAD, () => setPhase('rising'))
     at(standing, () => {
       setPhase('up')
-      // the dwell countdown starts here, armed rather than a fixed
-      // `at()`, so a closing cursor can buy it more time (react, below)
-      armDuck(dwell)
       // a cursor already parked beside the spot gets a reaction the
       // moment they stand up — react used to fire on movement only, so a
       // visitor who held still was never noticed
@@ -457,16 +315,17 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
     })
     at(standing + 800, () => turn(-found.face as 1 | -1))
     at(standing + 1150, () => {
-      setBubble(line(id, rng))
+      setBubble(line(id))
       at(2700, () => setBubble(null))
     })
     if (dwell > DWELL_MIN + 2400) {
       at(standing + 4900, () => {
         turn(found.face)
-        setBubble(line(id, rng))
+        setBubble(line(id))
         at(2600, () => setBubble(null))
       })
     }
+    at(standing + dwell, () => duck())
 
     // shared between the pointermove listener and the moment-of-standing
     // check below, so both a moving cursor and a parked one get read the
@@ -476,11 +335,6 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
       if (!p || phaseRef.current !== 'up') return
       const now = performance.now()
       const d = Math.hypot(x - p.x, y - (p.y - SIZE / 2))
-
-      // closing the gap buys the dwell timer more time instead of
-      // letting it drop the unit mid-approach — see DWELL_EXTEND, above
-      if (lastDist !== null && d < lastDist - 1) extendDuck(DWELL_EXTEND)
-      lastDist = d
 
       /* FIRST CONTACT. Before a unit has ever been met, the cursor
          getting close buys an introduction instead of a startle — they
@@ -507,13 +361,13 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
         // first offense: a startled hop, held ground
         scared = true
         calmUntil = now + 1600
-        setBubble(fleeLine(rng))
+        setBubble(fleeLine())
         setJumping(true)
         at(650, () => setJumping(false))
         at(1600, () => setBubble(null))
       } else {
         // second offense: down the hatch, mid-sentence
-        setBubble(fleeLine(rng))
+        setBubble(fleeLine())
         setBailing(true)
         at(340, () => duck(true))
       }
@@ -536,7 +390,7 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
       window.removeEventListener('resize', onResize)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduced, inspecting, cycle, frame, rng])
+  }, [reduced, inspecting, cycle])
 
   /* ---- dispatch flashes ---- */
   const [flashes, setFlashes] = useState<Flash[]>([])
@@ -582,40 +436,21 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
     return unsub
   }, [])
 
-  // a pinned frame overrides the live state wholesale — see PINNING A
-  // FRAME, above
-  const activePhase = frame?.phase ?? phase
-  const activeSpot = frame?.spot ?? spot
-  const activeAgent = frame?.agent ?? agent
-  const activeBubble = frame ? frame.bubble ?? null : bubble
-  const activeIntro = frame ? frame.intro ?? null : intro
-
   // the door is up for the two transitions only; the body is up from the
   // moment it starts climbing until the moment it starts dropping
-  const open =
-    activePhase === 'opening' ||
-    activePhase === 'rising' ||
-    activePhase === 'exiting' ||
-    activePhase === 'ducking'
-  const risen = activePhase === 'rising' || activePhase === 'up' || activePhase === 'exiting'
+  const open = phase === 'opening' || phase === 'rising' || phase === 'exiting' || phase === 'ducking'
+  const risen = phase === 'rising' || phase === 'up' || phase === 'exiting'
 
   return (
     <>
-      {(frame || !reduced) && activeSpot && (
-        <div
-          className={styles.burrow}
-          style={{ left: activeSpot.x, top: activeSpot.y }}
-          aria-hidden="true"
-        >
+      {!reduced && spot && (
+        <div className={styles.burrow} style={{ left: spot.x, top: spot.y }} aria-hidden="true">
           {/* the door is on `widget` and the body on `rise`: the climb
               is allowed its bounce, the hole is not (Jake, s88 — `rise`
-              overshot the ellipse to 1.09 and read as rubber). A pinned
-              frame skips the entrance too (`initial={false}`) — Chromatic
-              gets the settled art directly rather than a snapshot of
-              wherever the spring happened to be. */}
+              overshot the ellipse to 1.09 and read as rubber) */}
           <motion.span
             className={styles.hole}
-            initial={frame ? false : { scale: 0 }}
+            initial={{ scale: 0 }}
             animate={{ scale: open ? 1 : 0 }}
             transition={SPRINGS.widget}
             data-spring="widget"
@@ -632,58 +467,58 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
                 rubber the door was cured of. */}
             <motion.span
               className={styles.rider}
-              initial={frame ? false : { y: SIZE + 8 }}
-              animate={{ y: risen ? 0 : SIZE + 8, scaleX: activeSpot.face }}
+              initial={{ y: SIZE + 8 }}
+              animate={{ y: risen ? 0 : SIZE + 8, scaleX: spot.face }}
               transition={{ ...SPRINGS.rise, scaleX: { duration: 0 } }}
               data-spring="rise"
             >
               <span
                 className={styles.agentAvatar}
-                data-talking={(risen && activeBubble && !bailing) || undefined}
+                data-talking={(risen && bubble && !bailing) || undefined}
                 data-fleeing={bailing || undefined}
                 data-jumping={jumping || undefined}
                 style={{
-                  WebkitMaskImage: `url(${avatarFor(activeAgent, skin)})`,
-                  maskImage: `url(${avatarFor(activeAgent, skin)})`,
+                  WebkitMaskImage: `url(${avatarFor(agent, skin)})`,
+                  maskImage: `url(${avatarFor(agent, skin)})`,
                 }}
               />
             </motion.span>
           </span>
 
           <AnimatePresence>
-            {activeIntro && (
+            {intro && (
               <motion.div
                 className={styles.introCard}
-                data-align={activeIntro.align}
-                initial={frame ? false : { opacity: 0, y: 6 }}
+                data-align={intro.align}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={SPRINGS.deck}
                 data-spring="deck"
               >
                 <span className={styles.introHi}>
-                  HI, I&apos;M {CREW_BY_ID[activeIntro.id]?.name}. ONE OF JAKE&apos;S AGENTS.
+                  HI — I&apos;M {CREW_BY_ID[intro.id]?.name}. ONE OF JAKE&apos;S AGENTS.
                 </span>
                 <span className={styles.introJob}>
-                  {CREW_BY_ID[activeIntro.id]?.model} · {CREW_INTRO[activeIntro.id]}
+                  {CREW_BY_ID[intro.id]?.model} · {CREW_INTRO[intro.id]}
                 </span>
                 <span className={styles.introTask}>
-                  LAST TASK: {lastTask[activeIntro.id]}
+                  LAST TASK — {lastTask[intro.id]}
                 </span>
               </motion.div>
             )}
           </AnimatePresence>
 
           <AnimatePresence>
-            {activeBubble && !activeIntro && (
+            {bubble && !intro && (
               <motion.span
                 className={styles.bubble}
-                data-align={activeSpot.align}
-                initial={frame ? false : { opacity: 0, y: 4 }}
+                data-align={spot.align}
+                initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
               >
-                {activeBubble}
+                {bubble}
               </motion.span>
             )}
           </AnimatePresence>
