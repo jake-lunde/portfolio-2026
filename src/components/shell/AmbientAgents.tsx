@@ -43,10 +43,34 @@ type Flash = { key: number; agent: string; x: number; y: number }
 /* opening → rising → up → exiting → ducking → closing → gone. The hatch
    is only up for the two transitions at either end; `up` is a unit
    standing on a desk with no hole under it at all. */
-type Phase = 'gone' | 'opening' | 'rising' | 'up' | 'exiting' | 'ducking' | 'closing'
-type Align = 'left' | 'center' | 'right'
+export type Phase = 'gone' | 'opening' | 'rising' | 'up' | 'exiting' | 'ducking' | 'closing'
+export type Align = 'left' | 'center' | 'right'
 /** desk-relative centre of the hatch, plus which way the unit faces */
-type Spot = { x: number; y: number; face: 1 | -1; align: Align }
+export type Spot = { x: number; y: number; face: 1 | -1; align: Align }
+
+/* PINNING A FRAME (s88 follow-ups, task 3). Chromatic needs one frame
+   that looks the same every run; the live cycle is a chain of setTimeouts
+   ending in a roll of the dice, and even a seeded rng can't promise WHICH
+   millisecond a snapshot lands on inside that chain. `frame` skips the
+   cycle entirely and renders exactly this state — no timers, no dice —
+   which is a stronger guarantee than pinning the dice alone. Stories
+   only; the real desk never passes it. */
+type FrameOverride = {
+  phase: Phase
+  spot: Spot
+  agent: string
+  bubble?: string | null
+  intro?: { id: string; align: Align } | null
+}
+
+type AmbientAgentsProps = {
+  /** dice for findSpot/line/fleeLine and the dwell/gap rolls. Defaults to
+      Math.random for the real desk; a story passes a seeded generator so
+      a rare frame that DOES run the cycle rolls the same way every time. */
+  rng?: () => number
+  /** see PINNING A FRAME, above. */
+  frame?: FrameOverride
+}
 
 const SIZE = 34
 const HOLE_W = 52
@@ -105,12 +129,12 @@ const PROBES: [number, number][] = [
   [SIZE / 2 - 2, -SIZE + 6],
 ]
 
-const line = (agent: string): string => {
+const line = (agent: string, rng: () => number): string => {
   const pool = [...(CREW_DIALOG[agent] ?? []), ...(CREW_DIALOG.anybody ?? [])]
-  return pool[Math.floor(Math.random() * pool.length)] ?? 'BRB.'
+  return pool[Math.floor(rng() * pool.length)] ?? 'BRB.'
 }
 
-const fleeLine = () => FLEE_LINES[Math.floor(Math.random() * FLEE_LINES.length)]
+const fleeLine = (rng: () => number) => FLEE_LINES[Math.floor(rng() * FLEE_LINES.length)]
 
 /** bare desk, or somebody's furniture? `elementFromPoint` answers with
     the topmost thing that takes a pointer — the wallpaper takes none, so
@@ -139,8 +163,13 @@ const CURSOR_BIAS_MAX = 400
 /** roll for an empty patch of desk; null means the desk is full today.
     `hunt` asks for the cursor-biased roll (see HUNTING above) — a
     visitor findSpot has never heard a cursor from still gets the
-    uniform roll regardless of what `hunt` says. */
-function findSpot(mouse: { x: number; y: number } | null, hunt: boolean): Spot | null {
+    uniform roll regardless of what `hunt` says. `rng` is the dice — see
+    AmbientAgentsProps. */
+function findSpot(
+  mouse: { x: number; y: number } | null,
+  hunt: boolean,
+  rng: () => number
+): Spot | null {
   const desk = document.querySelector('[data-desktop-root]')
   if (!desk) return null
   const r = desk.getBoundingClientRect()
@@ -152,13 +181,13 @@ function findSpot(mouse: { x: number; y: number } | null, hunt: boolean): Spot |
     let x: number
     let y: number
     if (hunting) {
-      const angle = Math.random() * Math.PI * 2
-      const radius = CURSOR_BIAS_MIN + Math.random() * (CURSOR_BIAS_MAX - CURSOR_BIAS_MIN)
+      const angle = rng() * Math.PI * 2
+      const radius = CURSOR_BIAS_MIN + rng() * (CURSOR_BIAS_MAX - CURSOR_BIAS_MIN)
       x = Math.min(EDGE_PAD + w, Math.max(EDGE_PAD, mouse!.x - r.left + Math.cos(angle) * radius))
       y = Math.min(TOP_PAD + h, Math.max(TOP_PAD, mouse!.y - r.top + Math.sin(angle) * radius))
     } else {
-      x = EDGE_PAD + Math.random() * w
-      y = TOP_PAD + Math.random() * h
+      x = EDGE_PAD + rng() * w
+      y = TOP_PAD + rng() * h
     }
     const vx = r.left + x
     const vy = r.top + y
@@ -169,7 +198,7 @@ function findSpot(mouse: { x: number; y: number } | null, hunt: boolean): Spot |
       return {
         x,
         y,
-        face: Math.random() < 0.5 ? 1 : -1,
+        face: rng() < 0.5 ? 1 : -1,
         align: x < 150 ? 'left' : x > r.width - 150 ? 'right' : 'center',
       }
   }
@@ -192,7 +221,7 @@ function readMet(): Set<string> {
     hatch that is display:none still costs a probe every few seconds */
 const DESKTOP_MIN = 900
 
-export function AmbientAgents() {
+export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps = {}) {
   const reduced = useReducedMotion()
   const skin = useSettings((s) => s.skin)
   // INSPECT.MODE compresses the desk between two docked panels and the
@@ -273,6 +302,9 @@ export function AmbientAgents() {
      timers cannot be interrupted by a re-render, which is the whole
      reason the introduction used to need a ref to survive. */
   useEffect(() => {
+    // a pinned frame (Chromatic stories) skips the cycle outright — see
+    // PINNING A FRAME, above
+    if (frame) return
     if (reduced || inspecting) return
     if (window.innerWidth <= DESKTOP_MIN) {
       // a phone gets no crew, and no hit-testing loop either
@@ -322,7 +354,7 @@ export function AmbientAgents() {
     // hunt near the cursor while anybody is still unmet (see HUNTING,
     // above findSpot) — once the whole crew has been introduced the roll
     // goes back to uniform
-    const found = findSpot(mouse.current, met.current.size < CREW_IDS.length)
+    const found = findSpot(mouse.current, met.current.size < CREW_IDS.length, rng)
     if (!found) {
       // desk full — try again shortly rather than burning a unit's turn
       again(2600)
@@ -364,7 +396,7 @@ export function AmbientAgents() {
         spotRef.current = null
         atRef.current = null
       })
-      again(HOLE_LEAD + DUCK_MS + HOLE_SHUT + GAP_MIN + Math.random() * GAP_VAR)
+      again(HOLE_LEAD + DUCK_MS + HOLE_SHUT + GAP_MIN + rng() * GAP_VAR)
     }
     duckRef.current = duck
 
@@ -392,7 +424,7 @@ export function AmbientAgents() {
     // out of the hatch, the hatch shuts behind them, a beat of standing,
     // then the turn and the line
     const standing = HOLE_LEAD + RISE_SETTLE
-    const dwell = DWELL_MIN + Math.random() * DWELL_VAR
+    const dwell = DWELL_MIN + rng() * DWELL_VAR
     at(HOLE_LEAD, () => setPhase('rising'))
     at(standing, () => {
       setPhase('up')
@@ -406,13 +438,13 @@ export function AmbientAgents() {
     })
     at(standing + 800, () => turn(-found.face as 1 | -1))
     at(standing + 1150, () => {
-      setBubble(line(id))
+      setBubble(line(id, rng))
       at(2700, () => setBubble(null))
     })
     if (dwell > DWELL_MIN + 2400) {
       at(standing + 4900, () => {
         turn(found.face)
-        setBubble(line(id))
+        setBubble(line(id, rng))
         at(2600, () => setBubble(null))
       })
     }
@@ -456,13 +488,13 @@ export function AmbientAgents() {
         // first offense: a startled hop, held ground
         scared = true
         calmUntil = now + 1600
-        setBubble(fleeLine())
+        setBubble(fleeLine(rng))
         setJumping(true)
         at(650, () => setJumping(false))
         at(1600, () => setBubble(null))
       } else {
         // second offense: down the hatch, mid-sentence
-        setBubble(fleeLine())
+        setBubble(fleeLine(rng))
         setBailing(true)
         at(340, () => duck(true))
       }
@@ -485,7 +517,7 @@ export function AmbientAgents() {
       window.removeEventListener('resize', onResize)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduced, inspecting, cycle])
+  }, [reduced, inspecting, cycle, frame, rng])
 
   /* ---- dispatch flashes ---- */
   const [flashes, setFlashes] = useState<Flash[]>([])
@@ -531,21 +563,40 @@ export function AmbientAgents() {
     return unsub
   }, [])
 
+  // a pinned frame overrides the live state wholesale — see PINNING A
+  // FRAME, above
+  const activePhase = frame?.phase ?? phase
+  const activeSpot = frame?.spot ?? spot
+  const activeAgent = frame?.agent ?? agent
+  const activeBubble = frame ? frame.bubble ?? null : bubble
+  const activeIntro = frame ? frame.intro ?? null : intro
+
   // the door is up for the two transitions only; the body is up from the
   // moment it starts climbing until the moment it starts dropping
-  const open = phase === 'opening' || phase === 'rising' || phase === 'exiting' || phase === 'ducking'
-  const risen = phase === 'rising' || phase === 'up' || phase === 'exiting'
+  const open =
+    activePhase === 'opening' ||
+    activePhase === 'rising' ||
+    activePhase === 'exiting' ||
+    activePhase === 'ducking'
+  const risen = activePhase === 'rising' || activePhase === 'up' || activePhase === 'exiting'
 
   return (
     <>
-      {!reduced && spot && (
-        <div className={styles.burrow} style={{ left: spot.x, top: spot.y }} aria-hidden="true">
+      {(frame || !reduced) && activeSpot && (
+        <div
+          className={styles.burrow}
+          style={{ left: activeSpot.x, top: activeSpot.y }}
+          aria-hidden="true"
+        >
           {/* the door is on `widget` and the body on `rise`: the climb
               is allowed its bounce, the hole is not (Jake, s88 — `rise`
-              overshot the ellipse to 1.09 and read as rubber) */}
+              overshot the ellipse to 1.09 and read as rubber). A pinned
+              frame skips the entrance too (`initial={false}`) — Chromatic
+              gets the settled art directly rather than a snapshot of
+              wherever the spring happened to be. */}
           <motion.span
             className={styles.hole}
-            initial={{ scale: 0 }}
+            initial={frame ? false : { scale: 0 }}
             animate={{ scale: open ? 1 : 0 }}
             transition={SPRINGS.widget}
             data-spring="widget"
@@ -562,58 +613,58 @@ export function AmbientAgents() {
                 rubber the door was cured of. */}
             <motion.span
               className={styles.rider}
-              initial={{ y: SIZE + 8 }}
-              animate={{ y: risen ? 0 : SIZE + 8, scaleX: spot.face }}
+              initial={frame ? false : { y: SIZE + 8 }}
+              animate={{ y: risen ? 0 : SIZE + 8, scaleX: activeSpot.face }}
               transition={{ ...SPRINGS.rise, scaleX: { duration: 0 } }}
               data-spring="rise"
             >
               <span
                 className={styles.agentAvatar}
-                data-talking={(risen && bubble && !bailing) || undefined}
+                data-talking={(risen && activeBubble && !bailing) || undefined}
                 data-fleeing={bailing || undefined}
                 data-jumping={jumping || undefined}
                 style={{
-                  WebkitMaskImage: `url(${avatarFor(agent, skin)})`,
-                  maskImage: `url(${avatarFor(agent, skin)})`,
+                  WebkitMaskImage: `url(${avatarFor(activeAgent, skin)})`,
+                  maskImage: `url(${avatarFor(activeAgent, skin)})`,
                 }}
               />
             </motion.span>
           </span>
 
           <AnimatePresence>
-            {intro && (
+            {activeIntro && (
               <motion.div
                 className={styles.introCard}
-                data-align={intro.align}
-                initial={{ opacity: 0, y: 6 }}
+                data-align={activeIntro.align}
+                initial={frame ? false : { opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={SPRINGS.deck}
                 data-spring="deck"
               >
                 <span className={styles.introHi}>
-                  HI — I&apos;M {CREW_BY_ID[intro.id]?.name}. ONE OF JAKE&apos;S AGENTS.
+                  HI — I&apos;M {CREW_BY_ID[activeIntro.id]?.name}. ONE OF JAKE&apos;S AGENTS.
                 </span>
                 <span className={styles.introJob}>
-                  {CREW_BY_ID[intro.id]?.model} · {CREW_INTRO[intro.id]}
+                  {CREW_BY_ID[activeIntro.id]?.model} · {CREW_INTRO[activeIntro.id]}
                 </span>
                 <span className={styles.introTask}>
-                  LAST TASK — {lastTask[intro.id]}
+                  LAST TASK — {lastTask[activeIntro.id]}
                 </span>
               </motion.div>
             )}
           </AnimatePresence>
 
           <AnimatePresence>
-            {bubble && !intro && (
+            {activeBubble && !activeIntro && (
               <motion.span
                 className={styles.bubble}
-                data-align={spot.align}
-                initial={{ opacity: 0, y: 4 }}
+                data-align={activeSpot.align}
+                initial={frame ? false : { opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
               >
-                {bubble}
+                {activeBubble}
               </motion.span>
             )}
           </AnimatePresence>
