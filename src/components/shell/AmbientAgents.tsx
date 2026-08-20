@@ -662,13 +662,13 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
                 data-spring="deck"
               >
                 <span className={styles.introHi}>
-                  HI — I&apos;M {CREW_BY_ID[activeIntro.id]?.name}. ONE OF JAKE&apos;S AGENTS.
+                  HI, I&apos;M {CREW_BY_ID[activeIntro.id]?.name}. ONE OF JAKE&apos;S AGENTS.
                 </span>
                 <span className={styles.introJob}>
                   {CREW_BY_ID[activeIntro.id]?.model} · {CREW_INTRO[activeIntro.id]}
                 </span>
                 <span className={styles.introTask}>
-                  LAST TASK — {lastTask[activeIntro.id]}
+                  LAST TASK: {lastTask[activeIntro.id]}
                 </span>
               </motion.div>
             )}
