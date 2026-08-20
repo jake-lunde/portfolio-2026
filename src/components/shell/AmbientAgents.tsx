@@ -245,6 +245,27 @@ export function AmbientAgents() {
     return () => window.removeEventListener('pointermove', record)
   }, [])
 
+  /* THE DRAG BLIND SPOT. The window watcher below reacts to a new window
+     id, so opening a window sends whoever is standing there down the
+     hatch politely — but dragging or resizing an EXISTING window onto a
+     standing unit fires no store event at all, and the window just slides
+     over them at z-index 3. That contradicts the spot probe's own
+     courtesy to the furniture, so while a unit is up this re-runs the
+     same 10-point isBare footprint on a throttled interval and ducks the
+     moment it stops answering with the desk. Ten elementFromPoint calls a
+     second is nothing, and it catches icon drags for free — no subscribing
+     to window positions required. Runs for the life of the component,
+     same as the pointermove recorder above; it is a no-op read the rest
+     of the time (phaseRef only reads 'up' once every so often). */
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const at = atRef.current
+      if (phaseRef.current !== 'up' || !at) return
+      if (!isBare(at.x, at.y)) duckRef.current?.()
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [])
+
   /* ONE APPEARANCE PER RUN. The effect is keyed on `cycle` and nothing
      else: it opens a hatch, plays the beats on timers, and schedules the
      next cycle on its way out. Every earlier version of this component
