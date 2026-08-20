@@ -179,6 +179,7 @@ export function AmbientAgents() {
 
   const roster = useRef(-1)
   const mouse = useRef<{ x: number; y: number } | null>(null)
+  const pointerWaited = useRef(false)
   const met = useRef<Set<string>>(new Set())
   const spotRef = useRef<Spot | null>(null) // desk coords, for the window watcher
   const atRef = useRef<{ x: number; y: number } | null>(null) // viewport coords, for the cursor
@@ -201,6 +202,17 @@ export function AmbientAgents() {
     met.current = readMet()
   }, [])
 
+  /* the cycle effect's own pointermove listener is not attached while the
+     desk is full or before the first spawn, so mouse.current would
+     otherwise sit null through both — and findSpot can only avoid a
+     cursor it has heard from. Recorded at mount instead, once, for the
+     life of the component. */
+  useEffect(() => {
+    const record = (e: PointerEvent) => (mouse.current = { x: e.clientX, y: e.clientY })
+    window.addEventListener('pointermove', record, { passive: true })
+    return () => window.removeEventListener('pointermove', record)
+  }, [])
+
   /* ONE APPEARANCE PER RUN. The effect is keyed on `cycle` and nothing
      else: it opens a hatch, plays the beats on timers, and schedules the
      next cycle on its way out. Every earlier version of this component
@@ -217,6 +229,24 @@ export function AmbientAgents() {
       window.addEventListener('resize', onWide)
       return () => window.removeEventListener('resize', onWide)
     }
+
+    /* the first hatch waits for the cursor to declare itself, or eight
+       seconds, whichever comes first — a pointer that has never moved is
+       invisible to findSpot, and surfacing under it is a jump-scare, not
+       a hello. */
+    if (!mouse.current && !pointerWaited.current) {
+      const kick = () => {
+        pointerWaited.current = true
+        setCycle((c) => c + 1)
+      }
+      window.addEventListener('pointermove', kick, { once: true, passive: true })
+      const t = window.setTimeout(kick, 8000)
+      return () => {
+        clearTimeout(t)
+        window.removeEventListener('pointermove', kick)
+      }
+    }
+
     let timers: number[] = []
     const at = (ms: number, fn: () => void) => {
       timers.push(window.setTimeout(fn, ms))
@@ -276,7 +306,13 @@ export function AmbientAgents() {
     const standing = HOLE_LEAD + RISE_SETTLE
     const dwell = DWELL_MIN + Math.random() * DWELL_VAR
     at(HOLE_LEAD, () => setPhase('rising'))
-    at(standing, () => setPhase('up'))
+    at(standing, () => {
+      setPhase('up')
+      // a cursor already parked beside the spot gets a reaction the
+      // moment they stand up — react used to fire on movement only, so a
+      // visitor who held still was never noticed
+      if (mouse.current) react(mouse.current.x, mouse.current.y)
+    })
     at(standing + 800, () => turn(-found.face as 1 | -1))
     at(standing + 1150, () => {
       setBubble(line(id))
@@ -291,12 +327,14 @@ export function AmbientAgents() {
     }
     at(standing + dwell, () => duck())
 
-    const onMouse = (e: PointerEvent) => {
-      mouse.current = { x: e.clientX, y: e.clientY }
+    // shared between the pointermove listener and the moment-of-standing
+    // check below, so both a moving cursor and a parked one get read the
+    // same way
+    const react = (x: number, y: number) => {
       const p = atRef.current
       if (!p || phaseRef.current !== 'up') return
       const now = performance.now()
-      const d = Math.hypot(e.clientX - p.x, e.clientY - (p.y - SIZE / 2))
+      const d = Math.hypot(x - p.x, y - (p.y - SIZE / 2))
 
       /* FIRST CONTACT. Before a unit has ever been met, the cursor
          getting close buys an introduction instead of a startle — they
@@ -310,7 +348,7 @@ export function AmbientAgents() {
         }
         clear()
         setBubble(null)
-        turn(e.clientX > p.x ? 1 : -1)
+        turn(x > p.x ? 1 : -1)
         setIntro({ id, align: found.align })
         calmUntil = now + INTRO_MS + 1400
         at(INTRO_MS, () => setIntro(null))
@@ -333,6 +371,11 @@ export function AmbientAgents() {
         setBailing(true)
         at(340, () => duck(true))
       }
+    }
+
+    const onMouse = (e: PointerEvent) => {
+      mouse.current = { x: e.clientX, y: e.clientY }
+      react(e.clientX, e.clientY)
     }
 
     // the desk moved under them — the spot they measured is not that spot
@@ -417,12 +460,16 @@ export function AmbientAgents() {
             {/* the climb is on this box and the idle bob is on the sprite
                 inside it: one transform each, so neither clobbers the
                 other (a CSS animation outranks an inline transform, which
-                is how the old walker's turn quietly never happened) */}
+                is how the old walker's turn quietly never happened).
+                scaleX is cut to a hard flip, not sprung: a mirrored sprite
+                turns on a frame, and on the shared rise spring the turn
+                passed through zero width and overshot past ±1 — the same
+                rubber the door was cured of. */}
             <motion.span
               className={styles.rider}
               initial={{ y: SIZE + 8 }}
               animate={{ y: risen ? 0 : SIZE + 8, scaleX: spot.face }}
-              transition={SPRINGS.rise}
+              transition={{ ...SPRINGS.rise, scaleX: { duration: 0 } }}
               data-spring="rise"
             >
               <span
