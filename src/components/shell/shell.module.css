@@ -954,11 +954,12 @@
 /* THE HATCH — an ellipse of the dark under the desk. `--surface-inverse`
    is the one role in this token set that is dark in every skin and both
    modes (classic light #131811, classic dark #090c0a, medieval #17110b),
-   which is exactly what a hole needs: ink would have inverted with the
-   theme and painted a glowing saucer on the dark desk, with the unit —
-   also ink — dissolving into it. (Hatching was tried first, from the
-   resize grip's vocabulary. At 48×14 a hatched ellipse reads as a
-   striped saucer.) */
+   which is exactly what a hole needs ON A LIGHT DESK: ink would have
+   inverted with the theme and painted a glowing saucer on the dark desk,
+   with the unit — also ink — dissolving into it. (Hatching was tried
+   first, from the resize grip's vocabulary. At 48×14 a hatched ellipse
+   reads as a striped saucer.) Dark mode inverts this fill below, rather
+   than keeping it — see that rule for why. */
 .hole {
   position: absolute;
   left: -24px;
@@ -971,10 +972,18 @@
   opacity: 0.92;
 }
 
-/* on a dark desk the fill is only a shade under the surface it sits in,
-   so the edge has to be drawn rather than inferred */
+/* DARK MODE INVERTS TO PAPER (Jake). `--surface-inverse` is near-black in
+   every mode, so on a dark desk it painted a hole that was only a shade
+   off the surface it sat in — worth a border to even read as a hole at
+   all. Swapping the fill to `--content-inverse` (the light/paper role
+   dark mode still carries — semantically `color.cream`, the same family
+   as light mode's own `--surface`) makes the hole punch light-through-dark
+   the way it punches dark-through-light in the day skin: a hole is a gap
+   in the desk, not a shadow under it, and paper reads as a gap against a
+   dark desk the way ink reads as one against a light desk. That contrast
+   is its own edge, so the border this used to need is gone with it. */
 [data-theme='dark'] .hole {
-  border: var(--border-width-subtle) solid var(--border);
+  background: var(--content-inverse);
   opacity: 1;
 }
 
@@ -1218,6 +1227,9 @@
   white-space: nowrap;
 }
 
+/* must match --crew-desktop-min (globals.css) — AmbientAgents.tsx reads
+   that property instead of hand-copying this number; this literal is the
+   one place a media query can't be spared from spelling it out again */
 @media (max-width: 900px) {
   .burrow,
   .dispatchFlash {

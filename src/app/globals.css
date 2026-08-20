@@ -48,6 +48,20 @@ body[data-inspectmode='on'] {
   --inspect-right: 304px;
 }
 
+/* THE AMBIENT CREW'S OWN FLOOR (s88 follow-ups, task 4) — same reasoning
+   as INSPECT.MODE's docks above: AmbientAgents.tsx and its stylesheet
+   (components/shell/shell.module.css) both need the same width and
+   neither can hand it to the other, since a CSS Modules rule with no
+   local class isn't allowed to sit on `:root` in this pipeline (`pure`
+   selector mode) and a media query can't read a custom property anyway.
+   So this lives here instead: the stylesheet's own @media rule still has
+   to spell 900px out as a literal (it says so where it does), and the
+   component reads this property at runtime rather than hand-copying that
+   literal a second time. Change this value and the literal both. */
+:root {
+  --crew-desktop-min: 900px;
+}
+
 a {
   color: var(--accent);
 }
