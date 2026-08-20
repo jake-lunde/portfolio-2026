@@ -1032,19 +1032,13 @@
 }
 
 /* THE LIVING SKETCH (HeroSketch.tsx) — the concept collage in the case
-   header, where PROGRESS.VWR used to greet you (s94b). The cutout
-   exports sit on white, so the collage keeps its own artboard paper.
-   Narrow: a full-width panel between the thesis and the meta. Wide:
-   it rides the header's right side, beside the title and thesis. */
+   header, where PROGRESS.VWR used to greet you (s94b). The cutouts
+   float straight on the screen's own surface, no artboard (Jake's
+   call — same as the rail's old sketch stage). Narrow: full width
+   between the thesis and the meta. Wide: it rides the header's right
+   side, beside the title and thesis. */
 .heroArt {
-  background: #fff;
-  border: var(--border-width-default) solid var(--content);
-  padding: 10px;
   margin-top: 24px;
-}
-
-[data-theme='dark'] .heroArt {
-  border-color: var(--border);
 }
 
 .hero {
