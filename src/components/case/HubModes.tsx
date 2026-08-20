@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useInView, useReducedMotion } from 'motion/react'
 import { sfx } from '@/lib/sound'
+import { HUB_MODE_LABELS, HUB_SHOTS, HUB_SHOT_DIR, HUB_SHOT_MS, type HubMode } from './hubShipped'
+import { useHubLink } from './hubLink'
 import styles from './case.module.css'
 
 /* The shipped interaction model: Ambient (the heads-up screensaver) →
@@ -11,11 +13,16 @@ import styles from './case.module.css'
    layer — per Jake's s35 correction; no "focused" tier.
 
    s89: the old FIG. D plate (shipped surfaces, a placeholder) folded in
-   here. One viewport, two controls — the mode tabs pick which mode, and
-   the view switch flips between the lo-fi diagram of it and the screens
-   that actually shipped in it, cycling. */
+   here, then split across windows: the page argues, the viewer holds
+   the evidence. Wherever PROGRESS.VWR rides the margin (container
+   ≥640px, the rail's own threshold) the mode tabs here drive the
+   shipped screens THERE, via the hubLink store, and this plate shows
+   the lo-fi diagram only. Below that the rail doesn't exist, so the
+   plate keeps its own Lo-fi/Shipped toggle and carries everything
+   itself. The swap is pure CSS (container query) — both panes render,
+   the container decides which one is real. */
 
-type Mode = 'ambient' | 'active' | 'auth'
+type Mode = HubMode
 type View = 'diagram' | 'shipped'
 
 const VIEWS: Array<{ id: View; label: string }> = [
@@ -24,35 +31,10 @@ const VIEWS: Array<{ id: View; label: string }> = [
 ]
 
 const MODES: Array<{ id: Mode; label: string; blurb: string }> = [
-  { id: 'ambient', label: 'Ambient', blurb: 'The screensaver with a job. From across the room you get the time, what’s next, who’s where, the photo stream. It asks nothing of you.' },
-  { id: 'active', label: 'Active', blurb: 'Walk up and it’s a full dashboard. Drill into any feature, open modal views, filter the whole surface down to one family member.' },
-  { id: 'auth', label: 'Authenticated', blurb: 'The gate. Adults manage, kids view. A PIN sits between glancing and doing: approvals, money, calendar edits.' },
+  { id: 'ambient', label: HUB_MODE_LABELS.ambient, blurb: 'The screensaver with a job. From across the room you get the time, what’s next, who’s where, the photo stream. It asks nothing of you.' },
+  { id: 'active', label: HUB_MODE_LABELS.active, blurb: 'Walk up and it’s a full dashboard. Drill into any feature, open modal views, filter the whole surface down to one family member.' },
+  { id: 'auth', label: HUB_MODE_LABELS.auth, blurb: 'The gate. Adults manage, kids view. A PIN sits between glancing and doing: approvals, money, calendar edits.' },
 ]
-
-const DIR = '/case/family-hub/shipped'
-
-const SHOTS: Record<Mode, Array<{ file: string; alt: string }>> = {
-  ambient: [
-    { file: 'ambient-1', alt: 'Shipped ambient screen: a painting fills the wall edge to edge, the temperature tucked into one corner.' },
-    { file: 'ambient-2', alt: 'Shipped ambient screen: a photo card on a warm ground, the time top left, two chores due today bottom right.' },
-    { file: 'ambient-3', alt: 'Shipped ambient screen: a kid’s crayon drawing hung on a cream mat like a framed picture.' },
-    { file: 'ambient-4', alt: 'Shipped ambient screen: the clock alone, 06:45 PM, split across two deep green panels.' },
-  ],
-  active: [
-    { file: 'active-1', alt: 'Shipped active screen: the July month calendar with the whole household blocked onto one grid.' },
-    { file: 'active-2', alt: 'Shipped active screen: the chores board, a column per day, each kid’s tasks stacked under it.' },
-    { file: 'active-3', alt: 'Shipped active screen: the safety map, family activity down the side, two kids pinned on the street grid.' },
-    { file: 'active-4', alt: 'Shipped active screen: editing a chore, on-screen keyboard up, allowance and repeat settings above it.' },
-    { file: 'active-5', alt: 'Shipped active screen: settings, laid out as two columns of plain labelled rows.' },
-  ],
-  auth: [
-    { file: 'auth-1', alt: 'Shipped authenticated screen: the lock screen, a parent’s avatar beside a grid of icons used as the passcode.' },
-    { file: 'auth-2', alt: 'Shipped authenticated screen: Guardian Mode active, banner across the top, a kid’s investing portfolio underneath.' },
-    { file: 'auth-3', alt: 'Shipped authenticated screen: Parent mode active, the account balances and wallet unlocked behind the banner.' },
-  ],
-}
-
-const SHOT_MS = 3000
 
 const INK = '#E7E1D2'
 const W = 560
@@ -152,15 +134,26 @@ export function HubModes() {
   const rootRef = useRef<HTMLDivElement>(null)
   const inView = useInView(rootRef, { amount: 0.35 })
   const reduced = useReducedMotion()
+  const setLink = useHubLink((s) => s.set)
   const current = MODES.find((m) => m.id === mode)!
-  const shots = SHOTS[mode]
+  const shots = HUB_SHOTS[mode]
   const shipped = view === 'shipped'
 
-  /* the shipped screens advance on their own, but only while they're the
-     view you're looking at, on screen, and nobody's pointing at them */
+  /* broadcast to the rail: which mode, and whether the plate is on
+     screen enough to borrow the viewer */
+  useEffect(() => {
+    setLink({ mode })
+  }, [mode, setLink])
+  useEffect(() => {
+    setLink({ live: inView })
+    return () => setLink({ live: false })
+  }, [inView, setLink])
+
+  /* the plate's own cycle — only runs when its shipped pane is the one
+     showing (narrow layouts), on screen, and nobody's pointing at it */
   useEffect(() => {
     if (!shipped || reduced || held || !inView || shots.length < 2) return
-    const t = setInterval(() => setShot((i) => (i + 1) % shots.length), SHOT_MS)
+    const t = setInterval(() => setShot((i) => (i + 1) % shots.length), HUB_SHOT_MS)
     return () => clearInterval(t)
   }, [shipped, reduced, held, inView, shots.length])
 
@@ -187,11 +180,33 @@ export function HubModes() {
             {String(shot + 1).padStart(2, '0')} / {String(shots.length).padStart(2, '0')}
           </span>
         )}
+        {/* wide layouts only (CSS): where the screens went */}
+        <span className={styles.hubHint} aria-hidden="true">
+          shipped → progress.vwr
+        </span>
       </div>
 
-      {shipped ? (
+      <div className={styles.hubStage} data-view={view}>
+        <div data-pane="diagram">
+          <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Hub surface, ${current.label} mode. ${current.blurb}`} fontFamily="var(--mono)">
+            <rect x={1} y={1} width={W - 2} height={H - 2} fill="none" stroke={INK} strokeWidth="1.5" opacity="0.6" />
+            {/* keyed remount, fade-in only — no exit animation to get stuck on */}
+            <motion.g
+              key={mode}
+              initial={reduced ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+            >
+              {mode === 'ambient' && <Ambient />}
+              {mode === 'active' && <Active />}
+              {mode === 'auth' && <Auth />}
+            </motion.g>
+          </svg>
+        </div>
+
         <button
           type="button"
+          data-pane="shipped"
           className={styles.hubShip}
           aria-label={`${current.label} as shipped, screen ${shot + 1} of ${shots.length}. Next screen.`}
           onClick={() => {
@@ -206,7 +221,7 @@ export function HubModes() {
           {shots.map((s, i) => (
             <motion.img
               key={s.file}
-              src={`${DIR}/${s.file}.webp`}
+              src={`${HUB_SHOT_DIR}/${s.file}.webp`}
               width={1086}
               height={610}
               alt={i === shot ? s.alt : ''}
@@ -218,22 +233,7 @@ export function HubModes() {
             />
           ))}
         </button>
-      ) : (
-        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Hub surface, ${current.label} mode. ${current.blurb}`} fontFamily="var(--mono)">
-          <rect x={1} y={1} width={W - 2} height={H - 2} fill="none" stroke={INK} strokeWidth="1.5" opacity="0.6" />
-          {/* keyed remount, fade-in only — no exit animation to get stuck on */}
-          <motion.g
-            key={mode}
-            initial={reduced ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-          >
-            {mode === 'ambient' && <Ambient />}
-            {mode === 'active' && <Active />}
-            {mode === 'auth' && <Auth />}
-          </motion.g>
-        </svg>
-      )}
+      </div>
 
       <div className={styles.hubTabs}>
         {MODES.map((m) => {

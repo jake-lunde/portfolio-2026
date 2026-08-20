@@ -869,6 +869,29 @@
   border: var(--border-width-subtle) solid var(--border);
   background: transparent;
   cursor: pointer;
+  transition: opacity 0.25s ease;
+}
+
+/* while the viewer is lent to §03's plate the ladder stays put but
+   steps back — you keep your place, the screens keep the light */
+.railFoot[data-lent] .railTick {
+  opacity: 0.45;
+}
+
+/* the viewer as monitor: the shipped screens sit on the same black mat
+   the demo recordings use; the whole face is the step-forward button */
+.railShip {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: #000;
+  cursor: pointer;
+}
+
+.railShip:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
 }
 
 .railTick:hover {
@@ -886,16 +909,6 @@
   background: var(--accent-expressive);
 }
 
-/* compact: no art, so the rail stops claiming a picture's worth of
-   margin and rides as a chip — bar, ladder, label */
-.railSlot[data-compact] {
-  width: 244px;
-}
-
-.rail[data-compact] .railFoot {
-  border-top: none;
-  padding-bottom: 2px;
-}
 
 .railLabel {
   font-family: var(--mono);
@@ -1283,5 +1296,53 @@
 @media (max-width: 640px) {
   .hubTabs {
     grid-template-columns: 1fr;
+  }
+}
+
+/* where the shipped screens went — wide layouts only, set below */
+.hubHint {
+  display: none;
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(231, 225, 210, 0.45);
+}
+
+/* narrow (no rail): the plate is self-contained and the toggle picks
+   the pane */
+.hubStage [data-pane='shipped'] {
+  display: none;
+}
+
+.hubStage[data-view='shipped'] [data-pane='diagram'] {
+  display: none;
+}
+
+.hubStage[data-view='shipped'] [data-pane='shipped'] {
+  display: block;
+}
+
+/* wide enough for PROGRESS.VWR (the rail's own 640 threshold): the
+   plate cedes the shipped screens to the viewer — diagram always,
+   toggle away, pointer in its place. Same specificity as the narrow
+   rules; source order settles it. */
+@container (min-width: 640px) {
+  .hubViews,
+  .hubCount {
+    display: none;
+  }
+
+  .hubHint {
+    display: inline;
+  }
+
+  .hubStage[data-view] [data-pane='diagram'] {
+    display: block;
+  }
+
+  .hubStage[data-view] [data-pane='shipped'] {
+    display: none;
   }
 }

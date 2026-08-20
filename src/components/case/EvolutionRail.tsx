@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
+import { HUB_MODE_LABELS, HUB_SHOTS, HUB_SHOT_DIR, HUB_SHOT_MS } from './hubShipped'
+import { useHubLink } from './hubLink'
 import styles from './case.module.css'
 
 /* PROGRESS.VWR — a window into watching the Family Hub get built. A
@@ -12,16 +14,14 @@ import styles from './case.module.css'
    recordings, and a break-out finale where the device hangs in a
    kitchen. The persuasion-ladder thesis made literal.
 
-   s89 model change: the page owns imagery, the rail owns position.
-   Every section of this case carries its own figure, so a rail that
-   always shows art is a second picture competing with the first — most
-   visibly in §03, where both were playing the same product. The art is
-   opt-in per stage now (`open`), and the rail spends the rest of the
-   scroll as a compact map: title bar, the ladder as squares, one label.
-   It opens four times — the sketch before the case has shown you
-   anything, the hi-fi prototype that IS §04's argument, and the two
-   break-out beats where the device leaves the artboard. Quiet through
-   the middle, which is exactly where the page is loudest.
+   s89, the hand-off: while §03's HubModes plate is on screen, this
+   window is LENT to it — the ladder steps aside and the viewer becomes
+   the plate's monitor, showing the shipped screens for whichever mode
+   the plate's tabs pick (hubLink store; screens in hubShipped). One
+   window controlling another is the point: the page argues, the viewer
+   holds the evidence. Everywhere else the ladder runs at full strength.
+   Below the 640px container threshold this rail doesn't render and the
+   plate keeps its own toggle — nothing here to hand off to.
 
    Stage switching rides IntersectionObserver on the case's own beats
    (hero → sections → footer), never scroll-linked animation: safe in a
@@ -47,20 +47,18 @@ type Stage = {
   /** Jake's screen recording of the real prototype — plays while the
       stage is up, still frame (poster) under reduced motion */
   video?: string
-  /** this stage earns the art; the rest ride as the compact map */
-  open?: true
 }
 
 const STAGES: Stage[] = [
-  { v: 'v0.1', label: 'Sketch', open: true, ratio: '1089 / 490', alt: 'Concept collage: a big pink clock, weather, calendar and home glyphs, family portrait avatars, one checked-off chore — all gently afloat.' },
+  { v: 'v0.1', label: 'Sketch', ratio: '1089 / 490', alt: 'Concept collage: a big pink clock, weather, calendar and home glyphs, family portrait avatars, one checked-off chore — all gently afloat.' },
   { file: 'poster-poc.webp', video: 'demo-poc', v: 'v0.2', label: 'Proof of Concept', ratio: '16 / 9', alt: 'Screen recording of the first clickable prototype: clicking through the dark dashboard, the family agenda blocked in as bright color bars.' },
   { file: 'poster-poc.webp', video: 'demo-poc', v: 'v0.3', label: 'Proof of Concept', ratio: '16 / 9', alt: 'The proof-of-concept demo rolls on: into the month calendar, the whole household on one grid.' },
   { file: 'poster-wireframes.webp', video: 'demo-wireframes', v: 'v0.4', label: 'Lo-Fi Explorations', ratio: '1280 / 712', alt: 'Screen recording of the lo-fi build in Greenlight green: the morning brief and school-run map in motion.' },
   { file: 'poster-wireframes.webp', video: 'demo-wireframes', v: 'v0.5', label: 'Lo-Fi Explorations', ratio: '1280 / 712', alt: 'The lo-fi demo rolls on: the ambient morning screen, 8:32 AM.' },
-  { file: 'poster-hifi.webp', video: 'demo-hifi', v: 'v0.6', label: 'Hi-Fi Prototype', open: true, ratio: '16 / 9', alt: 'Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape.' },
+  { file: 'poster-hifi.webp', video: 'demo-hifi', v: 'v0.6', label: 'Hi-Fi Prototype', ratio: '16 / 9', alt: 'Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape.' },
   { file: 'stage-06.webp', v: 'v0.7', label: 'Color Explorations', ratio: '1440 / 800', alt: 'Color exploration: chats, chores and calendar as calm cards, color only where it means something.' },
-  { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', open: true, ratio: '10 / 7', scene: 'wall', alt: 'The launch build under test: the device hung on a plain wall.', },
-  { file: 'stage-08.webp', v: 'v1.0', label: 'Ship', open: true, ratio: '10 / 7', scene: 'kitchen', alt: 'Family Hub live in situ: the device on a kitchen wall, plant on the counter.' },
+  { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', ratio: '10 / 7', scene: 'wall', alt: 'The launch build under test: the device hung on a plain wall.', },
+  { file: 'stage-08.webp', v: 'v1.0', label: 'Ship', ratio: '10 / 7', scene: 'kitchen', alt: 'Family Hub live in situ: the device on a kitchen wall, plant on the counter.' },
 ]
 
 /* The story's beats don't map 1:1 onto the ladder — Jake's cut: the
@@ -239,12 +237,46 @@ export function EvolutionRail() {
   const [zoomed, setZoomed] = useState(false)
   const marksRef = useRef<Element[]>([])
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
+  /* the hand-off: §03's plate publishes mode + presence; while live
+     (and this slot actually has width — below 640 it's display:none
+     and there's nothing to lend) the viewer is its monitor */
+  const hubMode = useHubLink((st) => st.mode)
+  const hubLive = useHubLink((st) => st.live)
+  const [slotOn, setSlotOn] = useState(false)
+  const [shipShot, setShipShot] = useState(0)
   /* Auto-zoom on the break-out is OFF for now (Jake: tune later) —
      the + control still zooms manually. */
 
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setSlotOn(el.offsetWidth > 0))
+    ro.observe(el)
+    setSlotOn(el.offsetWidth > 0)
+    return () => ro.disconnect()
+  }, [])
+
+  const lent = hubLive && slotOn && !minimized
+
+  useEffect(() => {
+    setShipShot(0)
+  }, [hubMode])
+
+  /* the lent cycle — the viewer advances the shipped screens itself;
+     the plate's own timer only ever runs where this rail doesn't exist */
+  useEffect(() => {
+    if (!lent || reduced) return
+    const t = setInterval(
+      () => setShipShot((i) => (i + 1) % HUB_SHOTS[hubMode].length),
+      HUB_SHOT_MS,
+    )
+    return () => clearInterval(t)
+  }, [lent, reduced, hubMode])
+
   // demos run only while their stage is up and the window is open;
   // reduced motion gets the poster still. preload="none" means nothing
-  // downloads until here.
+  // downloads until here. While lent the ladder (and its videos) is
+  // unmounted, so returning from a loan must re-kick the active demo.
   useEffect(() => {
     const active = STAGES[stage]?.video
     for (const [key, el] of Object.entries(videoRefs.current)) {
@@ -252,7 +284,7 @@ export function EvolutionRail() {
       if (key === active && !reduced && !minimized) el.play().catch(() => {})
       else el.pause()
     }
-  }, [stage, reduced, minimized])
+  }, [stage, reduced, minimized, lent])
 
   useEffect(() => {
     const article = ref.current?.closest('article')
@@ -293,7 +325,6 @@ export function EvolutionRail() {
   }, [])
 
   const cur = STAGES[stage]
-  const showArt = Boolean(cur.open)
 
   const jumpTo = (i: number) => {
     const marks = marksRef.current
@@ -313,17 +344,11 @@ export function EvolutionRail() {
   }
 
   return (
-    <div
-      className={styles.railSlot}
-      ref={ref}
-      data-zoom={zoomed && !minimized && Boolean(STAGES[stage].open) ? 'true' : undefined}
-      data-compact={!minimized && !STAGES[stage].open ? 'true' : undefined}
-    >
+    <div className={styles.railSlot} ref={ref} data-zoom={zoomed && !minimized ? 'true' : undefined}>
       <aside
         className={styles.rail}
         aria-label="Progress viewer: the Family Hub being built, stage by stage"
         data-min={minimized ? 'true' : undefined}
-        data-compact={!minimized && !showArt ? 'true' : undefined}
       >
         <div
           className={styles.railBar}
@@ -347,7 +372,7 @@ export function EvolutionRail() {
           >
             −
           </button>
-          {!minimized && showArt && (
+          {!minimized && (
             <button
               className={styles.railCtrl}
               aria-label={zoomed ? 'Restore the progress viewer size' : 'Zoom the progress viewer'}
@@ -361,11 +386,35 @@ export function EvolutionRail() {
             </button>
           )}
           <span className={styles.railTitle}>Progress.Vwr</span>
-          <span className={styles.railVer}>{cur.v}</span>
+          <span className={styles.railVer}>{lent ? 'v1.0' : cur.v}</span>
         </div>
         {!minimized && (
           <>
-            {showArt && (
+            {lent ? (
+              <button
+                type="button"
+                className={styles.railShip}
+                aria-label={`${HUB_MODE_LABELS[hubMode]} as shipped, screen ${shipShot + 1} of ${HUB_SHOTS[hubMode].length}. Next screen.`}
+                onClick={() => {
+                  sfx.tap()
+                  setShipShot((i) => (i + 1) % HUB_SHOTS[hubMode].length)
+                }}
+              >
+                <div className={styles.railStack} style={{ aspectRatio: '1086 / 610' }}>
+                  {HUB_SHOTS[hubMode].map((sh, i) => (
+                    <img
+                      key={sh.file}
+                      src={`${HUB_SHOT_DIR}/${sh.file}.webp`}
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                      draggable={false}
+                      data-on={i === shipShot ? 'true' : undefined}
+                    />
+                  ))}
+                </div>
+              </button>
+            ) : (
             <div
               className={styles.railView}
               role="img"
@@ -429,7 +478,7 @@ export function EvolutionRail() {
               </div>
             </div>
             )}
-            <div className={styles.railFoot}>
+            <div className={styles.railFoot} data-lent={lent ? 'true' : undefined}>
               {STAGES.map((s, i) => (
                 <button
                   key={s.v}
@@ -443,9 +492,9 @@ export function EvolutionRail() {
               ))}
             </div>
             <div className={styles.railLabel} aria-hidden="true">
-              {cur.v} · {cur.label}
-              {/* only claim a demo when the art is actually up to play one */}
-              {showArt && cur.video && !reduced ? ' · demo' : ''}
+              {lent
+                ? `shipped · ${HUB_MODE_LABELS[hubMode]} · ${String(shipShot + 1).padStart(2, '0')} / ${String(HUB_SHOTS[hubMode].length).padStart(2, '0')}`
+                : `${cur.v} · ${cur.label}${cur.video && !reduced ? ' · demo' : ''}`}
             </div>
           </>
         )}
