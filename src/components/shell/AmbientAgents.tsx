@@ -100,6 +100,14 @@ const DWELL_EXTEND_MAX = 3200
 const GAP_MIN = 4200
 const GAP_VAR = 4600
 const MET_KEY = 'lunde-crew-met'
+/* a desk that stays full (mobile's stacked windows, INSPECT's two docked
+   panels widened) used to retry every 2.6s forever — up to 30 spots ×
+   10 probes = 300 elementFromPoint calls a shot, for nothing. Doubling
+   the gap on every consecutive miss, capped, keeps the earliest retries
+   quick (the usual case is one window closing a moment later) without
+   burning hit-tests on a desk that has been full for minutes. */
+const FULL_RETRY_BASE = 2600
+const FULL_RETRY_MAX = 30000
 
 /* where a hatch may open: clear of the wings, low enough that the intro
    card has room above it, high enough to keep off the dock rail. The
@@ -216,10 +224,16 @@ function readMet(): Set<string> {
   }
 }
 
-/** the floor the desk has to clear before anybody surfaces — the same
-    900px the stylesheet uses to hide them, kept in step by hand because a
-    hatch that is display:none still costs a probe every few seconds */
-const DESKTOP_MIN = 900
+/** the floor the desk has to clear before anybody surfaces — read from
+    the stylesheet's own `--crew-desktop-min` (shell.module.css) rather
+    than hand-copied, so the number lives in exactly one place. Still
+    checked here rather than left to CSS alone: a hatch that is
+    display:none still costs a probe every few seconds. Falls back to 900
+    if the property is ever missing (a stylesheet that hasn't loaded). */
+function desktopMin(): number {
+  const n = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--crew-desktop-min'))
+  return Number.isFinite(n) ? n : 900
+}
 
 export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps = {}) {
   const reduced = useReducedMotion()
@@ -239,6 +253,7 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
   const [intro, setIntro] = useState<{ id: string; align: Align } | null>(null)
 
   const roster = useRef(-1)
+  const fullRetries = useRef(0) // consecutive desk-full rolls — see the backoff below
   const mouse = useRef<{ x: number; y: number } | null>(null)
   const pointerWaited = useRef(false)
   const met = useRef<Set<string>>(new Set())
@@ -306,10 +321,11 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
     // PINNING A FRAME, above
     if (frame) return
     if (reduced || inspecting) return
-    if (window.innerWidth <= DESKTOP_MIN) {
+    const min = desktopMin()
+    if (window.innerWidth <= min) {
       // a phone gets no crew, and no hit-testing loop either
       const onWide = () => {
-        if (window.innerWidth > DESKTOP_MIN) setCycle((c) => c + 1)
+        if (window.innerWidth > min) setCycle((c) => c + 1)
       }
       window.addEventListener('resize', onWide)
       return () => window.removeEventListener('resize', onWide)
@@ -356,10 +372,13 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
     // goes back to uniform
     const found = findSpot(mouse.current, met.current.size < CREW_IDS.length, rng)
     if (!found) {
-      // desk full — try again shortly rather than burning a unit's turn
-      again(2600)
+      // desk full — retry, backing off geometrically per FULL_RETRY_BASE
+      const backoff = Math.min(FULL_RETRY_BASE * 2 ** fullRetries.current, FULL_RETRY_MAX)
+      fullRetries.current += 1
+      again(backoff)
       return clear
     }
+    fullRetries.current = 0
 
     const desk = document.querySelector('[data-desktop-root]')!.getBoundingClientRect()
     const id = CREW_IDS[(roster.current = (roster.current + 1) % CREW_IDS.length)]
