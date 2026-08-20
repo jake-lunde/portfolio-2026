@@ -16,11 +16,19 @@ Six sessions of orchestration on LUNDE OS. What held up:
   versioned-paths, two-accent law, "don't run builds"), and a definition of
   done (`tsc --noEmit` passes, report back X). Every correction we've had to
   make traces to something the brief left implicit.
-- **File ownership is the real interface.** We've never had a merge conflict
-  between agents — not because they're careful, but because briefs assign
-  disjoint files. The one near-miss: two sessions both editing registry.tsx
-  (orchestrator + FOURIER); solved by sequencing, and later by "FOURIER owns
-  registry this turn."
+- **File ownership is the real interface — and it needs a fence, not a
+  vibe.** Disjoint briefs kept us conflict-free through the registry.tsx
+  near-miss (solved by "FOURIER owns registry this turn"), then s93 ended
+  the streak: NYQUIST on AmbientAgents.tsx mechanics, FOURIER on
+  crewDialog.ts copy, and FOURIER followed the em-dash ban across the file
+  boundary into NYQUIST's component. Each agent was locally right; nobody
+  owned the intersection. Two gates are law since s96:
+  1. **Fence in the brief.** Every parallel dispatch names its writable
+     files. An edit wanted outside the fence goes in the *return*, not the
+     tree — the orchestrator routes it to the lane that owns the file.
+  2. **Overlap check before PRs.** `node scripts/crew-fence.mjs [branches]`
+     intersects each lane's diff vs origin/main pairwise; any shared file
+     blocks `gh pr create` until the orchestrator resolves ownership.
 - **Verification doesn't delegate.** Agents typecheck; only the orchestrator
   builds, previews, and ships (one owner of `.next`, one owner of the deploy).
   This is a hard rule born of corrupted builds, and it shapes everything:
