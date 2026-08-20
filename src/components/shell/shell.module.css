@@ -941,17 +941,6 @@
 
 /* ================= AMBIENT AGENTS ================= */
 
-/* THE CREW'S OWN FLOOR — the same number the @media rule at the bottom of
-   this section hides `.burrow`/`.dispatchFlash` under. A media query
-   cannot consume a custom property, so that rule still has to spell the
-   number out as a literal; this declaration is the one place the number
-   is CHOSEN, and AmbientAgents.tsx reads it at runtime (getComputedStyle)
-   instead of hand-copying a second 900. Change this, and update the
-   literal below to match. */
-:global(:root) {
-  --crew-desktop-min: 900px;
-}
-
 .burrow {
   /* a zero-size anchor pinned to the centre of the hatch: everything
      below hangs off that one point, so placing a unit is two numbers */
@@ -1238,7 +1227,9 @@
   white-space: nowrap;
 }
 
-/* must match --crew-desktop-min, declared at the top of this section */
+/* must match --crew-desktop-min (globals.css) — AmbientAgents.tsx reads
+   that property instead of hand-copying this number; this literal is the
+   one place a media query can't be spared from spelling it out again */
 @media (max-width: 900px) {
   .burrow,
   .dispatchFlash {
