@@ -15,12 +15,11 @@ import {
 import { ResearchBars } from '@/components/case/ResearchBars'
 import { HubModes } from '@/components/case/HubModes'
 import { TandemSetup } from '@/components/case/TandemSetup'
-import { TokenThread } from '@/components/case/TokenThread'
 import { CaseFooter } from '@/components/case/CaseFooter'
 import { PitchDeck } from '@/components/case/PitchDeck'
-import { EvolutionRail } from '@/components/case/EvolutionRail'
 import { LaunchFilm } from '@/components/case/LaunchFilm'
 import { FidelityFrame } from '@/components/case/FidelityFrame'
+import { HeroSketch } from '@/components/case/HeroSketch'
 
 <Hero
   eyebrow="Greenlight · Family Hub · First-party hardware"
@@ -32,9 +31,8 @@ import { FidelityFrame } from '@/components/case/FidelityFrame'
     ['Timeline', '2025 – 2026'],
     ['Shipped', '15.6″ + 10.1″ devices · GL’s first web app · GLOW DS'],
   ]}
+  art={<HeroSketch />}
 />
-
-<EvolutionRail />
 
 <Section no="01" label="The bet" title="We pitched three, and the family organizer won.">
   <Lead>
@@ -106,7 +104,7 @@ import { FidelityFrame } from '@/components/case/FidelityFrame'
   the thing and actually doing something on it. Approving chores, moving
   money, editing the calendar.
 
-  <Plate caption="Pick a mode. The lo-fi diagram, or the screens that shipped in it.">
+  <Plate caption="Pick a mode. The switch in the window bar flips it between the lo-fi diagram and the screens that shipped.">
     <HubModes />
   </Plate>
 
@@ -134,7 +132,7 @@ import { FidelityFrame } from '@/components/case/FidelityFrame'
   spearheaded. Over-the-air updates made iteration, by my very scientific
   estimate at the time, *&ldquo;a thousand percent&rdquo;* faster.
 
-  <Plate cap="Plate 04 · the ladder" caption="The same screen at v0.4 and v0.6, four months apart. The switch by the meter flips it.">
+  <Plate cap="Plate 04 · the ladder" caption="The same screen at v0.4 and v0.6, four months apart. Flip the switch in the window bar.">
     <FidelityFrame
       vDraft="v0.4"
       vShipped="v0.6"
@@ -221,16 +219,9 @@ import { FidelityFrame } from '@/components/case/FidelityFrame'
     />
   </Plate>
 
-  It went both directions, too. My favorite review on the whole project came
-  from an engineer, about one token:
-
-  <Plate tag="AVATAR TOKEN" caption="Replay the thread: my spec said weakest, his eye said otherwise, strongest shipped.">
-    <TokenThread />
-  </Plate>
-
-  The team also got one on me: my early visual pass was too loud. They told
-  me so. I stripped it back so the color shows up where it means something.
-  They were right, and the design got better.
+  The feedback ran the other way too: my early visual pass was too loud.
+  The team told me so. I stripped it back so the color shows up where it
+  means something. They were right, and the design got better.
 
   <Plate cap="Plate 09 · the rein-in" caption="The early color pass, and where it landed. The pass where the team was right.">
     <FidelityFrame

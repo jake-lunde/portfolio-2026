@@ -3,8 +3,8 @@
 
 .case {
   padding: 10px 30px 70px;
-  /* the evolution rail positions and container-queries against the
-     article — the window is resizable, so viewport queries can't know */
+  /* the sidecars container-query against the article — the window is
+     resizable, so viewport queries can't know */
   position: relative;
   container-type: inline-size;
 }
@@ -589,336 +589,6 @@
   cursor: default;
 }
 
-/* evolution rail — the Family Hub as a nested mini-window riding the
-   right margin (EvolutionRail.tsx). Shown only when the window is wide
-   enough to grant it a margin; the column cedes the room and slides
-   left. Below the threshold the plates carry the imagery instead. */
-.railSlot {
-  display: none;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 16px;
-  width: clamp(280px, 34cqw, 360px);
-  pointer-events: none;
-  z-index: 5;
-  transition: width 0.35s ease;
-}
-
-/* the mini-window's own zoom: roughly double, never the whole window */
-.railSlot[data-zoom] {
-  width: min(720px, calc(100cqw - 48px));
-}
-
-/* container queries measure the CONTENT box (≈ window minus .case's
-   60px side padding). The rail shows from 640 up — Jake's call: better
-   overlapping the plates than absent. The column cedes whatever spare
-   width it has (up to a full clear berth) and eats the rest as overlap. */
-@container (min-width: 640px) {
-  .railSlot {
-    display: block;
-  }
-
-  .hasRail .wrap {
-    margin-right: clamp(0px, calc(100cqw - 780px), 410px);
-  }
-}
-
-.rail {
-  position: sticky;
-  top: 16px;
-  pointer-events: auto;
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
-  box-shadow: 6px 6px 0 rgba(23, 21, 13, 0.14);
-}
-
-[data-theme='dark'] .rail {
-  border-color: var(--border);
-  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
-}
-
-.railBar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  border-bottom: var(--border-width-default) solid var(--content);
-  background: var(--surface);
-}
-
-[data-theme='dark'] .railBar {
-  border-bottom-color: var(--border);
-}
-
-.railTitle {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  flex: 1;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.railVer {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.08em;
-  color: var(--accent);
-}
-
-.railCtrl {
-  width: 11px;
-  height: 11px;
-  flex: 0 0 auto;
-  border: var(--border-width-default) solid currentColor;
-  display: grid;
-  place-items: center;
-  font-size: var(--text-caption);
-  line-height: var(--leading-none);
-  color: inherit;
-  cursor: pointer;
-}
-
-.railCtrl:hover {
-  background: var(--accent-expressive);
-  color: #17150d;
-  border-color: #17150d;
-}
-
-.railCtrl:focus-visible,
-.railTick:focus-visible {
-  outline: 2px solid var(--accent-expressive);
-  outline-offset: 2px;
-}
-
-.railView {
-  /* the artwork's own paper (every export sits on white) — a uniform
-     10px of it on all sides; the stack below matches each stage's
-     exact export ratio so no letterbox ever spoils the margin */
-  padding: 10px;
-  background: #fff;
-  overflow: hidden;
-  transition:
-    padding 0.3s ease,
-    background 0.3s ease;
-}
-
-/* the break-out: the room runs edge to edge, no paper left */
-.railView[data-scene] {
-  padding: 0;
-}
-
-/* demo stages: the recordings sit on their own pure-black surround
-   (sampled #000 corners) — the mat matches so the loop is seamless */
-.railView[data-video] {
-  background: #000;
-}
-
-/* the sketch floats on the screen's own surface, not artboard paper */
-.railView[data-sketch] {
-  background: var(--surface);
-}
-
-/* window-shade: the collapsed bar is one big reopen target */
-.rail[data-min] .railBar {
-  cursor: pointer;
-  border-bottom: none;
-}
-
-.railStack {
-  position: relative;
-  transition: aspect-ratio 0.3s ease;
-}
-
-.railStack > img,
-.railStack > video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0;
-  transition: opacity 0.28s ease-out;
-  /* stacked layers must never eat the pointer — the sketch scene
-     underneath is the only interactive surface in the stack */
-  pointer-events: none;
-}
-
-.railStack > img[data-on],
-.railStack > video[data-on] {
-  opacity: 1;
-}
-
-/* the living sketch — cutouts adrift on slow, staggered loops */
-.railScene {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.28s ease-out;
-}
-
-.railScene[data-on] {
-  opacity: 1;
-}
-
-.railBitWrap {
-  position: absolute;
-}
-
-.railBit {
-  display: block;
-  width: 100%;
-  animation: railDrift var(--dur) ease-in-out var(--delay) infinite alternate;
-}
-
-/* faded out ≠ free: don't run 14 composited loops behind other stages */
-.railScene:not([data-on]) .railBit {
-  animation-play-state: paused;
-}
-
-@keyframes railDrift {
-  to {
-    transform: translate(var(--dx), var(--dy)) rotate(var(--dr));
-  }
-}
-
-/* the finale rooms — wall for on-device testing, kitchen for the ship */
-.railWallScene {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.28s ease-out;
-  pointer-events: none;
-}
-
-.railWallScene[data-on] {
-  opacity: 1;
-}
-
-.railWallScene svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.railDevice {
-  position: absolute;
-  left: 12%;
-  top: 8%;
-  width: 76%;
-  border-radius: 6px;
-  box-shadow:
-    0 12px 26px rgba(23, 21, 13, 0.32),
-    0 3px 8px rgba(23, 21, 13, 0.18);
-  transform: scale(1.04);
-  transition: transform 0.45s ease-out;
-}
-
-.railWallScene[data-on] .railDevice {
-  transform: scale(1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .railWallScene,
-  .railDevice {
-    transition: none;
-  }
-
-  .railDevice {
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .railStack > img,
-  .railStack > video,
-  .railScene {
-    transition: none;
-  }
-
-  .railBit {
-    animation: none;
-  }
-
-  .railSlot {
-    transition: none;
-  }
-}
-
-.railFoot {
-  display: flex;
-  gap: 4px;
-  padding: 8px;
-  border-top: var(--border-width-subtle) solid var(--border);
-}
-
-/* the ladder as steps, not a fill bar (Jake's s89 call): nine squares,
-   each one a rung you can click to. A bar reads as "how far through" —
-   squares read as "which one", which is what the rail is for now. */
-.railTick {
-  flex: none;
-  width: 9px;
-  height: 9px;
-  padding: 0;
-  border: var(--border-width-subtle) solid var(--border);
-  background: transparent;
-  cursor: pointer;
-  transition: opacity 0.25s ease;
-}
-
-/* while the viewer is lent to §03's plate the ladder stays put but
-   steps back — you keep your place, the screens keep the light */
-.railFoot[data-lent] .railTick {
-  opacity: 0.45;
-}
-
-/* the viewer as monitor: the shipped screens sit on the same black mat
-   the demo recordings use; the whole face is the step-forward button */
-.railShip {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  border: none;
-  background: #000;
-  cursor: pointer;
-}
-
-.railShip:focus-visible {
-  outline: 2px solid var(--accent-expressive);
-  outline-offset: 2px;
-}
-
-.railTick:hover {
-  border-color: var(--content-muted);
-  background: var(--content-muted);
-}
-
-.railTick[data-done] {
-  border-color: var(--accent);
-  background: var(--accent);
-}
-
-.railTick[data-on] {
-  border-color: var(--accent-expressive);
-  background: var(--accent-expressive);
-}
-
-
-.railLabel {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--content-muted);
-  padding: 0 8px 7px;
-}
-
 /* plate 11 — the launch film. Inline: muted, chromeless, pointer-inert.
    Lightbox: sound on, controls on, portal'd past the window transform. */
 .film {
@@ -1084,9 +754,8 @@
   pointer-events: none;
 }
 
-/* same berth rule as the evolution rail (Jake's call there: better
-   overlapping the plates than absent) — and the same threshold, so the
-   two rails arrive together on FAMILY.HUB */
+/* the sidecar needs a margin to ride in (Jake's old berth call: better
+   overlapping the plates than absent) */
 @container (min-width: 640px) {
   .idxSlot {
     display: block;
@@ -1299,19 +968,8 @@
   }
 }
 
-/* where the shipped screens went — wide layouts only, set below */
-.hubHint {
-  display: none;
-  margin-left: auto;
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(231, 225, 210, 0.45);
-}
-
-/* narrow (no rail): the plate is self-contained and the toggle picks
-   the pane */
+/* the plate carries both panes at every width (s94b — the rail and its
+   loan retired); the case's fidelity switch picks the pane */
 .hubStage [data-pane='shipped'] {
   display: none;
 }
@@ -1324,101 +982,6 @@
   display: block;
 }
 
-/* wide enough for PROGRESS.VWR (the rail's own 640 threshold): the
-   plate cedes the shipped screens to the viewer — diagram always,
-   toggle away, pointer in its place. Same specificity as the narrow
-   rules; source order settles it. */
-@container (min-width: 640px) {
-  .hubViews,
-  .hubCount {
-    display: none;
-  }
-
-  .hubHint {
-    display: inline;
-  }
-
-  .hubStage[data-view] [data-pane='diagram'] {
-    display: block;
-  }
-
-  .hubStage[data-view] [data-pane='shipped'] {
-    display: none;
-  }
-}
-
-/* FIDELITY.SW (FidelitySwitch.tsx) — the case's one hardware switch,
-   docked in the read-o-meter band's left end (the meter cedes the room
-   via .hasFid, so nothing ever scrolls underneath it). Sticky with the
-   meter so it rides every width; below the rail's 640px threshold this
-   IS the fidelity story. Pressed side reads like a pressed key:
-   content ink on content, no invented colors. */
-.fidSlot {
-  position: sticky;
-  top: 0;
-  z-index: 8; /* over the meter band (7) */
-  height: 0;
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start; /* a 0-height slot must not stretch the tab flat */
-  /* into the band: over .case's top/side padding, at the meter's own
-     left padding (case pads 10px 30px, meter pads 12px) */
-  margin: -10px 0 0 -18px;
-}
-
-/* the meter's left end steps aside for the switch */
-.hasFid .meter {
-  padding-left: 178px;
-}
-
-.fidTab {
-  display: inline-flex;
-  margin-top: 3px; /* optically centered in the 24px band */
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
-}
-
-[data-theme='dark'] .fidTab {
-  border-color: var(--border);
-}
-
-.fidSeg {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 5px;
-  padding: 3px 9px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--content-muted);
-}
-
-.fidSeg + .fidSeg {
-  border-left: var(--border-width-default) solid var(--border);
-}
-
-.fidSeg[aria-pressed='true'] {
-  background: var(--content);
-  color: var(--surface);
-}
-
-.fidSeg:focus-visible {
-  outline: 2px solid var(--accent-expressive);
-  outline-offset: -2px;
-}
-
-.fidV {
-  color: var(--accent);
-  font-size: var(--text-caption);
-}
-
-.fidSeg[aria-pressed='true'] .fidV {
-  color: inherit;
-}
 
 /* FidelityFrame — one frame, two states, inside a plate. The chip
    restates the global switch in this pair's own rung labels; panes
@@ -1466,4 +1029,67 @@
 
 .fidStage[data-mode='shipped'] [data-pane='shipped'] {
   display: block;
+}
+
+/* THE LIVING SKETCH (HeroSketch.tsx) — the concept collage in the case
+   header, where PROGRESS.VWR used to greet you (s94b). The cutout
+   exports sit on white, so the collage keeps its own artboard paper.
+   Narrow: a full-width panel between the thesis and the meta. Wide:
+   it rides the header's right side, beside the title and thesis. */
+.heroArt {
+  background: #fff;
+  border: var(--border-width-default) solid var(--content);
+  padding: 10px;
+  margin-top: 24px;
+}
+
+[data-theme='dark'] .heroArt {
+  border-color: var(--border);
+}
+
+.hero {
+  position: relative;
+}
+
+@container (min-width: 640px) {
+  .heroArt {
+    position: absolute;
+    top: 44px; /* level with the eyebrow — .hero's own top padding */
+    right: 0;
+    width: clamp(260px, 34cqw, 400px);
+    margin-top: 0;
+  }
+
+  /* the header text clears the art's berth (thesis caps itself at 26ch
+     already; the eyebrow is the one line that spans) */
+  .hero[data-art] .eyebrow {
+    max-width: calc(100% - clamp(260px, 34cqw, 400px) - 24px);
+  }
+}
+
+.sketchScene {
+  position: relative;
+  aspect-ratio: 1089 / 490;
+}
+
+.sketchBitWrap {
+  position: absolute;
+}
+
+.sketchBit {
+  display: block;
+  width: 100%;
+  animation: sketchDrift var(--dur) ease-in-out var(--delay) infinite alternate;
+}
+
+@keyframes sketchDrift {
+  to {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--dr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sketchBit {
+    animation: none;
+  }
 }

@@ -9,17 +9,22 @@ export function Hero({
   title,
   thesis,
   meta,
+  art,
 }: {
   eyebrow: string
   title: string
   thesis: React.ReactNode
   meta: Array<[string, string]>
+  /** header artwork riding beside the thesis (family-hub's living
+      sketch, s94b) — the hero owns the slot, the case brings the art */
+  art?: React.ReactNode
 }) {
   return (
-    <header className={styles.hero}>
+    <header className={styles.hero} data-art={art ? 'true' : undefined}>
       <p className={styles.eyebrow}>{eyebrow}</p>
       <h1 className={styles.title}>{title}</h1>
       <p className={styles.thesis}>{thesis}</p>
+      {art}
       <div className={styles.meta}>
         {meta.map(([k, v]) => (
           <div key={k}>

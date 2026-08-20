@@ -1,48 +1,47 @@
 'use client'
 
-import { useFidelity, type Fidelity } from './fidelity'
+import { useFidelity } from './fidelity'
 import { sfx } from '@/lib/sound'
-import styles from './case.module.css'
+import styles from './FidelitySwitch.module.css'
 
-/* FIDELITY.SW — the case's one hardware switch. A small tab hanging
-   under the read-o-meter's right end, sticky with it, so the control
-   is in the same place at every width (the rail never renders below
-   640px; this does — it IS the fidelity story on mobile). Two big
-   dumb buttons, no third state. The generic v0.x/v1.0 labels are the
-   switch's own; each paired plate restates the mode in its own
-   version numbers via its chip. */
+/* FIDELITY.SW — the case's one hardware switch, riding the window bar's
+   right slot (s94b, Jake's call: in the titlebar, and it has to READ as
+   a toggle). A classic rocker: two labels, a track, a knob that slides.
+   Pressing anywhere flips the whole case between draft and shipped;
+   every paired plate (FidelityFrame) and HubModes' panes follow. Colors
+   are all currentColor so it wears whatever ink the titlebar has, per
+   skin and focus state.
 
-const SIDES: Array<{ id: Fidelity; v: string; label: string }> = [
-  { id: 'draft', v: 'v0.x', label: 'Draft' },
-  { id: 'shipped', v: 'v1.0', label: 'Shipped' },
-]
+   The titlebar drags and double-click zooms — this control, like
+   TitleAction, lets neither fire from inside it. */
 
 export function FidelitySwitch() {
   const mode = useFidelity((s) => s.mode)
   const set = useFidelity((s) => s.set)
+  const shipped = mode === 'shipped'
   return (
-    <div className={styles.fidSlot}>
-      <div
-        className={styles.fidTab}
-        role="group"
-        aria-label="Fidelity switch: every paired plate in the case follows it"
-      >
-        {SIDES.map((side) => (
-          <button
-            key={side.id}
-            className={styles.fidSeg}
-            aria-pressed={mode === side.id}
-            onClick={() => {
-              if (mode === side.id) return
-              sfx.tap()
-              set(side.id)
-            }}
-          >
-            <span className={styles.fidV}>{side.v}</span>
-            {side.label}
-          </button>
-        ))}
-      </div>
-    </div>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={shipped}
+      aria-label="Fidelity: flip the whole case between draft and shipped"
+      className={styles.sw}
+      onPointerDown={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+      onClick={() => {
+        sfx.tap()
+        set(shipped ? 'draft' : 'shipped')
+      }}
+    >
+      <span className={styles.side} data-on={!shipped ? 'true' : undefined}>
+        Draft
+      </span>
+      <span className={styles.track} aria-hidden="true">
+        <span className={styles.knob} />
+      </span>
+      <span className={styles.side} data-on={shipped ? 'true' : undefined}>
+        Shipped
+      </span>
+    </button>
   )
 }

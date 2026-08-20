@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic'
 import type { ComponentType } from 'react'
+import { FidelitySwitch } from '@/components/case/FidelitySwitch'
 
 /* The four box-art LAYOUTS on the shelf, named for the composition rather
    than for the case that happens to wear it — so a fifth case can pick one
@@ -49,6 +50,11 @@ export type CaseDef = {
   source?: string
   /** build state, read by the shelf's in-development boxes (WIP-15) */
   progress?: { pct: number; phase: string }
+  /** a live control in the titlebar's right slot, ahead of the doc-id —
+      the case's own chrome (family-hub's fidelity switch). Static
+      import, not dynamic: a control that pops in after the bar reads
+      as a glitch, and the one that exists is a few hundred bytes. */
+  titleWidget?: ComponentType
   /** SHIPPED.SW — the case as boxed retail software on the shelf
       (src/programs/shelf). Every field is optional so registering a new
       case stays one CASES entry: no `box` at all still yields a box, just
@@ -217,6 +223,8 @@ export const CASES: CaseDef[] = [
     component: dynamic(() => import('@/programs/projects/CaseFamilyHub')),
     source: 'family-hub.mdx',
     progress: { pct: 100, phase: 'Shipped. Read it' },
+    /* FIDELITY.SW — the draft/shipped rocker in the window bar (s94b) */
+    titleWidget: FidelitySwitch,
     box: {
       /* the hub dashboard, seated under the blob mask and the airbrush —
          the same treatment the film gets, which is what makes the two

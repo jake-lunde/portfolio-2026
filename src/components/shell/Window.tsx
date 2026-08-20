@@ -271,6 +271,11 @@ export function Window({ def, z, active, desktopRef }: Props) {
           <span className={styles.title} data-copy-id={`program.${def.id}.name`}>
             {title}
           </span>
+          {/* a live program control rides ahead of the right slot when
+              the window registers one (titleWidget — family-hub's
+              fidelity switch); it composes with the slot rather than
+              occupying it, so the doc-id survives beside it */}
+          {def.titleWidget && <def.titleWidget />}
           {/* the right slot: a doc-id, a button that summons what this
               window is (explainer key), or — highest precedence — a
               titlebar action link (titleAction, e.g. resume's download).

@@ -1,14 +1,13 @@
 import Content from '@content/family-hub.mdx'
 import { CaseIndex } from '@/components/case/CaseIndex'
-import { FidelitySwitch } from '@/components/case/FidelitySwitch'
 import styles from '@/components/case/case.module.css'
 
+/* FIDELITY.SW lives in the window bar, not here — the case registers
+   it as its titleWidget (projects/cases.ts). */
 export default function CaseFamilyHub() {
   return (
-    /* hasFid: the read-o-meter cedes its left end to FIDELITY.SW */
-    <article className={`${styles.case} ${styles.hasRail} ${styles.hasFid}`}>
+    <article className={styles.case}>
       <CaseIndex />
-      <FidelitySwitch />
       <div className={styles.wrap}>
         <Content />
       </div>

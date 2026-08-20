@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, useInView, useReducedMotion } from 'motion/react'
 import { sfx } from '@/lib/sound'
 import { HUB_MODE_LABELS, HUB_SHOTS, HUB_SHOT_DIR, HUB_SHOT_MS, type HubMode } from './hubShipped'
-import { useHubLink } from './hubLink'
 import { useFidelity } from './fidelity'
 import styles from './case.module.css'
 
@@ -13,19 +12,12 @@ import styles from './case.module.css'
    (PIN gate before anything consequential). Two modes plus the auth
    layer — per Jake's s35 correction; no "focused" tier.
 
-   s89: the old FIG. D plate (shipped surfaces, a placeholder) folded in
-   here, then split across windows: the page argues, the viewer holds
-   the evidence. Wherever PROGRESS.VWR rides the margin (container
-   ≥640px, the rail's own threshold) the mode tabs here drive the
-   shipped screens THERE, via the hubLink store, and this plate shows
-   the lo-fi diagram only. Below that the rail doesn't exist and this
-   plate carries everything itself. The swap is pure CSS (container
-   query) — both panes render, the container decides which one is real.
-
-   s94: the plate's own Lo-fi/Shipped toggle retired — which pane shows
-   (narrow), and whether the rail loan engages at all (wide), now
-   follows the case's one fidelity switch. Tabs stay the plate's; the
-   version axis is the case's. */
+   s89 folded the old FIG. D plate (shipped surfaces) in here; s94b
+   retired PROGRESS.VWR and its loan entirely, so this plate carries
+   both panes itself at every width. Which pane shows follows the
+   case's one fidelity switch in the window bar; the mode tabs stay the
+   plate's own. The pair's chip restates the switch in this pair's
+   rungs and flips it globally, like every FidelityFrame chip. */
 
 type Mode = HubMode
 type View = 'diagram' | 'shipped'
@@ -136,23 +128,12 @@ export function HubModes() {
   const rootRef = useRef<HTMLDivElement>(null)
   const inView = useInView(rootRef, { amount: 0.35 })
   const reduced = useReducedMotion()
-  const setLink = useHubLink((s) => s.set)
   const current = MODES.find((m) => m.id === mode)!
   const shots = HUB_SHOTS[mode]
   const shipped = view === 'shipped'
 
-  /* broadcast to the rail: which mode, and whether the plate is on
-     screen enough to borrow the viewer */
-  useEffect(() => {
-    setLink({ mode })
-  }, [mode, setLink])
-  useEffect(() => {
-    setLink({ live: inView })
-    return () => setLink({ live: false })
-  }, [inView, setLink])
-
-  /* the plate's own cycle — only runs when its shipped pane is the one
-     showing (narrow layouts), on screen, and nobody's pointing at it */
+  /* the cycle — runs while the shipped pane is showing, on screen,
+     and nobody's pointing at it */
   useEffect(() => {
     if (!shipped || reduced || held || !inView || shots.length < 2) return
     const t = setInterval(() => setShot((i) => (i + 1) % shots.length), HUB_SHOT_MS)
@@ -162,8 +143,8 @@ export function HubModes() {
   return (
     <div ref={rootRef}>
       <div className={styles.hubHead}>
-        {/* the pair's chip (narrow only, CSS): restates the case's one
-            fidelity switch in this plate's rungs, flips it globally */}
+        {/* the pair's chip: restates the case's one fidelity switch in
+            this plate's rungs, flips it globally */}
         <div className={styles.hubViews} role="group" aria-label="Fidelity">
           {(
             [
@@ -190,10 +171,6 @@ export function HubModes() {
             {String(shot + 1).padStart(2, '0')} / {String(shots.length).padStart(2, '0')}
           </span>
         )}
-        {/* wide layouts only (CSS): where the screens went */}
-        <span className={styles.hubHint} aria-hidden="true">
-          shipped → progress.vwr
-        </span>
       </div>
 
       <div className={styles.hubStage} data-view={view}>
