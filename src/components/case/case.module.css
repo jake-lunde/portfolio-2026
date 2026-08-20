@@ -1346,3 +1346,124 @@
     display: none;
   }
 }
+
+/* FIDELITY.SW (FidelitySwitch.tsx) — the case's one hardware switch,
+   docked in the read-o-meter band's left end (the meter cedes the room
+   via .hasFid, so nothing ever scrolls underneath it). Sticky with the
+   meter so it rides every width; below the rail's 640px threshold this
+   IS the fidelity story. Pressed side reads like a pressed key:
+   content ink on content, no invented colors. */
+.fidSlot {
+  position: sticky;
+  top: 0;
+  z-index: 8; /* over the meter band (7) */
+  height: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start; /* a 0-height slot must not stretch the tab flat */
+  /* into the band: over .case's top/side padding, at the meter's own
+     left padding (case pads 10px 30px, meter pads 12px) */
+  margin: -10px 0 0 -18px;
+}
+
+/* the meter's left end steps aside for the switch */
+.hasFid .meter {
+  padding-left: 178px;
+}
+
+.fidTab {
+  display: inline-flex;
+  margin-top: 3px; /* optically centered in the 24px band */
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+}
+
+[data-theme='dark'] .fidTab {
+  border-color: var(--border);
+}
+
+.fidSeg {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 3px 9px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+.fidSeg + .fidSeg {
+  border-left: var(--border-width-default) solid var(--border);
+}
+
+.fidSeg[aria-pressed='true'] {
+  background: var(--content);
+  color: var(--surface);
+}
+
+.fidSeg:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: -2px;
+}
+
+.fidV {
+  color: var(--accent);
+  font-size: var(--text-caption);
+}
+
+.fidSeg[aria-pressed='true'] .fidV {
+  color: inherit;
+}
+
+/* FidelityFrame — one frame, two states, inside a plate. The chip
+   restates the global switch in this pair's own rung labels; panes
+   flip instantly (1992 machines don't crossfade). */
+.fidChip {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+/* text switches, same species as .hubView — plate ink, marks-only accent */
+.fidChipSeg {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  color: rgba(231, 225, 210, 0.45);
+  cursor: pointer;
+}
+
+.fidChipSeg[aria-pressed='true'] {
+  color: rgba(231, 225, 210, 0.9);
+  border-bottom-color: var(--accent-expressive);
+}
+
+.fidChipSeg:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+.fidStage [data-pane='shipped'] {
+  display: none;
+}
+
+.fidStage[data-mode='shipped'] [data-pane='draft'] {
+  display: none;
+}
+
+.fidStage[data-mode='shipped'] [data-pane='shipped'] {
+  display: block;
+}

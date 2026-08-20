@@ -20,6 +20,7 @@ import { CaseFooter } from '@/components/case/CaseFooter'
 import { PitchDeck } from '@/components/case/PitchDeck'
 import { EvolutionRail } from '@/components/case/EvolutionRail'
 import { LaunchFilm } from '@/components/case/LaunchFilm'
+import { FidelityFrame } from '@/components/case/FidelityFrame'
 
 <Hero
   eyebrow="Greenlight · Family Hub · First-party hardware"
@@ -133,8 +134,13 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
   spearheaded. Over-the-air updates made iteration, by my very scientific
   estimate at the time, *&ldquo;a thousand percent&rdquo;* faster.
 
-  <Plate cap="Plate 04 · the ladder" caption="The lo-fi shell beside the hi-fi board build. Same screen, four months apart.">
-    <Placeholder>Lo-fi → hi-fi, side by side</Placeholder>
+  <Plate cap="Plate 04 · the ladder" caption="The same screen at v0.4 and v0.6, four months apart. The switch by the meter flips it.">
+    <FidelityFrame
+      vDraft="v0.4"
+      vShipped="v0.6"
+      draft={<Placeholder>The lo-fi shell · the wireframe build</Placeholder>}
+      shipped={<Placeholder>The hi-fi board build · same screen</Placeholder>}
+    />
   </Plate>
 
   <Plate cap="Plate 05 · the cadence" caption="A spread from the monthly leadership decks: the Gantt, per-platform principles, ambient studies.">
@@ -159,8 +165,13 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
   characters in nine colors, animating in as the family gets set up. Still
   one of my favorite things in the product.
 
-  <Plate cap="Plate 07 · the avatar system" caption="The 10×9 avatar grid, plus one mid-animation frame from onboarding.">
-    <Placeholder>Avatars · 10 characters × 9 colors</Placeholder>
+  <Plate cap="Plate 07 · the avatar system" caption="The 10×9 grid as specced, and the avatars animating in as they shipped.">
+    <FidelityFrame
+      vDraft="v0.7"
+      vShipped="v1.0"
+      draft={<Placeholder>The spec · 10 characters × 9 colors</Placeholder>}
+      shipped={<Placeholder>Avatars animating in during onboarding</Placeholder>}
+    />
   </Plate>
 
   <Ledger
@@ -188,11 +199,27 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
 
   The call we made: let engineering run on happy paths while I backfilled
   states and polish behind them. That was scary, but it worked because the
-  feedback stayed precise. Redrawn Figma, motion files, live edits in
-  DevTools on a staging mirror that went straight into tickets. And I kept a
-  hub on my desk that I could debug, test on, and mirror.
+  feedback stayed precise. Redrawn Figma, motion files, and a loop I
+  started calling the live audit.
+
+  I kept a hub on my desk that I could debug, test on, and mirror.
+  I&rsquo;d load the staging build into Chrome DevTools and edit the real
+  product live: the way calendar events stacked in the timeline, the
+  sizing of the assistant, pieces of the navigation. Every fix went into a
+  ticket with the exact values already worked out. The audit caught
+  quieter things too, values hardcoded where a design token should have
+  been, and I tied those back into the system.
 
   <Claim>That&rsquo;s when <em>design engineer</em> stopped being a title I was trying&nbsp;on.</Claim>
+
+  <Plate tag="LIVE.AUDIT" caption="The loop, drawn: the staging build in DevTools on the laptop, the hub on the desk. Flip it from the build to the fix.">
+    <FidelityFrame
+      vDraft="Build"
+      vShipped="Fix"
+      draft={<Placeholder>The desk scene · calendar events overlapping</Placeholder>}
+      shipped={<Placeholder>The desk scene · events stacked, tokens bound</Placeholder>}
+    />
+  </Plate>
 
   It went both directions, too. My favorite review on the whole project came
   from an engineer, about one token:
@@ -205,17 +232,24 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
   me so. I stripped it back so the color shows up where it means something.
   They were right, and the design got better.
 
-  <Plate cap="Plate 09 · the rein-in" caption="Color before and after, early 2026. The pass where the team was right.">
-    <Placeholder>Before / after · the color pullback</Placeholder>
+  <Plate cap="Plate 09 · the rein-in" caption="The early color pass, and where it landed. The pass where the team was right.">
+    <FidelityFrame
+      vDraft="v0.7"
+      vShipped="v1.0"
+      draft={<Placeholder>The loud pass · color everywhere</Placeholder>}
+      shipped={<Placeholder>Color only where it means something</Placeholder>}
+    />
   </Plate>
 </Section>
 
 <Section no="07" label="The ship" title="Zero code in January, nationwide by July.">
   <Lead>
-    When accounts got cut from launch scope, I argued hard for a more
-    complete first impression. We shipped fast instead. I&rsquo;m proud of
-    what we put out, and the jury&rsquo;s still out on the trade. Both of
-    those are true.
+    Accounts got cut from launch scope, and I argued hard for a more
+    complete first impression. You only get one, and families expect
+    accounts from Greenlight before anything else. The call went the other
+    way: ship fast, then let over-the-air updates close the gap. I&rsquo;m
+    proud of what we put out, and the jury&rsquo;s still out on the trade.
+    Both of those are true.
   </Lead>
 
   <Metrics>
@@ -227,6 +261,18 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
       <LaunchFilm />
     </Plate>
   </Metrics>
+
+  The first gap is already closing, and it&rsquo;s the one I argued for.
+
+  <Ledger
+    cap="What ships next"
+    rows={[
+      ['Accounts', <>Kids see their money right on the device, including kids who don&rsquo;t have phones yet.</>],
+      ['Home', <>Every feature rolled up at a glance, and you can slice the whole view down to one family member.</>],
+      ['Permissions', <>Families choose what the AI assistant can see and do. More control back in their hands.</>],
+      ['Partners', <>In the works. More on that soon.</>],
+    ]}
+  />
 
   We&rsquo;re not stopping here. Although we shipped fast and have
   experience gaps to fill, that&rsquo;s the mission: continue to listen to

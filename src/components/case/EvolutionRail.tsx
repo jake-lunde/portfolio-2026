@@ -6,6 +6,7 @@ import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
 import { HUB_MODE_LABELS, HUB_SHOTS, HUB_SHOT_DIR, HUB_SHOT_MS } from './hubShipped'
 import { useHubLink } from './hubLink'
+import { useFidelity } from './fidelity'
 import styles from './case.module.css'
 
 /* PROGRESS.VWR — a window into watching the Family Hub get built. A
@@ -59,14 +60,22 @@ const STAGES: Stage[] = [
   { file: 'stage-06.webp', v: 'v0.7', label: 'Color Explorations', ratio: '1440 / 800', alt: 'Color exploration: chats, chores and calendar as calm cards, color only where it means something.' },
   { file: 'stage-07.webp', v: 'v0.9', label: 'On-Device Testing', ratio: '10 / 7', scene: 'wall', alt: 'The launch build under test: the device hung on a plain wall.', },
   { file: 'stage-08.webp', v: 'v1.0', label: 'Ship', ratio: '10 / 7', scene: 'kitchen', alt: 'Family Hub live in situ: the device on a kitchen wall, plant on the counter.' },
+  /* s94, Jake's rung past the ship: the ladder ends back at the
+     drawing board. Same living collage as v0.1 — accounts, the home
+     roll-up and new permissions start life the way everything here
+     did, as a sketch. No file = the sketch scene renders. */
+  { v: 'v1.1', label: 'Next', ratio: '1089 / 490', alt: 'The concept collage again, gently afloat: the next round of features back on the drawing board.' },
 ]
 
 /* The story's beats don't map 1:1 onto the ladder — Jake's cut: the
    hi-fi prototype must arrive with §04 "the artifact" (the persuasion
    section IS the hi-fi build), which folds both lo-fi beats into §03.
    v0.5 stays reachable from the ticks; its demo spans v0.4 anyway.
+   s94: on-device testing (v0.9) lands with §06 (the hub on the desk is
+   that section's whole method), the kitchen ship with §07, and the
+   footer walks back to the drawing board (v1.1).
    Index = [hero, §01..§07, footer] → stage. */
-const BEAT_TO_STAGE = [0, 1, 2, 3, 5, 6, 6, 7, 8]
+const BEAT_TO_STAGE = [0, 1, 2, 3, 5, 6, 7, 8, 9]
 
 /* The living sketch — Jake's concept collage as cutouts on a virtual
    1089×490 canvas (coords straight from the Figma group), each adrift
@@ -242,6 +251,10 @@ export function EvolutionRail() {
      and there's nothing to lend) the viewer is its monitor */
   const hubMode = useHubLink((st) => st.mode)
   const hubLive = useHubLink((st) => st.live)
+  /* s94: the loan waits for the reader — draft mode keeps the ladder
+     running; flipping the case's fidelity switch to shipped is what
+     hands the viewer over as §03's monitor */
+  const fidelity = useFidelity((st) => st.mode)
   const [slotOn, setSlotOn] = useState(false)
   const [shipShot, setShipShot] = useState(0)
   /* Auto-zoom on the break-out is OFF for now (Jake: tune later) —
@@ -256,7 +269,7 @@ export function EvolutionRail() {
     return () => ro.disconnect()
   }, [])
 
-  const lent = hubLive && slotOn && !minimized
+  const lent = hubLive && slotOn && !minimized && fidelity === 'shipped'
 
   useEffect(() => {
     setShipShot(0)
@@ -421,10 +434,11 @@ export function EvolutionRail() {
               aria-label={`${cur.v} · ${cur.label}. ${cur.alt}`}
               data-scene={cur.scene ? 'true' : undefined}
               data-video={cur.video ? 'true' : undefined}
-              data-sketch={stage === 0 ? 'true' : undefined}
+              data-sketch={!cur.file ? 'true' : undefined}
             >
               <div className={styles.railStack} style={{ aspectRatio: cur.ratio }}>
-                <SketchScene on={stage === 0} />
+                {/* fileless rungs are the sketch: v0.1, and v1.1's reprise */}
+                <SketchScene on={!cur.file} />
                 {STAGES.map(
                   (s, i) =>
                     s.file &&

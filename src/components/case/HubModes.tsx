@@ -5,6 +5,7 @@ import { motion, useInView, useReducedMotion } from 'motion/react'
 import { sfx } from '@/lib/sound'
 import { HUB_MODE_LABELS, HUB_SHOTS, HUB_SHOT_DIR, HUB_SHOT_MS, type HubMode } from './hubShipped'
 import { useHubLink } from './hubLink'
+import { useFidelity } from './fidelity'
 import styles from './case.module.css'
 
 /* The shipped interaction model: Ambient (the heads-up screensaver) →
@@ -17,18 +18,17 @@ import styles from './case.module.css'
    the evidence. Wherever PROGRESS.VWR rides the margin (container
    ≥640px, the rail's own threshold) the mode tabs here drive the
    shipped screens THERE, via the hubLink store, and this plate shows
-   the lo-fi diagram only. Below that the rail doesn't exist, so the
-   plate keeps its own Lo-fi/Shipped toggle and carries everything
-   itself. The swap is pure CSS (container query) — both panes render,
-   the container decides which one is real. */
+   the lo-fi diagram only. Below that the rail doesn't exist and this
+   plate carries everything itself. The swap is pure CSS (container
+   query) — both panes render, the container decides which one is real.
+
+   s94: the plate's own Lo-fi/Shipped toggle retired — which pane shows
+   (narrow), and whether the rail loan engages at all (wide), now
+   follows the case's one fidelity switch. Tabs stay the plate's; the
+   version axis is the case's. */
 
 type Mode = HubMode
 type View = 'diagram' | 'shipped'
-
-const VIEWS: Array<{ id: View; label: string }> = [
-  { id: 'diagram', label: 'Lo-fi' },
-  { id: 'shipped', label: 'Shipped' },
-]
 
 const MODES: Array<{ id: Mode; label: string; blurb: string }> = [
   { id: 'ambient', label: HUB_MODE_LABELS.ambient, blurb: 'The screensaver with a job. From across the room you get the time, what’s next, who’s where, the photo stream. It asks nothing of you.' },
@@ -128,7 +128,9 @@ function Auth() {
 
 export function HubModes() {
   const [mode, setMode] = useState<Mode>('ambient')
-  const [view, setView] = useState<View>('diagram')
+  const fidelity = useFidelity((s) => s.mode)
+  const setFidelity = useFidelity((s) => s.set)
+  const view: View = fidelity === 'shipped' ? 'shipped' : 'diagram'
   const [shot, setShot] = useState(0)
   const [held, setHeld] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -160,18 +162,26 @@ export function HubModes() {
   return (
     <div ref={rootRef}>
       <div className={styles.hubHead}>
-        <div className={styles.hubViews} role="group" aria-label="View">
-          {VIEWS.map((v) => (
+        {/* the pair's chip (narrow only, CSS): restates the case's one
+            fidelity switch in this plate's rungs, flips it globally */}
+        <div className={styles.hubViews} role="group" aria-label="Fidelity">
+          {(
+            [
+              ['draft', 'v0.4'],
+              ['shipped', 'v1.0'],
+            ] as const
+          ).map(([id, label]) => (
             <button
-              key={v.id}
-              className={styles.hubView}
-              aria-pressed={v.id === view}
+              key={id}
+              className={styles.fidChipSeg}
+              aria-pressed={fidelity === id}
               onClick={() => {
+                if (fidelity === id) return
                 sfx.tap()
-                setView(v.id)
+                setFidelity(id)
               }}
             >
-              {v.label}
+              {label}
             </button>
           ))}
         </div>
