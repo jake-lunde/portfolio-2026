@@ -65,6 +65,14 @@ const RISE_SETTLE = 520 // the climb's spring is done about here
 const DUCK_MS = 260 // dropping back in is quicker than climbing out
 const DWELL_MIN = 5200
 const DWELL_VAR = 3800
+/* CLOSING THE GAP. A cursor visibly closing on a standing unit buys the
+   dwell timer more time, in bounded increments, instead of letting the
+   timer drop the unit mid-approach — half of what makes first contact
+   reachable (the other half is findSpot hunting near the cursor while
+   anybody is still unmet, below `isBare`). The cap means parking nearby
+   and never arriving can't pin a unit up forever. */
+const DWELL_EXTEND = 260
+const DWELL_EXTEND_MAX = 3200
 const GAP_MIN = 4200
 const GAP_VAR = 4600
 const MET_KEY = 'lunde-crew-met'
@@ -117,17 +125,41 @@ function isBare(vx: number, vy: number): boolean {
   })
 }
 
-/** roll for an empty patch of desk; null means the desk is full today */
-function findSpot(mouse: { x: number; y: number } | null): Spot | null {
+/* HUNTING. While anybody is still unmet, findSpot leans its roll toward
+   the cursor's own neighbourhood instead of rolling blind across the
+   whole desk — outside the jump-scare exclusion (the same ring findSpot
+   already keeps clear below), inside a radius a visitor's eye can still
+   cover without hunting for it. Once everyone has been introduced the
+   roll goes back to uniform: familiar faces don't need to be chased
+   down, and spreading out is the more interesting behaviour once first
+   contact isn't the point any more. */
+const CURSOR_BIAS_MIN = INTRO_RADIUS + 70 // == findSpot's own exclusion ring
+const CURSOR_BIAS_MAX = 400
+
+/** roll for an empty patch of desk; null means the desk is full today.
+    `hunt` asks for the cursor-biased roll (see HUNTING above) — a
+    visitor findSpot has never heard a cursor from still gets the
+    uniform roll regardless of what `hunt` says. */
+function findSpot(mouse: { x: number; y: number } | null, hunt: boolean): Spot | null {
   const desk = document.querySelector('[data-desktop-root]')
   if (!desk) return null
   const r = desk.getBoundingClientRect()
   const w = r.width - EDGE_PAD * 2
   const h = r.height - TOP_PAD - BOTTOM_PAD
   if (w < 140 || h < 60) return null
+  const hunting = hunt && !!mouse
   for (let i = 0; i < TRIES; i++) {
-    const x = EDGE_PAD + Math.random() * w
-    const y = TOP_PAD + Math.random() * h
+    let x: number
+    let y: number
+    if (hunting) {
+      const angle = Math.random() * Math.PI * 2
+      const radius = CURSOR_BIAS_MIN + Math.random() * (CURSOR_BIAS_MAX - CURSOR_BIAS_MIN)
+      x = Math.min(EDGE_PAD + w, Math.max(EDGE_PAD, mouse!.x - r.left + Math.cos(angle) * radius))
+      y = Math.min(TOP_PAD + h, Math.max(TOP_PAD, mouse!.y - r.top + Math.sin(angle) * radius))
+    } else {
+      x = EDGE_PAD + Math.random() * w
+      y = TOP_PAD + Math.random() * h
+    }
     const vx = r.left + x
     const vy = r.top + y
     // never surface under the cursor — that is a jump-scare, not a hello
@@ -248,16 +280,28 @@ export function AmbientAgents() {
     }
 
     let timers: number[] = []
+    // the dwell countdown, tracked apart from `timers` above so an
+    // approaching cursor can push it out without touching the turn/bubble
+    // beats scheduled alongside it (see armDuck/extendDuck, below)
+    let duckTimer: number | null = null
+    let duckDeadline = 0
     const at = (ms: number, fn: () => void) => {
       timers.push(window.setTimeout(fn, ms))
     }
     const clear = () => {
       timers.forEach(clearTimeout)
       timers = []
+      if (duckTimer !== null) {
+        clearTimeout(duckTimer)
+        duckTimer = null
+      }
     }
     const again = (gap: number) => at(gap, () => setCycle((c) => c + 1))
 
-    const found = findSpot(mouse.current)
+    // hunt near the cursor while anybody is still unmet (see HUNTING,
+    // above findSpot) — once the whole crew has been introduced the roll
+    // goes back to uniform
+    const found = findSpot(mouse.current, met.current.size < CREW_IDS.length)
     if (!found) {
       // desk full — try again shortly rather than burning a unit's turn
       again(2600)
@@ -268,6 +312,8 @@ export function AmbientAgents() {
     const id = CREW_IDS[(roster.current = (roster.current + 1) % CREW_IDS.length)]
     let scared = false
     let calmUntil = 0
+    let lastDist: number | null = null // for CLOSING THE GAP, below
+    let extended = 0
 
     spotRef.current = found
     atRef.current = { x: desk.left + found.x, y: desk.top + found.y }
@@ -301,6 +347,27 @@ export function AmbientAgents() {
     }
     duckRef.current = duck
 
+    // arms (or re-arms) the dwell countdown against `duckDeadline` rather
+    // than a bare `at()`, so extendDuck can push it out mid-flight
+    const armDuck = (delay: number) => {
+      if (duckTimer !== null) clearTimeout(duckTimer)
+      duckDeadline = performance.now() + delay
+      duckTimer = window.setTimeout(() => {
+        duckTimer = null
+        duck()
+      }, delay)
+    }
+    // CLOSING THE GAP (see the const above) — adds time to whatever is
+    // left on the clock rather than replacing it, and refuses once the
+    // cap is spent or the countdown isn't armed (already fleeing, mid
+    // intro, or already gone)
+    const extendDuck = (bump: number) => {
+      if (duckTimer === null || extended >= DWELL_EXTEND_MAX) return
+      const add = Math.min(bump, DWELL_EXTEND_MAX - extended)
+      extended += add
+      armDuck(Math.max(0, duckDeadline - performance.now()) + add)
+    }
+
     // out of the hatch, the hatch shuts behind them, a beat of standing,
     // then the turn and the line
     const standing = HOLE_LEAD + RISE_SETTLE
@@ -308,6 +375,9 @@ export function AmbientAgents() {
     at(HOLE_LEAD, () => setPhase('rising'))
     at(standing, () => {
       setPhase('up')
+      // the dwell countdown starts here, armed rather than a fixed
+      // `at()`, so a closing cursor can buy it more time (react, below)
+      armDuck(dwell)
       // a cursor already parked beside the spot gets a reaction the
       // moment they stand up — react used to fire on movement only, so a
       // visitor who held still was never noticed
@@ -325,7 +395,6 @@ export function AmbientAgents() {
         at(2600, () => setBubble(null))
       })
     }
-    at(standing + dwell, () => duck())
 
     // shared between the pointermove listener and the moment-of-standing
     // check below, so both a moving cursor and a parked one get read the
@@ -335,6 +404,11 @@ export function AmbientAgents() {
       if (!p || phaseRef.current !== 'up') return
       const now = performance.now()
       const d = Math.hypot(x - p.x, y - (p.y - SIZE / 2))
+
+      // closing the gap buys the dwell timer more time instead of
+      // letting it drop the unit mid-approach — see DWELL_EXTEND, above
+      if (lastDist !== null && d < lastDist - 1) extendDuck(DWELL_EXTEND)
+      lastDist = d
 
       /* FIRST CONTACT. Before a unit has ever been met, the cursor
          getting close buys an introduction instead of a startle — they
