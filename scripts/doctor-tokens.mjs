@@ -527,60 +527,23 @@ function buildResolvedThemeMaps(cssText) {
 
 /* THE RENAME LEDGER — old emitted name -> the name that replaced it.
  *
+ * Empty, and it should stay empty until the next rename needs it.
+ *
  * PARITY reads a removed custom property as a regression, which is right for
  * the additive PRs it was built for and wrong for one that renames a whole
- * shape at once. So a rename is DECLARED rather than waved through, and the
- * check gets stricter, not looser: the successor must exist in the new
+ * shape at once. So a rename is DECLARED here rather than waved through, and
+ * the check gets stricter, not looser: the successor must exist in the new
  * stylesheet, and it must resolve to the same computed value unless it is
  * listed in RETUNED. A rename that quietly changed a value still fails.
  *
- * Empty this once main carries the new names — a ledger that outlives its own
- * PR stops being evidence and starts being a blanket permission.
- *
- * Written for the chrome type ramp (2026-08-21): eleven text elements traded
- * their loose family/size/weight/tracking members for one typography
- * composite, which the build expands into the five names below. */
-const RENAMED = {
-  'button-weight': 'button-md-text-font-weight',
-  'button-sm-font-size': 'button-sm-text-font-size',
-  'button-sm-tracking': 'button-sm-text-letter-spacing',
-  'button-md-font-size': 'button-md-text-font-size',
-  'button-md-tracking': 'button-md-text-letter-spacing',
-  'menubar-family': 'menubar-text-font-family',
-  'menubar-font-size': 'menubar-text-font-size',
-  'menubar-tracking': 'menubar-text-letter-spacing',
-  'menubar-wordmark-family': 'menubar-wordmark-text-font-family',
-  'menubar-wordmark-weight': 'menubar-wordmark-text-font-weight',
-  'menubar-wordmark-tracking': 'menubar-wordmark-text-letter-spacing',
-  'menubar-wordmark-version-family': 'menubar-wordmark-version-text-font-family',
-  'menubar-wordmark-version-font-size': 'menubar-wordmark-version-text-font-size',
-  'menubar-wordmark-version-weight': 'menubar-wordmark-version-text-font-weight',
-  'menubar-wordmark-version-tracking': 'menubar-wordmark-version-text-letter-spacing',
-  'menubar-menu-btn-family': 'menubar-menu-btn-text-font-family',
-  'menubar-menu-btn-font-size': 'menubar-menu-btn-text-font-size',
-  'menubar-menu-btn-tracking': 'menubar-menu-btn-text-letter-spacing',
-  'stamp-family': 'stamp-text-font-family',
-  'stamp-font-size': 'stamp-text-font-size',
-  'stamp-weight': 'stamp-text-font-weight',
-  'stamp-tracking': 'stamp-text-letter-spacing',
-  'desktop-icons-label-family': 'desktop-icons-label-text-font-family',
-  'desktop-icons-label-font-size': 'desktop-icons-label-text-font-size',
-  'desktop-icons-label-tracking': 'desktop-icons-label-text-letter-spacing',
-  'window-title-family': 'window-title-text-font-family',
-  'window-title-font-size': 'window-title-text-font-size',
-  'window-title-weight': 'window-title-text-font-weight',
-  'window-title-tracking': 'window-title-text-letter-spacing',
-}
+ * Clear both the day main carries the new names. A ledger that outlives its
+ * own PR stops being evidence and starts being a blanket permission. The
+ * chrome type ramp filled it once (2026-08-21, PR #58) and emptied it here. */
+const RENAMED = {}
 
 /* The renamed properties allowed to land on a different value, and the only
- * ones. Jake ruled the menubar/window-title tracking split an accident and
- * normalized it on .14 (2026-08-21), which widens these three by 0.02em. Every
- * other rename above must be value-for-value. */
-const RETUNED = new Set([
-  'menubar-text-letter-spacing',
-  'menubar-wordmark-version-text-letter-spacing',
-  'button-sm-text-letter-spacing',
-])
+ * ones. Everything else in the ledger must be value-for-value. */
+const RETUNED = new Set([])
 
 async function checkParity(refArg, currentCss, reporters) {
   if (!currentCss) {
