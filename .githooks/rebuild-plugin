@@ -1,0 +1,39 @@
+#!/bin/sh
+# TOKEN BRIDGE — rebuild figma-plugin/dist when incoming commits touched the
+# plugin. Called by post-merge and post-checkout with two revisions.
+#
+# Why: dist/ is gitignored and built by hand, so a merge that fixes the plugin
+# leaves Figma running the old bundle. On 2026-08-21 that cost an hour of
+# hand-deleting junk variables minted by an Aug-11 build. src/freshness.ts
+# catches a stale bundle at PULL time; this keeps it from going stale at all.
+#
+# Never fails the git operation it hangs off: every path exits 0.
+from_rev=$1
+to_rev=$2
+
+[ -n "$from_rev" ] && [ -n "$to_rev" ] || exit 0
+[ "$from_rev" = "$to_rev" ] && exit 0
+git rev-parse --verify --quiet "$from_rev" >/dev/null 2>&1 || exit 0
+git rev-parse --verify --quiet "$to_rev" >/dev/null 2>&1 || exit 0
+
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+[ -n "$root" ] || exit 0
+
+changed=$(git diff --name-only "$from_rev" "$to_rev" -- figma-plugin/ 2>/dev/null)
+[ -n "$changed" ] || exit 0
+
+if [ ! -f "$root/figma-plugin/dist/code.js" ]; then
+  echo "TOKEN BRIDGE: plugin source changed. dist/ was never built in this checkout, so nothing to refresh."
+  exit 0
+fi
+
+out=$(cd "$root" && node figma-plugin/build.mjs 2>&1)
+if [ $? -ne 0 ]; then
+  echo "TOKEN BRIDGE: dist/ rebuild failed. Run: npm run plugin:build"
+  echo "$out" | tail -5
+  exit 0
+fi
+# build.mjs signs off with "TOKEN BRIDGE: build complete. stamp <sha> on <branch>".
+detail=$(echo "$out" | tail -1 | sed 's/^TOKEN BRIDGE: build complete\. *//')
+echo "TOKEN BRIDGE: plugin source changed, dist/ rebuilt ($detail)."
+exit 0

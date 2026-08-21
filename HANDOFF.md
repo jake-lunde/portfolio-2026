@@ -9,14 +9,12 @@
 > This file is the ONLY handoff cloud sessions can read — invariants
 > only, keep every line true; session narrative never returns here
 > (rotated blocks: `HANDOFF-ARCHIVE.md`).
-> Jake's ideas doc (Drive "Portfolio 2026 / Updates and Ideas") —
-> re-read at session start; his freshest silent edits are his real
-> priorities.
+> Jake's ideas doc (Drive "Portfolio 2026 / Updates and Ideas"): re-read
+> at session start, his freshest silent edits are his real priorities.
 
 ## Invariants
 
-- **Live:** https://lunde.co — Vercel project `portfolio-2026`, team
-  `lunde-os`.
+- **Live:** https://lunde.co — Vercel `portfolio-2026`, team `lunde-os`.
 - **⚠️ Shared-checkout law:** no concurrent sessions on one working
   tree; `git branch --show-current` before EVERY commit; worktrees are
   the pattern; leave the main checkout on main.
@@ -31,9 +29,11 @@
 - **Token commit route:** `/api/token-commit` → branch `inspect-tune`,
   stacking PRs; gate = CI `tokens-sync.yml`. Blocked on
   `GITHUB_COPY_TOKEN` scopes (vault task).
-- **Harness hooks:** `.claude/settings.json` — SessionStart §4.1
+- **Hooks:** harness in `.claude/settings.json` — SessionStart §4.1
   reminder; PreToolUse blocks generated edits, forbidden commits,
-  prettier.
+  prettier. Git in `.githooks/`, wired by npm `prepare` (by hand:
+  `npm run hooks:install`) — post-merge/post-checkout rebuild
+  `figma-plugin/dist`, and a bundle behind the branch blocks its PULL.
 - **Skins & copy:** classic (light/dark) + medieval live; underwater
   stub. Copy layer live — merge `copy.json` at KEY level; never
   force-push: live copy edits are a per-pick affordance in INSPECT's

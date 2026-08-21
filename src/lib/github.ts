@@ -113,6 +113,19 @@ export class GitHub {
     return json.login ?? 'unknown'
   }
 
+  /**
+   * SHAs of the commits touching `path` on `ref`, newest first. TOKEN BRIDGE
+   * uses it to tell a current plugin bundle from one built weeks ago.
+   */
+  async commitsForPath(path: string, ref: string, perPage = 40): Promise<string[]> {
+    const url =
+      `${this.base()}/commits?sha=${encodeURIComponent(ref)}` +
+      `&path=${encodeURIComponent(path)}&per_page=${perPage}`
+    const res = await this.req('GET', url)
+    const json = (await res.json()) as { sha: string }[]
+    return json.map((c) => c.sha)
+  }
+
   /** SHA the given branch currently points at. */
   async refSha(branch: string): Promise<string> {
     const res = await this.req('GET', `${this.base()}/git/ref/heads/${encodePath(branch)}`)
