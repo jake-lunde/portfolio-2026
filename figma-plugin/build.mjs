@@ -6,9 +6,17 @@
  *
  * dist/ is gitignored — the plugin is built locally and loaded via
  * "Import plugin from manifest" in Figma. Pass --watch to rebuild on change.
+ *
+ * Every bundle carries a build stamp (__BUILD_STAMP__): the HEAD commit that
+ * last touched figma-plugin/, the branch, whether the tree was dirty, and the
+ * time. src/freshness.ts checks it against GitHub before each PULL/PUSH, so a
+ * bundle running behind the branch says so instead of quietly replaying
+ * long-fixed bugs. The .githooks/ rebuild keeps it from happening in the first
+ * place; the stamp is what catches the cases the hook misses.
  */
 import { build, context } from 'esbuild'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -17,12 +25,38 @@ const SRC = path.join(DIR, 'src')
 const DIST = path.join(DIR, 'dist')
 const watch = process.argv.includes('--watch')
 
+/** Run git in the plugin dir; empty string when git has nothing to say. */
+function git(...args) {
+  try {
+    return execFileSync('git', args, { cwd: DIR, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * The stamp baked into both bundles. `sha` is the newest commit touching
+ * figma-plugin/ rather than plain HEAD, so commits elsewhere in the repo never
+ * read as plugin staleness. Empty sha = built outside a git checkout.
+ */
+function buildStamp() {
+  const sha = git('log', '-1', '--format=%H', '--', '.')
+  const branch = git('rev-parse', '--abbrev-ref', 'HEAD') || 'unknown'
+  // Ignored paths (dist/) never show up here, so this is src/build/manifest only.
+  const dirty = git('status', '--porcelain', '--', '.').length > 0
+  return { sha, branch, dirty, at: new Date().toISOString() }
+}
+
+const stamp = buildStamp()
+const define = { __BUILD_STAMP__: JSON.stringify(stamp) }
+
 const codeOptions = {
   entryPoints: [path.join(SRC, 'code.ts')],
   outfile: path.join(DIST, 'code.js'),
   bundle: true,
   format: 'iife',
   target: 'es2017',
+  define,
   logLevel: 'info',
 }
 
@@ -33,6 +67,7 @@ async function buildUI() {
     bundle: true,
     format: 'iife',
     target: 'es2017',
+    define,
     write: false,
     logLevel: 'silent',
   })
@@ -41,6 +76,11 @@ async function buildUI() {
   const html = template.replace('<!--INLINE_SCRIPT-->', `<script>\n${js}\n</script>`)
   await writeFile(path.join(DIST, 'ui.html'), html)
   console.log('  dist/ui.html  (ui.ts inlined)')
+}
+
+function stampLine() {
+  if (!stamp.sha) return '(no git, bundle unverifiable)'
+  return `stamp ${stamp.sha.slice(0, 7)}${stamp.dirty ? '+local' : ''} on ${stamp.branch}`
 }
 
 async function main() {
@@ -53,6 +93,7 @@ async function main() {
     const uiCtx = await context({
       entryPoints: [path.join(SRC, 'ui.ts')],
       bundle: true,
+      define,
       write: false,
       plugins: [
         {
@@ -64,11 +105,11 @@ async function main() {
       ],
     })
     await uiCtx.watch()
-    console.log('TOKEN BRIDGE: watching…')
+    console.log(`TOKEN BRIDGE: watching… ${stampLine()}`)
   } else {
     await build(codeOptions)
     await buildUI()
-    console.log('TOKEN BRIDGE: build complete.')
+    console.log(`TOKEN BRIDGE: build complete. ${stampLine()}`)
   }
 }
 

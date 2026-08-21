@@ -1,0 +1,4 @@
+#!/bin/sh
+# Covers the failure that actually bit: a PR merged, `git pull` landed it, and
+# the Figma bundle stayed on last month's code.
+exec "$(dirname "$0")/rebuild-plugin" ORIG_HEAD HEAD

@@ -85,6 +85,24 @@
   .logwrap .l-info { color: #8a9a93; }
   .badge { font-size: 9px; color: var(--ink-soft); margin-top: 4px; }
   .badge b { color: var(--blue); }
+  .foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .stamp {
+    font-size: 9px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .stamp.stale {
+    color: var(--paper);
+    background: #b3122a;
+    padding: 1px 4px;
+  }
 </style>
 
 <div class="wordmark">
@@ -114,6 +132,9 @@
 </div>
 
 <div class="logwrap" id="log"></div>
-<div class="badge">PUSH opens/updates a <b>design-tokens</b> PR → main.</div>
+<div class="foot">
+  <div class="badge">PUSH opens/updates a <b>design-tokens</b> PR → main.</div>
+  <div class="stamp" id="stamp"></div>
+</div>
 
 <!--INLINE_SCRIPT-->
