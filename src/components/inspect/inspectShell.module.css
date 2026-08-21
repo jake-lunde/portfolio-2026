@@ -745,21 +745,48 @@
    further), and COPY where the pick has one. See InspectorPanel.tsx for
    the grouping and why.
 
-   Flat and typographic on purpose — Jake's note was "not a modern
-   segmented control." No pill, no filled ground on the active tab: the
-   bar underneath is the same raised fill every section head already
-   wears, the tabs are plain machine-caps labels inside it divided by
-   hairlines (the same rule .tool + .tool takes), and the SELECTED one is
-   ink where the rest are muted — the exact dichotomy STYLER's own block
-   heads already use (.bar[data-styler-block] .head). Nothing new had to
-   be invented to say "this one is active." */
+   Round 5 (s107, screenshot review): the flat underlined row from round 4
+   read badly, and the nested STYLE row crowded its bar enough that the
+   InfoTip sitting beside it lost a reachable hover target (that tip is
+   gone now — see InspectorPanel.tsx). Jake's fix for the row itself: "use
+   a pill similar to the 'new' pill on the latest work window and use a
+   horizontal scroll for overflow." That pill is player.module.css's
+   .badge — --radius-pill, a filled ground, on-fill ink — borrowed here
+   for the SHAPE. The FILL a selected pill wears is not that badge's:
+   accent-expressive is a mark's accent, licensed for a one-off "NEW", not
+   for a row of everyday controls a visitor clicks through all day, so
+   the selected state instead takes the house's other standing answer —
+   accent fill, paper ink — the same pairing STYLER's own segmented tabs
+   already wear (stylerStage.module.css's .tab[aria-selected='true']) and
+   the same one PENDING's SAVE button wears. One shape, one fill vocabulary,
+   two places it already lived. */
 .tabs {
   flex: 1 1 auto;
   display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
   min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-pill);
 }
 
 .tab {
+  flex: none;
   padding: var(--spacing-component-xs) var(--spacing-component-sm);
   font-family: var(--type-micro-family);
   font-size: var(--type-label-size);
@@ -768,29 +795,28 @@
   line-height: var(--type-label-leading);
   text-transform: uppercase;
   color: var(--content-muted);
-  background: none;
-  border: 0;
-  border-radius: 0;
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+  border-radius: var(--radius-pill);
   cursor: pointer;
   white-space: nowrap;
 }
 
-.tab + .tab {
-  border-left: var(--border-width-subtle) solid var(--border);
-}
-
 .tab:hover {
   color: var(--content);
+  background: var(--interactive-default-hover);
 }
 
+/* what sits ON an accent fill is the paper, house-wide */
 .tab[aria-selected='true'] {
-  color: var(--content);
-  box-shadow: inset 0 -2px 0 var(--accent);
+  color: var(--surface);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .tab:focus-visible {
   outline: var(--border-width-strong) solid var(--accent);
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 
 /* ---- the info affordance ----

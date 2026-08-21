@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useSettings } from '@/store/settings'
 import { useInspect } from '@/store/inspect'
 import { resolveCopy, t } from '@/content/copy'
@@ -145,7 +145,15 @@ const COPY_PATH = 'src/content/copy.json'
    InspectorPanel's body: a component type built fresh on every render is a
    component that unmounts and remounts on every render, and that is a
    focus loss waiting to happen the moment a visitor arrows through it
-   (see useTokenSave.tsx's note on the same trap for the key gate). */
+   (see useTokenSave.tsx's note on the same trap for the key gate).
+
+   Jake, s107: the flat underlined row read badly and the row has to scroll
+   sideways rather than wrap (.tabs in inspectShell.module.css) — a pill
+   can end up off the edge of that scroller on either a click or an arrow
+   step, so the active one is walked into view explicitly rather than
+   trusting a focus call the button doesn't always get (Safari does not
+   focus a plain button on click). `block: 'nearest'` and `inline: 'nearest'`
+   keep the scroll local to the row — this must never drag the dock itself. */
 
 type TabItem = { id: string; label: string }
 
@@ -163,6 +171,14 @@ function TabList({
   onSelect: (id: string) => void
   ariaLabel: string
 }) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    ref.current
+      ?.querySelector<HTMLElement>(`[data-tab-id="${active}"]`)
+      ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [active])
+
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const at = tabs.findIndex((item) => item.id === active)
     const to = tabStep(at < 0 ? 0 : at, tabs.length, e.key)
@@ -178,7 +194,13 @@ function TabList({
   }
 
   return (
-    <div role="tablist" aria-label={ariaLabel} className={styles.tabs} onKeyDown={onKeyDown}>
+    <div
+      ref={ref}
+      role="tablist"
+      aria-label={ariaLabel}
+      className={styles.tabs}
+      onKeyDown={onKeyDown}
+    >
       {tabs.map((item) => {
         const selected = item.id === active
         return (
@@ -208,13 +230,11 @@ const STYLE_TABS_ID = 'inspect-style-tabs'
 type TopTabId = 'structure' | 'style' | 'copy'
 type StyleTabId = 'tokens' | 'contrast' | 'type' | 'motion'
 
-/** label and note key together, so STYLE's bar can swap its InfoTip with
-    whichever of the four is showing without a second lookup table. */
-const STYLE_TABS: { id: StyleTabId; label: string; note: string }[] = [
-  { id: 'tokens', label: 'inspect.section.tokens', note: 'inspect.tokens.note' },
-  { id: 'contrast', label: 'inspect.section.contrast', note: 'inspect.contrast.note' },
-  { id: 'type', label: 'inspect.section.type', note: 'inspect.type.note' },
-  { id: 'motion', label: 'inspect.section.motion', note: 'inspect.motion.note' },
+const STYLE_TABS: { id: StyleTabId; label: string }[] = [
+  { id: 'tokens', label: 'inspect.section.tokens' },
+  { id: 'contrast', label: 'inspect.section.contrast' },
+  { id: 'type', label: 'inspect.section.type' },
+  { id: 'motion', label: 'inspect.section.motion' },
 ]
 
 /* ---- a SOURCE pointer, printed ----
@@ -744,10 +764,15 @@ export function InspectorPanel({
                     and move like — and TOKENS especially can run to a dozen
                     rows, so this is the one tab that earns a second row of
                     tabs rather than staying stacked the way PATH and SOURCE
-                    do. One bar carries the nested tablist AND the InfoTip,
-                    which swaps its note to whichever of the four is active —
-                    the same reason STYLE.tabs.style.group exists as its own
-                    aria-label rather than reusing the outer one. */}
+                    do. STYLE.tabs.style.group still exists as its own
+                    aria-label rather than reusing the outer one.
+
+                    The bar used to carry an InfoTip too, swapping its note
+                    to whichever of the four was active. Jake, s107: the nested
+                    row crowded the bar enough that the tip's own hover target
+                    became unreachable — the note and the tab it explained sat
+                    on top of each other. Removed rather than shrunk; nothing
+                    else on this bar has a note to lose. */}
                 <section className={styles.section}>
                   <div className={styles.bar}>
                     <TabList
@@ -757,7 +782,6 @@ export function InspectorPanel({
                       onSelect={(id) => setStyleTab(id as StyleTabId)}
                       ariaLabel={t('inspect.tabs.style.group', skin)}
                     />
-                    <InfoTip k={STYLE_TABS.find((tt) => tt.id === styleTab)!.note} />
                   </div>
                   <div
                     role="tabpanel"
