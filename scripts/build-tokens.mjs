@@ -327,6 +327,94 @@ const refEntries = Object.keys(refs)
   .map((name) => `  '${name}': ${refs[name] === null ? 'null' : `'${refs[name]}'`},`)
   .join('\n')
 
+/* THE COMPOSITE PARENTS, read straight off the source files.
+ *
+ * A component text element binds ONE typography role — stamp's `text` is a
+ * single ref to {typography.badge} — and that binding is the row STYLER
+ * draws: one "Text style" offer per text element, never five knobs (Jake's
+ * ruling, s100 — type styles are packages, not knobs).
+ *
+ * It cannot come out of the dictionary the way TOKEN_TIERS and TOKEN_REFS do.
+ * The css platform's `expand` splits every component typography composite
+ * into its five members BEFORE any format runs, so by the time
+ * json/token-refs walks dictionary.allTokens the parent is gone — only
+ * --stamp-text-font-size and its four siblings are left, and none of them is
+ * the offer. The parent survives in exactly one place: the source file. So
+ * read the source.
+ *
+ * That read is theme-independent by construction, which is what lets one flat
+ * map be true: the component sets have no theme axis at all — they emit once,
+ * under :root, and per-skin divergence rides the semantic refs — so
+ * tokens/component/*.json IS the binding for every skin. The guard below
+ * proves each parent is real by insisting its five members actually emitted;
+ * a composite sitting in a set no theme enables would otherwise put a row in
+ * front of a person that moves nothing when they change it.
+ *
+ * Only a WHOLE ref counts, the same rule refOf uses. A composite assembled
+ * inline out of five member refs is a treatment, not a role, and there is no
+ * single token to name.
+ */
+const COMPOSITE_MEMBERS = [
+  'font-family',
+  'font-size',
+  'font-weight',
+  'letter-spacing',
+  'line-height',
+]
+
+const compositeParents = (node, prefix = [], out = []) => {
+  for (const [key, value] of Object.entries(node)) {
+    if (key.startsWith('$')) continue
+    if (!value || typeof value !== 'object' || Array.isArray(value)) continue
+    const next = [...prefix, key]
+    if (!('$value' in value)) {
+      compositeParents(value, next, out)
+      continue
+    }
+    if (value.$type !== 'typography' || typeof value.$value !== 'string') continue
+    const m = REF_ONLY.exec(value.$value.trim())
+    if (m) out.push([`--${next.join('-')}`, m[1].split('.').join('/')])
+  }
+  return out
+}
+
+const COMPONENT_DIR = path.join(TOKENS_DIR, 'component')
+const composites = {}
+for (const file of (await fs.readdir(COMPONENT_DIR)).filter((f) => f.endsWith('.json')).sort()) {
+  const tree = JSON.parse(await fs.readFile(path.join(COMPONENT_DIR, file), 'utf8'))
+  for (const [name, ref] of compositeParents(tree)) composites[name] = ref
+}
+for (const [name, ref] of Object.entries(composites)) {
+  const missing = COMPOSITE_MEMBERS.filter((m) => tiers[`${name}-${m}`] !== 'component')
+  if (missing.length > 0) {
+    throw new Error(
+      `${name} binds {${ref.split('/').join('.')}} but ${missing.join(', ')} never emitted — ` +
+        'the composite is in a set no theme enables, so STYLER would draw a row that moves nothing',
+    )
+  }
+}
+const compositeEntries = Object.keys(composites)
+  .sort()
+  .map((name) => `  '${name}': '${composites[name]}',`)
+  .join('\n')
+
+/* THE ROLES ON OFFER, in the order they were authored. DERIVED, where COLORS
+ * in styleCandidates.ts is hand-curated, and the difference is a rule worth
+ * writing down: derive where the semantic tier has already done the curating,
+ * hand-write only where the semantic set holds things that are not offers.
+ * The colour roles fail that test — status signals, shadows, the focus ring
+ * and the accent-expressive AA indirection's internals all sit beside the
+ * chrome colours, and half of them would be a mistake to put in a dropdown.
+ * semantic/typography.json passes it: every entry in it is a complete,
+ * named type style a text element may wear, and the authored order IS the
+ * design order (the content ramp, then the chrome ramp). Nothing to filter,
+ * nothing to reorder, and one fewer list to keep in sync by hand. */
+const typographySet = JSON.parse(
+  await fs.readFile(path.join(TOKENS_DIR, 'semantic/typography.json'), 'utf8'),
+)
+const typeRoles = Object.keys(typographySet.typography).filter((r) => !r.startsWith('$'))
+const roleEntries = typeRoles.map((role) => `  '${role}',`).join('\n')
+
 const tiersTs =
   '/* GENERATED FILE — DO NOT EDIT. Run npm run tokens:build. */\n\n' +
   '/* Every custom property tokens.generated.css emits, mapped to the tier it\n' +
@@ -341,9 +429,24 @@ const tiersTs =
   ' * it to show the binding a row is about to replace. Component tier only:\n' +
   ' * those sets emit once, under :root, so one flat map can be true. */\n' +
   'export const TOKEN_REFS: Record<string, string | null> = {\n' +
-  `${refEntries}\n}\n`
+  `${refEntries}\n}\n\n` +
+  '/* Every component text element, mapped to the ONE typography role it wears.\n' +
+  ' * Read off the source files rather than the dictionary, because the build\n' +
+  ' * expands each composite into its five CSS members before any format sees\n' +
+  " * it — so these names appear in neither map above, and the members that do\n" +
+  ' * appear are locked. This is the row STYLER offers: a whole type style,\n' +
+  ' * swapped for another whole type style. */\n' +
+  'export const TOKEN_COMPOSITES: Record<string, string> = {\n' +
+  `${compositeEntries}\n}\n\n` +
+  '/* The semantic typography roles, in authored order — the content ramp then\n' +
+  ' * the chrome ramp. The candidate list for a Text style row is derived from\n' +
+  ' * this, not typed out: every entry is a complete named style a text element\n' +
+  ' * may wear, so there is nothing here that is not an offer. */\n' +
+  'export const TYPE_ROLES: readonly string[] = [\n' +
+  `${roleEntries}\n]\n`
 await fs.writeFile(path.join(ROOT, 'src/lib/tokens.generated.ts'), tiersTs)
 console.log(
   `✓ wrote src/lib/tokens.generated.ts (${Object.keys(tiers).length} properties, ` +
-    `${Object.keys(refs).length} component refs)`
+    `${Object.keys(refs).length} component refs, ${Object.keys(composites).length} text ` +
+    `elements, ${typeRoles.length} type roles)`
 )

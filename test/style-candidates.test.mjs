@@ -41,7 +41,7 @@ function moduleUrl(path, deps = {}) {
 }
 
 const tiersUrl = moduleUrl('src/lib/tokens.generated.ts')
-const { TOKEN_TIERS, TOKEN_REFS } = await import(tiersUrl)
+const { TOKEN_TIERS, TOKEN_REFS, TOKEN_COMPOSITES, TYPE_ROLES } = await import(tiersUrl)
 const {
   COMPONENT_IDS,
   componentIdOf,
@@ -225,10 +225,9 @@ const EXPECTED_TIER = {
   color: 'semantic',
   radius: 'semantic',
   'border-width': 'semantic',
-  'font-size': 'semantic',
-  family: 'semantic',
-  tracking: 'core',
-  weight: 'core',
+  // a type role's varName is one MEMBER of the composite (--type-<role>-size);
+  // the members are semantic, the composite itself emits nothing at all
+  'type-role': 'semantic',
 }
 
 test('every candidate names a property the build actually emits', () => {
@@ -246,12 +245,65 @@ test('every candidate names a property the build actually emits', () => {
   }
 })
 
+/* The five properties a typography composite expands into, as the suffixes
+   the CSS carries and the member names the semantic type ramp publishes. */
+const TYPE_MEMBERS = [
+  ['font-family', 'family'],
+  ['font-size', 'size'],
+  ['font-weight', 'weight'],
+  ['letter-spacing', 'tracking'],
+  ['line-height', 'leading'],
+]
+
 test('a candidate varName is the slash path joined with dashes', () => {
-  for (const list of Object.values(CANDIDATES_BY_FAMILY)) {
+  for (const [family, list] of Object.entries(CANDIDATES_BY_FAMILY)) {
+    // type-role is the one family where it cannot be: 'typography/badge' emits
+    // no --typography-badge, it emits five --type-badge-* members. Checked by
+    // the test below instead, which is the stronger claim anyway.
+    if (family === 'type-role') continue
     for (const candidate of list) {
       assert.equal(candidate.varName, `--${candidate.token.split('/').join('-')}`, candidate.name)
       assert.ok(candidate.name.length > 0, candidate.token)
     }
+  }
+})
+
+test('a type-role offer names a real role, and all five of its members emit', () => {
+  for (const candidate of CANDIDATES_BY_FAMILY['type-role']) {
+    assert.ok(candidate.name.length > 0, candidate.token)
+    const role = candidate.token.replace(/^typography\//, '')
+    assert.notEqual(role, candidate.token, `${candidate.token} is not a typography role`)
+    // the varName is a representative member, not the composite — so pin the
+    // whole set it stands for, or naming one could quietly stop meaning five
+    assert.equal(candidate.varName, `--type-${role}-size`)
+    for (const [, member] of TYPE_MEMBERS) {
+      assert.equal(TOKEN_TIERS[`--type-${role}-${member}`], 'semantic', `--type-${role}-${member}`)
+    }
+  }
+})
+
+/* THE RETIRED KNOBS. STYLER shipped with font-size, tracking, weight and
+   family lists; the ruling took them away, and their absence is the law, not
+   an accident of a refactor — a re-added list would let a picker assemble a
+   treatment out of loose pieces again. */
+test('the loose type knobs are gone, and their suffixes fall to locked', () => {
+  for (const retired of ['font-size', 'tracking', 'weight', 'family']) {
+    assert.equal(retired in CANDIDATES_BY_FAMILY, false, `${retired} is back`)
+  }
+  assert.deepEqual(Object.keys(CANDIDATES_BY_FAMILY).sort(), [
+    'border-width',
+    'color',
+    'locked',
+    'radius',
+    'space',
+    'type-role',
+  ])
+  // the parent is the offer; every member of it, and any other stray bearing
+  // one of the retired suffixes, is locked
+  assert.equal(familyOf('stamp-text'), 'type-role')
+  for (const [suffix] of TYPE_MEMBERS) assert.equal(familyOf(`stamp-text-${suffix}`), 'locked')
+  for (const stray of ['button-tracking', 'button-weight', 'button-family', 'button-font-size']) {
+    assert.equal(familyOf(stray), 'locked', stray)
   }
 })
 
@@ -357,7 +409,8 @@ test('a text element binds one whole type role, and no row can split it', () => 
       continue
     }
     assert.equal(familyOf(role), 'locked', `${prop} is offerable; a composite member is not a knob`)
-    const element = role.replace(TEXT_MEMBER, '')
+    // keep the '-text', so the key IS the composite parent's custom property
+    const element = `--${role.replace(TEXT_MEMBER, '-text')}`
     if (!elements.has(element)) elements.set(element, [])
     elements.get(element).push([prop, ref])
   }
@@ -370,6 +423,70 @@ test('a text element binds one whole type role, and no row can split it', () => 
     )
     assert.deepEqual([...roles].length, 1, `${element} straddles type roles: ${[...roles]}`)
   }
+  /* And the elements the MEMBERS describe are exactly the elements the PARENT
+     manifest lists. The two are built from opposite ends — TOKEN_REFS out of
+     the expanded dictionary, TOKEN_COMPOSITES off the source files — so this
+     is where a parent that stopped expanding, or five orphan members with no
+     parent left, would show up instead of passing quietly. */
+  assert.deepEqual([...elements.keys()].sort(), Object.keys(TOKEN_COMPOSITES).sort())
+})
+
+/* ------------------------------------------------ the composite parents */
+
+test('every composite parent is a type-role row bound inside its own ramp', () => {
+  assert.equal(Object.keys(TOKEN_COMPOSITES).length, 11)
+  for (const [prop, ref] of Object.entries(TOKEN_COMPOSITES)) {
+    const role = prop.slice(2)
+    // not in TOKEN_TIERS at all — the build expands the parent away — which is
+    // exactly why the tier question has to be asked of both manifests
+    assert.equal(TOKEN_TIERS[prop], undefined, `${prop} emits after all`)
+    assert.equal(familyOf(role), 'type-role', `${prop} is ${familyOf(role)}`)
+    assert.ok(componentIdOf(role), `${prop} belongs to no registered component`)
+    // the curation honesty check: a picker must be able to show a row its own
+    // current value, or STYLER mis-describes the file the moment it opens
+    assert.equal(isLawfulTarget(role, ref), true, `${prop} → ${ref} is not an offer`)
+  }
+})
+
+test('a composite parent and its five members name the same role', () => {
+  const FACES = ['sans', 'mono', 'display']
+  for (const [prop, ref] of Object.entries(TOKEN_COMPOSITES)) {
+    const role = ref.replace(/^typography\//, '')
+    assert.equal(ref, `typography/${role}`, prop)
+    for (const [suffix, member] of TYPE_MEMBERS) {
+      const memberProp = `${prop}-${suffix}`
+      assert.equal(TOKEN_TIERS[memberProp], 'component', `${memberProp} does not emit`)
+      if (suffix === 'font-family') {
+        /* The one member that does NOT read type/<role>/family: the composite
+           names a Figma face and the build swaps it for the skin's var()
+           stack on the way in, so the member ref is --mono/--sans/--display.
+           Losing that swap would bake "Geist Mono" into the component and
+           take the per-skin face with it. */
+        assert.ok(FACES.includes(TOKEN_REFS[memberProp]), `${memberProp} → ${TOKEN_REFS[memberProp]}`)
+        continue
+      }
+      assert.equal(TOKEN_REFS[memberProp], `type/${role}/${member}`, memberProp)
+    }
+  }
+})
+
+test('the type-role offers are the authored typography roles, in order', () => {
+  const authored = Object.keys(JSON.parse(src('tokens/semantic/typography.json')).typography).filter(
+    (k) => !k.startsWith('$'),
+  )
+  assert.equal(authored.length, 18)
+  assert.deepEqual([...TYPE_ROLES], authored)
+  // 1:1 and in order — the list is derived, and nothing filters or re-sorts it
+  assert.deepEqual(
+    CANDIDATES_BY_FAMILY['type-role'].map((c) => c.token),
+    authored.map((role) => `typography/${role}`),
+  )
+  // the names a person reads: title case, with the size segments left as caps
+  const named = Object.fromEntries(CANDIDATES_BY_FAMILY['type-role'].map((c) => [c.token, c.name]))
+  assert.equal(named['typography/body-lg'], 'Body LG')
+  assert.equal(named['typography/heading-1'], 'Heading 1')
+  assert.equal(named['typography/control-sm'], 'Control SM')
+  assert.equal(named['typography/wordmark'], 'Wordmark')
 })
 
 test('TOKEN_REFS covers the component tier and nothing else', () => {

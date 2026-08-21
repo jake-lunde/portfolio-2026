@@ -11,6 +11,7 @@ import {
   serializeComponentTokens,
   serializeTokens,
   themeFilePath,
+  tierOfRole,
   validateEdit,
   type TokenEdit,
   type TokenTheme,
@@ -18,7 +19,6 @@ import {
 } from '@/lib/tokenEdit'
 import { PALETTE } from '@/lib/palette'
 import { candidatesFor, COMPONENT_IDS, componentIdOf } from '@/lib/styleCandidates'
-import { TOKEN_TIERS } from '@/lib/tokens.generated'
 import { REPO_SLUG as DEFAULT_REPO } from '@/lib/repo'
 
 export const runtime = 'nodejs'
@@ -272,8 +272,14 @@ export async function POST(req: Request) {
     const bad = validateEdit(edit)
     if (bad) return NextResponse.json({ error: bad }, { status: 400 })
   }
-  const semanticEdits = edits.filter((e) => TOKEN_TIERS[`--${e.role}`] === 'semantic')
-  const componentEdits = edits.filter((e) => TOKEN_TIERS[`--${e.role}`] === 'component')
+  /* tierOfRole, not TOKEN_TIERS directly: a text element's Text style row
+     names a composite parent (--stamp-text) that the build expands away and
+     the tier map therefore never lists. Read straight off TOKEN_TIERS, a
+     lawful type-role rebind would pass validateEdit and then match NEITHER
+     filter — dropped between the gate and the writer, answered as 'no
+     change'. One tier function, asked everywhere. */
+  const semanticEdits = edits.filter((e) => tierOfRole(e.role) === 'semantic')
+  const componentEdits = edits.filter((e) => tierOfRole(e.role) === 'component')
 
   let head: Head
   let file: { sha: string; content: string } | null
