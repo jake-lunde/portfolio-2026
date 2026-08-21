@@ -27,19 +27,23 @@ import styles from './stylerStage.module.css'
  * else.
  *
  * It is a room built out of the tool's own parts — crown across the top, a
- * 304px paper dock on the right, the bench between them — because a second
- * visual language for the second half of one tool would be a worse tool. The
- * inspect frame is display:none'd underneath it (inspectShell.module.css
- * reads the body attribute this sets), so nothing of it is left in the tab
- * order behind an opaque cover.
+ * 244px layer panel on the left, a 304px paper dock on the right, the bench
+ * between them — because a second visual language for the second half of one
+ * tool would be a worse tool. That is INSPECT's own arrangement, panel for
+ * panel and width for width, and it is Figma's: layers left, canvas centre,
+ * properties right. Jake asked for it in those words ("put the layers in a
+ * panel the left like figma so its closer to what im used to"). The inspect
+ * frame is display:none'd underneath it (inspectShell.module.css reads the
+ * body attribute this sets), so nothing of it is left in the tab order behind
+ * an opaque cover.
  *
  * ONE THING ON THE BENCH (Jake, s105). The first cut drew everything at once:
  * every variant side by side, both other token sets as small tiles under
  * them, and all twenty of window's rows in one flat list on the right. Three
  * choices are now three controls. Two tab rows pick what stands on the bench,
  * one axis each — the VARIANT (active, resting, system, expressive) and the
- * TOKEN SET (classic, classic dark, medieval) — and the dock's layer list
- * picks which part of the component the blocks are about. Nothing new is
+ * TOKEN SET (classic, classic dark, medieval) — and the left panel's layer
+ * list picks which part of the component the blocks are about. Nothing new is
  * being shown; the same three lists stopped being drawn simultaneously.
  *
  * THE SKINS, and the CSS finding behind them. The bench is a nested
@@ -167,14 +171,15 @@ function TabRow({
   )
 }
 
-/** THE LAYER LIST — the component's anatomy, two levels deep.
+/** THE LEFT PANEL — the component's anatomy, two levels deep.
  *
- * INSPECT's LayersPanel is the precedent and this is the same tree in a
- * smaller room: roving tabindex, arrows to walk, the picked row on the accent
- * fill. What it does NOT copy is that panel's Enter, which selects. The s97
- * hotkey grammar reserves Enter for drilling into children and Shift+Enter
- * for the parent, so selection follows the caret here and Enter means what
- * the grammar says it means. Tab and Shift+Tab step siblings.
+ * INSPECT's LayersPanel is the precedent, and after Jake's second look it is
+ * the precedent down to the wall it hangs on: same side, same width, same
+ * head, same tree. Roving tabindex, arrows to walk, the picked row on the
+ * accent fill. What it does NOT copy is that panel's Enter, which selects.
+ * The s97 hotkey grammar reserves Enter for drilling into children and
+ * Shift+Enter for the parent, so selection follows the caret here and Enter
+ * means what the grammar says it means. Tab and Shift+Tab step siblings.
  *
  * Those four go through the shared registry rather than this element's own
  * onKeyDown, which is the whole reason the registry exists: it sits on
@@ -285,12 +290,12 @@ function StageLayers({
   }
 
   return (
-    <div className={styles.layers}>
-      <div className={shell.bar}>
-        <h3 className={shell.head}>
-          <CopyText k="styler.layers" />
-        </h3>
-      </div>
+    <aside className={styles.layers}>
+      {/* the same head the right dock wears, and the same one INSPECT's own
+          left panel wears: three panels, one heading treatment */}
+      <h2 className={shell.panelHead}>
+        <CopyText k="styler.layers" />
+      </h2>
       <div className={`${shell.treeBody} ${styles.layerBody}`}>
         <div
           ref={treeRef}
@@ -331,7 +336,7 @@ function StageLayers({
           })}
         </div>
       </div>
-    </div>
+    </aside>
   )
 }
 
@@ -458,6 +463,8 @@ export function StylerStage({
       </header>
 
       <div className={styles.body}>
+        <StageLayers layers={layers} value={layer.id} onPick={setWantLayer} />
+
         <div className={styles.canvas}>
           {/* two axes, two rows, and the component names neither of them:
               the variants come from the spec and the sets from the commit
@@ -506,8 +513,6 @@ export function StylerStage({
             </h2>
             <InfoTip k="styler.note" />
           </div>
-
-          <StageLayers layers={layers} value={layer.id} onPick={setWantLayer} />
 
           <div className={styles.dockBody}>
             <StylerBlocks

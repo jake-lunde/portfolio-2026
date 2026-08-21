@@ -4,12 +4,14 @@
  * inspecting, and the thing being styled has to be away from the rest of the
  * site or you cannot see what you changed. So this is a takeover, and it is
  * built out of INSPECT.MODE's own idiom rather than a new one: a crown across
- * the top in the accent, a 304px paper dock on the right, and the canvas
- * between them. The inner pieces — .crownTitle, .crownBtn, .panelHead,
- * .resetAll, .roleChip — are imported straight from inspectShell.module.css,
- * because two files drawing the same button is how two buttons start to
- * differ. What is here is only what is different: where the frame sits, and
- * what the bench under the component looks like.
+ * the top in the accent, a 244px layer panel on the left, a 304px paper dock
+ * on the right, and the canvas between them. That is the tool's own floor
+ * plan, and Jake asked for it in Figma's words on his second look at the
+ * stage. The inner pieces — .crownTitle, .crownBtn, .panelHead, .resetAll,
+ * .roleChip — are imported straight from inspectShell.module.css, because two
+ * files drawing the same button is how two buttons start to differ. What is
+ * here is only what is different: where the frame sits, and what the bench
+ * under the component looks like.
  *
  * THE GROUND. The dock is --surface, the paper the inspector is already made
  * of. The canvas is --surface-raised, which is exactly one step darker in
@@ -271,23 +273,40 @@
   color: inherit;
 }
 
-/* ---- the layer list: the component's anatomy ----
+/* ---- the left dock: the component's anatomy ----
 
-   It sits above the blocks and takes only what it needs, capped at a third
-   of the dock. The blocks below it are the thing being worked in; a tree
-   that pushed them off the bottom would have swapped one flat list for
-   another. Five layers is the most any pilot component has, so the cap is
-   almost never reached and the list almost never scrolls. */
+   Jake, on the first cut of the drill: "why dont you put the layers in a
+   panel the left like figma so its closer to what im used to?" So the tree
+   came out of the right dock and took the left wall. Layers left, bench
+   centre, properties right is Figma's arrangement and it is also INSPECT's
+   own — that tool draws LayERS on the left and the inspector on the right —
+   so the stage now reads as the same room rather than as a second one.
+
+   244px, which is --inspect-left's value, because these two left panels are
+   the same panel doing the same job and a stage that invented its own width
+   would be saying they are not. Full height with it: the tree had a third of
+   the right dock before and now it has a wall, which is the point. */
 .layers {
   flex: none;
+  width: var(--inspect-left, 244px);
   display: flex;
   flex-direction: column;
   min-height: 0;
-  max-height: 33%;
-  border-bottom: var(--border-width-default) solid var(--content);
+  background: var(--surface);
+  border-right: var(--border-width-default) solid var(--content);
+  animation: layersIn var(--duration-theme) ease-out;
+}
+
+/* it arrives with the right dock, on the same transform-only terms and from
+   its own side */
+@keyframes layersIn {
+  from {
+    transform: translateX(-100%);
+  }
 }
 
 .layerBody {
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -349,11 +368,16 @@
   color: var(--content-muted);
 }
 
-/* Narrow: the dock stops being a dock. Below 720px a 304px column beside a
-   component leaves neither of them room, so the room stacks — bench first,
-   knobs under it — and the dock's border moves to the top edge, which is the
-   side it now meets the canvas on. The layer list gives up its cap here: a
-   scroll inside a scroll on a phone is a thing nobody can drive. */
+/* Narrow: the walls stop being walls. Below 720px a 244px column and a 304px
+   column either side of a component leave none of the three any room, so the
+   room stacks and both docks meet the canvas on a top edge instead of a side
+   one.
+
+   It stacks in the order it is written — layers, bench, blocks — rather than
+   putting the bench first, and that is a choice about the keyboard rather
+   than about the picture. Flex `order` moves what you see and leaves the tab
+   order where it was, so the caret would walk the page in an order the page
+   does not have. Five layers is a short list; the bench is right under it. */
 @media (max-width: 720px) {
   .body {
     flex-direction: column;
@@ -366,15 +390,18 @@
     padding: var(--spacing-component-md);
   }
 
+  .layers {
+    width: auto;
+    border-right: none;
+    border-bottom: var(--border-width-default) solid var(--content);
+    animation: none;
+  }
+
   .dock {
     width: auto;
     border-left: none;
     border-top: var(--border-width-default) solid var(--content);
     animation: none;
-  }
-
-  .layers {
-    max-height: none;
   }
 
   .layerBody,
@@ -389,6 +416,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .stage,
+  .layers,
   .dock {
     animation: none;
   }
