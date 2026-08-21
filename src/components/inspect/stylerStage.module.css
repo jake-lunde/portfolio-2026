@@ -152,18 +152,24 @@
   position: relative;
   transform: translateZ(0);
   overflow: hidden;
-  width: 100%;
-  max-width: 720px;
   background: var(--surface);
   border: var(--border-width-subtle) solid var(--border);
 }
 
+/* Explicit boxes, not width:100%. The bench sits inside a shrink-wrapping
+   flex column (.variant, .tile), and its two occupants take no space of
+   their own — the menubar is fixed, the icons grid absolute — so a
+   percentage here resolves against the label underneath and the bench
+   collapses to a sliver. */
 .benchChrome {
+  width: min(640px, 100%);
   height: calc(var(--menubar-h) * 2);
 }
 
+/* three grid columns plus the grid's own 26/20 desk offsets, with air */
 .benchDesk {
-  height: 240px;
+  width: 344px;
+  height: 372px;
 }
 
 /* The window sample measures itself against this box, the way a real one
