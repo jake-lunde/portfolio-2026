@@ -88,6 +88,9 @@
       "weight": {
         "$value": "{weight.regular}"
       },
+      "tracking": {
+        "$value": "{tracking.none}"
+      },
       "family": {
         "$value": "{display}"
       }
@@ -102,6 +105,9 @@
       },
       "weight": {
         "$value": "{weight.regular}"
+      },
+      "tracking": {
+        "$value": "{tracking.none}"
       },
       "family": {
         "$value": "{display}"
@@ -118,6 +124,9 @@
       "weight": {
         "$value": "{weight.semibold}"
       },
+      "tracking": {
+        "$value": "{tracking.none}"
+      },
       "family": {
         "$value": "{sans}"
       }
@@ -132,6 +141,9 @@
       },
       "weight": {
         "$value": "{weight.regular}"
+      },
+      "tracking": {
+        "$value": "{tracking.none}"
       },
       "family": {
         "$value": "{sans}"
@@ -148,6 +160,9 @@
       "weight": {
         "$value": "{weight.regular}"
       },
+      "tracking": {
+        "$value": "{tracking.none}"
+      },
       "family": {
         "$value": "{sans}"
       }
@@ -163,6 +178,9 @@
       },
       "weight": {
         "$value": "{weight.regular}"
+      },
+      "tracking": {
+        "$value": "{tracking.none}"
       },
       "family": {
         "$value": "{sans}"
