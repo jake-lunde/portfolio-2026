@@ -398,6 +398,47 @@ test('validateEdit refuses a palette primitive on a component color row', () => 
   )
 })
 
+/* THE TEXT STYLE ROW. Type styles are packages, not knobs (Jake, s100): a
+   text element's one row swaps a whole typography role for a whole typography
+   role. The parent it names — stamp.text — is the one component-tier token
+   the build EXPANDS rather than emits, so it appears in TOKEN_TIERS nowhere;
+   everything below would pass just as happily if validateEdit had quietly
+   started answering "unknown role" to every one of them, which is why the
+   lawful cases come first and by name. */
+
+test('validateEdit takes a whole type role on a text element', () => {
+  assert.equal(validateEdit({ role: 'stamp-text', token: 'typography/label' }), null)
+  assert.equal(validateEdit({ role: 'window-title-text', token: 'typography/body-sm' }), null)
+  assert.equal(validateEdit({ role: 'menubar-wordmark-text', token: 'typography/display' }), null)
+  assert.equal(validateEdit({ role: 'desktop-icons-label-text', token: 'typography/micro' }), null)
+})
+
+test('validateEdit refuses half a type role, and every member row', () => {
+  // the composite's own members are what a knob would reach for
+  for (const half of ['type/label/size', 'type/label/weight', 'text/label', 'mono']) {
+    assert.match(
+      validateEdit({ role: 'stamp-text', token: half }),
+      /is not a candidate for "stamp-text"/,
+      half,
+    )
+  }
+  // and the five rows the build expands the parent into stay shut, even when
+  // handed the very role their parent could lawfully take
+  for (const member of [
+    'font-family',
+    'font-size',
+    'font-weight',
+    'letter-spacing',
+    'line-height',
+  ]) {
+    assert.match(
+      validateEdit({ role: `stamp-text-${member}`, token: 'typography/label' }),
+      /is locked — no lawful ramp/,
+      member,
+    )
+  }
+})
+
 test('validateEdit still grades the semantic tier exactly as before', () => {
   assert.equal(validateEdit({ role: 'accent', token: COBALT }), null)
   assert.match(validateEdit({ role: 'accent', token: 'surface' }), /not in the palette/)
@@ -434,6 +475,53 @@ test('rebinding a leaf that already carried a ref keeps its $type', () => {
   // weight/tracking/family members, and the chrome-ramp rebind folded every
   // one of them into a typed `text` composite. The guard stays in tokenEdit;
   // restore the assertion the day a typeless component leaf exists again.
+})
+
+/* The round trip nobody should have to take on trust. applyComponentEdits
+   was written before a composite existed and never mentions one: varIndex
+   flattens any $value-bearing node, so stamp.text is just another leaf, and
+   setLeaf spreads the leaf it found. Whether that is ACTUALLY true of a
+   typography composite — whose $value is a ref like every other but whose
+   $type must survive as `typography`, and whose authored key order puts $type
+   FIRST — is a question for a test, not for a paragraph claiming it. */
+test('rebinds a text element to a whole type role, $type intact', () => {
+  const stamp = component('stamp')
+  assert.deepEqual(stamp.stamp.text, { $type: 'typography', $value: '{typography.badge}' })
+
+  const r = applyComponentEdits(stamp, [{ role: 'stamp-text', token: 'typography/label' }])
+  assert.equal(r.ok, true)
+  assert.deepEqual(r.json.stamp.text, { $type: 'typography', $value: '{typography.label}' })
+  // the authored order survives — $type first, the rewritten $value last —
+  // which is what keeps this to one changed line
+  assert.deepEqual(Object.keys(r.json.stamp.text), ['$type', '$value'])
+  // siblings untouched, caller's tree untouched, nothing materialized
+  assert.deepEqual(r.json.stamp.pink, stamp.stamp.pink)
+  assert.equal(stamp.stamp.text.$value, '{typography.badge}')
+  assert.equal(r.applied[0].materialized, false)
+
+  const before = src(componentFilePath('stamp')).split('\n')
+  const after = serializeComponentTokens(r.json).split('\n')
+  const changed = before.filter((line, i) => line !== after[i])
+  assert.equal(changed.length, 1, `expected one changed line, got ${changed.length}`)
+})
+
+test('a text style rebind travels with the rest of its component', () => {
+  // one component, one file — the Text style row is not a special case for
+  // the writer, and a set that mixes it with a colour row still lands as one
+  const r = applyComponentEdits(component('window'), [
+    { role: 'window-title-text', token: 'typography/control' },
+    { role: 'window-fill', token: 'surface-raised' },
+  ])
+  assert.equal(r.ok, true)
+  assert.deepEqual(r.json.window.title.text, {
+    $type: 'typography',
+    $value: '{typography.control}',
+  })
+  assert.equal(r.json.window.fill.$value, '{surface-raised}')
+  assert.deepEqual(
+    r.applied.map((e) => e.role),
+    ['window-title-text', 'window-fill'],
+  )
 })
 
 test('a rebind is a one-line diff', () => {

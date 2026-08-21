@@ -11,17 +11,29 @@
  * chain is component → semantic → core; a button that aliased a hex would skip
  * the layer that makes skins possible.
  *
- * WHY THE LISTS ARE HAND-WRITTEN. Every ramp here could be derived: sweep
- * TOKEN_TIERS for everything semantic whose name starts with `radius-` and you
- * have the radius list for free. Derivation gets the mechanics right and the
- * TASTE wrong. It would offer --focus and --shadow-modal as fills, the
- * accent-expressive-* indirection internals as ink, and every core radius step
- * beside the four semantic roles that actually mean something. What belongs in
- * front of a person choosing is a curated, ORDERED set — scale order for a
- * scale, design order for roles — and curation is a judgment, so it is typed
- * out. The honesty check is a test, not a generator: every real component
- * binding in TOKEN_REFS must land inside the list its row would offer, so a
- * curation that drifts from what the components actually do fails `npm test`.
+ * MOSTLY HAND-WRITTEN, AND THE RULE FOR WHEN IT ISN'T. Every ramp here could
+ * be derived: sweep TOKEN_TIERS for everything semantic whose name starts with
+ * `radius-` and you have the radius list for free. For colour, derivation gets
+ * the mechanics right and the TASTE wrong — it would offer --focus and
+ * --shadow-modal as fills, the accent-expressive-* indirection internals as
+ * ink, and every core radius step beside the four semantic roles that actually
+ * mean something. What belongs in front of a person choosing is a curated,
+ * ORDERED set — scale order for a scale, design order for roles — and curation
+ * is a judgment, so it is typed out.
+ *
+ * The test that decides which way a family goes: DERIVE WHERE THE SEMANTIC
+ * TIER HAS ALREADY DONE THE CURATING, HAND-WRITE WHERE THE SEMANTIC SET HOLDS
+ * THINGS THAT ARE NOT OFFERS. Colour fails it — status signals, shadows, the
+ * focus ring and an AA workaround's internals all live in the same set as the
+ * chrome colours. The typography roles pass it: semantic/typography.json is
+ * eighteen complete, named type styles and nothing else, authored in design
+ * order, so TYPE_ROLES comes off the generated manifest and there is one fewer
+ * list to keep in sync by hand.
+ *
+ * Either way the honesty check is a test, not a generator: every real
+ * component binding in TOKEN_REFS and TOKEN_COMPOSITES must land inside the
+ * list its row would offer, so a curation that drifts from what the components
+ * actually do fails `npm test`.
  *
  * WHY `locked` EXISTS. Two kinds of row have no lawful offer. Three pilot
  * properties — --menubar-h, --desktop-icons-cell-width, --window-ctrl-size —
@@ -32,16 +44,30 @@
  * properties, so offering any single member would let a picker rebind a
  * font-size out from under the weight and tracking it shipped with. Type
  * styles are packages, not knobs (Jake, 2026-08-21). Both classify as
- * `locked` — visible, honest, and not editable: the structural three until a
- * ramp exists that means something for them, the composite members until the
- * panel draws them as the one Text style row they really are.
+ * `locked` — visible, honest, and not editable. The structural three stay that
+ * way until a ramp exists that means something for them. The composite members
+ * stay that way for good: the `type-role` family below is the row they were
+ * waiting for, drawn on the PARENT (--stamp-text, which the build expands and
+ * therefore never emits), and the five members sit beneath it as read-only
+ * consequences of the one choice.
+ *
+ * AND WHY FOUR FAMILIES ARE GONE. STYLER shipped with font-size, tracking,
+ * weight and family lists — the loose type knobs, one row each. The same
+ * ruling retires them: a text element that could take a `-tracking` from one
+ * role and a `-font-size` from another would be assembling a treatment that
+ * exists nowhere in the system, which is exactly the nine near-miss treatments
+ * the pilot five started with. Phase 1 folded every one of those properties
+ * into a composite, so the lists had no consumers left; deleting them is not
+ * dead-code hygiene but the law catching up. Anything wearing one of those
+ * suffixes that is not a composite member now falls through to `locked`, which
+ * is the safe direction to fail.
  *
  * No 'use client' and no imports beyond the generated manifest, for the same
  * reason palette.ts has none: the commit route runs on the server and has to
  * read exactly the same law the panel drew.
  */
 
-import { TOKEN_TIERS } from './tokens.generated'
+import { TOKEN_TIERS, TYPE_ROLES } from './tokens.generated'
 
 /** The five pilot components. Kebab ids: token file name, `data-component`
     attribute and role prefix are deliberately the same string — that identity
@@ -68,19 +94,17 @@ export function componentIdOf(role: string): string | null {
   return best
 }
 
-/** The five panel categories, split the way a PICKER has to split them —
-    fill and stroke share one color list, but a radius row and a border-width
-    row cannot share anything. `locked` is the honest sixth: a row with no
-    lawful ramp. */
+/** The panel categories, split the way a PICKER has to split them — fill and
+    stroke share one color list, but a radius row and a border-width row cannot
+    share anything. `type-role` is one row per text element and its offers are
+    whole type styles. `locked` is the honest last: a row with no lawful
+    ramp. */
 export type StyleFamily =
   | 'color'
   | 'radius'
   | 'border-width'
-  | 'font-size'
-  | 'tracking'
-  | 'weight'
   | 'space'
-  | 'family'
+  | 'type-role'
   | 'locked'
 
 /* Classification is by PATH SUFFIX, because that is what the component token
@@ -93,19 +117,20 @@ export type StyleFamily =
    rather than a fixed list. Anything that matches nothing is locked, which is
    the safe direction to fail. */
 const SUFFIX_RULES: ReadonlyArray<readonly [RegExp, StyleFamily]> = [
-  // first, and before any type rule reads them: the five properties one
-  // typography composite expands into. Half a role is never an offer.
+  // first, and before the parent rule below can read them: the five properties
+  // one typography composite expands into. Half a role is never an offer.
   [/-text-(?:font-family|font-size|font-weight|letter-spacing|line-height)$/, 'locked'],
+  // and then the parent itself — the one offer a text element gets. It is the
+  // only row here whose name the stylesheet never carries, because the build
+  // expands it away; its five members stay locked beneath it, moving together
+  // when this one row changes.
+  [/-text$/, 'type-role'],
   [/-border-color$/, 'color'],
   [/-border-width$/, 'border-width'],
-  [/-font-size$/, 'font-size'],
   [/-color$/, 'color'],
   [/-(?:bg|fg|fill|stroke)$/, 'color'],
   [/-radius$/, 'radius'],
   [/-border$/, 'border-width'],
-  [/-tracking$/, 'tracking'],
-  [/-weight$/, 'weight'],
-  [/-family$/, 'family'],
   [/-(?:gap|padding|margin)(?:-[a-z]+)*$/, 'space'],
 ]
 
@@ -189,46 +214,6 @@ const BORDER_WIDTHS: readonly StyleCandidate[] = [
   c('Border Width Strong', 'border-width/strong', '--border-width-strong'),
 ]
 
-/* FONT SIZE — the semantic UI size ramp, small to large (8/9/10/11/17px).
-   The semantic TYPE ramp (--type-label-size and its siblings) is a different
-   thing and is not offered here: those are members of a composite role that
-   also carries leading, weight and tracking, and letting one row rebind a
-   font-size to half a composite would split the role. Every pilot text
-   element binds through that ramp now, which is why the `-text-` rows are
-   locked rather than pointed at this list. */
-const FONT_SIZES: readonly StyleCandidate[] = [
-  c('Text Micro', 'text/micro', '--text-micro'),
-  c('Text Caption', 'text/caption', '--text-caption'),
-  c('Text Label', 'text/label', '--text-label'),
-  c('Text UI', 'text/ui', '--text-ui'),
-  c('Text Body', 'text/body', '--text-body'),
-]
-
-/* TRACKING — the core ramp, 0.02em to 0.2em. No semantic tier exists for
-   tracking; the component files already alias core here (button, menubar,
-   stamp all do), and inventing a semantic layer for one picker would be a
-   token-architecture decision made by a dropdown. */
-const TRACKINGS: readonly StyleCandidate[] = [
-  c('Tracking 02', 'tracking/02', '--tracking-02'),
-  c('Tracking 06', 'tracking/06', '--tracking-06'),
-  c('Tracking 08', 'tracking/08', '--tracking-08'),
-  c('Tracking 10', 'tracking/10', '--tracking-10'),
-  c('Tracking 12', 'tracking/12', '--tracking-12'),
-  c('Tracking 14', 'tracking/14', '--tracking-14'),
-  c('Tracking 16', 'tracking/16', '--tracking-16'),
-  c('Tracking 18', 'tracking/18', '--tracking-18'),
-  c('Tracking 20', 'tracking/20', '--tracking-20'),
-]
-
-/* WEIGHT — the core ramp, light to heavy. Same precedent as tracking. */
-const WEIGHTS: readonly StyleCandidate[] = [
-  c('Weight Regular', 'weight/regular', '--weight-regular'),
-  c('Weight Medium', 'weight/medium', '--weight-medium'),
-  c('Weight Semibold', 'weight/semibold', '--weight-semibold'),
-  c('Weight Bold', 'weight/bold', '--weight-bold'),
-  c('Weight Black', 'weight/black', '--weight-black'),
-]
-
 /* SPACE — the semantic t-shirt scale first, because that is what new work
    should reach for, then the numeric core ramp, because that is where the
    pilots' bindings actually sit (button, menubar and desktop-icons all alias
@@ -250,23 +235,38 @@ const SPACES: readonly StyleCandidate[] = [
   c('Space 12', 'space/12', '--space-12'),
 ]
 
-/* FAMILY — the three faces a skin publishes. --cjk is a fallback stack the
-   type system reaches for by itself, never a component's choice. */
-const FAMILIES: readonly StyleCandidate[] = [
-  c('Sans', 'sans', '--sans'),
-  c('Mono', 'mono', '--mono'),
-  c('Display', 'display', '--display'),
-]
+/* TYPE ROLE — the whole offer for a text element, DERIVED from TYPE_ROLES
+   rather than typed out, per the rule at the top of this file: the semantic
+   typography set is already exactly eighteen complete type styles in design
+   order, so hand-copying it here would only be a second place to get it wrong.
+
+   `varName` is a REPRESENTATIVE MEMBER, and that is a compromise worth naming.
+   Every other candidate emits one custom property and points at it; a
+   typography composite emits five (family, size, weight, tracking, leading)
+   and no single one of them IS the role. --type-<role>-size is the anchor: the
+   member a panel would read back to show what a row currently measures, and
+   the one the test cross-checks against the generated manifest. The other four
+   are checked alongside it there — all five must exist and be semantic — so
+   picking one to name never quietly stops meaning the other four. */
+const SIZE_SEGMENT = /^(?:xs|sm|md|lg|xl)$/i
+const roleName = (role: string): string =>
+  role
+    .split('-')
+    .map((seg) =>
+      SIZE_SEGMENT.test(seg) ? seg.toUpperCase() : seg.charAt(0).toUpperCase() + seg.slice(1),
+    )
+    .join(' ')
+
+const TYPE_ROLE_STYLES: readonly StyleCandidate[] = TYPE_ROLES.map((role) =>
+  c(roleName(role), `typography/${role}`, `--type-${role}-size`),
+)
 
 export const CANDIDATES_BY_FAMILY: Readonly<Record<StyleFamily, readonly StyleCandidate[]>> = {
   color: COLORS,
   radius: RADII,
   'border-width': BORDER_WIDTHS,
-  'font-size': FONT_SIZES,
-  tracking: TRACKINGS,
-  weight: WEIGHTS,
   space: SPACES,
-  family: FAMILIES,
+  'type-role': TYPE_ROLE_STYLES,
   locked: [],
 }
 
@@ -282,9 +282,15 @@ export function isLawfulTarget(role: string, token: string): boolean {
   return candidatesFor(role).some((candidate) => candidate.token === token)
 }
 
-/** True when the role names a property the component tier actually emits.
-    TOKEN_TIERS is the manifest; this is the same question tokenEdit asks, kept
-    here so a caller that only imports the candidates can ask it too. */
+/** True when the role names a property the component tier actually EMITS.
+
+    Deliberately narrower than "is a component-tier token": a composite parent
+    like --stamp-text is authored in the component tier and is a lawful STYLER
+    row, but the build expands it away, so it emits nothing and this returns
+    false for it. That is the honest answer to the question as asked, and no
+    caller today wants the other one — tokenEdit grades a role by tier and has
+    its own tierOfRole for exactly that reason. Widen this only when a caller
+    appears that means "authored in the component tier", and rename it then. */
 export function isComponentRole(role: string): boolean {
   return TOKEN_TIERS[`--${role}`] === 'component'
 }

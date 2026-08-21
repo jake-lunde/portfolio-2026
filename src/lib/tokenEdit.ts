@@ -36,13 +36,13 @@
  *   and nothing to inherit: applyComponentEdits is the smaller half.
  *
  * What the two share is the shape of the law — validateEdit is the single
- * gate, and it grades a role by the tier TOKEN_TIERS records for it, never by
- * guessing from its name.
+ * gate, and it grades a role by the tier the generated manifest records for
+ * it (tierOfRole below), never by guessing from its name.
  */
 
 import { isCandidateToken } from './palette'
 import { componentIdOf, familyOf, isLawfulTarget } from './styleCandidates'
-import { TOKEN_TIERS } from './tokens.generated'
+import { TOKEN_COMPOSITES, TOKEN_TIERS } from './tokens.generated'
 
 /** The three theme sets in tokens/$themes.json — the only commit targets. */
 export const TOKEN_THEMES = ['classic-light', 'classic-dark', 'medieval'] as const
@@ -144,6 +144,28 @@ export function tokenRef(token: string): string {
   return `{${token.split('/').join('.')}}`
 }
 
+/** The tier a role was AUTHORED in — two manifests, one answer, and the
+    second one is not an afterthought.
+
+    TOKEN_TIERS covers every custom property the stylesheet emits, which was
+    the whole population until a text element started binding a whole
+    typography composite. The build expands those composites into their five
+    CSS members before it writes the tier map, so the parent (--stamp-text)
+    emits nothing and appears nowhere in TOKEN_TIERS — while being a real
+    component-tier token, the one STYLER offers a Text style row on, and the
+    one an edit names. TOKEN_COMPOSITES is where it survives.
+
+    Every place that asks "what tier is this role" has to ask both, or a
+    lawful composite edit validates and then falls out of the routing: not
+    semantic, not component, silently nothing. Hence one function, exported,
+    used by the route's partition too. Undefined means "no such role" — the
+    manifest is the only list, never a hand-written one. */
+export function tierOfRole(role: string): 'core' | 'semantic' | 'component' | undefined {
+  const tier = TOKEN_TIERS[`--${role}`]
+  if (tier) return tier
+  return `--${role}` in TOKEN_COMPOSITES ? 'component' : undefined
+}
+
 /** Validate one edit against house law, without touching any tree. The role
     must be a KNOWN custom property (tokens.generated.ts is the manifest —
     never a hand-written list), and the tier it was authored in decides which
@@ -164,7 +186,7 @@ export function validateEdit(edit: TokenEdit): string | null {
     return 'edit must be { role, token }'
   }
   if (!/^[a-z0-9-]+$/.test(edit.role)) return `bad role "${edit.role}"`
-  const tier = TOKEN_TIERS[`--${edit.role}`]
+  const tier = tierOfRole(edit.role)
   if (!tier) return `unknown role "${edit.role}"`
 
   if (tier === 'component') {
@@ -207,7 +229,7 @@ export function applyTokenEdits(
     if (bad) return { ok: false, error: bad }
     // validateEdit passes component roles too; this function is the SEMANTIC
     // half, and a component role reaching it would be a routing bug upstream
-    if (TOKEN_TIERS[`--${edit.role}`] !== 'semantic') {
+    if (tierOfRole(edit.role) !== 'semantic') {
       return { ok: false, error: `role "${edit.role}" is not semantic` }
     }
     if (seen.has(edit.role)) return { ok: false, error: `duplicate role "${edit.role}"` }
@@ -286,7 +308,7 @@ export function applyComponentEdits(
   for (const edit of edits) {
     const bad = validateEdit(edit)
     if (bad) return { ok: false, error: bad }
-    if (TOKEN_TIERS[`--${edit.role}`] !== 'component') {
+    if (tierOfRole(edit.role) !== 'component') {
       return { ok: false, error: `role "${edit.role}" is not a component property` }
     }
     const id = componentIdOf(edit.role)
