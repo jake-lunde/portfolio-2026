@@ -42,7 +42,7 @@
       },
       "active": {
         "bg": {
-          "$value": "{accent}",
+          "$value": "{accent-expressive}",
           "$type": "color"
         },
         "border-color": {
@@ -50,9 +50,8 @@
           "$type": "color"
         },
         "fg": {
-          "$value": "#f4f1e6",
-          "$type": "color",
-          "$description": "OFF-GRID literal — the active titlebar's inverse ink, extracted verbatim from the pre-token CSS. Nearest core candidate: {color.cream.base} (#e9e4d5). Do not substitute; Window's hardcoded hexes stay literal."
+          "$value": "{content}",
+          "$type": "color"
         }
       }
     },
