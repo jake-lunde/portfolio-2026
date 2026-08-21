@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useSettings } from '@/store/settings'
 import { useInspect } from '@/store/inspect'
 import { resolveCopy, t } from '@/content/copy'
@@ -145,7 +145,15 @@ const COPY_PATH = 'src/content/copy.json'
    InspectorPanel's body: a component type built fresh on every render is a
    component that unmounts and remounts on every render, and that is a
    focus loss waiting to happen the moment a visitor arrows through it
-   (see useTokenSave.tsx's note on the same trap for the key gate). */
+   (see useTokenSave.tsx's note on the same trap for the key gate).
+
+   Jake, s107: the flat underlined row read badly and the row has to scroll
+   sideways rather than wrap (.tabs in inspectShell.module.css) — a pill
+   can end up off the edge of that scroller on either a click or an arrow
+   step, so the active one is walked into view explicitly rather than
+   trusting a focus call the button doesn't always get (Safari does not
+   focus a plain button on click). `block: 'nearest'` and `inline: 'nearest'`
+   keep the scroll local to the row — this must never drag the dock itself. */
 
 type TabItem = { id: string; label: string }
 
@@ -163,6 +171,14 @@ function TabList({
   onSelect: (id: string) => void
   ariaLabel: string
 }) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    ref.current
+      ?.querySelector<HTMLElement>(`[data-tab-id="${active}"]`)
+      ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [active])
+
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const at = tabs.findIndex((item) => item.id === active)
     const to = tabStep(at < 0 ? 0 : at, tabs.length, e.key)
@@ -178,7 +194,13 @@ function TabList({
   }
 
   return (
-    <div role="tablist" aria-label={ariaLabel} className={styles.tabs} onKeyDown={onKeyDown}>
+    <div
+      ref={ref}
+      role="tablist"
+      aria-label={ariaLabel}
+      className={styles.tabs}
+      onKeyDown={onKeyDown}
+    >
       {tabs.map((item) => {
         const selected = item.id === active
         return (
@@ -202,19 +224,53 @@ function TabList({
   )
 }
 
+/* ---- the STYLER footer's link-out glyph ----
+
+   The house's small-chrome stroke recipe (MenuBar.tsx's NoteGlyph / Sun /
+   Moon): a 32-unit grid, round caps and joins, on currentColor so it always
+   matches the chip's own ink, whichever ink that turns out to be. Module
+   scope for the same reason TabList is: a component type rebuilt every
+   render is a component that remounts every render.
+
+   The width/height are literal pixels rather than an em box: at the
+   micro type step (--type-micro-size) an em-sized glyph works out under
+   8px, and a stroke icon that small stops reading as a shape. 11px is the
+   smallest this glyph holds together at the 3px stroke weight the 32-grid
+   wants once it is drawn this small — bumped up from the 1.5px MenuBar
+   uses at 14px, or the line all but disappears. Decorative only; the
+   button around it carries the aria-label. */
+function LinkOutGlyph() {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      width="11"
+      height="11"
+      className={styles.stylerChipIcon}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M13 8H9a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-4" />
+      <path d="M18 6h8v8" />
+      <path d="M26 6 15 17" />
+    </svg>
+  )
+}
+
 const TOP_TABS_ID = 'inspect-tabs'
 const STYLE_TABS_ID = 'inspect-style-tabs'
 
 type TopTabId = 'structure' | 'style' | 'copy'
 type StyleTabId = 'tokens' | 'contrast' | 'type' | 'motion'
 
-/** label and note key together, so STYLE's bar can swap its InfoTip with
-    whichever of the four is showing without a second lookup table. */
-const STYLE_TABS: { id: StyleTabId; label: string; note: string }[] = [
-  { id: 'tokens', label: 'inspect.section.tokens', note: 'inspect.tokens.note' },
-  { id: 'contrast', label: 'inspect.section.contrast', note: 'inspect.contrast.note' },
-  { id: 'type', label: 'inspect.section.type', note: 'inspect.type.note' },
-  { id: 'motion', label: 'inspect.section.motion', note: 'inspect.motion.note' },
+const STYLE_TABS: { id: StyleTabId; label: string }[] = [
+  { id: 'tokens', label: 'inspect.section.tokens' },
+  { id: 'contrast', label: 'inspect.section.contrast' },
+  { id: 'type', label: 'inspect.section.type' },
+  { id: 'motion', label: 'inspect.section.motion' },
 ]
 
 /* ---- a SOURCE pointer, printed ----
@@ -395,10 +451,31 @@ export function InspectorPanel({
 
   const springKey = report?.spring ? `inspect.spring.${report.spring.name}` : null
 
-  /* Which component the pick belongs to. The whole component, from wherever
-     inside it the visitor clicked: STYLER edits the tier, and the tier has
-     no instances (StylerStage.tsx). */
-  const componentId = picked?.closest<HTMLElement>('[data-component]')?.dataset.component ?? null
+  /* Which components the pick belongs to. The whole component, from
+     wherever inside it the visitor clicked: STYLER edits the tier, and the
+     tier has no instances (StylerStage.tsx).
+
+     Jake, s107, from a screenshot: picking a button inside a nav only
+     offered that nav's own door, not the button's. `closest()` only ever
+     found the nearest match, so a component nested inside another
+     component lost its own door the moment its ancestor also happened to
+     register one. The chain PATH already walks (lib/inspect.ts's
+     ancestorChain, picked first) has every ancestor in it, so this walks
+     the same list instead and keeps every stop that both carries
+     `data-component` and has a stage spec to open, nearest first,
+     deduped — the STYLER footer below turns each into its own chip. */
+  const componentIds = (() => {
+    const seen = new Set<string>()
+    const out: string[] = []
+    for (const entry of report?.chain ?? []) {
+      const id = entry.el.dataset.component
+      if (id && !seen.has(id) && specFor(id)) {
+        seen.add(id)
+        out.push(id)
+      }
+    }
+    return out
+  })()
 
   /* The whole SAVE flow lives in one hook now, because the STYLER stage is a
      second dock that has to send exactly the same set the same way
@@ -590,38 +667,16 @@ export function InspectorPanel({
               </p>
             )}
 
-            {/* ---- STYLER: a door, not a workshop ----
-                The five blocks stood here for one review. Jake's note: styling
-                and inspecting are two experiences, and a panel showing TOKENS,
-                CONTRAST, TYPE and MOTION around a set of styling controls is
-                asking a person to do one job while looking at another. So the
-                blocks moved to a stage of their own (StylerStage.tsx) and what
-                is left in the reading is the way in.
-
-                It sits OUTSIDE every tab, immediately under the ident: the
-                door back to the component tier must stay reachable in one
-                click whichever tab a visitor is reading, never something to
-                go hunting a tab for. */}
-            {componentId && specFor(componentId) && (
-              <section className={styles.section}>
-                <div className={styles.bar}>
-                  <h3 className={styles.head}>
-                    <CopyText k="styler.section" />
-                  </h3>
-                  <span className={styles.roleChip}>{componentId}</span>
-                  <button
-                    type="button"
-                    className={styles.resetAll}
-                    onClick={() => setStage(componentId)}
-                  >
-                    <CopyText k="styler.open" />
-                  </button>
-                  <InfoTip k="styler.note" />
-                </div>
-              </section>
-            )}
-
-            {/* ---- the top tabs: STRUCTURE / STYLE / COPY ---- */}
+            {/* ---- the top tabs: STRUCTURE / STYLE / COPY ----
+                STYLER's door used to sit right here, immediately under the
+                ident. Jake, s107: it now pins to the foot of the whole
+                dock instead (see the STYLER footer below, outside
+                .panelBody's scroll) so it stays reachable under every
+                tab without a gap of raised ground announcing it — the
+                same round flagged the ident's border-bottom running
+                straight into a section head as noise, and losing this
+                block's `.section` (which is what added the gap) fixes
+                both at once. */}
             <div className={styles.bar}>
               <TabList
                 idPrefix={TOP_TABS_ID}
@@ -639,8 +694,14 @@ export function InspectorPanel({
                 aria-labelledby={`${TOP_TABS_ID}-tab-structure`}
                 tabIndex={0}
               >
-                {/* ---- PATH ---- */}
-                <section className={styles.section}>
+                {/* ---- PATH ----
+                    First section under the tab row, so it takes
+                    .sectionFlush: .section's usual margin-top is the right
+                    call between two readings that both belong to this tab
+                    (see SOURCE below), but between the tab row and the
+                    first reading it was just a stray band of raised
+                    ground, per the same s107 note as the STYLER footer. */}
+                <section className={`${styles.section} ${styles.sectionFlush}`}>
                   <div className={styles.bar}>
                     <h3 className={styles.head}>
                       <CopyText k="inspect.section.path" />
@@ -744,11 +805,21 @@ export function InspectorPanel({
                     and move like — and TOKENS especially can run to a dozen
                     rows, so this is the one tab that earns a second row of
                     tabs rather than staying stacked the way PATH and SOURCE
-                    do. One bar carries the nested tablist AND the InfoTip,
-                    which swaps its note to whichever of the four is active —
-                    the same reason STYLE.tabs.style.group exists as its own
-                    aria-label rather than reusing the outer one. */}
-                <section className={styles.section}>
+                    do. STYLE.tabs.style.group still exists as its own
+                    aria-label rather than reusing the outer one.
+
+                    The bar used to carry an InfoTip too, swapping its note
+                    to whichever of the four was active. Jake, s107: the nested
+                    row crowded the bar enough that the tip's own hover target
+                    became unreachable — the note and the tab it explained sat
+                    on top of each other. Removed rather than shrunk; nothing
+                    else on this bar has a note to lose.
+
+                    This section also takes .sectionFlush, the same as
+                    PATH: it is the first (and only) reading under the top
+                    tab row on this tab, so .section's default margin-top
+                    would open the identical stray gap s107 flagged. */}
+                <section className={`${styles.section} ${styles.sectionFlush}`}>
                   <div className={styles.bar}>
                     <TabList
                       idPrefix={STYLE_TABS_ID}
@@ -757,7 +828,6 @@ export function InspectorPanel({
                       onSelect={(id) => setStyleTab(id as StyleTabId)}
                       ariaLabel={t('inspect.tabs.style.group', skin)}
                     />
-                    <InfoTip k={STYLE_TABS.find((tt) => tt.id === styleTab)!.note} />
                   </div>
                   <div
                     role="tabpanel"
@@ -990,8 +1060,12 @@ export function InspectorPanel({
                 aria-labelledby={`${TOP_TABS_ID}-tab-copy`}
                 tabIndex={0}
               >
-                {/* ---- COPY: the words themselves, editable in place ---- */}
-                <section className={styles.section}>
+                {/* ---- COPY: the words themselves, editable in place ----
+                    .sectionFlush for the same reason PATH and STYLE's
+                    section take it: this is the only reading under COPY's
+                    own top-tab row, so the default .section margin-top
+                    would open the s107 gap here too. */}
+                <section className={`${styles.section} ${styles.sectionFlush}`}>
                   <div className={styles.bar}>
                     <h3 className={styles.head}>
                       <CopyText k="inspect.section.copy" />
@@ -1079,6 +1153,61 @@ export function InspectorPanel({
           </div>
         )}
       </div>
+
+      {/* ---- STYLER: a door, not a workshop ----
+          The five blocks stood here for one review. Jake's note: styling
+          and inspecting are two experiences, and a panel showing TOKENS,
+          CONTRAST, TYPE and MOTION around a set of styling controls is
+          asking a person to do one job while looking at another. So the
+          blocks moved to a stage of their own (StylerStage.tsx) and what
+          is left in the reading is the way in.
+
+          Round 6 (s107): two more rulings, both about this block staying
+          reachable. First, one chip per styler-compatible component in
+          the pick's WHOLE ancestor chain (componentIds above), not only
+          the nearest — a button picked inside a nav inside a window
+          used to offer only the nav's door. Second, the block itself
+          moves outside .panelBody, as a sibling after it rather than a
+          child inside it: `.panel` is already a flex column
+          (panelHead flex:none, panelBody flex:1 auto scrolling), so a
+          third flex item here pins to the foot of the dock the same way
+          panelHead pins to the top, no position:fixed needed. Every tab
+          scrolls behind it now, which is the whole point — the door back
+          to STYLER must never be a click a visitor has to go hunting a
+          tab, or a scroll position, for.
+
+          Each chip IS the button now too: it used to be a stroked
+          .roleChip (component id) beside a separate OPEN COMPONENT
+          button, and Jake's read was that a stroked container next to
+          its own trigger is one affordance drawn as two. The link-out
+          glyph inside says "this opens something" without adding a
+          second focus stop, and the chip keeps .roleChip's stroke
+          treatment — accent border, accent ink, surface fill — since
+          nothing about becoming clickable changes what it is reporting. */}
+      {report && componentIds.length > 0 && (
+        <div className={styles.stylerFoot}>
+          <div className={styles.bar}>
+            <h3 className={styles.head}>
+              <CopyText k="styler.section" />
+            </h3>
+            <InfoTip k="styler.note" />
+          </div>
+          <div className={styles.stylerChips}>
+            {componentIds.map((id) => (
+              <button
+                key={id}
+                type="button"
+                className={styles.stylerChip}
+                onClick={() => setStage(id)}
+                aria-label={`${t('styler.open', skin)} ${id.toUpperCase()} ${t('styler.instyler', skin)}`}
+              >
+                <span className={styles.stylerChipLabel}>{id}</span>
+                <LinkOutGlyph />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </>
   )
 }
