@@ -638,7 +638,8 @@
 .value,
 .ratio,
 .facts,
-.sourcePath {
+.sourcePath,
+.bind {
   font-family: var(--type-mono-family);
   font-size: var(--type-mono-size);
   font-weight: var(--type-mono-weight);
@@ -1108,6 +1109,78 @@
   line-height: var(--type-micro-leading);
   text-transform: uppercase;
   border-top: var(--border-width-default) solid var(--border);
+}
+
+/* ---- STYLER: the component tier, in five blocks ----
+
+   Two levels of bar, and the difference has to read without being loud.
+   STYLER takes the same bar every other section takes — raised fill, ink,
+   full bleed — and the five block heads under it keep the bleed and give up
+   the fill: the panel's own ground, muted ink, the hairline still there to
+   say a list starts. So the eye reads one section with five parts rather
+   than six sections, and nothing new had to be minted to say it. */
+.styler {
+  margin-top: var(--spacing-component-md);
+}
+
+.bar[data-styler-block] {
+  background: var(--surface);
+}
+
+.bar[data-styler-block] .head {
+  color: var(--content-muted);
+}
+
+/* the row is name / swatch / binding, and the name takes the slack so every
+   binding in a block lines up on the right edge the way a spec panel does.
+   The attribute carries the row's role for the keys to read (StylerBlocks). */
+.var[data-styler-row] .varName {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* the current binding, and the way into the list of what else it could be */
+.bind {
+  flex: none;
+  max-width: 60%;
+  overflow: hidden;
+  padding: 0 var(--spacing-component-xs);
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--content);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.bind:hover,
+.bind[aria-expanded='true'] {
+  border-color: var(--content);
+}
+
+.bind:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* a literal, with no token behind it. Dashed rather than solid, because the
+   row is telling you the binding is missing, not naming a quiet one. */
+.bind[data-offgrid] {
+  color: var(--content-muted);
+  border-style: dashed;
+}
+
+/* the binding the row has right now, marked in the list so the ramp reads
+   as a position rather than a menu — which is what makes the arrow keys
+   feel like a step instead of a jump */
+.candidate[aria-current] {
+  box-shadow: inset var(--border-width-strong) 0 0 var(--accent);
+}
+
+.candidate[aria-current] .candidateName {
+  color: var(--content);
 }
 
 /* ---- CONTRAST ---- */
