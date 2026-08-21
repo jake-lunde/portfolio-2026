@@ -27,8 +27,8 @@
   per-IP 20/day · 8-msg cap · 5s cooldown · kill switch `AI_CHAT_OFF` ·
   backstop = workspace spend limit (vault task). `/machine` 307→`/readme`.
 - **Token commit route:** `/api/token-commit` → branch `inspect-tune`,
-  stacking PRs; gate = CI `tokens-sync.yml`. Blocked on
-  `GITHUB_COPY_TOKEN` scopes (vault task).
+  stacking PRs; gate = CI `tokens-sync.yml`. `GITHUB_COPY_TOKEN` scopes
+  fixed 2026-08-21 (unverified until the first real SAVE).
 - **Hooks:** harness in `.claude/settings.json` — SessionStart §4.1
   reminder; PreToolUse blocks generated edits, forbidden commits,
   prettier. Git in `.githooks/`, wired by npm `prepare` (by hand:
