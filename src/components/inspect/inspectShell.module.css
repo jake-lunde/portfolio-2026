@@ -703,6 +703,18 @@
   margin-top: var(--spacing-component-md);
 }
 
+/* Jake, s107: a section that lands directly under a bare .bar (the top
+   tab row, with no .section of its own to carry a margin) still inherited
+   .section's usual gap above it — a stray band of raised ground between
+   two things that should read as one continuous edge. Only the FIRST
+   section under a tab row takes this: PATH's neighbour SOURCE, and every
+   other section that follows another reading rather than a tab bar,
+   keeps the ordinary margin, because that gap is the one doing real work
+   (see the note above .sectionBody). */
+.sectionFlush {
+  margin-top: 0;
+}
+
 .bar {
   /* the tip below hangs off this, and it spans the bar rather than the
      button, so it can never be clipped by the dock's edge */
@@ -745,21 +757,48 @@
    further), and COPY where the pick has one. See InspectorPanel.tsx for
    the grouping and why.
 
-   Flat and typographic on purpose — Jake's note was "not a modern
-   segmented control." No pill, no filled ground on the active tab: the
-   bar underneath is the same raised fill every section head already
-   wears, the tabs are plain machine-caps labels inside it divided by
-   hairlines (the same rule .tool + .tool takes), and the SELECTED one is
-   ink where the rest are muted — the exact dichotomy STYLER's own block
-   heads already use (.bar[data-styler-block] .head). Nothing new had to
-   be invented to say "this one is active." */
+   Round 5 (s107, screenshot review): the flat underlined row from round 4
+   read badly, and the nested STYLE row crowded its bar enough that the
+   InfoTip sitting beside it lost a reachable hover target (that tip is
+   gone now — see InspectorPanel.tsx). Jake's fix for the row itself: "use
+   a pill similar to the 'new' pill on the latest work window and use a
+   horizontal scroll for overflow." That pill is player.module.css's
+   .badge — --radius-pill, a filled ground, on-fill ink — borrowed here
+   for the SHAPE. The FILL a selected pill wears is not that badge's:
+   accent-expressive is a mark's accent, licensed for a one-off "NEW", not
+   for a row of everyday controls a visitor clicks through all day, so
+   the selected state instead takes the house's other standing answer —
+   accent fill, paper ink — the same pairing STYLER's own segmented tabs
+   already wear (stylerStage.module.css's .tab[aria-selected='true']) and
+   the same one PENDING's SAVE button wears. One shape, one fill vocabulary,
+   two places it already lived. */
 .tabs {
   flex: 1 1 auto;
   display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
   min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-pill);
 }
 
 .tab {
+  flex: none;
   padding: var(--spacing-component-xs) var(--spacing-component-sm);
   font-family: var(--type-micro-family);
   font-size: var(--type-label-size);
@@ -768,29 +807,28 @@
   line-height: var(--type-label-leading);
   text-transform: uppercase;
   color: var(--content-muted);
-  background: none;
-  border: 0;
-  border-radius: 0;
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+  border-radius: var(--radius-pill);
   cursor: pointer;
   white-space: nowrap;
 }
 
-.tab + .tab {
-  border-left: var(--border-width-subtle) solid var(--border);
-}
-
 .tab:hover {
   color: var(--content);
+  background: var(--interactive-default-hover);
 }
 
+/* what sits ON an accent fill is the paper, house-wide */
 .tab[aria-selected='true'] {
-  color: var(--content);
-  box-shadow: inset 0 -2px 0 var(--accent);
+  color: var(--surface);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .tab:focus-visible {
   outline: var(--border-width-strong) solid var(--accent);
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 
 /* ---- the info affordance ----
@@ -1327,6 +1365,94 @@
   border: var(--border-width-default) solid var(--accent);
   border-radius: 0;
   text-transform: none;
+}
+
+/* ================= STYLER footer =================
+   Jake, s107: "fix the styler section to the bottom of the right panel."
+   `.panel` (the aside wrapping this whole component) is already a flex
+   column — panelHead flex:none pinned at the top, panelBody flex:1 1 auto
+   scrolling in the middle — so this is the third flex item, sized to its
+   own content and left at the foot by the column rather than by
+   position:fixed. Every tab scrolls behind it now. A status bar, the way
+   Jake put it, so it takes the same border weight .ident's own
+   border-bottom does rather than the section bars' hairline — this is
+   the edge of the dock's reading, not one more reading inside it. */
+.stylerFoot {
+  flex: none;
+  border-top: var(--border-width-default) solid var(--content);
+}
+
+/* Its own horizontal scroller, the same recipe .tabs takes above: never
+   wraps (a wrapped "desktop-icons" was Jake's second complaint), scrolls
+   sideways instead once the chips outrun the dock's width. */
+.stylerChips {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.stylerChips::-webkit-scrollbar {
+  height: 6px;
+}
+
+.stylerChips::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.stylerChips::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-pill);
+}
+
+/* The chip IS the door now — it used to be a stroked .roleChip (inert,
+   just the component's id) sitting beside a separate OPEN COMPONENT
+   button, and Jake's read of the screenshot was that a stroked container
+   next to its own trigger is one affordance drawn as two. This borrows
+   .roleChip's stroke wholesale — accent border, accent ink, surface fill
+   — because becoming clickable doesn't change what it is reporting; what
+   is new is the interactive states an inert chip never needed. */
+.stylerChip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  color: var(--accent);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--accent);
+  border-radius: 0;
+  text-transform: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* what sits on an accent fill is the paper, house-wide */
+.stylerChip:hover {
+  color: var(--surface);
+  background: var(--accent);
+}
+
+.stylerChip:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+.stylerChipLabel {
+  white-space: nowrap;
+}
+
+.stylerChipIcon {
+  flex: none;
 }
 
 /* ---- MOTION ---- */
