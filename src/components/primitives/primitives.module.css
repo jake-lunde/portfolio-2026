@@ -1,10 +1,10 @@
 /* rubber-stamp block — archival accent vocabulary */
 .stamp {
   display: inline-block;
-  font-family: var(--stamp-family);
-  font-size: var(--stamp-font-size);
-  font-weight: var(--stamp-weight); /* diverges from label's regular weight — stamp reads bolder */
-  letter-spacing: var(--stamp-tracking); /* diverges from label's tracking-14 — wider track for the stamp */
+  font-family: var(--stamp-text-font-family);
+  font-size: var(--stamp-text-font-size);
+  font-weight: var(--stamp-text-font-weight);
+  letter-spacing: var(--stamp-text-letter-spacing);
   text-transform: uppercase;
   color: var(--stamp-fg);
   border: var(--stamp-border-width) solid var(--stamp-border-color);
@@ -28,8 +28,6 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  font-family: var(--mono);
-  font-weight: var(--button-weight);
   text-transform: uppercase;
   border-radius: var(--button-radius);
   background: var(--button-bg);
@@ -44,16 +42,23 @@
   --button-stroke: var(--border);
 }
 
+/* The face lives on the SIZE classes, not on .btn: a button's type is one
+   role — sm is type/control-sm, md is type/control — and Button always draws
+   exactly one of the two. */
 .btnSm {
-  font-size: var(--button-sm-font-size);
-  letter-spacing: var(--button-sm-tracking);
+  font-family: var(--button-sm-text-font-family);
+  font-size: var(--button-sm-text-font-size);
+  font-weight: var(--button-sm-text-font-weight);
+  letter-spacing: var(--button-sm-text-letter-spacing);
   padding: var(--button-sm-padding-y) var(--button-sm-padding-x);
   border-width: var(--button-sm-border);
 }
 
 .btnMd {
-  font-size: var(--button-md-font-size);
-  letter-spacing: var(--button-md-tracking);
+  font-family: var(--button-md-text-font-family);
+  font-size: var(--button-md-text-font-size);
+  font-weight: var(--button-md-text-font-weight);
+  letter-spacing: var(--button-md-text-letter-spacing);
   padding: var(--button-md-padding-y) var(--button-md-padding-x);
   border-width: var(--button-md-border);
 }

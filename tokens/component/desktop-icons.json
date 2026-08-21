@@ -48,15 +48,9 @@
       }
     },
     "label": {
-      "family": {
-        "$value": "{mono}"
-      },
-      "font-size": {
-        "$value": "{text.label}",
-        "$type": "dimension"
-      },
-      "tracking": {
-        "$value": "{tracking.10}"
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.icon-label}"
       }
     }
   }

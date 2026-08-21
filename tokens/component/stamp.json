@@ -12,18 +12,9 @@
       "$value": "{border-width.strong}",
       "$type": "dimension"
     },
-    "family": {
-      "$value": "{type.label.family}"
-    },
-    "font-size": {
-      "$value": "{type.label.size}",
-      "$type": "dimension"
-    },
-    "weight": {
-      "$value": "{weight.bold}"
-    },
-    "tracking": {
-      "$value": "{tracking.20}"
+    "text": {
+      "$type": "typography",
+      "$value": "{typography.badge}"
     },
     "padding-y": {
       "$value": "5px",

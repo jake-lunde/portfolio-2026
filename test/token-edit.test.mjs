@@ -363,7 +363,7 @@ test('validateEdit takes a component rebind that is inside its ramp', () => {
   assert.equal(validateEdit({ role: 'button-radius', token: 'radius/pill' }), null)
   assert.equal(validateEdit({ role: 'button-bg', token: 'surface-raised' }), null)
   assert.equal(validateEdit({ role: 'menubar-gap', token: 'spacing/component/md' }), null)
-  assert.equal(validateEdit({ role: 'stamp-weight', token: 'weight/black' }), null)
+  assert.equal(validateEdit({ role: 'stamp-border-width', token: 'border-width/subtle' }), null)
 })
 
 test('validateEdit refuses a target from the wrong family', () => {
@@ -429,11 +429,11 @@ test('rebinding a leaf that already carried a ref keeps its $type', () => {
   assert.equal(r.ok, true)
   assert.deepEqual(r.json.button.radius, { $value: '{radius.pill}', $type: 'dimension' })
   assert.deepEqual(r.json.button.bg, { $value: '{surface-raised}', $type: 'color' })
-  // a leaf with no authored $type does not grow one
-  const w = applyComponentEdits(component('button'), [
-    { role: 'button-weight', token: 'weight/medium' },
-  ])
-  assert.deepEqual(w.json.button.weight, { $value: '{weight.medium}' })
+  // The other half of this — "a leaf with no authored $type does not grow
+  // one" — has nothing left to stand on: the typeless leaves were the loose
+  // weight/tracking/family members, and the chrome-ramp rebind folded every
+  // one of them into a typed `text` composite. The guard stays in tokenEdit;
+  // restore the assertion the day a typeless component leaf exists again.
 })
 
 test('a rebind is a one-line diff', () => {
@@ -468,7 +468,7 @@ test('serialize is byte-stable against every component file on disk', () => {
 test('refuses a set that spans two components', () => {
   const r = applyComponentEdits(component('button'), [
     { role: 'button-radius', token: 'radius/pill' },
-    { role: 'stamp-weight', token: 'weight/black' },
+    { role: 'stamp-border-width', token: 'border-width/subtle' },
   ])
   assert.equal(r.ok, false)
   assert.match(r.error, /span two components \(button, stamp\)/)

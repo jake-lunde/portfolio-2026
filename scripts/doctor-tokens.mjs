@@ -10,6 +10,10 @@
  *   npm run tokens:doctor -- --strict  # warnings become errors (CI gate)
  *   npm run tokens:doctor -- --parity <baseline.css>
  *
+ * PARITY diffs computed values against a baseline: a changed or dropped
+ * custom property is an error. A deliberate rename declares itself in the
+ * RENAMED ledger further down and is verified rather than excused.
+ *
  * Checks (v1: D1–D4; v2 adds D5 contrast + D6 orphans):
  *   D1  leaf-vs-group collision   — a token path that is BOTH a leaf and a
  *                                    group prefix of another leaf (the A8 killer).
@@ -145,14 +149,23 @@ async function loadModel() {
   return { themes, metadata, setFlat, setRaw }
 }
 
+/* Sets the CSS build LOADS but never emits, whatever the theme says. A
+   `disabled` flag is Tokens Studio's instruction — do not push these as Figma
+   variables — and the build stopped reading it as "do not load" when component
+   text elements began binding whole typography composites. Mirror it here, or
+   every one of those binds reads as a dangling ref (build-tokens.mjs,
+   SOURCE_ONLY). */
+const SOURCE_ONLY = ['semantic/typography']
+
 /** Sets a theme enables (emit) and sources (resolve-only), preserving order. */
 function themeSets(theme, metadata) {
   const enabled = []
   const source = []
   for (const set of metadata.tokenSetOrder) {
     const state = theme.selectedTokenSets[set]
+    if (state === undefined) continue
     if (state === 'enabled') enabled.push(set)
-    else if (state === 'source') source.push(set)
+    else if (state === 'source' || SOURCE_ONLY.includes(set)) source.push(set)
   }
   return { enabled, source }
 }
@@ -198,14 +211,38 @@ function checkLeafGroupCollision(theme, sets, model) {
 // D2 — post-kebab emitted-name collision
 // ---------------------------------------------------------------------------
 
-function emittedLeaves(theme, sets, setFlat) {
+/* A component's text element is ONE authored leaf and FIVE emitted vars: the
+   build expands the typography composite it binds (build-tokens.mjs, the css
+   platform's `expand`) and drops fontStyle, which names a font file rather
+   than a CSS property. Counting the leaf as one declaration would make the
+   tripwire fire on every rebuild. */
+function expandTypography(leaf, model) {
+  const raw = valueAtPath(model.setRaw['semantic/typography'], leaf.aliasRef)
+  if (!raw || typeof raw.$value !== 'object') return [leaf]
+  return Object.keys(raw.$value)
+    .filter((member) => member !== 'fontStyle')
+    .map((member) => ({ ...leaf, path: `${leaf.path}.${member}` }))
+}
+
+function valueAtPath(json, dottedPath) {
+  let node = json
+  for (const key of dottedPath.split('.')) {
+    if (!node || typeof node !== 'object') return undefined
+    node = node[key]
+  }
+  return node
+}
+
+function emittedLeaves(theme, sets, model) {
   // Later enabled sets override earlier ones by path (SD merge order). Return
   // the winning leaf per path, in first-seen order.
   const byPath = new Map()
   for (const set of sets.enabled) {
-    for (const t of setFlat[set] ?? []) byPath.set(t.path, { ...t, set })
+    for (const t of model.setFlat[set] ?? []) byPath.set(t.path, { ...t, set })
   }
-  return [...byPath.values()]
+  return [...byPath.values()].flatMap((t) =>
+    t.type === 'typography' && t.isAlias ? expandTypography(t, model) : [t]
+  )
 }
 
 function checkKebabCollision(theme, leaves) {
@@ -273,7 +310,7 @@ async function checkDeclTripwire(model, cssPath) {
       continue
     }
     const sets = themeSets(theme, model.metadata)
-    const expected = new Set(emittedLeaves(theme, sets, model.setFlat).map((t) => kebab(t.path))).size
+    const expected = new Set(emittedLeaves(theme, sets, model).map((t) => kebab(t.path))).size
     if (actual !== expected) {
       err(
         'D3',
@@ -488,6 +525,63 @@ function buildResolvedThemeMaps(cssText) {
   return resolved
 }
 
+/* THE RENAME LEDGER — old emitted name -> the name that replaced it.
+ *
+ * PARITY reads a removed custom property as a regression, which is right for
+ * the additive PRs it was built for and wrong for one that renames a whole
+ * shape at once. So a rename is DECLARED rather than waved through, and the
+ * check gets stricter, not looser: the successor must exist in the new
+ * stylesheet, and it must resolve to the same computed value unless it is
+ * listed in RETUNED. A rename that quietly changed a value still fails.
+ *
+ * Empty this once main carries the new names — a ledger that outlives its own
+ * PR stops being evidence and starts being a blanket permission.
+ *
+ * Written for the chrome type ramp (2026-08-21): eleven text elements traded
+ * their loose family/size/weight/tracking members for one typography
+ * composite, which the build expands into the five names below. */
+const RENAMED = {
+  'button-weight': 'button-md-text-font-weight',
+  'button-sm-font-size': 'button-sm-text-font-size',
+  'button-sm-tracking': 'button-sm-text-letter-spacing',
+  'button-md-font-size': 'button-md-text-font-size',
+  'button-md-tracking': 'button-md-text-letter-spacing',
+  'menubar-family': 'menubar-text-font-family',
+  'menubar-font-size': 'menubar-text-font-size',
+  'menubar-tracking': 'menubar-text-letter-spacing',
+  'menubar-wordmark-family': 'menubar-wordmark-text-font-family',
+  'menubar-wordmark-weight': 'menubar-wordmark-text-font-weight',
+  'menubar-wordmark-tracking': 'menubar-wordmark-text-letter-spacing',
+  'menubar-wordmark-version-family': 'menubar-wordmark-version-text-font-family',
+  'menubar-wordmark-version-font-size': 'menubar-wordmark-version-text-font-size',
+  'menubar-wordmark-version-weight': 'menubar-wordmark-version-text-font-weight',
+  'menubar-wordmark-version-tracking': 'menubar-wordmark-version-text-letter-spacing',
+  'menubar-menu-btn-family': 'menubar-menu-btn-text-font-family',
+  'menubar-menu-btn-font-size': 'menubar-menu-btn-text-font-size',
+  'menubar-menu-btn-tracking': 'menubar-menu-btn-text-letter-spacing',
+  'stamp-family': 'stamp-text-font-family',
+  'stamp-font-size': 'stamp-text-font-size',
+  'stamp-weight': 'stamp-text-font-weight',
+  'stamp-tracking': 'stamp-text-letter-spacing',
+  'desktop-icons-label-family': 'desktop-icons-label-text-font-family',
+  'desktop-icons-label-font-size': 'desktop-icons-label-text-font-size',
+  'desktop-icons-label-tracking': 'desktop-icons-label-text-letter-spacing',
+  'window-title-family': 'window-title-text-font-family',
+  'window-title-font-size': 'window-title-text-font-size',
+  'window-title-weight': 'window-title-text-font-weight',
+  'window-title-tracking': 'window-title-text-letter-spacing',
+}
+
+/* The renamed properties allowed to land on a different value, and the only
+ * ones. Jake ruled the menubar/window-title tracking split an accident and
+ * normalized it on .14 (2026-08-21), which widens these three by 0.02em. Every
+ * other rename above must be value-for-value. */
+const RETUNED = new Set([
+  'menubar-text-letter-spacing',
+  'menubar-wordmark-version-text-letter-spacing',
+  'button-sm-text-letter-spacing',
+])
+
 async function checkParity(refArg, currentCss, reporters) {
   if (!currentCss) {
     console.log('parity: current tokens.generated.css not found — run tokens:build. Skipping.')
@@ -514,6 +608,7 @@ async function checkParity(refArg, currentCss, reporters) {
   let added = 0
   let changed = 0
   let removed = 0
+  let renamed = 0
 
   for (const themeId of new Set([...baseline.keys(), ...current.keys()])) {
     const before = baseline.get(themeId) ?? new Map()
@@ -533,6 +628,24 @@ async function checkParity(refArg, currentCss, reporters) {
         }
       } else if (hasAfter) {
         added++
+      } else if (RENAMED[name]) {
+        const heir = RENAMED[name]
+        if (!after.has(heir)) {
+          removed++
+          reporters.err(
+            'PARITY',
+            `[${themeId}] --${name} was renamed to --${heir}, which the build does not emit.`
+          )
+        } else if (after.get(heir) !== before.get(name) && !RETUNED.has(heir)) {
+          changed++
+          reporters.err(
+            'PARITY',
+            `[${themeId}] --${name} -> --${heir} changed value on the way: ` +
+              `"${before.get(name)}" -> "${after.get(heir)}"`
+          )
+        } else {
+          renamed++
+        }
       } else {
         removed++
         reporters.err('PARITY', `[${themeId}] --${name} removed (was "${before.get(name)}").`)
@@ -541,7 +654,8 @@ async function checkParity(refArg, currentCss, reporters) {
   }
 
   console.log(
-    `\nparity (vs ${refArg}): ${unchanged} unchanged, ${added} added, ${changed} changed, ${removed} removed.`
+    `\nparity (vs ${refArg}): ${unchanged} unchanged, ${added} added, ${renamed} renamed, ` +
+      `${changed} changed, ${removed} removed.`
   )
 }
 
@@ -771,7 +885,7 @@ async function main() {
   for (const theme of model.themes) {
     const sets = themeSets(theme, model.metadata)
     checkLeafGroupCollision(theme, sets, model)
-    checkKebabCollision(theme, emittedLeaves(theme, sets, model.setFlat))
+    checkKebabCollision(theme, emittedLeaves(theme, sets, model))
     checkRefs(theme, sets, model.setFlat)
   }
   await checkDeclTripwire(model, OUT_FILE)

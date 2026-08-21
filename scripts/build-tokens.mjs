@@ -9,7 +9,7 @@
  */
 import StyleDictionary from 'style-dictionary'
 import { usesReferences, getReferences } from 'style-dictionary/utils'
-import { register } from '@tokens-studio/sd-transforms'
+import { register, expandTypesMap } from '@tokens-studio/sd-transforms'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
@@ -41,6 +41,47 @@ const tierOf = (filePath) => {
   const seg = path.relative(TOKENS_DIR, path.resolve(filePath)).split(path.sep)[0]
   return TIERS.includes(seg) ? seg : null
 }
+
+/* THE SOURCE-ONLY TIER. semantic/typography is `disabled` in every $theme,
+ * which is a FIGMA-side instruction (Tokens Studio owns those as text styles,
+ * not variables) that the CSS build used to read as "don't load". It has to
+ * load now: a component text element binds one whole typography composite —
+ * stamp's is a single ref to typography.badge — and SD can only expand that
+ * into the five CSS custom properties if the composite is in the dictionary.
+ * Loaded, never emitted: the per-file `enabled` filter below already excludes
+ * it, and that exclusion is load-bearing. Emitted, a `typography` composite
+ * renders as the CSS `font` shorthand, which has no slot for letter-spacing
+ * and drops it silently — silently, because this build runs with warnings
+ * disabled. Only for the theme that lists it; classic-dark and medieval carry
+ * neither this set nor the core scales it references. */
+const SOURCE_ONLY = ['semantic/typography']
+
+/* THE FIGMA FACE NAMES, ON THE WAY TO CSS. A composite's fontFamily names the
+ * installed Figma face ("Geist Mono") because that is the only thing a Figma
+ * TEXT STYLE can be built from; CSS needs the same face as the var() stack the
+ * skin publishes. Same three faces, two names, so the CSS build swaps one for
+ * the other as the tokens come in and the composites keep ONE convention for
+ * both readers. Without it a component that binds a whole composite would bake
+ * "Geist Mono" into its font-family and lose the fallback stack — and the
+ * per-skin face swap with it. */
+const FIGMA_FACE_REF = /^\{font-figma\.([a-z]+)\}$/
+StyleDictionary.registerPreprocessor({
+  name: 'figma-face-to-css-stack',
+  preprocessor: (tokens) => {
+    const swap = (node) => {
+      for (const [key, value] of Object.entries(node)) {
+        if (typeof value === 'string') {
+          const face = FIGMA_FACE_REF.exec(value)
+          if (face) node[key] = `{${face[1]}}`
+        } else if (value && typeof value === 'object') {
+          swap(value)
+        }
+      }
+      return node
+    }
+    return swap(structuredClone(tokens))
+  },
+})
 
 StyleDictionary.registerFormat({
   name: 'json/token-tiers',
@@ -106,10 +147,20 @@ await fs.mkdir(OUT_DIR, { recursive: true })
 
 for (const theme of themes) {
   const sets = Object.entries(theme.selectedTokenSets).filter(([, v]) => v !== 'disabled')
-  const source = sets.map(([s]) => path.join('tokens', `${s}.json`))
+  const sourceOnly = Object.keys(theme.selectedTokenSets).filter((s) => SOURCE_ONLY.includes(s))
+  const source = [...sets.map(([s]) => s), ...sourceOnly].map((s) => path.join('tokens', `${s}.json`))
   const enabled = new Set(
     sets.filter(([, v]) => v === 'enabled').map(([s]) => path.resolve(TOKENS_DIR, `${s}.json`))
   )
+
+  /* What reaches the stylesheet: a token from an `enabled` set, minus the
+   * composite member that is not a CSS property. `fontStyle` names the FONT
+   * FILE a weight implies ("Bold"), which is what Figma binds a text style to
+   * and what `font-style` in CSS emphatically does not mean. It is derived
+   * from fontWeight, so dropping it costs nothing and keeps the emitted set at
+   * the five properties a text element actually declares. */
+  const emits = (token) =>
+    enabled.has(path.resolve(token.filePath)) && token.path.at(-1) !== 'fontStyle'
 
   const sd = new StyleDictionary({
     source,
@@ -120,12 +171,22 @@ for (const theme of themes) {
       css: {
         transformGroup: 'tokens-studio-kebab',
         buildPath: 'src/styles/generated/',
+        preprocessors: ['figma-face-to-css-stack'],
+        /* One typography composite per text element in the component tier,
+         * expanded here into --<component>-text-font-family / -font-size /
+         * -font-weight / -letter-spacing / -line-height. SCOPED TO THE
+         * COMPONENT TIER on purpose: expanding the semantic composites too
+         * would destroy the very tokens the component refs point at. */
+        expand: {
+          typesMap: expandTypesMap,
+          include: (token) => tierOf(token.filePath) === 'component',
+        },
         files: [
           {
             destination: `${theme.id}.css`,
             format: 'css/variables',
             // emit only tokens that came from an `enabled` set
-            filter: (token) => enabled.has(path.resolve(token.filePath)),
+            filter: emits,
             options: {
               selector: SELECTOR[theme.id],
               usesDtcg: true,
@@ -161,12 +222,12 @@ for (const theme of themes) {
             format: 'json/token-tiers',
             // the SAME filter as the CSS file above: one dictionary, two
             // renderings, so the map and the stylesheet can't drift
-            filter: (token) => enabled.has(path.resolve(token.filePath)),
+            filter: emits,
           },
           {
             destination: `${theme.id}.refs.json`,
             format: 'json/token-refs',
-            filter: (token) => enabled.has(path.resolve(token.filePath)),
+            filter: emits,
           },
         ],
       },

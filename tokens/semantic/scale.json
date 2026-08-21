@@ -60,7 +60,7 @@
     }
   },
   "type": {
-    "$description": "Semantic type ramp v1 \u2014 role-named groups of plain size/leading/weight/tracking/family sub-tokens referencing core. Fluid roles (display, heading-1) carry clamp() literals to preserve the site's current responsive behavior. The Desktop/Mobile-mode round-trip representation of the fluid sizes, plus DTCG `typography` composites and Figma text-styles, land in the NEXT phase (do not build here).",
+    "$description": "Semantic type ramp v1 \u2014 role-named groups of plain size/leading/weight/tracking/family sub-tokens referencing core. Fluid roles (display, heading-1) carry clamp() literals to preserve the site's current responsive behavior. The Desktop/Mobile-mode round-trip representation of the fluid sizes, plus DTCG `typography` composites and Figma text-styles, land in the NEXT phase (do not build here). Two ramps live here: display through mono are CONTENT, and title through wordmark are CHROME \u2014 the OS furniture the pilot five used to hand-assemble from loose core primitives, one role per treatment (Jake's ruling, 2026-08-21).",
     "display": {
       "size": {
         "$value": "clamp(34px, 6vw, 62px)"
@@ -257,6 +257,139 @@
       },
       "family": {
         "$value": "{mono}"
+      }
+    },
+    "title": {
+      "$description": "CHROME ramp — a window's title. Same face and size as label, bolder.",
+      "size": {
+        "$value": "{font-size.base}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "weight": {
+        "$value": "{weight.bold}"
+      },
+      "tracking": {
+        "$value": "{tracking.14}"
+      },
+      "family": {
+        "$value": "{mono}"
+      }
+    },
+    "control": {
+      "$description": "CHROME ramp — a button's label at the dialog size.",
+      "size": {
+        "$value": "{font-size.sm}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "weight": {
+        "$value": "{weight.bold}"
+      },
+      "tracking": {
+        "$value": "{tracking.14}"
+      },
+      "family": {
+        "$value": "{mono}"
+      }
+    },
+    "control-sm": {
+      "$description": "CHROME ramp — a button's label at the chrome size.",
+      "size": {
+        "$value": "{font-size.xs}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "weight": {
+        "$value": "{weight.bold}"
+      },
+      "tracking": {
+        "$value": "{tracking.14}"
+      },
+      "family": {
+        "$value": "{mono}"
+      }
+    },
+    "menu": {
+      "$description": "CHROME ramp — a menubar item.",
+      "size": {
+        "$value": "{font-size.sm}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
+      "tracking": {
+        "$value": "{tracking.14}"
+      },
+      "family": {
+        "$value": "{mono}"
+      }
+    },
+    "icon-label": {
+      "$description": "CHROME ramp — a desktop icon's name. Tighter than menu: the label sits under an 88px cell and must not wrap.",
+      "size": {
+        "$value": "{font-size.sm}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
+      "tracking": {
+        "$value": "{tracking.10}"
+      },
+      "family": {
+        "$value": "{mono}"
+      }
+    },
+    "badge": {
+      "$description": "CHROME ramp — a rubber-stamp mark. The widest track in the system; the stamp reads as ink, not as prose.",
+      "size": {
+        "$value": "{font-size.base}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "weight": {
+        "$value": "{weight.bold}"
+      },
+      "tracking": {
+        "$value": "{tracking.20}"
+      },
+      "family": {
+        "$value": "{mono}"
+      }
+    },
+    "wordmark": {
+      "$description": "CHROME ramp — the menubar's LUNDE OS mark. The one chrome role on the display face.",
+      "size": {
+        "$value": "{font-size.lg}",
+        "$type": "dimension"
+      },
+      "leading": {
+        "$value": "{leading.normal}"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
+      "tracking": {
+        "$value": "{tracking.08}"
+      },
+      "family": {
+        "$value": "{display}"
       }
     }
   },

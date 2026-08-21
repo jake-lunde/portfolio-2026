@@ -14,25 +14,26 @@
   padding: 0 var(--menubar-padding-x);
   background: var(--menubar-bg);
   border-bottom: var(--menubar-border-width) solid var(--menubar-border-color);
-  font-family: var(--menubar-family);
-  font-size: var(--menubar-font-size);
-  letter-spacing: var(--menubar-tracking);
+  font-family: var(--menubar-text-font-family);
+  font-size: var(--menubar-text-font-size);
+  font-weight: var(--menubar-text-font-weight);
+  letter-spacing: var(--menubar-text-letter-spacing);
 }
 
 .wordmark {
-  font-family: var(--menubar-wordmark-family);
-  font-size: var(--type-body-sm-size); /* 13px exact — display family is an intentional divergence from body-sm's sans */
-  font-weight: var(--menubar-wordmark-weight);
-  letter-spacing: var(--menubar-wordmark-tracking);
+  font-family: var(--menubar-wordmark-text-font-family);
+  font-size: var(--menubar-wordmark-text-font-size);
+  font-weight: var(--menubar-wordmark-text-font-weight);
+  letter-spacing: var(--menubar-wordmark-text-letter-spacing);
   text-transform: uppercase;
 }
 
 .wordmark span {
-  font-family: var(--menubar-wordmark-version-family); /* the version string reads as a machine stamp against the display wordmark */
-  font-size: var(--menubar-wordmark-version-font-size);
+  font-family: var(--menubar-wordmark-version-text-font-family); /* the version string reads as a machine stamp against the display wordmark */
+  font-size: var(--menubar-wordmark-version-text-font-size);
   color: var(--content-muted);
-  font-weight: var(--menubar-wordmark-version-weight);
-  letter-spacing: var(--menubar-wordmark-version-tracking);
+  font-weight: var(--menubar-wordmark-version-text-font-weight);
+  letter-spacing: var(--menubar-wordmark-version-text-letter-spacing);
   margin-left: var(--menubar-wordmark-version-margin-left);
 }
 
@@ -43,9 +44,10 @@
 }
 
 .menuBtn {
-  font-family: var(--menubar-menu-btn-family);
-  font-size: var(--menubar-menu-btn-font-size);
-  letter-spacing: var(--menubar-menu-btn-tracking);
+  font-family: var(--menubar-menu-btn-text-font-family);
+  font-size: var(--menubar-menu-btn-text-font-size);
+  font-weight: var(--menubar-menu-btn-text-font-weight);
+  letter-spacing: var(--menubar-menu-btn-text-letter-spacing);
   text-transform: uppercase;
   padding: var(--menubar-menu-btn-padding-y) var(--menubar-menu-btn-padding-x);
   border: var(--menubar-menu-btn-border-width) solid transparent;
@@ -535,9 +537,10 @@
 }
 
 .iconLabel {
-  font-family: var(--desktop-icons-label-family);
-  font-size: var(--desktop-icons-label-font-size);
-  letter-spacing: var(--desktop-icons-label-tracking);
+  font-family: var(--desktop-icons-label-text-font-family);
+  font-size: var(--desktop-icons-label-text-font-size);
+  font-weight: var(--desktop-icons-label-text-font-weight);
+  letter-spacing: var(--desktop-icons-label-text-letter-spacing);
   text-transform: uppercase;
 }
 
@@ -1324,10 +1327,10 @@
 }
 
 .title {
-  font-family: var(--window-title-family);
-  font-size: var(--window-title-font-size);
-  font-weight: var(--window-title-weight);
-  letter-spacing: var(--window-title-tracking);
+  font-family: var(--window-title-text-font-family);
+  font-size: var(--window-title-text-font-size);
+  font-weight: var(--window-title-text-font-weight);
+  letter-spacing: var(--window-title-text-letter-spacing);
   text-transform: uppercase;
   flex: 1;
   text-align: center;
@@ -1337,9 +1340,10 @@
 }
 
 .titleMeta {
-  font-family: var(--mono);
-  font-size: var(--text-caption);
-  letter-spacing: 0.14em;
+  font-family: var(--window-title-meta-text-font-family);
+  font-size: var(--window-title-meta-text-font-size);
+  font-weight: var(--window-title-meta-text-font-weight);
+  letter-spacing: var(--window-title-meta-text-letter-spacing);
   opacity: 0.6;
 }
 
@@ -1354,9 +1358,10 @@
 }
 
 .explainerBtn {
-  font-family: var(--mono);
-  font-size: var(--text-caption);
-  letter-spacing: var(--tracking-14);
+  font-family: var(--window-explainer-btn-text-font-family);
+  font-size: var(--window-explainer-btn-text-font-size);
+  font-weight: var(--window-explainer-btn-text-font-weight);
+  letter-spacing: var(--window-explainer-btn-text-letter-spacing);
   text-transform: uppercase;
   white-space: nowrap;
   /* rides the titlebar's own ink: content when idle, inverse when active —
