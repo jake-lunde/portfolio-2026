@@ -87,18 +87,21 @@
       }
     },
     "title": {
-      "family": {
-        "$value": "{mono}"
-      },
-      "font-size": {
-        "$value": "{text.ui}",
-        "$type": "dimension"
-      },
-      "weight": {
-        "$value": "{weight.bold}"
-      },
-      "tracking": {
-        "$value": "{tracking.14}"
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.title}"
+      }
+    },
+    "title-meta": {
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.caption}"
+      }
+    },
+    "explainer-btn": {
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.caption}"
       }
     }
   }

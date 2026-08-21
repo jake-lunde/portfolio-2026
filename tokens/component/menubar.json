@@ -17,15 +17,9 @@
       "$value": "{border-width.default}",
       "$type": "dimension"
     },
-    "family": {
-      "$value": "{mono}"
-    },
-    "font-size": {
-      "$value": "{text.ui}",
-      "$type": "dimension"
-    },
-    "tracking": {
-      "$value": "{tracking.12}"
+    "text": {
+      "$type": "typography",
+      "$value": "{typography.label}"
     },
     "padding-x": {
       "$value": "14px",
@@ -37,28 +31,14 @@
       "$type": "dimension"
     },
     "wordmark": {
-      "family": {
-        "$value": "{display}"
-      },
-      "weight": {
-        "$value": "{weight.regular}"
-      },
-      "tracking": {
-        "$value": "{tracking.08}"
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.wordmark}"
       },
       "version": {
-        "family": {
-          "$value": "{mono}"
-        },
-        "font-size": {
-          "$value": "{text.ui}",
-          "$type": "dimension"
-        },
-        "weight": {
-          "$value": "{weight.regular}"
-        },
-        "tracking": {
-          "$value": "{tracking.12}"
+        "text": {
+          "$type": "typography",
+          "$value": "{typography.label}"
         },
         "margin-left": {
           "$value": "10px",
@@ -68,15 +48,9 @@
       }
     },
     "menu-btn": {
-      "family": {
-        "$value": "{mono}"
-      },
-      "font-size": {
-        "$value": "{text.label}",
-        "$type": "dimension"
-      },
-      "tracking": {
-        "$value": "{tracking.14}"
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.menu}"
       },
       "padding-y": {
         "$value": "{space.1}",

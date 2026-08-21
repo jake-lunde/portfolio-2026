@@ -229,7 +229,7 @@
 .tag {
   font-family: var(--type-label-family);
   font-size: var(--type-caption-size); /* 9px — smaller than any face type */
-  font-weight: var(--button-weight);
+  font-weight: var(--type-control-weight);
   letter-spacing: var(--tracking-16);
   line-height: var(--leading-none);
   text-transform: uppercase;
@@ -1925,7 +1925,7 @@
 .cancelBtn {
   font-family: var(--type-label-family);
   font-size: var(--type-label-size); /* 11px */
-  font-weight: var(--button-weight);
+  font-weight: var(--type-control-weight);
   letter-spacing: var(--tracking-16); /* the button role's wider set */
   padding: 5px 10px;
   background: var(--surface-raised);
@@ -2618,7 +2618,7 @@
   display: none;
   font-family: var(--type-label-family);
   font-size: var(--type-caption-size);
-  font-weight: var(--button-weight);
+  font-weight: var(--type-control-weight);
   letter-spacing: var(--tracking-16);
   line-height: var(--leading-none);
   text-transform: uppercase;

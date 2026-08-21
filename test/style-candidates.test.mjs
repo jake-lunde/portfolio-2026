@@ -94,22 +94,27 @@ const FAMILY_MAP = {
   'button-expressive-hover-fg': 'color',
   'button-fg': 'color',
   'button-md-border': 'border-width',
-  'button-md-font-size': 'font-size',
   'button-md-padding-x': 'space',
   'button-md-padding-y': 'space',
-  'button-md-tracking': 'tracking',
+  'button-md-text-font-family': 'locked',
+  'button-md-text-font-size': 'locked',
+  'button-md-text-font-weight': 'locked',
+  'button-md-text-letter-spacing': 'locked',
+  'button-md-text-line-height': 'locked',
   'button-radius': 'radius',
   'button-sm-border': 'border-width',
-  'button-sm-font-size': 'font-size',
   'button-sm-padding-x': 'space',
   'button-sm-padding-y': 'space',
-  'button-sm-tracking': 'tracking',
+  'button-sm-text-font-family': 'locked',
+  'button-sm-text-font-size': 'locked',
+  'button-sm-text-font-weight': 'locked',
+  'button-sm-text-letter-spacing': 'locked',
+  'button-sm-text-line-height': 'locked',
   'button-solid-bg': 'color',
   'button-solid-fg': 'color',
   'button-stroke': 'color',
   'button-system-hover-bg': 'color',
   'button-system-hover-fg': 'color',
-  'button-weight': 'weight',
   'desktop-icons-border-width': 'border-width',
   'desktop-icons-cell-width': 'locked',
   'desktop-icons-gap-column': 'space',
@@ -120,56 +125,77 @@ const FAMILY_MAP = {
   'desktop-icons-icon-btn-padding-bottom': 'space',
   'desktop-icons-icon-btn-padding-top': 'space',
   'desktop-icons-icon-btn-padding-x': 'space',
-  'desktop-icons-label-family': 'family',
-  'desktop-icons-label-font-size': 'font-size',
-  'desktop-icons-label-tracking': 'tracking',
+  'desktop-icons-label-text-font-family': 'locked',
+  'desktop-icons-label-text-font-size': 'locked',
+  'desktop-icons-label-text-font-weight': 'locked',
+  'desktop-icons-label-text-letter-spacing': 'locked',
+  'desktop-icons-label-text-line-height': 'locked',
   'menubar-bg': 'color',
   'menubar-border-color': 'color',
   'menubar-border-width': 'border-width',
-  'menubar-family': 'family',
-  'menubar-font-size': 'font-size',
   'menubar-gap': 'space',
   'menubar-h': 'locked',
   'menubar-menu-btn-border-width': 'border-width',
-  'menubar-menu-btn-family': 'family',
-  'menubar-menu-btn-font-size': 'font-size',
   'menubar-menu-btn-padding-x': 'space',
   'menubar-menu-btn-padding-y': 'space',
-  'menubar-menu-btn-tracking': 'tracking',
+  'menubar-menu-btn-text-font-family': 'locked',
+  'menubar-menu-btn-text-font-size': 'locked',
+  'menubar-menu-btn-text-font-weight': 'locked',
+  'menubar-menu-btn-text-letter-spacing': 'locked',
+  'menubar-menu-btn-text-line-height': 'locked',
   'menubar-menu-glyph-btn-padding': 'space',
   'menubar-padding-x': 'space',
-  'menubar-tracking': 'tracking',
-  'menubar-wordmark-family': 'family',
-  'menubar-wordmark-tracking': 'tracking',
-  'menubar-wordmark-version-family': 'family',
-  'menubar-wordmark-version-font-size': 'font-size',
+  'menubar-text-font-family': 'locked',
+  'menubar-text-font-size': 'locked',
+  'menubar-text-font-weight': 'locked',
+  'menubar-text-letter-spacing': 'locked',
+  'menubar-text-line-height': 'locked',
+  'menubar-wordmark-text-font-family': 'locked',
+  'menubar-wordmark-text-font-size': 'locked',
+  'menubar-wordmark-text-font-weight': 'locked',
+  'menubar-wordmark-text-letter-spacing': 'locked',
+  'menubar-wordmark-text-line-height': 'locked',
   'menubar-wordmark-version-margin-left': 'space',
-  'menubar-wordmark-version-tracking': 'tracking',
-  'menubar-wordmark-version-weight': 'weight',
-  'menubar-wordmark-weight': 'weight',
+  'menubar-wordmark-version-text-font-family': 'locked',
+  'menubar-wordmark-version-text-font-size': 'locked',
+  'menubar-wordmark-version-text-font-weight': 'locked',
+  'menubar-wordmark-version-text-letter-spacing': 'locked',
+  'menubar-wordmark-version-text-line-height': 'locked',
   'stamp-border-color': 'color',
   'stamp-border-width': 'border-width',
-  'stamp-family': 'family',
   'stamp-fg': 'color',
-  'stamp-font-size': 'font-size',
   'stamp-padding-x': 'space',
   'stamp-padding-y': 'space',
   'stamp-pink-border-color': 'color',
   'stamp-pink-fg': 'color',
-  'stamp-tracking': 'tracking',
-  'stamp-weight': 'weight',
+  'stamp-text-font-family': 'locked',
+  'stamp-text-font-size': 'locked',
+  'stamp-text-font-weight': 'locked',
+  'stamp-text-letter-spacing': 'locked',
+  'stamp-text-line-height': 'locked',
   'window-border-width': 'border-width',
   'window-ctrl-hover-bg': 'color',
   'window-ctrl-hover-border-color': 'color',
   'window-ctrl-hover-fg': 'color',
   'window-ctrl-size': 'locked',
+  'window-explainer-btn-text-font-family': 'locked',
+  'window-explainer-btn-text-font-size': 'locked',
+  'window-explainer-btn-text-font-weight': 'locked',
+  'window-explainer-btn-text-letter-spacing': 'locked',
+  'window-explainer-btn-text-line-height': 'locked',
   'window-fill': 'color',
   'window-stroke': 'color',
   'window-title-controls-gap': 'space',
-  'window-title-family': 'family',
-  'window-title-font-size': 'font-size',
-  'window-title-tracking': 'tracking',
-  'window-title-weight': 'weight',
+  'window-title-meta-text-font-family': 'locked',
+  'window-title-meta-text-font-size': 'locked',
+  'window-title-meta-text-font-weight': 'locked',
+  'window-title-meta-text-letter-spacing': 'locked',
+  'window-title-meta-text-line-height': 'locked',
+  'window-title-text-font-family': 'locked',
+  'window-title-text-font-size': 'locked',
+  'window-title-text-font-weight': 'locked',
+  'window-title-text-letter-spacing': 'locked',
+  'window-title-text-line-height': 'locked',
   'window-titlebar-active-bg': 'color',
   'window-titlebar-active-border-color': 'color',
   'window-titlebar-active-fg': 'color',
@@ -186,9 +212,10 @@ test('familyOf classifies the pilot five exactly as pinned', () => {
   assert.deepEqual(actual, FAMILY_MAP)
 })
 
-test('only the three structural dimensions are locked', () => {
+test('the structural three and the composite members are all that is locked', () => {
   const locked = COMPONENT_ROLES.filter((role) => familyOf(role) === 'locked')
-  assert.deepEqual(locked.sort(), ['desktop-icons-cell-width', 'menubar-h', 'window-ctrl-size'])
+  const structural = locked.filter((role) => !/-text-/.test(role))
+  assert.deepEqual(structural.sort(), ['desktop-icons-cell-width', 'menubar-h', 'window-ctrl-size'])
   for (const role of locked) assert.deepEqual(candidatesFor(role), [])
 })
 
@@ -286,26 +313,19 @@ test('isLawfulTarget is the ramp, and nothing but the ramp', () => {
 
 /* ------------------------------------------------------- the invariant */
 
-/* The two bindings the curation deliberately does not offer back.
-   stamp reaches through the semantic TYPE ramp — {type.label.family} and
-   {type.label.size} — which is a member of a COMPOSITE role that also carries
-   leading, weight and tracking. The pickers offer the flat scales instead, so
-   choosing from one flattens the stamp onto `text-*`/`mono` rather than
-   editing half a composite. That is a real, deliberate one-way door, and it is
-   pinned by exact path here: a SIXTH property binding through the ramp is
-   news, and should arrive as a failing test rather than as a row STYLER
-   quietly mis-labels. */
-const RAMP_BOUND = {
-  '--stamp-family': 'type/label/family',
-  '--stamp-font-size': 'type/label/size',
-}
+/* The five rows one typography composite expands into. A component text
+   element carries ONE binding — `"text": "{typography.badge}"` — and the build
+   splits it into font-family, font-size, font-weight, letter-spacing and
+   line-height. None of the five is an offer, so they are checked by the test
+   below rather than against a picker list. */
+const TEXT_MEMBER = /-text-(?:font-family|font-size|font-weight|letter-spacing|line-height)$/
 
 test('every real component binding is inside the ramp its row offers', () => {
   const strays = []
   for (const [prop, ref] of Object.entries(TOKEN_REFS)) {
     if (ref === null) continue // OFF-GRID literal: nothing to match
     const role = prop.slice(2)
-    if (RAMP_BOUND[prop] === ref) continue
+    if (TEXT_MEMBER.test(role)) continue // a composite member, checked below
     if (familyOf(role) === 'locked') {
       strays.push(`${prop} is locked but bound to ${ref}`)
       continue
@@ -317,14 +337,39 @@ test('every real component binding is inside the ramp its row offers', () => {
   assert.deepEqual(strays, [])
 })
 
-test('the type-ramp exception is exactly the two stamp rows, still true', () => {
-  for (const [prop, ref] of Object.entries(RAMP_BOUND)) {
-    assert.equal(TOKEN_REFS[prop], ref, `${prop} moved — re-check the exception`)
+/* THE RULING, AS A TEST. Type styles are packages, not knobs (Jake,
+   2026-08-21): a text element binds one semantic type role and gets all of it.
+   Two ways that can rot, both silent. A component could go back to assembling
+   a treatment from loose pieces — a bare `-tracking` here, a `-font-size`
+   there — and the panel would happily offer each one, which is how the pilot
+   five ended up with nine near-miss treatments in the first place. Or an
+   element's five rows could drift onto two different roles, which renders as a
+   type style that exists nowhere in the system. So: nothing outside a text
+   element may reach into the ramp, every text element must carry all five
+   members, its four ramp members must name ONE role, and none of the five may
+   be offerable. */
+test('a text element binds one whole type role, and no row can split it', () => {
+  const elements = new Map()
+  for (const [prop, ref] of Object.entries(TOKEN_REFS)) {
+    const role = prop.slice(2)
+    if (!TEXT_MEMBER.test(role)) {
+      assert.ok(!ref?.startsWith('type/'), `${prop} binds ${ref} — half a type role`)
+      continue
+    }
+    assert.equal(familyOf(role), 'locked', `${prop} is offerable; a composite member is not a knob`)
+    const element = role.replace(TEXT_MEMBER, '')
+    if (!elements.has(element)) elements.set(element, [])
+    elements.get(element).push([prop, ref])
   }
-  const throughRamp = Object.entries(TOKEN_REFS)
-    .filter(([, ref]) => ref?.startsWith('type/'))
-    .map(([prop]) => prop)
-  assert.deepEqual(throughRamp.sort(), Object.keys(RAMP_BOUND).sort())
+  assert.ok(elements.size > 0)
+  for (const [element, members] of elements) {
+    assert.equal(members.length, 5, `${element} carries ${members.length} of the five members`)
+    // font-family names a face (--mono/--display); the other four name one role
+    const roles = new Set(
+      members.filter(([, ref]) => ref?.startsWith('type/')).map(([, ref]) => ref.split('/')[1]),
+    )
+    assert.deepEqual([...roles].length, 1, `${element} straddles type roles: ${[...roles]}`)
+  }
 })
 
 test('TOKEN_REFS covers the component tier and nothing else', () => {

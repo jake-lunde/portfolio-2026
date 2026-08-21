@@ -145,14 +145,23 @@ async function loadModel() {
   return { themes, metadata, setFlat, setRaw }
 }
 
+/* Sets the CSS build LOADS but never emits, whatever the theme says. A
+   `disabled` flag is Tokens Studio's instruction — do not push these as Figma
+   variables — and the build stopped reading it as "do not load" when component
+   text elements began binding whole typography composites. Mirror it here, or
+   every one of those binds reads as a dangling ref (build-tokens.mjs,
+   SOURCE_ONLY). */
+const SOURCE_ONLY = ['semantic/typography']
+
 /** Sets a theme enables (emit) and sources (resolve-only), preserving order. */
 function themeSets(theme, metadata) {
   const enabled = []
   const source = []
   for (const set of metadata.tokenSetOrder) {
     const state = theme.selectedTokenSets[set]
+    if (state === undefined) continue
     if (state === 'enabled') enabled.push(set)
-    else if (state === 'source') source.push(set)
+    else if (state === 'source' || SOURCE_ONLY.includes(set)) source.push(set)
   }
   return { enabled, source }
 }
@@ -198,14 +207,38 @@ function checkLeafGroupCollision(theme, sets, model) {
 // D2 — post-kebab emitted-name collision
 // ---------------------------------------------------------------------------
 
-function emittedLeaves(theme, sets, setFlat) {
+/* A component's text element is ONE authored leaf and FIVE emitted vars: the
+   build expands the typography composite it binds (build-tokens.mjs, the css
+   platform's `expand`) and drops fontStyle, which names a font file rather
+   than a CSS property. Counting the leaf as one declaration would make the
+   tripwire fire on every rebuild. */
+function expandTypography(leaf, model) {
+  const raw = valueAtPath(model.setRaw['semantic/typography'], leaf.aliasRef)
+  if (!raw || typeof raw.$value !== 'object') return [leaf]
+  return Object.keys(raw.$value)
+    .filter((member) => member !== 'fontStyle')
+    .map((member) => ({ ...leaf, path: `${leaf.path}.${member}` }))
+}
+
+function valueAtPath(json, dottedPath) {
+  let node = json
+  for (const key of dottedPath.split('.')) {
+    if (!node || typeof node !== 'object') return undefined
+    node = node[key]
+  }
+  return node
+}
+
+function emittedLeaves(theme, sets, model) {
   // Later enabled sets override earlier ones by path (SD merge order). Return
   // the winning leaf per path, in first-seen order.
   const byPath = new Map()
   for (const set of sets.enabled) {
-    for (const t of setFlat[set] ?? []) byPath.set(t.path, { ...t, set })
+    for (const t of model.setFlat[set] ?? []) byPath.set(t.path, { ...t, set })
   }
-  return [...byPath.values()]
+  return [...byPath.values()].flatMap((t) =>
+    t.type === 'typography' && t.isAlias ? expandTypography(t, model) : [t]
+  )
 }
 
 function checkKebabCollision(theme, leaves) {
@@ -273,7 +306,7 @@ async function checkDeclTripwire(model, cssPath) {
       continue
     }
     const sets = themeSets(theme, model.metadata)
-    const expected = new Set(emittedLeaves(theme, sets, model.setFlat).map((t) => kebab(t.path))).size
+    const expected = new Set(emittedLeaves(theme, sets, model).map((t) => kebab(t.path))).size
     if (actual !== expected) {
       err(
         'D3',
@@ -771,7 +804,7 @@ async function main() {
   for (const theme of model.themes) {
     const sets = themeSets(theme, model.metadata)
     checkLeafGroupCollision(theme, sets, model)
-    checkKebabCollision(theme, emittedLeaves(theme, sets, model.setFlat))
+    checkKebabCollision(theme, emittedLeaves(theme, sets, model))
     checkRefs(theme, sets, model.setFlat)
   }
   await checkDeclTripwire(model, OUT_FILE)

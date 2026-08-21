@@ -1,6 +1,6 @@
 {
   "typography": {
-    "$description": "DTCG `typography` COMPOSITES — the Figma-facing view of the type ramp. One composite per role; each member references the CSS-facing sub-tokens in semantic/scale (type.*) plus a Figma family name (font-figma.*). The TOKEN BRIDGE expands each composite into individual bindable variables (Figma-native units: line-height/letter-spacing as %, weight/size as FLOAT, family/style as STRING) in a `type` variable collection, then creates one Figma TEXT STYLE per role bound to them. This set is bridge-only: it is `disabled` in every $theme so Style Dictionary never emits it to CSS (scope decision 2026-07-23 — no CSS utility emit this session). fontStyle mirrors fontWeight (Regular/Bold). Fluid sizes (display, heading-1) are pinned to their clamp() DESKTOP MAX by the bridge and are pull-only until the Desktop/Mobile mode axis lands.",
+    "$description": "DTCG `typography` COMPOSITES — the Figma-facing view of the type ramp. One composite per role; each member references the CSS-facing sub-tokens in semantic/scale (type.*) plus a Figma family name (font-figma.*). The TOKEN BRIDGE expands each composite into individual bindable variables (Figma-native units: line-height/letter-spacing as %, weight/size as FLOAT, family/style as STRING) in a `type` variable collection, then creates one Figma TEXT STYLE per role bound to them. The set stays `disabled` in every $theme so Style Dictionary never EMITS it to CSS; since the chrome ramp landed it is nonetheless LOADED as source (scripts/build-tokens.mjs, SOURCE_ONLY), because a component token now binds a whole composite — stamp's text element is one ref to typography.badge — and the expansion into five CSS custom properties can only resolve if the composite is in the dictionary. fontStyle mirrors fontWeight (Regular/Bold) and is dropped from the CSS emit: it names a font FILE, not a CSS font-style. fontFamily still names the Figma face for every role, chrome included — the CSS build swaps that name for the skin's var() stack on its way in (build-tokens.mjs, figma-family-to-css-stack), so one convention serves both readers. Fluid sizes (display, heading-1) are pinned to their clamp() DESKTOP MAX by the bridge and are pull-only until the Desktop/Mobile mode axis lands.",
     "display": {
       "$type": "typography",
       "$value": {
@@ -119,6 +119,83 @@
         "fontWeight": "{type.mono.weight}",
         "lineHeight": "{type.mono.leading}",
         "letterSpacing": "{type.mono.tracking}",
+        "fontStyle": "Regular"
+      }
+    },
+    "title": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.mono}",
+        "fontSize": "{type.title.size}",
+        "fontWeight": "{type.title.weight}",
+        "lineHeight": "{type.title.leading}",
+        "letterSpacing": "{type.title.tracking}",
+        "fontStyle": "Bold"
+      }
+    },
+    "control": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.mono}",
+        "fontSize": "{type.control.size}",
+        "fontWeight": "{type.control.weight}",
+        "lineHeight": "{type.control.leading}",
+        "letterSpacing": "{type.control.tracking}",
+        "fontStyle": "Bold"
+      }
+    },
+    "control-sm": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.mono}",
+        "fontSize": "{type.control-sm.size}",
+        "fontWeight": "{type.control-sm.weight}",
+        "lineHeight": "{type.control-sm.leading}",
+        "letterSpacing": "{type.control-sm.tracking}",
+        "fontStyle": "Bold"
+      }
+    },
+    "menu": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.mono}",
+        "fontSize": "{type.menu.size}",
+        "fontWeight": "{type.menu.weight}",
+        "lineHeight": "{type.menu.leading}",
+        "letterSpacing": "{type.menu.tracking}",
+        "fontStyle": "Regular"
+      }
+    },
+    "icon-label": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.mono}",
+        "fontSize": "{type.icon-label.size}",
+        "fontWeight": "{type.icon-label.weight}",
+        "lineHeight": "{type.icon-label.leading}",
+        "letterSpacing": "{type.icon-label.tracking}",
+        "fontStyle": "Regular"
+      }
+    },
+    "badge": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.mono}",
+        "fontSize": "{type.badge.size}",
+        "fontWeight": "{type.badge.weight}",
+        "lineHeight": "{type.badge.leading}",
+        "letterSpacing": "{type.badge.tracking}",
+        "fontStyle": "Bold"
+      }
+    },
+    "wordmark": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "{font-figma.display}",
+        "fontSize": "{type.wordmark.size}",
+        "fontWeight": "{type.wordmark.weight}",
+        "lineHeight": "{type.wordmark.leading}",
+        "letterSpacing": "{type.wordmark.tracking}",
         "fontStyle": "Regular"
       }
     }

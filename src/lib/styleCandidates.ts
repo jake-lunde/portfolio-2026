@@ -23,13 +23,18 @@
  * binding in TOKEN_REFS must land inside the list its row would offer, so a
  * curation that drifts from what the components actually do fails `npm test`.
  *
- * WHY `locked` EXISTS. Three pilot properties — --menubar-h,
- * --desktop-icons-cell-width, --window-ctrl-size — are structural dimensions.
- * They are real component decisions and they belong in the token files, but
- * there is no lawful ramp to offer for them: the spacing scale is inset and
- * gap, not "how tall is the menubar". Rather than offer the wrong ramp or
- * quietly omit the row, they classify as `locked` — visible, honest, and not
- * editable until a ramp exists that means something for them.
+ * WHY `locked` EXISTS. Two kinds of row have no lawful offer. Three pilot
+ * properties — --menubar-h, --desktop-icons-cell-width, --window-ctrl-size —
+ * are structural dimensions: real component decisions that belong in the token
+ * files, but the spacing scale is inset and gap, not "how tall is the
+ * menubar". And every `-text-` row is one member of a typography composite —
+ * a text element binds ONE type role and the build expands it into five CSS
+ * properties, so offering any single member would let a picker rebind a
+ * font-size out from under the weight and tracking it shipped with. Type
+ * styles are packages, not knobs (Jake, 2026-08-21). Both classify as
+ * `locked` — visible, honest, and not editable: the structural three until a
+ * ramp exists that means something for them, the composite members until the
+ * panel draws them as the one Text style row they really are.
  *
  * No 'use client' and no imports beyond the generated manifest, for the same
  * reason palette.ts has none: the commit route runs on the server and has to
@@ -88,6 +93,9 @@ export type StyleFamily =
    rather than a fixed list. Anything that matches nothing is locked, which is
    the safe direction to fail. */
 const SUFFIX_RULES: ReadonlyArray<readonly [RegExp, StyleFamily]> = [
+  // first, and before any type rule reads them: the five properties one
+  // typography composite expands into. Half a role is never an offer.
+  [/-text-(?:font-family|font-size|font-weight|letter-spacing|line-height)$/, 'locked'],
   [/-border-color$/, 'color'],
   [/-border-width$/, 'border-width'],
   [/-font-size$/, 'font-size'],
@@ -185,8 +193,9 @@ const BORDER_WIDTHS: readonly StyleCandidate[] = [
    The semantic TYPE ramp (--type-label-size and its siblings) is a different
    thing and is not offered here: those are members of a composite role that
    also carries leading, weight and tracking, and letting one row rebind a
-   font-size to half a composite would split the role. Stamp binds through the
-   ramp today — see the exception the invariant test pins. */
+   font-size to half a composite would split the role. Every pilot text
+   element binds through that ramp now, which is why the `-text-` rows are
+   locked rather than pointed at this list. */
 const FONT_SIZES: readonly StyleCandidate[] = [
   c('Text Micro', 'text/micro', '--text-micro'),
   c('Text Caption', 'text/caption', '--text-caption'),
