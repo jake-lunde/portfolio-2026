@@ -3,5 +3,100 @@
     "$value": "34px",
     "$type": "dimension",
     "$description": "The menubar's own height — a component decision, not a layout primitive."
+  },
+  "menubar": {
+    "bg": {
+      "$value": "{surface}",
+      "$type": "color"
+    },
+    "border-color": {
+      "$value": "{content}",
+      "$type": "color"
+    },
+    "border-width": {
+      "$value": "{border-width.default}",
+      "$type": "dimension"
+    },
+    "family": {
+      "$value": "{mono}"
+    },
+    "font-size": {
+      "$value": "{text.ui}",
+      "$type": "dimension"
+    },
+    "tracking": {
+      "$value": "{tracking.12}"
+    },
+    "padding-x": {
+      "$value": "14px",
+      "$type": "dimension",
+      "$description": "OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. Snap to {space.3} (12px) or {space.4} (16px) when a deliberate visual change is approved."
+    },
+    "gap": {
+      "$value": "{spacing.component.lg}",
+      "$type": "dimension"
+    },
+    "wordmark": {
+      "family": {
+        "$value": "{display}"
+      },
+      "weight": {
+        "$value": "{weight.regular}"
+      },
+      "tracking": {
+        "$value": "{tracking.08}"
+      },
+      "version": {
+        "family": {
+          "$value": "{mono}"
+        },
+        "font-size": {
+          "$value": "{text.ui}",
+          "$type": "dimension"
+        },
+        "weight": {
+          "$value": "{weight.regular}"
+        },
+        "tracking": {
+          "$value": "{tracking.12}"
+        },
+        "margin-left": {
+          "$value": "10px",
+          "$type": "dimension",
+          "$description": "OFF-GRID literal. Snap to {space.2} (8px) or {space.3} (12px) when approved."
+        }
+      }
+    },
+    "menu-btn": {
+      "family": {
+        "$value": "{mono}"
+      },
+      "font-size": {
+        "$value": "{text.label}",
+        "$type": "dimension"
+      },
+      "tracking": {
+        "$value": "{tracking.14}"
+      },
+      "padding-y": {
+        "$value": "{space.1}",
+        "$type": "dimension"
+      },
+      "padding-x": {
+        "$value": "{space.2}",
+        "$type": "dimension"
+      },
+      "border-width": {
+        "$value": "{border-width.subtle}",
+        "$type": "dimension"
+      }
+    },
+    "menu-glyph-btn": {
+      "padding": {
+        "$value": "3px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal. Snap to {space.1} (4px) when approved."
+      }
+    }
   }
 }

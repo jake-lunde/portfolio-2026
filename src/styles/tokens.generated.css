@@ -105,6 +105,24 @@
   --button-md-padding-x: 18px; /** OFF-GRID literal. Snap to 16px (16px) or 20px (20px) when approved. */
   --button-md-padding-y: 7px; /** OFF-GRID literal. Snap to 8px (8px) when approved. */
   --menubar-h: 34px; /** The menubar's own height — a component decision, not a layout primitive. */
+  --menubar-padding-x: 14px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. Snap to 12px (12px) or 16px (16px) when a deliberate visual change is approved. */
+  --menubar-wordmark-version-margin-left: 10px; /** OFF-GRID literal. Snap to 8px (8px) or 12px (12px) when approved. */
+  --menubar-menu-glyph-btn-padding: 3px; /** OFF-GRID literal. Snap to 4px (4px) when approved. */
+  --stamp-padding-y: 5px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. Snap to 4px (4px) or 8px (8px) when a deliberate visual change is approved. */
+  --stamp-padding-x: 10px; /** OFF-GRID literal. Snap to 8px (8px) or 12px (12px) when approved. */
+  --desktop-icons-cell-width: 88px; /** OFF-GRID literal, off any core spacing step (nearest is 48px at 48px, far off). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. */
+  --desktop-icons-gap-row: 18px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Snap to 16px (16px) or 20px (20px) when a deliberate visual change is approved. */
+  --desktop-icons-gap-column: 10px; /** OFF-GRID literal. Snap to 8px (8px) or 12px (12px) when approved. */
+  --desktop-icons-icon-btn-gap: 7px; /** OFF-GRID literal. Snap to 4px (4px) or 8px (8px) when approved. */
+  --desktop-icons-icon-btn-padding-top: 10px; /** OFF-GRID literal. Snap to 8px (8px) or 12px (12px) when approved. */
+  --window-titlebar-gap: 10px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Snap to 8px (8px) or 12px (12px) when a deliberate visual change is approved. */
+  --window-titlebar-padding-y: 7px; /** OFF-GRID literal. Snap to 8px (8px) when approved. */
+  --window-titlebar-padding-x: 10px; /** OFF-GRID literal. Snap to 8px (8px) or 12px (12px) when approved. */
+  --window-titlebar-active-fg: #f4f1e6; /** OFF-GRID literal — the active titlebar's inverse ink, extracted verbatim from the pre-token CSS. Nearest core candidate: #e9e4d5 (#e9e4d5). Do not substitute; Window's hardcoded hexes stay literal. */
+  --window-title-controls-gap: 6px; /** OFF-GRID literal. Snap to 4px (4px) or 8px (8px) when approved. */
+  --window-ctrl-size: 13px; /** OFF-GRID literal (spacing scale is base-4). Nearest core candidate: 12px (12px). Extracted verbatim for a zero-visual-change migration. */
+  --window-ctrl-hover-fg: #17150d; /** OFF-GRID literal, exactly matches #17150d (#17150d). Kept literal per house rule — Window's hardcoded hexes stay literal, never substituted for an alias. */
+  --window-ctrl-hover-border-color: #17150d; /** OFF-GRID literal, exactly matches #17150d (#17150d). Same value as ctrl.hover.fg — kept literal per house rule. */
   --radius-control: var(--radius-md);
   --radius-pill: var(--radius-lg);
   --radius-circle: var(--radius-full);
@@ -194,6 +212,28 @@
   --button-sm-tracking: var(--tracking-12);
   --button-sm-padding-x: var(--space-3);
   --button-md-tracking: var(--tracking-14);
+  --menubar-family: var(--mono);
+  --menubar-tracking: var(--tracking-12);
+  --menubar-wordmark-family: var(--display);
+  --menubar-wordmark-weight: var(--weight-regular);
+  --menubar-wordmark-tracking: var(--tracking-08);
+  --menubar-wordmark-version-family: var(--mono);
+  --menubar-wordmark-version-weight: var(--weight-regular);
+  --menubar-wordmark-version-tracking: var(--tracking-12);
+  --menubar-menu-btn-family: var(--mono);
+  --menubar-menu-btn-tracking: var(--tracking-14);
+  --menubar-menu-btn-padding-y: var(--space-1);
+  --menubar-menu-btn-padding-x: var(--space-2);
+  --stamp-weight: var(--weight-bold);
+  --stamp-tracking: var(--tracking-20);
+  --desktop-icons-hover-border-color: var(--border);
+  --desktop-icons-icon-btn-padding-x: var(--space-1);
+  --desktop-icons-icon-btn-padding-bottom: var(--space-2);
+  --desktop-icons-label-family: var(--mono);
+  --desktop-icons-label-tracking: var(--tracking-10);
+  --window-title-family: var(--mono);
+  --window-title-weight: var(--weight-bold);
+  --window-title-tracking: var(--tracking-14);
   --accent-expressive-text: var(--content);
   --accent-expressive-mark: var(--accent-expressive);
   --focus: var(--accent);
@@ -204,10 +244,47 @@
   --interactive-expressive-hover: var(--accent-expressive);
   --interactive-expressive-on-hover: var(--on-accent-expressive);
   --button-radius: var(--radius-control);
+  --button-bg: var(--surface);
+  --button-fg: var(--content);
+  --button-stroke: var(--content);
+  --button-expressive-hover-bg: var(--accent-expressive);
+  --button-expressive-hover-fg: var(--on-accent-expressive);
+  --button-system-hover-bg: var(--accent);
+  --button-system-hover-fg: var(--surface);
+  --button-solid-bg: var(--accent);
+  --button-solid-fg: var(--surface);
   --button-sm-font-size: var(--text-caption);
   --button-sm-border: var(--border-width-default);
   --button-md-font-size: var(--text-label);
   --button-md-border: var(--border-width-strong);
+  --menubar-bg: var(--surface);
+  --menubar-border-color: var(--content);
+  --menubar-border-width: var(--border-width-default);
+  --menubar-font-size: var(--text-ui);
+  --menubar-gap: var(--spacing-component-lg);
+  --menubar-wordmark-version-font-size: var(--text-ui);
+  --menubar-menu-btn-font-size: var(--text-label);
+  --menubar-menu-btn-border-width: var(--border-width-subtle);
+  --stamp-fg: var(--accent);
+  --stamp-border-color: var(--accent);
+  --stamp-border-width: var(--border-width-strong);
+  --stamp-family: var(--type-label-family);
+  --stamp-font-size: var(--type-label-size);
+  --stamp-pink-fg: var(--content);
+  --stamp-pink-border-color: var(--accent-expressive);
+  --desktop-icons-border-width: var(--border-width-subtle);
+  --desktop-icons-hover-bg: var(--surface-raised);
+  --desktop-icons-label-font-size: var(--text-label);
+  --window-fill: var(--surface-raised);
+  --window-stroke: var(--content);
+  --window-border-width: var(--border-width-default);
+  --window-titlebar-fill: var(--surface);
+  --window-titlebar-border-color: var(--content);
+  --window-titlebar-border-width: var(--border-width-default);
+  --window-titlebar-active-bg: var(--accent);
+  --window-titlebar-active-border-color: var(--content);
+  --window-ctrl-hover-bg: var(--accent-expressive);
+  --window-title-font-size: var(--text-ui);
 }
 
 /**

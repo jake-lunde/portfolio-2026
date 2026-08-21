@@ -10,30 +10,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-component-lg);
-  padding: 0 14px;
-  background: var(--surface);
-  border-bottom: var(--border-width-default) solid var(--content);
-  font-family: var(--mono);
-  font-size: var(--text-ui);
-  letter-spacing: 0.12em;
+  gap: var(--menubar-gap);
+  padding: 0 var(--menubar-padding-x);
+  background: var(--menubar-bg);
+  border-bottom: var(--menubar-border-width) solid var(--menubar-border-color);
+  font-family: var(--menubar-family);
+  font-size: var(--menubar-font-size);
+  letter-spacing: var(--menubar-tracking);
 }
 
 .wordmark {
-  font-family: var(--display);
+  font-family: var(--menubar-wordmark-family);
   font-size: var(--type-body-sm-size); /* 13px exact — display family is an intentional divergence from body-sm's sans */
-  font-weight: var(--weight-regular);
-  letter-spacing: 0.08em;
+  font-weight: var(--menubar-wordmark-weight);
+  letter-spacing: var(--menubar-wordmark-tracking);
   text-transform: uppercase;
 }
 
 .wordmark span {
-  font-family: var(--mono); /* the version string reads as a machine stamp against the display wordmark */
-  font-size: var(--text-ui);
+  font-family: var(--menubar-wordmark-version-family); /* the version string reads as a machine stamp against the display wordmark */
+  font-size: var(--menubar-wordmark-version-font-size);
   color: var(--content-muted);
-  font-weight: var(--weight-regular);
-  letter-spacing: 0.12em;
-  margin-left: 10px;
+  font-weight: var(--menubar-wordmark-version-weight);
+  letter-spacing: var(--menubar-wordmark-version-tracking);
+  margin-left: var(--menubar-wordmark-version-margin-left);
 }
 
 .menuRight {
@@ -43,12 +43,12 @@
 }
 
 .menuBtn {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.14em;
+  font-family: var(--menubar-menu-btn-family);
+  font-size: var(--menubar-menu-btn-font-size);
+  letter-spacing: var(--menubar-menu-btn-tracking);
   text-transform: uppercase;
-  padding: 4px 8px;
-  border: var(--border-width-subtle) solid transparent;
+  padding: var(--menubar-menu-btn-padding-y) var(--menubar-menu-btn-padding-x);
+  border: var(--menubar-menu-btn-border-width) solid transparent;
   color: var(--content);
   /* a control's label never breaks. The bar is one line and at 360 the
      right cluster sits at zero slack, so a shrink of two pixels once
@@ -72,7 +72,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3px;
+  padding: var(--menubar-menu-glyph-btn-padding);
 }
 
 .menuGlyphBtn svg {
@@ -509,24 +509,25 @@
   display: grid;
   /* row flow so the top row is literal: README · GUESTBOOK · MACHINE */
   grid-auto-flow: row;
-  grid-template-columns: repeat(3, 88px);
-  gap: 18px 10px;
+  grid-template-columns: repeat(3, var(--desktop-icons-cell-width));
+  gap: var(--desktop-icons-gap-row) var(--desktop-icons-gap-column);
 }
 
 .iconBtn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
-  width: 88px;
-  padding: 10px 4px 8px;
+  gap: var(--desktop-icons-icon-btn-gap);
+  width: var(--desktop-icons-cell-width);
+  padding: var(--desktop-icons-icon-btn-padding-top) var(--desktop-icons-icon-btn-padding-x)
+    var(--desktop-icons-icon-btn-padding-bottom);
   color: var(--content);
-  border: var(--border-width-subtle) solid transparent;
+  border: var(--desktop-icons-border-width) solid transparent;
 }
 
 .iconBtn:hover {
-  border-color: var(--border);
-  background: color-mix(in srgb, var(--surface-raised) 60%, transparent);
+  border-color: var(--desktop-icons-hover-border-color);
+  background: color-mix(in srgb, var(--desktop-icons-hover-bg) 60%, transparent);
 }
 
 .iconBtn:active svg {
@@ -534,9 +535,9 @@
 }
 
 .iconLabel {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.1em;
+  font-family: var(--desktop-icons-label-family);
+  font-size: var(--desktop-icons-label-font-size);
+  letter-spacing: var(--desktop-icons-label-tracking);
   text-transform: uppercase;
 }
 
@@ -1243,8 +1244,8 @@
   position: absolute;
   display: flex;
   flex-direction: column;
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
+  background: var(--window-fill);
+  border: var(--window-border-width) solid var(--window-stroke);
   box-shadow: 6px 6px 0 rgba(23, 21, 13, 0.14);
   min-width: 280px;
   max-width: calc(100% - 24px);
@@ -1252,7 +1253,7 @@
 }
 
 [data-theme='dark'] .window {
-  border-color: var(--border);
+  --window-stroke: var(--border);
   box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
 }
 
@@ -1271,10 +1272,10 @@
 .titlebar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 10px;
-  border-bottom: var(--border-width-default) solid var(--content);
-  background: var(--surface);
+  gap: var(--window-titlebar-gap);
+  padding: var(--window-titlebar-padding-y) var(--window-titlebar-padding-x);
+  border-bottom: var(--window-titlebar-border-width) solid var(--window-titlebar-border-color);
+  background: var(--window-titlebar-fill);
   cursor: grab;
   user-select: none;
   touch-action: none;
@@ -1286,28 +1287,28 @@
 }
 
 [data-theme='dark'] .titlebar {
-  border-bottom-color: var(--border);
+  --window-titlebar-border-color: var(--border);
 }
 
 /* active window: blue system chrome */
 .windowActive .titlebar {
-  background: var(--accent);
-  color: #f4f1e6;
-  border-bottom-color: var(--content);
+  background: var(--window-titlebar-active-bg);
+  color: var(--window-titlebar-active-fg);
+  border-bottom-color: var(--window-titlebar-active-border-color);
 }
 
 [data-theme='dark'] .windowActive .titlebar {
-  color: #0d100c;
+  --window-titlebar-active-fg: #0d100c;
 }
 
 .titleControls {
   display: flex;
-  gap: 6px;
+  gap: var(--window-title-controls-gap);
 }
 
 .ctrl {
-  width: 13px;
-  height: 13px;
+  width: var(--window-ctrl-size);
+  height: var(--window-ctrl-size);
   border: var(--border-width-default) solid currentColor;
   display: grid;
   place-items: center;
@@ -1317,16 +1318,16 @@
 }
 
 .ctrl:hover {
-  background: var(--accent-expressive);
-  color: #17150d;
-  border-color: #17150d;
+  background: var(--window-ctrl-hover-bg);
+  color: var(--window-ctrl-hover-fg);
+  border-color: var(--window-ctrl-hover-border-color);
 }
 
 .title {
-  font-family: var(--mono);
-  font-size: var(--text-ui);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.14em;
+  font-family: var(--window-title-family);
+  font-size: var(--window-title-font-size);
+  font-weight: var(--window-title-weight);
+  letter-spacing: var(--window-title-tracking);
   text-transform: uppercase;
   flex: 1;
   text-align: center;
@@ -1703,12 +1704,12 @@
 /* medieval skin: heavier frame + manuscript corner ornaments — scoped
    entirely under [data-skin='medieval'] so classic/dark are untouched */
 :global([data-skin='medieval']) .window {
-  border-width: var(--border-width-strong);
-  border-color: var(--content);
+  --window-border-width: var(--border-width-strong);
+  --window-stroke: var(--content);
 }
 
 :global([data-skin='medieval']) .titlebar {
-  border-bottom: 3px double var(--content);
+  border-bottom: 3px double var(--window-titlebar-border-color);
 }
 
 :global([data-skin='medieval']) .window::before,

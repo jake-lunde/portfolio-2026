@@ -1,0 +1,63 @@
+{
+  "desktop-icons": {
+    "cell-width": {
+      "$value": "88px",
+      "$type": "dimension",
+      "$description": "OFF-GRID literal, off any core spacing step (nearest is {space.12} at 48px, far off). Extracted verbatim from the pre-token CSS for a zero-visual-change migration."
+    },
+    "gap-row": {
+      "$value": "18px",
+      "$type": "dimension",
+      "$description": "OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Snap to {space.4} (16px) or {space.5} (20px) when a deliberate visual change is approved."
+    },
+    "gap-column": {
+      "$value": "10px",
+      "$type": "dimension",
+      "$description": "OFF-GRID literal. Snap to {space.2} (8px) or {space.3} (12px) when approved."
+    },
+    "border-width": {
+      "$value": "{border-width.subtle}",
+      "$type": "dimension"
+    },
+    "hover-bg": {
+      "$value": "{surface-raised}",
+      "$type": "color"
+    },
+    "hover-border-color": {
+      "$value": "{border}",
+      "$type": "color"
+    },
+    "icon-btn": {
+      "gap": {
+        "$value": "7px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal. Snap to {space.1} (4px) or {space.2} (8px) when approved."
+      },
+      "padding-top": {
+        "$value": "10px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal. Snap to {space.2} (8px) or {space.3} (12px) when approved."
+      },
+      "padding-x": {
+        "$value": "{space.1}",
+        "$type": "dimension"
+      },
+      "padding-bottom": {
+        "$value": "{space.2}",
+        "$type": "dimension"
+      }
+    },
+    "label": {
+      "family": {
+        "$value": "{mono}"
+      },
+      "font-size": {
+        "$value": "{text.label}",
+        "$type": "dimension"
+      },
+      "tracking": {
+        "$value": "{tracking.10}"
+      }
+    }
+  }
+}

@@ -8,7 +8,10 @@ export function Stamp({
   tone?: 'blue' | 'pink'
 }) {
   return (
-    <span className={`${styles.stamp} ${tone === 'pink' ? styles.stampPink : ''}`}>
+    <span
+      className={`${styles.stamp} ${tone === 'pink' ? styles.stampPink : ''}`}
+      data-component="stamp"
+    >
       {children}
     </span>
   )

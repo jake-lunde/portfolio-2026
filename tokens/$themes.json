@@ -21,7 +21,10 @@
       "semantic/typography": "disabled",
       "semantic/classic-light": "enabled",
       "component/button": "enabled",
-      "component/menubar": "enabled"
+      "component/menubar": "enabled",
+      "component/stamp": "enabled",
+      "component/desktop-icons": "enabled",
+      "component/window": "enabled"
     }
   },
   {

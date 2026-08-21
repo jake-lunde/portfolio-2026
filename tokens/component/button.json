@@ -7,6 +7,52 @@
     "weight": {
       "$value": "{weight.bold}"
     },
+    "bg": {
+      "$value": "{surface}",
+      "$type": "color"
+    },
+    "fg": {
+      "$value": "{content}",
+      "$type": "color"
+    },
+    "stroke": {
+      "$value": "{content}",
+      "$type": "color"
+    },
+    "expressive": {
+      "hover": {
+        "bg": {
+          "$value": "{accent-expressive}",
+          "$type": "color"
+        },
+        "fg": {
+          "$value": "{on-accent-expressive}",
+          "$type": "color"
+        }
+      }
+    },
+    "system": {
+      "hover": {
+        "bg": {
+          "$value": "{accent}",
+          "$type": "color"
+        },
+        "fg": {
+          "$value": "{surface}",
+          "$type": "color"
+        }
+      }
+    },
+    "solid": {
+      "bg": {
+        "$value": "{accent}",
+        "$type": "color"
+      },
+      "fg": {
+        "$value": "{surface}",
+        "$type": "color"
+      }
+    },
     "sm": {
       "font-size": {
         "$value": "{text.caption}",

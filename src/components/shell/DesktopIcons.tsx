@@ -89,7 +89,11 @@ export function DesktopIcons() {
   )
 
   return (
-    <nav className={`${styles.icons} ${styles.deskObject}`} aria-label="Programs">
+    <nav
+      className={`${styles.icons} ${styles.deskObject}`}
+      aria-label="Programs"
+      data-component="desktop-icons"
+    >
       {doors.map((p) => iconBtn(p))}
       {dockedForMobile.map((p) => iconBtn(p, styles.dockedGrid))}
       {/* trash joins the grid on mobile only (see .trashGrid) — on desktop

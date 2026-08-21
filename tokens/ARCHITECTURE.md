@@ -118,3 +118,31 @@ Figma than raw numerics. So `semantic/scale.json` now adds
 core scale. **Both layers coexist**: `--space-N` still emits unchanged; the
 t-shirt tokens are additive. Adopt `--spacing-component-*` in new CSS; a sweep
 of existing `var(--space-N)` usage is optional and mechanical.
+
+## Styler promotion recipe (2026-08-20, s98)
+
+A component becomes Styler-editable by promoting its style bindings to
+named component tokens. The recipe, mechanical after the pilot five:
+
+1. Every declaration in the five panel categories (fill, stroke,
+   border-width + radius, typography, spacing) gets a token in
+   `tokens/component/<component>.json`, path
+   `<component>.<part?>.<variant?>.<property>`; module CSS consumes the
+   emitted `--<component>-…` var. Rendered values must not change.
+2. Value: alias the semantic role the CSS consumed; a core-consumed var
+   or a literal sitting exactly on a core step aliases the core step
+   (button.json precedent); a true off-grid literal stays literal with
+   the OFF-GRID `$description` naming its snap candidate.
+3. Skin/theme divergence is a re-declaration of the component var inside
+   the scoped selector — a rebind, not a property override. This is the
+   data Styler's per-skin story edits later.
+4. Register the set in `$metadata.json` tokenSetOrder + the
+   `classic-light` theme (component tier emits once under `:root`;
+   per-skin resolution rides the semantic refs — which is why semantic
+   refs must emit as `var()`, see the outputReferences note above).
+5. Stamp `data-component="<component-id>"` (kebab, = token file name) on
+   the component's root element. This is Styler's stable identity;
+   `data-window-id` remains the instance id.
+Out of scope, always: position/inset, shadows, motion, decorative
+transform/opacity/mask, z-index.
+Pilot set (s97): button · stamp · menubar · desktop-icons · window.
