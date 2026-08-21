@@ -56,9 +56,57 @@ const applied = new Map<string, Held>()
 /** prop -> the inline value it carried before we touched it ('' if none) */
 const prior = new Map<string, string>()
 
+/* ---- THE EXTRA ROOTS, and the CSS finding that forced them ----
+
+   The stage shows the same component in three skins at once, each inside a
+   nested `data-skin` wrapper, which is how the desktop has always drawn a
+   live skin preview (SkinSwitch). That works for semantic tokens and it does
+   NOT work for these. Read tokens.generated.css: the first block is
+   `:root, [data-skin='classic']` and it carries EVERY tier — core, semantic
+   and component — while the `[data-theme='dark']` and `[data-skin='medieval']`
+   blocks that follow carry semantic overrides only.
+
+   So a nested `[data-skin='classic']` wrapper re-declares all 116 component
+   properties on itself, and an inline write on <html> never reaches inside
+   it: the cascade beats inheritance every time. A medieval or dark wrapper
+   re-declares none of them and inherits ours happily. Verified against the
+   generated file (--button-radius, --stamp-fg and --window-fill each appear
+   exactly once, inside the first block), not assumed.
+
+   One inline write per root fixes it in every direction, because an inline
+   style outranks any selector. The stage registers its wrappers; every rebind
+   and reset lands on all of them plus the document root.
+
+   These roots are OURS — the stage mints them and nothing else writes their
+   style attribute — so there is no prior value to stash and none to hand
+   back. That asymmetry is deliberate; the document root keeps its stash. */
+const roots = new Set<HTMLElement>()
+
 function root(): HTMLElement | null {
   if (typeof document === 'undefined') return null
   return document.documentElement
+}
+
+/** Every element a write has to land on: the document, then the stage's. */
+function targets(): HTMLElement[] {
+  const el = root()
+  return el ? [el, ...roots] : [...roots]
+}
+
+/** Mirror the live set onto a stage wrapper and keep it mirrored. Applying
+    what is already pending is the point: the stage can open onto a set of
+    rebinds that were made from the inspector five minutes ago. */
+export function addRoot(el: HTMLElement): void {
+  roots.add(el)
+  for (const [role, held] of applied) {
+    for (const [prop, value] of writesFor(role, held.candidate)) el.style.setProperty(prop, value)
+  }
+}
+
+/** Drop a wrapper on its way out. Its inline properties go with the element
+    itself, so there is nothing to clean up on it. */
+export function removeRoot(el: HTMLElement): void {
+  roots.delete(el)
 }
 
 /** 'typography/badge' -> 'badge'. The composite candidates are the only ones
@@ -88,13 +136,12 @@ export function writesFor(role: string, candidate: StyleCandidate): Array<[strin
     than by property, because a composite's five members are one decision. */
 export function rebind(role: string, candidate: StyleCandidate): void {
   const el = root()
-  if (!el) return
   const writes = writesFor(role, candidate)
   if (writes.length === 0) return
   resetRole(role)
   for (const [prop, value] of writes) {
-    if (!prior.has(prop)) prior.set(prop, el.style.getPropertyValue(prop))
-    el.style.setProperty(prop, value)
+    if (el && !prior.has(prop)) prior.set(prop, el.style.getPropertyValue(prop))
+    for (const target of targets()) target.style.setProperty(prop, value)
   }
   applied.set(role, { candidate, props: writes.map(([prop]) => prop) })
 }
@@ -107,22 +154,23 @@ export function rebind(role: string, candidate: StyleCandidate): void {
     the value WE wrote". A property somebody else has since claimed is theirs;
     we drop our bookkeeping and get out of the way. */
 export function resetRole(role: string): void {
-  const el = root()
-  if (!el) return
   const held = applied.get(role)
   if (!held) return
+  const el = root()
   const writes = writesFor(role, held.candidate)
   for (const [prop, value] of writes) {
-    if (el.style.getPropertyValue(prop) === value) {
+    if (el && el.style.getPropertyValue(prop) === value) {
       el.style.removeProperty(prop)
       const was = prior.get(prop)
       if (was) el.style.setProperty(prop, was)
     }
+    // the stage's roots carry nothing but ours, so they just lose the line
+    for (const stage of roots) stage.style.removeProperty(prop)
     prior.delete(prop)
   }
   applied.delete(role)
   // an empty style attribute is litter
-  if (!el.getAttribute('style')) el.removeAttribute('style')
+  if (el && !el.getAttribute('style')) el.removeAttribute('style')
 }
 
 /** Hand everything back. Called on every exit from the mode, beside tune's. */
