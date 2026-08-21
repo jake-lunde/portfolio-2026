@@ -90,26 +90,30 @@
   background: var(--surface-raised);
 }
 
-/* the active skin's spread, big, centred, and given air. This is the whole
-   point of the room: one component with nothing else in the frame. */
-.spread {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--spacing-component-xl);
-  min-height: 240px;
-  padding: var(--spacing-component-xl) var(--spacing-component-md);
-}
+/* ---- the two tab rows: what stands on the bench ----
 
-.variant {
+   A name on the left and the choices beside it, one row per axis, both rows
+   in a strip across the top of the canvas. Micro caps and a hairline box, so
+   the strip reads as a control panel and not as content: the component is
+   the only thing in this room allowed to be loud. */
+.axes {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-component-sm);
+  gap: var(--spacing-component-xs);
 }
 
-.label {
+.axis {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-xs) var(--spacing-component-sm);
+}
+
+.axisName {
+  flex: none;
+  /* both names line up so the two rows read as one panel rather than as two
+     unrelated lists that happen to be stacked */
+  width: 5.5rem;
   font-family: var(--type-micro-family);
   font-size: var(--type-micro-size);
   font-weight: var(--type-micro-weight);
@@ -119,25 +123,63 @@
   color: var(--content-muted);
 }
 
-/* ---- the other skins, side by side underneath ---- */
-.skins {
+.tabs {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--spacing-component-lg);
-  margin-top: var(--spacing-component-xl);
-  padding-top: var(--spacing-component-lg);
-  border-top: var(--border-width-subtle) solid var(--border);
 }
 
-/* each tile paints its OWN skin's ground, because a medieval component
-   standing on classic paper is not what medieval looks like */
-.tile {
+/* the tabs share their edges the way a 1992 segmented control does. A
+   negative `gap` is not a thing CSS has, so the overlap is a margin on every
+   tab but the first, which collapses the doubled line between two of them. */
+.tab + .tab {
+  margin-left: calc(var(--border-width-default) * -1);
+}
+
+.tab {
+  position: relative;
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--content);
+  background: var(--interactive-default-hover);
+}
+
+/* what sits ON an accent fill is the paper, house-wide */
+.tab[aria-selected='true'] {
+  z-index: 1;
+  color: var(--surface);
+  background: var(--accent);
+  border-color: var(--content);
+}
+
+.tab:focus-visible {
+  z-index: 2;
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: var(--border-width-default);
+}
+
+/* the bench, big, centred, and given air. This is the whole point of the
+   room: one component with nothing else in the frame. It paints its OWN
+   skin's ground, because a medieval component standing on classic paper is
+   not what medieval looks like. */
+.mount {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--spacing-component-sm);
-  padding: var(--spacing-component-md);
+  justify-content: center;
+  min-height: 240px;
+  margin-top: var(--spacing-component-lg);
+  padding: var(--spacing-component-xl) var(--spacing-component-md);
   background: var(--surface);
   border: var(--border-width-default) solid var(--border);
 }
@@ -229,6 +271,39 @@
   color: inherit;
 }
 
+/* ---- the layer list: the component's anatomy ----
+
+   It sits above the blocks and takes only what it needs, capped at a third
+   of the dock. The blocks below it are the thing being worked in; a tree
+   that pushed them off the bottom would have swapped one flat list for
+   another. Five layers is the most any pilot component has, so the cap is
+   almost never reached and the list almost never scrolls. */
+.layers {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 33%;
+  border-bottom: var(--border-width-default) solid var(--content);
+}
+
+.layerBody {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* how many rows the layer holds, so the drill says where the work is before
+   you open it. It takes the row's own ink rather than a dimmed version of
+   it: the picked row draws on the accent flood, and anything faded there
+   falls under AA. */
+.layerCount {
+  flex: none;
+  margin-left: auto;
+  padding-left: var(--spacing-component-xs);
+  color: inherit;
+}
+
 .dockBody {
   flex: 1 1 auto;
   min-height: 0;
@@ -272,6 +347,44 @@
   line-height: var(--type-micro-leading);
   text-transform: uppercase;
   color: var(--content-muted);
+}
+
+/* Narrow: the dock stops being a dock. Below 720px a 304px column beside a
+   component leaves neither of them room, so the room stacks — bench first,
+   knobs under it — and the dock's border moves to the top edge, which is the
+   side it now meets the canvas on. The layer list gives up its cap here: a
+   scroll inside a scroll on a phone is a thing nobody can drive. */
+@media (max-width: 720px) {
+  .body {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .canvas {
+    flex: none;
+    overflow: visible;
+    padding: var(--spacing-component-md);
+  }
+
+  .dock {
+    width: auto;
+    border-left: none;
+    border-top: var(--border-width-default) solid var(--content);
+    animation: none;
+  }
+
+  .layers {
+    max-height: none;
+  }
+
+  .layerBody,
+  .dockBody {
+    overflow: visible;
+  }
+
+  .axisName {
+    width: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

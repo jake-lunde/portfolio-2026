@@ -39,6 +39,7 @@
 import {
   componentIdOf,
   familyOf,
+  propertySuffixOf,
   type StyleFamily,
 } from './styleCandidates'
 import { TOKEN_COMPOSITES, TOKEN_REFS } from './tokens.generated'
@@ -59,6 +60,9 @@ export type StylerRow = {
   family: StyleFamily
   ref: string | null
   locked: boolean
+  /** which layer of the component's anatomy this row paints. The component
+      id itself for the rows the component owns directly (stylerLayers below) */
+  layer: string
 }
 
 /** The five members the build expands one typography composite into, as
@@ -126,9 +130,10 @@ export function rowLabel(role: string, id: string): string {
   return bare.split('-').join(' ').toUpperCase()
 }
 
-/** Every row a component owns, in manifest order, block assigned. Composite
-    parents come after the properties, which is where TOKEN_COMPOSITES puts
-    them; inside a block the panel draws them in this order. */
+/** Every row a component owns, in manifest order, block and layer assigned.
+    Composite parents come after the properties, which is where
+    TOKEN_COMPOSITES puts them; inside a block the panel draws them in this
+    order. */
 export function rowsFor(id: string): StylerRow[] {
   const out: StylerRow[] = []
   const add = (prop: string, ref: string | null) => {
@@ -137,22 +142,129 @@ export function rowsFor(id: string): StylerRow[] {
     const block = blockOf(role)
     if (!block) return
     const family = familyOf(role)
-    out.push({ role, label: rowLabel(role, id), block, family, ref, locked: family === 'locked' })
+    out.push({
+      role,
+      label: rowLabel(role, id),
+      block,
+      family,
+      ref,
+      locked: family === 'locked',
+      layer: id,
+    })
   }
   for (const prop of Object.keys(TOKEN_REFS)) add(prop, TOKEN_REFS[prop])
   for (const prop of Object.keys(TOKEN_COMPOSITES)) add(prop, TOKEN_COMPOSITES[prop])
+  assignLayers(id, out)
   return out
 }
 
 /** The rows grouped for drawing: block order fixed, empty blocks dropped —
     a stamp has no radius and a heading that stands over nothing is furniture
-    pretending to be a finding. */
-export function blocksFor(id: string): Array<{ block: StylerBlock; rows: StylerRow[] }> {
-  const rows = rowsFor(id)
+    pretending to be a finding.
+
+    `layer` narrows it to one part of the anatomy, which is what the stage
+    dock asks for; without it the whole component draws, flat, the way the
+    inspector's panel used to. */
+export function blocksFor(
+  id: string,
+  layer?: string | null,
+): Array<{ block: StylerBlock; rows: StylerRow[] }> {
+  const rows = rowsFor(id).filter((row) => !layer || row.layer === layer)
   return STYLER_BLOCKS.map((block) => ({
     block,
     rows: rows.filter((row) => row.block === block),
   })).filter((group) => group.rows.length > 0)
+}
+
+/* ---- the anatomy ----
+
+   Jake, reviewing the stage: "styler should have layers to drill in so i can
+   evaluate at the layer/container layer rather than exposing all tokens at
+   once on the right." Window is twenty rows in one list, which is a list
+   nobody reads.
+
+   THE NAMES ALREADY SAY IT, so nothing new is declared. A component token is
+   `<component>.<part?>.<variant?>.<property>` and styleCandidates owns the
+   list of property tails: take the tail off the end and the component off the
+   front and what is left is the part path — 'titlebar-active' out of
+   --window-titlebar-active-bg, nothing at all out of --window-fill. The first
+   segment of that path is the layer. So window reads WINDOW · CTRL · TITLE ·
+   TITLEBAR · EXPLAINER, menubar reads MENUBAR · MENU · WORDMARK, and neither
+   list was typed by hand. A part that gets renamed in the token file renames
+   itself here, which a hand-kept list in stageSpecs would not do.
+
+   THE THREE LOCKED ROWS are the one place the rule needs a second look:
+   --window-ctrl-size, --menubar-h and --desktop-icons-cell-width match no
+   property tail, so there is no path to cut. They go where their own siblings
+   are — the first segment of the name, IF the component named a part with it.
+   'ctrl' is a part (--window-ctrl-hover-bg), so the control size sits with the
+   controls; 'cell' and 'h' name no part, so they stay on the root, which is
+   where a structural dimension of the component itself belongs anyway. */
+
+/** The part path a role encodes, or null when no property tail claims one.
+    '' means the component itself — --stamp-fg is the stamp's own fill. */
+function partPathOf(role: string, id: string): string | null {
+  const suffix = propertySuffixOf(role)
+  if (suffix === null) return null
+  const path = role.slice(0, role.length - suffix.length)
+  if (path === id) return ''
+  return path.startsWith(`${id}-`) ? path.slice(id.length + 1) : ''
+}
+
+/** The first segment of a role's bare name — what a locked row is asked for. */
+function headOf(role: string, id: string): string {
+  return role === id ? '' : role.slice(id.length + 1).split('-')[0]
+}
+
+/** Write every row's layer, in two passes: the rows that name a property
+    tail decide what the parts ARE, then the ones that do not join a part
+    they can name. Mutating in place because these rows were minted one call
+    ago and belong to nobody yet. */
+function assignLayers(id: string, rows: StylerRow[]): void {
+  const parts = new Set<string>()
+  const paths = rows.map((row) => partPathOf(row.role, id))
+  for (const path of paths) {
+    if (path) parts.add(path.split('-')[0])
+  }
+  rows.forEach((row, at) => {
+    const path = paths[at]
+    if (path === null) {
+      const head = headOf(row.role, id)
+      row.layer = parts.has(head) ? head : id
+      return
+    }
+    row.layer = path ? path.split('-')[0] : id
+  })
+}
+
+/** One layer of a component's anatomy: the part, and the rows that paint it. */
+export type StylerLayer = { id: string; label: string; rows: StylerRow[] }
+
+/** 'titlebar' -> 'TITLEBAR'; the root layer wears the component's own name. */
+export function layerLabel(layer: string, id: string): string {
+  return (layer === id ? id : layer).split('-').join(' ').toUpperCase()
+}
+
+/** A component's layers, root first and the parts after it in manifest
+    order. Never empty — every pilot component owns rows directly — and every
+    row it has is in exactly one of them. */
+export function layersFor(id: string): StylerLayer[] {
+  const out: StylerLayer[] = []
+  const at = new Map<string, StylerLayer>()
+  const put = (key: string) => {
+    let layer = at.get(key)
+    if (!layer) {
+      layer = { id: key, label: layerLabel(key, id), rows: [] }
+      at.set(key, layer)
+      out.push(layer)
+    }
+    return layer
+  }
+  // the root is minted first so it heads the list whatever order the
+  // manifest happens to hand its rows over in
+  put(id)
+  for (const row of rowsFor(id)) put(row.layer).rows.push(row)
+  return out.filter((layer) => layer.rows.length > 0)
 }
 
 /* ---- the X key's pairing ----

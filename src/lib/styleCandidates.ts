@@ -143,6 +143,20 @@ export function familyOf(role: string): StyleFamily {
   return 'locked'
 }
 
+/** The property tail a role ends in — '-bg', '-padding-x', '-text' — or null
+    when no rule claims one. Same list, same order, asked for the MATCH rather
+    than the family: what is left when the tail comes off is the part path the
+    component files encode, which is how the stage derives a component's
+    layers (stylerBlocks.ts). Reading the suffixes a second time somewhere
+    else is how two lists start to disagree. */
+export function propertySuffixOf(role: string): string | null {
+  for (const [pattern] of SUFFIX_RULES) {
+    const hit = pattern.exec(role)
+    if (hit) return hit[0]
+  }
+  return null
+}
+
 /** One offer in a picker. `token` is the SOURCE path in slash form — what
     tokenRef() turns into the `{dot.ref}` the token files carry — and
     `varName` is the custom property that path emits, which is how the test

@@ -35,6 +35,14 @@ import styles from './inspectShell.module.css'
  * scoped to the picked node would be describing an instance, and the token
  * system has no such thing.
  *
+ * ONE LAYER AT A TIME, when the stage asks for one. Window declares twenty
+ * rows and the first cut drew all twenty in a column, which is a column
+ * nobody reads (Jake, s105). The stage's layer list names a part of the
+ * component's anatomy and passes it down here; these blocks then draw that
+ * part's rows and no others. Nothing is hidden that was not already three
+ * scrolls away, and the tier has not moved: TITLEBAR is still window's
+ * titlebar everywhere on the desktop, not this window's.
+ *
  * A row is a name, its current binding, and a list of what it may become
  * (styleCandidates.ts is the law; blocksFor is the grouping). Choosing writes
  * a REFERENCE on <html> and every instance on the desktop moves at once
@@ -73,6 +81,7 @@ function boundCandidate(row: StylerRow): StyleCandidate | null {
 
 export function StylerBlocks({
   componentId,
+  layer,
   openVar,
   setOpenVar,
   onChange,
@@ -81,6 +90,10 @@ export function StylerBlocks({
 }: {
   /** the `data-component` of the root the pick sits inside */
   componentId: string
+  /** one layer of the component's anatomy, or every row when it is absent.
+      The stage always names one (Jake, s105: evaluate at the layer, not at
+      twenty rows); the flat panel is what the inspector used to draw. */
+  layer?: string | null
   openVar: string | null
   setOpenVar: (v: string | null) => void
   /** re-read the pick and re-render the panel — the same after() SAVE uses */
@@ -93,7 +106,7 @@ export function StylerBlocks({
   bare?: boolean
 }) {
   const skin = useSettings((s) => s.skin)
-  const blocks = blocksFor(componentId)
+  const blocks = blocksFor(componentId, layer)
   const held = count()
 
   const choose = (row: StylerRow, candidate: StyleCandidate) => {
@@ -129,6 +142,10 @@ export function StylerBlocks({
       return /^(input|textarea|select)$/i.test(el.tagName)
     }
 
+    /* The whole component, not the drawn layer. A row can only have the
+       caret if it is on screen, so the layer has already done the narrowing
+       and asking for it again would only give the lookup a way to disagree
+       with what the visitor is pointing at. */
     const rowOf = (role: string): StylerRow | null => {
       for (const group of blocksFor(act.current.componentId)) {
         const row = group.rows.find((r) => r.role === role)
