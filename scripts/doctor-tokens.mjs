@@ -10,6 +10,10 @@
  *   npm run tokens:doctor -- --strict  # warnings become errors (CI gate)
  *   npm run tokens:doctor -- --parity <baseline.css>
  *
+ * PARITY diffs computed values against a baseline: a changed or dropped
+ * custom property is an error. A deliberate rename declares itself in the
+ * RENAMED ledger further down and is verified rather than excused.
+ *
  * Checks (v1: D1–D4; v2 adds D5 contrast + D6 orphans):
  *   D1  leaf-vs-group collision   — a token path that is BOTH a leaf and a
  *                                    group prefix of another leaf (the A8 killer).
@@ -521,6 +525,63 @@ function buildResolvedThemeMaps(cssText) {
   return resolved
 }
 
+/* THE RENAME LEDGER — old emitted name -> the name that replaced it.
+ *
+ * PARITY reads a removed custom property as a regression, which is right for
+ * the additive PRs it was built for and wrong for one that renames a whole
+ * shape at once. So a rename is DECLARED rather than waved through, and the
+ * check gets stricter, not looser: the successor must exist in the new
+ * stylesheet, and it must resolve to the same computed value unless it is
+ * listed in RETUNED. A rename that quietly changed a value still fails.
+ *
+ * Empty this once main carries the new names — a ledger that outlives its own
+ * PR stops being evidence and starts being a blanket permission.
+ *
+ * Written for the chrome type ramp (2026-08-21): eleven text elements traded
+ * their loose family/size/weight/tracking members for one typography
+ * composite, which the build expands into the five names below. */
+const RENAMED = {
+  'button-weight': 'button-md-text-font-weight',
+  'button-sm-font-size': 'button-sm-text-font-size',
+  'button-sm-tracking': 'button-sm-text-letter-spacing',
+  'button-md-font-size': 'button-md-text-font-size',
+  'button-md-tracking': 'button-md-text-letter-spacing',
+  'menubar-family': 'menubar-text-font-family',
+  'menubar-font-size': 'menubar-text-font-size',
+  'menubar-tracking': 'menubar-text-letter-spacing',
+  'menubar-wordmark-family': 'menubar-wordmark-text-font-family',
+  'menubar-wordmark-weight': 'menubar-wordmark-text-font-weight',
+  'menubar-wordmark-tracking': 'menubar-wordmark-text-letter-spacing',
+  'menubar-wordmark-version-family': 'menubar-wordmark-version-text-font-family',
+  'menubar-wordmark-version-font-size': 'menubar-wordmark-version-text-font-size',
+  'menubar-wordmark-version-weight': 'menubar-wordmark-version-text-font-weight',
+  'menubar-wordmark-version-tracking': 'menubar-wordmark-version-text-letter-spacing',
+  'menubar-menu-btn-family': 'menubar-menu-btn-text-font-family',
+  'menubar-menu-btn-font-size': 'menubar-menu-btn-text-font-size',
+  'menubar-menu-btn-tracking': 'menubar-menu-btn-text-letter-spacing',
+  'stamp-family': 'stamp-text-font-family',
+  'stamp-font-size': 'stamp-text-font-size',
+  'stamp-weight': 'stamp-text-font-weight',
+  'stamp-tracking': 'stamp-text-letter-spacing',
+  'desktop-icons-label-family': 'desktop-icons-label-text-font-family',
+  'desktop-icons-label-font-size': 'desktop-icons-label-text-font-size',
+  'desktop-icons-label-tracking': 'desktop-icons-label-text-letter-spacing',
+  'window-title-family': 'window-title-text-font-family',
+  'window-title-font-size': 'window-title-text-font-size',
+  'window-title-weight': 'window-title-text-font-weight',
+  'window-title-tracking': 'window-title-text-letter-spacing',
+}
+
+/* The renamed properties allowed to land on a different value, and the only
+ * ones. Jake ruled the menubar/window-title tracking split an accident and
+ * normalized it on .14 (2026-08-21), which widens these three by 0.02em. Every
+ * other rename above must be value-for-value. */
+const RETUNED = new Set([
+  'menubar-text-letter-spacing',
+  'menubar-wordmark-version-text-letter-spacing',
+  'button-sm-text-letter-spacing',
+])
+
 async function checkParity(refArg, currentCss, reporters) {
   if (!currentCss) {
     console.log('parity: current tokens.generated.css not found — run tokens:build. Skipping.')
@@ -547,6 +608,7 @@ async function checkParity(refArg, currentCss, reporters) {
   let added = 0
   let changed = 0
   let removed = 0
+  let renamed = 0
 
   for (const themeId of new Set([...baseline.keys(), ...current.keys()])) {
     const before = baseline.get(themeId) ?? new Map()
@@ -566,6 +628,24 @@ async function checkParity(refArg, currentCss, reporters) {
         }
       } else if (hasAfter) {
         added++
+      } else if (RENAMED[name]) {
+        const heir = RENAMED[name]
+        if (!after.has(heir)) {
+          removed++
+          reporters.err(
+            'PARITY',
+            `[${themeId}] --${name} was renamed to --${heir}, which the build does not emit.`
+          )
+        } else if (after.get(heir) !== before.get(name) && !RETUNED.has(heir)) {
+          changed++
+          reporters.err(
+            'PARITY',
+            `[${themeId}] --${name} -> --${heir} changed value on the way: ` +
+              `"${before.get(name)}" -> "${after.get(heir)}"`
+          )
+        } else {
+          renamed++
+        }
       } else {
         removed++
         reporters.err('PARITY', `[${themeId}] --${name} removed (was "${before.get(name)}").`)
@@ -574,7 +654,8 @@ async function checkParity(refArg, currentCss, reporters) {
   }
 
   console.log(
-    `\nparity (vs ${refArg}): ${unchanged} unchanged, ${added} added, ${changed} changed, ${removed} removed.`
+    `\nparity (vs ${refArg}): ${unchanged} unchanged, ${added} added, ${renamed} renamed, ` +
+      `${changed} changed, ${removed} removed.`
   )
 }
 
