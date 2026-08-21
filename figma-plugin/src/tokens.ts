@@ -129,6 +129,44 @@ export function isTypeRole(path: string): boolean {
 }
 
 /**
+ * True when a COMPONENT-tier token is authored as ONE whole-composite
+ * reference to a semantic typography composite (Jake's ruling, 2026-08-21) —
+ * e.g. `"text": { "$type": "typography", "$value": "{type.badge}" }`. Such a
+ * token has NO Figma variable representation: in Figma it is a TEXT STYLE
+ * applied to the component's text layer (the mirror skill's job, later — not
+ * the bridge's). The component variable pass must skip it: no variable
+ * created, no "Unresolved alias" warning logged — this is expected shape,
+ * not an error.
+ *
+ * An explicit `$type: "typography"` is authoritative (any ref shape). Absent
+ * that, the ref body must carry a `type.` or `typography.` prefix whose
+ * remainder matches a known composite ROLE — handling both spellings a
+ * hand-authored or Tokens-Studio-exported file might use. A BARE ref (no
+ * prefix) is deliberately NOT treated as a composite match here even if it
+ * happens to spell a role name: real component tokens today alias bare
+ * semantic font names that collide with role names (e.g.
+ * `component/menubar.json`'s `family: { $value: "{mono}" }` and
+ * `component/window.json`'s `title.family: { $value: "{mono}" }`, both
+ * ordinary refs to the semantic `mono` font stack, not the `mono` typography
+ * composite) — treating bare refs as composite matches would wrongly skip
+ * those. A SUB-token alias like `{type.label.family}` does not match any
+ * whole ROLE and is therefore unaffected — those stay "Unresolved alias"
+ * until Phase 1 rebinds stamp (do not special-case them here).
+ */
+export function isTypographyCompositeRef(token: FlatToken, model: PulledModel): boolean {
+  if (token.type !== undefined) return token.type === 'typography'
+  if (!token.isAlias) return false
+  const ref = (token.aliasRef as string).trim()
+  const role = ref.startsWith('typography.')
+    ? ref.slice('typography.'.length)
+    : ref.startsWith('type.')
+      ? ref.slice('type.'.length)
+      : undefined
+  if (role === undefined) return false
+  return model.typographyComposites.some((c) => c.role === role)
+}
+
+/**
  * The Figma variable NAME for a semantic/component token. Internal keys and
  * refs stay dotted ("radius.control"), but Figma rejects "." in names and
  * treats "/" as a group separator — so nested tokens must slash. Flat names

@@ -33,6 +33,7 @@ import {
   isCoreSet,
   isFluidSize,
   isTypeRole,
+  isTypographyCompositeRef,
   leadingToPercent,
   leafAtPath,
   memberConcrete,
@@ -293,6 +294,9 @@ async function pull(gh: GitHub, branch: string): Promise<void> {
   }
   if (compCol) {
     for (const t of model.componentTokens) {
+      // Whole-composite typography ref — a Figma TEXT STYLE, not a variable.
+      // No variable to create here (Phase 1a, ruled 2026-08-21).
+      if (isTypographyCompositeRef(t, model)) continue
       const v = getOrCreateVariable(figmaVarName(t.path), compCol, resolveKind(t, model), index)
       compVars.set(t.path, v)
     }
@@ -319,6 +323,9 @@ async function pull(gh: GitHub, branch: string): Promise<void> {
   if (compCol) {
     const compModeId = compCol.modes[0].modeId
     for (const t of model.componentTokens) {
+      // Same skip as Pass 1 — no variable exists for this token, so there is
+      // nothing to set (and no "Unresolved alias" warning to log).
+      if (isTypographyCompositeRef(t, model)) continue
       const v = compVars.get(t.path) as Variable
       setValue(v, compModeId, t, model, coreVars, semVars)
     }
