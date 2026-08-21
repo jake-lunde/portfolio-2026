@@ -385,6 +385,100 @@ test('the bench still registers itself, or the skin previews go half-dead', () =
   assert.ok(/data-skin=\{set\.skin\}/.test(stageSrc), 'and the bench is the skin wrapper')
 })
 
+/* ---------------------------------------------- the s107 wide review */
+
+const stageCss = src('src/components/inspect/stylerStage.module.css')
+const shellCss = src('src/components/inspect/inspectShell.module.css')
+
+test('every copy key the stage names exists', () => {
+  // the tabs are checked above by their `label:` shape; this is everything
+  // else the room says out loud, the aria-labels on the grips included
+  const keys = [
+    ...[...stageSrc.matchAll(/k="([\w.]+)"/g)].map((m) => m[1]),
+    ...[...stageSrc.matchAll(/t\('([\w.]+)', skin\)/g)].map((m) => m[1]),
+    ...[...stageSrc.matchAll(/label="([\w.]+)"/g)].map((m) => m[1]),
+  ]
+  assert.ok(keys.includes('styler.grip.layers'), 'the grips were found')
+  for (const key of keys) assert.ok(key in COPY, `${key} is in copy.json`)
+})
+
+test('the revert button and the way out do not share one sentence', () => {
+  // Jake, s107: "'put the component back' should be 'revert'." The close X
+  // keeps the sentence; the button that drops the pending set gets its own
+  assert.equal(COPY['styler.resetall'], 'REVERT')
+  assert.notEqual(COPY['styler.resetall'], COPY['styler.close'])
+  assert.match(COPY['styler.close'], /DESKTOP/)
+})
+
+test('the commit bar stands outside the dock, last in the room', () => {
+  const dockAt = stageSrc.indexOf('className={styles.dock}')
+  const dockEnd = stageSrc.indexOf('</aside>', dockAt)
+  const barAt = stageSrc.indexOf('className={styles.commit}')
+  assert.ok(dockAt > 0 && barAt > 0, 'both were found')
+  assert.ok(barAt > dockEnd, 'the bar is not inside the right dock any more')
+  // and the key gate went with it, or SAVE asks for a key nobody can see
+  assert.ok(stageSrc.indexOf('saver.keyGate()') > barAt, 'the gate draws in the bar')
+  assert.ok(stageSrc.indexOf('saver.saveStatus()') > barAt, 'and so does the status')
+})
+
+test('the walls open where the stylesheet says they do', () => {
+  const stops = (name) => {
+    const m = stageSrc.match(new RegExp(`const ${name} = \\{ min: (\\d+), def: (\\d+), max: (\\d+) \\}`))
+    assert.ok(m, `${name} declares its stops`)
+    return { min: +m[1], def: +m[2], max: +m[3] }
+  }
+  const left = stops('LEFT')
+  const right = stops('RIGHT')
+  for (const [name, w] of [
+    ['LEFT', left],
+    ['RIGHT', right],
+  ]) {
+    assert.ok(w.min < w.def && w.def < w.max, `${name} opens between its own stops`)
+  }
+  // the left panel is INSPECT's own width, still — one number, two panels
+  const inspect = src('src/app/globals.css').match(/--inspect-left: (\d+)px/)
+  assert.equal(left.def, +inspect[1], 'the left wall opens on --inspect-left')
+  // and the right one opens wider than the inspector's dock, which is the
+  // whole change: 304px is where the rows were folding
+  const opens = stageCss.match(/--styler-right: (\d+)px/)
+  assert.equal(right.def, +opens[1], 'the sheet and the grip agree on the default')
+  assert.ok(right.def > right.min, 'the dock opens wider than it may be dragged')
+  assert.equal(right.min, +src('src/app/globals.css').match(/--inspect-right: (\d+)px/)[1])
+  // and the layout gives up before the two walls eat the bench: a wider dock
+  // with the old breakpoint is the wrapping back again, one size down
+  const stack = +stageCss.match(/@media \(max-width: (\d+)px\)/)[1]
+  assert.ok(stack - (left.def + right.def) >= 170, 'the narrowest side-by-side still has a bench')
+})
+
+test('a grip is a separator a keyboard can move', () => {
+  assert.ok(stageSrc.includes('role="separator"'), 'it is a separator')
+  assert.ok(stageSrc.includes('aria-orientation="vertical"'), 'a vertical one')
+  assert.ok(/tabIndex=\{0\}/.test(stageSrc), 'and it is reachable')
+  for (const attr of ['aria-valuenow', 'aria-valuemin', 'aria-valuemax', 'aria-controls']) {
+    assert.ok(stageSrc.includes(attr), `${attr} is reported`)
+  }
+  for (const key of ['ArrowRight', 'ArrowLeft', 'Home', 'End']) {
+    assert.ok(stageSrc.includes(`'${key}'`), `${key} moves the wall`)
+  }
+  assert.ok(stageSrc.includes('onDoubleClick={onReset}'), 'and a double-click puts it back')
+  // pointer capture, not window listeners: a fast drag leaves the strip
+  assert.ok(stageSrc.includes('setPointerCapture'), 'the strip takes the pointer')
+  assert.ok(stageSrc.includes('releasePointerCapture'), 'and gives it back')
+})
+
+test('the small type in the room steps to a role the ramp already has', () => {
+  // Jake, s107: "fonts seem small as well." Micro to control, both of them
+  // roles in tokens.generated.css — never a literal size
+  const step = shellCss.slice(shellCss.indexOf('[data-styler-stage]'))
+  assert.ok(step.includes('var(--type-control-size)'), 'the dock steps up')
+  assert.ok(stageSrc.includes('data-styler-stage'), 'and the stage sets the hook it reads')
+  assert.ok(stageCss.includes('var(--type-control-size)'), 'the tab rows step with it')
+  for (const sheet of [stageCss, shellCss]) {
+    const sizes = [...sheet.matchAll(/font-size: (?!var\()([^;]+);/g)].map((m) => m[1])
+    assert.deepEqual(sizes, [], 'no hand-written font size anywhere in either sheet')
+  }
+})
+
 /* ------------------------------------------------------ the X pairing */
 
 test('a fill pairs with the stroke on its own part', () => {

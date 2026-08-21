@@ -1508,3 +1508,50 @@
   outline: var(--border-width-strong) solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ================= THE STAGE READS ONE STEP UP =================
+
+   Jake, on the wide review of the STYLER stage (s107): "fonts seem small as
+   well." He was looking at 8px — the MICRO role, which is the right size for a
+   chip in a 304px dock beside a running site and the wrong size for the only
+   panel in a room that has taken the whole screen.
+
+   So inside the stage, and only there, every one of these steps from MICRO to
+   CONTROL: 8px to 10px, tracking 20 to 14, and the mono face and the bold
+   weight unchanged, which is what keeps the machine sounding like the machine.
+   Both are roles the ramp already has (tokens.generated.css) — nothing was
+   minted and no size was invented to answer this.
+
+   It is written HERE, next to the classes it moves, rather than in
+   stylerStage.module.css: these are this file's own declarations and a second
+   file reaching in to resize them is how two files start disagreeing about
+   one control. The attribute is the stage's, set on its root
+   (StylerStage.tsx), so INSPECT's own two docks are untouched. The stage's
+   own furniture — the tab rows, the axis names — takes the same step in its
+   own sheet.
+
+   The 11px MONO readings are not in this list, and that is the point of
+   naming a step rather than scaling a panel: they were never the small type,
+   and the next role up from mono is a 13px sans that would put a body face
+   on a token value. */
+[data-styler-stage] .row,
+[data-styler-stage] .tier,
+[data-styler-stage] .candidateName,
+[data-styler-stage] .candidateGrade,
+[data-styler-stage] .candidate[data-reset],
+[data-styler-stage] .previewText,
+[data-styler-stage] .resetAll,
+[data-styler-stage] .keyLabel,
+[data-styler-stage] .saveNote {
+  font-family: var(--type-control-family);
+  font-size: var(--type-control-size);
+  font-weight: var(--type-control-weight);
+  letter-spacing: var(--type-control-tracking);
+  line-height: var(--type-control-leading);
+}
+
+/* the field beside the label goes with it, or the key prompt is a 10px word
+   next to an 8px box */
+[data-styler-stage] .keyInput {
+  font-size: var(--type-control-size);
+}

@@ -24,6 +24,16 @@
  */
 
 .stage {
+  /* THE TWO WALLS, and the only place either number is written.
+     The panels are sized by these, the commit band spans the gap between
+     them, and StylerStage.tsx overwrites one of them inline the moment
+     somebody drags its grip. Left is INSPECT's own panel width, still: two
+     left panels doing one job. Right opens 80px wider than the inspector's
+     dock, which is Jake's s107 note in a number — at 304px a row called
+     TITLEBAR ACTIVE BORDER COLOR drops its binding onto a second line, and
+     at 384px it does not. */
+  --styler-left: var(--inspect-left, 244px);
+  --styler-right: 384px;
   position: fixed;
   inset: 0;
   /* above the tool's own frame (6500), below BOOT (8000) and the
@@ -83,12 +93,18 @@
   display: flex;
 }
 
-/* ---- the canvas: the component, alone, with room around it ---- */
+/* ---- the canvas: the component, alone, with room around it ----
+
+   The floor is deeper than the other three sides on purpose: the commit band
+   stands on it, and a bench you have to scroll out from under the SAVE button
+   to read would be the same crowding this change is undoing. Four of the room's
+   own spacing step, which clears the band with its key gate open. */
 .canvas {
   flex: 1 1 auto;
   min-width: 0;
   overflow: auto;
   padding: var(--spacing-component-xl);
+  padding-bottom: calc(var(--spacing-component-xl) * 4);
   background: var(--surface-raised);
 }
 
@@ -111,16 +127,24 @@
   gap: var(--spacing-component-xs) var(--spacing-component-sm);
 }
 
+/* ONE STEP UP THE RAMP (Jake, s107: "fonts seem small as well"). Everything
+   in this room that was drawn at the MICRO role is drawn at CONTROL instead:
+   same mono face, same bold, same caps, 8px to 10px and the tracking tightened
+   from 20 to 14 because a wider letter at a bigger size is a worse letter.
+   Two roles the ramp already has, so no scale was invented to do it. The
+   crown keeps micro — that bar is the tool's chrome and it matches INSPECT's
+   own. The dock's half of the same step lives in inspectShell.module.css,
+   where those classes are declared. */
 .axisName {
   flex: none;
   /* both names line up so the two rows read as one panel rather than as two
      unrelated lists that happen to be stacked */
   width: 5.5rem;
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  font-weight: var(--type-micro-weight);
-  letter-spacing: var(--type-micro-tracking);
-  line-height: var(--type-micro-leading);
+  font-family: var(--type-control-family);
+  font-size: var(--type-control-size);
+  font-weight: var(--type-control-weight);
+  letter-spacing: var(--type-control-tracking);
+  line-height: var(--type-control-leading);
   text-transform: uppercase;
   color: var(--content-muted);
 }
@@ -140,11 +164,11 @@
 .tab {
   position: relative;
   padding: var(--spacing-component-xs) var(--spacing-component-sm);
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size);
-  font-weight: var(--type-micro-weight);
-  letter-spacing: var(--type-micro-tracking);
-  line-height: var(--type-micro-leading);
+  font-family: var(--type-control-family);
+  font-size: var(--type-control-size);
+  font-weight: var(--type-control-weight);
+  letter-spacing: var(--type-control-tracking);
+  line-height: var(--type-control-leading);
   text-transform: uppercase;
   color: var(--content-muted);
   background: var(--surface);
@@ -238,8 +262,9 @@
 
 /* ---- the right dock: the blocks, and the way to send them ---- */
 .dock {
+  position: relative;
   flex: none;
-  width: var(--inspect-right, 304px);
+  width: var(--styler-right);
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -285,10 +310,14 @@
    244px, which is --inspect-left's value, because these two left panels are
    the same panel doing the same job and a stage that invented its own width
    would be saying they are not. Full height with it: the tree had a third of
-   the right dock before and now it has a wall, which is the point. */
+   the right dock before and now it has a wall, which is the point.
+
+   It is a STARTING width now rather than the width: --styler-left opens on
+   --inspect-left and moves when somebody drags the grip on its inner edge. */
 .layers {
+  position: relative;
   flex: none;
-  width: var(--inspect-left, 244px);
+  width: var(--styler-left);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -330,30 +359,90 @@
   overflow-x: hidden;
 }
 
-/* the send bar sits at the foot of the dock, always reachable — a person
-   who has re-bound six rows should not have to scroll to the bottom of six
-   blocks to find the button that proposes them */
-.send {
-  flex: none;
+/* ---- the grips: an edge you can take hold of ----
+
+   An 8px strip straddling the panel's own border, so the thing you grab is
+   the line you can already see. It is inside the panel and absolutely
+   positioned rather than a flex item between the two, because a column of its
+   own would have to be subtracted from something and the wall is not a
+   column — it is the join.
+
+   No hover fill and no idle mark: the cursor says what it is, and a panel
+   with a permanent stripe down its edge would be a panel wearing its
+   plumbing. It shows itself when it is being used, and when the keyboard is
+   on it. */
+.grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: var(--spacing-component-sm);
+  cursor: col-resize;
+  /* the browser must not pan the room out from under a drag */
+  touch-action: none;
+}
+
+.gripLeft {
+  right: calc(var(--spacing-component-xs) * -1);
+}
+
+.gripRight {
+  left: calc(var(--spacing-component-xs) * -1);
+}
+
+.grip:hover,
+.grip[data-drag] {
+  background: var(--accent);
+}
+
+.grip:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: calc(var(--border-width-strong) * -1);
+}
+
+/* ---- the commit band: the send bar, on the floor ----
+
+   It was the dock's foot and it wrapped there (Jake, s107): the count broke
+   across two lines and the theme chip on SAVE ran off the edge. Down here it
+   spans the gap between the two walls and centres in it, so the only thing
+   between the visitor and the button is the component the button is about.
+
+   ABSOLUTE, inside a room that is already `position: fixed` over the whole
+   viewport, which is the same thing as fixed and none of the containing-block
+   trouble: the bench sets a transform on itself, and a fixed descendant would
+   have to care. The band itself lets pointers through — it is a strip of air
+   with a bar in the middle of it, not a lid on the canvas. */
+.commit {
+  position: absolute;
+  left: var(--styler-left);
+  right: var(--styler-right);
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-component-md);
+  pointer-events: none;
+}
+
+.commitBar {
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-component-sm);
-  border-top: var(--border-width-default) solid var(--content);
+  max-width: 100%;
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
   background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  pointer-events: auto;
 }
 
-.sendTop {
+/* the count, the revert and the send, in one line with room to be one line.
+   It wraps only where there is genuinely no room left, and centres when it
+   does, so the bar never reads as a ragged column. */
+.commitRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-component-sm);
-}
-
-.sendActions {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-component-xs);
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-sm) var(--spacing-component-md);
 }
 
 .empty {
@@ -368,17 +457,23 @@
   color: var(--content-muted);
 }
 
-/* Narrow: the walls stop being walls. Below 720px a 244px column and a 304px
-   column either side of a component leave none of the three any room, so the
-   room stacks and both docks meet the canvas on a top edge instead of a side
-   one.
+/* Narrow: the walls stop being walls. A 244px column and a 384px column
+   either side of a component leave none of the three any room on a small
+   screen, so the room stacks and both docks meet the canvas on a top edge
+   instead of a side one.
+
+   The number moved with the dock. It was 720px when the dock was 304px wide,
+   which left 172px of bench at the breakpoint; the dock opens 80px wider now
+   (Jake, s107) and the same 172px of bench needs 900px of screen. Widening a
+   panel without moving the point where the layout gives up would have bought
+   the wrapping back at a size nobody would think to check.
 
    It stacks in the order it is written — layers, bench, blocks — rather than
    putting the bench first, and that is a choice about the keyboard rather
    than about the picture. Flex `order` moves what you see and leaves the tab
    order where it was, so the caret would walk the page in an order the page
    does not have. Five layers is a short list; the bench is right under it. */
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .body {
     flex-direction: column;
     overflow: auto;
@@ -411,6 +506,30 @@
 
   .axisName {
     width: auto;
+  }
+
+  /* nothing to resize: the walls are the full width of the screen and there
+     is no join left to take hold of */
+  .grip {
+    display: none;
+  }
+
+  /* the band joins the flow and becomes the last thing in the column. A bar
+     hovering over a stacked layout would be a bar covering the rows it was
+     put there to send, and 360px has no width to spare for a shadow of a
+     canvas underneath it. */
+  .commit {
+    position: static;
+    flex: none;
+    padding: 0;
+  }
+
+  .commitBar {
+    max-width: none;
+    width: 100%;
+    border-right: none;
+    border-bottom: none;
+    border-left: none;
   }
 }
 
