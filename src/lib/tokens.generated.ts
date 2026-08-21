@@ -476,3 +476,48 @@ export const TOKEN_REFS: Record<string, string | null> = {
   '--window-titlebar-padding-x': null,
   '--window-titlebar-padding-y': null,
 }
+
+/* Every component text element, mapped to the ONE typography role it wears.
+ * Read off the source files rather than the dictionary, because the build
+ * expands each composite into its five CSS members before any format sees
+ * it — so these names appear in neither map above, and the members that do
+ * appear are locked. This is the row STYLER offers: a whole type style,
+ * swapped for another whole type style. */
+export const TOKEN_COMPOSITES: Record<string, string> = {
+  '--button-md-text': 'typography/control',
+  '--button-sm-text': 'typography/control-sm',
+  '--desktop-icons-label-text': 'typography/icon-label',
+  '--menubar-menu-btn-text': 'typography/menu',
+  '--menubar-text': 'typography/label',
+  '--menubar-wordmark-text': 'typography/wordmark',
+  '--menubar-wordmark-version-text': 'typography/label',
+  '--stamp-text': 'typography/badge',
+  '--window-explainer-btn-text': 'typography/caption',
+  '--window-title-meta-text': 'typography/caption',
+  '--window-title-text': 'typography/title',
+}
+
+/* The semantic typography roles, in authored order — the content ramp then
+ * the chrome ramp. The candidate list for a Text style row is derived from
+ * this, not typed out: every entry is a complete named style a text element
+ * may wear, so there is nothing here that is not an offer. */
+export const TYPE_ROLES: readonly string[] = [
+  'display',
+  'heading-1',
+  'heading-2',
+  'heading-3',
+  'body-lg',
+  'body',
+  'body-sm',
+  'label',
+  'caption',
+  'micro',
+  'mono',
+  'title',
+  'control',
+  'control-sm',
+  'menu',
+  'icon-label',
+  'badge',
+  'wordmark',
+]
