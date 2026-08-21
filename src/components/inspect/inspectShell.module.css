@@ -736,6 +736,63 @@
   padding: var(--spacing-component-md);
 }
 
+/* ---- the tab rows ----
+
+   Round 4 (2026-08-21, s105): "collapse the sections (path, source,
+   tokens) and/or turn like kinds into tabs." Seven stacked sections
+   became three: STRUCTURE (path, source), STYLE (tokens, contrast, type,
+   motion — nested, since that's the one kind that still needed splitting
+   further), and COPY where the pick has one. See InspectorPanel.tsx for
+   the grouping and why.
+
+   Flat and typographic on purpose — Jake's note was "not a modern
+   segmented control." No pill, no filled ground on the active tab: the
+   bar underneath is the same raised fill every section head already
+   wears, the tabs are plain machine-caps labels inside it divided by
+   hairlines (the same rule .tool + .tool takes), and the SELECTED one is
+   ink where the rest are muted — the exact dichotomy STYLER's own block
+   heads already use (.bar[data-styler-block] .head). Nothing new had to
+   be invented to say "this one is active." */
+.tabs {
+  flex: 1 1 auto;
+  display: flex;
+  min-width: 0;
+}
+
+.tab {
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-label-leading);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab + .tab {
+  border-left: var(--border-width-subtle) solid var(--border);
+}
+
+.tab:hover {
+  color: var(--content);
+}
+
+.tab[aria-selected='true'] {
+  color: var(--content);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.tab:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: -2px;
+}
+
 /* ---- the info affordance ----
    One glyph, one behaviour, on every bar that carries a note. Hover shows
    it, focus shows it, Escape puts it away (InfoTip.tsx). */
