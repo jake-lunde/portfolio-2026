@@ -54,6 +54,43 @@ StyleDictionary.registerFormat({
   },
 })
 
+/* Tier says WHICH LAYER a property was authored in; this says WHAT IT IS
+ * BOUND TO. STYLER shows a component's current binding and offers the lawful
+ * alternatives, and it can only name the current one if the build hands it
+ * the authored source path — the emitted CSS carries a var() or a literal,
+ * never the token path behind it.
+ *
+ * COMPONENT TIER ONLY, and that is not laziness: the component sets emit
+ * once, under :root, so a property has exactly one authored value and this
+ * map can be a flat Record. Semantic properties are re-declared per theme and
+ * would need a per-theme map to say anything true.
+ *
+ * A ref is recorded only when the authored $value is EXACTLY one whole
+ * reference ("{radius.control}"). An OFF-GRID literal, a composite, or a
+ * value with a reference embedded in a larger string records null — there is
+ * no single source token to name, and guessing one would put a lie in front
+ * of the person choosing the replacement. Slash form, matching palette.ts,
+ * because tokenRef() is the one place slashes become dots. */
+const REF_ONLY = /^\{([^{}]+)\}$/
+const refOf = (token) => {
+  const raw = token.original?.$value
+  if (typeof raw !== 'string') return null
+  const m = REF_ONLY.exec(raw.trim())
+  return m ? m[1].split('.').join('/') : null
+}
+
+StyleDictionary.registerFormat({
+  name: 'json/token-refs',
+  format: ({ dictionary }) => {
+    const out = {}
+    for (const token of dictionary.allTokens) {
+      if (tierOf(token.filePath) !== 'component') continue
+      out[`--${token.name}`] = refOf(token)
+    }
+    return JSON.stringify(out, null, 2)
+  },
+})
+
 /* Final selector model. classic-dark also matches today's bare
  * [data-theme='dark'] so dark mode keeps working before the data-skin
  * attribute exists (introduced in Milestone B / store widening). */
@@ -124,6 +161,11 @@ for (const theme of themes) {
             format: 'json/token-tiers',
             // the SAME filter as the CSS file above: one dictionary, two
             // renderings, so the map and the stylesheet can't drift
+            filter: (token) => enabled.has(path.resolve(token.filePath)),
+          },
+          {
+            destination: `${theme.id}.refs.json`,
+            format: 'json/token-refs',
             filter: (token) => enabled.has(path.resolve(token.filePath)),
           },
         ],
@@ -201,6 +243,29 @@ const tierEntries = Object.keys(tiers)
   .sort()
   .map((name) => `  '${name}': '${tiers[name]}',`)
   .join('\n')
+
+/* The component tier's authored bindings, merged the same way. Component sets
+ * are `enabled` in exactly one theme today, so the merge is a formality — but
+ * if a second theme ever enables one, two different refs under one name is a
+ * real contradiction (this map is flat), and it should be heard, not averaged.
+ * First write wins, in $themes order, and the disagreement is logged. */
+const refs = {}
+for (const theme of themes) {
+  const part = JSON.parse(await fs.readFile(path.join(OUT_DIR, `${theme.id}.refs.json`), 'utf8'))
+  for (const [name, ref] of Object.entries(part)) {
+    if (!(name in refs)) {
+      refs[name] = ref
+      continue
+    }
+    if (refs[name] === ref) continue
+    console.warn(`  ⚠ ref collision: ${name} is ${refs[name]} and ${ref} — keeping the first`)
+  }
+}
+const refEntries = Object.keys(refs)
+  .sort()
+  .map((name) => `  '${name}': ${refs[name] === null ? 'null' : `'${refs[name]}'`},`)
+  .join('\n')
+
 const tiersTs =
   '/* GENERATED FILE — DO NOT EDIT. Run npm run tokens:build. */\n\n' +
   '/* Every custom property tokens.generated.css emits, mapped to the tier it\n' +
@@ -208,6 +273,16 @@ const tiersTs =
   " * primitive consumed raw in product CSS is house-law violation, and a\n" +
   ' * property absent from this map came from outside the token system. */\n' +
   "export const TOKEN_TIERS: Record<string, 'core' | 'semantic' | 'component'> = {\n" +
-  `${tierEntries}\n}\n`
+  `${tierEntries}\n}\n\n` +
+  '/* What each COMPONENT-tier property is currently bound to, as the source\n' +
+  " * token's path in slash form — or null where the author wrote a literal\n" +
+  ' * (the OFF-GRID values) and there is no source token to name. STYLER reads\n' +
+  ' * it to show the binding a row is about to replace. Component tier only:\n' +
+  ' * those sets emit once, under :root, so one flat map can be true. */\n' +
+  'export const TOKEN_REFS: Record<string, string | null> = {\n' +
+  `${refEntries}\n}\n`
 await fs.writeFile(path.join(ROOT, 'src/lib/tokens.generated.ts'), tiersTs)
-console.log(`✓ wrote src/lib/tokens.generated.ts (${Object.keys(tiers).length} properties)`)
+console.log(
+  `✓ wrote src/lib/tokens.generated.ts (${Object.keys(tiers).length} properties, ` +
+    `${Object.keys(refs).length} component refs)`
+)
