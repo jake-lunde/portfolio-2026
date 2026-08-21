@@ -59,6 +59,8 @@ const {
   blocksFor,
   fillStrokePair,
   isCompositeMember,
+  layerLabel,
+  layersFor,
   rowLabel,
   rowsFor,
 } = await import(blocksUrl)
@@ -71,6 +73,15 @@ const { addRoot, count, pendingEdits, rebind, removeRoot, resetAll, resetRole, w
   )
 const { handleKey, isReserved, matches, registerHotkeys, activeScopes } = await import(
   moduleUrl('src/lib/hotkeys.ts')
+)
+/* the three sets the stage's second axis offers are the three the commit
+   route writes to, and tokenEdit is where that list lives */
+const { TOKEN_THEMES } = await import(
+  moduleUrl('src/lib/tokenEdit.ts', {
+    './palette': moduleUrl('src/lib/palette.ts'),
+    './tokens.generated': tiersUrl,
+    './styleCandidates': candidatesUrl,
+  })
 )
 
 /** Every custom property the generated CSS actually emits — the only list
@@ -241,6 +252,137 @@ test('a row is named without the prefix the block already said', () => {
   assert.equal(rowLabel('button-radius', 'button'), 'RADIUS')
   assert.equal(rowLabel('window-titlebar-active-bg', 'window'), 'TITLEBAR ACTIVE BG')
   assert.equal(rowLabel('desktop-icons-cell-width', 'desktop-icons'), 'CELL WIDTH')
+})
+
+/* ------------------------------------------------------- the anatomy */
+
+/* THE DRILL. Jake, s105: evaluate at the layer, not at twenty rows at once.
+   The layers are DERIVED from the token names, so the failure to guard is a
+   quiet one: a rule that stops matching drops rows onto the root, the list
+   still draws, and the only symptom is a component that suddenly has no
+   parts. So this is a partition test like the block one above it. */
+
+test('every row lands in exactly one layer, and the layers are the whole set', () => {
+  for (const id of COMPONENT_IDS) {
+    const layers = layersFor(id)
+    const seen = []
+    for (const layer of layers) {
+      assert.ok(layer.rows.length > 0, `${id}/${layer.id} draws no empty layer`)
+      for (const row of layer.rows) {
+        assert.equal(row.layer, layer.id, `${row.role} is filed under ${layer.id}`)
+        seen.push(row.role)
+      }
+    }
+    assert.deepEqual(
+      seen.sort(),
+      rowsFor(id)
+        .map((r) => r.role)
+        .sort(),
+      `${id}'s layers hold its whole set, once each`,
+    )
+  }
+})
+
+test('the root layer comes first and wears the component name', () => {
+  for (const id of COMPONENT_IDS) {
+    const layers = layersFor(id)
+    assert.equal(layers[0].id, id, `${id}'s own rows head the list`)
+    assert.equal(layers[0].label, id.split('-').join(' ').toUpperCase())
+  }
+  assert.equal(layerLabel('titlebar', 'window'), 'TITLEBAR')
+  assert.equal(layerLabel('desktop-icons', 'desktop-icons'), 'DESKTOP ICONS')
+})
+
+test('the parts come from the token names, not from a hand-kept list', () => {
+  const named = (id) => layersFor(id).map((l) => l.id)
+  assert.deepEqual(named('window'), ['window', 'ctrl', 'title', 'titlebar', 'explainer'])
+  assert.deepEqual(named('menubar'), ['menubar', 'menu', 'wordmark'])
+  assert.deepEqual(named('stamp'), ['stamp', 'pink'])
+  assert.deepEqual(named('desktop-icons'), ['desktop-icons', 'hover', 'icon', 'label'])
+
+  const layerOf = (id, role) => rowsFor(id).find((r) => r.role === role)?.layer
+  // the property tail comes off and the first segment of what is left is the
+  // layer, whatever else the name carries between them
+  assert.equal(layerOf('window', 'window-titlebar-active-bg'), 'titlebar')
+  assert.equal(layerOf('window', 'window-titlebar-padding-x'), 'titlebar')
+  assert.equal(layerOf('window', 'window-title-meta-text'), 'title')
+  assert.equal(layerOf('menubar', 'menubar-wordmark-version-margin-left'), 'wordmark')
+  // and a row with no part path at all is the component's own
+  assert.equal(layerOf('window', 'window-fill'), 'window')
+  assert.equal(layerOf('menubar', 'menubar-gap'), 'menubar')
+})
+
+test('a locked row joins the part it names, or the root when it names none', () => {
+  const layerOf = (id, role) => rowsFor(id).find((r) => r.role === role)?.layer
+  // 'ctrl' is a part the window's other rows already named
+  assert.equal(layerOf('window', 'window-ctrl-size'), 'ctrl')
+  // 'h' and 'cell' name no part, so they stay with the component itself
+  assert.equal(layerOf('menubar', 'menubar-h'), 'menubar')
+  assert.equal(layerOf('desktop-icons', 'desktop-icons-cell-width'), 'desktop-icons')
+})
+
+test('the dock scoped to a layer draws that layer and nothing else', () => {
+  for (const id of COMPONENT_IDS) {
+    const whole = blocksFor(id).flatMap((g) => g.rows.map((r) => r.role))
+    const drilled = []
+    for (const layer of layersFor(id)) {
+      const groups = blocksFor(id, layer.id)
+      for (const group of groups) {
+        assert.ok(group.rows.length > 0, `${id}/${layer.id} draws no empty block`)
+        for (const row of group.rows) {
+          assert.equal(row.layer, layer.id, `${row.role} belongs on this layer`)
+          drilled.push(row.role)
+        }
+      }
+      // block order survives the scoping
+      const order = groups.map((g) => g.block)
+      assert.deepEqual(order, STYLER_BLOCKS.filter((b) => order.includes(b)))
+    }
+    assert.deepEqual(drilled.sort(), whole.slice().sort(), `${id} loses no row to the drill`)
+  }
+  // the drill is what it was minted for: window's twenty rows, nine at worst
+  const biggest = Math.max(...layersFor('window').map((l) => l.rows.length))
+  assert.ok(biggest < rowsFor('window').length / 2, 'no layer is half the component')
+})
+
+/* ------------------------------------------------------ the two axes */
+
+/* The tabs re-arrange data that already existed — the specs' variants and the
+   commit route's three token sets — so what can go wrong is a MISMATCH: a tab
+   whose label names no copy key renders the key, and a set the commit route
+   has never heard of offers a SAVE with nowhere to go. StylerStage.tsx is JSX
+   over five real components and cannot be imported in a harness with no DOM,
+   so both read off the source, the way the spec-coverage test above does. */
+
+const stageSrc = src('src/components/inspect/StylerStage.tsx')
+const specSrc = src('src/components/inspect/stageSpecs.tsx')
+const COPY = JSON.parse(src('src/content/copy.json'))
+
+test('the token-set axis offers exactly the three sets SAVE can commit to', () => {
+  const sets = [...stageSrc.matchAll(/\{ id: '([a-z-]+)', skin:/g)].map((m) => m[1])
+  assert.deepEqual(sets, [...TOKEN_THEMES])
+})
+
+test('every tab on either axis names a copy key that exists', () => {
+  const keys = [
+    ...[...specSrc.matchAll(/label: '([\w.]+)'/g)].map((m) => m[1]),
+    ...[...stageSrc.matchAll(/label: '([\w.]+)'/g)].map((m) => m[1]),
+    'styler.axis.variant',
+    'styler.axis.set',
+    'styler.layers',
+  ]
+  assert.ok(keys.length >= 12, 'the labels were found at all')
+  for (const key of keys) assert.ok(key in COPY, `${key} is in copy.json`)
+})
+
+test('the bench still registers itself, or the skin previews go half-dead', () => {
+  // the finding two tests below this one, held to: a non-active token set on
+  // the bench is a nested data-skin wrapper, and a nested wrapper only takes
+  // a rebind because stylerTune was told about it
+  assert.ok(stageSrc.includes('addRoot(el)'), 'the bench is registered')
+  assert.ok(stageSrc.includes('removeRoot(el)'), 'and unregistered on the way out')
+  assert.ok(/ref=\{benchRef\}/.test(stageSrc), 'the registered element is the bench')
+  assert.ok(/data-skin=\{set\.skin\}/.test(stageSrc), 'and the bench is the skin wrapper')
 })
 
 /* ------------------------------------------------------ the X pairing */
