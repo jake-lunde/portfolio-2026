@@ -1,0 +1,282 @@
+/* STYLER STAGE — the bench.
+ *
+ * Jake, reviewing the first cut: styling should not be conflated with
+ * inspecting, and the thing being styled has to be away from the rest of the
+ * site or you cannot see what you changed. So this is a takeover, and it is
+ * built out of INSPECT.MODE's own idiom rather than a new one: a crown across
+ * the top in the accent, a 304px paper dock on the right, and the canvas
+ * between them. The inner pieces — .crownTitle, .crownBtn, .panelHead,
+ * .resetAll, .roleChip — are imported straight from inspectShell.module.css,
+ * because two files drawing the same button is how two buttons start to
+ * differ. What is here is only what is different: where the frame sits, and
+ * what the bench under the component looks like.
+ *
+ * THE GROUND. The dock is --surface, the paper the inspector is already made
+ * of. The canvas is --surface-raised, which is exactly one step darker in
+ * every skin and mode (see .bar in inspectShell.module.css) — a bench under
+ * the paper rather than a second sheet of it. No token was minted for this.
+ *
+ * MOTION is the docks' own: transform and opacity, one --duration-theme, and
+ * nothing at all under prefers-reduced-motion. No springs — the frame arrives,
+ * it does not bounce.
+ */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  /* above the tool's own frame (6500), below BOOT (8000) and the
+     screensaver: the stage is a room inside the tool, not a new machine */
+  z-index: 6600;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  color: var(--content);
+  font-family: var(--type-body-family);
+  animation: stageIn var(--duration-theme) ease-out;
+}
+
+@keyframes stageIn {
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+}
+
+/* the crown, spanning the whole width this time: there is no left dock to
+   make room for, and the component's name belongs across the top of the room
+   it is standing in */
+.crown {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-sm);
+  height: var(--menubar-h);
+  padding: 0 var(--spacing-component-sm);
+  background: var(--accent);
+  color: var(--surface);
+  border-bottom: var(--border-width-default) solid var(--content);
+  user-select: none;
+}
+
+/* the chip on the crown reads on the accent flood, not on paper. It takes
+   the slack too, so the way out sits at the far edge where a titlebar's
+   control belongs. */
+.crownChip {
+  flex: none;
+  margin-right: auto;
+  padding: 0 var(--spacing-component-xs);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--surface);
+  border: var(--border-width-default) solid var(--surface);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+/* ---- the canvas: the component, alone, with room around it ---- */
+.canvas {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: auto;
+  padding: var(--spacing-component-xl);
+  background: var(--surface-raised);
+}
+
+/* the active skin's spread, big, centred, and given air. This is the whole
+   point of the room: one component with nothing else in the frame. */
+.spread {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-xl);
+  min-height: 240px;
+  padding: var(--spacing-component-xl) var(--spacing-component-md);
+}
+
+.variant {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-component-sm);
+}
+
+.label {
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+/* ---- the other skins, side by side underneath ---- */
+.skins {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-component-lg);
+  margin-top: var(--spacing-component-xl);
+  padding-top: var(--spacing-component-lg);
+  border-top: var(--border-width-subtle) solid var(--border);
+}
+
+/* each tile paints its OWN skin's ground, because a medieval component
+   standing on classic paper is not what medieval looks like */
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-component-sm);
+  padding: var(--spacing-component-md);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+}
+
+/* ---- the benches: what a component needs to stand up on ---- */
+
+/* a transform makes this the containing block for a `position: fixed`
+   descendant, which is what lets the menubar lay itself across the bench
+   instead of across the viewport (the same trick storyHarness's DeskStage
+   uses). The relative + size does the same job for an absolute one. */
+.bench {
+  position: relative;
+  transform: translateZ(0);
+  overflow: hidden;
+  background: var(--surface);
+  border: var(--border-width-subtle) solid var(--border);
+}
+
+/* Explicit boxes, not width:100%. The bench sits inside a shrink-wrapping
+   flex column (.variant, .tile), and its two occupants take no space of
+   their own — the menubar is fixed, the icons grid absolute — so a
+   percentage here resolves against the label underneath and the bench
+   collapses to a sliver. */
+.benchChrome {
+  width: min(640px, 100%);
+  height: calc(var(--menubar-h) * 2);
+}
+
+/* three grid columns plus the grid's own 26/20 desk offsets, with air */
+.benchDesk {
+  width: 344px;
+  height: 372px;
+}
+
+/* The window sample measures itself against this box, the way a real one
+   measures itself against the desktop. Wider than the sample by more than
+   the 12px gutter Window clamps its right edge by, or the clamp resolves
+   negative and the frame hangs off the left of its own bench. */
+.windowBench {
+  position: relative;
+  width: 340px;
+  height: 180px;
+}
+
+.sampleBody {
+  margin: 0;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  font-weight: var(--type-body-sm-weight);
+  letter-spacing: var(--type-body-sm-tracking);
+  line-height: var(--type-body-sm-leading);
+  color: var(--content-muted);
+}
+
+/* ---- the right dock: the blocks, and the way to send them ---- */
+.dock {
+  flex: none;
+  width: var(--inspect-right, 304px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-left: var(--border-width-default) solid var(--content);
+  animation: dockIn var(--duration-theme) ease-out;
+}
+
+@keyframes dockIn {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+/* the dock's head carries the note glyph, so it is a bar in .bar's sense:
+   the positioning context the tip hangs off, with the heading holding only
+   its own label */
+.dockHead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+}
+
+.dockTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+.dockBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* the send bar sits at the foot of the dock, always reachable — a person
+   who has re-bound six rows should not have to scroll to the bottom of six
+   blocks to find the button that proposes them */
+.send {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-component-sm);
+  border-top: var(--border-width-default) solid var(--content);
+  background: var(--surface-raised);
+}
+
+.sendTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-component-sm);
+}
+
+.sendActions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--spacing-component-md);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage,
+  .dock {
+    animation: none;
+  }
+}

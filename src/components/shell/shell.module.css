@@ -485,6 +485,18 @@
   display: none;
 }
 
+/* ONE EXCEPTION, and it is the same bar. STYLER's stage puts the real
+   MenuBar on a bench to be restyled (components/inspect/stageSpecs.tsx), and
+   the rule above would hide the sample along with the desktop's own copy —
+   the stage only runs while the tool is up, so it matches every time. Same
+   specificity as the rule it answers, declared after it, which is how it
+   wins without an !important. The bench is a marked wrapper rather than a
+   change to MenuBar: nothing in that file should have to know a stage
+   exists. */
+:global([data-styler-bench]) .menubar {
+  display: flex;
+}
+
 /* INSPECT.MODE compresses the desk between two docked panels, and a
    hatch measured against the old desk would open under one of them. The
    crew sits this mode out. */

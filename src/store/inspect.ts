@@ -37,18 +37,31 @@ import { create } from 'zustand'
  */
 export type InspectTool = 'select' | 'operate'
 
+/* THE STAGE lives here too, for one reason: it is a mode inside a mode, and
+   putting the tool down has to take it with it. Jake's note on the first cut
+   of STYLER was that styling and inspecting are two experiences and the panel
+   was showing both at once — so the five blocks left the inspector and became
+   a takeover, and `stage` is which component that takeover is holding. Every
+   way OUT of the tool clears it, which is why setOn and toggle write it rather
+   than leaving it to a cleanup somewhere else to remember. */
+
 type InspectState = {
   on: boolean
   tool: InspectTool
+  /** the `data-component` STYLER has isolated on the stage, or null */
+  stage: string | null
   toggle: () => void
   setOn: (v: boolean, tool?: InspectTool) => void
   setTool: (t: InspectTool) => void
+  setStage: (id: string | null) => void
 }
 
 export const useInspect = create<InspectState>((set) => ({
   on: false,
   tool: 'select',
-  toggle: () => set((s) => ({ on: !s.on, tool: 'select' })),
-  setOn: (v, tool = 'select') => set({ on: v, tool }),
+  stage: null,
+  toggle: () => set((s) => ({ on: !s.on, tool: 'select', stage: null })),
+  setOn: (v, tool = 'select') => set({ on: v, tool, stage: null }),
   setTool: (tool) => set({ tool }),
+  setStage: (stage) => set({ stage }),
 }))
