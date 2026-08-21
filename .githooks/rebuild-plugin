@@ -33,5 +33,7 @@ if [ $? -ne 0 ]; then
   echo "$out" | tail -5
   exit 0
 fi
-echo "TOKEN BRIDGE: plugin source changed, dist/ rebuilt. $(echo "$out" | tail -1)"
+# build.mjs signs off with "TOKEN BRIDGE: build complete. stamp <sha> on <branch>".
+detail=$(echo "$out" | tail -1 | sed 's/^TOKEN BRIDGE: build complete\. *//')
+echo "TOKEN BRIDGE: plugin source changed, dist/ rebuilt ($detail)."
 exit 0

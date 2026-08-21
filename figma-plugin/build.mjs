@@ -25,10 +25,31 @@ const SRC = path.join(DIR, 'src')
 const DIST = path.join(DIR, 'dist')
 const watch = process.argv.includes('--watch')
 
+/* A git hook exports GIT_DIR (and friends) to everything it runs. Inherit
+ * those and git treats build.mjs's own cwd as the repo root, so `-- .` matches
+ * the whole tree and the stamp comes out wrong. Drop them and let git discover
+ * the repo from cwd like a normal invocation. */
+const GIT_ENV_VARS = [
+  'GIT_DIR',
+  'GIT_COMMON_DIR',
+  'GIT_WORK_TREE',
+  'GIT_INDEX_FILE',
+  'GIT_OBJECT_DIRECTORY',
+  'GIT_PREFIX',
+  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+]
+const gitEnv = { ...process.env }
+for (const key of GIT_ENV_VARS) delete gitEnv[key]
+
 /** Run git in the plugin dir; empty string when git has nothing to say. */
 function git(...args) {
   try {
-    return execFileSync('git', args, { cwd: DIR, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+    return execFileSync('git', args, {
+      cwd: DIR,
+      env: gitEnv,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()
   } catch {
     return ''
   }
