@@ -39,13 +39,13 @@ export function Button({
     .join(' ')
   if (href) {
     return (
-      <a className={cls} href={href} target="_blank" rel="noreferrer">
+      <a className={cls} href={href} target="_blank" rel="noreferrer" data-component="button">
         {children}
       </a>
     )
   }
   return (
-    <button className={cls} {...rest}>
+    <button className={cls} data-component="button" {...rest}>
       {children}
     </button>
   )

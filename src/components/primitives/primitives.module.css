@@ -1,14 +1,14 @@
 /* rubber-stamp block — archival accent vocabulary */
 .stamp {
   display: inline-block;
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  font-weight: var(--weight-bold); /* diverges from label's regular weight — stamp reads bolder */
-  letter-spacing: var(--tracking-20); /* diverges from label's tracking-14 — wider track for the stamp */
+  font-family: var(--stamp-family);
+  font-size: var(--stamp-font-size);
+  font-weight: var(--stamp-weight); /* diverges from label's regular weight — stamp reads bolder */
+  letter-spacing: var(--stamp-tracking); /* diverges from label's tracking-14 — wider track for the stamp */
   text-transform: uppercase;
-  color: var(--accent);
-  border: 2px solid var(--accent);
-  padding: 5px 10px;
+  color: var(--stamp-fg);
+  border: var(--stamp-border-width) solid var(--stamp-border-color);
+  padding: var(--stamp-padding-y) var(--stamp-padding-x);
   transform: rotate(-3deg);
   opacity: 0.85;
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='2'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 .4 .7 1 1 1 1 1'/%3E%3C/feComponentTransfer%3E%3CfeComposite operator='in' in2='SourceGraphic'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E");
@@ -16,8 +16,8 @@
 }
 
 .stampPink {
-  color: var(--content);
-  border-color: var(--accent-expressive);
+  color: var(--stamp-pink-fg);
+  border-color: var(--stamp-pink-border-color);
 }
 
 /* ---------- Button — token-driven, the component-loop demo target ------- */
@@ -32,16 +32,16 @@
   font-weight: var(--button-weight);
   text-transform: uppercase;
   border-radius: var(--button-radius);
-  background: var(--surface);
-  color: var(--content);
+  background: var(--button-bg);
+  color: var(--button-fg);
   border-style: solid;
-  border-color: var(--content);
+  border-color: var(--button-stroke);
   cursor: pointer;
   transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 [data-theme='dark'] .btn {
-  border-color: var(--border);
+  --button-stroke: var(--border);
 }
 
 .btnSm {
@@ -59,13 +59,13 @@
 }
 
 .btnExpressive:hover {
-  background: var(--accent-expressive);
-  color: var(--on-accent-expressive);
+  background: var(--button-expressive-hover-bg);
+  color: var(--button-expressive-hover-fg);
 }
 
 .btnSystem:hover {
-  background: var(--accent);
-  color: var(--surface);
+  background: var(--button-system-hover-bg);
+  color: var(--button-system-hover-fg);
 }
 
 /* solid: the system accent at rest (hub-player's CASE STUDY). Hover spec
@@ -73,8 +73,8 @@
    rules resolve to the same fill. */
 .btnSolid,
 .btnSolid:hover {
-  background: var(--accent);
-  color: var(--surface);
+  background: var(--button-solid-bg);
+  color: var(--button-solid-fg);
 }
 
 /* under-construction plate for stub programs */

@@ -147,7 +147,7 @@ export function MenuBar() {
     /* the menubar is the tool's own toolbar while INSPECT.MODE is up, so
        it is exempt from picking (InspectShell) — the way OUT of the mode
        must never be something the mode swallows */
-    <header className={styles.menubar} data-inspect-self="">
+    <header className={styles.menubar} data-inspect-self="" data-component="menubar">
       <div className={styles.menuLeft}>
         <div className={styles.wordmark}>
           {/* the house mark, in system ink — mask-image lets a raster

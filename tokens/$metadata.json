@@ -19,6 +19,9 @@
     "semantic/classic-dark",
     "semantic/medieval",
     "component/button",
-    "component/menubar"
+    "component/menubar",
+    "component/stamp",
+    "component/desktop-icons",
+    "component/window"
   ]
 }
