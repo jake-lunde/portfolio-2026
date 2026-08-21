@@ -18,6 +18,7 @@
   font-size: var(--menubar-text-font-size);
   font-weight: var(--menubar-text-font-weight);
   letter-spacing: var(--menubar-text-letter-spacing);
+  line-height: var(--menubar-text-line-height);
 }
 
 .wordmark {
@@ -25,6 +26,7 @@
   font-size: var(--menubar-wordmark-text-font-size);
   font-weight: var(--menubar-wordmark-text-font-weight);
   letter-spacing: var(--menubar-wordmark-text-letter-spacing);
+  line-height: var(--menubar-wordmark-text-line-height);
   text-transform: uppercase;
 }
 
@@ -34,6 +36,7 @@
   color: var(--content-muted);
   font-weight: var(--menubar-wordmark-version-text-font-weight);
   letter-spacing: var(--menubar-wordmark-version-text-letter-spacing);
+  line-height: var(--menubar-wordmark-version-text-line-height);
   margin-left: var(--menubar-wordmark-version-margin-left);
 }
 
@@ -48,6 +51,7 @@
   font-size: var(--menubar-menu-btn-text-font-size);
   font-weight: var(--menubar-menu-btn-text-font-weight);
   letter-spacing: var(--menubar-menu-btn-text-letter-spacing);
+  line-height: var(--menubar-menu-btn-text-line-height);
   text-transform: uppercase;
   padding: var(--menubar-menu-btn-padding-y) var(--menubar-menu-btn-padding-x);
   border: var(--menubar-menu-btn-border-width) solid transparent;
@@ -541,6 +545,7 @@
   font-size: var(--desktop-icons-label-text-font-size);
   font-weight: var(--desktop-icons-label-text-font-weight);
   letter-spacing: var(--desktop-icons-label-text-letter-spacing);
+  line-height: var(--desktop-icons-label-text-line-height);
   text-transform: uppercase;
 }
 
@@ -1331,6 +1336,7 @@
   font-size: var(--window-title-text-font-size);
   font-weight: var(--window-title-text-font-weight);
   letter-spacing: var(--window-title-text-letter-spacing);
+  line-height: var(--window-title-text-line-height);
   text-transform: uppercase;
   flex: 1;
   text-align: center;
@@ -1344,6 +1350,7 @@
   font-size: var(--window-title-meta-text-font-size);
   font-weight: var(--window-title-meta-text-font-weight);
   letter-spacing: var(--window-title-meta-text-letter-spacing);
+  line-height: var(--window-title-meta-text-line-height);
   opacity: 0.6;
 }
 
@@ -1362,6 +1369,7 @@
   font-size: var(--window-explainer-btn-text-font-size);
   font-weight: var(--window-explainer-btn-text-font-weight);
   letter-spacing: var(--window-explainer-btn-text-letter-spacing);
+  line-height: var(--window-explainer-btn-text-line-height);
   text-transform: uppercase;
   white-space: nowrap;
   /* rides the titlebar's own ink: content when idle, inverse when active —
