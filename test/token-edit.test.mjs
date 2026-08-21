@@ -12,7 +12,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import ts from 'typescript'
@@ -35,15 +35,21 @@ function moduleUrl(path, deps = {}) {
 
 const paletteUrl = moduleUrl('src/lib/palette.ts')
 const tiersUrl = moduleUrl('src/lib/tokens.generated.ts')
+const candidatesUrl = moduleUrl('src/lib/styleCandidates.ts', { './tokens.generated': tiersUrl })
 const editUrl = moduleUrl('src/lib/tokenEdit.ts', {
   './palette': paletteUrl,
   './tokens.generated': tiersUrl,
+  './styleCandidates': candidatesUrl,
 })
 
 const {
+  applyComponentEdits,
   applyTokenEdits,
+  componentFilePath,
+  serializeComponentTokens,
   serializeTokens,
   tokenRef,
+  validateEdit,
   varIndex,
   themeFor,
   isTokenTheme,
@@ -55,6 +61,9 @@ const light = JSON.parse(src('tokens/semantic/classic-light.json'))
 const dark = JSON.parse(src('tokens/semantic/classic-dark.json'))
 const medieval = JSON.parse(src('tokens/semantic/medieval.json'))
 const clone = (o) => JSON.parse(JSON.stringify(o))
+
+const COMPONENTS = ['button', 'desktop-icons', 'menubar', 'stamp', 'window']
+const component = (id) => JSON.parse(src(componentFilePath(id)))
 
 const COBALT = 'color/nasa/cobalt'
 const GLOW = 'color/nasa/glow'
@@ -219,10 +228,19 @@ test('refuses a CORE role — semantic tier only', () => {
   assert.match(r.error, /not semantic/)
 })
 
-test('refuses a COMPONENT role', () => {
+test('refuses a COMPONENT role — a palette primitive is not its ramp', () => {
+  // the component tier has its own law (styleCandidates): a radius row takes
+  // radius roles, and a core color primitive is not one of them. Even a role
+  // whose ramp WOULD take a color still cannot land in a theme file.
   const r = applyTokenEdits(clone(light), clone(light), [{ role: 'button-radius', token: COBALT }])
   assert.equal(r.ok, false)
-  assert.match(r.error, /not semantic/)
+  assert.match(r.error, /not a candidate for "button-radius"/)
+
+  const lawful = applyTokenEdits(clone(light), clone(light), [
+    { role: 'button-bg', token: 'surface-raised' },
+  ])
+  assert.equal(lawful.ok, false)
+  assert.match(lawful.error, /not semantic/)
 })
 
 test('refuses a semantic role that is not a colour', () => {
@@ -331,4 +349,172 @@ test('only the three theme sets are commit targets', () => {
   assert.equal(isTokenTheme('scale'), false)
   assert.equal(isTokenTheme('../../package'), false)
   assert.equal(themeFilePath('medieval'), 'tokens/semantic/medieval.json')
+})
+
+/* ============================================================ COMPONENT
+
+   STYLER's half. The failure modes are the same species as the semantic
+   half's and just as quiet: a rebind that keeps the OFF-GRID note leaves a
+   file that describes itself wrongly; a role minted rather than found puts a
+   token in the JSON that no CSS reads; a mixed set writes one component's
+   change into another's file. */
+
+test('validateEdit takes a component rebind that is inside its ramp', () => {
+  assert.equal(validateEdit({ role: 'button-radius', token: 'radius/pill' }), null)
+  assert.equal(validateEdit({ role: 'button-bg', token: 'surface-raised' }), null)
+  assert.equal(validateEdit({ role: 'menubar-gap', token: 'spacing/component/md' }), null)
+  assert.equal(validateEdit({ role: 'stamp-weight', token: 'weight/black' }), null)
+})
+
+test('validateEdit refuses a target from the wrong family', () => {
+  assert.match(
+    validateEdit({ role: 'button-radius', token: 'surface' }),
+    /token "surface" is not a candidate for "button-radius"/,
+  )
+  assert.match(
+    validateEdit({ role: 'button-bg', token: 'space/2' }),
+    /not a candidate for "button-bg"/,
+  )
+  // a core step behind a semantic role is still not the role
+  assert.match(
+    validateEdit({ role: 'button-radius', token: 'radius/md' }),
+    /not a candidate for "button-radius"/,
+  )
+})
+
+test('validateEdit refuses a locked structural dimension', () => {
+  for (const role of ['menubar-h', 'window-ctrl-size', 'desktop-icons-cell-width']) {
+    assert.match(validateEdit({ role, token: 'space/8' }), /is locked — no lawful ramp/)
+  }
+})
+
+test('validateEdit refuses a palette primitive on a component color row', () => {
+  // colour rows take semantic ROLES; the twelve primitives are the semantic
+  // tier's raw material, and a component that aliased one would skip the layer
+  // that makes skins possible
+  assert.match(
+    validateEdit({ role: 'button-bg', token: COBALT }),
+    /token "color\/nasa\/cobalt" is not a candidate for "button-bg"/,
+  )
+})
+
+test('validateEdit still grades the semantic tier exactly as before', () => {
+  assert.equal(validateEdit({ role: 'accent', token: COBALT }), null)
+  assert.match(validateEdit({ role: 'accent', token: 'surface' }), /not in the palette/)
+  assert.match(validateEdit({ role: 'border-width-thin', token: COBALT }), /is core, not semantic/)
+  assert.match(validateEdit({ role: 'accent-ish', token: COBALT }), /unknown role/)
+})
+
+test('rebinds an OFF-GRID literal and retires the note that described it', () => {
+  const button = component('button')
+  assert.ok(button.button.sm['padding-y'].$description.startsWith('OFF-GRID'))
+
+  const r = applyComponentEdits(button, [{ role: 'button-sm-padding-y', token: 'space/2' }])
+  assert.equal(r.ok, true)
+  assert.deepEqual(r.json.button.sm['padding-y'], { $value: '{space.2}', $type: 'dimension' })
+  // key order is the authored one, so the diff stays local
+  assert.deepEqual(Object.keys(r.json.button.sm['padding-y']), ['$value', '$type'])
+  // siblings are untouched, and so is the caller's tree
+  assert.deepEqual(r.json.button.sm['padding-x'], button.button.sm['padding-x'])
+  assert.deepEqual(r.json.button.md, button.button.md)
+  assert.equal(button.button.sm['padding-y'].$value, '6px')
+  assert.equal(r.applied[0].materialized, false)
+})
+
+test('rebinding a leaf that already carried a ref keeps its $type', () => {
+  const r = applyComponentEdits(component('button'), [
+    { role: 'button-radius', token: 'radius/pill' },
+    { role: 'button-bg', token: 'surface-raised' },
+  ])
+  assert.equal(r.ok, true)
+  assert.deepEqual(r.json.button.radius, { $value: '{radius.pill}', $type: 'dimension' })
+  assert.deepEqual(r.json.button.bg, { $value: '{surface-raised}', $type: 'color' })
+  // a leaf with no authored $type does not grow one
+  const w = applyComponentEdits(component('button'), [
+    { role: 'button-weight', token: 'weight/medium' },
+  ])
+  assert.deepEqual(w.json.button.weight, { $value: '{weight.medium}' })
+})
+
+test('a rebind is a one-line diff', () => {
+  const r = applyComponentEdits(component('window'), [
+    { role: 'window-fill', token: 'surface' },
+  ])
+  assert.equal(r.ok, true)
+  const before = src(componentFilePath('window')).split('\n')
+  const after = serializeComponentTokens(r.json).split('\n')
+  const changed = before.filter((line, i) => line !== after[i])
+  assert.equal(changed.length, 1, `expected one changed line, got ${changed.length}`)
+})
+
+/* The directory, not the list — a sixth component file must round-trip too,
+   and nobody will remember to add it here. The theme sets escape their em
+   dashes because Tokens Studio wrote them; these were written by hand and do
+   not, which is the whole reason there are two serializers. */
+test('serialize is byte-stable against every component file on disk', () => {
+  const ids = readdirSync(resolve(here, '..', 'tokens/component'))
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => f.replace(/\.json$/, ''))
+  assert.deepEqual(ids.sort(), COMPONENTS)
+  for (const id of ids) {
+    assert.equal(serializeComponentTokens(component(id)), src(componentFilePath(id)), id)
+    // and the escaping serializer would NOT be byte-stable — the split is real
+    if (/[^\x00-\x7e]/.test(src(componentFilePath(id)))) {
+      assert.notEqual(serializeTokens(component(id)), src(componentFilePath(id)), id)
+    }
+  }
+})
+
+test('refuses a set that spans two components', () => {
+  const r = applyComponentEdits(component('button'), [
+    { role: 'button-radius', token: 'radius/pill' },
+    { role: 'stamp-weight', token: 'weight/black' },
+  ])
+  assert.equal(r.ok, false)
+  assert.match(r.error, /span two components \(button, stamp\)/)
+})
+
+test('never mints a component leaf — a role absent from the tree is refused', () => {
+  // menubar's roles are real, but not in button.json; a picker cannot promote
+  const r = applyComponentEdits(component('button'), [
+    { role: 'menubar-gap', token: 'spacing/component/xl' },
+  ])
+  assert.equal(r.ok, false)
+  assert.match(r.error, /is not in menubar's token set/)
+})
+
+test('refuses a semantic or unknown role on the component path', () => {
+  const semantic = applyComponentEdits(component('button'), [{ role: 'accent', token: COBALT }])
+  assert.equal(semantic.ok, false)
+  assert.match(semantic.error, /not in the palette|not a component property/)
+
+  const unknown = applyComponentEdits(component('button'), [
+    { role: 'button-nonsense', token: 'space/2' },
+  ])
+  assert.equal(unknown.ok, false)
+  assert.match(unknown.error, /unknown role/)
+})
+
+test('the component path honours the same cap and the same duplicate rule', () => {
+  const many = Array.from({ length: MAX_EDITS + 1 }, () => ({
+    role: 'button-radius',
+    token: 'radius/pill',
+  }))
+  const over = applyComponentEdits(component('button'), many)
+  assert.equal(over.ok, false)
+  assert.match(over.error, /too many edits/)
+
+  const dupe = applyComponentEdits(component('button'), [
+    { role: 'button-radius', token: 'radius/pill' },
+    { role: 'button-radius', token: 'radius/circle' },
+  ])
+  assert.equal(dupe.ok, false)
+  assert.match(dupe.error, /duplicate role/)
+
+  assert.equal(applyComponentEdits(component('button'), []).ok, false)
+})
+
+test('componentFilePath is the id, and the id is the file name', () => {
+  assert.equal(componentFilePath('desktop-icons'), 'tokens/component/desktop-icons.json')
+  for (const id of COMPONENTS) assert.ok(component(id))
 })
