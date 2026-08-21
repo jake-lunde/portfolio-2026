@@ -6,6 +6,7 @@ import { useInspect } from '@/store/inspect'
 import { t } from '@/content/copy'
 import { inspectElement, type Inspection } from '@/lib/inspect'
 import { resetAll } from '@/lib/tune'
+import { resetAll as stylerResetAll } from '@/lib/stylerTune'
 import { LayersPanel } from './LayersPanel'
 import { InspectorPanel } from './InspectorPanel'
 import { useCopyEditing } from './useCopyEditing'
@@ -481,6 +482,9 @@ export default function InspectShell() {
   useEffect(
     () => () => {
       resetAll()
+      // both tiers preview on the same root, and neither may outlive the
+      // tool that wrote it (lib/stylerTune.ts)
+      stylerResetAll()
       document.body.removeAttribute('data-inspectmode')
       document.body.removeAttribute('data-inspecttool')
       scrub('data-inspect-hover')

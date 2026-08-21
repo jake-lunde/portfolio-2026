@@ -14,9 +14,10 @@ import {
   type SourcePart,
 } from '@/lib/inspect'
 import { editUrl } from '@/lib/repo'
-import { themeFor } from '@/lib/tokenEdit'
+import { MAX_EDITS, themeFor } from '@/lib/tokenEdit'
 import type { useCopyEditing } from './useCopyEditing'
 import { InfoTip } from './InfoTip'
+import { StylerBlocks } from './StylerBlocks'
 import {
   CANDIDATES,
   isNudged,
@@ -27,6 +28,11 @@ import {
   resetAll,
   wouldGrade,
 } from '@/lib/tune'
+import {
+  count as stylerCount,
+  pendingEdits as stylerPendingEdits,
+  resetAll as stylerResetAll,
+} from '@/lib/stylerTune'
 import styles from './inspectShell.module.css'
 
 /* INSPECTOR — the right dock. Everything the window version reported,
@@ -240,7 +246,12 @@ export function InspectorPanel({
   const [gate, setGate] = useState<Gate>(null)
   const [keyInput, setKeyInput] = useState('')
   const live = overrides()
-  const anyLive = Object.keys(live).length > 0
+  /* Two tiers preview at once now, and the banner speaks for both: a
+     re-cast role and a re-bound component property are the same sentence,
+     something on this desktop is changed and not saved. They also ride one
+     POST — the commit route partitions by tier — so one SAVE, one PR. */
+  const stylerHeld = stylerCount()
+  const anyLive = Object.keys(live).length > 0 || stylerHeld > 0
 
   /* ---- what the pick means to the copy layer ----
      The key may sit on an ancestor: a copy string renders into one node
@@ -276,17 +287,26 @@ export function InspectorPanel({
 
   const springKey = report?.spring ? `inspect.spring.${report.spring.name}` : null
 
+  /* Which component the pick belongs to. The whole component, from wherever
+     inside it the visitor clicked: STYLER edits the tier, and the tier has
+     no instances (StylerBlocks.tsx). */
+  const componentId = picked?.closest<HTMLElement>('[data-component]')?.dataset.component ?? null
+
   /* Which token file the desktop on screen is actually reading. */
   const target = themeFor(skin, theme)
   const pending = pendingEdits()
-  /* The two reasons SAVE is not offered. A failing pick still PREVIEWS —
+  /* The three reasons SAVE is not offered. A failing pick still PREVIEWS —
      that is the driver's seat — but a PR that lands a AA failure is a PR
-     CI will paint red, so it never leaves the panel. */
+     CI will paint red, so it never leaves the panel. The cap is the route's
+     and it is not lifted here: a POST over it comes back 400, so the panel
+     says the number instead of spending a round trip to be told. */
   const blocked = !target
     ? 'inspect.save.notheme'
     : pending.some((e) => e.fails)
       ? 'inspect.save.aafail'
-      : null
+      : pending.length + stylerHeld > MAX_EDITS
+        ? 'styler.save.overcap'
+        : null
 
   const after = () => {
     // a new pick makes any reported PR describe a different set — the
@@ -299,7 +319,18 @@ export function InspectorPanel({
   /* ---- SAVE: read the file's sha, then post the re-casts as a PR ---- */
   const commit = async () => {
     if (!target || blocked) return
-    const edits = pendingEdits().map((e) => ({ role: e.role, token: e.token }))
+    /* Both tiers in one list. The route validates, then partitions by
+       tierOfRole and writes tokens/semantic/<theme>.json and every touched
+       tokens/component/<id>.json into ONE commit on the same branch — which
+       is the right shape, because a visitor who re-cast a role and re-bound
+       a button did one piece of work and should get one PR for it. `theme`
+       rides along on a component-only save too: the route needs the theme
+       file's sha to parent the commit either way, and the GET above already
+       fetched it. */
+    const edits = [
+      ...pendingEdits().map((e) => ({ role: e.role, token: e.token })),
+      ...stylerPendingEdits(),
+    ]
     if (edits.length === 0) return
     setSave({ k: 'busy' })
     try {
@@ -439,6 +470,15 @@ export function InspectorPanel({
      follow-up nudge now stacks onto that same open PR. */
   const saveInert = save.k === 'busy' || !!blocked
 
+  /* What SAVE does, named so Cmd+S can do exactly it rather than a second
+     version of it (StylerBlocks arms the key). With nothing pending it is a
+     no-op: the key should not summon a key prompt for a set that is empty. */
+  const requestSave = () => {
+    if (saveInert || !anyLive) return
+    if (readEditKey()) void commit()
+    else setGate({ for: 'token' })
+  }
+
   return (
     <>
       <h2 className={styles.panelHead}>
@@ -462,11 +502,7 @@ export function InspectorPanel({
                   className={`${styles.resetAll} ${styles.save}`}
                   aria-disabled={saveInert || undefined}
                   aria-describedby={note ? NOTE_ID : undefined}
-                  onClick={() => {
-                    if (saveInert) return
-                    if (readEditKey()) void commit()
-                    else setGate({ for: 'token' })
-                  }}
+                  onClick={requestSave}
                 >
                   <CopyText k="inspect.save" />
                   {target && <span className={styles.saveTarget}>{target.toUpperCase()}</span>}
@@ -476,6 +512,7 @@ export function InspectorPanel({
                   className={styles.resetAll}
                   onClick={() => {
                     resetAll()
+                    stylerResetAll()
                     setOpenVar(null)
                     setSave({ k: 'idle' })
                     after()
@@ -921,6 +958,20 @@ export function InspectorPanel({
                 )}
               </div>
             </section>
+
+            {/* ---- STYLER: the component tier, and the panel's second write ----
+                TOKENS above reports what the PICK reads. This is what the
+                COMPONENT is made of, and the rows are its own — pick a label
+                inside a desktop icon and desktop-icons' whole set draws. */}
+            {componentId && (
+              <StylerBlocks
+                componentId={componentId}
+                openVar={openVar}
+                setOpenVar={setOpenVar}
+                onChange={after}
+                onSave={requestSave}
+              />
+            )}
 
             {/* ---- CONTRAST ---- */}
             <section className={styles.section}>
