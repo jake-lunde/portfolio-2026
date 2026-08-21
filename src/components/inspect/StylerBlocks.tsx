@@ -77,6 +77,7 @@ export function StylerBlocks({
   setOpenVar,
   onChange,
   onSave,
+  bare,
 }: {
   /** the `data-component` of the root the pick sits inside */
   componentId: string
@@ -86,6 +87,10 @@ export function StylerBlocks({
   onChange: () => void
   /** what the SAVE button does, for Cmd+S to do the same thing */
   onSave: () => void
+  /** blocks only. The stage's dock names itself in its own head and carries
+      the count and the reset in its send bar, so this drops the section bar
+      and the footer rather than saying either thing twice. */
+  bare?: boolean
 }) {
   const skin = useSettings((s) => s.skin)
   const blocks = blocksFor(componentId)
@@ -200,13 +205,15 @@ export function StylerBlocks({
 
   return (
     <section className={styles.styler}>
-      <div className={styles.bar}>
-        <h3 className={styles.head}>
-          <CopyText k="styler.section" />
-        </h3>
-        <span className={styles.roleChip}>{componentId}</span>
-        <InfoTip k="styler.note" />
-      </div>
+      {!bare && (
+        <div className={styles.bar}>
+          <h3 className={styles.head}>
+            <CopyText k="styler.section" />
+          </h3>
+          <span className={styles.roleChip}>{componentId}</span>
+          <InfoTip k="styler.note" />
+        </div>
+      )}
 
       {blocks.map(({ block, rows }) => (
         <div key={block}>
@@ -313,7 +320,7 @@ export function StylerBlocks({
         </div>
       ))}
 
-      {held > 0 && (
+      {held > 0 && !bare && (
         <div className={styles.sectionBody}>
           <p className={styles.note}>
             <CopyText k="styler.pending" /> {held}

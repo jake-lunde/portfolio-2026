@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { useSettings } from '@/store/settings'
+import { useInspect } from '@/store/inspect'
 import { resolveCopy, t } from '@/content/copy'
 import { CopyText } from '@/content/CopyText'
 import { getCase } from '@/programs/projects/cases'
-import { clearEditKey, readEditKey } from '@/lib/editKey'
 import {
   labelFor,
   sourceText,
@@ -14,25 +14,12 @@ import {
   type SourcePart,
 } from '@/lib/inspect'
 import { editUrl } from '@/lib/repo'
-import { MAX_EDITS, themeFor } from '@/lib/tokenEdit'
 import type { useCopyEditing } from './useCopyEditing'
 import { InfoTip } from './InfoTip'
-import { StylerBlocks } from './StylerBlocks'
-import {
-  CANDIDATES,
-  isNudged,
-  nudge,
-  overrides,
-  pendingEdits,
-  reset,
-  resetAll,
-  wouldGrade,
-} from '@/lib/tune'
-import {
-  count as stylerCount,
-  pendingEdits as stylerPendingEdits,
-  resetAll as stylerResetAll,
-} from '@/lib/stylerTune'
+import { useTokenSave } from './useTokenSave'
+import { specFor } from './stageSpecs'
+import { CANDIDATES, isNudged, nudge, reset, resetAll, wouldGrade } from '@/lib/tune'
+import { resetAll as stylerResetAll } from '@/lib/stylerTune'
 import styles from './inspectShell.module.css'
 
 /* INSPECTOR — the right dock. Everything the window version reported,
@@ -91,7 +78,19 @@ import styles from './inspectShell.module.css'
    that explains the TOOL hangs off the bar's info glyph and shows on
    hover or focus (InfoTip.tsx); readings that describe the PICK stay
    inline where they can be seen without asking. So SOURCE's "pointers to
-   search for" is on hover and the core-primitive warning is not. */
+   search for" is on hover and the core-primitive warning is not.
+
+   ---- round 4, and STYLER leaves ----
+
+   The component tier's five blocks shipped inside this panel for exactly
+   one review. Jake: styling must not be conflated with inspecting, and the
+   thing being styled has to come away from the site or you cannot see what
+   you changed. Both notes point the same way, so the blocks became a room
+   of their own (StylerStage.tsx) and what is left here is the door — one
+   bar, the component's name, OPEN COMPONENT. The SAVE flow went into a
+   hook on the way out (useTokenSave.tsx) rather than being copied, because
+   two docks proposing the same edits by two code paths is how an AA refusal
+   in one of them goes missing. */
 
 /* Constant ids, never useId: this panel mounts inside a tree that reshapes
    at the SSR handover, and a generated id mismatches across it (see memory).
@@ -202,21 +201,6 @@ function indentOf(depth: number) {
   }
 }
 
-type Save =
-  /** nothing sent yet — the SAVE button is showing */
-  | { k: 'idle' }
-  | { k: 'busy' }
-  /** committed: the override is on a branch, awaiting review — NOT live */
-  | { k: 'done'; number: number; url: string }
-  /** terse and retryable; `msg` is a copy key */
-  | { k: 'error'; msg: string }
-  /** no EDIT_MODE_KEY or no commit token on this deployment */
-  | { k: 'locked' }
-
-/** The key prompt is one form for both proposals. `for` remembers which
-    one asked, so a successful arming goes on and does it. */
-type Gate = { for: 'token' | 'copy'; fail?: 'badkey' | 'throttled' } | null
-
 export function InspectorPanel({
   report,
   picked,
@@ -239,19 +223,9 @@ export function InspectorPanel({
   onPick: (el: HTMLElement) => void
 }) {
   const skin = useSettings((s) => s.skin)
-  const theme = useSettings((s) => s.theme)
+  const setStage = useInspect((s) => s.setStage)
   // tune.ts is module state, not a store — this is what re-reads it
   const [, bump] = useState(0)
-  const [save, setSave] = useState<Save>({ k: 'idle' })
-  const [gate, setGate] = useState<Gate>(null)
-  const [keyInput, setKeyInput] = useState('')
-  const live = overrides()
-  /* Two tiers preview at once now, and the banner speaks for both: a
-     re-cast role and a re-bound component property are the same sentence,
-     something on this desktop is changed and not saved. They also ride one
-     POST — the commit route partitions by tier — so one SAVE, one PR. */
-  const stylerHeld = stylerCount()
-  const anyLive = Object.keys(live).length > 0 || stylerHeld > 0
 
   /* ---- what the pick means to the copy layer ----
      The key may sit on an ancestor: a copy string renders into one node
@@ -289,195 +263,35 @@ export function InspectorPanel({
 
   /* Which component the pick belongs to. The whole component, from wherever
      inside it the visitor clicked: STYLER edits the tier, and the tier has
-     no instances (StylerBlocks.tsx). */
+     no instances (StylerStage.tsx). */
   const componentId = picked?.closest<HTMLElement>('[data-component]')?.dataset.component ?? null
 
-  /* Which token file the desktop on screen is actually reading. */
-  const target = themeFor(skin, theme)
-  const pending = pendingEdits()
-  /* The three reasons SAVE is not offered. A failing pick still PREVIEWS —
-     that is the driver's seat — but a PR that lands a AA failure is a PR
-     CI will paint red, so it never leaves the panel. The cap is the route's
-     and it is not lifted here: a POST over it comes back 400, so the panel
-     says the number instead of spending a round trip to be told. */
-  const blocked = !target
-    ? 'inspect.save.notheme'
-    : pending.some((e) => e.fails)
-      ? 'inspect.save.aafail'
-      : pending.length + stylerHeld > MAX_EDITS
-        ? 'styler.save.overcap'
-        : null
+  /* The whole SAVE flow lives in one hook now, because the STYLER stage is a
+     second dock that has to send exactly the same set the same way
+     (useTokenSave.tsx). The gate's constant id is passed in from here, so the
+     two docks can both be mounted without their inputs colliding. */
+  const saver = useTokenSave({
+    keyId: KEY_ID,
+    noteId: NOTE_ID,
+    authenticate: copy.authenticate,
+    onCopyArmed: () => {
+      if (copyHost) copy.beginEdit(copyHost)
+    },
+  })
 
   const after = () => {
     // a new pick makes any reported PR describe a different set — the
     // panel goes back to offering SAVE rather than quoting a stale number
-    setSave((s) => (s.k === 'done' || s.k === 'error' ? { k: 'idle' } : s))
+    saver.setSave((s) => (s.k === 'done' || s.k === 'error' ? { k: 'idle' } : s))
     bump((n) => n + 1)
     onRefresh()
   }
-
-  /* ---- SAVE: read the file's sha, then post the re-casts as a PR ---- */
-  const commit = async () => {
-    if (!target || blocked) return
-    /* Both tiers in one list. The route validates, then partitions by
-       tierOfRole and writes tokens/semantic/<theme>.json and every touched
-       tokens/component/<id>.json into ONE commit on the same branch — which
-       is the right shape, because a visitor who re-cast a role and re-bound
-       a button did one piece of work and should get one PR for it. `theme`
-       rides along on a component-only save too: the route needs the theme
-       file's sha to parent the commit either way, and the GET above already
-       fetched it. */
-    const edits = [
-      ...pendingEdits().map((e) => ({ role: e.role, token: e.token })),
-      ...stylerPendingEdits(),
-    ]
-    if (edits.length === 0) return
-    setSave({ k: 'busy' })
-    try {
-      const head = await fetch(`/api/token-commit?theme=${target}`, {
-        headers: { 'x-edit-key': readEditKey() },
-        cache: 'no-store',
-      })
-      if (head.status === 501) return setSave({ k: 'locked' })
-      if (head.status === 401) {
-        // the cached key is no good — drop it and ask again
-        clearEditKey()
-        return setGate({ for: 'token', fail: 'badkey' })
-      }
-      if (!head.ok) return setSave({ k: 'error', msg: 'inspect.save.failed' })
-      const { sha } = (await head.json()) as { sha: string }
-
-      const post = (baseSha: string) =>
-        fetch('/api/token-commit', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json', 'x-edit-key': readEditKey() },
-          body: JSON.stringify({ theme: target, baseSha, edits }),
-        })
-
-      let res = await post(sha)
-      /* A 409 hands back the revision that moved under us. These edits are
-         DECLARATIVE — "this role now aliases that primitive" — so replaying
-         them onto the fresh content is exactly what the visitor meant, and
-         the server re-applies rather than the client patching blind. One
-         retry only: a second 409 means something is genuinely churning, and
-         at that point the honest answer is to say so. */
-      if (res.status === 409) {
-        const fresh = (await res.json().catch(() => ({}))) as { sha?: string }
-        if (fresh.sha) res = await post(fresh.sha)
-      }
-      if (res.status === 409) return setSave({ k: 'error', msg: 'inspect.save.conflict' })
-      if (!res.ok) {
-        // the one refusal worth naming: the token already says this
-        const why = (await res.json().catch(() => ({}))) as { error?: string }
-        return setSave({
-          k: 'error',
-          msg: why.error === 'no change' ? 'inspect.save.nochange' : 'inspect.save.failed',
-        })
-      }
-      const j = (await res.json()) as { prNumber: number; prUrl: string }
-      setSave({ k: 'done', number: j.prNumber, url: j.prUrl })
-    } catch {
-      setSave({ k: 'error', msg: 'inspect.save.failed' })
-    }
-  }
-
-  /* ---- the gate. One form, whichever proposal opened it.
-     The verify goes through the copy engine rather than straight to
-     verifyEditKey, because the engine has to LEARN that the session is
-     armed: it is the thing holding the phase and the copy.json sha. The
-     token side needs nothing but the stored key, which is already there
-     by the time this resolves. ---- */
-  const arm = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const entered = keyInput
-    const asked = gate?.for ?? 'token'
-    setKeyInput('')
-    const verdict = await copy.authenticate(entered)
-    if (verdict === 'unconfigured') {
-      setGate(null)
-      if (asked === 'token') setSave({ k: 'locked' })
-      return
-    }
-    if (verdict !== true) return setGate({ for: asked, fail: verdict })
-    setGate(null)
-    if (asked === 'token') await commit()
-    else if (copyHost) copy.beginEdit(copyHost)
-  }
-
-  /* The status line under the banner — one at a time, terse. */
-  const note: { key: string; fail?: boolean } | null =
-    save.k === 'busy'
-      ? { key: 'inspect.save.saving' }
-      : save.k === 'locked'
-        ? { key: 'inspect.save.locked' }
-        : save.k === 'error'
-          ? { key: save.msg, fail: true }
-          : blocked
-            ? { key: blocked, fail: true }
-            : null
-
-  /* The one gate's markup, called from wherever asked for it — the SAVE
-     banner or the COPY block, never both at once, which is what lets it
-     hold a constant id. A function rather than a component: a component
-     declared in this body would be a new type on every render and the
-     input would lose focus mid-key.
-
-     A refused key answers HERE rather than up in the SAVE banner's status
-     line, because the gate is the thing that was refused and the banner is
-     not always on screen to carry the message. */
-  const keyGate = () => (
-    <div className={styles.gate}>
-      <form className={styles.keyRow} onSubmit={arm}>
-        <label className={styles.keyLabel} htmlFor={KEY_ID}>
-          <CopyText k="inspect.save.key" />
-        </label>
-        <input
-          id={KEY_ID}
-          type="password"
-          className={styles.keyInput}
-          value={keyInput}
-          onChange={(e) => setKeyInput(e.target.value)}
-          autoComplete="off"
-          autoFocus
-        />
-        <button type="submit" className={styles.resetAll}>
-          <CopyText k="inspect.save.arm" />
-        </button>
-      </form>
-      {gate?.fail && (
-        <p className={styles.saveNote} data-fail="" role="alert">
-          <CopyText
-            k={gate.fail === 'throttled' ? 'inspect.save.throttled' : 'inspect.save.badkey'}
-          />
-        </p>
-      )}
-    </div>
-  )
 
   /* PENDING earns its place when there is something in it, or while a
      commit is in flight, or while it has an outcome to report. */
   const copyStatus = copy.status
   const showPending = copy.edits.length > 0 || copy.committing || !!copyStatus
   const copyFail = !!copyStatus && copyStatus.key !== 'inspect.edit.done'
-
-  /* SAVE is present in every state — never unmounted mid-interaction, or
-     focus falls to <body> exactly when the visitor is waiting to hear what
-     happened. It goes ARIA-disabled rather than `disabled` for the same
-     reason: a disabled control is dropped from the tab order and its
-     aria-describedby reason becomes unreachable, so the button that refuses
-     would also refuse to say why. The click handler enforces what the
-     attribute only advertises. After a PR lands it re-arms, because a
-     follow-up nudge now stacks onto that same open PR. */
-  const saveInert = save.k === 'busy' || !!blocked
-
-  /* What SAVE does, named so Cmd+S can do exactly it rather than a second
-     version of it (StylerBlocks arms the key). With nothing pending it is a
-     no-op: the key should not summon a key prompt for a set that is empty. */
-  const requestSave = () => {
-    if (saveInert || !anyLive) return
-    if (readEditKey()) void commit()
-    else setGate({ for: 'token' })
-  }
 
   return (
     <>
@@ -486,26 +300,33 @@ export function InspectorPanel({
       </h2>
 
       <div className={styles.panelBody}>
-        {anyLive && (
+        {saver.anyLive && (
           <div className={styles.preview}>
             <div className={styles.previewTop} role="status">
               {/* the two states the visitor must be able to tell apart:
                   previewing an override, vs. that override sitting in a PR
                   waiting on review. Neither one is live. */}
               <CopyText
-                k={save.k === 'done' ? 'inspect.previewpr' : 'inspect.preview'}
+                k={saver.save.k === 'done' ? 'inspect.previewpr' : 'inspect.preview'}
                 className={styles.previewText}
               />
               <span className={styles.previewActions}>
+                {/* SAVE is present in every state — never unmounted
+                    mid-interaction, or focus falls to <body> exactly when the
+                    visitor is waiting to hear what happened. ARIA-disabled
+                    rather than `disabled`, so the button keeps its place in
+                    the tab order and its reason stays reachable. */}
                 <button
                   type="button"
                   className={`${styles.resetAll} ${styles.save}`}
-                  aria-disabled={saveInert || undefined}
-                  aria-describedby={note ? NOTE_ID : undefined}
-                  onClick={requestSave}
+                  aria-disabled={saver.saveInert || undefined}
+                  aria-describedby={saver.note ? NOTE_ID : undefined}
+                  onClick={saver.requestSave}
                 >
                   <CopyText k="inspect.save" />
-                  {target && <span className={styles.saveTarget}>{target.toUpperCase()}</span>}
+                  {saver.target && (
+                    <span className={styles.saveTarget}>{saver.target.toUpperCase()}</span>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -514,7 +335,7 @@ export function InspectorPanel({
                     resetAll()
                     stylerResetAll()
                     setOpenVar(null)
-                    setSave({ k: 'idle' })
+                    saver.setSave({ k: 'idle' })
                     after()
                   }}
                 >
@@ -523,34 +344,8 @@ export function InspectorPanel({
               </span>
             </div>
 
-            {gate?.for === 'token' && keyGate()}
-
-            {/* The live region is mounted for the whole life of the banner,
-                empty or not: a role="status" node that appears at the same
-                moment as its text is announced unreliably, because there was
-                no region to observe when the text arrived. */}
-            <div className={styles.saveStatus} role="status">
-              {save.k === 'done' ? (
-                <p className={styles.saveNote} id={NOTE_ID}>
-                  <CopyText k="inspect.save.done" />{' '}
-                  <a
-                    className={styles.prLink}
-                    href={save.url}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
-                    {/* fragment + number, the same composition
-                        `inspect.on` uses between two value spans */}
-                    <CopyText k="inspect.save.pr" />
-                    {save.number}
-                  </a>
-                </p>
-              ) : note ? (
-                <p className={styles.saveNote} id={NOTE_ID} data-fail={note.fail || undefined}>
-                  <CopyText k={note.key} />
-                </p>
-              ) : null}
-            </div>
+            {saver.gate?.for === 'token' && saver.keyGate()}
+            {saver.saveStatus()}
           </div>
         )}
 
@@ -819,13 +614,13 @@ export function InspectorPanel({
                         onClick={() => {
                           if (editingHere) copy.endEdit()
                           else if (copy.phase === 'armed' && copyHost) copy.beginEdit(copyHost)
-                          else setGate({ for: 'copy' })
+                          else saver.setGate({ for: 'copy' })
                         }}
                       >
                         <CopyText k={editingHere ? 'inspect.copy.done' : 'inspect.copy.edit'} />
                       </button>
 
-                      {gate?.for === 'copy' && keyGate()}
+                      {saver.gate?.for === 'copy' && saver.keyGate()}
                     </>
                   )}
                 </div>
@@ -959,18 +754,30 @@ export function InspectorPanel({
               </div>
             </section>
 
-            {/* ---- STYLER: the component tier, and the panel's second write ----
-                TOKENS above reports what the PICK reads. This is what the
-                COMPONENT is made of, and the rows are its own — pick a label
-                inside a desktop icon and desktop-icons' whole set draws. */}
-            {componentId && (
-              <StylerBlocks
-                componentId={componentId}
-                openVar={openVar}
-                setOpenVar={setOpenVar}
-                onChange={after}
-                onSave={requestSave}
-              />
+            {/* ---- STYLER: a door, not a workshop ----
+                The five blocks stood here for one review. Jake's note: styling
+                and inspecting are two experiences, and a panel showing TOKENS,
+                CONTRAST, TYPE and MOTION around a set of styling controls is
+                asking a person to do one job while looking at another. So the
+                blocks moved to a stage of their own (StylerStage.tsx) and what
+                is left in the reading is the way in. */}
+            {componentId && specFor(componentId) && (
+              <section className={styles.section}>
+                <div className={styles.bar}>
+                  <h3 className={styles.head}>
+                    <CopyText k="styler.section" />
+                  </h3>
+                  <span className={styles.roleChip}>{componentId}</span>
+                  <button
+                    type="button"
+                    className={styles.resetAll}
+                    onClick={() => setStage(componentId)}
+                  >
+                    <CopyText k="styler.open" />
+                  </button>
+                  <InfoTip k="styler.note" />
+                </div>
+              </section>
             )}
 
             {/* ---- CONTRAST ---- */}

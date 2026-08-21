@@ -62,12 +62,13 @@ const {
   rowLabel,
   rowsFor,
 } = await import(blocksUrl)
-const { writesFor } = await import(
-  moduleUrl('src/lib/stylerTune.ts', {
-    './styleCandidates': candidatesUrl,
-    './stylerBlocks': blocksUrl,
-  })
-)
+const { addRoot, count, pendingEdits, rebind, removeRoot, resetAll, resetRole, writesFor } =
+  await import(
+    moduleUrl('src/lib/stylerTune.ts', {
+      './styleCandidates': candidatesUrl,
+      './stylerBlocks': blocksUrl,
+    })
+  )
 const { handleKey, isReserved, matches, registerHotkeys, activeScopes } = await import(
   moduleUrl('src/lib/hotkeys.ts')
 )
@@ -269,6 +270,99 @@ test('a component with no fill/stroke pair swaps nothing', () => {
     const pair = fillStrokePair(id)
     if (!pair) continue
     for (const row of pair) assert.equal(row.family, 'color', `${row.role} is a colour`)
+  }
+})
+
+/* ------------------------------------------- the stage's extra roots */
+
+/* THE FINDING THIS GUARDS. tokens.generated.css declares every component
+   property inside `:root, [data-skin='classic']`, so a nested classic wrapper
+   — which is how the stage draws a second skin beside the first —
+   re-declares all of them and an inline write on <html> never reaches inside
+   it. The stage registers its wrappers and every rebind mirrors onto them.
+   Lose that and the preview goes quietly half-dead: the big spread moves and
+   the skin tiles do not. */
+
+test('the component tier is declared in the classic block, which is why roots exist', () => {
+  const css = src('src/styles/tokens.generated.css')
+  const classicBlock = css.indexOf("[data-skin='classic'] {")
+  const darkBlock = css.indexOf("[data-theme='dark'],")
+  assert.ok(classicBlock >= 0 && darkBlock > classicBlock)
+  for (const prop of ['--button-radius', '--stamp-fg', '--window-fill']) {
+    const hits = [...css.matchAll(new RegExp(`^\\s*${prop}\\s*:`, 'gm'))]
+    assert.equal(hits.length, 1, `${prop} is declared once`)
+    assert.ok(hits[0].index < darkBlock, `${prop} is in the classic block`)
+  }
+})
+
+/** An element, as much of one as stylerTune touches. */
+function fakeRoot() {
+  const props = new Map()
+  return {
+    props,
+    getAttribute: () => null,
+    removeAttribute: () => {},
+    style: {
+      setProperty: (k, v) => props.set(k, v),
+      removeProperty: (k) => props.delete(k),
+      getPropertyValue: (k) => props.get(k) ?? '',
+    },
+  }
+}
+
+const PILL = candidatesFor('button-radius').find((c) => c.token === 'radius/pill')
+
+test('a registered root takes every write the document root takes', () => {
+  const tile = fakeRoot()
+  addRoot(tile)
+  rebind('button-radius', PILL)
+  assert.equal(tile.props.get('--button-radius'), 'var(--radius-pill)')
+
+  resetRole('button-radius')
+  assert.equal(tile.props.has('--button-radius'), false)
+  removeRoot(tile)
+})
+
+test('a root registered late catches up on what is already pending', () => {
+  rebind('button-radius', PILL)
+  const tile = fakeRoot()
+  addRoot(tile)
+  assert.equal(tile.props.get('--button-radius'), 'var(--radius-pill)')
+
+  // and a composite carries all five members onto it
+  const badge = candidatesFor('stamp-text').find((c) => c.token === 'typography/badge')
+  rebind('stamp-text', badge)
+  assert.equal(tile.props.get('--stamp-text-font-size'), 'var(--type-badge-size)')
+  assert.equal(tile.props.size, 6)
+
+  resetAll()
+  assert.equal(tile.props.size, 0)
+  assert.equal(count(), 0)
+  removeRoot(tile)
+})
+
+test('an unregistered root stops taking writes', () => {
+  const tile = fakeRoot()
+  addRoot(tile)
+  removeRoot(tile)
+  rebind('button-radius', PILL)
+  assert.equal(tile.props.size, 0)
+  assert.deepEqual(pendingEdits(), [{ role: 'button-radius', token: 'radius/pill' }])
+  resetAll()
+})
+
+/* ------------------------------------------------ the stage's specs */
+
+test('every pilot component has a spec to put on the bench', () => {
+  /* stageSpecs.tsx is JSX over five real components, so it cannot be
+     imported in a harness with no DOM. The thing worth guarding is the
+     COVERAGE — a component the panel offers OPEN COMPONENT for and the stage
+     cannot draw is a dead end — and that reads straight off the source. */
+  const source = src('src/components/inspect/stageSpecs.tsx')
+  const body = source.slice(source.indexOf('export const STAGE_SPECS'))
+  for (const id of COMPONENT_IDS) {
+    const key = /^[a-z]+$/.test(id) ? `\n  ${id}: {` : `\n  '${id}': {`
+    assert.ok(body.includes(key), `${id} has a stage spec`)
   }
 })
 

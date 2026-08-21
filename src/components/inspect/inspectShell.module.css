@@ -141,6 +141,22 @@
   }
 }
 
+/* ---- while the STYLER stage is up, the tool's own frame stands down ----
+
+   Jake's note: styling is not inspecting, and a room full of the inspector's
+   readings around a set of styling controls is asking a person to do one job
+   while looking at another. So the crown and both docks leave, exactly the
+   way the shell's menubar leaves when the tool arrives (shell.module.css).
+
+   display:none, not an opaque cover: a covered dock is still in the tab
+   order, and a keyboard visitor would walk out of the stage into a panel
+   they cannot see. The stage paints its own frame in the same idiom
+   (stylerStage.module.css) and hands everything back on close. */
+:global(body[data-stylerstage='on']) .crown,
+:global(body[data-stylerstage='on']) .panel {
+  display: none;
+}
+
 /* The tool's own name, and the top of the panel type hierarchy — see the
    note above .panelHead for the three tiers and the two families. It was
    an 11px mono label, the same size and family as the section heads and
