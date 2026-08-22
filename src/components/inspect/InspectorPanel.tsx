@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import Link from 'next/link'
 import { useSettings } from '@/store/settings'
 import { useInspect } from '@/store/inspect'
 import { resolveCopy, t } from '@/content/copy'
@@ -1205,6 +1206,18 @@ export function InspectorPanel({
                 <LinkOutGlyph />
               </button>
             ))}
+
+            {/* THE SHELF, last in the row. The chips before it are doors to
+                the component you happen to be pointing at; this one is the
+                door to all of them (/styler), for the case the picked chain
+                cannot answer — you want the stamp and there is no stamp on
+                this screen. A real navigation, so it is a <Link> and not a
+                button, and it wears the same stroke the chips beside it do
+                because it is the same kind of offer. */}
+            <Link href="/styler" className={`${styles.stylerChip} ${styles.stylerLibraryChip}`}>
+              <CopyText k="styler.library.link" className={styles.stylerChipLabel} />
+              <LinkOutGlyph />
+            </Link>
           </div>
         </div>
       )}
