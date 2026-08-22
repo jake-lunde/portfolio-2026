@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { SPRINGS } from '@/lib/motion'
 import { useWindows } from '@/store/windows'
@@ -76,7 +77,13 @@ const SIZE = 34
 const HOLE_W = 52
 const FLEE_RADIUS = 64
 const INTRO_RADIUS = 84 // they notice you a little before they'd spook
-const INTRO_MS = 5200
+/* SHYING. A standing unit leans away from an approaching cursor the way
+   the Family Hub sketch cutouts do — a gentle radial shove, spring-
+   settled, that starts well outside the startle ring so the lean reads
+   before the hop does. Screen px, small on purpose. */
+const SHY_RADIUS = 170
+const SHY_SHOVE = 14
+const INTRO_LEAVE = INTRO_RADIUS + 28 // hysteresis: the card holds until the cursor is clearly off
 /* THE HATCH IS A DOOR, NOT A PLACE (Jake, s88). It exists for exactly two
    moments — the climb out and the drop back — and is shut the whole time
    the unit is standing on the desk, which is most of the visit. So it
@@ -97,8 +104,14 @@ const DWELL_VAR = 3800
    and never arriving can't pin a unit up forever. */
 const DWELL_EXTEND = 260
 const DWELL_EXTEND_MAX = 3200
-const GAP_MIN = 4200
-const GAP_VAR = 4600
+/* halved cadence (Jake, 2026-08-22): twice the gap between visits, and a
+   line on about half of them — the desk is a desk most of the time */
+const GAP_MIN = 8400
+const GAP_VAR = 9200
+const TALK_ODDS = 0.5
+/* who you've been introduced to THIS visit — sessionStorage, so the crew
+   says hello again every time you land on the site but not again on the
+   way back from a case study (Jake, 2026-08-22: never stored forever) */
 const MET_KEY = 'lunde-crew-met'
 /* a desk that stays full (mobile's stacked windows, INSPECT's two docked
    panels widened) used to retry every 2.6s forever — up to 30 spots ×
@@ -213,11 +226,11 @@ function findSpot(
   return null
 }
 
-/* who you've already been introduced to — a plain id list in
-   localStorage, guarded because the read can throw in private mode */
+/* who you've already been introduced to this visit — a plain id list in
+   sessionStorage, guarded because the read can throw in private mode */
 function readMet(): Set<string> {
   try {
-    const raw = JSON.parse(localStorage.getItem(MET_KEY) ?? '[]')
+    const raw = JSON.parse(sessionStorage.getItem(MET_KEY) ?? '[]')
     return new Set(Array.isArray(raw) ? raw.filter(isCrewId) : [])
   } catch {
     return new Set()
@@ -251,6 +264,9 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
   const [jumping, setJumping] = useState(false)
   const [bailing, setBailing] = useState(false)
   const [intro, setIntro] = useState<{ id: string; align: Align } | null>(null)
+  // viewport coords of the hatch, for the voice portal (see THE VOICE, below)
+  const [voiceAt, setVoiceAt] = useState<{ x: number; y: number } | null>(null)
+  const [push, setPush] = useState({ x: 0, y: 0 }) // SHYING, above
 
   const roster = useRef(-1)
   const fullRetries = useRef(0) // consecutive desk-full rolls — see the backoff below
@@ -383,12 +399,15 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
     const desk = document.querySelector('[data-desktop-root]')!.getBoundingClientRect()
     const id = CREW_IDS[(roster.current = (roster.current + 1) % CREW_IDS.length)]
     let scared = false
+    let bailed = false // the second offense fires once, not per pointermove
+    let introducing = false // the card is up and waiting for the cursor to leave
     let calmUntil = 0
     let lastDist: number | null = null // for CLOSING THE GAP, below
     let extended = 0
 
     spotRef.current = found
     atRef.current = { x: desk.left + found.x, y: desk.top + found.y }
+    setVoiceAt(atRef.current)
     setAgent(id)
     setSpot(found)
     setBailing(false)
@@ -401,6 +420,7 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
       if (p !== 'up' && p !== 'rising' && p !== 'opening') return
       clear()
       setIntro(null)
+      setPush({ x: 0, y: 0 })
       if (!hold) setBubble(null)
       // the hatch re-opens under them first, then they drop through it
       setPhase('exiting')
@@ -412,6 +432,7 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
       at(HOLE_LEAD + DUCK_MS + HOLE_SHUT, () => {
         setPhase('gone')
         setSpot(null)
+        setVoiceAt(null)
         spotRef.current = null
         atRef.current = null
       })
@@ -456,16 +477,17 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
       if (mouse.current) react(mouse.current.x, mouse.current.y)
     })
     at(standing + 800, () => turn(-found.face as 1 | -1))
-    at(standing + 1150, () => {
-      setBubble(line(id, rng))
-      at(2700, () => setBubble(null))
-    })
-    if (dwell > DWELL_MIN + 2400) {
-      at(standing + 4900, () => {
-        turn(found.face)
+    // one line a visit at most, and only on about half of them (TALK_ODDS)
+    // — the rest of the time they just stand there and look around
+    const talks = rng() < TALK_ODDS
+    if (talks) {
+      at(standing + 1150, () => {
         setBubble(line(id, rng))
-        at(2600, () => setBubble(null))
+        at(2700, () => setBubble(null))
       })
+    }
+    if (dwell > DWELL_MIN + 2400) {
+      at(standing + 4900, () => turn(found.face))
     }
 
     // shared between the pointermove listener and the moment-of-standing
@@ -475,7 +497,19 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
       const p = atRef.current
       if (!p || phaseRef.current !== 'up') return
       const now = performance.now()
-      const d = Math.hypot(x - p.x, y - (p.y - SIZE / 2))
+      const dx = p.x - x
+      const dy = p.y - SIZE / 2 - y
+      const d = Math.hypot(dx, dy)
+
+      // SHYING (see the const) — the lean away from the cursor, settled
+      // on the riser's own spring, on top of whatever else they're doing
+      if (!bailed) {
+        if (d >= SHY_RADIUS || d === 0) setPush({ x: 0, y: 0 })
+        else {
+          const f = ((SHY_RADIUS - d) / SHY_RADIUS) * SHY_SHOVE
+          setPush({ x: (dx / d) * f, y: (dy / d) * f })
+        }
+      }
 
       // closing the gap buys the dwell timer more time instead of
       // letting it drop the unit mid-approach — see DWELL_EXTEND, above
@@ -485,24 +519,34 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
       /* FIRST CONTACT. Before a unit has ever been met, the cursor
          getting close buys an introduction instead of a startle — they
          turn to face you and say what they are. Once each, remembered. */
+      /* THE CARD HOLDS. Once up, the introduction stays — unit and card
+         both — until the cursor is clearly off them (INTRO_LEAVE); no
+         timer (Jake, 2026-08-22). Then a beat, and down the hatch. */
+      if (introducing) {
+        if (d > INTRO_LEAVE) {
+          introducing = false
+          setIntro(null)
+          at(500, () => duck())
+        }
+        return
+      }
+
       if (!met.current.has(id) && d < INTRO_RADIUS) {
         met.current.add(id)
         try {
-          localStorage.setItem(MET_KEY, JSON.stringify([...met.current]))
+          sessionStorage.setItem(MET_KEY, JSON.stringify([...met.current]))
         } catch {
-          /* private mode — they'll re-introduce themselves next visit */
+          /* private mode — they'll re-introduce themselves next time */
         }
         clear()
         setBubble(null)
         turn(x > p.x ? 1 : -1)
         setIntro({ id, align: found.align })
-        calmUntil = now + INTRO_MS + 1400
-        at(INTRO_MS, () => setIntro(null))
-        at(INTRO_MS + 500, () => duck())
+        introducing = true
         return
       }
 
-      if (d > FLEE_RADIUS || now < calmUntil) return
+      if (bailed || d > FLEE_RADIUS || now < calmUntil) return
       if (!scared) {
         // first offense: a startled hop, held ground
         scared = true
@@ -512,7 +556,10 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
         at(650, () => setJumping(false))
         at(1600, () => setBubble(null))
       } else {
-        // second offense: down the hatch, mid-sentence
+        // second offense: down the hatch, mid-sentence — once. This used
+        // to re-roll a new line on every pointermove until the duck
+        // landed, which stacked five bubbles on a unit already leaving.
+        bailed = true
         setBubble(fleeLine(rng))
         setBailing(true)
         at(340, () => duck(true))
@@ -523,17 +570,26 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
       mouse.current = { x: e.clientX, y: e.clientY }
       react(e.clientX, e.clientY)
     }
+    // a cursor that leaves the page altogether has moved off
+    const onLeave = () => {
+      if (!introducing) return
+      introducing = false
+      setIntro(null)
+      at(500, () => duck())
+    }
 
     // the desk moved under them — the spot they measured is not that spot
     const onResize = () => duck()
 
     window.addEventListener('pointermove', onMouse, { passive: true })
     window.addEventListener('resize', onResize)
+    document.documentElement.addEventListener('pointerleave', onLeave)
     return () => {
       clear()
       duckRef.current = null
       window.removeEventListener('pointermove', onMouse)
       window.removeEventListener('resize', onResize)
+      document.documentElement.removeEventListener('pointerleave', onLeave)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduced, inspecting, cycle, frame, rng])
@@ -599,6 +655,56 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
     activePhase === 'ducking'
   const risen = activePhase === 'rising' || activePhase === 'up' || activePhase === 'exiting'
 
+  /* THE VOICE floats above every window. The body lives at z 3 under
+     the furniture on purpose (a window sliding over a unit is what sends
+     them down the hatch), but a line of speech or an introduction that
+     vanishes behind a window is a line nobody reads (Jake, 2026-08-22).
+     So the bubble and the card render through a portal on a fixed 0×0
+     anchor at the hatch's viewport point, at z 4900 — over the windows
+     (10), under the bar chrome and its popovers (4990+). A pinned story
+     frame keeps them inline so Chromatic shoots one tree. */
+  const voice = activeSpot ? (
+    <>
+      <AnimatePresence>
+        {activeIntro && (
+          <motion.div
+            className={styles.introCard}
+            data-align={activeIntro.align}
+            initial={frame ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={SPRINGS.deck}
+            data-spring="deck"
+          >
+            <span className={styles.introHi}>
+              HI, I&apos;M {CREW_BY_ID[activeIntro.id]?.name}. ONE OF JAKE&apos;S AGENTS.
+            </span>
+            <span className={styles.introJob}>
+              {CREW_BY_ID[activeIntro.id]?.model} · {CREW_INTRO[activeIntro.id]}
+            </span>
+            <span className={styles.introTask}>
+              LAST TASK: {lastTask[activeIntro.id]}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {activeBubble && !activeIntro && (
+          <motion.span
+            className={styles.bubble}
+            data-align={activeSpot.align}
+            initial={frame ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            {activeBubble}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </>
+  ) : null
+
   return (
     <>
       {(frame || !reduced) && activeSpot && (
@@ -621,7 +727,13 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
             data-spring="widget"
           />
 
-          <span className={styles.riser}>
+          <motion.span
+            className={styles.riser}
+            initial={false}
+            animate={{ x: frame ? 0 : push.x, y: frame ? 0 : push.y }}
+            transition={SPRINGS.widget}
+            data-spring="widget"
+          >
             {/* the climb is on this box and the idle bob is on the sprite
                 inside it: one transform each, so neither clobbers the
                 other (a CSS animation outranks an inline transform, which
@@ -648,47 +760,24 @@ export function AmbientAgents({ rng = Math.random, frame }: AmbientAgentsProps =
                 }}
               />
             </motion.span>
-          </span>
+          </motion.span>
 
-          <AnimatePresence>
-            {activeIntro && (
-              <motion.div
-                className={styles.introCard}
-                data-align={activeIntro.align}
-                initial={frame ? false : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={SPRINGS.deck}
-                data-spring="deck"
-              >
-                <span className={styles.introHi}>
-                  HI, I&apos;M {CREW_BY_ID[activeIntro.id]?.name}. ONE OF JAKE&apos;S AGENTS.
-                </span>
-                <span className={styles.introJob}>
-                  {CREW_BY_ID[activeIntro.id]?.model} · {CREW_INTRO[activeIntro.id]}
-                </span>
-                <span className={styles.introTask}>
-                  LAST TASK: {lastTask[activeIntro.id]}
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {activeBubble && !activeIntro && (
-              <motion.span
-                className={styles.bubble}
-                data-align={activeSpot.align}
-                initial={frame ? false : { opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-              >
-                {activeBubble}
-              </motion.span>
-            )}
-          </AnimatePresence>
+          {frame && voice}
         </div>
       )}
+
+      {!frame && !reduced && voiceAt && voice
+        ? createPortal(
+            <div
+              className={styles.burrowVoice}
+              style={{ left: voiceAt.x, top: voiceAt.y }}
+              aria-hidden="true"
+            >
+              {voice}
+            </div>,
+            document.body,
+          )
+        : null}
 
       <AnimatePresence>
         {flashes.map((f) => (
