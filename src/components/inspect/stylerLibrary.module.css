@@ -148,6 +148,7 @@
   font-weight: var(--type-label-weight);
   letter-spacing: var(--type-label-tracking);
   line-height: var(--type-label-leading);
+  text-transform: uppercase; /* same register as the stage crown chip */
   color: var(--content);
 }
 
