@@ -1,0 +1,186 @@
+/* THE SHELF — /styler, the page the cards sit on.
+ *
+ * It is the plainest surface in the repo on purpose. The whole point of a
+ * card is that the component on it is the only thing with any treatment, so
+ * the page around it is paper, a hairline and a label, and every colour here
+ * is a semantic role the components themselves are already standing on.
+ *
+ * `body` is `overflow: hidden` house-wide (globals.css — the OS owns the
+ * viewport and windows scroll internally). This route has no windows, so it
+ * takes the scroll itself rather than asking globals for an exception.
+ */
+
+.library {
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--spacing-component-xl) var(--spacing-component-lg);
+  background: var(--surface);
+  color: var(--content);
+}
+
+.head {
+  max-width: 1200px;
+  margin: 0 auto var(--spacing-component-xl);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--type-heading-1-family);
+  font-size: var(--type-heading-1-size);
+  font-weight: var(--type-heading-1-weight);
+  letter-spacing: var(--type-heading-1-tracking);
+  line-height: var(--type-heading-1-leading);
+  text-transform: uppercase;
+  color: var(--content);
+}
+
+.sub {
+  margin: var(--spacing-component-xs) 0 0;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  color: var(--content-muted);
+}
+
+.narrow {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-component-lg);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  color: var(--content-muted);
+  border: var(--border-width-default) solid var(--border);
+}
+
+/* Five cards, and a track wide enough to hold the widest picture (320px of
+   sample plus the card's own inset) without ever stretching one so far that
+   a button floats alone in a field. */
+.grid {
+  display: grid;
+  max-width: 1200px;
+  margin: 0 auto;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--spacing-component-lg);
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-component-md);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+}
+
+/* THE PICTURE'S BOX, fixed so the shelf is a grid of one shape rather than
+   five. Height first: everything else on the card is one line, so a picture
+   that sized itself to its sample would leave the names walking up and down
+   the row. */
+.thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--surface-raised);
+  border: var(--border-width-subtle) solid var(--border);
+}
+
+/* A REAL BOX, not a shrink-wrap, and the menubar is why. `.benchChrome` is
+   `width: min(640px, 100%)` and a percentage inside a shrink-to-fit absolute
+   box has nothing to resolve against, so the bar came out as a hairline. On
+   the stage that percentage resolves against `.mount`, which is the width of
+   the canvas; here it needs a stated one. 640×400 is the widest bench (the
+   menubar's) by the tallest (the icon desk's 372), so every sample lands
+   inside it at its own size and the crop below decides what shows. */
+.thumbInner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 640px;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* THE SCALE, AND WHY IT IS A LOOKUP. A card is 320×200 of picture and the
+     five samples are nowhere near one size: the menubar bench is 640 wide,
+     the icons bench is 344×372, the window sample is 340×180, and a button
+     is about 90×32. One number cannot serve all five — it would either crop
+     the desk or leave the button as a speck — so each one names its own,
+     derived from the bench sizes stylerStage.module.css declares. Layout
+     arithmetic, not a design value: there is no token for "how much of a
+     desktop fits on a card". */
+  transform: translate(-50%, -50%) scale(var(--thumb-scale, 1));
+  transform-origin: center;
+}
+
+/* 640 wide → 320, the full width of the picture */
+.thumb[data-thumb='menubar'] {
+  --thumb-scale: 0.5;
+}
+
+/* 344 × 372 → 172 × 186 */
+.thumb[data-thumb='desktop-icons'] {
+  --thumb-scale: 0.5;
+}
+
+/* 340 × 180 → 279 × 148 */
+.thumb[data-thumb='window'] {
+  --thumb-scale: 0.82;
+}
+
+/* the two small ones, up to reading size on a 200px shelf */
+.thumb[data-thumb='button'],
+.thumb[data-thumb='stamp'] {
+  --thumb-scale: 1.5;
+}
+
+.name {
+  margin-top: var(--spacing-component-sm);
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  line-height: var(--type-label-leading);
+  text-transform: uppercase; /* same register as the stage crown chip */
+  color: var(--content);
+}
+
+.counts {
+  margin-top: var(--spacing-component-xs);
+  font-family: var(--mono);
+  font-size: var(--type-micro-size);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  color: var(--content-muted);
+}
+
+/* The hit target: the whole card, one focus stop, and no box of its own.
+   Drawn as an overlay because a <button> may not hold a <button> and four
+   of the five samples do. */
+.hit {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.hit:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* the stroke answers the pointer; the lift is motion's (SPRINGS.widget in
+   StylerLibrary.tsx), so nothing here animates a layout property */
+.card:hover,
+.card:has(.hit:focus-visible) {
+  border-color: var(--accent);
+}

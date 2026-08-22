@@ -134,8 +134,13 @@ const SKIN_SETS: ReadonlyArray<{
   { id: 'medieval', skin: 'medieval', theme: 'light', label: 'styler.skin.medieval' },
 ]
 
-/** The bench a spec asked for, or none. */
-function Bench({ kind, children }: { kind: StageSpec['bench']; children: ReactNode }) {
+/** The bench a spec asked for, or none.
+ *
+ * Exported because the LIBRARY draws the same five samples at thumbnail size
+ * (StylerLibrary.tsx) and a second bench with the same three cases in it
+ * would be two places to fix the day a component changes what it needs to
+ * stand on. */
+export function Bench({ kind, children }: { kind: StageSpec['bench']; children: ReactNode }) {
   if (kind === 'plain') return <>{children}</>
   const size = kind === 'chrome' ? styles.benchChrome : styles.benchDesk
   /* the marker is what lets shell.module.css make its one exception: the
@@ -509,11 +514,18 @@ export function StylerStage({
   componentId,
   copy,
   onClose,
+  closeLabelKey = 'styler.close',
 }: {
   componentId: string
   /** the copy engine, for the one thing the gate needs it for: arming */
   copy: ReturnType<typeof useCopyEditing>
   onClose: () => void
+  /** What the door says, because the room now has two of them. In the OS the
+      component came off the desktop and goes back on it; from the library it
+      came off a shelf. Same button, same behaviour, and the only honest
+      difference is where the exit lands, so it is one copy key rather than a
+      second close path. */
+  closeLabelKey?: string
 }) {
   const skin = useSettings((s) => s.skin)
   const theme = useSettings((s) => s.theme)
@@ -642,7 +654,7 @@ export function StylerStage({
           className={shell.crownBtn}
           ref={closeRef}
           onClick={onClose}
-          aria-label={t('styler.close', skin)}
+          aria-label={t(closeLabelKey, skin)}
         >
           <span aria-hidden="true">✕</span>
         </button>

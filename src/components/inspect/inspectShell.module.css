@@ -1455,6 +1455,19 @@
   flex: none;
 }
 
+/* THE LIBRARY CHIP — same stroke, one difference. It is an <a> rather than a
+   <button> because it goes to a page (/styler), so it needs the underline
+   struck and the inherited link colour said out loud; and it takes a gap
+   plus a rule on its leading edge, because the chips before it name what is
+   under the pointer and this one names everything. Same row, different
+   question. */
+.stylerLibraryChip {
+  margin-left: var(--spacing-component-xs);
+  border-left-width: var(--border-width-strong);
+  color: var(--accent);
+  text-decoration: none;
+}
+
 /* ---- MOTION ---- */
 .springLine {
   display: flex;

@@ -143,6 +143,10 @@ named component tokens. The recipe, mechanical after the pilot five:
 5. Stamp `data-component="<component-id>"` (kebab, = token file name) on
    the component's root element. This is Styler's stable identity;
    `data-window-id` remains the instance id.
+6. Add the id to `COMPONENT_IDS` (`src/lib/styleCandidates.ts`) and a
+   recipe to `STAGE_SPECS` (`src/components/inspect/stageSpecs.tsx`); the
+   `/styler` library then lists it automatically, first variant as the
+   card's thumbnail, and `npm test` fails if either half is missing.
 Out of scope, always: position/inset, shadows, motion, decorative
 transform/opacity/mask, z-index.
 Pilot set (s97): button · stamp · menubar · desktop-icons · window.
