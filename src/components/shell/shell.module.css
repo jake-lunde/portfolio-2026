@@ -544,7 +544,30 @@
   border: var(--desktop-icons-border-width) solid transparent;
 }
 
-.iconBtn:hover {
+/* ---- HOVER, AND THE ONE PLACE IT CAN BE HELD DOWN ----
+
+   STYLER's stage offers a STATE modifier (DEFAULT · HOVER), because half of
+   this component's rows only paint under the pointer: rebind
+   --desktop-icons-hover-bg with nothing hovered and the bench sits there
+   telling you nothing changed. There is no way to hover a sample on a
+   visitor's behalf, so the bench declares the state instead — it writes
+   `data-styler-state="hover"` on itself (inspect/StylerStage.tsx) and every
+   pilot hover rule answers to that as well as to the pointer.
+
+   `:is(:hover, [data-styler-state='hover'] *)` rather than a second rule,
+   for two reasons. It keeps ONE declaration of what hover looks like, which
+   is the whole reason the forced state is trustworthy — a copy would drift.
+   And `:is()` takes the specificity of its heaviest branch, which here is
+   the same (0,1,0) `:hover` already had, so nothing in the cascade below
+   these rules moved.
+
+   Only the components STYLER puts on a bench carry this, and only the rules
+   their own token rows name: desktop-icons' hover pair here, window's three
+   --window-ctrl-hover-* below, and the button's two tones
+   (primitives/primitives.module.css). The menu bar's .menuBtn:hover is left
+   alone on purpose — menubar declares no hover token, so the stage never
+   offers it the state and a forced selector there would be dead code. */
+.iconBtn:is(:hover, [data-styler-state='hover'] *) {
   border-color: var(--desktop-icons-hover-border-color);
   background: color-mix(in srgb, var(--desktop-icons-hover-bg) 60%, transparent);
 }
@@ -1350,7 +1373,10 @@
   color: inherit;
 }
 
-.ctrl:hover {
+/* the pointer, or the stage holding the state down for you — see the note
+   on .iconBtn above for why the second branch is inside :is() rather than
+   in a rule of its own */
+.ctrl:is(:hover, [data-styler-state='hover'] *) {
   background: var(--window-ctrl-hover-bg);
   color: var(--window-ctrl-hover-fg);
   border-color: var(--window-ctrl-hover-border-color);
@@ -1523,8 +1549,19 @@
    the shelf's cuboid boxes collapsed to cardboard cut-outs the moment
    their window lost focus. The shelf does not live in a window any more
    (store/shelfMode.ts) and it was the only caller, so the hatch is
-   retired and this rule has one `:not()` fewer to carry. */
-@media (min-width: 721px) {
+   retired and this rule has one `:not()` fewer to carry.
+
+   @container, not @media, and the same for the window's mobile block at the
+   foot of this file: window is one of STYLER's five pilot components, and
+   the stage puts it on a bench that can be told to be 360px wide. A viewport
+   rule cannot see a bench, so the tool could show you every colour the frame
+   is made of and never the shape it takes on a phone (Jake, s111: "I feel
+   like I'm not able to manipulate the mobile view"). The container is `body`
+   on the real desktop (globals.css) and the bench inside the stage
+   (inspect/stylerStage.module.css), so nothing about this rule changed on
+   screen — the same 721px, measured against a box that is still the
+   viewport everywhere except on the bench. */
+@container viewport (min-width: 721px) {
   .window > .titlebar,
   .window > .windowBody {
     transition: filter 0.2s ease-out;
@@ -1826,9 +1863,34 @@
   }
 }
 
-/* ================= MOBILE: launcher + full-bleed stack ================= */
+/* ================= MOBILE: launcher + full-bleed stack =================
 
-@media (max-width: 720px) {
+   ONE BLOCK, SPLIT IN TWO, and the split is about who is being styled.
+
+   Jake, s111: "I feel like I'm not able to manipulate the mobile view."
+   STYLER's stage takes a component off the desktop and stands it on a
+   bench, and a bench can be told to be 360px wide — but a `@media` rule
+   asks the SCREEN, and on a 1440px screen the answer is 1440 whatever the
+   bench says. So the phone form of a window, a titlebar or the icon grid
+   was a thing the tool could not draw, which is the one thing the tool is
+   for. Everything below that belongs to one of STYLER's five pilot
+   components moved to `@container viewport`, which is the viewport on the
+   real desktop (globals.css declares it on `body`, and body IS the screen)
+   and the bench inside the stage (inspect/stylerStage.module.css, .mount).
+   Same 720px, same rules, one more box that may answer the question.
+
+   What stayed a media query is what is not a component: `.trashGrid` and
+   `.dockedGrid` are the DESKTOP deciding where the dock's programs live at
+   this width, and a desk is not a thing you put on a bench. The dock rail's
+   own rule (dock.module.css) stays for the same reason.
+
+   ⚠️ INSPECT.MODE reports @media rules and skips @container ones whole,
+   because it cannot tell which box a container rule was measured against
+   (lib/inspect.ts says so where it does it). So the tool no longer lists
+   these declarations on a narrow screen. That is a known cost of the move,
+   not an oversight. */
+
+@container viewport (max-width: 720px) {
   .icons {
     /* clears the nameplate, which takes the band above the grid on mobile
        (see .nameplate at the foot of this file: top 14 + the About box
@@ -1850,18 +1912,6 @@
 
   .iconBtn {
     width: auto;
-  }
-
-  /* on mobile every icon lives in the one scrolling grid — including
-     trash, which rides the dock rail on desktop instead */
-  .trashGrid {
-    display: flex;
-  }
-
-  /* the dock (dock.module.css) doesn't render at this width — its
-     programs reappear here instead */
-  .dockedGrid {
-    display: flex;
   }
 
   .window {
@@ -1901,9 +1951,28 @@
     display: none;
   }
 
+  /* both of these are the menu bar's, so both travel with it onto the
+     bench: the version stamp beside the wordmark and the clock at the far
+     end are the two things the bar drops when it runs out of width */
   .clock,
   .wordmark span {
     display: none;
+  }
+}
+
+/* the desk's own half of the old block: where the dock's programs go when
+   the rail stands down. Not a component, so not a container query. */
+@media (max-width: 720px) {
+  /* on mobile every icon lives in the one scrolling grid — including
+     trash, which rides the dock rail on desktop instead */
+  .trashGrid {
+    display: flex;
+  }
+
+  /* the dock (dock.module.css) doesn't render at this width — its
+     programs reappear here instead */
+  .dockedGrid {
+    display: flex;
   }
 }
 

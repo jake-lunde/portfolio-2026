@@ -66,12 +66,21 @@
   border-width: var(--button-md-border);
 }
 
-.btnExpressive:hover {
+/* The two tone hovers, and the second thing that can turn them on. STYLER's
+   stage offers a STATE modifier, and a button whose hover fill can only be
+   seen by pointing at it is a rebind you cannot review: the bench writes
+   `data-styler-state="hover"` on itself and these answer to that as well as
+   to the pointer. One declaration, not two, so the forced state cannot drift
+   from the real one; `:is()` takes its heaviest branch's specificity, which
+   is the (0,1,0) `:hover` already carried, so `.btnSolid:hover` below still
+   wins the way it did. The long version of this note is in
+   components/shell/shell.module.css, on .iconBtn. */
+.btnExpressive:is(:hover, [data-styler-state='hover'] *) {
   background: var(--button-expressive-hover-bg);
   color: var(--button-expressive-hover-fg);
 }
 
-.btnSystem:hover {
+.btnSystem:is(:hover, [data-styler-state='hover'] *) {
   background: var(--button-system-hover-bg);
   color: var(--button-system-hover-fg);
 }

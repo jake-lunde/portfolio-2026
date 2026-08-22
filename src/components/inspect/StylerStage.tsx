@@ -10,12 +10,10 @@ import {
   type PointerEvent,
   type ReactNode,
 } from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useSettings, type Skin } from '@/store/settings'
 import { t } from '@/content/copy'
 import { CopyText } from '@/content/CopyText'
 import { registerHotkeys } from '@/lib/hotkeys'
-import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
 import { themeFor } from '@/lib/tokenEdit'
 import { layersFor, type StylerLayer } from '@/lib/stylerBlocks'
@@ -52,24 +50,59 @@ import styles from './stylerStage.module.css'
  * ONE THING ON THE BENCH (Jake, s105). The first cut drew everything at once:
  * every variant side by side, both other token sets as small tiles under
  * them, and all twenty of window's rows in one flat list on the right. Three
- * choices are now three controls. A tab row picks the VARIANT (active,
- * resting, system, expressive), the crown carries the TOKEN SET, and the left
- * panel's layer list picks which part of the component the blocks are about.
- * Nothing new is being shown; the same three lists stopped being drawn
+ * choices are now three controls: which VARIANT stands on the bench, which
+ * TOKEN SET it is wearing, and which part of it the blocks are about. Nothing
+ * new is being shown; the same three lists stopped being drawn
  * simultaneously.
  *
- * WHERE THE TOKEN SET WENT, and why it is not a tab. It was a second tab row
- * under the bench, held in this component's own state, while SAVE committed
- * to whatever the DESKTOP was wearing (useTokenSave reads the settings store).
- * So a visitor could preview a rebind on the MEDIEVAL tab, press the button
- * and land a commit in classic-light. Two answers to one question, and the
- * fix is to stop asking it twice: the switch in the crown writes the settings
- * store, the bench reads the store back, and the button that sends it reads
- * the same store. Picking a set restyles the desktop under the room, which is
- * the honest consequence of one source of truth rather than a side effect to
+ * THE MODIFIERS (Jake, s111): "make all of the modifiers be elements in the
+ * styler panel on the right (desktop, mobile + default, hover, etc + classic,
+ * medieval + variant active, resting)." They were scattered — VARIANT was a
+ * tab row over the bench, TOKEN SET was a flyout in the crown — and two of
+ * them did not exist at all. All four are one block now, at the head of the
+ * right dock, one row per axis and every row the same segmented control:
+ *
+ * · VIEWPORT — DESKTOP or MOBILE, which sizes the bench rather than the
+ *   screen. See THE MOBILE VIEW below.
+ * · STATE — DEFAULT or HOVER, and only where the component's own tokens
+ *   declare a hover (stageSpecs.tsx carries the list). The bench writes the
+ *   state onto itself and the components' hover rules answer to it.
+ * · TOKEN SET — the three files SAVE can commit to. Same three, same
+ *   consequence, and it is still the settings store it writes; only the
+ *   control moved.
+ * · VARIANT — from the spec, as before.
+ *
+ * So the canvas holds the component and nothing else, and every question the
+ * room asks is asked in the same column, in the same shape, next to the
+ * answers those questions change. The crown keeps the title, the component's
+ * name and the way out.
+ *
+ * WHY THE TOKEN SET IS NOT ITS OWN THING. It was a tab row under the bench
+ * once, held in this component's own state, while SAVE committed to whatever
+ * the DESKTOP was wearing (useTokenSave reads the settings store). So a
+ * visitor could preview a rebind on the MEDIEVAL tab, press the button and
+ * land a commit in classic-light. Two answers to one question, and the fix
+ * was to stop asking it twice: the control writes the settings store, the
+ * bench reads the store back, and the button that sends it reads the same
+ * store. Picking a set restyles the desktop under the room, which is the
+ * honest consequence of one source of truth rather than a side effect to
  * hide. Picking MEDIEVAL settles the appearance on light, so a visitor who
  * goes back to CLASSIC lands on classic light: the set you chose last is the
- * set you get.
+ * set you get. It spent one review as a flyout in the crown (s110) and came
+ * down here with the rest of them, because a modifier in the chrome is a
+ * modifier nobody counts.
+ *
+ * THE MOBILE VIEW (Jake, s111): "I feel like I'm not able to manipulate the
+ * mobile view." He was right, and the reason was in the stylesheets rather
+ * than in this room: every small-screen rule on the pilot components was a
+ * `@media` query, and a media query asks the SCREEN. A 360px bench inside a
+ * 1440px room is not a 360px screen, so the tool could show you every colour
+ * a titlebar is made of and never the shape it takes on a phone. Those rules
+ * are `@container viewport` now — the same 720px, measured against a named
+ * box instead of the window. `body` declares that name on the real desktop
+ * (globals.css) and the bench declares it again, closer in, so the nearest
+ * container wins and MOBILE genuinely narrows the component. Nothing about
+ * the site's own layout moved: body is the screen.
  *
  * DIRECT SELECT (Jake): "wire up the figma hotkeys, I'm very interested in
  * having direct select available to select individual elements instead of
@@ -115,11 +148,12 @@ import styles from './stylerStage.module.css'
  * and pushed the theme chip off the dock's edge, a row called TITLEBAR ACTIVE
  * BORDER COLOR dropped its binding to the next line, and the whole dock read
  * small. So the commit bar came out of the dock and became a band across the
- * bottom of the canvas ("put the commit buttons at the bottom center at the
- * bottom of the viewport fixed below the component"), both panels got a grip
- * on their inner edge, the dock opens 80px wider than the inspector's, and
- * everything in the room that was drawn at the micro step is drawn at the
- * control step instead. Nothing was added to the room; it was given room.
+ * bottom of the canvas, both panels got a grip on their inner edge, the dock
+ * opens 80px wider than the inspector's, and everything in the room that was
+ * drawn at the micro step is drawn at the control step instead. Nothing was
+ * added to the room; it was given room. The band has since gone back into the
+ * dock (Jake, s111) — the 80px it was moved out to escape is the 80px that
+ * now holds it. THE COMMIT FOOT, at the foot of this file, has the rest.
  */
 
 /* Constant ids, never useId (the tree reshapes at the SSR handover). These
@@ -130,11 +164,7 @@ const NOTE_ID = 'styler-stage-note'
 const BENCH_ID = 'styler-stage-bench'
 const LAYERS_ID = 'styler-stage-layers-panel'
 const DOCK_ID = 'styler-stage-dock'
-/* the set's NAME, on its own, so the bench can be labelled "ACTIVE MEDIEVAL"
-   by pointing at it. The switch's own button says more than that — it has a
-   job to explain — and a bench named after the whole sentence would read the
-   instructions out every time the caret landed on it. */
-const SET_NAME_ID = 'styler-stage-set-name'
+const MODS_ID = 'styler-stage-modifiers'
 
 /** How far either wall may travel, and where it stands when the room opens.
  *
@@ -156,14 +186,21 @@ const RIGHT = { min: 304, def: 384, max: 560 }
 /** one arrow press, in pixels */
 const STEP = 16
 
-/** A tab's element id, so the bench can name itself after the tab that chose
-    it. Derived from ids the specs already carry, which keeps it identical on
-    the server and on the client. */
-const tabId = (id: string) => `styler-stage-tab-variant-${id}`
+/* THE MOBILE WIDTH is 360px and it is written in the stylesheet, not here
+   (stylerStage.module.css, .mountMobile): a container query can only be
+   answered by a box the browser lays out, so the number has to be a CSS
+   width. 360 is the site's own floor — the width every layout in this
+   codebase is built down to — so MOBILE is not a guess at "small", it is the
+   number the rest of the work already answers to. */
+
+/** An item's element id, so the bench can name itself after the controls that
+    chose it. Derived from ids the specs already carry, which keeps it
+    identical on the server and on the client. */
+const itemId = (axis: string, id: string) => `styler-stage-${axis}-${id}`
 
 /** The three token sets a component can be seen in — the same three
     /api/token-commit will commit to (tokenEdit's TOKEN_THEMES), which is why
-    the switch offers these three and not "every skin": underwater has no token
+    the row offers these three and not "every skin": underwater has no token
     file yet, so there is nothing to show and nowhere to send it. */
 const SKIN_SETS: ReadonlyArray<{
   id: string
@@ -175,6 +212,23 @@ const SKIN_SETS: ReadonlyArray<{
   { id: 'classic-dark', skin: 'classic', theme: 'dark', label: 'styler.skin.classicDark' },
   { id: 'medieval', skin: 'medieval', theme: 'light', label: 'styler.skin.medieval' },
 ]
+
+/** The two widths the bench can be. Not "every breakpoint the site has": the
+    shell declares one, at 720px, and a control offering sizes that change
+    nothing would be a control inviting you to look for a difference that is
+    not there. */
+const VIEWPORTS = [
+  { id: 'desktop', label: 'styler.viewport.desktop' },
+  { id: 'mobile', label: 'styler.viewport.mobile' },
+] as const
+
+/** Every state the row can offer, in the order a person meets them. Which of
+    them a given component actually gets is the spec's call (stageSpecs.tsx,
+    `states`), and a component with one state draws no row at all. */
+const STATES = [
+  { id: 'default', label: 'styler.state.default' },
+  { id: 'hover', label: 'styler.state.hover' },
+] as const
 
 /** The bench a spec asked for, or none.
  *
@@ -195,61 +249,87 @@ export function Bench({ kind, children }: { kind: StageSpec['bench']; children: 
   )
 }
 
-/** The variant axis, as tabs.
+/** ONE AXIS, ONE ROW: the name on the left, the choices beside it.
  *
- * The WAI-ARIA tab pattern with automatic activation: arrow keys move the
- * caret and the choice together, because there is nothing to confirm — the
- * bench redraws either way, and asking for a second key to commit a preview
- * would be a step that exists only to exist. One tabindex in the row, so Tab
- * crosses the whole axis in one press and lands on the next thing. */
-function TabRow({
+ * Four modifiers, one control. It began as the variant tab row over the
+ * bench and it is the whole MODIFIERS block now (Jake, s111), which is the
+ * argument for generalising it rather than writing three more: four segmented
+ * controls that only mostly matched would be four keyboards to get right and
+ * four places to fix a focus bug.
+ *
+ * TABS OR RADIOS, and the difference is real rather than decorative. VARIANT
+ * chooses which of several things the bench is SHOWING, so the bench is its
+ * tabpanel and the row is a tablist — the relationship a screen reader can
+ * follow from either end. The other three do not swap panels; they change a
+ * setting that the one panel then obeys, which is what a radio group is. Both
+ * shapes take the same arrow keys, the same roving tabindex and the same
+ * pills, so the difference is only ever heard, never seen.
+ *
+ * Automatic activation either way: arrows move the caret and the choice
+ * together, because there is nothing to confirm — the bench redraws on every
+ * press, and asking for a second key to commit a preview would be a step that
+ * exists only to exist. One tabindex in the row, so Tab crosses the whole axis
+ * in one press and lands on the next thing. */
+function AxisRow({
+  axis,
   name,
-  tabs,
+  items,
   value,
+  tabs,
   onPick,
 }: {
+  /** the axis's own slug, which is half of every item's element id */
+  axis: string
   /** copy key for the axis name beside the row */
   name: string
-  tabs: ReadonlyArray<{ id: string; label: string }>
+  items: ReadonlyArray<{ id: string; label: string }>
   value: string
+  /** true when this row picks what the bench SHOWS rather than how it is set */
+  tabs?: boolean
   onPick: (id: string) => void
 }) {
   const skin = useSettings((s) => s.skin)
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    const at = tabs.findIndex((tab) => tab.id === value)
+    const at = items.findIndex((item) => item.id === value)
     if (at < 0) return
     const go = (to: number) => {
       e.preventDefault()
-      const next = tabs[(to + tabs.length) % tabs.length]
+      const next = items[(to + items.length) % items.length]
       onPick(next.id)
-      document.getElementById(tabId(next.id))?.focus()
+      document.getElementById(itemId(axis, next.id))?.focus()
     }
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(at + 1)
     else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(at - 1)
     else if (e.key === 'Home') go(0)
-    else if (e.key === 'End') go(tabs.length - 1)
+    else if (e.key === 'End') go(items.length - 1)
   }
 
   return (
     <div className={styles.axis}>
       <CopyText k={name} className={styles.axisName} />
-      <div role="tablist" aria-label={t(name, skin)} className={styles.tabs} onKeyDown={onKeyDown}>
-        {tabs.map((tab) => {
-          const on = tab.id === value
+      <div
+        role={tabs ? 'tablist' : 'radiogroup'}
+        aria-label={t(name, skin)}
+        className={styles.tabs}
+        onKeyDown={onKeyDown}
+      >
+        {items.map((item) => {
+          const on = item.id === value
           return (
             <button
-              key={tab.id}
-              id={tabId(tab.id)}
+              key={item.id}
+              id={itemId(axis, item.id)}
               type="button"
-              role="tab"
+              role={tabs ? 'tab' : 'radio'}
               className={styles.tab}
-              aria-selected={on}
+              aria-selected={tabs ? on : undefined}
+              aria-checked={tabs ? undefined : on}
               aria-controls={BENCH_ID}
               tabIndex={on ? 0 : -1}
-              onClick={() => onPick(tab.id)}
+              onClick={() => onPick(item.id)}
             >
-              <CopyText k={tab.label} />
+              <CopyText k={item.label} />
             </button>
           )
         })}
@@ -258,168 +338,6 @@ function TabRow({
   )
 }
 
-/** THE SET SWITCH — which token set the room, and the desktop, is wearing.
- *
- * The site already has this control: SkinSwitch sits beside the wordmark and
- * flies out to offer the skins, each row wearing its own `data-skin` so the
- * MEDIEVAL row is genuinely parchment and vermilion. This is that control,
- * with the theme folded into it, because the three things it offers are the
- * three FILES the commit route writes (tokenEdit's TOKEN_THEMES) and classic
- * keeps one per appearance. Same trigger — dot, name, caret — same flyout,
- * same live preview per row, and the same `role="menu"` with radio items,
- * since picking one of three is exactly what a radio group is.
- *
- * It is not the shell's component reused, and the reason is the ground under
- * it. That switch is built for the menubar, where everything stands on paper;
- * this one stands on the crown's accent flood, where the paper fill it draws
- * would be a white tab glued to the tool's own bar. The classes are the
- * stage's, on the crown's ink (stylerStage.module.css) — the CRT chrome rule,
- * the same one .crownChip and .crownBtn already follow.
- *
- * OPEN is the STAGE's state, not this component's, and that is the Escape
- * ladder's doing: the stage owns Escape through the hotkey registry, which
- * runs in the capture phase on `window` and so gets the key before any
- * listener here could. One place holds what is open, and the ladder closes
- * the menu first, then the candidate list, then the room. */
-function SetSwitch({
-  value,
-  open,
-  setOpen,
-  onPick,
-}: {
-  value: (typeof SKIN_SETS)[number]
-  open: boolean
-  setOpen: (open: boolean) => void
-  onPick: (set: (typeof SKIN_SETS)[number]) => void
-}) {
-  const skin = useSettings((s) => s.skin)
-  const reduced = useReducedMotion()
-  const ref = useRef<HTMLDivElement>(null)
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const menuRef = useRef<HTMLUListElement>(null)
-
-  /* a press anywhere else closes it. Escape is deliberately NOT here — see
-     the note above: the stage's ladder owns that key for the whole room. */
-  useEffect(() => {
-    if (!open) return
-    const onDown = (e: globalThis.PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    window.addEventListener('pointerdown', onDown)
-    return () => window.removeEventListener('pointerdown', onDown)
-  }, [open, setOpen])
-
-  /* THE CARET, both ways. It goes to the checked row when the menu opens,
-     which is the menu pattern, and it comes back to the trigger when the menu
-     goes — but only if it would otherwise be lost. A pick and an Escape both
-     leave the caret on a button that is about to be removed, and a visitor who
-     closed the menu by clicking something else has already put it somewhere
-     they chose. */
-  const wasOpen = useRef(false)
-  useEffect(() => {
-    if (open) {
-      wasOpen.current = true
-      menuRef.current
-        ?.querySelector<HTMLElement>('[aria-checked="true"]')
-        ?.focus({ preventScroll: true })
-      return
-    }
-    if (!wasOpen.current) return
-    wasOpen.current = false
-    const at = document.activeElement
-    if (!at || at === document.body || menuRef.current?.contains(at)) {
-      triggerRef.current?.focus({ preventScroll: true })
-    }
-  }, [open])
-
-  const onKeyDown = (e: KeyboardEvent<HTMLUListElement>) => {
-    const items = Array.from(
-      menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"]') ?? [],
-    )
-    const at = items.indexOf(document.activeElement as HTMLElement)
-    const go = (to: number) => {
-      e.preventDefault()
-      items[(to + items.length) % items.length]?.focus()
-    }
-    if (e.key === 'ArrowDown') go(at + 1)
-    else if (e.key === 'ArrowUp') go(at - 1)
-    else if (e.key === 'Home') go(0)
-    else if (e.key === 'End') go(items.length - 1)
-  }
-
-  return (
-    <div className={styles.setSwitch} ref={ref}>
-      <button
-        type="button"
-        ref={triggerRef}
-        className={styles.setTrigger}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label={`${t('styler.axis.set', skin)}: ${t(value.label, skin)}. ${t('styler.set.change', skin)}`}
-        onClick={() => {
-          sfx.tap()
-          setOpen(!open)
-        }}
-      >
-        <span className={styles.setDot} aria-hidden="true" />
-        <span className={styles.setName} id={SET_NAME_ID}>
-          {t(value.label, skin)}
-        </span>
-        <span className={styles.setCaret} data-open={open} aria-hidden="true">
-          ▾
-        </span>
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.ul
-            ref={menuRef}
-            className={styles.setMenu}
-            role="menu"
-            aria-label={t('styler.axis.set', skin)}
-            initial={reduced ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.97 }}
-            animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={reduced ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.97 }}
-            transition={SPRINGS.deck}
-            data-spring="deck"
-            style={{ transformOrigin: 'top left' }}
-            onKeyDown={onKeyDown}
-          >
-            {SKIN_SETS.map((set) => (
-              <li
-                key={set.id}
-                role="none"
-                className={styles.setItemWrap}
-                /* the row IS the set: nested attributes re-scope every token
-                   under them, so this is the paper, the ink and the accent
-                   that set actually has (lib/stylerTune.ts carries the one
-                   place that trick does not hold on its own) */
-                data-skin={set.skin}
-                data-theme={set.theme}
-              >
-                <button
-                  type="button"
-                  role="menuitemradio"
-                  aria-checked={set.id === value.id}
-                  className={styles.setItem}
-                  onClick={() => onPick(set)}
-                >
-                  <span className={styles.setDot} aria-hidden="true" />
-                  <CopyText k={set.label} className={styles.setItemName} />
-                  {set.id === value.id && (
-                    <span className={styles.setCheck} aria-hidden="true">
-                      ●
-                    </span>
-                  )}
-                </button>
-              </li>
-            ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
 
 /** THE GRIP — a wall you can move.
  *
@@ -740,17 +658,18 @@ export function StylerStage({
       state: the inspector's palette and this one are never on screen
       together, and Escape here is the stage's own ladder. */
   const [openRow, setOpenRow] = useState<string | null>(null)
-  /** whether the crown's token-set menu is flown out. Held here rather than
-      inside the switch so Escape can close it from the ladder below. */
-  const [openSet, setOpenSet] = useState(false)
-  /* The two choices this room holds itself, both as "what was asked for"
+  /* The choices this room holds itself, all of them as "what was asked for"
      rather than as "what is showing". A null is the default and a stale id is
      a miss, and both resolve to the same fallback below, so the stage can
      change component without an effect racing the render to clean up after
-     it. The third choice, the token set, is the SETTINGS STORE's — see the
-     header — so there is no want for it. */
+     it. That matters most for STATE: a component with no hover is one HOVER
+     pick away from a modifier row it does not have, and the fallback answers
+     it without a cleanup effect. The one choice NOT held here is the token
+     set, which is the SETTINGS STORE's — see the header. */
   const [wantVariant, setWantVariant] = useState<string | null>(null)
   const [wantLayer, setWantLayer] = useState<string | null>(null)
+  const [wantViewport, setWantViewport] = useState<string | null>(null)
+  const [wantState, setWantState] = useState<string | null>(null)
   /* The two walls, held the same way the tabs are: null is "wherever the room
      opens it", a number is somebody having moved it. Null on the left is what
      keeps --inspect-left the default rather than a second copy of 244. */
@@ -788,9 +707,10 @@ export function StylerStage({
      its own appearance, so picking it while the desktop is in dark would
      otherwise leave data-theme='dark' on <html> under a skin whose selector
      wins over it — a document telling two stories. */
-  const pickSet = (next: (typeof SKIN_SETS)[number]) => {
+  const pickSet = (id: string) => {
+    const next = SKIN_SETS.find((s) => s.id === id)
+    if (!next) return
     sfx.tap()
-    setOpenSet(false)
     if (next.skin !== skin) setSkin(next.skin)
     if (next.theme !== theme) setTheme(next.theme)
   }
@@ -923,11 +843,12 @@ export function StylerStage({
      registry sits on `window` in the capture phase and the ladder sits on
      `document`, so this runs first and stops the event — the ladder never
      sees it and never deselects the pick underneath. Two rungs, in the
-     ladder's own order: the crown's set menu closes first, then an open
-     candidate list, then the room. Nothing about InspectShell changed to make
-     this work. */
-  const act = useRef({ onClose, openRow, openSet })
-  act.current = { onClose, openRow, openSet }
+     ladder's own order: an open candidate list closes first, then the room.
+     There were three while the token set was a flyout in the crown; the
+     modifiers are all rows on the panel now and a row has nothing to close.
+     Nothing about InspectShell changed to make this work. */
+  const act = useRef({ onClose, openRow })
+  act.current = { onClose, openRow }
 
   useEffect(
     () =>
@@ -935,8 +856,7 @@ export function StylerStage({
         {
           key: 'Escape',
           run: () => {
-            if (act.current.openSet) setOpenSet(false)
-            else if (act.current.openRow) setOpenRow(null)
+            if (act.current.openRow) setOpenRow(null)
             else act.current.onClose()
           },
         },
@@ -953,6 +873,15 @@ export function StylerStage({
   const layers = layersFor(componentId)
   const layer = layers.find((l) => l.id === wantLayer) ?? layers[0]
   bench.current = { componentId, layers, picked: layer.id }
+
+  /* The two modifiers the SPEC has a say in, resolved the same way every
+     other want in this room is: the ask, checked against what is actually on
+     offer, falling through to the first. `states` is a component fact and the
+     row is drawn only when there are two of them, so a spec with one state
+     can never leave a stale HOVER on the bench. */
+  const viewport = VIEWPORTS.find((v) => v.id === wantViewport) ?? VIEWPORTS[0]
+  const states = STATES.filter((s) => spec.states.includes(s.id))
+  const state = states.find((s) => s.id === wantState) ?? states[0]
 
   /** The deepest layer marker under a pointer, or null when the pointer is
       not on one. `closest` can walk out of the bench on its way up, so the
@@ -977,11 +906,10 @@ export function StylerStage({
   }
 
   /* The two walls, written as custom properties on the room itself. The
-     stylesheet declares both defaults on .stage and everything that has to
-     line up with a wall reads them from there — the panels, and the commit
-     band spanning the gap between them — so a dragged edge moves all three
-     without a second number anywhere. Only a MOVED wall is written here; an
-     untouched one leaves the sheet's default standing. */
+     stylesheet declares both defaults on .stage and both panels read them
+     from there, so a dragged edge moves the layout without a second number
+     anywhere. Only a MOVED wall is written here; an untouched one leaves the
+     sheet's default standing. */
   const walls = {
     ...(leftWidth !== null ? { '--styler-left': `${leftWidth}px` } : null),
     ...(rightWidth !== null ? { '--styler-right': `${rightWidth}px` } : null),
@@ -1002,10 +930,6 @@ export function StylerStage({
       <header className={styles.crown}>
         <span className={shell.crownTitle}>{t('styler.title', skin)}</span>
         <span className={styles.crownChip}>{componentId}</span>
-        {/* the set sits between the component's name and the way out: it is
-            the tool's own chrome, the same as the two things either side of
-            it, and it is the last thing the room asks before SAVE */}
-        <SetSwitch value={set} open={openSet} setOpen={setOpenSet} onPick={pickSet} />
         <button
           type="button"
           className={shell.crownBtn}
@@ -1036,27 +960,35 @@ export function StylerStage({
           }
         />
 
+        {/* THE CANVAS holds the component and nothing else now. The variant
+            tabs stood across the top of it until the modifiers were gathered
+            into one block in the dock (Jake, s111), and a strip of controls
+            over the bench was the last thing in the room competing with the
+            thing the room is for. */}
         <div className={styles.canvas}>
-          {/* one axis over the bench, and the component does not name it: the
-              variants come from the spec. The other axis is the crown's now */}
-          <TabRow
-            name="styler.axis.variant"
-            tabs={variants}
-            value={variant?.id ?? ''}
-            onPick={setWantVariant}
-          />
-
           <div
             id={BENCH_ID}
             ref={benchRef}
-            className={styles.mount}
+            className={`${styles.mount} ${viewport.id === 'mobile' ? styles.mountMobile : ''}`}
             role="tabpanel"
-            /* named by the two controls that chose it — the variant tab and
-               the crown's set name — so a screen reader reads "ACTIVE CLASSIC
+            /* named by the two controls that chose it — the variant pill and
+               the token set's — so a screen reader reads "ACTIVE CLASSIC
                DARK" rather than "region" */
-            aria-labelledby={variant ? `${tabId(variant.id)} ${SET_NAME_ID}` : SET_NAME_ID}
+            aria-labelledby={
+              variant
+                ? `${itemId('variant', variant.id)} ${itemId('set', set.id)}`
+                : itemId('set', set.id)
+            }
             data-skin={set.skin}
             data-theme={set.theme}
+            /* THE FORCED STATE. There is no way to hover a sample on somebody
+               else's behalf, so the bench declares the state instead and every
+               pilot hover rule answers to this as well as to the pointer
+               (shell.module.css carries the note, on .iconBtn). It is written
+               on every render, DEFAULT included, because an attribute that
+               only appears sometimes is an attribute somebody debugs later. */
+            data-styler-state={state?.id ?? 'default'}
+            data-styler-viewport={viewport.id}
             /* CAPTURE, so the pick is made before the sample handles its own
                click, and swallowed only for ⌘: a plain click has to reach the
                sample button underneath and still leave the root selected
@@ -1086,6 +1018,51 @@ export function StylerStage({
             onSize={setRightWidth}
             onReset={() => setRightWidth(null)}
           />
+
+          {/* THE MODIFIERS, all four of them, at the head of the column that
+              answers them (Jake, s111). One heading, one row per axis, and
+              every row the same segmented control — see AxisRow above for why
+              one of them is a tablist and the other three are radio groups. */}
+          <h2 className={`${shell.panelHead} ${styles.modsHead}`} id={MODS_ID}>
+            <CopyText k="styler.modifiers" />
+          </h2>
+          <div className={styles.mods} role="group" aria-labelledby={MODS_ID}>
+            <AxisRow
+              axis="viewport"
+              name="styler.axis.viewport"
+              items={VIEWPORTS}
+              value={viewport.id}
+              onPick={setWantViewport}
+            />
+            {/* a component with one state has nothing to ask about: the row
+                is drawn when the spec offers a choice and not otherwise */}
+            {states.length > 1 && state && (
+              <AxisRow
+                axis="state"
+                name="styler.axis.state"
+                items={states}
+                value={state.id}
+                onPick={setWantState}
+              />
+            )}
+            <AxisRow
+              axis="set"
+              name="styler.axis.set"
+              items={SKIN_SETS}
+              value={set.id}
+              onPick={pickSet}
+            />
+            {/* the component does not name its own variants: the spec does */}
+            <AxisRow
+              axis="variant"
+              name="styler.axis.variant"
+              items={variants}
+              value={variant?.id ?? ''}
+              tabs
+              onPick={setWantVariant}
+            />
+          </div>
+
           {/* the note glyph is a SIBLING of the heading, never inside it: a
               heading takes its accessible name from its contents, and the
               whole tip would be read out as part of the name (InfoTip.tsx) */}
@@ -1107,67 +1084,73 @@ export function StylerStage({
               bare
             />
           </div>
-        </aside>
-      </div>
 
-      {/* THE COMMIT BAND. It stood in the dock's foot until Jake looked at it
-          on a wide screen: three things that each want a line of their own,
-          in a 304px column, next to a canvas with the whole middle of the
-          screen going spare. "Put the commit buttons at the bottom center at
-          the bottom of the viewport fixed below the component now that we
-          have the whole canvas with the localized components." So it spans
-          the gap between the two walls and sits on the floor, under the thing
-          it is about to propose a change to.
+          {/* THE COMMIT FOOT, and why it came back.
 
-          Nothing about the flow moved with it. It is still the same count,
-          the same revert, the same button and the same key gate underneath
-          (useTokenSave) — the gate and the status line are the hook's own
-          markup and they draw here now.
+              It stood here once. Jake looked at it on a wide screen in s107
+              and everything he flagged was something being squeezed: the
+              count broke onto two lines, the theme chip on SAVE ran off the
+              edge. So it left the dock and became a band across the bottom of
+              the canvas, and the dock got 80px wider in the same pass.
 
-          THE BUTTON SAYS WHAT IT DOES: OPEN PR. It said SAVE → PR and wore a
-          chip naming the theme it was about to write, which was the honest
-          thing to do back when the set on the bench and the set being
-          committed to could disagree. They cannot now — the crown's switch is
-          the only thing that sets either (see the header) — so the chip was
-          repeating the crown two feet below it. The inspector keeps its own
-          SAVE → PR: that panel has no crown to read the destination off.
+              That extra 80px is what brings it back (Jake, s111: "fix the
+              export options to the bottom of that panel"). A 384px column
+              holds the row the 304px one folded, the chip it was carrying is
+              gone with the crown's old switch, and a band floating over the
+              canvas was a second thing in the middle of the room competing
+              with the component. The dock is a column of three now — the
+              modifiers, the blocks that scroll, and this, which does not.
 
-          Last in the document, which is also where the keyboard should reach
-          it: layers, bench, blocks, then the button that sends them. */}
-      <div className={styles.commit}>
-        <div className={styles.commitBar}>
-          <div className={styles.commitRow}>
-            <span className={shell.previewText}>
-              <CopyText k={held > 0 ? 'styler.pending' : 'styler.clean'} />
-              {held > 0 ? ` ${held}` : ''}
-            </span>
-            {held > 0 && (
+              Nothing about the flow moved either way. It is still the same
+              count, the same revert, the same button and the same key gate
+              underneath (useTokenSave) — the gate and the status line are the
+              hook's own markup and they draw here.
+
+              THE BUTTON SAYS WHAT IT DOES: OPEN PR. It said SAVE → PR and
+              wore a chip naming the theme it was about to write, which was
+              honest back when the set on the bench and the set being
+              committed to could disagree. They cannot now — the TOKEN SET row
+              is the only thing that sets either (see the header) — so the
+              chip was repeating a control one panel above it. The inspector
+              keeps its own SAVE → PR: that panel has no modifier block to
+              read the destination off.
+
+              Last in the dock, which is also where the keyboard should reach
+              it: modifiers, blocks, then the button that sends them. */}
+          <div className={styles.commit}>
+            <div className={styles.commitRow}>
+              <span className={shell.previewText}>
+                <CopyText k={held > 0 ? 'styler.pending' : 'styler.clean'} />
+                {held > 0 ? ` ${held}` : ''}
+              </span>
+              {held > 0 && (
+                <button
+                  type="button"
+                  className={shell.resetAll}
+                  onClick={() => {
+                    resetAll()
+                    setOpenRow(null)
+                    after()
+                  }}
+                >
+                  <CopyText k="styler.resetall" />
+                </button>
+              )}
               <button
                 type="button"
-                className={shell.resetAll}
-                onClick={() => {
-                  resetAll()
-                  setOpenRow(null)
-                  after()
-                }}
+                className={`${shell.resetAll} ${shell.save}`}
+                aria-disabled={saver.saveInert || undefined}
+                aria-describedby={saver.note ? NOTE_ID : undefined}
+                onClick={saver.requestSave}
               >
-                <CopyText k="styler.resetall" />
+                <CopyText k="styler.save" />
               </button>
-            )}
-            <button
-              type="button"
-              className={`${shell.resetAll} ${shell.save}`}
-              aria-disabled={saver.saveInert || undefined}
-              aria-describedby={saver.note ? NOTE_ID : undefined}
-              onClick={saver.requestSave}
-            >
-              <CopyText k="styler.save" />
-            </button>
-          </div>
+            </div>
 
-          {saver.gate?.for === 'token' && saver.keyGate()}
-          {saver.saveStatus()}
-        </div>
+            {saver.gate?.for === 'token' && saver.keyGate()}
+            {saver.saveStatus()}
+          </div>
+        </aside>
       </div>
     </div>
   )

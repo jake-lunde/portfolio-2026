@@ -376,16 +376,26 @@ test('the token-set axis offers exactly the three sets SAVE can commit to', () =
   assert.deepEqual(sets, [...TOKEN_THEMES])
 })
 
-test('every tab on either axis names a copy key that exists', () => {
+test('every pill on every modifier row names a copy key that exists', () => {
   const keys = [
     ...[...specSrc.matchAll(/label: '([\w.]+)'/g)].map((m) => m[1]),
     ...[...stageSrc.matchAll(/label: '([\w.]+)'/g)].map((m) => m[1]),
-    'styler.axis.variant',
-    'styler.axis.set',
+    // the axis names, which the rows carry as a `name=` prop
+    ...[...stageSrc.matchAll(/name="([\w.]+)"/g)].map((m) => m[1]),
     'styler.layers',
   ]
-  assert.ok(keys.length >= 12, 'the labels were found at all')
+  assert.ok(keys.length >= 16, 'the labels were found at all')
   for (const key of keys) assert.ok(key in COPY, `${key} is in copy.json`)
+  // all four axes are named, and the block that holds them is too
+  for (const key of [
+    'styler.axis.viewport',
+    'styler.axis.state',
+    'styler.axis.set',
+    'styler.axis.variant',
+    'styler.modifiers',
+  ]) {
+    assert.ok(keys.includes(key) || stageSrc.includes(`k="${key}"`), `${key} is on the panel`)
+  }
 })
 
 test('the bench still registers itself, or the skin previews go half-dead', () => {
@@ -423,15 +433,27 @@ test('the revert button and the way out do not share one sentence', () => {
   assert.match(COPY['styler.close'], /DESKTOP/)
 })
 
-test('the commit bar stands outside the dock, last in the room', () => {
+test('the commit foot is the last thing in the dock', () => {
+  /* Jake, s111: "fix the export options to the bottom of that panel." The bar
+     spent one review as a band across the canvas floor (s107, when the dock
+     was 304px and the row folded in it); the dock opens at 384 now and the
+     row fits, so it went back to the panel it sends. */
   const dockAt = stageSrc.indexOf('className={styles.dock}')
   const dockEnd = stageSrc.indexOf('</aside>', dockAt)
+  const bodyAt = stageSrc.indexOf('className={styles.dockBody}')
   const barAt = stageSrc.indexOf('className={styles.commit}')
   assert.ok(dockAt > 0 && barAt > 0, 'both were found')
-  assert.ok(barAt > dockEnd, 'the bar is not inside the right dock any more')
+  assert.ok(barAt > dockAt && barAt < dockEnd, 'the bar is inside the right dock')
+  assert.ok(barAt > bodyAt, 'and below the blocks, which is where the keyboard reaches it')
   // and the key gate went with it, or SAVE asks for a key nobody can see
   assert.ok(stageSrc.indexOf('saver.keyGate()') > barAt, 'the gate draws in the bar')
   assert.ok(stageSrc.indexOf('saver.saveStatus()') > barAt, 'and so does the status')
+  // a column of three: the modifiers, a body that scrolls, a foot that does
+  // not. Nothing is positioned, so twenty rows can never push the button off.
+  const foot = stageCss.slice(stageCss.indexOf('.commit {'))
+  assert.match(foot.slice(0, foot.indexOf('}')), /flex: none/)
+  assert.ok(!/\.commit \{[^}]*position:/.test(stageCss), 'the foot is not positioned')
+  assert.ok(stageCss.includes('.commitRow > :first-child'), 'the count may shrink and wrap')
 })
 
 test('the walls open where the stylesheet says they do', () => {
@@ -766,12 +788,13 @@ test('the bench picks with Figma’s two gestures, and swallows only one', () =>
   assert.match(guarded, /if \(direct\) \{\s*e\.preventDefault\(\)\s*e\.stopPropagation\(\)/)
 })
 
-/* ------------------------------------------------ the crown's set switch */
+/* ------------------------------------------------------- the modifiers */
 
 test('the token set is one control, and it is the one SAVE reads', () => {
-  // one tab row left in the room: the variant axis
-  assert.equal([...stageSrc.matchAll(/role="tablist"/g)].length, 1, 'the set row is gone')
-  assert.ok(!stageSrc.includes(`name="styler.axis.set"`), 'and it is not a tab row any more')
+  // one row on the panel, not a flyout in the crown and not a second tab row
+  assert.ok(!stageSrc.includes('SetSwitch'), 'the crown flyout is gone')
+  assert.ok(!stageSrc.includes('aria-haspopup="menu"'), 'and nothing opens a menu any more')
+  assert.match(stageSrc, /axis="set"\s*\n\s*name="styler\.axis\.set"/, 'it is a modifier row')
   // picking one writes the settings store, both halves of it
   assert.match(stageSrc, /setSkin\(next\.skin\)/)
   assert.match(stageSrc, /setTheme\(next\.theme\)/)
@@ -781,22 +804,160 @@ test('the token set is one control, and it is the one SAVE reads', () => {
     src('src/components/inspect/useTokenSave.tsx').includes('themeFor(skin, theme)'),
     'and so does the button that sends it',
   )
+  // the crown's copy went with the control
+  assert.ok(!('styler.set.change' in COPY), 'the flyout prompt left copy.json')
+  assert.ok('styler.axis.set' in COPY, 'the axis name stayed')
 })
 
-test('the switch is the skin picker, on the crown', () => {
-  // the pattern SkinSwitch established: a menu of radios, each row wearing
-  // its own tokens, on the deck spring with a reduced-motion fallback
-  assert.ok(stageSrc.includes('role="menuitemradio"'), 'the rows are radios')
-  assert.ok(stageSrc.includes('aria-haspopup="menu"'), 'the trigger says what it opens')
-  assert.match(stageSrc, /data-skin=\{set\.skin\}\s*\n\s*data-theme=\{set\.theme\}/)
-  assert.ok(stageSrc.includes('SPRINGS.deck'), 'the flyout is on the deck spring')
-  assert.ok(stageSrc.includes('useReducedMotion'), 'with a fallback')
-  // Escape closes the menu before it closes the room
-  const ladder = stageSrc.slice(stageSrc.indexOf("key: 'Escape'"))
-  assert.ok(
-    ladder.indexOf('setOpenSet(false)') < ladder.indexOf('act.current.onClose()'),
-    'the menu is the first rung',
-  )
+test('every modifier is a row in the dock, and every row is one control', () => {
+  /* Jake, s111: "make all of the modifiers be elements in the styler panel on
+     the right (desktop, mobile + default, hover, etc + classic, medieval +
+     variant active, resting)." Four axes, one component, one block. */
+  const dockAt = stageSrc.indexOf('className={styles.dock}')
+  const modsAt = stageSrc.indexOf('className={styles.mods}')
+  const bodyAt = stageSrc.indexOf('className={styles.dockBody}')
+  assert.ok(modsAt > dockAt, 'the block is in the right dock')
+  assert.ok(modsAt < bodyAt, 'and above the blocks it sets up')
+  const axes = [...stageSrc.matchAll(/axis="(\w+)"/g)].map((m) => m[1])
+  assert.deepEqual(axes, ['viewport', 'state', 'set', 'variant'])
+  // one component draws all four, or four segmented controls start to differ
+  assert.equal([...stageSrc.matchAll(/function AxisRow\(/g)].length, 1)
+  assert.equal([...stageSrc.matchAll(/<AxisRow\b/g)].length, 4)
+  // VARIANT swaps what the bench SHOWS, so it is a tablist and the bench is
+  // its panel; the other three set the one panel, which is a radio group
+  assert.match(stageSrc, /role=\{tabs \? 'tablist' : 'radiogroup'\}/)
+  assert.match(stageSrc, /role=\{tabs \? 'tab' : 'radio'\}/)
+  assert.equal([...stageSrc.matchAll(/^\s+tabs\s*$/gm)].length, 1, 'exactly one row is tabs')
+  assert.ok(stageSrc.includes('aria-controls={BENCH_ID}'), 'every row still names the bench')
+  // and both marks paint the same pill, or a visitor can see which is which
+  assert.match(stageCss, /\.tab\[aria-selected='true'\],\s*\n\s*\.tab\[aria-checked='true'\]/)
+})
+
+test('a modifier row is a segmented control a keyboard can walk', () => {
+  const row = stageSrc.slice(stageSrc.indexOf('function AxisRow('), stageSrc.indexOf('/** THE GRIP'))
+  for (const key of ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']) {
+    assert.ok(row.includes(`'${key}'`), `${key} moves the caret`)
+  }
+  // roving tabindex: one stop per row, so Tab crosses an axis in one press
+  assert.match(row, /tabIndex=\{on \? 0 : -1\}/)
+  // and the caret follows the pick, which is what automatic activation means
+  assert.ok(row.includes('document.getElementById(itemId(axis, next.id))?.focus()'))
+})
+
+test('the state row is offered only where the component has a hover to show', () => {
+  /* A HOVER pill on a component whose tokens declare no hover would be a
+     control that paints nothing and blames the visitor for not seeing it. The
+     spec declares the states; the TOKEN NAMES are what this checks it against,
+     so the two can never drift apart in silence. */
+  const body = specSrc.slice(specSrc.indexOf('export const STAGE_SPECS'))
+  for (const id of COMPONENT_IDS) {
+    const at = body.indexOf(/^[a-z]+$/.test(id) ? `\n  ${id}: {` : `\n  '${id}': {`)
+    const spec = body.slice(at, at + 400)
+    const states = spec.match(/states: \[([^\]]*)\]/)
+    assert.ok(states, `${id} declares its states`)
+    const offersHover = states[1].includes("'hover'")
+    const hasHover = rowsFor(id).some((row) => row.role.includes('-hover-'))
+    assert.equal(offersHover, hasHover, `${id}: the row matches what its tokens declare`)
+    assert.ok(states[1].includes("'default'"), `${id} always has a resting state`)
+  }
+  // and the panel draws the row only when there is a choice in it
+  assert.ok(stageSrc.includes('states.length > 1 && state &&'), 'one state draws no row')
+})
+
+test('the bench holds the state down, and the pilot hover rules answer to it', () => {
+  // there is no way to hover a sample on somebody else's behalf, so the mount
+  // declares the state and the components' own rules read it
+  assert.match(stageSrc, /data-styler-state=\{state\?\.id \?\? 'default'\}/)
+  const forced = /:is\(:hover, \[data-styler-state='hover'\] \*\)/
+  const shellSheet = src('src/components/shell/shell.module.css')
+  const primitives = src('src/components/primitives/primitives.module.css')
+  assert.match(shellSheet, new RegExp(`\\.ctrl${forced.source}`), 'window ctrl')
+  assert.match(shellSheet, new RegExp(`\\.iconBtn${forced.source}`), 'desktop icons')
+  assert.match(primitives, new RegExp(`\\.btnSystem${forced.source}`), 'button, system')
+  assert.match(primitives, new RegExp(`\\.btnExpressive${forced.source}`), 'button, expressive')
+  // one declaration of what hover looks like, never a forced copy beside it
+  for (const [name, sheet] of [
+    ['shell', shellSheet],
+    ['primitives', primitives],
+  ]) {
+    const bare = [...sheet.matchAll(/\.(ctrl|iconBtn|btnSystem|btnExpressive):hover\b/g)]
+    assert.deepEqual(bare, [], `${name} has no unforced copy of a pilot hover rule`)
+  }
+})
+
+test('the pilot components size themselves against a container, not the screen', () => {
+  /* Jake, s111: "I feel like I'm not able to manipulate the mobile view." A
+     @media rule asks the screen, and a 360px bench in a 1440px room gets the
+     wide answer, so the mobile form was a thing the tool could not draw. */
+  const shellSheet = src('src/components/shell/shell.module.css')
+  const at = (needle) => shellSheet.indexOf(needle)
+  assert.ok(at('@container viewport (max-width: 720px)') > 0, 'the mobile block moved')
+  assert.ok(at('@container viewport (min-width: 721px)') > 0, 'and the desktop one with it')
+  // every pilot selector is under a container rule now, and none under a
+  // viewport media query at the same breakpoint
+  const container = shellSheet.slice(at('@container viewport (max-width: 720px)'))
+  const block = container.slice(0, container.indexOf('\n}\n'))
+  for (const sel of [
+    '.icons',
+    '.iconBtn',
+    '.window',
+    '.titlebar',
+    '.title',
+    '.ctrl',
+    '.titleControls',
+    '.resizeGrip',
+    '.wordmark span',
+  ]) {
+    assert.ok(block.includes(`${sel} {`) || block.includes(`${sel},`), `${sel} is in the container`)
+  }
+  // the desk's own two stayed behind: where the dock's programs live at this
+  // width is a fact about the desktop, and a desk goes on no bench
+  const media = shellSheet.slice(at('@media (max-width: 720px)'))
+  assert.ok(media.includes('.trashGrid'), 'trashGrid is still a viewport rule')
+  assert.ok(media.includes('.dockedGrid'), 'and so is dockedGrid')
+})
+
+test('a locked row wears a glyph and keeps the word in the tree', () => {
+  /* The word LOCKED sat in a chip in a column of bindings, where it read as
+     one more binding. A padlock reads as "not an offer" at a glance — but
+     only to the eye, so the chip carries the name the word used to be. */
+  const blocksSrc = src('src/components/inspect/StylerBlocks.tsx')
+  assert.ok(blocksSrc.includes('function LockGlyph()'), 'there is a glyph')
+  assert.ok(!/<CopyText k="styler.locked"/.test(blocksSrc), 'the word is off the screen')
+  assert.ok('styler.locked' in COPY, 'and the copy key survived')
+  const chip = blocksSrc.slice(blocksSrc.indexOf('data-tier="locked"'))
+  const open = chip.slice(0, chip.indexOf('</span>'))
+  assert.match(open, /role="img"/, 'the chip is the label')
+  assert.match(open, /aria-label=\{t\('styler\.locked', skin\)\}/, 'named from the copy layer')
+  assert.match(open, /<LockGlyph \/>/)
+  // the house's small-chrome recipe: currentColor, no fill, decorative
+  const glyph = blocksSrc.slice(blocksSrc.indexOf('function LockGlyph()'))
+  const svg = glyph.slice(0, glyph.indexOf('</svg>'))
+  assert.match(svg, /stroke="currentColor"/)
+  assert.match(svg, /fill="none"/)
+  assert.match(svg, /aria-hidden="true"/)
+  assert.match(svg, /viewBox="0 0 32 32"/, 'the 32-unit grid the other glyphs use')
+})
+
+test('the container is declared on the body and again on the bench', () => {
+  /* The nearest named ancestor wins, which is the whole mechanism: body is
+     the screen, the bench is closer, so MOBILE narrows the component without
+     touching the room around it. Body rather than the desktop element because
+     `container-type: inline-size` makes a box the containing block for every
+     fixed descendant under it, and body is the one that already IS the
+     viewport — the desktop starts below the menu bar, INSPECT.MODE insets its
+     sides, and the menu bar is its sibling rather than its child. */
+  const globals = src('src/app/globals.css')
+  const body = globals.slice(globals.indexOf('\nbody {'), globals.indexOf('\nbody,\n'))
+  assert.match(body, /container-name: viewport/)
+  assert.match(body, /container-type: inline-size/)
+  assert.match(body, /height: 100%/, 'and body is still the whole screen')
+  assert.match(stageCss, /container: viewport \/ inline-size/, 'the bench takes the same name')
+  // MOBILE is the site's own floor, and it is a real CSS width or the query
+  // has nothing to measure
+  assert.match(stageCss, /\.mountMobile \{[^}]*width: 360px/)
+  assert.match(stageCss, /\.mountMobile \{[^}]*box-sizing: content-box/)
+  assert.match(stageSrc, /styles\.mountMobile/, 'and the viewport row turns it on')
 })
 
 test('the button on the floor says what it does, and says it once', () => {
