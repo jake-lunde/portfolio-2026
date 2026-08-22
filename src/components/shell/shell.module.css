@@ -166,8 +166,10 @@
    between them, and the desktop has already shed its widgets down there
    anyway. No toggle, no way in — and InspectShell watches the same
    width and stands the mode down if it is already up. The whole switch
-   goes, not just the chip, so the bar's gap closes with it. */
-@media (max-width: 900px) {
+   goes, not just the chip, so the bar's gap closes with it. A container
+   query like the bar's other small-screen rules (s111), so the MOBILE
+   bench in STYLER drops it the way a phone does. */
+@container viewport (max-width: 900px) {
   .inspectSwitch {
     display: none;
   }
