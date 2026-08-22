@@ -8,13 +8,17 @@ import { registerHotkeys } from '@/lib/hotkeys'
 import { candidatesFor, CANDIDATES_BY_FAMILY, type StyleCandidate } from '@/lib/styleCandidates'
 import { blocksFor, fillStrokePair, type StylerRow } from '@/lib/stylerBlocks'
 import {
+  canRedo,
+  canUndo,
   count,
   heldToken,
   isRebound,
   readValue,
   rebind,
+  redo,
   resetAll,
   resetRole,
+  undo,
 } from '@/lib/stylerTune'
 import { InfoTip } from './InfoTip'
 import styles from './inspectShell.module.css'
@@ -57,8 +61,10 @@ import styles from './inspectShell.module.css'
  * lands, which is the honest half.
  *
  * THE KEYS. Arrow up and down step the ramp on a focused row, one token at a
- * time; Shift takes it to the ends; X swaps a fill with its stroke; Cmd+S
- * saves. They are a registry now rather than another hand-written ladder
+ * time; Shift takes it to the ends; X swaps a fill with its stroke; Cmd+Z and
+ * Cmd+Shift+Z walk the pending set backwards and forwards (the history lives
+ * in stylerTune, so one stack covers this panel, the stage and the bench);
+ * Cmd+S opens the pull request. They are a registry rather than a ladder
  * (lib/hotkeys.ts) — the first shared keyboard infrastructure on the desktop,
  * sitting on `window` in the capture phase, above INSPECT's Escape ladder and
  * deliberately not owning Escape. Escape belongs to the ladder, and the open
@@ -206,12 +212,25 @@ export function StylerBlocks({
        cannot act does not match, and the key falls through untouched. */
     const onRow = () => !!focusedRole()
 
+    /* UNDO, on the key every other tool on a designer's machine uses for it.
+       Guarded on there being something to undo rather than shrugging inside
+       the handler: an empty stack should hand ⌘Z back to the browser, which
+       is what the visitor means by it in a text field on the page. The
+       history is stylerTune's — one stack for the panel, the stage and the
+       bench, because they are all writing the same pending set. */
+    const stepBack = (back: boolean) => {
+      if (!(back ? undo() : redo())) return
+      act.current.onChange()
+    }
+
     return registerHotkeys('styler', [
       { key: 'ArrowUp', when: onRow, run: () => step(-1, false) },
       { key: 'ArrowDown', when: onRow, run: () => step(1, false) },
       { key: 'ArrowUp', shift: true, when: onRow, run: () => step(-1, true) },
       { key: 'ArrowDown', shift: true, when: onRow, run: () => step(1, true) },
       { key: 'x', when: () => !!pairNow(), run: swap },
+      { key: 'z', meta: true, when: canUndo, run: () => stepBack(true) },
+      { key: 'z', meta: true, shift: true, when: canRedo, run: () => stepBack(false) },
       // the browser's save dialog is worth taking while the tool is up: the
       // thing on screen that can be saved is this panel's pending set
       { key: 's', meta: true, run: () => act.current.onSave() },

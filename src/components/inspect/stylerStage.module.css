@@ -87,6 +87,154 @@
   border: var(--border-width-default) solid var(--surface);
 }
 
+/* ---- THE SET SWITCH, on the crown ----
+ *
+ * The token set left the canvas and became a control in the tool's chrome,
+ * built on the site's own skin switch (shell.module.css, .skinSwitch): a dot,
+ * the name, a caret, and a flyout whose every row wears its own tokens. Those
+ * classes are not reused, and the reason is the ground. The bar's switch is a
+ * paper chip on paper; this one stands on the accent flood, where a --surface
+ * fill would be a white tab stuck on the crown and --content ink would be a
+ * hole in it. So the trigger is .crownChip's treatment exactly — micro caps,
+ * --surface ink, a --surface hairline, no fill — and every measurement under
+ * it comes from the same tokens the shell's switch uses.
+ *
+ * The MENU is a different ground again: it hangs below the crown on paper, so
+ * it goes back to --surface and --content, and each row re-scopes both with
+ * its own data-skin/data-theme. That is the live preview, and it is the same
+ * trick the desktop has always used.
+ */
+.setSwitch {
+  position: relative;
+  flex: none;
+}
+
+.setTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  padding: 0 var(--spacing-component-xs);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--surface);
+  background: none;
+  border: var(--border-width-default) solid var(--surface);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+/* the flood is already the accent, so the hover cannot be a colour change —
+   it is the paper coming up under the chip a little, the same figure/ground
+   flip the crown's own controls make on hover */
+.setTrigger:hover {
+  background: color-mix(in srgb, var(--surface) 20%, transparent);
+}
+
+/* on an accent fill --focus disappears: every control up here takes its ring
+   in the ink it is printed in (inspectShell.module.css, .crownBtn) */
+.setTrigger:focus-visible {
+  outline: var(--border-width-strong) solid var(--surface);
+  outline-offset: calc(var(--border-width-strong) * -1);
+}
+
+/* on the crown the dot is the ink it stands in; in the menu it is that row's
+   own accent, which is the half of the preview a name cannot carry */
+.setDot {
+  flex: none;
+  width: var(--spacing-component-sm);
+  height: var(--spacing-component-sm);
+  border-radius: var(--radius-circle);
+  background: currentColor;
+}
+
+.setName {
+  flex: none;
+}
+
+.setCaret {
+  font-family: var(--type-caption-family);
+  font-size: var(--type-caption-size);
+  line-height: var(--leading-none);
+  transition: transform var(--duration-tap) ease;
+}
+
+.setCaret[data-open='true'] {
+  transform: rotate(180deg);
+}
+
+.setMenu {
+  position: absolute;
+  top: calc(100% + var(--spacing-component-xs));
+  left: 0;
+  z-index: 1;
+  min-width: 11rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: var(--shadow-print);
+}
+
+/* each row re-scopes the tokens with its own data-skin and data-theme, so it
+   is genuinely that set's paper, ink and accent */
+.setItemWrap {
+  display: block;
+  background: var(--surface);
+}
+
+.setItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-sm);
+  width: 100%;
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  text-align: left;
+  font-family: var(--type-control-family);
+  font-size: var(--type-control-size);
+  font-weight: var(--type-control-weight);
+  letter-spacing: var(--type-control-tracking);
+  line-height: var(--type-control-leading);
+  text-transform: uppercase;
+  color: var(--content);
+  background: var(--surface);
+  border: none;
+  border-bottom: var(--border-width-subtle) solid var(--border);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.setItemWrap:last-child .setItem {
+  border-bottom: none;
+}
+
+.setItem:hover {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+.setItem:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: calc(var(--border-width-strong) * -1);
+}
+
+.setItem .setDot {
+  background: var(--accent);
+}
+
+.setItemName {
+  flex: 1 1 auto;
+}
+
+.setCheck {
+  flex: none;
+  color: var(--accent);
+}
+
 .body {
   flex: 1 1 auto;
   min-height: 0;
@@ -108,18 +256,18 @@
   background: var(--surface-raised);
 }
 
-/* ---- the two tab rows: what stands on the bench ----
+/* ---- the tab row: which variant stands on the bench ----
 
-   A name on the left and the choices beside it, one row per axis, both rows
-   in a strip across the top of the canvas. Micro caps and a hairline box, so
-   the strip reads as a control panel and not as content: the component is
-   the only thing in this room allowed to be loud. */
-.axes {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-component-xs);
-}
+   A name on the left and the choices beside it, in a strip across the top of
+   the canvas. Micro caps and a hairline box, so the strip reads as a control
+   panel and not as content: the component is the only thing in this room
+   allowed to be loud.
 
+   There were two rows here. The second one picked the TOKEN SET, and it is a
+   control in the crown now (.setSwitch above) because the set is not a
+   property of the bench: it is which file SAVE writes to, and a tab that
+   previewed medieval while the button underneath committed to classic was
+   two answers to one question. */
 .axis {
   display: flex;
   align-items: center;
@@ -208,6 +356,41 @@
   padding: var(--spacing-component-xl) var(--spacing-component-md);
   background: var(--surface);
   border: var(--border-width-default) solid var(--border);
+}
+
+/* ---- DIRECT SELECT: the part under the pointer, outlined ----
+
+   Jake: "wire up the figma hotkeys, I'm very interested in having direct
+   select available to select individual elements instead of having to drill
+   down in the layers on the left." Figma's grammar, and its feedback with it:
+   hold the command key and whatever is under the pointer draws a line around
+   itself, so you can see what a click is about to take before you take it.
+
+   The markers are on the components themselves (data-part, written in
+   Window.tsx, MenuBar.tsx, DesktopIcons.tsx and Stamp.tsx), one per layer the
+   token names already declare. The stage writes the two state attributes and
+   these two rules paint them.
+
+   OUTLINE, not a border and not a ring drawn with a box-shadow: an outline is
+   the one thing in CSS that can appear on an element without moving anything
+   around it, and a bench that nudged the component sideways as you swept the
+   pointer over it would be a bench lying about the layout. Hover is the
+   hairline and the pick is a step heavier, so the two can be on screen at
+   once and still be told apart.
+
+   The elements are the real components: their class names belong to their
+   own sheets and the only thing this room can name them by is the attribute
+   pair. The module's own .stage class in front is what keeps the selector
+   pure (CSS modules refuse an attribute-only selector) and what keeps the
+   rule inside the room. */
+.stage [data-part][data-styler-hover] {
+  outline: var(--border-width-subtle) solid var(--accent);
+  outline-offset: var(--border-width-subtle);
+}
+
+.stage [data-styler-picked] {
+  outline: var(--border-width-default) solid var(--accent);
+  outline-offset: var(--border-width-subtle);
 }
 
 /* ---- the benches: what a component needs to stand up on ---- */

@@ -767,7 +767,7 @@ export const TEXT_INDEX: Record<string, string[]> = {
   "tip of the southern horn": ["src/programs/visualizers/TaurusViz.tsx"],
   "title slide: levels, over a photo of a teen and ": ["src/programs/trash/ExhibitStack.tsx"],
   "top artists, past 12 months": ["src/programs/visualizers/ScrobblesViz.tsx"],
-  "top left": ["src/components/shell/SkinSwitch.tsx"],
+  "top left": ["src/components/inspect/StylerStage.tsx","src/components/shell/SkinSwitch.tsx"],
   "top right": ["src/components/shell/FableMark.tsx"],
   "trace the stencil with the machine": ["src/programs/paint/Paint.tsx"],
   "trace the stencil with the machine · s on the cl": ["src/programs/paint/Paint.tsx"],

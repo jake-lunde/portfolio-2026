@@ -64,13 +64,26 @@ const {
   rowLabel,
   rowsFor,
 } = await import(blocksUrl)
-const { addRoot, count, pendingEdits, rebind, removeRoot, resetAll, resetRole, writesFor } =
-  await import(
-    moduleUrl('src/lib/stylerTune.ts', {
-      './styleCandidates': candidatesUrl,
-      './stylerBlocks': blocksUrl,
-    })
-  )
+const {
+  addRoot,
+  canRedo,
+  canUndo,
+  clearHistory,
+  count,
+  pendingEdits,
+  rebind,
+  redo,
+  removeRoot,
+  resetAll,
+  resetRole,
+  undo,
+  writesFor,
+} = await import(
+  moduleUrl('src/lib/stylerTune.ts', {
+    './styleCandidates': candidatesUrl,
+    './stylerBlocks': blocksUrl,
+  })
+)
 const { handleKey, isReserved, matches, registerHotkeys, activeScopes } = await import(
   moduleUrl('src/lib/hotkeys.ts')
 )
@@ -585,6 +598,214 @@ test('an unregistered root stops taking writes', () => {
   assert.equal(tile.props.size, 0)
   assert.deepEqual(pendingEdits(), [{ role: 'button-radius', token: 'radius/pill' }])
   resetAll()
+})
+
+/* ------------------------------------------------------- undo and redo */
+
+/* A history is the one piece of state in this module that can be WRONG rather
+   than merely absent, and every way it goes wrong is quiet: a redo stack that
+   survives a fresh move replays a branch nobody is on, a composite that comes
+   back with four of its five members looks right on screen, and a stack that
+   is never cleared lets a fresh room undo its way into the last one's pending
+   set. So the moves are exercised rather than the shape of the code. */
+
+/** Put the module back to nothing held and nothing remembered. */
+const quiet = () => {
+  resetAll()
+  clearHistory()
+}
+
+const BADGE = candidatesFor('stamp-text').find((c) => c.token === 'typography/badge')
+
+test('undo and redo walk the pending set one move at a time', () => {
+  quiet()
+  assert.equal(canUndo(), false)
+  assert.equal(canRedo(), false)
+
+  rebind('button-radius', PILL)
+  assert.equal(count(), 1)
+  assert.equal(canUndo(), true)
+
+  assert.equal(undo(), true)
+  assert.equal(count(), 0)
+  assert.equal(canUndo(), false)
+  assert.equal(canRedo(), true)
+
+  assert.equal(redo(), true)
+  assert.deepEqual(pendingEdits(), [{ role: 'button-radius', token: 'radius/pill' }])
+  assert.equal(canRedo(), false)
+  quiet()
+})
+
+test('an empty stack answers no rather than pretending it moved', () => {
+  quiet()
+  assert.equal(undo(), false)
+  assert.equal(redo(), false)
+  quiet()
+})
+
+test('undo takes a composite back all five members at a time', () => {
+  quiet()
+  const tile = fakeRoot()
+  addRoot(tile)
+
+  rebind('stamp-text', BADGE)
+  assert.equal(tile.props.size, 5)
+  undo()
+  assert.equal(tile.props.size, 0, 'not four of them')
+  redo()
+  assert.equal(tile.props.get('--stamp-text-letter-spacing'), 'var(--type-badge-tracking)')
+
+  removeRoot(tile)
+  quiet()
+})
+
+test('REVERT is one move, and undo brings the whole set back', () => {
+  quiet()
+  rebind('button-radius', PILL)
+  rebind('stamp-text', BADGE)
+  assert.equal(count(), 2)
+
+  resetAll()
+  assert.equal(count(), 0)
+  undo()
+  assert.equal(count(), 2, 'one press, one set')
+  quiet()
+})
+
+test('a fresh move clears the redo stack', () => {
+  quiet()
+  rebind('button-radius', PILL)
+  undo()
+  assert.equal(canRedo(), true)
+  rebind('stamp-text', BADGE)
+  assert.equal(canRedo(), false, 'the branch nobody is on is gone')
+  quiet()
+})
+
+test('a move that changes nothing never enters the history', () => {
+  quiet()
+  resetRole('button-radius') // nothing held on that role
+  resetAll() // nothing held at all
+  assert.equal(canUndo(), false, 'or the key does nothing and looks broken')
+  quiet()
+})
+
+test('the history is bounded and the oldest move falls off the end', () => {
+  quiet()
+  const ramp = candidatesFor('button-radius')
+  assert.ok(ramp.length > 1, 'the radius row has a ramp to walk')
+  for (let n = 0; n < 60; n += 1) rebind('button-radius', ramp[n % ramp.length])
+
+  let steps = 0
+  while (undo()) steps += 1
+  assert.equal(steps, 50, 'fifty back, and the sixtieth is REVERT territory')
+  quiet()
+})
+
+test('the stage drops the history as it opens, and keeps the pending set', () => {
+  quiet()
+  rebind('button-radius', PILL)
+  clearHistory()
+  assert.equal(canUndo(), false)
+  assert.equal(count(), 1, 'clearing the history is not a revert')
+  quiet()
+  // the room is the thing that calls it, on the way IN — the teardown that
+  // drops a pending set runs after the room is already gone
+  assert.ok(stageSrc.includes('clearHistory()'), 'the stage clears it')
+})
+
+test('undo and redo sit on the command key, guarded', () => {
+  const blocksSrc = src('src/components/inspect/StylerBlocks.tsx')
+  assert.match(blocksSrc, /key: 'z', meta: true, when: canUndo/)
+  assert.match(blocksSrc, /key: 'z', meta: true, shift: true, when: canRedo/)
+  assert.ok(!isReserved({ key: 'z', meta: true }), 'the browser does not want this one')
+
+  // and the two chords do not answer for each other
+  const seen = []
+  const off = registerHotkeys('undo-redo', [
+    { key: 'z', meta: true, run: () => seen.push('undo') },
+    { key: 'z', meta: true, shift: true, run: () => seen.push('redo') },
+  ])
+  handleKey(key('z', { metaKey: true }))
+  handleKey(key('z', { metaKey: true, shiftKey: true }))
+  assert.deepEqual(seen, ['undo', 'redo'])
+  off()
+})
+
+/* ------------------------------------------------ the anatomy markers */
+
+test('every anatomy marker on a component names a layer its tokens declare', () => {
+  /* data-part is what the bench direct-selects by, and the only thing that
+     makes it agree with the layer list on the left is the name. A marker
+     naming a part the token files do not have is a click that selects
+     nothing, silently. */
+  const files = {
+    window: 'src/components/shell/Window.tsx',
+    menubar: 'src/components/shell/MenuBar.tsx',
+    'desktop-icons': 'src/components/shell/DesktopIcons.tsx',
+    stamp: 'src/components/primitives/Stamp.tsx',
+  }
+  for (const [id, path] of Object.entries(files)) {
+    // both spellings: a literal attribute, and the ternary Stamp writes
+    const marks = [...src(path).matchAll(/data-part=(?:"([a-z-]+)"|\{[^}]*?'([a-z-]+)')/g)].map(
+      (m) => m[1] ?? m[2],
+    )
+    assert.ok(marks.length > 0, `${id} carries markers at all`)
+    const known = new Set(layersFor(id).map((layer) => layer.id))
+    for (const part of marks) assert.ok(known.has(part), `${id}'s "${part}" is one of its layers`)
+  }
+})
+
+test('the bench picks with Figma’s two gestures, and swallows only one', () => {
+  assert.ok(stageSrc.includes('onClickCapture'), 'the pick is made before the sample reacts')
+  assert.ok(stageSrc.includes('onDoubleClickCapture'), 'and a double-click enters the group')
+  // ⌘ is the tool's; a plain click still belongs to the sample under it
+  const capture = stageSrc.slice(stageSrc.indexOf('onClickCapture'))
+  const guarded = capture.slice(0, capture.indexOf('onDoubleClickCapture'))
+  assert.match(guarded, /if \(direct\) \{\s*e\.preventDefault\(\)\s*e\.stopPropagation\(\)/)
+})
+
+/* ------------------------------------------------ the crown's set switch */
+
+test('the token set is one control, and it is the one SAVE reads', () => {
+  // one tab row left in the room: the variant axis
+  assert.equal([...stageSrc.matchAll(/role="tablist"/g)].length, 1, 'the set row is gone')
+  assert.ok(!stageSrc.includes(`name="styler.axis.set"`), 'and it is not a tab row any more')
+  // picking one writes the settings store, both halves of it
+  assert.match(stageSrc, /setSkin\(next\.skin\)/)
+  assert.match(stageSrc, /setTheme\(next\.theme\)/)
+  // and the bench reads back exactly what the commit hook reads
+  assert.ok(stageSrc.includes('themeFor(skin, theme)'), 'the bench reads the store')
+  assert.ok(
+    src('src/components/inspect/useTokenSave.tsx').includes('themeFor(skin, theme)'),
+    'and so does the button that sends it',
+  )
+})
+
+test('the switch is the skin picker, on the crown', () => {
+  // the pattern SkinSwitch established: a menu of radios, each row wearing
+  // its own tokens, on the deck spring with a reduced-motion fallback
+  assert.ok(stageSrc.includes('role="menuitemradio"'), 'the rows are radios')
+  assert.ok(stageSrc.includes('aria-haspopup="menu"'), 'the trigger says what it opens')
+  assert.match(stageSrc, /data-skin=\{set\.skin\}\s*\n\s*data-theme=\{set\.theme\}/)
+  assert.ok(stageSrc.includes('SPRINGS.deck'), 'the flyout is on the deck spring')
+  assert.ok(stageSrc.includes('useReducedMotion'), 'with a fallback')
+  // Escape closes the menu before it closes the room
+  const ladder = stageSrc.slice(stageSrc.indexOf("key: 'Escape'"))
+  assert.ok(
+    ladder.indexOf('setOpenSet(false)') < ladder.indexOf('act.current.onClose()'),
+    'the menu is the first rung',
+  )
+})
+
+test('the button on the floor says what it does, and says it once', () => {
+  assert.equal(COPY['styler.save'], 'OPEN PR')
+  assert.ok(stageSrc.includes(`k="styler.save"`), 'the stage uses its own key')
+  assert.ok(!stageSrc.includes('shell.saveTarget'), 'the theme chip left with the tab row')
+  // the inspector keeps its own, and its own destination chip with it
+  assert.equal(COPY['inspect.save'], 'SAVE → PR')
+  assert.ok(src('src/components/inspect/InspectorPanel.tsx').includes(`k="inspect.save"`))
 })
 
 /* ------------------------------------------------ the stage's specs */
