@@ -117,6 +117,18 @@ test('every copy key the library renders exists in copy.json', () => {
   for (const key of keys) assert.ok(key in COPY, `${key} is in copy.json`)
 })
 
+test('the shelf has a door back to the machine it belongs to', () => {
+  /* /styler draws no menubar and no dock, so the page's only way back to the
+     OS is this link. Lose it and a visitor who arrived on a shared URL is in
+     a room with no handle on the inside. */
+  assert.match(librarySrc, /<Link className=\{styles\.back\} href="\/">/)
+  assert.match(librarySrc, /k="styler\.library\.back"/)
+  assert.ok('styler.library.back' in COPY)
+  // the words carry the meaning; the arrow is scenery in front of them
+  assert.match(COPY['styler.library.back'], /BACK TO THE DESKTOP/)
+  assert.match(src('src/components/inspect/stylerLibrary.module.css'), /\.back:focus-visible/)
+})
+
 test('the inspector foot carries the door to the shelf', () => {
   const panel = src('src/components/inspect/InspectorPanel.tsx')
   assert.match(panel, /href="\/styler"/)

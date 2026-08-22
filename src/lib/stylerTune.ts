@@ -41,6 +41,11 @@ import { COMPOSITE_MEMBERS } from './stylerBlocks'
  * five), and whether there is a verdict to carry (AA vs. none). One module
  * with two modes would need a flag on every function, and the flag would have
  * a wrong way round.
+ *
+ * IT ALSO REMEMBERS. Every rebind, reset and revert takes a snapshot of the
+ * pending map first, so ⌘Z on the stage steps back through them and ⌘⇧Z steps
+ * forward again. The reasoning for a stack of states rather than a stack of
+ * inverses is in "UNDO" below, next to the code it is about.
  */
 
 /** One pending rebind, in the shape /api/token-commit consumes — the same
@@ -131,14 +136,15 @@ export function writesFor(role: string, candidate: StyleCandidate): Array<[strin
   return [[`--${role}`, `var(${candidate.varName})`]]
 }
 
-/** Preview `candidate` on `role`. Clears the role's previous writes first, so
-    a second choice never stacks onto the first — and clears by ROLE rather
-    than by property, because a composite's five members are one decision. */
-export function rebind(role: string, candidate: StyleCandidate): void {
+/** Preview `candidate` on `role`, without telling the history about it. The
+    exported half below is the one that records; this one is what UNDO replays
+    through, and a replay that wrote its own history entry would be a room you
+    could never get out of. */
+function write(role: string, candidate: StyleCandidate): void {
   const el = root()
   const writes = writesFor(role, candidate)
   if (writes.length === 0) return
-  resetRole(role)
+  clear(role)
   for (const [prop, value] of writes) {
     if (el && !prior.has(prop)) prior.set(prop, el.style.getPropertyValue(prop))
     for (const target of targets()) target.style.setProperty(prop, value)
@@ -146,14 +152,15 @@ export function rebind(role: string, candidate: StyleCandidate): void {
   applied.set(role, { candidate, props: writes.map(([prop]) => prop) })
 }
 
-/** Hand one role back to whoever held it before the rebind.
+/** Hand one role back to whoever held it before the rebind. Silent, same as
+    `write`.
 
     Same guard tune.ts takes, for a narrower reason: nobody else writes these
     properties inline today, but SKIN BUILDER writes semantic ones and the
     honest rule is "put the stash back only while the property still reads as
     the value WE wrote". A property somebody else has since claimed is theirs;
     we drop our bookkeeping and get out of the way. */
-export function resetRole(role: string): void {
+function clear(role: string): void {
   const held = applied.get(role)
   if (!held) return
   const el = root()
@@ -173,9 +180,119 @@ export function resetRole(role: string): void {
   if (el && !el.getAttribute('style')) el.removeAttribute('style')
 }
 
+/* ---- UNDO, and why it is a stack of STATES rather than of moves ----
+
+   Jake asked for Figma's keys on the bench, and ⌘Z is the one every other
+   key in that grammar assumes. The tempting shape is a list of moves to play
+   backwards — "this role was Surface, put it back" — and it is the shape that
+   goes wrong here, because one move is not always one property. A type-role
+   rebind writes five, a reset restores whatever was stashed under all five,
+   and REVERT drops the whole set at once. Three kinds of inverse to keep
+   correct, and each of them a place for a fifth member to be left behind.
+
+   A snapshot of the pending map is one kind of thing, and putting it back is
+   one operation: drop the roles the snapshot does not have, write the ones it
+   does. The map is at most twelve entries (the commit route's cap), so the
+   copy costs nothing worth measuring, and the DOM writes are the same writes
+   a click would have made.
+
+   Bounded at fifty, oldest dropped. A session that made fifty rebinds and
+   wants the first one back is a session that wants REVERT.
+
+   THE FUTURE IS CLEARED BY ANY NEW MOVE, which is every undo stack there has
+   ever been: a redo after a fresh edit would be replaying a branch the
+   visitor left. Cleared in `record`, so nothing else has to remember. */
+
+/** One pending set, flattened to what it takes to rebuild: role -> what it
+    is previewing. The props list in `Held` is derived from the candidate, so
+    there is nothing else to carry. */
+type Snapshot = Map<string, StyleCandidate>
+
+const HISTORY_MAX = 50
+const past: Snapshot[] = []
+const future: Snapshot[] = []
+
+function snapshot(): Snapshot {
+  return new Map(Array.from(applied, ([role, held]) => [role, held.candidate]))
+}
+
+/** Take a snapshot before a move. Called only by the three exported writers,
+    and only when they are genuinely about to change something: a no-op that
+    pushed a state would make ⌘Z do nothing and look broken. */
+function record(): void {
+  past.push(snapshot())
+  if (past.length > HISTORY_MAX) past.shift()
+  future.length = 0
+}
+
+/** Make the live set look like `snap`, in the two passes the difference has:
+    what has to go, then what has to arrive. Roles already holding the right
+    candidate are left alone, so an undo across one rebind touches one role. */
+function restore(snap: Snapshot): void {
+  for (const role of Array.from(applied.keys())) {
+    if (!snap.has(role)) clear(role)
+  }
+  for (const [role, candidate] of snap) {
+    if (applied.get(role)?.candidate.token === candidate.token) continue
+    write(role, candidate)
+  }
+}
+
+export function canUndo(): boolean {
+  return past.length > 0
+}
+
+export function canRedo(): boolean {
+  return future.length > 0
+}
+
+/** Step back one move. Returns false when there is nothing behind, so the
+    hotkey can fall through rather than swallow a key that did nothing. */
+export function undo(): boolean {
+  const snap = past.pop()
+  if (!snap) return false
+  future.push(snapshot())
+  restore(snap)
+  return true
+}
+
+export function redo(): boolean {
+  const snap = future.pop()
+  if (!snap) return false
+  past.push(snapshot())
+  restore(snap)
+  return true
+}
+
+/** Forget every move. The stage calls this as it opens: this module outlives
+    the room, so without it ⌘Z in a fresh room would undo its way back into
+    the set somebody dropped on the way out of the last one. */
+export function clearHistory(): void {
+  past.length = 0
+  future.length = 0
+}
+
+/** Preview `candidate` on `role`. Clears the role's previous writes first, so
+    a second choice never stacks onto the first — and clears by ROLE rather
+    than by property, because a composite's five members are one decision. */
+export function rebind(role: string, candidate: StyleCandidate): void {
+  if (writesFor(role, candidate).length === 0) return
+  record()
+  write(role, candidate)
+}
+
+/** Hand one role back to whoever held it before the rebind. */
+export function resetRole(role: string): void {
+  if (!applied.has(role)) return
+  record()
+  clear(role)
+}
+
 /** Hand everything back. Called on every exit from the mode, beside tune's. */
 export function resetAll(): void {
-  for (const role of Array.from(applied.keys())) resetRole(role)
+  if (applied.size === 0) return
+  record()
+  for (const role of Array.from(applied.keys())) clear(role)
 }
 
 /** What this role is previewing, as a token path — or null when it is still
