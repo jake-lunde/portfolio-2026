@@ -500,7 +500,8 @@
 /* INSPECT.MODE compresses the desk between two docked panels, and a
    hatch measured against the old desk would open under one of them. The
    crew sits this mode out. */
-:global(body[data-inspectmode='on']) .burrow {
+:global(body[data-inspectmode='on']) .burrow,
+:global(body[data-inspectmode='on']) .burrowVoice {
   display: none;
 }
 
@@ -972,6 +973,17 @@
   pointer-events: none;
 }
 
+/* the same anchor for the voice alone — fixed, in viewport coords, over
+   the windows (10) and under the bar chrome (4990+); see THE VOICE in
+   AmbientAgents.tsx */
+.burrowVoice {
+  position: fixed;
+  width: 0;
+  height: 0;
+  z-index: 4900;
+  pointer-events: none;
+}
+
 /* THE HATCH — an ellipse of the dark under the desk. `--surface-inverse`
    is the one role in this token set that is dark in every skin and both
    modes (classic light #131811, classic dark #090c0a, medieval #17110b),
@@ -1253,6 +1265,7 @@
    one place a media query can't be spared from spelling it out again */
 @media (max-width: 900px) {
   .burrow,
+  .burrowVoice,
   .dispatchFlash {
     display: none;
   }

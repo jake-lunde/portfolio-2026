@@ -68,9 +68,8 @@ const PERSISTED = [
   'lunde-wallpaper',
   'lunde-theme',
   'lunde-skin',
-  'lunde-crew-met',
 ]
-const SESSION_PERSISTED = ['lunde-build-a-skin']
+const SESSION_PERSISTED = ['lunde-build-a-skin', 'lunde-crew-met']
 
 function forget() {
   try {
