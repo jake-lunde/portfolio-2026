@@ -37,16 +37,22 @@ export function Button({
   ]
     .filter(Boolean)
     .join(' ')
+  /* The label is its own span so STYLER's bench has something to direct-select
+     — the button's two text rows paint it and nothing else (lib/stylerAnatomy
+     .ts). An inline span inside an inline-flex box, inheriting the face from
+     the size class above it: it is a flex item where a bare text node was an
+     anonymous one, and .btn sets no gap and names no child, so nothing moves. */
+  const label = <span data-part="label">{children}</span>
   if (href) {
     return (
       <a className={cls} href={href} target="_blank" rel="noreferrer" data-component="button">
-        {children}
+        {label}
       </a>
     )
   }
   return (
     <button className={cls} data-component="button" {...rest}>
-      {children}
+      {label}
     </button>
   )
 }

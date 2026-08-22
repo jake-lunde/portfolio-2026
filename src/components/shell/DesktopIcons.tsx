@@ -76,9 +76,10 @@ export function DesktopIcons() {
   }
 
   /* data-part is the anatomy marker STYLER's bench direct-selects by: one
-     per part the token names already declare (lib/stylerBlocks.ts:
-     layersFor), so ⌘+click on the stage lands on the same layer the left
-     panel lists. An attribute and nothing else — only the stage reads it. */
+     per node of the declared tree (lib/stylerAnatomy.ts), so ⌘+click on the
+     stage lands on the same layer the left panel lists — and the label really
+     does sit inside the button there, the way it sits inside it here. An
+     attribute and nothing else, only the stage reads it. */
   const iconBtn = (p: (typeof desktopPrograms)[number], extra = '') => (
     <button
       key={p.id}

@@ -6,7 +6,7 @@ import { t } from '@/content/copy'
 import { CopyText } from '@/content/CopyText'
 import { registerHotkeys } from '@/lib/hotkeys'
 import { candidatesFor, CANDIDATES_BY_FAMILY, type StyleCandidate } from '@/lib/styleCandidates'
-import { blocksFor, fillStrokePair, type StylerRow } from '@/lib/stylerBlocks'
+import { blocksFor, dockFor, fillStrokePair, type StylerRow } from '@/lib/stylerBlocks'
 import {
   canRedo,
   canUndo,
@@ -41,11 +41,19 @@ import styles from './inspectShell.module.css'
  *
  * ONE LAYER AT A TIME, when the stage asks for one. Window declares twenty
  * rows and the first cut drew all twenty in a column, which is a column
- * nobody reads (Jake, s105). The stage's layer list names a part of the
- * component's anatomy and passes it down here; these blocks then draw that
- * part's rows and no others. Nothing is hidden that was not already three
- * scrolls away, and the tier has not moved: TITLEBAR is still window's
+ * nobody reads (Jake, s105). The stage's layer list names a node of the
+ * component's declared anatomy and passes it down here; these blocks then
+ * draw that node's rows and no others. Nothing is hidden that was not already
+ * three scrolls away, and the tier has not moved: TITLEBAR is still window's
  * titlebar everywhere on the desktop, not this window's.
+ *
+ * A NODE CAN TAKE NOTHING. The anatomy is the component's real shape now, so
+ * it holds parts no token names — the window's body, its resize grip — and
+ * containers whose rows all belong to their children. Both would have drawn a
+ * blank column, which reads as a bug. So the panel falls through: the
+ * children's rows with a line saying they are the children's, or the plain
+ * sentence that this part takes none. stylerBlocks' dockFor decides which of
+ * the three it is; this file only draws the answer.
  *
  * A row is a name, its current binding, and a list of what it may become
  * (styleCandidates.ts is the law; blocksFor is the grouping). Choosing writes
@@ -134,9 +142,9 @@ export function StylerBlocks({
 }: {
   /** the `data-component` of the root the pick sits inside */
   componentId: string
-  /** one layer of the component's anatomy, or every row when it is absent.
-      The stage always names one (Jake, s105: evaluate at the layer, not at
-      twenty rows); the flat panel is what the inspector used to draw. */
+  /** one node of the component's declared anatomy, or every row when it is
+      absent. The stage always names one (Jake, s105: evaluate at the layer,
+      not at twenty rows); the flat panel is what the inspector used to draw. */
   layer?: string | null
   openVar: string | null
   setOpenVar: (v: string | null) => void
@@ -150,7 +158,12 @@ export function StylerBlocks({
   bare?: boolean
 }) {
   const skin = useSettings((s) => s.skin)
-  const blocks = blocksFor(componentId, layer)
+  /* WHOSE ROWS THESE ARE, asked of the model rather than decided here. A node
+     with rows of its own draws them; a node with none and children that have
+     some draws the subtree's and says so above them; a node with nothing at
+     all says that instead of drawing an empty column. The window's titlebar
+     and its body are both real layers and only one of them takes a token. */
+  const { scope, groups: blocks } = dockFor(componentId, layer)
   const held = count()
 
   const choose = (row: StylerRow, candidate: StyleCandidate) => {
@@ -286,6 +299,14 @@ export function StylerBlocks({
           </h3>
           <span className={styles.roleChip}>{componentId}</span>
           <InfoTip k="styler.note" />
+        </div>
+      )}
+
+      {(scope === 'subtree' || scope === 'empty') && (
+        <div className={styles.sectionBody}>
+          <p className={styles.note}>
+            <CopyText k={scope === 'subtree' ? 'styler.layer.inherits' : 'styler.layer.empty'} />
+          </p>
         </div>
       )}
 

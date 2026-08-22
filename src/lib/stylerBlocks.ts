@@ -36,13 +36,11 @@
  * the panel is the only thing that needs a browser.
  */
 
-import {
-  componentIdOf,
-  familyOf,
-  propertySuffixOf,
-  type StyleFamily,
-} from './styleCandidates'
+import { anatomyOf, type AnatomyNode } from './stylerAnatomy'
+import { componentIdOf, familyOf, type StyleFamily } from './styleCandidates'
 import { TOKEN_COMPOSITES, TOKEN_REFS } from './tokens.generated'
+
+export type { AnatomyNode }
 
 /** The five blocks, in the order the panel draws them. */
 export const STYLER_BLOCKS = ['fill', 'stroke', 'radius', 'typography', 'spacing'] as const
@@ -60,8 +58,10 @@ export type StylerRow = {
   family: StyleFamily
   ref: string | null
   locked: boolean
-  /** which layer of the component's anatomy this row paints. The component
-      id itself for the rows the component owns directly (stylerLayers below) */
+  /** which layer of the declared anatomy this row paints — the node id, which
+      is the element's `data-part`. The root's id (the component id) for a row
+      no node claims. Rows claimed by two nodes name the first of them; both
+      nodes still carry the row (layersFor below). */
   layer: string
 }
 
@@ -158,23 +158,6 @@ export function rowsFor(id: string): StylerRow[] {
   return out
 }
 
-/** The rows grouped for drawing: block order fixed, empty blocks dropped —
-    a stamp has no radius and a heading that stands over nothing is furniture
-    pretending to be a finding.
-
-    `layer` narrows it to one part of the anatomy, which is what the stage
-    dock asks for; without it the whole component draws, flat, the way the
-    inspector's panel used to. */
-export function blocksFor(
-  id: string,
-  layer?: string | null,
-): Array<{ block: StylerBlock; rows: StylerRow[] }> {
-  const rows = rowsFor(id).filter((row) => !layer || row.layer === layer)
-  return STYLER_BLOCKS.map((block) => ({
-    block,
-    rows: rows.filter((row) => row.block === block),
-  })).filter((group) => group.rows.length > 0)
-}
 
 /* ---- the anatomy ----
 
@@ -183,88 +166,161 @@ export function blocksFor(
    once on the right." Window is twenty rows in one list, which is a list
    nobody reads.
 
-   THE NAMES ALREADY SAY IT, so nothing new is declared. A component token is
-   `<component>.<part?>.<variant?>.<property>` and styleCandidates owns the
-   list of property tails: take the tail off the end and the component off the
-   front and what is left is the part path — 'titlebar-active' out of
-   --window-titlebar-active-bg, nothing at all out of --window-fill. The first
-   segment of that path is the layer. So window reads WINDOW · CTRL · TITLE ·
-   TITLEBAR · EXPLAINER, menubar reads MENUBAR · MENU · WORDMARK, and neither
-   list was typed by hand. A part that gets renamed in the token file renames
-   itself here, which a hand-kept list in stageSpecs would not do.
+   THE TREE IS DECLARED, not derived. stylerAnatomy.ts holds one per pilot and
+   its header explains why the token names stopped being the source. What this
+   half does is match the two together: every row a component declares is
+   offered to every node's role prefixes, the longest claim takes it, and a row
+   nothing claims falls to the root. Nothing here drops a node for being empty
+   — the window's body takes no token and is still half the window.
 
-   THE THREE LOCKED ROWS are the one place the rule needs a second look:
-   --window-ctrl-size, --menubar-h and --desktop-icons-cell-width match no
-   property tail, so there is no path to cut. They go where their own siblings
-   are — the first segment of the name, IF the component named a part with it.
-   'ctrl' is a part (--window-ctrl-hover-bg), so the control size sits with the
-   controls; 'cell' and 'h' name no part, so they stay on the root, which is
-   where a structural dimension of the component itself belongs anyway. */
+   THE THREE LOCKED ROWS need no special case any more. --window-ctrl-size is
+   claimed by `ctrl` the same way --window-ctrl-hover-bg is, --menubar-h by the
+   bar's own `h`, and --desktop-icons-cell-width by the grid's `cell-width`.
+   The derivation had to cut a property tail off first and those three have
+   none, which is what made them the exception. A prefix does not care. */
 
-/** The part path a role encodes, or null when no property tail claims one.
-    '' means the component itself — --stamp-fg is the stamp's own fill. */
-function partPathOf(role: string, id: string): string | null {
-  const suffix = propertySuffixOf(role)
-  if (suffix === null) return null
-  const path = role.slice(0, role.length - suffix.length)
-  if (path === id) return ''
-  return path.startsWith(`${id}-`) ? path.slice(id.length + 1) : ''
+/** A role with its component prefix off — '' for the component's own name,
+    'titlebar-active-bg' for --window-titlebar-active-bg. */
+function bareOf(role: string, id: string): string {
+  return role === id ? '' : role.slice(id.length + 1)
 }
 
-/** The first segment of a role's bare name — what a locked row is asked for. */
-function headOf(role: string, id: string): string {
-  return role === id ? '' : role.slice(id.length + 1).split('-')[0]
+/** One node's claim on a name: the prefix it declared, and which node it was. */
+type Claim = { prefix: string; node: string }
+
+function claimsOf(node: AnatomyNode, out: Claim[] = []): Claim[] {
+  for (const prefix of node.roles ?? []) out.push({ prefix, node: node.id })
+  for (const kid of node.children ?? []) claimsOf(kid, out)
+  return out
 }
 
-/** Write every row's layer, in two passes: the rows that name a property
-    tail decide what the parts ARE, then the ones that do not join a part
-    they can name. Mutating in place because these rows were minted one call
-    ago and belong to nobody yet. */
+/** Which nodes claim a bare role. A prefix matches on a dash boundary or as
+    the whole name — `title` must not swallow `titlebar-fill` — and only the
+    LONGEST match answers, so Version takes the rows Wordmark would otherwise
+    have. More than one node comes back when two declared the same prefix
+    (Close and Zoom are both `ctrl`), in declaration order. */
+function claimants(bare: string, claims: readonly Claim[]): string[] {
+  let longest = -1
+  let out: string[] = []
+  for (const { prefix, node } of claims) {
+    if (bare !== prefix && !bare.startsWith(`${prefix}-`)) continue
+    if (prefix.length > longest) {
+      longest = prefix.length
+      out = [node]
+    } else if (prefix.length === longest) out.push(node)
+  }
+  return out
+}
+
+/** Write every row's primary layer. Mutating in place because these rows were
+    minted one call ago and belong to nobody yet. */
 function assignLayers(id: string, rows: StylerRow[]): void {
-  const parts = new Set<string>()
-  const paths = rows.map((row) => partPathOf(row.role, id))
-  for (const path of paths) {
-    if (path) parts.add(path.split('-')[0])
-  }
-  rows.forEach((row, at) => {
-    const path = paths[at]
-    if (path === null) {
-      const head = headOf(row.role, id)
-      row.layer = parts.has(head) ? head : id
-      return
+  const claims = claimsOf(anatomyOf(id))
+  for (const row of rows) row.layer = claimants(bareOf(row.role, id), claims)[0] ?? id
+}
+
+/** One node of the anatomy, with the rows that paint it. `rows` is what the
+    node takes itself; `subtreeRows` is that plus everything under it, deduped
+    and still in manifest order — which is what the dock falls back on when a
+    node takes nothing of its own. */
+export type StylerLayer = {
+  id: string
+  /** copy key: the name a designer would find in a Figma layer list */
+  name: string
+  depth: number
+  parent: string | null
+  rows: StylerRow[]
+  subtreeRows: StylerRow[]
+  children: StylerLayer[]
+}
+
+/** A component's anatomy, as the ROOT node with its children hanging off it.
+    Empty nodes stay: the tree is the component, not the token file. */
+export function layersFor(id: string): StylerLayer {
+  const root = anatomyOf(id)
+  const rows = rowsFor(id)
+  const claims = claimsOf(root)
+
+  /* Every node that claims a row, not just the first. --window-ctrl-hover-bg
+     paints two buttons and both of them list it. */
+  const owned = new Map<string, Set<string>>()
+  for (const row of rows) {
+    const hit = claimants(bareOf(row.role, id), claims)
+    for (const node of hit.length > 0 ? hit : [root.id]) {
+      const at = owned.get(node) ?? new Set<string>()
+      at.add(row.role)
+      owned.set(node, at)
     }
-    row.layer = path ? path.split('-')[0] : id
-  })
+  }
+
+  const build = (node: AnatomyNode, depth: number, parent: string | null): StylerLayer => {
+    const children = (node.children ?? []).map((kid) => build(kid, depth + 1, node.id))
+    const mine = owned.get(node.id) ?? new Set<string>()
+    const all = new Set(mine)
+    for (const kid of children) for (const row of kid.subtreeRows) all.add(row.role)
+    /* Filtering the manifest list rather than collecting as we go: it is what
+       keeps a subtree in the order the token file declares it, and it dedupes
+       the two-owner rows for free. */
+    return {
+      id: node.id,
+      name: node.name,
+      depth,
+      parent,
+      rows: rows.filter((row) => mine.has(row.role)),
+      subtreeRows: rows.filter((row) => all.has(row.role)),
+      children,
+    }
+  }
+  return build(root, 0, null)
 }
 
-/** One layer of a component's anatomy: the part, and the rows that paint it. */
-export type StylerLayer = { id: string; label: string; rows: StylerRow[] }
-
-/** 'titlebar' -> 'TITLEBAR'; the root layer wears the component's own name. */
-export function layerLabel(layer: string, id: string): string {
-  return (layer === id ? id : layer).split('-').join(' ').toUpperCase()
-}
-
-/** A component's layers, root first and the parts after it in manifest
-    order. Never empty — every pilot component owns rows directly — and every
-    row it has is in exactly one of them. */
-export function layersFor(id: string): StylerLayer[] {
+/** The tree as a list, pre-order — the order the panel draws it and the order
+    the arrow keys walk it. */
+export function flattenLayers(root: StylerLayer): StylerLayer[] {
   const out: StylerLayer[] = []
-  const at = new Map<string, StylerLayer>()
-  const put = (key: string) => {
-    let layer = at.get(key)
-    if (!layer) {
-      layer = { id: key, label: layerLabel(key, id), rows: [] }
-      at.set(key, layer)
-      out.push(layer)
-    }
-    return layer
+  const walk = (layer: StylerLayer) => {
+    out.push(layer)
+    for (const kid of layer.children) walk(kid)
   }
-  // the root is minted first so it heads the list whatever order the
-  // manifest happens to hand its rows over in
-  put(id)
-  for (const row of rowsFor(id)) put(row.layer).rows.push(row)
-  return out.filter((layer) => layer.rows.length > 0)
+  walk(root)
+  return out
+}
+
+/** Which rows the dock is showing, and whose they are. OWN is the ordinary
+    answer. SUBTREE is a node that paints nothing itself and has children that
+    do — Controls holds only a gap, Titlebar holds a whole titlebar — where an
+    empty panel would read as "this part takes no tokens" and be wrong. EMPTY
+    is the honest end of it: the window's body really does take none.
+
+    Without a `layer` the whole component draws, flat, the way the inspector's
+    panel used to. */
+export type DockScope = 'own' | 'subtree' | 'empty'
+
+export function dockFor(
+  id: string,
+  layer?: string | null,
+): { scope: DockScope; groups: Array<{ block: StylerBlock; rows: StylerRow[] }> } {
+  /* block order fixed, empty blocks dropped — a stamp has no radius and a
+     heading that stands over nothing is furniture pretending to be a finding */
+  const group = (rows: StylerRow[]) =>
+    STYLER_BLOCKS.map((block) => ({
+      block,
+      rows: rows.filter((row) => row.block === block),
+    })).filter((g) => g.rows.length > 0)
+  if (!layer) return { scope: 'own', groups: group(rowsFor(id)) }
+  const node = flattenLayers(layersFor(id)).find((l) => l.id === layer)
+  if (!node) return { scope: 'empty', groups: [] }
+  if (node.rows.length > 0) return { scope: 'own', groups: group(node.rows) }
+  if (node.subtreeRows.length > 0) return { scope: 'subtree', groups: group(node.subtreeRows) }
+  return { scope: 'empty', groups: [] }
+}
+
+/** The groups alone, for the callers that only want the rows. */
+export function blocksFor(
+  id: string,
+  layer?: string | null,
+): Array<{ block: StylerBlock; rows: StylerRow[] }> {
+  return dockFor(id, layer).groups
 }
 
 /* ---- the X key's pairing ----
