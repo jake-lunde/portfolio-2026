@@ -1,0 +1,676 @@
+/* STYLER STAGE — the bench.
+ *
+ * Jake, reviewing the first cut: styling should not be conflated with
+ * inspecting, and the thing being styled has to be away from the rest of the
+ * site or you cannot see what you changed. So this is a takeover, and it is
+ * built out of INSPECT.MODE's own idiom rather than a new one: a crown across
+ * the top in the accent, a 244px layer panel on the left, a 304px paper dock
+ * on the right, and the canvas between them. That is the tool's own floor
+ * plan, and Jake asked for it in Figma's words on his second look at the
+ * stage. The inner pieces — .crownTitle, .crownBtn, .panelHead, .resetAll,
+ * .roleChip — are imported straight from inspectShell.module.css, because two
+ * files drawing the same button is how two buttons start to differ. What is
+ * here is only what is different: where the frame sits, and what the bench
+ * under the component looks like.
+ *
+ * THE GROUND. The dock is --surface, the paper the inspector is already made
+ * of. The canvas is --surface-raised, which is exactly one step darker in
+ * every skin and mode (see .bar in inspectShell.module.css) — a bench under
+ * the paper rather than a second sheet of it. No token was minted for this.
+ *
+ * MOTION is the docks' own: transform and opacity, one --duration-theme, and
+ * nothing at all under prefers-reduced-motion. No springs — the frame arrives,
+ * it does not bounce.
+ *
+ * THE DOCK IS A COLUMN OF THREE (Jake, s111). Every modifier the room offers
+ * is a row at its head, the blocks scroll under them, and the commit foot
+ * stands on the bottom of the panel rather than floating over the canvas.
+ * The canvas is the component and nothing else. What that costs this sheet is
+ * one class each — .mods, .modsHead, .commit — and what it saves is the whole
+ * set-switch flyout, which was 150 lines of menu for one of four questions.
+ *
+ * THE BENCH IS A QUERY CONTAINER (.mount, below), which is the other half of
+ * Jake's "I feel like I'm not able to manipulate the mobile view": the pilot
+ * components' small-screen rules ask a container named `viewport` now, body
+ * declares it on the real desktop, and the bench declares it again, closer
+ * in. So MOBILE narrows the component the way a phone would.
+ */
+
+.stage {
+  /* THE TWO WALLS, and the only place either number is written.
+     The panels are sized by these, and StylerStage.tsx overwrites one of them
+     inline the moment somebody drags its grip. Left is INSPECT's own panel
+     width, still: two left panels doing one job. Right opens 80px wider than
+     the inspector's dock, which is Jake's s107 note in a number — at 304px a
+     row called TITLEBAR ACTIVE BORDER COLOR drops its binding onto a second
+     line, and at 384px it does not. The commit foot lives on that same 80px:
+     it left the dock in s107 because it folded at 304 and came back in s111
+     because it does not fold at 384. */
+  --styler-left: var(--inspect-left, 244px);
+  --styler-right: 384px;
+  position: fixed;
+  inset: 0;
+  /* above the tool's own frame (6500), below BOOT (8000) and the
+     screensaver: the stage is a room inside the tool, not a new machine */
+  z-index: 6600;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  color: var(--content);
+  font-family: var(--type-body-family);
+  animation: stageIn var(--duration-theme) ease-out;
+}
+
+@keyframes stageIn {
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+}
+
+/* the crown, spanning the whole width this time: there is no left dock to
+   make room for, and the component's name belongs across the top of the room
+   it is standing in */
+.crown {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-sm);
+  height: var(--menubar-h);
+  padding: 0 var(--spacing-component-sm);
+  background: var(--accent);
+  color: var(--surface);
+  border-bottom: var(--border-width-default) solid var(--content);
+  user-select: none;
+}
+
+/* the chip on the crown reads on the accent flood, not on paper. It takes
+   the slack too, so the way out sits at the far edge where a titlebar's
+   control belongs. */
+.crownChip {
+  flex: none;
+  margin-right: auto;
+  padding: 0 var(--spacing-component-xs);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--surface);
+  border: var(--border-width-default) solid var(--surface);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+/* ---- the canvas: the component, alone, with room around it ----
+
+   Even padding on all four sides again. The floor used to be four spacing
+   steps deep to clear the commit band that stood on it; the band is the
+   dock's foot now (Jake, s111) and the canvas has nothing in it but the
+   bench, so the bench sits in the middle of the room the way a thing on a
+   table does.
+
+   A flex COLUMN with the centring done by the bench's own `margin-block:
+   auto`, rather than `justify-content: center` on this box. The difference
+   only shows when the bench is taller than the canvas — MOBILE is 480px of
+   sample and a short window makes that easy — and it is the difference
+   between scrolling back to the top of it and not being able to: centred
+   content that overflows a scroll container leaks off the top edge, where
+   there is nothing to scroll to. Auto margins give the same centre and give
+   the overflow back. */
+.canvas {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: var(--spacing-component-xl);
+  background: var(--surface-raised);
+}
+
+/* ---- the modifier rows: every question the room asks, in one block ----
+
+   Jake, s111: "make all of the modifiers be elements in the styler panel on
+   the right (desktop, mobile + default, hover, etc + classic, medieval +
+   variant active, resting)." Four axes, one shape: the name in a fixed column
+   on the left so the four read as a stack rather than as four unrelated
+   lists, and the pills beside it, wrapping inside their own box when the dock
+   is dragged in to its 304px stop.
+
+   The name column is 4.75rem rather than the 5.5 the tab row used over the
+   canvas. TOKEN SET is the longest of the four and it fits in that at the
+   control step; the extra 0.75rem was slack a full-width strip could afford
+   and a dock cannot. */
+.mods {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-component-sm);
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
+  border-bottom: var(--border-width-default) solid var(--border);
+}
+
+/* the same head the blocks below wear, and the same one both other panels
+   wear: four panels in this tool, one heading treatment */
+.modsHead {
+  flex: none;
+}
+
+.axis {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-component-xs) var(--spacing-component-sm);
+}
+
+/* ONE STEP UP THE RAMP (Jake, s107: "fonts seem small as well"). Everything
+   in this room that was drawn at the MICRO role is drawn at CONTROL instead:
+   same mono face, same bold, same caps, 8px to 10px and the tracking tightened
+   from 20 to 14 because a wider letter at a bigger size is a worse letter.
+   Two roles the ramp already has, so no scale was invented to do it. The
+   crown keeps micro — that bar is the tool's chrome and it matches INSPECT's
+   own. The dock's half of the same step lives in inspectShell.module.css,
+   where those classes are declared. */
+.axisName {
+  flex: none;
+  /* all four names line up so the block reads as one panel rather than as
+     four unrelated lists that happen to be stacked */
+  width: 4.75rem;
+  /* the pills are a control tall; the name sits on the first one's line
+     rather than in the middle of a row that has wrapped to three */
+  padding-top: var(--spacing-component-xs);
+  font-family: var(--type-control-family);
+  font-size: var(--type-control-size);
+  font-weight: var(--type-control-weight);
+  letter-spacing: var(--type-control-tracking);
+  line-height: var(--type-control-leading);
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+/* the pills take the rest of the row and wrap inside it. min-width:0 is what
+   lets them: a flex item's floor is its content, and three pills that will
+   not shrink push the row wider than the dock rather than folding. */
+.tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* the tabs share their edges the way a 1992 segmented control does. A
+   negative `gap` is not a thing CSS has, so the overlap is a margin on every
+   tab but the first, which collapses the doubled line between two of them. */
+.tab + .tab {
+  margin-left: calc(var(--border-width-default) * -1);
+}
+
+.tab {
+  position: relative;
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  font-family: var(--type-control-family);
+  font-size: var(--type-control-size);
+  font-weight: var(--type-control-weight);
+  letter-spacing: var(--type-control-tracking);
+  line-height: var(--type-control-leading);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--content);
+  background: var(--interactive-default-hover);
+}
+
+/* what sits ON an accent fill is the paper, house-wide. Two attributes for
+   one look, because one of the four rows is a tablist and the other three are
+   radio groups (StylerStage.tsx, AxisRow, says why): a tab reports
+   aria-selected and a radio reports aria-checked, and a visitor should never
+   be able to see which is which. */
+.tab[aria-selected='true'],
+.tab[aria-checked='true'] {
+  z-index: 1;
+  color: var(--surface);
+  background: var(--accent);
+  border-color: var(--content);
+}
+
+.tab:focus-visible {
+  z-index: 2;
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: var(--border-width-default);
+}
+
+/* the bench, big, centred, and given air. This is the whole point of the
+   room: one component with nothing else in the frame. It paints its OWN
+   skin's ground, because a medieval component standing on classic paper is
+   not what medieval looks like. */
+.mount {
+  /* THE BENCH IS THE VIEWPORT, for anything standing on it.
+     Jake, s111: "I feel like I'm not able to manipulate the mobile view."
+     The pilot components' small-screen rules used to ask the screen, so a
+     narrow bench in a wide room got the wide answer and the tool could never
+     draw the thing it was for. They ask a container named `viewport` now
+     (components/shell/shell.module.css) — body declares it for the real
+     desktop, and this declares it again one step closer, so the nearest
+     container wins and the bench overrides the screen for what is on it.
+
+     Only the MOBILE mount declares it (.mountMobile below). At DESKTOP the
+     mount is NOT a container, on purpose: the canvas between the two walls
+     is about 600px on a 1280 screen, and a desktop bench measuring itself
+     would fall under the 720 rule and draw the phone form while claiming to
+     be the desktop. So the desktop bench lets the query fall through to
+     body, which is the real screen — the one answer "DESKTOP" can honestly
+     mean on a tool that only opens above 900px. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* `flex: none` so a short bench keeps its own height in the canvas column
+     rather than being stretched down it, and the auto margins do the
+     centring — see .canvas above for why not justify-content */
+  flex: none;
+  margin-block: auto;
+  min-height: 240px;
+  padding: var(--spacing-component-xl) var(--spacing-component-md);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+}
+
+/* MOBILE: the bench stands 360px wide, which is the site's own floor — the
+   width every layout in this codebase is built down to, so this is the number
+   the rest of the work already answers to rather than a guess at "small".
+
+   `content-box` against the sheet-wide border-box reset, deliberately and
+   only here: a container query reads the CONTENT box, so a 360px border-box
+   would hand the component 358 and the bench would be lying by two pixels
+   about the one measurement it exists to make. The border and the padding sit
+   outside the 360.
+
+   The side padding goes with it for the same reason — a phone has no gutter
+   outside its own screen — and `margin-inline: auto` keeps the narrow bench
+   in the middle of the canvas rather than against its left wall.
+
+   `container-type: inline-size` also makes this the containing block for
+   any `position: fixed` descendant. That is already true one level in — the
+   .bench wrapper below sets a transform for exactly that reason, and it is
+   nearer, so the menu bar sample still lays itself across the bench and not
+   across the mount. */
+.mountMobile {
+  container: viewport / inline-size;
+  box-sizing: content-box;
+  width: 360px;
+  margin-inline: auto;
+  padding-inline: 0;
+}
+
+/* ---- DIRECT SELECT: the part under the pointer, outlined ----
+
+   Jake: "wire up the figma hotkeys, I'm very interested in having direct
+   select available to select individual elements instead of having to drill
+   down in the layers on the left." Figma's grammar, and its feedback with it:
+   hold the command key and whatever is under the pointer draws a line around
+   itself, so you can see what a click is about to take before you take it.
+
+   The markers are on the components themselves (data-part, written in
+   Window.tsx, MenuBar.tsx, DesktopIcons.tsx and Stamp.tsx), one per layer the
+   token names already declare. The stage writes the two state attributes and
+   these two rules paint them.
+
+   OUTLINE, not a border and not a ring drawn with a box-shadow: an outline is
+   the one thing in CSS that can appear on an element without moving anything
+   around it, and a bench that nudged the component sideways as you swept the
+   pointer over it would be a bench lying about the layout. Hover is the
+   hairline and the pick is a step heavier, so the two can be on screen at
+   once and still be told apart.
+
+   The elements are the real components: their class names belong to their
+   own sheets and the only thing this room can name them by is the attribute
+   pair. The module's own .stage class in front is what keeps the selector
+   pure (CSS modules refuse an attribute-only selector) and what keeps the
+   rule inside the room. */
+.stage [data-part][data-styler-hover] {
+  outline: var(--border-width-subtle) solid var(--accent);
+  outline-offset: var(--border-width-subtle);
+}
+
+.stage [data-styler-picked] {
+  outline: var(--border-width-default) solid var(--accent);
+  outline-offset: var(--border-width-subtle);
+}
+
+/* ---- the benches: what a component needs to stand up on ---- */
+
+/* a transform makes this the containing block for a `position: fixed`
+   descendant, which is what lets the menubar lay itself across the bench
+   instead of across the viewport (the same trick storyHarness's DeskStage
+   uses). The relative + size does the same job for an absolute one. */
+.bench {
+  position: relative;
+  transform: translateZ(0);
+  overflow: hidden;
+  background: var(--surface);
+  border: var(--border-width-subtle) solid var(--border);
+}
+
+/* Explicit boxes, not width:100%. The bench sits inside a shrink-wrapping
+   flex column (.variant, .tile), and its two occupants take no space of
+   their own — the menubar is fixed, the icons grid absolute — so a
+   percentage here resolves against the label underneath and the bench
+   collapses to a sliver. */
+.benchChrome {
+  width: min(640px, 100%);
+  height: calc(var(--menubar-h) * 2);
+}
+
+/* three grid columns plus the grid's own 26/20 desk offsets, with air */
+.benchDesk {
+  width: 344px;
+  height: 372px;
+}
+
+/* The window sample measures itself against this box, the way a real one
+   measures itself against the desktop. Wider than the sample by more than
+   the 12px gutter Window clamps its right edge by, or the clamp resolves
+   negative and the frame hangs off the left of its own bench. */
+.windowBench {
+  position: relative;
+  width: 340px;
+  height: 180px;
+}
+
+/* MOBILE, on the bench: a phone-shaped box for the samples that carry one.
+   Under 720px a window goes full-bleed, and a full-bleed window in a 340×180
+   letterbox reads as a squashed bar rather than as a screen; the desk grid
+   starts 118px down to clear the nameplate and wants the height for it. Both
+   take the bench's whole width and a height a phone would have.
+
+   Declared after the two boxes it overrides, because a container rule carries
+   no extra weight of its own — same specificity, so the later one wins, and
+   this file's order is doing the work. */
+@container viewport (max-width: 720px) {
+  .windowBench,
+  .benchDesk {
+    width: 100%;
+    height: 480px;
+  }
+}
+
+.sampleBody {
+  margin: 0;
+  font-family: var(--type-body-sm-family);
+  font-size: var(--type-body-sm-size);
+  font-weight: var(--type-body-sm-weight);
+  letter-spacing: var(--type-body-sm-tracking);
+  line-height: var(--type-body-sm-leading);
+  color: var(--content-muted);
+}
+
+/* ---- the right dock: the blocks, and the way to send them ---- */
+.dock {
+  position: relative;
+  flex: none;
+  width: var(--styler-right);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-left: var(--border-width-default) solid var(--content);
+  animation: dockIn var(--duration-theme) ease-out;
+}
+
+@keyframes dockIn {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+/* the dock's head carries the note glyph, so it is a bar in .bar's sense:
+   the positioning context the tip hangs off, with the heading holding only
+   its own label */
+.dockHead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+}
+
+.dockTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+/* ---- the left dock: the component's anatomy ----
+
+   Jake, on the first cut of the drill: "why dont you put the layers in a
+   panel the left like figma so its closer to what im used to?" So the tree
+   came out of the right dock and took the left wall. Layers left, bench
+   centre, properties right is Figma's arrangement and it is also INSPECT's
+   own — that tool draws LayERS on the left and the inspector on the right —
+   so the stage now reads as the same room rather than as a second one.
+
+   244px, which is --inspect-left's value, because these two left panels are
+   the same panel doing the same job and a stage that invented its own width
+   would be saying they are not. Full height with it: the tree had a third of
+   the right dock before and now it has a wall, which is the point.
+
+   It is a STARTING width now rather than the width: --styler-left opens on
+   --inspect-left and moves when somebody drags the grip on its inner edge. */
+.layers {
+  position: relative;
+  flex: none;
+  width: var(--styler-left);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface);
+  border-right: var(--border-width-default) solid var(--content);
+  animation: layersIn var(--duration-theme) ease-out;
+}
+
+/* it arrives with the right dock, on the same transform-only terms and from
+   its own side */
+@keyframes layersIn {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+.layerBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* how many rows the layer holds, so the drill says where the work is before
+   you open it. It takes the row's own ink rather than a dimmed version of
+   it: the picked row draws on the accent flood, and anything faded there
+   falls under AA. */
+.layerCount {
+  flex: none;
+  margin-left: auto;
+  padding-left: var(--spacing-component-xs);
+  color: inherit;
+}
+
+.dockBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- the grips: an edge you can take hold of ----
+
+   An 8px strip straddling the panel's own border, so the thing you grab is
+   the line you can already see. It is inside the panel and absolutely
+   positioned rather than a flex item between the two, because a column of its
+   own would have to be subtracted from something and the wall is not a
+   column — it is the join.
+
+   No hover fill and no idle mark: the cursor says what it is, and a panel
+   with a permanent stripe down its edge would be a panel wearing its
+   plumbing. It shows itself when it is being used, and when the keyboard is
+   on it. */
+.grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: var(--spacing-component-sm);
+  cursor: col-resize;
+  /* the browser must not pan the room out from under a drag */
+  touch-action: none;
+}
+
+.gripLeft {
+  right: calc(var(--spacing-component-xs) * -1);
+}
+
+.gripRight {
+  left: calc(var(--spacing-component-xs) * -1);
+}
+
+.grip:hover,
+.grip[data-drag] {
+  background: var(--accent);
+}
+
+.grip:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: calc(var(--border-width-strong) * -1);
+}
+
+/* ---- THE COMMIT FOOT: the send bar, on the bottom of the dock ----
+
+   It stood here, left for a review, and came back (Jake, s111: "fix the
+   export options to the bottom of that panel"). The s107 reason it left was
+   real — at 304px the count broke across two lines and the theme chip on SAVE
+   ran off the edge — and it is the same pass that made the dock 384px wide,
+   which is the width the row now fits in. The chip went with the crown's old
+   set switch, and a bar floating over the canvas was a second thing in the
+   middle of the room competing with the component.
+
+   `flex: none` at the end of a flex column, under a body that scrolls: that
+   is the whole mechanism. Nothing is positioned, nothing is sticky, and the
+   blocks above it can be twenty rows long without ever pushing the button off
+   the bottom of the panel.
+
+   --surface-raised, one step off the dock's paper, so the foot reads as the
+   panel's own floor rather than as another block in the list. */
+.commit {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
+  background: var(--surface-raised);
+  border-top: var(--border-width-default) solid var(--content);
+}
+
+/* The count, the revert and the send, in one line at 384px and folding
+   gracefully at the dock's 304px stop: the count takes what is left after the
+   two buttons and wraps its own words, and when even that will not fit the
+   row breaks and the buttons take the next line. `min-width: 0` on the text
+   is what allows either — a flex item's floor is its content otherwise, and a
+   count that refuses to shrink pushes the buttons out through the wall. */
+.commitRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-xs) var(--spacing-component-sm);
+}
+
+.commitRow > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--spacing-component-md);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  text-transform: uppercase;
+  color: var(--content-muted);
+}
+
+/* Narrow: the walls stop being walls. A 244px column and a 384px column
+   either side of a component leave none of the three any room on a small
+   screen, so the room stacks and both docks meet the canvas on a top edge
+   instead of a side one.
+
+   The number moved with the dock. It was 720px when the dock was 304px wide,
+   which left 172px of bench at the breakpoint; the dock opens 80px wider now
+   (Jake, s107) and the same 172px of bench needs 900px of screen. Widening a
+   panel without moving the point where the layout gives up would have bought
+   the wrapping back at a size nobody would think to check.
+
+   It stacks in the order it is written — layers, bench, blocks — rather than
+   putting the bench first, and that is a choice about the keyboard rather
+   than about the picture. Flex `order` moves what you see and leaves the tab
+   order where it was, so the caret would walk the page in an order the page
+   does not have. Five layers is a short list; the bench is right under it. */
+@media (max-width: 900px) {
+  .body {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .canvas {
+    flex: none;
+    overflow: visible;
+    padding: var(--spacing-component-md);
+  }
+
+  .layers {
+    width: auto;
+    border-right: none;
+    border-bottom: var(--border-width-default) solid var(--content);
+    animation: none;
+  }
+
+  .dock {
+    width: auto;
+    border-left: none;
+    border-top: var(--border-width-default) solid var(--content);
+    animation: none;
+  }
+
+  .layerBody,
+  .dockBody {
+    overflow: visible;
+  }
+
+  .axisName {
+    width: auto;
+  }
+
+  /* nothing to resize: the walls are the full width of the screen and there
+     is no join left to take hold of */
+  .grip {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage,
+  .layers,
+  .dock {
+    animation: none;
+  }
+}

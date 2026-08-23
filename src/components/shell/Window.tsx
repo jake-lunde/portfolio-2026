@@ -187,6 +187,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
       tabIndex={-1}
       aria-label={title}
       data-window-id={def.id}
+      data-component="window"
       className={`${styles.window} ${active ? styles.windowActive : ''} ${zoomed ? styles.windowZoomed : ''} ${bare ? styles.windowBare : ''}`}
       style={{
         /* clamp the resting x so a window's right edge never opens off
@@ -243,6 +244,12 @@ export function Window({ def, z, active, desktopRef }: Props) {
       {bare ? null : (
         <div
           className={styles.titlebar}
+          /* the anatomy markers STYLER's bench direct-selects by. One per
+             part the token names already declare (lib/stylerBlocks.ts:
+             layersFor), so ⌘+click on the stage lands on the same layer the
+             left panel lists. Attributes only: nothing here reads them but
+             the stage. */
+          data-part="titlebar"
           onPointerDown={(e) => {
             // free-floating drag is a desktop affordance only
             if (window.innerWidth > 720) dragControls.start(e)
@@ -252,6 +259,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
           <div className={styles.titleControls}>
             <button
               className={styles.ctrl}
+              data-part="ctrl"
               aria-label={`Close ${title}`}
               onClick={() => {
                 sfx.close()
@@ -262,21 +270,25 @@ export function Window({ def, z, active, desktopRef }: Props) {
             </button>
             <button
               className={styles.ctrl}
+              data-part="ctrl"
               aria-label={zoomed ? `Restore ${title}` : `Zoom ${title}`}
               onClick={() => setZoomed(def.id, !zoomed)}
             >
               +
             </button>
           </div>
-          <span className={styles.title} data-copy-id={`program.${def.id}.name`}>
+          <span className={styles.title} data-part="title" data-copy-id={`program.${def.id}.name`}>
             {title}
           </span>
           {/* the right slot: a doc-id, a button that summons what this
-              window is (explainer key), or — highest precedence — a
-              titlebar action link (titleAction, e.g. resume's download).
-              A program gets exactly one of the three; a titleAction
-              replaces both the explainer and the plain meta text. */}
-          {def.titleAction ? (
+              window is (explainer key), a titlebar action link
+              (titleAction, e.g. resume's download), or — highest
+              precedence — a live program control (titleWidget,
+              family-hub's fidelity switch). A program gets exactly one
+              of the four in this slot, never two. */}
+          {def.titleWidget ? (
+            <def.titleWidget />
+          ) : def.titleAction ? (
             <TitleAction
               icon={def.titleAction.icon}
               label={t(def.titleAction.copyKey, skin)}
@@ -286,6 +298,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
           ) : def.explainer ? (
             <div
               className={styles.explainer}
+              data-part="explainer"
               onPointerEnter={(e) => {
                 // hover is a mouse affordance: on touch, pointerenter fires
                 // with the tap and would cancel the click toggle out

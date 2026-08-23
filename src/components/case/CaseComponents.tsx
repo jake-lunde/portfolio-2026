@@ -9,17 +9,22 @@ export function Hero({
   title,
   thesis,
   meta,
+  art,
 }: {
   eyebrow: string
   title: string
   thesis: React.ReactNode
   meta: Array<[string, string]>
+  /** header artwork riding beside the thesis (family-hub's living
+      sketch, s94b) — the hero owns the slot, the case brings the art */
+  art?: React.ReactNode
 }) {
   return (
-    <header className={styles.hero}>
+    <header className={styles.hero} data-art={art ? 'true' : undefined}>
       <p className={styles.eyebrow}>{eyebrow}</p>
       <h1 className={styles.title}>{title}</h1>
       <p className={styles.thesis}>{thesis}</p>
+      {art}
       <div className={styles.meta}>
         {meta.map(([k, v]) => (
           <div key={k}>
@@ -61,22 +66,24 @@ export function Lead({ children }: { children: React.ReactNode }) {
 
 export function Plate({
   cap,
-  fig,
+  tag,
   caption,
   children,
 }: {
   cap?: React.ReactNode /* filled plates drop their "Plate NN" label (Jake's s55 rule); placeholders keep it, and live plates may put dynamic text here */
-  fig: string
+  tag?: string /* right-hand cap slot: a date, a ticker, a technique. The FIG. specimen letters came off in s89 — plates are numbered by their cap, if at all */
   caption?: string
   children: React.ReactNode
 }) {
   return (
     <figure className={styles.figure}>
       <div className={styles.plate}>
-        <div className={styles.plateCap}>
-          {cap && (typeof cap === 'string' ? <span>{cap}</span> : cap)}
-          <span className={styles.fig}>{fig}</span>
-        </div>
+        {(cap || tag) && (
+          <div className={styles.plateCap}>
+            {cap && (typeof cap === 'string' ? <span>{cap}</span> : cap)}
+            {tag && <span className={styles.tag}>{tag}</span>}
+          </div>
+        )}
         {children}
         <div className="halftone" aria-hidden="true" />
       </div>

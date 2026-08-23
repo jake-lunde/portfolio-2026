@@ -1,0 +1,108 @@
+{
+  "window": {
+    "fill": {
+      "$value": "{surface-raised}",
+      "$type": "color"
+    },
+    "stroke": {
+      "$value": "{content}",
+      "$type": "color"
+    },
+    "border-width": {
+      "$value": "{border-width.default}",
+      "$type": "dimension"
+    },
+    "titlebar": {
+      "fill": {
+        "$value": "{surface}",
+        "$type": "color"
+      },
+      "border-color": {
+        "$value": "{content}",
+        "$type": "color"
+      },
+      "border-width": {
+        "$value": "{border-width.default}",
+        "$type": "dimension"
+      },
+      "gap": {
+        "$value": "10px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Snap to {space.2} (8px) or {space.3} (12px) when a deliberate visual change is approved."
+      },
+      "padding-y": {
+        "$value": "7px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal. Snap to {space.2} (8px) when approved."
+      },
+      "padding-x": {
+        "$value": "10px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal. Snap to {space.2} (8px) or {space.3} (12px) when approved."
+      },
+      "active": {
+        "bg": {
+          "$value": "{accent}",
+          "$type": "color"
+        },
+        "border-color": {
+          "$value": "{content}",
+          "$type": "color"
+        },
+        "fg": {
+          "$value": "#f4f1e6",
+          "$type": "color",
+          "$description": "OFF-GRID literal — the active titlebar's inverse ink, extracted verbatim from the pre-token CSS. Nearest core candidate: {color.cream.base} (#e9e4d5). Do not substitute; Window's hardcoded hexes stay literal."
+        }
+      }
+    },
+    "title-controls": {
+      "gap": {
+        "$value": "6px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal. Snap to {space.1} (4px) or {space.2} (8px) when approved."
+      }
+    },
+    "ctrl": {
+      "size": {
+        "$value": "13px",
+        "$type": "dimension",
+        "$description": "OFF-GRID literal (spacing scale is base-4). Nearest core candidate: {space.3} (12px). Extracted verbatim for a zero-visual-change migration."
+      },
+      "hover": {
+        "bg": {
+          "$value": "{accent-expressive}",
+          "$type": "color"
+        },
+        "fg": {
+          "$value": "#17150d",
+          "$type": "color",
+          "$description": "OFF-GRID literal, exactly matches {color.ink.base} (#17150d). Kept literal per house rule — Window's hardcoded hexes stay literal, never substituted for an alias."
+        },
+        "border-color": {
+          "$value": "#17150d",
+          "$type": "color",
+          "$description": "OFF-GRID literal, exactly matches {color.ink.base} (#17150d). Same value as ctrl.hover.fg — kept literal per house rule."
+        }
+      }
+    },
+    "title": {
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.title}"
+      }
+    },
+    "title-meta": {
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.caption}"
+      }
+    },
+    "explainer-btn": {
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.caption}"
+      }
+    }
+  }
+}

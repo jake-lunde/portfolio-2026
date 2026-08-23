@@ -75,21 +75,30 @@ export function DesktopIcons() {
     open(id)
   }
 
+  /* data-part is the anatomy marker STYLER's bench direct-selects by: one
+     per part the token names already declare (lib/stylerBlocks.ts:
+     layersFor), so ⌘+click on the stage lands on the same layer the left
+     panel lists. An attribute and nothing else — only the stage reads it. */
   const iconBtn = (p: (typeof desktopPrograms)[number], extra = '') => (
     <button
       key={p.id}
       className={`${styles.iconBtn} ${extra}`}
+      data-part="icon"
       onClick={(e) => launch(p.id, e.currentTarget)}
     >
       <Icon name={p.icon} />
-      <span className={styles.iconLabel} data-copy-id={`program.${p.id}.name`}>
+      <span className={styles.iconLabel} data-part="label" data-copy-id={`program.${p.id}.name`}>
         {programName(p.id, p.desktopLabel ?? p.name, skin)}
       </span>
     </button>
   )
 
   return (
-    <nav className={`${styles.icons} ${styles.deskObject}`} aria-label="Programs">
+    <nav
+      className={`${styles.icons} ${styles.deskObject}`}
+      aria-label="Programs"
+      data-component="desktop-icons"
+    >
       {doors.map((p) => iconBtn(p))}
       {dockedForMobile.map((p) => iconBtn(p, styles.dockedGrid))}
       {/* trash joins the grid on mobile only (see .trashGrid) — on desktop

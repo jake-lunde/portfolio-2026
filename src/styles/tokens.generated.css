@@ -57,6 +57,7 @@
   --tracking-16: 0.16em;
   --tracking-18: 0.18em;
   --tracking-20: 0.2em;
+  --tracking-none: 0; /** Zero tracking — lets composites that want no letter-spacing adjustment bind a token instead of hardcoding the literal. */
   --tracking-02: 0.02em;
   --tracking-06: 0.06em;
   --tracking-08: 0.08em;
@@ -105,6 +106,24 @@
   --button-md-padding-x: 18px; /** OFF-GRID literal. Snap to 16px (16px) or 20px (20px) when approved. */
   --button-md-padding-y: 7px; /** OFF-GRID literal. Snap to 8px (8px) when approved. */
   --menubar-h: 34px; /** The menubar's own height — a component decision, not a layout primitive. */
+  --menubar-padding-x: 14px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. Snap to 12px (12px) or 16px (16px) when a deliberate visual change is approved. */
+  --menubar-wordmark-version-margin-left: 10px; /** OFF-GRID literal. Snap to 8px (8px) or 12px (12px) when approved. */
+  --menubar-menu-glyph-btn-padding: 3px; /** OFF-GRID literal. Snap to 4px (4px) when approved. */
+  --stamp-padding-y: 5px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. Snap to 4px (4px) or 8px (8px) when a deliberate visual change is approved. */
+  --stamp-padding-x: 10px; /** OFF-GRID literal. Snap to 8px (8px) or 12px (12px) when approved. */
+  --desktop-icons-cell-width: 88px; /** OFF-GRID literal, off any core spacing step (nearest is 48px at 48px, far off). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. */
+  --desktop-icons-gap-row: 18px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Snap to 16px (16px) or 20px (20px) when a deliberate visual change is approved. */
+  --desktop-icons-gap-column: 10px; /** OFF-GRID literal. Snap to 8px (8px) or 12px (12px) when approved. */
+  --desktop-icons-icon-btn-gap: 7px; /** OFF-GRID literal. Snap to 4px (4px) or 8px (8px) when approved. */
+  --desktop-icons-icon-btn-padding-top: 10px; /** OFF-GRID literal. Snap to 8px (8px) or 12px (12px) when approved. */
+  --window-titlebar-gap: 10px; /** OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Snap to 8px (8px) or 12px (12px) when a deliberate visual change is approved. */
+  --window-titlebar-padding-y: 7px; /** OFF-GRID literal. Snap to 8px (8px) when approved. */
+  --window-titlebar-padding-x: 10px; /** OFF-GRID literal. Snap to 8px (8px) or 12px (12px) when approved. */
+  --window-titlebar-active-fg: #f4f1e6; /** OFF-GRID literal — the active titlebar's inverse ink, extracted verbatim from the pre-token CSS. Nearest core candidate: #e9e4d5 (#e9e4d5). Do not substitute; Window's hardcoded hexes stay literal. */
+  --window-title-controls-gap: 6px; /** OFF-GRID literal. Snap to 4px (4px) or 8px (8px) when approved. */
+  --window-ctrl-size: 13px; /** OFF-GRID literal (spacing scale is base-4). Nearest core candidate: 12px (12px). Extracted verbatim for a zero-visual-change migration. */
+  --window-ctrl-hover-fg: #17150d; /** OFF-GRID literal, exactly matches #17150d (#17150d). Kept literal per house rule — Window's hardcoded hexes stay literal, never substituted for an alias. */
+  --window-ctrl-hover-border-color: #17150d; /** OFF-GRID literal, exactly matches #17150d (#17150d). Same value as ctrl.hover.fg — kept literal per house rule. */
   --radius-control: var(--radius-md);
   --radius-pill: var(--radius-lg);
   --radius-circle: var(--radius-full);
@@ -122,26 +141,32 @@
   --type-display-family: var(--display);
   --type-heading-1-leading: var(--leading-tight);
   --type-heading-1-weight: var(--weight-regular);
+  --type-heading-1-tracking: var(--tracking-none);
   --type-heading-1-family: var(--display);
   --type-heading-2-size: var(--font-size-4xl);
   --type-heading-2-leading: var(--leading-snug);
   --type-heading-2-weight: var(--weight-regular);
+  --type-heading-2-tracking: var(--tracking-none);
   --type-heading-2-family: var(--display);
   --type-heading-3-size: var(--font-size-3xl);
   --type-heading-3-leading: var(--leading-snug);
   --type-heading-3-weight: var(--weight-semibold);
+  --type-heading-3-tracking: var(--tracking-none);
   --type-heading-3-family: var(--sans);
   --type-body-lg-size: var(--font-size-2xl);
   --type-body-lg-leading: var(--leading-relaxed);
   --type-body-lg-weight: var(--weight-regular);
+  --type-body-lg-tracking: var(--tracking-none);
   --type-body-lg-family: var(--sans);
   --type-body-size: var(--font-size-xl);
   --type-body-leading: var(--leading-relaxed);
   --type-body-weight: var(--weight-regular);
+  --type-body-tracking: var(--tracking-none);
   --type-body-family: var(--sans);
   --type-body-sm-size: var(--font-size-lg);
   --type-body-sm-leading: var(--leading-normal);
   --type-body-sm-weight: var(--weight-regular);
+  --type-body-sm-tracking: var(--tracking-none);
   --type-body-sm-family: var(--sans);
   --type-label-size: var(--font-size-base);
   --type-label-leading: var(--leading-normal);
@@ -163,6 +188,41 @@
   --type-mono-weight: var(--weight-regular);
   --type-mono-tracking: var(--tracking-08);
   --type-mono-family: var(--mono);
+  --type-title-size: var(--font-size-base);
+  --type-title-leading: var(--leading-normal);
+  --type-title-weight: var(--weight-bold);
+  --type-title-tracking: var(--tracking-14);
+  --type-title-family: var(--mono);
+  --type-control-size: var(--font-size-sm);
+  --type-control-leading: var(--leading-normal);
+  --type-control-weight: var(--weight-bold);
+  --type-control-tracking: var(--tracking-14);
+  --type-control-family: var(--mono);
+  --type-control-sm-size: var(--font-size-xs);
+  --type-control-sm-leading: var(--leading-normal);
+  --type-control-sm-weight: var(--weight-bold);
+  --type-control-sm-tracking: var(--tracking-14);
+  --type-control-sm-family: var(--mono);
+  --type-menu-size: var(--font-size-sm);
+  --type-menu-leading: var(--leading-normal);
+  --type-menu-weight: var(--weight-regular);
+  --type-menu-tracking: var(--tracking-14);
+  --type-menu-family: var(--mono);
+  --type-icon-label-size: var(--font-size-sm);
+  --type-icon-label-leading: var(--leading-normal);
+  --type-icon-label-weight: var(--weight-regular);
+  --type-icon-label-tracking: var(--tracking-10);
+  --type-icon-label-family: var(--mono);
+  --type-badge-size: var(--font-size-base);
+  --type-badge-leading: var(--leading-normal);
+  --type-badge-weight: var(--weight-bold);
+  --type-badge-tracking: var(--tracking-20);
+  --type-badge-family: var(--mono);
+  --type-wordmark-size: var(--font-size-lg);
+  --type-wordmark-leading: var(--leading-normal);
+  --type-wordmark-weight: var(--weight-regular);
+  --type-wordmark-tracking: var(--tracking-08);
+  --type-wordmark-family: var(--display);
   --spacing-component-xs: var(--space-1);
   --spacing-component-sm: var(--space-2);
   --spacing-component-md: var(--space-3);
@@ -190,10 +250,23 @@
   --status-danger-on-base: #e7e1d2;
   --status-info-base: #2036c8;
   --status-info-on-base: #e7e1d2;
-  --button-weight: var(--weight-bold);
-  --button-sm-tracking: var(--tracking-12);
+  --button-sm-text-font-family: var(--mono);
   --button-sm-padding-x: var(--space-3);
-  --button-md-tracking: var(--tracking-14);
+  --button-md-text-font-family: var(--mono);
+  --menubar-text-font-family: var(--mono);
+  --menubar-wordmark-text-font-family: var(--display);
+  --menubar-wordmark-version-text-font-family: var(--mono);
+  --menubar-menu-btn-text-font-family: var(--mono);
+  --menubar-menu-btn-padding-y: var(--space-1);
+  --menubar-menu-btn-padding-x: var(--space-2);
+  --stamp-text-font-family: var(--mono);
+  --desktop-icons-hover-border-color: var(--border);
+  --desktop-icons-icon-btn-padding-x: var(--space-1);
+  --desktop-icons-icon-btn-padding-bottom: var(--space-2);
+  --desktop-icons-label-text-font-family: var(--mono);
+  --window-title-text-font-family: var(--mono);
+  --window-title-meta-text-font-family: var(--mono);
+  --window-explainer-btn-text-font-family: var(--mono);
   --accent-expressive-text: var(--content);
   --accent-expressive-mark: var(--accent-expressive);
   --focus: var(--accent);
@@ -204,10 +277,82 @@
   --interactive-expressive-hover: var(--accent-expressive);
   --interactive-expressive-on-hover: var(--on-accent-expressive);
   --button-radius: var(--radius-control);
-  --button-sm-font-size: var(--text-caption);
+  --button-bg: var(--surface);
+  --button-fg: var(--content);
+  --button-stroke: var(--content);
+  --button-expressive-hover-bg: var(--accent-expressive);
+  --button-expressive-hover-fg: var(--on-accent-expressive);
+  --button-system-hover-bg: var(--accent);
+  --button-system-hover-fg: var(--surface);
+  --button-solid-bg: var(--accent);
+  --button-solid-fg: var(--surface);
+  --button-sm-text-font-size: var(--type-control-sm-size);
+  --button-sm-text-font-weight: var(--type-control-sm-weight);
+  --button-sm-text-line-height: var(--type-control-sm-leading);
+  --button-sm-text-letter-spacing: var(--type-control-sm-tracking);
   --button-sm-border: var(--border-width-default);
-  --button-md-font-size: var(--text-label);
+  --button-md-text-font-size: var(--type-control-size);
+  --button-md-text-font-weight: var(--type-control-weight);
+  --button-md-text-line-height: var(--type-control-leading);
+  --button-md-text-letter-spacing: var(--type-control-tracking);
   --button-md-border: var(--border-width-strong);
+  --menubar-bg: var(--surface);
+  --menubar-border-color: var(--content);
+  --menubar-border-width: var(--border-width-default);
+  --menubar-text-font-size: var(--type-label-size);
+  --menubar-text-font-weight: var(--type-label-weight);
+  --menubar-text-line-height: var(--type-label-leading);
+  --menubar-text-letter-spacing: var(--type-label-tracking);
+  --menubar-gap: var(--spacing-component-lg);
+  --menubar-wordmark-text-font-size: var(--type-wordmark-size);
+  --menubar-wordmark-text-font-weight: var(--type-wordmark-weight);
+  --menubar-wordmark-text-line-height: var(--type-wordmark-leading);
+  --menubar-wordmark-text-letter-spacing: var(--type-wordmark-tracking);
+  --menubar-wordmark-version-text-font-size: var(--type-label-size);
+  --menubar-wordmark-version-text-font-weight: var(--type-label-weight);
+  --menubar-wordmark-version-text-line-height: var(--type-label-leading);
+  --menubar-wordmark-version-text-letter-spacing: var(--type-label-tracking);
+  --menubar-menu-btn-text-font-size: var(--type-menu-size);
+  --menubar-menu-btn-text-font-weight: var(--type-menu-weight);
+  --menubar-menu-btn-text-line-height: var(--type-menu-leading);
+  --menubar-menu-btn-text-letter-spacing: var(--type-menu-tracking);
+  --menubar-menu-btn-border-width: var(--border-width-subtle);
+  --stamp-fg: var(--accent);
+  --stamp-border-color: var(--accent);
+  --stamp-border-width: var(--border-width-strong);
+  --stamp-text-font-size: var(--type-badge-size);
+  --stamp-text-font-weight: var(--type-badge-weight);
+  --stamp-text-line-height: var(--type-badge-leading);
+  --stamp-text-letter-spacing: var(--type-badge-tracking);
+  --stamp-pink-fg: var(--content);
+  --stamp-pink-border-color: var(--accent-expressive);
+  --desktop-icons-border-width: var(--border-width-subtle);
+  --desktop-icons-hover-bg: var(--surface-raised);
+  --desktop-icons-label-text-font-size: var(--type-icon-label-size);
+  --desktop-icons-label-text-font-weight: var(--type-icon-label-weight);
+  --desktop-icons-label-text-line-height: var(--type-icon-label-leading);
+  --desktop-icons-label-text-letter-spacing: var(--type-icon-label-tracking);
+  --window-fill: var(--surface-raised);
+  --window-stroke: var(--content);
+  --window-border-width: var(--border-width-default);
+  --window-titlebar-fill: var(--surface);
+  --window-titlebar-border-color: var(--content);
+  --window-titlebar-border-width: var(--border-width-default);
+  --window-titlebar-active-bg: var(--accent);
+  --window-titlebar-active-border-color: var(--content);
+  --window-ctrl-hover-bg: var(--accent-expressive);
+  --window-title-text-font-size: var(--type-title-size);
+  --window-title-text-font-weight: var(--type-title-weight);
+  --window-title-text-line-height: var(--type-title-leading);
+  --window-title-text-letter-spacing: var(--type-title-tracking);
+  --window-title-meta-text-font-size: var(--type-caption-size);
+  --window-title-meta-text-font-weight: var(--type-caption-weight);
+  --window-title-meta-text-line-height: var(--type-caption-leading);
+  --window-title-meta-text-letter-spacing: var(--type-caption-tracking);
+  --window-explainer-btn-text-font-size: var(--type-caption-size);
+  --window-explainer-btn-text-font-weight: var(--type-caption-weight);
+  --window-explainer-btn-text-line-height: var(--type-caption-leading);
+  --window-explainer-btn-text-letter-spacing: var(--type-caption-tracking);
 }
 
 /**

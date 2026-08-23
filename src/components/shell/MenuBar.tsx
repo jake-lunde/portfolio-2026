@@ -147,9 +147,13 @@ export function MenuBar() {
     /* the menubar is the tool's own toolbar while INSPECT.MODE is up, so
        it is exempt from picking (InspectShell) — the way OUT of the mode
        must never be something the mode swallows */
-    <header className={styles.menubar} data-inspect-self="">
+    <header className={styles.menubar} data-inspect-self="" data-component="menubar">
       <div className={styles.menuLeft}>
-        <div className={styles.wordmark}>
+        {/* the anatomy markers STYLER's bench direct-selects by, one per
+            part the token names already declare (lib/stylerBlocks.ts:
+            layersFor) — MENUBAR · MENU · WORDMARK. Attributes only:
+            nothing here reads them but the stage. */}
+        <div className={styles.wordmark} data-part="wordmark">
           {/* the house mark, in system ink — mask-image lets a raster
               PNG take var(--content) and follow dark mode for free
               (see .mark below). Decorative: the wordmark text already
@@ -252,6 +256,7 @@ export function MenuBar() {
             colour — the slash and the shape change carry it. */}
         <button
           className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
+          data-part="menu"
           onClick={toggleSound}
           aria-pressed={sound}
           aria-label={`Sound ${sound ? 'on' : 'off'}`}
@@ -262,6 +267,7 @@ export function MenuBar() {
         {skin === 'classic' && (
           <button
             className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
+            data-part="menu"
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
             title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
@@ -275,6 +281,7 @@ export function MenuBar() {
             the SPEC.SHEET desktop icon both lead to. */}
         <button
           className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
+          data-part="menu"
           onClick={() => {
             sfx.open()
             openWindow('spec-sheet')

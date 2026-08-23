@@ -19,6 +19,9 @@ export type ResolvedWindow = {
   /** titlebar action link — wins over both the doc-id and the explainer
       in the meta slot (see registry) */
   titleAction?: ProgramDef['titleAction']
+  /** a live control ahead of the meta slot — the case's own chrome
+      (family-hub's fidelity switch; see cases.ts) */
+  titleWidget?: ComponentType
   /** requires macrodata refinement (the sphere) before the body shows */
   gated?: boolean
 }
@@ -50,12 +53,11 @@ export function resolveWindow(id: string): ResolvedWindow | null {
       meta: `${c.no} / SPEC`,
       chrome: 'paper',
       component: c.component ?? null,
-      /* wide enough that the evolution rail (360px + berth) sits clear
-         of the column; clamps to the desktop on smaller screens, where
-         the rail overlaps the plates instead (Jake-approved) */
+      titleWidget: c.titleWidget,
+      /* the reading-room width the case was designed at (the rail that
+         once needed the right margin is retired — s94b); x hugs left so
+         width + x fits a 1280 laptop exactly */
       size: { w: 1280, h: 720 },
-      /* x hugs left so width + x fits a 1280 laptop exactly — the rail
-         lives on the window's right edge and must never hang offscreen */
       pos: { x: 24, y: 40 },
       path: `/projects/${c.slug}`,
       gated: true,

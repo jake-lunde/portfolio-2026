@@ -4,20 +4,60 @@
       "$value": "{radius.control}",
       "$type": "dimension"
     },
-    "weight": {
-      "$value": "{weight.bold}"
+    "bg": {
+      "$value": "{surface}",
+      "$type": "color"
+    },
+    "fg": {
+      "$value": "{content}",
+      "$type": "color"
+    },
+    "stroke": {
+      "$value": "{content}",
+      "$type": "color"
+    },
+    "expressive": {
+      "hover": {
+        "bg": {
+          "$value": "{accent-expressive}",
+          "$type": "color"
+        },
+        "fg": {
+          "$value": "{on-accent-expressive}",
+          "$type": "color"
+        }
+      }
+    },
+    "system": {
+      "hover": {
+        "bg": {
+          "$value": "{accent}",
+          "$type": "color"
+        },
+        "fg": {
+          "$value": "{surface}",
+          "$type": "color"
+        }
+      }
+    },
+    "solid": {
+      "bg": {
+        "$value": "{accent}",
+        "$type": "color"
+      },
+      "fg": {
+        "$value": "{surface}",
+        "$type": "color"
+      }
     },
     "sm": {
-      "font-size": {
-        "$value": "{text.caption}",
-        "$type": "dimension"
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.control-sm}"
       },
       "border": {
         "$value": "{border-width.default}",
         "$type": "dimension"
-      },
-      "tracking": {
-        "$value": "{tracking.12}"
       },
       "padding-x": {
         "$value": "{space.3}",
@@ -30,16 +70,13 @@
       }
     },
     "md": {
-      "font-size": {
-        "$value": "{text.label}",
-        "$type": "dimension"
+      "text": {
+        "$type": "typography",
+        "$value": "{typography.control}"
       },
       "border": {
         "$value": "{border-width.strong}",
         "$type": "dimension"
-      },
-      "tracking": {
-        "$value": "{tracking.14}"
       },
       "padding-x": {
         "$value": "18px",

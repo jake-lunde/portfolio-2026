@@ -6,6 +6,7 @@
     --ink-soft: #5a564a;
     --blue: #2036c8;
     --pink: #f2a6c2;
+    --danger: #a32b1f;
     --line: rgba(23, 21, 13, 0.18);
   }
   * { box-sizing: border-box; }
@@ -85,6 +86,21 @@
   .logwrap .l-info { color: #8a9a93; }
   .badge { font-size: 9px; color: var(--ink-soft); margin-top: 4px; }
   .badge b { color: var(--blue); }
+  /* Which bundle Figma is running. --danger is the classic light skin's
+     --status-danger-base / --status-danger-on-base, same source as --paper. */
+  .stamp {
+    font-size: 9px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    letter-spacing: 0.06em;
+  }
+  .stamp.stale {
+    display: inline-block;
+    color: var(--paper);
+    background: var(--danger);
+    padding: 1px 5px;
+    letter-spacing: 0.1em;
+  }
 </style>
 
 <div class="wordmark">
@@ -114,6 +130,7 @@
 </div>
 
 <div class="logwrap" id="log"></div>
+<div class="stamp" id="stamp"></div>
 <div class="badge">PUSH opens/updates a <b>design-tokens</b> PR → main.</div>
 
 <!--INLINE_SCRIPT-->

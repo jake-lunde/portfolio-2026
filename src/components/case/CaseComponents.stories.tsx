@@ -85,7 +85,7 @@ export const LeadStory: Story = {
 export const PlateStory: Story = {
   name: 'Plate (with Placeholder)',
   render: () => (
-    <Plate cap="Plate 03 · Onboarding flow" fig="FIG. 3" caption="The three-tap setup, end to end.">
+    <Plate cap="Plate 03 · Onboarding flow" caption="The three-tap setup, end to end.">
       <Placeholder>
         Screen recording
         <br />
@@ -98,7 +98,7 @@ export const PlateStory: Story = {
 export const PlaceholderStory: Story = {
   name: 'Placeholder',
   render: () => (
-    <Plate cap="Plate 01 · Asset" fig="FIG. 1">
+    <Plate cap="Plate 01 · Asset">
       <Placeholder>Duotone photo — swappable</Placeholder>
     </Plate>
   ),
