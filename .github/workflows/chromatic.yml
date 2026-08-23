@@ -1,29 +1,43 @@
 name: Chromatic
 
-on: push
+# Snapshot budget law: the free 5k dies in a week if every branch push
+# snapshots. Chromatic runs only for pushes to main (baselines) and for
+# PRs carrying the `visual` label. The tokens freshness guard still runs
+# on every push and PR — it's the cheap gate, not the expensive one.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
 
 jobs:
-  chromatic:
+  tokens-guard:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Chromatic needs full history for baselines
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22 # match local (22.16)
-
       - run: npm ci
-
-      # Freshness guard: the committed tokens.generated.css must match what
-      # tokens/ produces — a stale generated file (e.g. a Tokens Studio PR
-      # that skipped the build) fails here instead of shipping silently.
+      # The committed tokens.generated.css must match what tokens/ produces —
+      # a stale generated file (e.g. a Tokens Studio PR that skipped the
+      # build) fails here instead of shipping silently.
       - name: Tokens freshness guard
         run: |
           npm run tokens:build
           git diff --exit-code -- src/styles/tokens.generated.css
 
+  chromatic:
+    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'visual')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Chromatic needs full history for baselines
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
       - uses: chromaui/action@latest
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
