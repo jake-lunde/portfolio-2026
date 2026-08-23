@@ -1128,6 +1128,17 @@
   border-color: var(--status-danger-base);
 }
 
+/* THE LOCK. The three structural dimensions carry a padlock rather than the
+   word LOCKED (StylerBlocks.tsx draws it and carries the reasoning): in a
+   column of bindings a word reads as one more binding, and a shape does not.
+   Same chip, same muted ink, same hairline as every other tier mark — only
+   the contents changed, so the glyph is centred in the box the word had. */
+.tier[data-tier='locked'] {
+  display: inline-flex;
+  align-items: center;
+  line-height: var(--leading-none);
+}
+
 .swatch,
 .swatchBtn {
   flex: none;

@@ -27,6 +27,30 @@ body {
   -webkit-font-smoothing: antialiased;
   line-height: var(--leading-normal);
   overflow: hidden; /* the OS owns the viewport; windows scroll internally */
+  /* THE VIEWPORT, NAMED, so a bench can stand in for it.
+     Jake, on STYLER's stage: "I feel like I'm not able to manipulate the
+     mobile view." The pilot components' small-screen rules were viewport
+     @media, and a 360px bench inside a 1440px room is not a 360px viewport,
+     so the stage could never draw the mobile form of the thing it was
+     styling. Those rules are @container now (shell.module.css) and this is
+     the container they measure against on the real desktop; the stage's
+     bench declares the same NAME closer in, so the nearest one wins and the
+     bench overrides the screen (inspect/stylerStage.module.css, .mount).
+
+     WHY BODY AND NOT THE DESKTOP. `container-type: inline-size` carries
+     layout containment, which makes the element the containing block for
+     every `position: fixed` descendant under it — so the container has to
+     be a box that already IS the viewport, or the whole OS moves. `main
+     .desktop` is neither: it starts below the menu bar, INSPECT.MODE insets
+     both its sides (which would put a 1200px screen under the 720px rule
+     the moment the tool opened), and the menu bar is its SIBLING rather
+     than its child, so half the pilot components are outside it. Body is
+     the one element that spans the screen and holds all of them: height
+     100% of an html that is 100% of the viewport, margin 0, and the fixed
+     furniture it now positions lands pixel-for-pixel where it landed
+     before. Verified by rect probe at 1280 and at 400 (s111). */
+  container-name: viewport;
+  container-type: inline-size;
 }
 
 body,

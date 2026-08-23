@@ -1,9 +1,53 @@
 name: Chromatic
 
-on: push
+# Chromatic's free tier is 5,000 snapshots/month. At this repo's cadence
+# (~175 pushes and ~58 PRs in a week) an `on: push` trigger burned the whole
+# allowance in 7 days — TurboSnap included. So snapshots are now OPT-IN:
+#
+#   * add the `visual` label to a PR  → one Chromatic build
+#   * remove and re-add the label     → another build
+#   * Actions → Chromatic → Run workflow → any branch, on demand
+#
+# Nothing else spends snapshots. The tokens freshness guard is free, so it
+# stays on every push as its own job.
+#
+# Note: `exitOnceUploaded` returns the runner before Chromatic finishes
+# capturing, so cancelling this job does NOT cancel the snapshots — the spend
+# is committed the moment the upload lands.
+
+on:
+  push:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+
+concurrency:
+  group: chromatic-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  # Free gate — the committed tokens.generated.css must match what tokens/
+  # produces. A stale generated file (e.g. a Tokens Studio PR that skipped the
+  # build) fails here instead of shipping silently. Costs no snapshots, so it
+  # runs on every push.
+  tokens-guard:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22 # match local (22.16)
+      - run: npm ci
+      - name: Tokens freshness guard
+        run: |
+          npm run tokens:build
+          git diff --exit-code -- src/styles/tokens.generated.css
+
   chromatic:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'visual')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,9 +60,6 @@ jobs:
 
       - run: npm ci
 
-      # Freshness guard: the committed tokens.generated.css must match what
-      # tokens/ produces — a stale generated file (e.g. a Tokens Studio PR
-      # that skipped the build) fails here instead of shipping silently.
       - name: Tokens freshness guard
         run: |
           npm run tokens:build
