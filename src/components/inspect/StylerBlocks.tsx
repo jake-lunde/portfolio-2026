@@ -8,13 +8,17 @@ import { registerHotkeys } from '@/lib/hotkeys'
 import { candidatesFor, CANDIDATES_BY_FAMILY, type StyleCandidate } from '@/lib/styleCandidates'
 import { blocksFor, fillStrokePair, type StylerRow } from '@/lib/stylerBlocks'
 import {
+  canRedo,
+  canUndo,
   count,
   heldToken,
   isRebound,
   readValue,
   rebind,
+  redo,
   resetAll,
   resetRole,
+  undo,
 } from '@/lib/stylerTune'
 import { InfoTip } from './InfoTip'
 import styles from './inspectShell.module.css'
@@ -57,8 +61,10 @@ import styles from './inspectShell.module.css'
  * lands, which is the honest half.
  *
  * THE KEYS. Arrow up and down step the ramp on a focused row, one token at a
- * time; Shift takes it to the ends; X swaps a fill with its stroke; Cmd+S
- * saves. They are a registry now rather than another hand-written ladder
+ * time; Shift takes it to the ends; X swaps a fill with its stroke; Cmd+Z and
+ * Cmd+Shift+Z walk the pending set backwards and forwards (the history lives
+ * in stylerTune, so one stack covers this panel, the stage and the bench);
+ * Cmd+S opens the pull request. They are a registry rather than a ladder
  * (lib/hotkeys.ts) — the first shared keyboard infrastructure on the desktop,
  * sitting on `window` in the capture phase, above INSPECT's Escape ladder and
  * deliberately not owning Escape. Escape belongs to the ladder, and the open
@@ -69,6 +75,44 @@ import styles from './inspectShell.module.css'
 /** The lifted key for an open candidate list, kept apart from the TOKENS
     palette's `property|--var` shape so the two can never collide. */
 const openKeyFor = (role: string) => `styler|${role}`
+
+/** THE LOCK, on the three rows that have no ramp.
+ *
+ * It was the word LOCKED in a chip, which read as one more binding in a
+ * column of bindings: --window-ctrl-size said LOCKED where the row above it
+ * said Surface, and the eye had to read the word to learn that one of them is
+ * not an offer. A padlock says it at a glance and says it in a shape no
+ * binding can be mistaken for.
+ *
+ * The house's small-chrome recipe, the same one InspectorPanel's LinkOutGlyph
+ * and MenuBar's glyphs use: a 32-unit grid, round caps and joins, no fill and
+ * currentColor, so it takes whatever ink the chip around it is printed in. 12
+ * pixels rather than an em box, because the chip draws at the control step and
+ * an em glyph there works out under 10px, where a 3px stroke stops reading as
+ * a shape. Two shapes only — a shackle and a body — and no keyhole: a third
+ * mark at this size is a smudge.
+ *
+ * aria-hidden, and the chip around it carries the name (see the row below).
+ * Module scope so it is one component rather than a new one every render. */
+function LockGlyph() {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      width="12"
+      height="12"
+      className={styles.stylerChipIcon}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M10 14V9a6 6 0 0 1 12 0v5" />
+      <rect x="6" y="14" width="20" height="13" />
+    </svg>
+  )
+}
 
 /** The candidate a row is bound to right now, pending edits on top of the
     token file. Null when the file wrote a literal (OFF-GRID) — there is a
@@ -206,12 +250,25 @@ export function StylerBlocks({
        cannot act does not match, and the key falls through untouched. */
     const onRow = () => !!focusedRole()
 
+    /* UNDO, on the key every other tool on a designer's machine uses for it.
+       Guarded on there being something to undo rather than shrugging inside
+       the handler: an empty stack should hand ⌘Z back to the browser, which
+       is what the visitor means by it in a text field on the page. The
+       history is stylerTune's — one stack for the panel, the stage and the
+       bench, because they are all writing the same pending set. */
+    const stepBack = (back: boolean) => {
+      if (!(back ? undo() : redo())) return
+      act.current.onChange()
+    }
+
     return registerHotkeys('styler', [
       { key: 'ArrowUp', when: onRow, run: () => step(-1, false) },
       { key: 'ArrowDown', when: onRow, run: () => step(1, false) },
       { key: 'ArrowUp', shift: true, when: onRow, run: () => step(-1, true) },
       { key: 'ArrowDown', shift: true, when: onRow, run: () => step(1, true) },
       { key: 'x', when: () => !!pairNow(), run: swap },
+      { key: 'z', meta: true, when: canUndo, run: () => stepBack(true) },
+      { key: 'z', meta: true, shift: true, when: canRedo, run: () => stepBack(false) },
       // the browser's save dialog is worth taking while the tool is up: the
       // thing on screen that can be saved is this panel's pending set
       { key: 's', meta: true, run: () => act.current.onSave() },
@@ -271,10 +328,30 @@ export function StylerBlocks({
                     )}
                     {row.locked ? (
                       <>
-                        <span className={styles.tier} data-tier="locked">
-                          <CopyText k="styler.locked" />
+                        {/* the chip is the label: role="img" with a name
+                            keeps LOCKED in the accessibility tree and off
+                            the screen, so the column reads as bindings and
+                            a screen reader still hears which rows are not
+                            one. Same copy key the word used. */}
+                        <span
+                          className={styles.tier}
+                          data-tier="locked"
+                          role="img"
+                          aria-label={t('styler.locked', skin)}
+                        >
+                          <LockGlyph />
                         </span>
-                        <span className={styles.value}>{readValue(`--${row.role}`) || '—'}</span>
+                        {/* readValue reads computed CSS, which the server
+                            does not have: it renders the dash and the client
+                            renders the pixel value. That is the span's job,
+                            not a mismatch to repair, so hydration is told
+                            so — the stage opens straight from ?c= on the
+                            server (s108) and without this every locked or
+                            off-grid row in the first layer tripped the
+                            overlay. */}
+                        <span className={styles.value} suppressHydrationWarning>
+                          {readValue(`--${row.role}`) || '—'}
+                        </span>
                       </>
                     ) : (
                       <button
@@ -290,7 +367,9 @@ export function StylerBlocks({
                         ) : (
                           <>
                             <CopyText k="styler.offgrid" />{' '}
-                            <span className={styles.value}>{readValue(`--${row.role}`)}</span>
+                            <span className={styles.value} suppressHydrationWarning>
+                              {readValue(`--${row.role}`)}
+                            </span>
                           </>
                         )}
                       </button>

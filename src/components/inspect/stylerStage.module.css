@@ -21,17 +21,31 @@
  * MOTION is the docks' own: transform and opacity, one --duration-theme, and
  * nothing at all under prefers-reduced-motion. No springs — the frame arrives,
  * it does not bounce.
+ *
+ * THE DOCK IS A COLUMN OF THREE (Jake, s111). Every modifier the room offers
+ * is a row at its head, the blocks scroll under them, and the commit foot
+ * stands on the bottom of the panel rather than floating over the canvas.
+ * The canvas is the component and nothing else. What that costs this sheet is
+ * one class each — .mods, .modsHead, .commit — and what it saves is the whole
+ * set-switch flyout, which was 150 lines of menu for one of four questions.
+ *
+ * THE BENCH IS A QUERY CONTAINER (.mount, below), which is the other half of
+ * Jake's "I feel like I'm not able to manipulate the mobile view": the pilot
+ * components' small-screen rules ask a container named `viewport` now, body
+ * declares it on the real desktop, and the bench declares it again, closer
+ * in. So MOBILE narrows the component the way a phone would.
  */
 
 .stage {
   /* THE TWO WALLS, and the only place either number is written.
-     The panels are sized by these, the commit band spans the gap between
-     them, and StylerStage.tsx overwrites one of them inline the moment
-     somebody drags its grip. Left is INSPECT's own panel width, still: two
-     left panels doing one job. Right opens 80px wider than the inspector's
-     dock, which is Jake's s107 note in a number — at 304px a row called
-     TITLEBAR ACTIVE BORDER COLOR drops its binding onto a second line, and
-     at 384px it does not. */
+     The panels are sized by these, and StylerStage.tsx overwrites one of them
+     inline the moment somebody drags its grip. Left is INSPECT's own panel
+     width, still: two left panels doing one job. Right opens 80px wider than
+     the inspector's dock, which is Jake's s107 note in a number — at 304px a
+     row called TITLEBAR ACTIVE BORDER COLOR drops its binding onto a second
+     line, and at 384px it does not. The commit foot lives on that same 80px:
+     it left the dock in s107 because it folded at 304 and came back in s111
+     because it does not fold at 384. */
   --styler-left: var(--inspect-left, 244px);
   --styler-right: 384px;
   position: fixed;
@@ -95,35 +109,61 @@
 
 /* ---- the canvas: the component, alone, with room around it ----
 
-   The floor is deeper than the other three sides on purpose: the commit band
-   stands on it, and a bench you have to scroll out from under the SAVE button
-   to read would be the same crowding this change is undoing. Four of the room's
-   own spacing step, which clears the band with its key gate open. */
+   Even padding on all four sides again. The floor used to be four spacing
+   steps deep to clear the commit band that stood on it; the band is the
+   dock's foot now (Jake, s111) and the canvas has nothing in it but the
+   bench, so the bench sits in the middle of the room the way a thing on a
+   table does.
+
+   A flex COLUMN with the centring done by the bench's own `margin-block:
+   auto`, rather than `justify-content: center` on this box. The difference
+   only shows when the bench is taller than the canvas — MOBILE is 480px of
+   sample and a short window makes that easy — and it is the difference
+   between scrolling back to the top of it and not being able to: centred
+   content that overflows a scroll container leaks off the top edge, where
+   there is nothing to scroll to. Auto margins give the same centre and give
+   the overflow back. */
 .canvas {
   flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
   overflow: auto;
   padding: var(--spacing-component-xl);
-  padding-bottom: calc(var(--spacing-component-xl) * 4);
   background: var(--surface-raised);
 }
 
-/* ---- the two tab rows: what stands on the bench ----
+/* ---- the modifier rows: every question the room asks, in one block ----
 
-   A name on the left and the choices beside it, one row per axis, both rows
-   in a strip across the top of the canvas. Micro caps and a hairline box, so
-   the strip reads as a control panel and not as content: the component is
-   the only thing in this room allowed to be loud. */
-.axes {
+   Jake, s111: "make all of the modifiers be elements in the styler panel on
+   the right (desktop, mobile + default, hover, etc + classic, medieval +
+   variant active, resting)." Four axes, one shape: the name in a fixed column
+   on the left so the four read as a stack rather than as four unrelated
+   lists, and the pills beside it, wrapping inside their own box when the dock
+   is dragged in to its 304px stop.
+
+   The name column is 4.75rem rather than the 5.5 the tab row used over the
+   canvas. TOKEN SET is the longest of the four and it fits in that at the
+   control step; the extra 0.75rem was slack a full-width strip could afford
+   and a dock cannot. */
+.mods {
+  flex: none;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-component-xs);
+  gap: var(--spacing-component-sm);
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
+  border-bottom: var(--border-width-default) solid var(--border);
+}
+
+/* the same head the blocks below wear, and the same one both other panels
+   wear: four panels in this tool, one heading treatment */
+.modsHead {
+  flex: none;
 }
 
 .axis {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: flex-start;
   gap: var(--spacing-component-xs) var(--spacing-component-sm);
 }
 
@@ -137,9 +177,12 @@
    where those classes are declared. */
 .axisName {
   flex: none;
-  /* both names line up so the two rows read as one panel rather than as two
-     unrelated lists that happen to be stacked */
-  width: 5.5rem;
+  /* all four names line up so the block reads as one panel rather than as
+     four unrelated lists that happen to be stacked */
+  width: 4.75rem;
+  /* the pills are a control tall; the name sits on the first one's line
+     rather than in the middle of a row that has wrapped to three */
+  padding-top: var(--spacing-component-xs);
   font-family: var(--type-control-family);
   font-size: var(--type-control-size);
   font-weight: var(--type-control-weight);
@@ -149,7 +192,12 @@
   color: var(--content-muted);
 }
 
+/* the pills take the rest of the row and wrap inside it. min-width:0 is what
+   lets them: a flex item's floor is its content, and three pills that will
+   not shrink push the row wider than the dock rather than folding. */
 .tabs {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
 }
@@ -181,8 +229,13 @@
   background: var(--interactive-default-hover);
 }
 
-/* what sits ON an accent fill is the paper, house-wide */
-.tab[aria-selected='true'] {
+/* what sits ON an accent fill is the paper, house-wide. Two attributes for
+   one look, because one of the four rows is a tablist and the other three are
+   radio groups (StylerStage.tsx, AxisRow, says why): a tab reports
+   aria-selected and a radio reports aria-checked, and a visitor should never
+   be able to see which is which. */
+.tab[aria-selected='true'],
+.tab[aria-checked='true'] {
   z-index: 1;
   color: var(--surface);
   background: var(--accent);
@@ -200,14 +253,96 @@
    skin's ground, because a medieval component standing on classic paper is
    not what medieval looks like. */
 .mount {
+  /* THE BENCH IS THE VIEWPORT, for anything standing on it.
+     Jake, s111: "I feel like I'm not able to manipulate the mobile view."
+     The pilot components' small-screen rules used to ask the screen, so a
+     narrow bench in a wide room got the wide answer and the tool could never
+     draw the thing it was for. They ask a container named `viewport` now
+     (components/shell/shell.module.css) — body declares it for the real
+     desktop, and this declares it again one step closer, so the nearest
+     container wins and the bench overrides the screen for what is on it.
+
+     Only the MOBILE mount declares it (.mountMobile below). At DESKTOP the
+     mount is NOT a container, on purpose: the canvas between the two walls
+     is about 600px on a 1280 screen, and a desktop bench measuring itself
+     would fall under the 720 rule and draw the phone form while claiming to
+     be the desktop. So the desktop bench lets the query fall through to
+     body, which is the real screen — the one answer "DESKTOP" can honestly
+     mean on a tool that only opens above 900px. */
   display: flex;
   align-items: center;
   justify-content: center;
+  /* `flex: none` so a short bench keeps its own height in the canvas column
+     rather than being stretched down it, and the auto margins do the
+     centring — see .canvas above for why not justify-content */
+  flex: none;
+  margin-block: auto;
   min-height: 240px;
-  margin-top: var(--spacing-component-lg);
   padding: var(--spacing-component-xl) var(--spacing-component-md);
   background: var(--surface);
   border: var(--border-width-default) solid var(--border);
+}
+
+/* MOBILE: the bench stands 360px wide, which is the site's own floor — the
+   width every layout in this codebase is built down to, so this is the number
+   the rest of the work already answers to rather than a guess at "small".
+
+   `content-box` against the sheet-wide border-box reset, deliberately and
+   only here: a container query reads the CONTENT box, so a 360px border-box
+   would hand the component 358 and the bench would be lying by two pixels
+   about the one measurement it exists to make. The border and the padding sit
+   outside the 360.
+
+   The side padding goes with it for the same reason — a phone has no gutter
+   outside its own screen — and `margin-inline: auto` keeps the narrow bench
+   in the middle of the canvas rather than against its left wall.
+
+   `container-type: inline-size` also makes this the containing block for
+   any `position: fixed` descendant. That is already true one level in — the
+   .bench wrapper below sets a transform for exactly that reason, and it is
+   nearer, so the menu bar sample still lays itself across the bench and not
+   across the mount. */
+.mountMobile {
+  container: viewport / inline-size;
+  box-sizing: content-box;
+  width: 360px;
+  margin-inline: auto;
+  padding-inline: 0;
+}
+
+/* ---- DIRECT SELECT: the part under the pointer, outlined ----
+
+   Jake: "wire up the figma hotkeys, I'm very interested in having direct
+   select available to select individual elements instead of having to drill
+   down in the layers on the left." Figma's grammar, and its feedback with it:
+   hold the command key and whatever is under the pointer draws a line around
+   itself, so you can see what a click is about to take before you take it.
+
+   The markers are on the components themselves (data-part, written in
+   Window.tsx, MenuBar.tsx, DesktopIcons.tsx and Stamp.tsx), one per layer the
+   token names already declare. The stage writes the two state attributes and
+   these two rules paint them.
+
+   OUTLINE, not a border and not a ring drawn with a box-shadow: an outline is
+   the one thing in CSS that can appear on an element without moving anything
+   around it, and a bench that nudged the component sideways as you swept the
+   pointer over it would be a bench lying about the layout. Hover is the
+   hairline and the pick is a step heavier, so the two can be on screen at
+   once and still be told apart.
+
+   The elements are the real components: their class names belong to their
+   own sheets and the only thing this room can name them by is the attribute
+   pair. The module's own .stage class in front is what keeps the selector
+   pure (CSS modules refuse an attribute-only selector) and what keeps the
+   rule inside the room. */
+.stage [data-part][data-styler-hover] {
+  outline: var(--border-width-subtle) solid var(--accent);
+  outline-offset: var(--border-width-subtle);
+}
+
+.stage [data-styler-picked] {
+  outline: var(--border-width-default) solid var(--accent);
+  outline-offset: var(--border-width-subtle);
 }
 
 /* ---- the benches: what a component needs to stand up on ---- */
@@ -248,6 +383,23 @@
   position: relative;
   width: 340px;
   height: 180px;
+}
+
+/* MOBILE, on the bench: a phone-shaped box for the samples that carry one.
+   Under 720px a window goes full-bleed, and a full-bleed window in a 340×180
+   letterbox reads as a squashed bar rather than as a screen; the desk grid
+   starts 118px down to clear the nameplate and wants the height for it. Both
+   take the bench's whole width and a height a phone would have.
+
+   Declared after the two boxes it overrides, because a container rule carries
+   no extra weight of its own — same specificity, so the later one wins, and
+   this file's order is doing the work. */
+@container viewport (max-width: 720px) {
+  .windowBench,
+  .benchDesk {
+    width: 100%;
+    height: 480px;
+  }
 }
 
 .sampleBody {
@@ -400,49 +552,49 @@
   outline-offset: calc(var(--border-width-strong) * -1);
 }
 
-/* ---- the commit band: the send bar, on the floor ----
+/* ---- THE COMMIT FOOT: the send bar, on the bottom of the dock ----
 
-   It was the dock's foot and it wrapped there (Jake, s107): the count broke
-   across two lines and the theme chip on SAVE ran off the edge. Down here it
-   spans the gap between the two walls and centres in it, so the only thing
-   between the visitor and the button is the component the button is about.
+   It stood here, left for a review, and came back (Jake, s111: "fix the
+   export options to the bottom of that panel"). The s107 reason it left was
+   real — at 304px the count broke across two lines and the theme chip on SAVE
+   ran off the edge — and it is the same pass that made the dock 384px wide,
+   which is the width the row now fits in. The chip went with the crown's old
+   set switch, and a bar floating over the canvas was a second thing in the
+   middle of the room competing with the component.
 
-   ABSOLUTE, inside a room that is already `position: fixed` over the whole
-   viewport, which is the same thing as fixed and none of the containing-block
-   trouble: the bench sets a transform on itself, and a fixed descendant would
-   have to care. The band itself lets pointers through — it is a strip of air
-   with a bar in the middle of it, not a lid on the canvas. */
+   `flex: none` at the end of a flex column, under a body that scrolls: that
+   is the whole mechanism. Nothing is positioned, nothing is sticky, and the
+   blocks above it can be twenty rows long without ever pushing the button off
+   the bottom of the panel.
+
+   --surface-raised, one step off the dock's paper, so the foot reads as the
+   panel's own floor rather than as another block in the list. */
 .commit {
-  position: absolute;
-  left: var(--styler-left);
-  right: var(--styler-right);
-  bottom: 0;
-  z-index: 2;
-  display: flex;
-  justify-content: center;
-  padding: var(--spacing-component-md);
-  pointer-events: none;
-}
-
-.commitBar {
+  flex: none;
   display: flex;
   flex-direction: column;
-  max-width: 100%;
   padding: var(--spacing-component-sm) var(--spacing-component-md);
   background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
-  pointer-events: auto;
+  border-top: var(--border-width-default) solid var(--content);
 }
 
-/* the count, the revert and the send, in one line with room to be one line.
-   It wraps only where there is genuinely no room left, and centres when it
-   does, so the bar never reads as a ragged column. */
+/* The count, the revert and the send, in one line at 384px and folding
+   gracefully at the dock's 304px stop: the count takes what is left after the
+   two buttons and wraps its own words, and when even that will not fit the
+   row breaks and the buttons take the next line. `min-width: 0` on the text
+   is what allows either — a flex item's floor is its content otherwise, and a
+   count that refuses to shrink pushes the buttons out through the wall. */
 .commitRow {
   display: flex;
   align-items: center;
-  justify-content: center;
   flex-wrap: wrap;
-  gap: var(--spacing-component-sm) var(--spacing-component-md);
+  gap: var(--spacing-component-xs) var(--spacing-component-sm);
+}
+
+.commitRow > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .empty {
@@ -512,24 +664,6 @@
      is no join left to take hold of */
   .grip {
     display: none;
-  }
-
-  /* the band joins the flow and becomes the last thing in the column. A bar
-     hovering over a stacked layout would be a bar covering the rows it was
-     put there to send, and 360px has no width to spare for a shadow of a
-     canvas underneath it. */
-  .commit {
-    position: static;
-    flex: none;
-    padding: 0;
-  }
-
-  .commitBar {
-    max-width: none;
-    width: 100%;
-    border-right: none;
-    border-bottom: none;
-    border-left: none;
   }
 }
 

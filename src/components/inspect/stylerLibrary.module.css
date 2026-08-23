@@ -23,6 +23,18 @@
   margin: 0 auto var(--spacing-component-xl);
 }
 
+/* the title and the way out, at either end of one line. It wraps rather than
+   squeezes, and the link keeps its own baseline when it does: the two are
+   different sizes, so aligning them on their box would leave the small one
+   floating. */
+.headRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-sm) var(--spacing-component-md);
+}
+
 .title {
   margin: 0;
   font-family: var(--type-heading-1-family);
@@ -42,6 +54,31 @@
   letter-spacing: var(--type-micro-tracking);
   line-height: var(--type-micro-leading);
   color: var(--content-muted);
+}
+
+/* the sub line's step, because that is what it is: the small print around the
+   title. It takes the ink rather than the muted grey the sub wears, since a
+   thing you can press should not read as a caption, and the underline arrives
+   on hover the way every other plain link in the OS does. */
+.back {
+  flex: none;
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  color: var(--content);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.back:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: var(--spacing-component-xs);
 }
 
 .narrow {

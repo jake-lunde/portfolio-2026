@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, useReducedMotion } from 'motion/react'
 import { useSettings } from '@/store/settings'
@@ -203,9 +204,22 @@ export function StylerLibrary() {
   return (
     <div className={styles.library}>
       <header className={styles.head}>
-        <h1 className={styles.title}>
-          <CopyText k="styler.library.title" />
-        </h1>
+        {/* THE WAY BACK. The route stands on its own — no menubar, no dock,
+            nothing else on the page that leads anywhere — so a visitor who
+            arrived on a link had no door to the machine the shelf is part of.
+            A plain next/link, on the same line as the title and at the other
+            end of it, which is where a browser's own back control sits and
+            where this page has room. The arrow is part of the sentence rather
+            than a glyph beside it: one string to translate, one string to
+            edit, and the accessible name is the words either way. */}
+        <div className={styles.headRow}>
+          <h1 className={styles.title}>
+            <CopyText k="styler.library.title" />
+          </h1>
+          <Link className={styles.back} href="/">
+            <CopyText k="styler.library.back" />
+          </Link>
+        </div>
         <p className={styles.sub}>
           <CopyText k="styler.library.sub" />
         </p>
