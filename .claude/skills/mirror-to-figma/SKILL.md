@@ -160,7 +160,7 @@ node scripts/figma-map.mjs write --node <SET_NODE_ID> \
 `--props` is only needed where a Figma property name differs from the prop
 (Button's `Size`→`size`, `label`→`children`); matching names map by identity.
 The script prints the description pointer and a `use_figma` snippet that
-prepends it to the set's description — run that snippet (REST cannot write
+sets it as the set's description — the pointer is the whole description, prose lives in the map or the code — run that snippet (REST cannot write
 descriptions). Two writes, one source. Re-running a mirror re-runs this step;
 `node scripts/figma-map.mjs check` verifies every row is still live.
 

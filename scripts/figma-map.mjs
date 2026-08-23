@@ -111,8 +111,12 @@ async function write() {
   map.components.sort((a, b) => a.name.localeCompare(b.name))
   await fs.writeFile(MAP, JSON.stringify(map, null, 2) + '\n')
   const line = pointer(row)
-  const body = set.description.replace(POINTER_RE, '')
-  const next = body ? `${line}\n\n${body}` : line
+  // The description IS the pointer (Jake, s116): prose there drifts the
+  // moment the component changes, and every fact it held has a home
+  // elsewhere (the skill, the CSS, the derived-annotations task).
+  if (set.description.replace(POINTER_RE, '').trim())
+    console.log(`note: the set's description carries prose beyond the pointer — the snippet replaces it`)
+  const next = line
   console.log(`${i >= 0 ? 'rewrote' : 'added'} row ${row.name} (${row.key})`)
   console.log(`description pointer:\n  ${line}`)
   console.log(`\nset it with use_figma (REST cannot write descriptions):\n`)
@@ -158,7 +162,7 @@ async function check() {
     if (set.name !== row.name) fail(`${row.name}: Figma now calls it "${set.name}"`)
     for (const p of Object.keys(row.props)) if (!set.properties.includes(p)) fail(`${row.name}: property "${p}" gone from the set`)
     for (const p of set.properties) if (!(p in row.props)) fail(`${row.name}: set grew property "${p}" the row does not map`)
-    if (!set.description.startsWith(pointer(row))) fail(`${row.name}: description pointer missing or stale`)
+    if (set.description.trim() !== pointer(row)) fail(`${row.name}: description is not exactly the pointer`)
     if (errors === before) console.log(`✓ ${row.name} ${row.key}`)
   }
   // Every component set in the file should have a row, or be listed as owed.
