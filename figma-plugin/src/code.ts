@@ -619,19 +619,32 @@ async function upsertTextStyle(
   await figma.loadFontAsync({ family: ft.fontFamily, style: ft.fontStyle })
   style.fontName = { family: ft.fontFamily, style: ft.fontStyle }
   style.fontSize = ft.fontSize
-  // Set PERCENT units BEFORE binding so the bound FLOAT reads as a percentage,
-  // not pixels (our leadings/tracking are unitless/em, i.e. proportional).
+  // lineHeight / letterSpacing are NEVER bound. A FLOAT variable bound to
+  // either field is applied as PIXELS no matter what unit the style held
+  // (leading 1.5 -> 150px — s114 verified: set-PERCENT-then-bind yields
+  // PIXELS, bind-then-set-PERCENT silently unbinds). Our leadings/tracking
+  // are proportional, so they stay static PERCENT; the type/<role>/*
+  // variables still exist and PUSH still reads them. Unbind first so a
+  // style written by an older bundle is repaired in place.
+  unbindTextField(style, 'lineHeight')
+  unbindTextField(style, 'letterSpacing')
   style.lineHeight = { unit: 'PERCENT', value: ft.lineHeight }
   style.letterSpacing = { unit: 'PERCENT', value: ft.letterSpacing }
 
   bindTextField(style, 'fontFamily', vars.fontFamily)
   bindTextField(style, 'fontStyle', vars.fontStyle)
   bindTextField(style, 'fontSize', vars.fontSize)
-  bindTextField(style, 'lineHeight', vars.lineHeight)
-  bindTextField(style, 'letterSpacing', vars.letterSpacing)
   // fontWeight is carried by fontStyle for STATIC families (Geist), so this may
   // be a no-op/refused — bind opportunistically (variable fonts honor it).
   bindTextField(style, 'fontWeight', vars.fontWeight)
+}
+
+function unbindTextField(style: TextStyle, field: VariableBindableTextField): void {
+  try {
+    if (style.boundVariables?.[field]) style.setBoundVariable(field, null)
+  } catch (e) {
+    log(`  unbind ${style.name}.${field} skipped (${errorText(e)}).`, 'warn')
+  }
 }
 
 function bindTextField(style: TextStyle, field: VariableBindableTextField, v: Variable): void {
