@@ -24,6 +24,9 @@
   text-align: center;
 }
 
+/* Motion scales this row (not the boxes) through the rise — GateSphere's
+   RISE_SCALE — about its own centre, so this gap is what holds the risen
+   boxes apart. Anything that changes the pitch here changes the rise. */
 .slots {
   display: flex;
   gap: 8px;
@@ -67,11 +70,23 @@
   border-color: var(--accent-expressive);
 }
 
+/* the stage holds the sphere, and the typed field when it stands in */
+.stage {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .sphere {
   position: relative;
   width: 100%;
   flex: 1;
-  min-height: 300px;
+  /* 240, not 300: at 300 the gate overran the 640x480 PROJECTS window by
+     ~40px and the keyboard path sat under the fold, which is how visitors
+     missed it. flex: 1 still hands the sphere every spare pixel. */
+  min-height: 240px;
   cursor: grab;
   touch-action: none;
   transition: transform 0.7s ease, opacity 0.7s ease;
@@ -123,32 +138,52 @@
 }
 
 .typeRow {
-  margin-top: 8px;
-  min-height: 26px;
+  margin-top: 10px;
 }
 
-.typeToggle {
-  font-family: var(--type-micro-family);
-  font-size: var(--type-micro-size); /* 8px exact */
-  letter-spacing: var(--tracking-16); /* diverges from micro's tracking-20 — matches original 0.16em */
-  color: rgba(231, 225, 210, 0.45);
+/* the house button in the plate's ink: CRT chrome rule, on-body text is
+   --content-inverse and the border is cut from it. Hover inverts. */
+.typeBtn {
+  background: transparent;
+  color: var(--content-inverse);
+  border-color: color-mix(in srgb, var(--content-inverse) 55%, transparent);
 }
 
-.typeToggle:hover {
-  color: var(--accent);
+.typeBtn:hover,
+.typeBtn:focus-visible {
+  background: var(--content-inverse);
+  color: var(--surface-inverse);
+  border-color: var(--content-inverse);
+}
+
+/* the field stands where the sphere was, centred on the receded orb */
+.typeField {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
 }
 
 .typeInput {
+  pointer-events: auto;
   font-family: var(--display);
-  font-size: var(--type-body-lg-size); /* 16px exact */
+  font-size: var(--type-heading-2-size); /* 22px — the sphere's letter size, so the typed word reads at the orb's weight */
   letter-spacing: 0.4em;
+  text-indent: 0.4em; /* centres the tracked word; the trailing tracking would otherwise lean it left */
   text-transform: uppercase;
   background: transparent;
-  border: 1.5px solid rgba(231, 225, 210, 0.45);
-  color: #e7e1d2;
-  padding: 4px 10px;
-  width: 140px;
+  border: 1.5px solid color-mix(in srgb, var(--content-inverse) 55%, transparent);
+  color: var(--content-inverse);
+  caret-color: var(--accent);
+  padding: 8px 14px;
+  width: min(220px, 80%);
   text-align: center;
+}
+
+.typeInput:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 /* classic-Mac verdict dialog */

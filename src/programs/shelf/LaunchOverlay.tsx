@@ -139,6 +139,7 @@ export function LaunchOverlay({
   const open = useWindows((s) => s.open)
   const requestSize = useWindows((s) => s.requestSize)
   const releaseSize = useWindows((s) => s.releaseSize)
+  const setZoomed = useWindows((s) => s.setZoomed)
   const [step, setStep] = useState(0)
   const [phase, setPhase] = useState<Phase>('loading')
   const panel = useRef<HTMLDivElement>(null)
@@ -198,18 +199,27 @@ export function LaunchOverlay({
     return () => releaseSize(id)
   }, [phase, requestSize, releaseSize])
 
+  /* THE CASE ARRIVES FULL SCREEN (Jake). A case study is 1280×720 of
+     window on a desk that may be 1280 wide, and the reader has just spent
+     a loading bar and a licence check asking for it — so it opens
+     maximised rather than opening at its registry size for them to zoom.
+     `setZoomed` before `open` on purpose: the window mounts already
+     maximised and there is no frame where it paints at its own size and
+     snaps. The store forgets the flag when the window closes, so a case
+     reopened from a deep link still arrives as itself. */
   useEffect(() => {
     if (phase !== 'done') return
     const id = setTimeout(
       () => {
         sfx.open()
+        setZoomed(`case:${slug}`, true)
         open(`case:${slug}`)
         onDone()
       },
       reduced ? 0 : DONE_MS,
     )
     return () => clearTimeout(id)
-  }, [phase, reduced, open, slug, onDone])
+  }, [phase, reduced, open, setZoomed, slug, onDone])
 
   const dark = phase === 'license'
   const pct = phase === 'done' ? 100 : Math.round((Math.min(step, STEPS.length) / STEPS.length) * 90)

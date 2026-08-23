@@ -133,3 +133,180 @@
   margin: var(--spacing-component-lg) 0 0;
   text-align: center;
 }
+
+/* ---------- evidence — the visuals attached to a record ----------
+
+   Photos ON the paper, not printed into it: same figure/ground as the
+   records themselves. The pile's under-cards peek out tilted; the phone
+   is inverse-plate hardware like Studio's iPod, sized off one --ph-w. */
+
+.exhibits {
+  margin: 14px 0 4px;
+}
+
+.pile {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+
+.card {
+  position: absolute;
+  inset: 0;
+}
+
+.card[data-top='true'] {
+  cursor: pointer;
+}
+
+.card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: var(--border-width-subtle) solid var(--border);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-sticky);
+}
+
+.exhibitFoot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.exhibitCount {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-tracking);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.exhibitBtn {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  line-height: 1;
+  padding: 2px 9px 4px;
+  border: var(--border-width-subtle) solid var(--border);
+  background: var(--surface-raised);
+  color: var(--content);
+}
+
+.exhibitBtn:hover {
+  border-color: var(--content-muted);
+}
+
+/* the phone sits centered on the record, tag underneath */
+.deviceWell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 4px;
+}
+
+.phone {
+  --ph-w: min(216px, 100%);
+  --ph-bezel: calc(var(--ph-w) * 0.035);
+  --ph-r: calc(var(--ph-w) * 0.155);
+  position: relative;
+  width: var(--ph-w);
+  padding: var(--ph-bezel);
+  border-radius: var(--ph-r);
+  border: var(--border-width-default) solid
+    color-mix(in srgb, var(--content-inverse) 26%, var(--surface-inverse));
+  /* the same restrained vertical sheen as Studio's pod */
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--content-inverse) 7%, transparent) 0,
+      transparent 34%,
+      transparent 100%
+    ),
+    var(--surface-inverse);
+  box-shadow: var(--shadow-sticky);
+}
+
+.phoneScreen {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 640 / 1388;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--ph-r) - var(--ph-bezel));
+  background: var(--surface-inverse);
+}
+
+.phoneScreen video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.playCue {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding-left: 3px; /* optical centering of the glyph */
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface-inverse) 72%, transparent);
+  color: var(--content-inverse);
+  font-size: 15px;
+}
+
+/* the island is housing, not screen — it matches the body */
+.phoneIsland {
+  position: absolute;
+  top: calc(var(--ph-bezel) + var(--ph-w) * 0.028);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(var(--ph-w) * 0.3);
+  height: calc(var(--ph-w) * 0.082);
+  border-radius: 999px;
+  background: var(--surface-inverse);
+  border: var(--border-width-subtle) solid
+    color-mix(in srgb, var(--content-inverse) 12%, var(--surface-inverse));
+}
+
+.phoneKey {
+  position: absolute;
+  width: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--content-inverse) 22%, var(--surface-inverse));
+}
+
+.keyPower {
+  right: -4px;
+  top: 27%;
+  height: 12%;
+}
+
+.keyVolUp {
+  left: -4px;
+  top: 22%;
+  height: 8%;
+}
+
+.keyVolDown {
+  left: -4px;
+  top: 32%;
+  height: 8%;
+}
+
+.deviceTag {
+  font-family: var(--type-label-family);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-tracking);
+  text-transform: uppercase;
+  color: var(--content-muted);
+}

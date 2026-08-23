@@ -1,0 +1,40 @@
+{
+  "stamp": {
+    "fg": {
+      "$value": "{accent}",
+      "$type": "color"
+    },
+    "border-color": {
+      "$value": "{accent}",
+      "$type": "color"
+    },
+    "border-width": {
+      "$value": "{border-width.strong}",
+      "$type": "dimension"
+    },
+    "text": {
+      "$type": "typography",
+      "$value": "{typography.badge}"
+    },
+    "padding-y": {
+      "$value": "5px",
+      "$type": "dimension",
+      "$description": "OFF-GRID literal (spacing scale is base-4: 4/8/12/16/20/24/32/48). Extracted verbatim from the pre-token CSS for a zero-visual-change migration. Snap to {space.1} (4px) or {space.2} (8px) when a deliberate visual change is approved."
+    },
+    "padding-x": {
+      "$value": "10px",
+      "$type": "dimension",
+      "$description": "OFF-GRID literal. Snap to {space.2} (8px) or {space.3} (12px) when approved."
+    },
+    "pink": {
+      "fg": {
+        "$value": "{content}",
+        "$type": "color"
+      },
+      "border-color": {
+        "$value": "{accent-expressive}",
+        "$type": "color"
+      }
+    }
+  }
+}

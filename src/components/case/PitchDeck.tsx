@@ -64,7 +64,7 @@ function CapTicker({ text }: { text: string }) {
   )
 }
 
-export function PitchDeck({ fig, caption }: { fig: string; caption: string }) {
+export function PitchDeck({ tag, caption }: { tag?: string; caption: string }) {
   const [fine, setFine] = useState(false)
   const [on, setOn] = useState(0)
 
@@ -80,7 +80,7 @@ export function PitchDeck({ fig, caption }: { fig: string; caption: string }) {
     setOn((v) => Math.min(SLIDES.length - 1, Math.max(0, v + d)))
 
   return (
-    <Plate fig={fig} caption={caption} cap={<CapTicker text={SLIDES[on][3]} />}>
+    <Plate tag={tag} caption={caption} cap={<CapTicker text={SLIDES[on][3]} />}>
       <div className={styles.deck}>
         {fine ? (
           <div

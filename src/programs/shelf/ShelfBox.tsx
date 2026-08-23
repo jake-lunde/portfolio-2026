@@ -11,11 +11,27 @@ import type { CaseDef, CoverVariant } from '@/programs/projects/cases'
 import { useSettings } from '@/store/settings'
 import { Box3D } from './Box3D'
 import { CoverFilm } from './CoverFilm'
-import { InstallBar } from './InstallBar'
 import styles from './shelf.module.css'
 
-/* One box on the shelf. Back is the panel every 1992 box had — a thesis,
-   a review blurb, system requirements, and the button.
+/* One box on the shelf. Back is the panel every 1992 box had — an edition
+   line, a thesis, a data block on the foot, and the button.
+
+   PASS 12 IS JAKE'S FIGMA PASS ON ALL EIGHT FACES. The back stopped being a
+   stack and became two groups with the slack in the middle: edition, name and
+   thesis at the head, the ledger standing on the foot under a solid accent
+   rule. Three things went with the rewrite. The review blurb is off the panel
+   — two quoted registers (thesis and blurb) on a 246px board were one voice
+   too many. The shelf index is off the title, which now prints the name only.
+   And the progress meter is gone: an unshipped box printed a phase line, a
+   bar, a shrink-wrap hint and a button asking the reader to nudge Jake, which
+   is four registers spent apologising, where a carton would print COMING SOON
+   and stop. `progress` stays in cases.ts — it is what tells a shipped box
+   from an unshipped one — but the endpoint behind that button is gone (pass
+   13, Jake's ruling): the shelf was its only caller.
+
+   The FRONTS came back almost unchanged: figma, catalog and nocturne are
+   pixel-for-pixel what pass 11 shipped, and every edit landed on stripe (see
+   the note over `.vStripe` in the CSS).
 
    PASS 5 EMPTIED THAT PANEL OUT. It had grown four data rows, three
    screenshot thumbs and a version line under a thesis and a quote, which
@@ -77,17 +93,19 @@ import styles from './shelf.module.css'
    The feather is a `mask-image` on the plate that holds the art. Mask is a
    grouping property, exactly like filter: it flattens the element it sits
    on. Inside a face — a leaf of the 3D tree — that costs nothing. On an
-   ancestor of a face it would collapse the whole cuboid. Same law as the
-   registry's `noRecede` (the shell's unfocused `filter: opacity()`) and
-   medieval's #lunde-roughen: never a grouping property above a face.
+   ancestor of a face it would collapse the whole cuboid. Same law that
+   kept the shell's unfocused `filter: opacity()` off this program's
+   window for as long as it had one, and the same law as medieval's
+   #lunde-roughen: never a grouping property above a face.
 
-   Pass 3 took the writing off the box; pass 4 moved the handle below it. A
-   small tag hangs UNDER the box, outside the cuboid so it never turns with
-   it, and it is the accessible control: the aria-expanded / aria-controls
-   wiring lives there and focus returns to it. The front face is still a
-   button (the whole cover is a hit target, which is what a pointer expects
-   of a box you can pick up) but it is out of the tab order and carries no
-   state — one control announcing the flip, not two.
+   Pass 3 took the writing off the box; pass 4 moved the handle below it; a
+   small tag hung UNDER the box, outside the cuboid so it never turned with
+   it, and it was the accessible control. Jake has taken the chips off for
+   now (`flipTag`), so the announced control moved onto the COVER: same
+   aria-expanded / aria-controls pair, same focus home, on the thing the
+   reader was already reaching for. Exactly one control announces the flip
+   either way — the front face is a plain hit target with no tab stop
+   while the chip is drawn, and the chip's job in full while it isn't.
 
    useId is unsafe in programs (dynamic imports rehydrate into a reshaped
    tree), so ids derive from the slug — stable across SSR and client. */
@@ -131,29 +149,14 @@ const spoken = (s: string) => s.replace(/[←→]/g, '').trim()
 
 export function ShelfBox({
   c,
-  index,
-  count,
-  sent,
-  busy,
-  durable,
-  error,
   fine,
   revealed,
   overlayOpen,
   onReveal,
-  onNudge,
   onPlay,
+  flipTag = true,
 }: {
   c: CaseDef
-  index: number
-  count: number
-  sent: boolean
-  busy: boolean
-  durable: boolean
-  /** this box's own nudge came back with a refusal — printed under the
-      button that caused it, which is where pass 7 moved it from the shelf
-      footer it used to share with a hint nobody needed */
-  error: string | null
   /** hover-capable machine — measured once by the shelf */
   fine: boolean
   /** this box is the one whose tag is out */
@@ -161,8 +164,15 @@ export function ShelfBox({
   /** the launch layer is up, covering the shelf — see `leave` below */
   overlayOpen: boolean
   onReveal: (slug: string) => void
-  onNudge: (slug: string) => void
   onPlay: (slug: string, trigger: HTMLElement) => void
+  /** DRAW THE FLIP CHIP UNDER THE BOX, or don't (Jake, "lose the flip
+      buttons for now"). Off, the whole apparatus stays — the turn, the
+      back panel, the walk-away, the Escape rung — and the COVER becomes
+      the announced control that carries the tab stop and the
+      aria-expanded/aria-controls pair the chip used to. It has to go
+      somewhere: PLAY is printed on the back panel, so a box with no way
+      to turn from the keyboard is a case study with no way in. */
+  flipTag?: boolean
 }) {
   const reduced = useReducedMotion()
   const skin = useSettings((s) => s.skin)
@@ -171,6 +181,7 @@ export function ShelfBox({
   /** the key art did not load — the composed number takes the plate back */
   const [artFailed, setArtFailed] = useState(false)
   const tag = useRef<HTMLButtonElement>(null)
+  const front = useRef<HTMLButtonElement>(null)
   const back = useRef<HTMLDivElement>(null)
   const slot = useRef<HTMLDivElement>(null)
   /** the value the focus effect last acted on — see the note there */
@@ -178,9 +189,14 @@ export function ShelfBox({
   /** this unflip was the pointer leaving, not a control being pressed */
   const walkedAway = useRef(false)
 
+  /** whichever control announces the flip — the chip under the box, or
+      the cover itself when the chip is off (see `flipTag`). The unflip
+      focus effect and every "put focus back" path ask for it by job
+      rather than by name, so neither has to know which one is drawn. */
+  const handle = flipTag ? tag : front
+
   const backId = `shelf-${c.slug}-back`
   const box = c.box
-  const pct = c.progress?.pct ?? 0
   const shipped = c.status === 'live' && Boolean(c.component)
 
   /* The cover film mounts on the client only. The shelf window is on screen
@@ -237,7 +253,7 @@ export function ShelfBox({
       const active = document.activeElement
       if (active instanceof HTMLElement && slot.current?.contains(active)) active.blur()
     } else {
-      tag.current?.focus({ preventScroll: true })
+      handle.current?.focus({ preventScroll: true })
     }
   }, [flipped])
 
@@ -299,6 +315,39 @@ export function ShelfBox({
     turn(false, true)
   }
 
+  /* A FINGER HAS NOWHERE TO WALK AWAY TO (Jake's ruling). The pointer
+     rule above is the mouse's way back: leave the slot and the box turns
+     over. Touch has no leave — the pointer stops existing at the end of
+     the tap — and with the flip chip off there is no visible control to
+     press either, so a turned box on a phone was a box the reader was
+     stuck behind. So while a box is turned on a coarse pointer, the next
+     tap ANYWHERE but the CTA turns it back: the panel itself, the desk,
+     or another box, which then turns over as usual because its own click
+     lands after this one.
+
+     `pointerdown`, captured on the document, is what makes that last case
+     one gesture instead of two — it runs before the click that flips the
+     neighbour, so the two never fight over the same tap. The CTA is the
+     one exemption (PLAY is the reason the panel exists), and the overlay
+     is the other: while it is up the tap belongs to the dialog, and
+     turning the box behind it would land a cancel on a cover.
+
+     Quiet, and via `walkedAway`: the reader tapped somewhere else, so
+     nothing here was pressed and focus has no business jumping back onto
+     the cover. */
+  useEffect(() => {
+    if (flipTag || fine || !flipped || overlayOpen) return
+    const away = (e: PointerEvent) => {
+      const t = e.target
+      if (t instanceof Element && t.closest('[data-shelf-cta]')) return
+      walkedAway.current = true
+      turn(false, true)
+    }
+    document.addEventListener('pointerdown', away, true)
+    return () => document.removeEventListener('pointerdown', away, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flipTag, fine, flipped, overlayOpen])
+
   const tagKey = flipped ? 'shelf.tag.front' : 'shelf.tag.back'
 
   /* The tag is OUT when you have reached for this box, and it stays out
@@ -345,11 +394,21 @@ export function ShelfBox({
         fine={fine}
         front={
           <motion.button
+            ref={front}
             type="button"
             className={`${styles.face} ${styles.frontFace} ${cover.className}`}
-            // the cover is a hit target, not a second announced control:
-            // the tag owns the state and the tab stop
-            tabIndex={-1}
+            /* WITH THE CHIP DRAWN the cover is a hit target and nothing
+               else: the tag owns the state and the tab stop, and a second
+               announced control for one flip is two labels on one object.
+               With the chip off (Jake) this IS the control — tab stop,
+               state and name — and the name is stated rather than
+               computed, because the cover's own text is a title, an
+               eyebrow and a tagline, which read as three labels in a row
+               to anyone listening instead of looking. */
+            tabIndex={flipTag ? -1 : undefined}
+            aria-expanded={flipTag ? undefined : flipped}
+            aria-controls={flipTag ? undefined : backId}
+            aria-label={flipTag ? undefined : `${c.name} — ${spoken(t('shelf.tag.back', skin))}`}
             inert={flipped}
             onClick={() => turn(true)}
             initial={faceFade(false)}
@@ -420,10 +479,16 @@ export function ShelfBox({
                 parameters, so it can never come adrift of it. */}
             {cover.frame && <span className={styles.frame} aria-hidden="true" />}
 
-            {/* the cartridge box's rainbow rules, sitting flush on the top
-                edge of the picture — the one place on this shelf where ink is
-                a literal rather than a token (see shelf.module.css) */}
+            {/* the cartridge box's rainbow rules, printed down the binding
+                edge — the one place on this shelf where ink is a literal
+                rather than a token (see shelf.module.css) */}
             {cover.band && <span className={styles.band} aria-hidden="true" />}
+
+            {/* the starburst seal, over the corner of the picture. It is a
+                shape and a promise together, so it is drawn by the cover that
+                has words for it and by nothing else — an empty seal is a
+                sticker with no offer on it. */}
+            {box?.burst && <span className={styles.burst}>{box.burst}</span>}
 
             {/* the airbrush — Jake's Figma "Ellipse 2", a conic sweep blurred
                 over the art at soft-light. Every 90s cover had one; pass 6
@@ -461,8 +526,8 @@ export function ShelfBox({
                 in a strip beneath it, which is the whole difference between a
                 box and a card with a caption. */}
             <span className={styles.type}>
-              <span className={styles.frontEyebrow}>{c.org}</span>
-              <span className={styles.title}>{c.name}</span>
+              <span className={styles.frontEyebrow}>{box?.coverEyebrow ?? c.org}</span>
+              <span className={styles.title}>{box?.coverTitle ?? c.name}</span>
               {box?.tagline && <span className={styles.tagline}>{box.tagline}</span>}
             </span>
 
@@ -475,6 +540,11 @@ export function ShelfBox({
                 {cover.foot === 'org' ? c.org : c.year}
               </span>
             )}
+
+            {/* the smallest print on the box, along the bottom edge — the age
+                rating, the count, the line a carton carries because cartons
+                carry one. Ordered last so it sits over everything else. */}
+            {box?.footnote && <span className={styles.footnote}>{box.footnote}</span>}
           </motion.button>
         }
         back={
@@ -483,114 +553,110 @@ export function ShelfBox({
             id={backId}
             className={`${styles.face} ${styles.backFace}`}
             tabIndex={-1}
+            /* THE NAME LIVES WHERE THE READER IS. The cover carries it
+               while the cover is up, and the cover is `inert` the moment
+               the box turns — so a screen reader landing on this panel
+               would otherwise be told nothing at all, while the only
+               labelled thing in the box sat behind it announcing a FLIP
+               nobody can reach. A named group is the cheapest correct
+               wiring: the panel says which box it is on arrival, and the
+               expanded/collapsed state stays on the control that owns it. */
+            role="group"
+            aria-label={c.name}
             inert={!flipped}
             initial={faceFade(true)}
             animate={faceFade(true)}
             transition={{ duration: reduced ? 0.14 : 0 }}
           >
+            {/* TWO GROUPS, ONE GAP (pass 12). The panel used to be a single
+                top-packed stack, which left whatever room was going over as
+                a ragged tail under the last row. Now the prose sits at the
+                head, the ledger stands on the foot, and the slack between
+                them is the panel's only whitespace — the same way a real
+                carton prints its blurb at the top and its data block down
+                by the barcode. */}
             <div className={styles.backInner}>
-              <p className={styles.backTitle}>
-                <span className={styles.backNo}>{c.no}</span> {c.name}
-              </p>
+              <div className={styles.backLead}>
+                {/* the version, rehoused. It used to be printed on the front,
+                    under the name — pass 4's box art has no room for a serial
+                    number and no reason to carry one, so it moved here, above
+                    the title, where a box prints its edition. */}
+                <p className={styles.backVersion}>
+                  <Copy k="shelf.versionLabel" as="span" /> {version(c.year)}
+                </p>
 
-              {/* the version, rehoused. It used to be printed on the front,
-                  under the name — pass 4's box art has no room for a serial
-                  number and no reason to carry one, so it moved here, where
-                  the rest of the box's small print already lives. */}
-              <p className={styles.backVersion}>
-                <Copy k="shelf.versionLabel" as="span" /> {version(c.year)}
-              </p>
+                {/* the name alone. The shelf index used to be printed in
+                    front of it in the expressive ink, which was a second
+                    label for a box that is already the third one along. */}
+                <p className={styles.backTitle}>{c.name}</p>
 
-              {box?.thesis && <p className={styles.thesis}>{box.thesis}</p>}
+                {box?.thesis && <p className={styles.thesis}>{box.thesis}</p>}
+              </div>
 
               {box?.requirements?.length ? (
-                <>
-                  <Copy k="shelf.requirements" as="h4" className={styles.backHead} />
+                <div className={styles.backLedger}>
+                  {/* SYSTEM REQUIREMENTS is what a box that shipped prints;
+                      INCLUDED is what a box that hasn't prints, because a
+                      carton with nothing to require still lists what is in
+                      it. Same block, two headings. */}
+                  <Copy
+                    k={shipped ? 'shelf.requirements' : 'shelf.included'}
+                    as="h4"
+                    className={styles.backHead}
+                  />
                   {/* Each row is its own element (dl > div > dt+dd is valid
                       HTML and keeps the description-list semantics). It has
                       to be: a shared grid column is sized to the WIDEST
                       label in the set, so one long row used to eat width
                       from every other row and the values wrapped. Row by
                       row, each line only has to clear the panel on its own
-                      — which is what makes the one-line rule keepable. */}
+                      — which is what makes the one-line rule keepable.
+
+                      A row with no value is a contents line rather than a
+                      ledger line: the label takes the width and the panel
+                      numbers it in CSS (a counter, so the numbering can
+                      never disagree with the list). */}
                   <dl className={styles.reqs}>
                     {box.requirements.map((r) => (
-                      <div key={r.label}>
+                      <div key={r.label} className={r.value ? undefined : styles.listed}>
                         <dt>{r.label}</dt>
-                        <dd>{r.value}</dd>
+                        {r.value && <dd>{r.value}</dd>}
                       </div>
                     ))}
                   </dl>
-                </>
-              ) : null}
-
-              {box?.blurb && (
-                <blockquote className={styles.blurb}>
-                  <p>&ldquo;{box.blurb.quote}&rdquo;</p>
-                  <footer>{box.blurb.source}</footer>
-                </blockquote>
-              )}
-
-              {/* an unshipped box has no hero act to offer, so the nudge
-                  stays down here in the body with the thing it's about — the
-                  progress meter — rather than pretending to be PLAY */}
-              {!shipped && (
-                <div className={styles.meter}>
-                  <p className={styles.phase}>{c.progress?.phase}</p>
-                  <InstallBar
-                    pct={pct}
-                    role="meter"
-                    label={`${c.name}: ${pct}% — ${c.progress?.phase ?? ''}`}
-                    delay={0.05 * (index + 1)}
-                  />
-                  <Copy k="shelf.wrappedHint" as="p" className={styles.wrappedHint} />
-                  <div className={styles.nudgeRow}>
-                    <button
-                      type="button"
-                      className={styles.nudgeBtn}
-                      onClick={() => onNudge(c.slug)}
-                      disabled={!durable || sent || busy}
-                      aria-label={`Encourage Jake to work on ${c.name}`}
-                    >
-                      {sent ? (
-                        <Copy k="progress.nudged" as="span" />
-                      ) : (
-                        <Copy k="progress.nudge" as="span" />
-                      )}
-                    </button>
-                    {count > 0 && (
-                      <span className={styles.count} aria-label={`${count} nudges so far`}>
-                        · {count}
-                      </span>
-                    )}
-                  </div>
-                  {/* the refusal, printed with the button that earned it.
-                      Pass 7 deleted the shelf footer this used to live in —
-                      an error about ONE box announced under FOUR of them was
-                      the whole reason it needed a footer at all. */}
-                  {error && (
-                    <p className={styles.nudgeError} role="alert">
-                      {error}
-                    </p>
-                  )}
                 </div>
-              )}
+              ) : null}
             </div>
 
-            {/* PLAY is the whole reason the box turns over: full width, its
-                own register at the foot of the panel, nothing sharing the
-                row with it — and now nothing beneath it either. */}
-            {shipped && (
-              <div className={styles.heroAction}>
+            {/* THE FOOT IS ALWAYS A BUTTON-SHAPED THING (pass 12). PLAY is
+                the whole reason a shipped box turns over: full width, its own
+                register, nothing sharing the row. An unshipped one prints the
+                same register set to COMING SOON and disabled — a box on the
+                shelf with its foot cut off read as a panel that had failed to
+                load rather than as a box that isn't out yet. */}
+            <div className={styles.heroAction}>
+              {shipped ? (
                 <button
                   type="button"
                   className={styles.playBtn}
+                  /* the one thing a tap on a turned box does NOT turn it
+                     back for — see the pointerdown effect above */
+                  data-shelf-cta=""
                   onClick={(e) => onPlay(c.slug, e.currentTarget)}
                 >
                   <Copy k="shelf.play" as="span" />
                 </button>
-              </div>
-            )}
+              ) : (
+                <button
+                  type="button"
+                  className={`${styles.playBtn} ${styles.comingSoon}`}
+                  data-shelf-cta=""
+                  disabled
+                >
+                  <Copy k="shelf.comingSoon" as="span" />
+                </button>
+              )}
+            </div>
           </motion.div>
         }
       />
@@ -611,6 +677,7 @@ export function ShelfBox({
           purpose: focus reveals it on the way in, which is the standard
           skip-link bargain and strictly better than a control that keyboard
           users cannot reach at all. */}
+      {flipTag && (
       <motion.div
         className={styles.tagRow}
         initial={false}
@@ -631,6 +698,7 @@ export function ShelfBox({
           <Copy k={tagKey} as="span" />
         </button>
       </motion.div>
+      )}
     </div>
   )
 }

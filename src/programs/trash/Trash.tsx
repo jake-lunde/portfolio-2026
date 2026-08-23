@@ -1,14 +1,21 @@
 import { Stamp } from '@/components/primitives/Stamp'
 import { CopyText as Copy } from '@/content/CopyText'
+import ExhibitStack from './ExhibitStack'
+import RecoveredPhone from './RecoveredPhone'
 import styles from './trash.module.css'
 
 /* The Trash — open. Killed ideas, kept on file: what it was, why it died,
    what it taught. The reasons are the point — judgment about what NOT to
    build is the argument this window makes.
 
-   Facts cross-checked against portfolio-tracker.md (Grows With You) and
-   the team-library Figma (the Assistants — node 442:338964); Jake
-   approved the copy to ship (s31).
+   Each record carries its evidence (s95): Levels gets the presentation
+   deck as a pile of exhibit photos, the Assistants gets the recording
+   still running on a phone. Both sit between the memo and the findings.
+
+   Facts cross-checked against portfolio-tracker.md (Levels — renamed
+   from "Grows With You", Jake's call, s95) and the team-library Figma
+   (the Assistants — node 442:338964); Jake approved the copy to ship
+   (s31).
    PARKED: a third record, "The Installer" (the site's own killed
    progress-bar metaphor), rides with the unshipped leaf patch — restore
    it from branch leaf-patch (8934b21) when the caterpillar ships.
@@ -24,12 +31,13 @@ type KilledIdea = {
   cause: string
   lesson: string
   tone: 'paper' | 'pink'
+  media?: 'exhibits' | 'device'
 }
 
 const IDEAS: KilledIdea[] = [
   {
     no: 'TAG-01',
-    name: 'Grows With You',
+    name: 'Levels',
     origin: 'GREENLIGHT INVEST · 2024–25',
     memo: 'Read the whole picture of a young investor — their experience, their spending, their family’s financial context — and level the entire interface with them: language, data density, complexity, all rising as the kid grows into it. A real curriculum, not a settings toggle.',
     cause:
@@ -37,6 +45,7 @@ const IDEAS: KilledIdea[] = [
     lesson:
       'Shipping the simple thing that works beats shipping the ambitious thing that doesn’t. Knowing which is which is most of the job.',
     tone: 'pink',
+    media: 'exhibits',
   },
   {
     no: 'TAG-02',
@@ -48,6 +57,7 @@ const IDEAS: KilledIdea[] = [
     lesson:
       'A character is a promise. Don’t make five promises you can only keep one of.',
     tone: 'paper',
+    media: 'device',
   },
 ]
 
@@ -76,6 +86,8 @@ export default function Trash() {
             </header>
             <p className={styles.origin}>{idea.origin}</p>
             <p className={styles.memo}>{idea.memo}</p>
+            {idea.media === 'exhibits' && <ExhibitStack />}
+            {idea.media === 'device' && <RecoveredPhone />}
             <div className={styles.field}>
               <Copy k="trash.field.cause" as="span" className={styles.fieldLabel} />
               <p className={styles.fieldText}>{idea.cause}</p>

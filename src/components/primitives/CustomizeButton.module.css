@@ -127,9 +127,9 @@
   padding: var(--button-sm-padding-y) var(--button-sm-padding-x);
   border: var(--border-width-subtle) solid var(--content);
   font-family: var(--type-label-family);
-  font-size: var(--button-sm-font-size);
-  font-weight: var(--button-weight);
-  letter-spacing: var(--button-sm-tracking);
+  font-size: var(--button-sm-text-font-size);
+  font-weight: var(--button-sm-text-font-weight);
+  letter-spacing: var(--button-sm-text-letter-spacing);
   text-transform: uppercase;
   line-height: var(--leading-none);
 }

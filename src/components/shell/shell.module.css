@@ -10,30 +10,34 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-component-lg);
-  padding: 0 14px;
-  background: var(--surface);
-  border-bottom: var(--border-width-default) solid var(--content);
-  font-family: var(--mono);
-  font-size: var(--text-ui);
-  letter-spacing: 0.12em;
+  gap: var(--menubar-gap);
+  padding: 0 var(--menubar-padding-x);
+  background: var(--menubar-bg);
+  border-bottom: var(--menubar-border-width) solid var(--menubar-border-color);
+  font-family: var(--menubar-text-font-family);
+  font-size: var(--menubar-text-font-size);
+  font-weight: var(--menubar-text-font-weight);
+  letter-spacing: var(--menubar-text-letter-spacing);
+  line-height: var(--menubar-text-line-height);
 }
 
 .wordmark {
-  font-family: var(--display);
-  font-size: var(--type-body-sm-size); /* 13px exact — display family is an intentional divergence from body-sm's sans */
-  font-weight: var(--weight-regular);
-  letter-spacing: 0.08em;
+  font-family: var(--menubar-wordmark-text-font-family);
+  font-size: var(--menubar-wordmark-text-font-size);
+  font-weight: var(--menubar-wordmark-text-font-weight);
+  letter-spacing: var(--menubar-wordmark-text-letter-spacing);
+  line-height: var(--menubar-wordmark-text-line-height);
   text-transform: uppercase;
 }
 
 .wordmark span {
-  font-family: var(--mono); /* the version string reads as a machine stamp against the display wordmark */
-  font-size: var(--text-ui);
+  font-family: var(--menubar-wordmark-version-text-font-family); /* the version string reads as a machine stamp against the display wordmark */
+  font-size: var(--menubar-wordmark-version-text-font-size);
   color: var(--content-muted);
-  font-weight: var(--weight-regular);
-  letter-spacing: 0.12em;
-  margin-left: 10px;
+  font-weight: var(--menubar-wordmark-version-text-font-weight);
+  letter-spacing: var(--menubar-wordmark-version-text-letter-spacing);
+  line-height: var(--menubar-wordmark-version-text-line-height);
+  margin-left: var(--menubar-wordmark-version-margin-left);
 }
 
 .menuRight {
@@ -43,12 +47,14 @@
 }
 
 .menuBtn {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.14em;
+  font-family: var(--menubar-menu-btn-text-font-family);
+  font-size: var(--menubar-menu-btn-text-font-size);
+  font-weight: var(--menubar-menu-btn-text-font-weight);
+  letter-spacing: var(--menubar-menu-btn-text-letter-spacing);
+  line-height: var(--menubar-menu-btn-text-line-height);
   text-transform: uppercase;
-  padding: 4px 8px;
-  border: var(--border-width-subtle) solid transparent;
+  padding: var(--menubar-menu-btn-padding-y) var(--menubar-menu-btn-padding-x);
+  border: var(--menubar-menu-btn-border-width) solid transparent;
   color: var(--content);
   /* a control's label never breaks. The bar is one line and at 360 the
      right cluster sits at zero slack, so a shrink of two pixels once
@@ -72,7 +78,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3px;
+  padding: var(--menubar-menu-glyph-btn-padding);
 }
 
 .menuGlyphBtn svg {
@@ -160,8 +166,10 @@
    between them, and the desktop has already shed its widgets down there
    anyway. No toggle, no way in — and InspectShell watches the same
    width and stands the mode down if it is already up. The whole switch
-   goes, not just the chip, so the bar's gap closes with it. */
-@media (max-width: 900px) {
+   goes, not just the chip, so the bar's gap closes with it. A container
+   query like the bar's other small-screen rules (s111), so the MOBILE
+   bench in STYLER drops it the way a phone does. */
+@container viewport (max-width: 900px) {
   .inspectSwitch {
     display: none;
   }
@@ -479,9 +487,23 @@
   display: none;
 }
 
-/* The wanderer's walk is plotted against window.innerWidth, so it would
-   stroll straight under the docked panels. It sits this one out. */
-:global(body[data-inspectmode='on']) .wanderer {
+/* ONE EXCEPTION, and it is the same bar. STYLER's stage puts the real
+   MenuBar on a bench to be restyled (components/inspect/stageSpecs.tsx), and
+   the rule above would hide the sample along with the desktop's own copy —
+   the stage only runs while the tool is up, so it matches every time. Same
+   specificity as the rule it answers, declared after it, which is how it
+   wins without an !important. The bench is a marked wrapper rather than a
+   change to MenuBar: nothing in that file should have to know a stage
+   exists. */
+:global([data-styler-bench]) .menubar {
+  display: flex;
+}
+
+/* INSPECT.MODE compresses the desk between two docked panels, and a
+   hatch measured against the old desk would open under one of them. The
+   crew sits this mode out. */
+:global(body[data-inspectmode='on']) .burrow,
+:global(body[data-inspectmode='on']) .burrowVoice {
   display: none;
 }
 
@@ -508,24 +530,48 @@
   display: grid;
   /* row flow so the top row is literal: README · GUESTBOOK · MACHINE */
   grid-auto-flow: row;
-  grid-template-columns: repeat(3, 88px);
-  gap: 18px 10px;
+  grid-template-columns: repeat(3, var(--desktop-icons-cell-width));
+  gap: var(--desktop-icons-gap-row) var(--desktop-icons-gap-column);
 }
 
 .iconBtn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
-  width: 88px;
-  padding: 10px 4px 8px;
+  gap: var(--desktop-icons-icon-btn-gap);
+  width: var(--desktop-icons-cell-width);
+  padding: var(--desktop-icons-icon-btn-padding-top) var(--desktop-icons-icon-btn-padding-x)
+    var(--desktop-icons-icon-btn-padding-bottom);
   color: var(--content);
-  border: var(--border-width-subtle) solid transparent;
+  border: var(--desktop-icons-border-width) solid transparent;
 }
 
-.iconBtn:hover {
-  border-color: var(--border);
-  background: color-mix(in srgb, var(--surface-raised) 60%, transparent);
+/* ---- HOVER, AND THE ONE PLACE IT CAN BE HELD DOWN ----
+
+   STYLER's stage offers a STATE modifier (DEFAULT · HOVER), because half of
+   this component's rows only paint under the pointer: rebind
+   --desktop-icons-hover-bg with nothing hovered and the bench sits there
+   telling you nothing changed. There is no way to hover a sample on a
+   visitor's behalf, so the bench declares the state instead — it writes
+   `data-styler-state="hover"` on itself (inspect/StylerStage.tsx) and every
+   pilot hover rule answers to that as well as to the pointer.
+
+   `:is(:hover, [data-styler-state='hover'] *)` rather than a second rule,
+   for two reasons. It keeps ONE declaration of what hover looks like, which
+   is the whole reason the forced state is trustworthy — a copy would drift.
+   And `:is()` takes the specificity of its heaviest branch, which here is
+   the same (0,1,0) `:hover` already had, so nothing in the cascade below
+   these rules moved.
+
+   Only the components STYLER puts on a bench carry this, and only the rules
+   their own token rows name: desktop-icons' hover pair here, window's three
+   --window-ctrl-hover-* below, and the button's two tones
+   (primitives/primitives.module.css). The menu bar's .menuBtn:hover is left
+   alone on purpose — menubar declares no hover token, so the stage never
+   offers it the state and a forced selector there would be dead code. */
+.iconBtn:is(:hover, [data-styler-state='hover'] *) {
+  border-color: var(--desktop-icons-hover-border-color);
+  background: color-mix(in srgb, var(--desktop-icons-hover-bg) 60%, transparent);
 }
 
 .iconBtn:active svg {
@@ -533,9 +579,11 @@
 }
 
 .iconLabel {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.1em;
+  font-family: var(--desktop-icons-label-text-font-family);
+  font-size: var(--desktop-icons-label-text-font-size);
+  font-weight: var(--desktop-icons-label-text-font-weight);
+  letter-spacing: var(--desktop-icons-label-text-letter-spacing);
+  line-height: var(--desktop-icons-label-text-line-height);
   text-transform: uppercase;
 }
 
@@ -864,9 +912,11 @@
    desktop element (src/app/not-found.tsx mounts it as a sibling of the
    shell), so `fixed` rather than the widgets' `absolute`; the z sits above
    the windows and below the menubar and ticker, which own the top strip.
-   Bottom-left, but lifted: the wanderer (AmbientAgents) parks its avatar
-   in that corner and its intro card tops out near 91px, so the notice
-   sits on a 104px floor and clears it. */
+   Bottom-left, but lifted: this notice is furniture like everything else
+   on the desk, and the ambient agents will not open a hatch on top of
+   furniture — they probe the point first (AmbientAgents.tsx). The 104px
+   floor stays because their intro card tops out near 91px and nothing is
+   won by crowding it. */
 .notFound {
   position: fixed;
   left: 20px;
@@ -938,21 +988,99 @@
 
 /* ================= AMBIENT AGENTS ================= */
 
-.wanderer {
+.burrow {
+  /* a zero-size anchor pinned to the centre of the hatch: everything
+     below hangs off that one point, so placing a unit is two numbers */
   position: absolute;
-  left: 0;
-  bottom: 6px;
+  width: 0;
+  height: 0;
   z-index: 3;
   pointer-events: none;
+}
+
+/* the same anchor for the voice alone — fixed, in viewport coords, over
+   the windows (10) and under the bar chrome (4990+); see THE VOICE in
+   AmbientAgents.tsx */
+.burrowVoice {
+  position: fixed;
+  width: 0;
+  height: 0;
+  z-index: 4900;
+  pointer-events: none;
+}
+
+/* THE HATCH — an ellipse of the dark under the desk. `--surface-inverse`
+   is the one role in this token set that is dark in every skin and both
+   modes (classic light #131811, classic dark #090c0a, medieval #17110b),
+   which is exactly what a hole needs ON A LIGHT DESK: ink would have
+   inverted with the theme and painted a glowing saucer on the dark desk,
+   with the unit — also ink — dissolving into it. (Hatching was tried
+   first, from the resize grip's vocabulary. At 48×14 a hatched ellipse
+   reads as a striped saucer.) Dark mode inverts this fill below, rather
+   than keeping it — see that rule for why. */
+.hole {
+  position: absolute;
+  left: -24px;
+  top: -7px;
+  width: 48px;
+  height: 14px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--surface-inverse);
+  opacity: 0.92;
+}
+
+/* DARK MODE INVERTS TO PAPER (Jake). `--surface-inverse` is near-black in
+   every mode, so on a dark desk it painted a hole that was only a shade
+   off the surface it sat in — worth a border to even read as a hole at
+   all. Swapping the fill to `--content-inverse` (the light/paper role
+   dark mode still carries — semantically `color.cream`, the same family
+   as light mode's own `--surface`) makes the hole punch light-through-dark
+   the way it punches dark-through-light in the day skin: a hole is a gap
+   in the desk, not a shadow under it, and paper reads as a gap against a
+   dark desk the way ink reads as one against a light desk. That contrast
+   is its own edge, so the border this used to need is gone with it. */
+[data-theme='dark'] .hole {
+  background: var(--content-inverse);
+  opacity: 1;
+}
+
+/* THE SHAFT. Its bottom edge is the hatch's waist: the climb is one
+   translate against a clip, no masks and no reflow.
+
+   THE SPRITE HANGS NOTHING PAST IT, and that is measured rather than
+   taste. `mask-size: contain` centres the art in a 34px box, and the two
+   casts are drawn differently — the classic shapes leave 4–5px of empty
+   box under the ink, the medieval cuts leave zero (checked, all twelve).
+   Any hang at all therefore slices the medieval units while they are
+   standing on a desk with no hole under them, which reads as a bug rather
+   than as depth. So the box bottom IS the waist: nothing is ever cut
+   except during the climb and the drop, which is the only time there is a
+   hole to justify it. */
+.riser {
+  position: absolute;
+  left: -17px;
+  bottom: 0;
+  width: 34px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.rider {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 34px;
+  height: 34px;
   will-change: transform;
 }
 
-.wandererAvatar {
+.agentAvatar {
   display: block;
   width: 34px;
   height: 34px;
   background-color: var(--content);
-  opacity: 0.8;
+  opacity: 0.85;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: contain;
@@ -960,12 +1088,14 @@
   animation: wanderBob 0.8s ease-in-out infinite;
 }
 
-.wandererAvatar[data-inspecting] {
+/* mid-sentence — the same wobble the walker used to do while inspecting
+   something, reused for talking, which is what they do now */
+.agentAvatar[data-talking] {
   animation: wanderInspect 1.4s ease-in-out infinite;
   opacity: 1;
 }
 
-.wandererAvatar[data-fleeing] {
+.agentAvatar[data-fleeing] {
   background-color: var(--accent-expressive);
   animation: wanderFlee 0.22s ease-in-out infinite;
   opacity: 1;
@@ -981,7 +1111,7 @@
   }
 }
 
-.wandererAvatar[data-jumping] {
+.agentAvatar[data-jumping] {
   background-color: var(--accent-expressive);
   animation: wanderJump 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) 1;
   opacity: 1;
@@ -1007,7 +1137,7 @@
 
 .bubble {
   position: absolute;
-  bottom: 40px;
+  bottom: 34px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--surface);
@@ -1025,15 +1155,28 @@
   border-color: var(--border);
 }
 
+/* a hatch can open near a wing, where a centred bubble runs off the desk
+   — same pinning the intro card has always done */
+.bubble[data-align='left'] {
+  left: -20px;
+  transform: none;
+}
+
+.bubble[data-align='right'] {
+  left: auto;
+  right: -20px;
+  transform: none;
+}
+
 /* ---- first contact ---- */
 /* A speech bubble can hold a joke; an introduction needs three lines.
    Same print-shadow housing, wider, and it stays put while the unit
-   finishes talking. Decorative like everything else on the wanderer —
-   the same facts are text inside COMMAND.CTR. */
+   finishes talking. Decorative like everything else the crew does — the
+   same facts are text inside COMMAND.CTR. */
 
 .introCard {
   position: absolute;
-  bottom: 42px;
+  bottom: 36px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -1053,13 +1196,13 @@
 
 /* near a wing there is no room to centre — pin to the edge instead */
 .introCard[data-align='left'] {
-  left: 0;
+  left: -26px;
   transform: none;
 }
 
 .introCard[data-align='right'] {
   left: auto;
-  right: 0;
+  right: -26px;
   transform: none;
 }
 
@@ -1142,8 +1285,12 @@
   white-space: nowrap;
 }
 
+/* must match --crew-desktop-min (globals.css) — AmbientAgents.tsx reads
+   that property instead of hand-copying this number; this literal is the
+   one place a media query can't be spared from spelling it out again */
 @media (max-width: 900px) {
-  .wanderer,
+  .burrow,
+  .burrowVoice,
   .dispatchFlash {
     display: none;
   }
@@ -1155,8 +1302,8 @@
   position: absolute;
   display: flex;
   flex-direction: column;
-  background: var(--surface-raised);
-  border: var(--border-width-default) solid var(--content);
+  background: var(--window-fill);
+  border: var(--window-border-width) solid var(--window-stroke);
   box-shadow: 6px 6px 0 rgba(23, 21, 13, 0.14);
   min-width: 280px;
   max-width: calc(100% - 24px);
@@ -1164,7 +1311,7 @@
 }
 
 [data-theme='dark'] .window {
-  border-color: var(--border);
+  --window-stroke: var(--border);
   box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
 }
 
@@ -1183,10 +1330,10 @@
 .titlebar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 10px;
-  border-bottom: var(--border-width-default) solid var(--content);
-  background: var(--surface);
+  gap: var(--window-titlebar-gap);
+  padding: var(--window-titlebar-padding-y) var(--window-titlebar-padding-x);
+  border-bottom: var(--window-titlebar-border-width) solid var(--window-titlebar-border-color);
+  background: var(--window-titlebar-fill);
   cursor: grab;
   user-select: none;
   touch-action: none;
@@ -1198,28 +1345,28 @@
 }
 
 [data-theme='dark'] .titlebar {
-  border-bottom-color: var(--border);
+  --window-titlebar-border-color: var(--border);
 }
 
 /* active window: blue system chrome */
 .windowActive .titlebar {
-  background: var(--accent);
-  color: #f4f1e6;
-  border-bottom-color: var(--content);
+  background: var(--window-titlebar-active-bg);
+  color: var(--window-titlebar-active-fg);
+  border-bottom-color: var(--window-titlebar-active-border-color);
 }
 
 [data-theme='dark'] .windowActive .titlebar {
-  color: #0d100c;
+  --window-titlebar-active-fg: #0d100c;
 }
 
 .titleControls {
   display: flex;
-  gap: 6px;
+  gap: var(--window-title-controls-gap);
 }
 
 .ctrl {
-  width: 13px;
-  height: 13px;
+  width: var(--window-ctrl-size);
+  height: var(--window-ctrl-size);
   border: var(--border-width-default) solid currentColor;
   display: grid;
   place-items: center;
@@ -1228,17 +1375,21 @@
   color: inherit;
 }
 
-.ctrl:hover {
-  background: var(--accent-expressive);
-  color: #17150d;
-  border-color: #17150d;
+/* the pointer, or the stage holding the state down for you — see the note
+   on .iconBtn above for why the second branch is inside :is() rather than
+   in a rule of its own */
+.ctrl:is(:hover, [data-styler-state='hover'] *) {
+  background: var(--window-ctrl-hover-bg);
+  color: var(--window-ctrl-hover-fg);
+  border-color: var(--window-ctrl-hover-border-color);
 }
 
 .title {
-  font-family: var(--mono);
-  font-size: var(--text-ui);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.14em;
+  font-family: var(--window-title-text-font-family);
+  font-size: var(--window-title-text-font-size);
+  font-weight: var(--window-title-text-font-weight);
+  letter-spacing: var(--window-title-text-letter-spacing);
+  line-height: var(--window-title-text-line-height);
   text-transform: uppercase;
   flex: 1;
   text-align: center;
@@ -1248,9 +1399,11 @@
 }
 
 .titleMeta {
-  font-family: var(--mono);
-  font-size: var(--text-caption);
-  letter-spacing: 0.14em;
+  font-family: var(--window-title-meta-text-font-family);
+  font-size: var(--window-title-meta-text-font-size);
+  font-weight: var(--window-title-meta-text-font-weight);
+  letter-spacing: var(--window-title-meta-text-letter-spacing);
+  line-height: var(--window-title-meta-text-line-height);
   opacity: 0.6;
 }
 
@@ -1265,9 +1418,11 @@
 }
 
 .explainerBtn {
-  font-family: var(--mono);
-  font-size: var(--text-caption);
-  letter-spacing: var(--tracking-14);
+  font-family: var(--window-explainer-btn-text-font-family);
+  font-size: var(--window-explainer-btn-text-font-size);
+  font-weight: var(--window-explainer-btn-text-font-weight);
+  letter-spacing: var(--window-explainer-btn-text-letter-spacing);
+  line-height: var(--window-explainer-btn-text-line-height);
   text-transform: uppercase;
   white-space: nowrap;
   /* rides the titlebar's own ink: content when idle, inverse when active —
@@ -1387,28 +1542,42 @@
    Desktop only: on mobile the windows are a full-bleed stack with nothing
    behind them and no hover to recover with.
 
-   Two exemptions, both by declaration on the program (registry.tsx):
+   One exemption, by declaration on the program (registry.tsx):
    `chrome: 'bare'` (.windowBare) — the iPod, an appliance sitting on the
-   desk rather than a document competing for attention — and `noRecede`
-   (.windowNoRecede), for a program that owns a 3D context. `filter` is a
-   grouping property: it forces `transform-style: flat` on every
-   descendant, so the shelf's cuboid boxes would collapse to cardboard
-   cut-outs the moment the window lost focus. */
-@media (min-width: 721px) {
+   desk rather than a document competing for attention.
+
+   There were two. `noRecede` exempted a program that owned a 3D context,
+   because `filter` is a grouping property and flattens every descendant:
+   the shelf's cuboid boxes collapsed to cardboard cut-outs the moment
+   their window lost focus. The shelf does not live in a window any more
+   (store/shelfMode.ts) and it was the only caller, so the hatch is
+   retired and this rule has one `:not()` fewer to carry.
+
+   @container, not @media, and the same for the window's mobile block at the
+   foot of this file: window is one of STYLER's five pilot components, and
+   the stage puts it on a bench that can be told to be 360px wide. A viewport
+   rule cannot see a bench, so the tool could show you every colour the frame
+   is made of and never the shape it takes on a phone (Jake, s111: "I feel
+   like I'm not able to manipulate the mobile view"). The container is `body`
+   on the real desktop (globals.css) and the bench inside the stage
+   (inspect/stylerStage.module.css), so nothing about this rule changed on
+   screen — the same 721px, measured against a box that is still the
+   viewport everywhere except on the bench. */
+@container viewport (min-width: 721px) {
   .window > .titlebar,
   .window > .windowBody {
     transition: filter 0.2s ease-out;
   }
 
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede) > .titlebar,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede) > .windowBody {
+  .window:not(.windowActive):not(.windowBare) > .titlebar,
+  .window:not(.windowActive):not(.windowBare) > .windowBody {
     filter: opacity(0.3);
   }
 
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):hover > .titlebar,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):hover > .windowBody,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):focus-within > .titlebar,
-  .window:not(.windowActive):not(.windowBare):not(.windowNoRecede):focus-within > .windowBody {
+  .window:not(.windowActive):not(.windowBare):hover > .titlebar,
+  .window:not(.windowActive):not(.windowBare):hover > .windowBody,
+  .window:not(.windowActive):not(.windowBare):focus-within > .titlebar,
+  .window:not(.windowActive):not(.windowBare):focus-within > .windowBody {
     filter: opacity(1);
   }
 
@@ -1417,12 +1586,8 @@
      THERE — a dimmed window would read as a disabled layer and would
      also lie to the inspector about what the eye is reading. The extra
      :not() chain is only there to out-specify the rule above. */
-  :global(body[data-inspectmode='on'])
-    .window:not(.windowActive):not(.windowBare):not(.windowNoRecede)
-    > .titlebar,
-  :global(body[data-inspectmode='on'])
-    .window:not(.windowActive):not(.windowBare):not(.windowNoRecede)
-    > .windowBody {
+  :global(body[data-inspectmode='on']) .window:not(.windowActive):not(.windowBare) > .titlebar,
+  :global(body[data-inspectmode='on']) .window:not(.windowActive):not(.windowBare) > .windowBody {
     filter: none;
   }
 }
@@ -1486,6 +1651,107 @@
   }
 }
 
+/* ================= SHELF.MODE: the desk goes back ====================
+
+   Jake's ruling ("Hide Others"): pressing WORK opens no window. The desk
+   goes back and the four case boxes come up on a plank that spans the
+   screen (programs/shelf/ShelfMode.tsx). Everything on the desk recedes
+   IN PLACE — no sliding aside, no Exposé — and it recedes as ONE layer on
+   ONE composited transform, which is the only way a desk of windows, four
+   cuboids and a video on each of them all hold 60fps at once.
+
+   THE RECEDE RUNS ON THE SHELF'S OWN CAMERA, and that is the move rather
+   than a flourish. The row's perspective is 980px (shelf.module.css,
+   `.row`) — the same lens the hover pop travels toward — so the desk
+   borrows it: `perspective(980px) translateZ(-62.55px)` projects to
+   980 / (980 + 62.55) = 0.940, the "about 0.94" Jake asked for, arrived
+   at by moving the desk away from a camera that already exists rather
+   than by picking a scale factor out of the air. For the beat the plank
+   takes to arrive, the desk and the boxes are one 3D scene.
+
+   The dim is 0.3 because 0.3 is the house number: it is exactly what an
+   unfocused window and a receded desk object already fade to, above. The
+   `.deskObject` rule stands down while the mode is up (see below) so the
+   two never multiply — 0.3 of 0.3 is a desk nobody can see.
+
+   THE RAIL IS NOT IN HERE, and that is deliberate: it is chrome, it never
+   dims (see the desk-recede note above), and pressing WORK on it is one of
+   the three ways out. Desktop.tsx renders it as a sibling of this layer.
+
+   ⚠️ A transform makes an element the containing block for every
+   `position: fixed` descendant, so it is declared ONLY while the mode is
+   on. At rest this box carries no transform, no opacity and no stacking
+   context: it is a pass-through wrapper and the desk behaves exactly as
+   it did before the layer existed. */
+.deskLayer {
+  position: absolute;
+  inset: 0;
+  /* THE BLUR IS NOT IN HERE, and that is the one deliberate omission. A
+     blur RADIUS that changes has to be re-rasterised every frame, over
+     the whole desk; a blur that is simply on can be rasterised once and
+     the transform and the dim applied to that texture at composite time.
+     So the radius snaps at the first frame and the motion is carried by
+     the two properties that are free. (Measured, honestly, as far as it
+     could be: a software-rendered headless run cannot separate a
+     composited blur's cost from its own baseline — both with and without
+     it sat at ~40ms a frame — so the cheap construction wins over the
+     one that would need a GPU to prove.) */
+  transition:
+    transform var(--duration-theme) ease-out,
+    opacity var(--duration-theme) ease-out;
+}
+
+/* Contained for as long as the mode runs, on every screen: windows climb
+   z forever (useWindows.open) and the catcher below has to cover them
+   without out-numbering them. `isolation` rather than a z-index of its
+   own, so the rail keeps its seat above a receded desk and gets it back
+   the moment the mode ends. */
+.desktop[data-shelf-mode='on'] .deskLayer {
+  isolation: isolate;
+}
+
+@media (min-width: 721px) {
+  /* AND THE FRAMES BEHIND GO SOFT (Jake). A blur on this element used to
+     be unthinkable: `filter` is a grouping property, it flattens every 3D
+     descendant, and the shelf's cuboids used to stand inside this layer
+     in a window — which is exactly what the registry's retired `noRecede`
+     hatch was for. The boxes are in their own layer above the desk now,
+     so nothing under this filter is 3D and the blur costs nothing but the
+     pixels it softens. 5px, measured rather than picked: enough that a
+     titlebar stops being readable text at 0.3 opacity, little enough that
+     the desk is still recognisably the reader's own desk. */
+  .desktop[data-shelf-mode='on'] .deskLayer {
+    transform: perspective(980px) translateZ(-62.55px);
+    opacity: 0.3;
+    filter: blur(5px);
+  }
+}
+
+/* Jake's ruling: reduced motion crossfades, it does not scale. The dim
+   stays — it is the thing that says the desk stood down — and so does the
+   blur, which arrives whole on every path anyway. */
+@media (prefers-reduced-motion: reduce) {
+  .deskLayer {
+    transition: opacity var(--duration-theme) ease-out;
+  }
+
+  .desktop[data-shelf-mode='on'] .deskLayer {
+    transform: none;
+  }
+}
+
+/* THE BARE DESK, while the shelf is up. A click here leaves the mode
+   (Desktop.tsx mounts it only then). It sits above the receded desk —
+   which is its own stacking context for as long as the mode runs, so a
+   window at z 900 cannot climb over it — and below the dock rail at z 6,
+   which is what lets the WORK tile stay lit and live while everything
+   behind it is out of reach. */
+.deskCatcher {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
 /* `chrome: 'bare'` — the iPod. No titlebar, no frame, no resize grip: the
    program draws its own housing and floats free on the desktop, so the
    window element itself has to disappear completely. It also keeps full
@@ -1515,12 +1781,12 @@
 /* medieval skin: heavier frame + manuscript corner ornaments — scoped
    entirely under [data-skin='medieval'] so classic/dark are untouched */
 :global([data-skin='medieval']) .window {
-  border-width: var(--border-width-strong);
-  border-color: var(--content);
+  --window-border-width: var(--border-width-strong);
+  --window-stroke: var(--content);
 }
 
 :global([data-skin='medieval']) .titlebar {
-  border-bottom: 3px double var(--content);
+  border-bottom: 3px double var(--window-titlebar-border-color);
 }
 
 :global([data-skin='medieval']) .window::before,
@@ -1599,9 +1865,34 @@
   }
 }
 
-/* ================= MOBILE: launcher + full-bleed stack ================= */
+/* ================= MOBILE: launcher + full-bleed stack =================
 
-@media (max-width: 720px) {
+   ONE BLOCK, SPLIT IN TWO, and the split is about who is being styled.
+
+   Jake, s111: "I feel like I'm not able to manipulate the mobile view."
+   STYLER's stage takes a component off the desktop and stands it on a
+   bench, and a bench can be told to be 360px wide — but a `@media` rule
+   asks the SCREEN, and on a 1440px screen the answer is 1440 whatever the
+   bench says. So the phone form of a window, a titlebar or the icon grid
+   was a thing the tool could not draw, which is the one thing the tool is
+   for. Everything below that belongs to one of STYLER's five pilot
+   components moved to `@container viewport`, which is the viewport on the
+   real desktop (globals.css declares it on `body`, and body IS the screen)
+   and the bench inside the stage (inspect/stylerStage.module.css, .mount).
+   Same 720px, same rules, one more box that may answer the question.
+
+   What stayed a media query is what is not a component: `.trashGrid` and
+   `.dockedGrid` are the DESKTOP deciding where the dock's programs live at
+   this width, and a desk is not a thing you put on a bench. The dock rail's
+   own rule (dock.module.css) stays for the same reason.
+
+   ⚠️ INSPECT.MODE reports @media rules and skips @container ones whole,
+   because it cannot tell which box a container rule was measured against
+   (lib/inspect.ts says so where it does it). So the tool no longer lists
+   these declarations on a narrow screen. That is a known cost of the move,
+   not an oversight. */
+
+@container viewport (max-width: 720px) {
   .icons {
     /* clears the nameplate, which takes the band above the grid on mobile
        (see .nameplate at the foot of this file: top 14 + the About box
@@ -1623,18 +1914,6 @@
 
   .iconBtn {
     width: auto;
-  }
-
-  /* on mobile every icon lives in the one scrolling grid — including
-     trash, which rides the dock rail on desktop instead */
-  .trashGrid {
-    display: flex;
-  }
-
-  /* the dock (dock.module.css) doesn't render at this width — its
-     programs reappear here instead */
-  .dockedGrid {
-    display: flex;
   }
 
   .window {
@@ -1674,9 +1953,28 @@
     display: none;
   }
 
+  /* both of these are the menu bar's, so both travel with it onto the
+     bench: the version stamp beside the wordmark and the clock at the far
+     end are the two things the bar drops when it runs out of width */
   .clock,
   .wordmark span {
     display: none;
+  }
+}
+
+/* the desk's own half of the old block: where the dock's programs go when
+   the rail stands down. Not a component, so not a container query. */
+@media (max-width: 720px) {
+  /* on mobile every icon lives in the one scrolling grid — including
+     trash, which rides the dock rail on desktop instead */
+  .trashGrid {
+    display: flex;
+  }
+
+  /* the dock (dock.module.css) doesn't render at this width — its
+     programs reappear here instead */
+  .dockedGrid {
+    display: flex;
   }
 }
 

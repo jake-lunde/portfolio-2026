@@ -1,6 +1,7 @@
 import { useEffect, useReducer } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
+import { raw, scanTokens } from './tokenProbe'
 
 /* TYPE RAMP — the bench where type rulings get made.
  *
@@ -45,37 +46,8 @@ const BENCH = ['label', 'caption', 'micro', 'mono'] as const
 
 /* ── live reads ───────────────────────────────────────────────────────────── */
 
-function raw(name: string): string {
-  if (typeof document === 'undefined') return ''
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-}
-
-/** Every custom property declared in the loaded stylesheets matching `match`.
-    Scanned, not hardcoded, so the board follows the token build. */
-function scanTokens(match: RegExp): string[] {
-  const found = new Set<string>()
-  if (typeof document === 'undefined') return []
-  const walk = (rules: CSSRuleList) => {
-    for (const rule of Array.from(rules)) {
-      const nested = (rule as CSSGroupingRule).cssRules
-      if (nested) walk(nested)
-      const style = (rule as CSSStyleRule).style
-      if (!style) continue
-      for (let i = 0; i < style.length; i++) {
-        const prop = style.item(i)
-        if (prop.startsWith('--') && match.test(prop)) found.add(prop)
-      }
-    }
-  }
-  for (const sheet of Array.from(document.styleSheets)) {
-    try {
-      walk(sheet.cssRules)
-    } catch {
-      /* cross-origin sheet — nothing of ours lives there */
-    }
-  }
-  return Array.from(found)
-}
+/* raw and scanTokens live in tokenProbe.ts, shared with ScaleBoards — they
+   were the same two functions letter for letter in both files. */
 
 type Prim = { name: string; value: string; num: number }
 

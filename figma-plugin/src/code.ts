@@ -33,6 +33,7 @@ import {
   isCoreSet,
   isFluidSize,
   isTypeRole,
+  isTypographyCompositeRef,
   leadingToPercent,
   leafAtPath,
   memberConcrete,
@@ -62,6 +63,14 @@ import {
   type TypoMember,
   type TypographyComposite,
 } from './tokens'
+import {
+  blocks,
+  judge,
+  lines,
+  stampLabel,
+  STAMP,
+  type Verdict,
+} from './freshness'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -80,6 +89,8 @@ const PR_BODY_INTRO =
 const CHANGE_LIST_CAP = 20
 const TOKENS_DIR = 'tokens'
 const DEFAULT_REPO = 'jake-lunde/portfolio-2026'
+/** Repo path whose commits decide whether this bundle is current. */
+const PLUGIN_PATH = 'figma-plugin'
 const DEFAULT_BRANCH = 'main'
 
 const SETTINGS_KEYS = { pat: 'tb.pat', repo: 'tb.repo', branch: 'tb.branch' }
@@ -129,8 +140,33 @@ async function runGuarded(label: string, fn: (gh: GitHub, branch: string) => Pro
   }
   log(`${label} starting…`)
   const gh = new GitHub(pat, parseRepo(repo))
+  if (!(await bundleIsCurrent(gh, branch))) return
   await fn(gh, branch)
   log(`${label} done.`, 'ok')
+}
+
+/**
+ * Report the bundle's build stamp against the branch and return false when the
+ * run should not go ahead. A bundle behind the branch reproduces bugs the
+ * source already fixed, which is what happened on 2026-08-21 (see
+ * freshness.ts), so a proven-stale bundle stops here rather than writing
+ * variables from old code. Everything softer is a warning and carries on.
+ */
+async function bundleIsCurrent(gh: GitHub, branch: string): Promise<boolean> {
+  let verdict: Verdict
+  if (!STAMP || STAMP.dirty || !STAMP.sha) {
+    verdict = judge(STAMP, [])
+  } else {
+    try {
+      verdict = judge(STAMP, await gh.commitsForPath(PLUGIN_PATH, branch))
+    } catch (e) {
+      verdict = { kind: 'unknown', stamp: STAMP, reason: errorText(e) }
+    }
+  }
+  for (const line of lines(verdict, branch)) log(line.text, line.level as LogLevel)
+  const stale = blocks(verdict)
+  figma.ui.postMessage({ type: 'stamp', label: stampLabel(STAMP), stale })
+  return !stale
 }
 
 function errorText(e: unknown): string {
@@ -148,6 +184,7 @@ async function sendSettings(): Promise<void> {
     ((await figma.clientStorage.getAsync(SETTINGS_KEYS.branch)) as string) || DEFAULT_BRANCH
   // NB: the PAT value itself is never sent to the UI — only whether one exists.
   figma.ui.postMessage({ type: 'settings', repo, branch, hasPat: !!pat })
+  figma.ui.postMessage({ type: 'stamp', label: stampLabel(STAMP), stale: false })
 }
 
 async function saveSettings(pat: string, repo: string, branch: string): Promise<void> {
@@ -293,6 +330,9 @@ async function pull(gh: GitHub, branch: string): Promise<void> {
   }
   if (compCol) {
     for (const t of model.componentTokens) {
+      // Whole-composite typography ref — a Figma TEXT STYLE, not a variable.
+      // No variable to create here (Phase 1a, ruled 2026-08-21).
+      if (isTypographyCompositeRef(t, model)) continue
       const v = getOrCreateVariable(figmaVarName(t.path), compCol, resolveKind(t, model), index)
       compVars.set(t.path, v)
     }
@@ -319,6 +359,9 @@ async function pull(gh: GitHub, branch: string): Promise<void> {
   if (compCol) {
     const compModeId = compCol.modes[0].modeId
     for (const t of model.componentTokens) {
+      // Same skip as Pass 1 — no variable exists for this token, so there is
+      // nothing to set (and no "Unresolved alias" warning to log).
+      if (isTypographyCompositeRef(t, model)) continue
       const v = compVars.get(t.path) as Variable
       setValue(v, compModeId, t, model, coreVars, semVars)
     }

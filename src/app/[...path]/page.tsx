@@ -1,7 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Desktop } from '@/components/shell/Desktop'
-import { ALL_PATHS, inspectForPath, isKnownPath, windowsForPath } from '@/programs/resolve'
+import {
+  ALL_PATHS,
+  inspectForPath,
+  isKnownPath,
+  shelfModeForPath,
+  windowsForPath,
+} from '@/programs/resolve'
 import { PROGRAMS } from '@/programs/registry'
 import { BASE } from '@/lib/base'
 import { getCase } from '@/programs/projects/cases'
@@ -140,6 +146,10 @@ export default async function DeepLink({ params }: Props) {
      which still shows the desk, just with the status the URL deserves. */
   if (!isKnownPath(path)) notFound()
   return (
-    <Desktop initialWindows={windowsForPath(path)} initialInspect={inspectForPath(path)} />
+    <Desktop
+      initialWindows={windowsForPath(path)}
+      initialInspect={inspectForPath(path)}
+      initialShelfMode={shelfModeForPath(path)}
+    />
   )
 }

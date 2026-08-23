@@ -9,6 +9,13 @@ import localFont from 'next/font/local'
 import '../src/styles/tokens.generated.css'
 import '../src/app/globals.css'
 
+/* The store harness (src/design-system/storyHarness.tsx) — a cold-booted
+   settings / windows / shelf / inspect machine for every story, so the eight
+   components that read a zustand store need no changes to be catalogued. It
+   reads the same `theme` global this file writes onto the document, so the two
+   decorators agree without either one knowing about the other. */
+import { withStores } from '../src/design-system/storyHarness'
+
 const sans = Geist({ subsets: ['latin'], variable: '--font-sans', display: 'swap' })
 const mono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' })
 const pixel = localFont({
@@ -114,7 +121,9 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withTheme],
+  /* withStores first = innermost, so the theme decorator has already written
+     data-skin onto <html> by the time a store-reading component paints. */
+  decorators: [withStores, withTheme],
 }
 
 export default preview

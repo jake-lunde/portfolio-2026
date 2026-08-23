@@ -1,5 +1,10 @@
 {
   "tracking": {
+    "none": {
+      "$value": "0",
+      "$type": "dimension",
+      "$description": "Zero tracking — lets composites that want no letter-spacing adjustment bind a token instead of hardcoding the literal."
+    },
     "02": {
       "$value": "0.02em",
       "$type": "dimension"

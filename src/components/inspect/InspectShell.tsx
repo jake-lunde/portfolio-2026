@@ -6,8 +6,10 @@ import { useInspect } from '@/store/inspect'
 import { t } from '@/content/copy'
 import { inspectElement, type Inspection } from '@/lib/inspect'
 import { resetAll } from '@/lib/tune'
+import { resetAll as stylerResetAll } from '@/lib/stylerTune'
 import { LayersPanel } from './LayersPanel'
 import { InspectorPanel } from './InspectorPanel'
+import { StylerStage } from './StylerStage'
 import { useCopyEditing } from './useCopyEditing'
 import styles from './inspectShell.module.css'
 
@@ -153,6 +155,9 @@ export default function InspectShell() {
   const setOn = useInspect((s) => s.setOn)
   const tool = useInspect((s) => s.tool)
   const setTool = useInspect((s) => s.setTool)
+  /** which component STYLER has taken away to a bench of its own, if any */
+  const stage = useInspect((s) => s.stage)
+  const setStage = useInspect((s) => s.setStage)
 
   /* LIVE COPY EDITING, running for as long as the tool is up. It was a
      program at /edit that took the whole desktop, then a third segment in
@@ -445,6 +450,18 @@ export default function InspectShell() {
     return () => obs.disconnect()
   }, [refresh])
 
+  /* ---- the stage's flag on the body ----
+     One attribute, read by the CSS that stands the crown and both docks
+     down while the room is up (inspectShell.module.css). It is written here
+     rather than by the stage itself so the flag and the state can never
+     disagree: the same component that decides to render the room is the one
+     that says so on the body, and the cleanup below runs on every exit. */
+  useEffect(() => {
+    if (!stage) return
+    document.body.setAttribute('data-stylerstage', 'on')
+    return () => document.body.removeAttribute('data-stylerstage')
+  }, [stage])
+
   /* ---- the floor: no canvas left, so no tool ---- */
   useEffect(() => {
     const mq = window.matchMedia(FLOOR)
@@ -481,6 +498,14 @@ export default function InspectShell() {
   useEffect(
     () => () => {
       resetAll()
+      // both tiers preview on the same root, and neither may outlive the
+      // tool that wrote it (lib/stylerTune.ts)
+      stylerResetAll()
+      // the room goes with the tool. setOn and toggle already clear it on
+      // the two deliberate exits; this covers the third, where the shell
+      // unmounts under the 900px floor with the stage still up.
+      setStage(null)
+      document.body.removeAttribute('data-stylerstage')
       document.body.removeAttribute('data-inspectmode')
       document.body.removeAttribute('data-inspecttool')
       scrub('data-inspect-hover')
@@ -490,7 +515,7 @@ export default function InspectShell() {
       const home = kept ?? document.querySelector<HTMLElement>('[data-inspect-toggle]')
       home?.focus?.({ preventScroll: true })
     },
-    [opener],
+    [opener, setStage],
   )
 
   return (
@@ -572,6 +597,15 @@ export default function InspectShell() {
           onPick={pick}
         />
       </aside>
+
+      {/* THE STAGE. A room inside the tool: one component on a bench with
+          the styling blocks beside it, and the frame above standing down
+          while it is up. It mounts last so it is above everything the tool
+          drew, and it is stamped `data-inspect-self` like the rest of our
+          chrome — nothing in here is ever the subject of a pick. */}
+      {stage && (
+        <StylerStage componentId={stage} copy={copyEdit} onClose={() => setStage(null)} />
+      )}
     </>
   )
 }

@@ -50,6 +50,7 @@ const {
   figmaFloatToCoreValue,
   weightToStyleName,
   familyHasWeights,
+  isTypographyCompositeRef,
 } = mod
 
 /* A miniature of the real repo: core primitives, a shared scale set, and three
@@ -254,6 +255,7 @@ const typoMeta = {
     'semantic/scale',
     'semantic/typography',
     'semantic/classic-light',
+    'component/stamp',
   ],
 }
 const typoThemes = [
@@ -308,6 +310,20 @@ const typoFiles = () => ({
     },
   },
   'semantic/classic-light': {},
+  // Component-tier: the Phase 1a shape (whole-composite ref, both spellings +
+  // bare) alongside the pre-existing sub-token aliases (stamp.json today) and
+  // a plain, unaliased token — none of which should be mistaken for the other.
+  'component/stamp': {
+    stamp: {
+      text: { $type: 'typography', $value: '{type.label}' }, // explicit $type, "type." spelling
+      caption: { $value: '{typography.label}' }, // no $type, "typography." spelling
+      heading: { $type: 'typography', $value: '{label}' }, // explicit $type, bare ref — $type wins
+      'bare-role-family': { $value: '{label}' }, // NO $type, bare ref — must NOT match (false positive risk)
+      family: { $value: '{type.label.family}' }, // SUB-token alias — must stay unaffected
+      'font-size': { $value: '{type.label.size}', $type: 'dimension' }, // SUB-token alias — must stay unaffected
+      'border-width': { $value: '2px', $type: 'dimension' }, // plain literal — must stay unaffected
+    },
+  },
 })
 const typoModel = () => buildModel(typoMeta, typoThemes, typoFiles())
 
@@ -415,4 +431,50 @@ test('familyHasWeights: only the Geist variable fonts carry real weights', () =>
   assert.equal(familyHasWeights('Geist Mono'), true)
   assert.equal(familyHasWeights('Geist Pixel'), false) // single-weight pixel display face
   assert.equal(familyHasWeights('MedievalSharp'), false)
+})
+
+// ---------------------------------------------------------------------------
+// isTypographyCompositeRef — component-tier skip (Phase 1a, ruled 2026-08-21)
+// ---------------------------------------------------------------------------
+
+test('isTypographyCompositeRef flags a whole-composite ref in any spelling', () => {
+  const m = typoModel()
+  const stamp = m.componentTokens.filter((t) => t.set === 'component/stamp')
+  const byPath = (p) => stamp.find((t) => t.path === p)
+  assert.equal(isTypographyCompositeRef(byPath('stamp.text'), m), true) // $type: typography, "type."
+  assert.equal(isTypographyCompositeRef(byPath('stamp.caption'), m), true) // no $type, "typography."
+  assert.equal(isTypographyCompositeRef(byPath('stamp.heading'), m), true) // $type: typography, bare ref
+})
+
+test('isTypographyCompositeRef leaves SUB-token aliases and plain tokens alone', () => {
+  const m = typoModel()
+  const stamp = m.componentTokens.filter((t) => t.set === 'component/stamp')
+  const byPath = (p) => stamp.find((t) => t.path === p)
+  // stamp.json's two existing warnings today (Unresolved alias for family /
+  // font-size) — these are SUB-token refs, not whole composites, and must
+  // keep falling through to the unresolved-alias path unchanged.
+  assert.equal(isTypographyCompositeRef(byPath('stamp.family'), m), false)
+  assert.equal(isTypographyCompositeRef(byPath('stamp.font-size'), m), false)
+  // an ordinary literal component token is never mistaken for a composite ref
+  assert.equal(isTypographyCompositeRef(byPath('stamp.border-width'), m), false)
+  // a BARE ref with no $type must NOT match even when it spells a role name —
+  // this is the real false-positive: component/menubar.json's `family: {
+  // $value: "{mono}" }` is an ordinary alias to the semantic `mono` font
+  // stack, not the `mono` typography composite.
+  assert.equal(isTypographyCompositeRef(byPath('stamp.bare-role-family'), m), false)
+})
+
+test('isTypographyCompositeRef: an explicit non-typography $type always wins', () => {
+  const m = typoModel()
+  const coincidental = {
+    set: 'component/stamp',
+    path: 'stamp.weird',
+    rawValue: '{label}',
+    type: 'color',
+    isAlias: true,
+    aliasRef: 'label',
+  }
+  // even though the ref body names a real composite role, an explicit
+  // non-typography $type means the author meant something else — never skip.
+  assert.equal(isTypographyCompositeRef(coincidental, m), false)
 })

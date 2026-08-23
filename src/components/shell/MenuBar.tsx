@@ -147,9 +147,13 @@ export function MenuBar() {
     /* the menubar is the tool's own toolbar while INSPECT.MODE is up, so
        it is exempt from picking (InspectShell) — the way OUT of the mode
        must never be something the mode swallows */
-    <header className={styles.menubar} data-inspect-self="">
+    <header className={styles.menubar} data-inspect-self="" data-component="menubar">
       <div className={styles.menuLeft}>
-        <div className={styles.wordmark}>
+        {/* the anatomy markers STYLER's bench direct-selects by, one per
+            part the token names already declare (lib/stylerBlocks.ts:
+            layersFor) — MENUBAR · MENU · WORDMARK. Attributes only:
+            nothing here reads them but the stage. */}
+        <div className={styles.wordmark} data-part="wordmark">
           {/* the house mark, in system ink — mask-image lets a raster
               PNG take var(--content) and follow dark mode for free
               (see .mark below). Decorative: the wordmark text already
@@ -209,6 +213,14 @@ export function MenuBar() {
           onFocus={() => setHintUp(true)}
           onBlur={() => setHintUp(false)}
         >
+          {/* data-inspect-toggle is load-bearing, and looks like it isn't:
+              no CSS reads it — the 900px stand-down sits on the wrapper —
+              so nothing on screen changes if it goes. What breaks is the
+              way out. On teardown InspectShell returns focus to whatever
+              opened the mode, and when that opener is gone or was never
+              anything but the body it falls back to this attribute as the
+              landing. Drop it and that path focuses nothing: a keyboard
+              user leaves INSPECT at the top of the document. */}
           <button
             className={`${styles.skinTrigger} ${styles.inspectBtn}`}
             data-inspect-toggle=""
@@ -244,6 +256,7 @@ export function MenuBar() {
             colour — the slash and the shape change carry it. */}
         <button
           className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
+          data-part="menu"
           onClick={toggleSound}
           aria-pressed={sound}
           aria-label={`Sound ${sound ? 'on' : 'off'}`}
@@ -254,6 +267,7 @@ export function MenuBar() {
         {skin === 'classic' && (
           <button
             className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
+            data-part="menu"
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
             title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
@@ -267,6 +281,7 @@ export function MenuBar() {
             the SPEC.SHEET desktop icon both lead to. */}
         <button
           className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
+          data-part="menu"
           onClick={() => {
             sfx.open()
             openWindow('spec-sheet')

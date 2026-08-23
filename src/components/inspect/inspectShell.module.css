@@ -141,6 +141,22 @@
   }
 }
 
+/* ---- while the STYLER stage is up, the tool's own frame stands down ----
+
+   Jake's note: styling is not inspecting, and a room full of the inspector's
+   readings around a set of styling controls is asking a person to do one job
+   while looking at another. So the crown and both docks leave, exactly the
+   way the shell's menubar leaves when the tool arrives (shell.module.css).
+
+   display:none, not an opaque cover: a covered dock is still in the tab
+   order, and a keyboard visitor would walk out of the stage into a panel
+   they cannot see. The stage paints its own frame in the same idiom
+   (stylerStage.module.css) and hands everything back on close. */
+:global(body[data-stylerstage='on']) .crown,
+:global(body[data-stylerstage='on']) .panel {
+  display: none;
+}
+
 /* The tool's own name, and the top of the panel type hierarchy — see the
    note above .panelHead for the three tiers and the two families. It was
    an 11px mono label, the same size and family as the section heads and
@@ -638,7 +654,8 @@
 .value,
 .ratio,
 .facts,
-.sourcePath {
+.sourcePath,
+.bind {
   font-family: var(--type-mono-family);
   font-size: var(--type-mono-size);
   font-weight: var(--type-mono-weight);
@@ -686,6 +703,18 @@
   margin-top: var(--spacing-component-md);
 }
 
+/* Jake, s107: a section that lands directly under a bare .bar (the top
+   tab row, with no .section of its own to carry a margin) still inherited
+   .section's usual gap above it — a stray band of raised ground between
+   two things that should read as one continuous edge. Only the FIRST
+   section under a tab row takes this: PATH's neighbour SOURCE, and every
+   other section that follows another reading rather than a tab bar,
+   keeps the ordinary margin, because that gap is the one doing real work
+   (see the note above .sectionBody). */
+.sectionFlush {
+  margin-top: 0;
+}
+
 .bar {
   /* the tip below hangs off this, and it spans the bar rather than the
      button, so it can never be clipped by the dock's edge */
@@ -717,6 +746,89 @@
    whole job of the rhythm. */
 .sectionBody {
   padding: var(--spacing-component-md);
+}
+
+/* ---- the tab rows ----
+
+   Round 4 (2026-08-21, s105): "collapse the sections (path, source,
+   tokens) and/or turn like kinds into tabs." Seven stacked sections
+   became three: STRUCTURE (path, source), STYLE (tokens, contrast, type,
+   motion — nested, since that's the one kind that still needed splitting
+   further), and COPY where the pick has one. See InspectorPanel.tsx for
+   the grouping and why.
+
+   Round 5 (s107, screenshot review): the flat underlined row from round 4
+   read badly, and the nested STYLE row crowded its bar enough that the
+   InfoTip sitting beside it lost a reachable hover target (that tip is
+   gone now — see InspectorPanel.tsx). Jake's fix for the row itself: "use
+   a pill similar to the 'new' pill on the latest work window and use a
+   horizontal scroll for overflow." That pill is player.module.css's
+   .badge — --radius-pill, a filled ground, on-fill ink — borrowed here
+   for the SHAPE. The FILL a selected pill wears is not that badge's:
+   accent-expressive is a mark's accent, licensed for a one-off "NEW", not
+   for a row of everyday controls a visitor clicks through all day, so
+   the selected state instead takes the house's other standing answer —
+   accent fill, paper ink — the same pairing STYLER's own segmented tabs
+   already wear (stylerStage.module.css's .tab[aria-selected='true']) and
+   the same one PENDING's SAVE button wears. One shape, one fill vocabulary,
+   two places it already lived. */
+.tabs {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-pill);
+}
+
+.tab {
+  flex: none;
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-label-leading);
+  text-transform: uppercase;
+  color: var(--content-muted);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--content);
+  background: var(--interactive-default-hover);
+}
+
+/* what sits ON an accent fill is the paper, house-wide */
+.tab[aria-selected='true'] {
+  color: var(--surface);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.tab:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* ---- the info affordance ----
@@ -1016,6 +1128,17 @@
   border-color: var(--status-danger-base);
 }
 
+/* THE LOCK. The three structural dimensions carry a padlock rather than the
+   word LOCKED (StylerBlocks.tsx draws it and carries the reasoning): in a
+   column of bindings a word reads as one more binding, and a shape does not.
+   Same chip, same muted ink, same hairline as every other tier mark — only
+   the contents changed, so the glyph is centred in the box the word had. */
+.tier[data-tier='locked'] {
+  display: inline-flex;
+  align-items: center;
+  line-height: var(--leading-none);
+}
+
 .swatch,
 .swatchBtn {
   flex: none;
@@ -1110,6 +1233,78 @@
   border-top: var(--border-width-default) solid var(--border);
 }
 
+/* ---- STYLER: the component tier, in five blocks ----
+
+   Two levels of bar, and the difference has to read without being loud.
+   STYLER takes the same bar every other section takes — raised fill, ink,
+   full bleed — and the five block heads under it keep the bleed and give up
+   the fill: the panel's own ground, muted ink, the hairline still there to
+   say a list starts. So the eye reads one section with five parts rather
+   than six sections, and nothing new had to be minted to say it. */
+.styler {
+  margin-top: var(--spacing-component-md);
+}
+
+.bar[data-styler-block] {
+  background: var(--surface);
+}
+
+.bar[data-styler-block] .head {
+  color: var(--content-muted);
+}
+
+/* the row is name / swatch / binding, and the name takes the slack so every
+   binding in a block lines up on the right edge the way a spec panel does.
+   The attribute carries the row's role for the keys to read (StylerBlocks). */
+.var[data-styler-row] .varName {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* the current binding, and the way into the list of what else it could be */
+.bind {
+  flex: none;
+  max-width: 60%;
+  overflow: hidden;
+  padding: 0 var(--spacing-component-xs);
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--content);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--border);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.bind:hover,
+.bind[aria-expanded='true'] {
+  border-color: var(--content);
+}
+
+.bind:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* a literal, with no token behind it. Dashed rather than solid, because the
+   row is telling you the binding is missing, not naming a quiet one. */
+.bind[data-offgrid] {
+  color: var(--content-muted);
+  border-style: dashed;
+}
+
+/* the binding the row has right now, marked in the list so the ramp reads
+   as a position rather than a menu — which is what makes the arrow keys
+   feel like a step instead of a jump */
+.candidate[aria-current] {
+  box-shadow: inset var(--border-width-strong) 0 0 var(--accent);
+}
+
+.candidate[aria-current] .candidateName {
+  color: var(--content);
+}
+
 /* ---- CONTRAST ---- */
 .contrast {
   display: flex;
@@ -1181,6 +1376,107 @@
   border: var(--border-width-default) solid var(--accent);
   border-radius: 0;
   text-transform: none;
+}
+
+/* ================= STYLER footer =================
+   Jake, s107: "fix the styler section to the bottom of the right panel."
+   `.panel` (the aside wrapping this whole component) is already a flex
+   column — panelHead flex:none pinned at the top, panelBody flex:1 1 auto
+   scrolling in the middle — so this is the third flex item, sized to its
+   own content and left at the foot by the column rather than by
+   position:fixed. Every tab scrolls behind it now. A status bar, the way
+   Jake put it, so it takes the same border weight .ident's own
+   border-bottom does rather than the section bars' hairline — this is
+   the edge of the dock's reading, not one more reading inside it. */
+.stylerFoot {
+  flex: none;
+  border-top: var(--border-width-default) solid var(--content);
+}
+
+/* Its own horizontal scroller, the same recipe .tabs takes above: never
+   wraps (a wrapped "desktop-icons" was Jake's second complaint), scrolls
+   sideways instead once the chips outrun the dock's width. */
+.stylerChips {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  padding: var(--spacing-component-sm) var(--spacing-component-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.stylerChips::-webkit-scrollbar {
+  height: 6px;
+}
+
+.stylerChips::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.stylerChips::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-pill);
+}
+
+/* The chip IS the door now — it used to be a stroked .roleChip (inert,
+   just the component's id) sitting beside a separate OPEN COMPONENT
+   button, and Jake's read of the screenshot was that a stroked container
+   next to its own trigger is one affordance drawn as two. This borrows
+   .roleChip's stroke wholesale — accent border, accent ink, surface fill
+   — because becoming clickable doesn't change what it is reporting; what
+   is new is the interactive states an inert chip never needed. */
+.stylerChip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  padding: var(--spacing-component-xs) var(--spacing-component-sm);
+  font-family: var(--type-micro-family);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  letter-spacing: var(--type-micro-tracking);
+  line-height: var(--type-micro-leading);
+  color: var(--accent);
+  background: var(--surface);
+  border: var(--border-width-default) solid var(--accent);
+  border-radius: 0;
+  text-transform: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* what sits on an accent fill is the paper, house-wide */
+.stylerChip:hover {
+  color: var(--surface);
+  background: var(--accent);
+}
+
+.stylerChip:focus-visible {
+  outline: var(--border-width-strong) solid var(--accent);
+  outline-offset: 2px;
+}
+
+.stylerChipLabel {
+  white-space: nowrap;
+}
+
+.stylerChipIcon {
+  flex: none;
+}
+
+/* THE LIBRARY CHIP — same stroke, one difference. It is an <a> rather than a
+   <button> because it goes to a page (/styler), so it needs the underline
+   struck and the inherited link colour said out loud; and it takes a gap
+   plus a rule on its leading edge, because the chips before it name what is
+   under the pointer and this one names everything. Same row, different
+   question. */
+.stylerLibraryChip {
+  margin-left: var(--spacing-component-xs);
+  border-left-width: var(--border-width-strong);
+  color: var(--accent);
+  text-decoration: none;
 }
 
 /* ---- MOTION ---- */
@@ -1361,4 +1657,51 @@
 .editCommit:focus-visible {
   outline: var(--border-width-strong) solid var(--accent);
   outline-offset: 2px;
+}
+
+/* ================= THE STAGE READS ONE STEP UP =================
+
+   Jake, on the wide review of the STYLER stage (s107): "fonts seem small as
+   well." He was looking at 8px — the MICRO role, which is the right size for a
+   chip in a 304px dock beside a running site and the wrong size for the only
+   panel in a room that has taken the whole screen.
+
+   So inside the stage, and only there, every one of these steps from MICRO to
+   CONTROL: 8px to 10px, tracking 20 to 14, and the mono face and the bold
+   weight unchanged, which is what keeps the machine sounding like the machine.
+   Both are roles the ramp already has (tokens.generated.css) — nothing was
+   minted and no size was invented to answer this.
+
+   It is written HERE, next to the classes it moves, rather than in
+   stylerStage.module.css: these are this file's own declarations and a second
+   file reaching in to resize them is how two files start disagreeing about
+   one control. The attribute is the stage's, set on its root
+   (StylerStage.tsx), so INSPECT's own two docks are untouched. The stage's
+   own furniture — the tab rows, the axis names — takes the same step in its
+   own sheet.
+
+   The 11px MONO readings are not in this list, and that is the point of
+   naming a step rather than scaling a panel: they were never the small type,
+   and the next role up from mono is a 13px sans that would put a body face
+   on a token value. */
+[data-styler-stage] .row,
+[data-styler-stage] .tier,
+[data-styler-stage] .candidateName,
+[data-styler-stage] .candidateGrade,
+[data-styler-stage] .candidate[data-reset],
+[data-styler-stage] .previewText,
+[data-styler-stage] .resetAll,
+[data-styler-stage] .keyLabel,
+[data-styler-stage] .saveNote {
+  font-family: var(--type-control-family);
+  font-size: var(--type-control-size);
+  font-weight: var(--type-control-weight);
+  letter-spacing: var(--type-control-tracking);
+  line-height: var(--type-control-leading);
+}
+
+/* the field beside the label goes with it, or the key prompt is a 10px word
+   next to an 8px box */
+[data-styler-stage] .keyInput {
+  font-size: var(--type-control-size);
 }

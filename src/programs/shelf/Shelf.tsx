@@ -1,9 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { AnimatePresence } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { CopyText as Copy } from '@/content/CopyText'
-import { metric } from '@/lib/metrics'
+import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
 import { CASES, getCase } from '@/programs/projects/cases'
 import { useFinePointer } from './Box3D'
@@ -17,21 +17,44 @@ import styles from './shelf.module.css'
    is here instead of apologizing for what isn't. Boxes that HAVE shipped
    PLAY (nobody installs a case study — they play it, and the loading
    screen is the 1992 beat before it opens); boxes that haven't stay
-   shrink-wrapped and keep the nudge wiring, verbatim, from the old window.
+   shrink-wrapped and print COMING SOON at the foot of their panel.
 
-   The shelf is a horizontal carousel, one row deep, and it is deliberately
-   never fully in frame: a box is always cut by the right edge, because a
-   shelf you can see all of is a shelf with nothing else on it.
+   ALL FOUR BOXES ARE IN FRAME NOW, AND THAT OVERTURNS THE s39b RULING.
+   This file used to say that the shelf was "deliberately never fully in
+   frame: a box is always cut by the right edge, because a shelf you can
+   see all of is a shelf with nothing else on it" — the cut third box was
+   on purpose, a carousel promising more stock down the aisle. Jake struck
+   it ("Hide Others"): the boxes are the signature object on this site, the
+   760px window was cutting two whole ones plus 160px of a third, and a
+   promise of more is worth less than the work itself. The shelf is not in
+   a window any more. It is a MODE OF THE DESK (store/shelfMode.ts): the
+   desk recedes on this row's own 980px camera, blurs, and the four boxes
+   come up over it, all of them at once. The boxes earn the room now.
+
+   AND THERE IS NO SHELF UNDER THEM EITHER. A painted board ran the width
+   of the row for nine passes; at desk width it was a hairline the length
+   of the screen, so Jake struck it — "lose the shelf, it doesn't read,
+   and instead give the drop shadow a little more distance". The boxes
+   float now, and how high is the shadow's job (shelf.module.css).
+
+   The row is still a scroller and still cuts on MOBILE, where a finger
+   drags the stock along — the carousel survives exactly where it is still
+   the honest answer.
 
    A new case appears on this shelf by being in CASES — nothing here is
    registered twice. Optional `box` data (cases.ts) fills the back panel;
    without it the box still stands, just barer.
 
-   Nudges: one per case per browser session. The pressed set lives in
-   sessionStorage so the button can't be mashed, and the count is
-   optimistic — the encouragement lands before the network does. */
-
-const SENT_KEY = 'lunde-nudged'
+   PASS 12 TOOK THE NUDGE OFF THE SHELF (Jake's Figma pass) AND PASS 13 TOOK
+   IT OUT OF THE REPO. An unshipped box used to carry a progress meter and a
+   TELL HIM TO FINISH IT button on its back, which meant this window held a
+   session-scoped pressed set, an optimistic count, a honeypot field and a
+   per-box refusal — a whole apparatus so that a carton could ask to be
+   encouraged. The panel prints COMING SOON now, and with the shelf as its
+   only caller, `/api/nudge` and the `progress.nudge*` strings went with it
+   (Jake's ruling): an endpoint nothing reaches is a blob store waiting to
+   collect writes nobody reads. `progress` itself stays in cases.ts — it is
+   what decides shipped from unshipped. */
 
 /* THE RESTING TURN IS GONE (pass 4, Jake's ruling: head-on at rest).
 
@@ -50,27 +73,24 @@ const SENT_KEY = 'lunde-nudged'
    at 0deg) — is deleted rather than zeroed. The shadow now answers the
    hover, and only the hover, from Box3D. */
 
-const readSent = (): string[] => {
-  try {
-    const raw = sessionStorage.getItem(SENT_KEY)
-    const parsed: unknown = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed.filter((s): s is string => typeof s === 'string') : []
-  } catch {
-    return []
-  }
-}
+/* THE BEAT BETWEEN TWO BOXES ARRIVING. 70ms: long enough that the four
+   read as four separate arrivals, short enough that the last one is on
+   the desk 210ms after the first and nobody is waiting on furniture.
+   A literal rather than a token because the motion tokens describe how a
+   thing moves (SPRINGS) and how long a fade takes (DURATIONS), and there
+   is no stagger in the set — the day there is, this is its first
+   caller. */
+const STAGGER = 0.07
 
-export default function Shelf() {
+export default function Shelf({
+  onLaunched,
+}: {
+  /** the case window is open and holds focus — the mode that mounted this
+      shelf steps aside so the case lands on a restored desk */
+  onLaunched?: () => void
+} = {}) {
   const fine = useFinePointer()
-  const [counts, setCounts] = useState<Record<string, number>>({})
-  const [durable, setDurable] = useState(true)
-  const [sent, setSent] = useState<string[]>([])
-  const [busy, setBusy] = useState<string | null>(null)
-  /* WHOSE nudge failed, not just that one did. Pass 7 struck the shelf
-     footer, and with it the last place on this window where a message could
-     be printed about no box in particular; a refusal now prints under the
-     button that caused it, so it has to carry its slug this far. */
-  const [error, setError] = useState<{ slug: string; message: string } | null>(null)
+  const reduced = useReducedMotion()
   const [playing, setPlaying] = useState<string | null>(null)
   /* WHICH BOX IS SHOWING ITS TAG. One string for the whole shelf, because
      the rule is a shelf-level rule and not a box-level one: a tag comes out
@@ -79,7 +99,6 @@ export default function Shelf() {
      one out and pushes this one back. Two independent booleans could show
      two tags at once, which is the state this deliberately cannot reach. */
   const [revealed, setRevealed] = useState<string | null>(null)
-  const hp = useRef<HTMLInputElement>(null)
   const trigger = useRef<HTMLElement | null>(null)
   const row = useRef<HTMLUListElement>(null)
 
@@ -119,55 +138,6 @@ export default function Shelf() {
     if (row.current) row.current.scrollLeft = 0
   }, [])
 
-  useEffect(() => {
-    setSent(readSent())
-    fetch('/api/nudge')
-      .then((r) => r.json())
-      .then((d) => {
-        setCounts(d.counts ?? {})
-        setDurable(Boolean(d.durable))
-      })
-      // no `loaded` flag any more: it existed only to keep the footer's
-      // offline stamp from flashing before the first answer came back, and
-      // the footer is gone. A nudge button that cannot work is disabled,
-      // which is the whole message and needs no line of copy under it.
-      .catch(() => setDurable(false))
-  }, [])
-
-  const nudge = async (slug: string) => {
-    if (busy || sent.includes(slug)) return
-    setBusy(slug)
-    setError(null)
-    sfx.tap()
-    // optimistic — the encouragement lands before the network does
-    setCounts((c) => ({ ...c, [slug]: (c[slug] ?? 0) + 1 }))
-    const nextSent = [...sent, slug]
-    setSent(nextSent)
-    try {
-      sessionStorage.setItem(SENT_KEY, JSON.stringify(nextSent))
-    } catch {}
-    try {
-      const res = await fetch('/api/nudge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, website: hp.current?.value ?? '' }),
-      })
-      const d = await res.json()
-      if (!res.ok) throw new Error(d.error ?? 'The line went quiet.')
-      if (typeof d.count === 'number') setCounts((c) => ({ ...c, [slug]: d.count }))
-      metric('case_nudge', { slug })
-    } catch (err) {
-      setError({ slug, message: err instanceof Error ? err.message : 'The line went quiet.' })
-      setCounts((c) => ({ ...c, [slug]: Math.max(0, (c[slug] ?? 1) - 1) }))
-      setSent((s) => s.filter((x) => x !== slug))
-      try {
-        sessionStorage.setItem(SENT_KEY, JSON.stringify(nextSent.filter((x) => x !== slug)))
-      } catch {}
-    } finally {
-      setBusy(null)
-    }
-  }
-
   const startPlay = (slug: string, from: HTMLElement) => {
     trigger.current = from
     sfx.tap()
@@ -181,8 +151,12 @@ export default function Shelf() {
   }, [])
 
   // finished: the case window has focus now — taking it back would drop
-  // the reader behind the window they just opened
-  const finishPlay = useCallback(() => setPlaying(null), [])
+  // the reader behind the window they just opened. The mode goes with it:
+  // the case opens on the restored desk, never under the shelf.
+  const finishPlay = useCallback(() => {
+    setPlaying(null)
+    onLaunched?.()
+  }, [onLaunched])
 
   if (!CASES.length) {
     return <Copy k="progress.empty" as="p" className={styles.empty} />
@@ -191,49 +165,77 @@ export default function Shelf() {
   const playingCase = playing ? getCase(playing) : undefined
 
   return (
-    <div className={styles.wrap}>
-      <input
-        ref={hp}
-        type="text"
-        name="website"
-        tabIndex={-1}
-        autoComplete="off"
-        aria-hidden="true"
-        className={styles.hp}
-      />
-
-      {/* NO MASTHEAD. "SHIPPED.SW · parallel 1992" stood here for three
-          passes and Jake struck it in pass 4: the window is already titled
-          Case Studies, and a shelf of boxed software does not need a line of
-          copy explaining that it is a shelf of boxed software. The store
-          framing went with it — Family Hub is hardware as well as software,
-          and an aisle overcommits to a metaphor the work outgrew. The 54px
-          it used to occupy went to the row. */}
+    <div className={`${styles.wrap} ${styles.deckWrap}`}>
+      {/* NO MASTHEAD, AND IT DOES NOT COME BACK. "SHIPPED.SW · parallel
+          1992" stood here for three passes and Jake struck it in pass 4: a
+          shelf of boxed software does not need a line of copy explaining
+          that it is a shelf of boxed software. The store framing went with
+          it — Family Hub is hardware as well as software, and an aisle
+          overcommits to a metaphor the work outgrew. The 54px it used to
+          occupy went to the row. The mode has no titlebar to carry the
+          name either, and Jake ruled on that directly when the room
+          arrived: pass 4 deleted it and it stays deleted. */}
 
       {/* one row, never two: a shelf is a line of boxes you walk along. The
           row is the 3D camera for every box on it (perspective lives here,
-          in CSS) and it draws the plank they stand on. */}
-      <ul className={styles.row} ref={row}>
+          in CSS).
+
+          `data-shelf-stock` is how the mode tells a click on the shelf
+          from a click on the bare desk (ShelfMode.tsx). It sits on the
+          SLOTS, because with the board gone the row is an invisible band
+          across the desk and the gap between two boxes has to mean what it
+          looks like: bare desk. It stays on the row as well for the phone,
+          where the row is a full-bleed scroller a finger drags.
+
+          `data-shelf-row` is the mode's measuring hook: on a phone the
+          stack's scale is bounded by the room this scroller has left as
+          well as by the width (ShelfMode.tsx). Its own attribute rather
+          than the click test above, because the two answer different
+          questions and the slots carry that one too. */}
+      <ul
+        className={`${styles.row} ${styles.deckRow}`}
+        ref={row}
+        data-shelf-stock=""
+        data-shelf-row=""
+      >
         {CASES.map((c, i) => (
-          <li key={c.slug} className={styles.slot}>
+          /* THEY COME IN ONE AT A TIME (Jake). Each box rises a little,
+             grows the last 8% into place, and waits a beat longer than the
+             one to its left — so the shelf is stocked left to right rather
+             than switched on. Transform only: an opacity here would group
+             the slot, and a grouping property above a face flattens the
+             cuboid inside it (see ShelfBox's header). Under reduced motion
+             there is nothing to protect — the solid is already a flat
+             stack — so that path is the plain fade, still one at a time. */
+          <motion.li
+            key={c.slug}
+            className={styles.slot}
+            data-shelf-stock=""
+            initial={reduced ? { opacity: 0 } : { y: 26, scale: 0.92 }}
+            animate={reduced ? { opacity: 1 } : { y: 0, scale: 1 }}
+            transition={
+              reduced
+                ? { duration: 0.16, delay: i * STAGGER }
+                : { ...SPRINGS.rise, delay: i * STAGGER }
+            }
+          >
             <ShelfBox
               c={c}
-              index={i}
-              count={counts[c.slug] ?? 0}
-              sent={sent.includes(c.slug)}
-              busy={busy === c.slug}
-              durable={durable}
-              error={error?.slug === c.slug ? error.message : null}
               fine={fine}
               revealed={revealed === c.slug}
               // the launch layer covers the shelf, so every box under it
               // reads a pointerleave it must ignore — see ShelfBox's `leave`
               overlayOpen={playing !== null}
               onReveal={setRevealed}
-              onNudge={(slug) => void nudge(slug)}
               onPlay={startPlay}
+              /* THE FLIP TAG IS OFF (Jake, "lose the flip buttons for
+                 now"). One flag, so it comes back the day he wants it —
+                 and with the chip gone the cover itself becomes the
+                 announced control, which is what keeps PLAY (printed on
+                 the back panel) reachable from a keyboard. */
+              flipTag={false}
             />
-          </li>
+          </motion.li>
         ))}
       </ul>
 
@@ -244,7 +246,7 @@ export default function Shelf() {
           disables itself when it cannot work. Both are gone; the refusal it
           also carried moved onto the box that caused it (ShelfBox), which is
           the only place it was ever about anything. The 40px went back to the
-          window — see the height derivation in programs/registry.tsx. */}
+          row — see the height derivation on `.row` in shelf.module.css. */}
 
       <AnimatePresence>
         {playingCase && (

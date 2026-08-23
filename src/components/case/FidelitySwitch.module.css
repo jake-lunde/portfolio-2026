@@ -1,0 +1,64 @@
+/* FIDELITY.SW — a classic rocker in the titlebar's right slot. Own
+   module for the same reason TitleAction has one (see that file);
+   everything draws in currentColor so the bar's per-skin ink carries
+   through, active and inactive alike. */
+
+.sw {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 4px;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-14);
+  text-transform: uppercase;
+}
+
+.side {
+  opacity: 0.5;
+  transition: opacity var(--duration-tap) ease;
+}
+
+.side[data-on] {
+  opacity: 1;
+  font-weight: var(--weight-bold);
+}
+
+/* the rocker itself: a hairline case, a solid knob. Big enough to read
+   as a switch at a glance — it is the case's one control. */
+.track {
+  position: relative;
+  width: 36px;
+  height: 16px;
+  border: var(--border-width-default) solid currentColor;
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 10px;
+  background: currentColor;
+  transition: transform 0.16s ease-out;
+}
+
+.sw[aria-checked='true'] .knob {
+  transform: translateX(16px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knob {
+    transition: none;
+  }
+}
+
+.sw:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}

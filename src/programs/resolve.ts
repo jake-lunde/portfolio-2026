@@ -19,11 +19,11 @@ export type ResolvedWindow = {
   /** titlebar action link — wins over both the doc-id and the explainer
       in the meta slot (see registry) */
   titleAction?: ProgramDef['titleAction']
+  /** a live control ahead of the meta slot — the case's own chrome
+      (family-hub's fidelity switch; see cases.ts) */
+  titleWidget?: ComponentType
   /** requires macrodata refinement (the sphere) before the body shows */
   gated?: boolean
-  /** keeps full opacity when unfocused — the program owns a 3D context and
-      the recede is a `filter`, which flattens one (see registry.tsx) */
-  noRecede?: true
 }
 
 /* A window id is a program id, `case:<slug>`, or `viz:<id>`. */
@@ -53,19 +53,24 @@ export function resolveWindow(id: string): ResolvedWindow | null {
       meta: `${c.no} / SPEC`,
       chrome: 'paper',
       component: c.component ?? null,
-      /* wide enough that the evolution rail (360px + berth) sits clear
-         of the column; clamps to the desktop on smaller screens, where
-         the rail overlaps the plates instead (Jake-approved) */
+      titleWidget: c.titleWidget,
+      /* the reading-room width the case was designed at (the rail that
+         once needed the right margin is retired — s94b); x hugs left so
+         width + x fits a 1280 laptop exactly */
       size: { w: 1280, h: 720 },
-      /* x hugs left so width + x fits a 1280 laptop exactly — the rail
-         lives on the window's right edge and must never hang offscreen */
       pos: { x: 24, y: 40 },
       path: `/projects/${c.slug}`,
       gated: true,
     }
   }
   const p = getProgram(id)
-  if (!p) return null
+  /* A registry entry with no component is not a window and never resolves
+     to one: WORK (`progress`) keeps an entry for its icon, its name and
+     its deep link, and opens a mode of the desk instead (registry.tsx).
+     Geometry and the doc-id are optional for exactly that reason, and
+     this guard is what makes it safe — anything that gets past here has
+     all four. */
+  if (!p?.component || !p.size || !p.pos || !p.meta) return null
   return {
     id,
     name: p.name,
@@ -77,7 +82,6 @@ export function resolveWindow(id: string): ResolvedWindow | null {
     path: p.path ?? null,
     explainer: p.explainer,
     titleAction: p.titleAction,
-    noRecede: p.noRecede,
     gated: id === 'projects',
   }
 }
@@ -98,11 +102,20 @@ export function windowsForPath(path: string[]): string[] {
      /edit used to open the EDIT.MODE program, then INSPECT's third tool;
      it lands in plain INSPECT now (see inspectForPath). */
   if (path[0] === 'inspect' || path[0] === 'edit') return ['readme']
+  /* /cases opens NO WINDOW: WORK is a mode of the desk now (SHELF.MODE,
+     store/shelfMode.ts + shelfModeForPath below). The `progress` id keeps
+     its registry entry, its copy keys and this path — the thing the path
+     turns on simply isn't a frame any more. */
+  if (path[0] === 'cases') return []
   if (path[0] === 'projects') {
-    // a case deep-link opens the SHELF behind the case window — that is the
-    // room this work lives in now. The flat `projects` index stays
-    // registered for the bare /projects path only.
-    if (path[1] && getCase(path[1])) return ['progress', `case:${path[1]}`]
+    /* A case deep-link opens the case and nothing else. It used to open
+       `progress` behind it, so the reader landed in the room the work
+       lives in — but that room is the desk itself now, and the mode
+       COVERS the desk: a case window under the plank is a window nobody
+       can see. The two are mutually exclusive by construction (PLAY
+       leaves the mode as the case arrives), and this keeps the deep link
+       honest about it. WORK is one press away. */
+    if (path[1] && getCase(path[1])) return [`case:${path[1]}`]
     return ['projects']
   }
   if (path[0] === 'visualizers') {
@@ -112,6 +125,14 @@ export function windowsForPath(path: string[]): string[] {
   }
   const p = PROGRAMS.find((x) => x.path === `/${path.join('/')}`)
   return p ? [p.id] : ['readme']
+}
+
+/** Does this path bring the shelf up on the desk? Separate from
+    windowsForPath for the same reason inspectForPath is: SHELF.MODE is not
+    a window, so a path that opens it has nothing to put in the window list
+    (see store/shelfMode.ts). */
+export function shelfModeForPath(path: string[]): boolean {
+  return path[0] === 'cases'
 }
 
 /** Does this path arm INSPECT.MODE, and with which tool in the hand?

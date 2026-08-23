@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic'
 import type { ComponentType } from 'react'
+import { FidelitySwitch } from '@/components/case/FidelitySwitch'
 
 /* The four box-art LAYOUTS on the shelf, named for the composition rather
    than for the case that happens to wear it — so a fifth case can pick one
@@ -49,6 +50,11 @@ export type CaseDef = {
   source?: string
   /** build state, read by the shelf's in-development boxes (WIP-15) */
   progress?: { pct: number; phase: string }
+  /** a live control in the titlebar's right slot, ahead of the doc-id —
+      the case's own chrome (family-hub's fidelity switch). Static
+      import, not dynamic: a control that pops in after the bar reads
+      as a glitch, and the one that exists is a few hundred bytes. */
+  titleWidget?: ComponentType
   /** SHIPPED.SW — the case as boxed retail software on the shelf
       (src/programs/shelf). Every field is optional so registering a new
       case stays one CASES entry: no `box` at all still yields a box, just
@@ -97,6 +103,25 @@ export type CaseDef = {
     /** the line under the title on the front of the box — what the software
         promises, in six words. Jake's own from the Figma template. */
     tagline?: string
+    /** THE COVER'S OWN NAME, when the box is not selling the case study by
+        the case study's name. A shelf title is marketing and a case title is
+        a record: the cartridge says "Investing for Kids" because that is what
+        a 1982 box would have printed on it, while the panel behind it, the
+        window it opens and the route it lives at all keep `name`. Absent →
+        the cover prints `name`, which is what three of the four do. */
+    coverTitle?: string
+    /** same argument for the line above (or under) the title — "by Greenlight"
+        is how a box credits its house, and `org` is how a résumé does.
+        Absent → the cover prints `org`. */
+    coverEyebrow?: string
+    /** THE STARBURST, printed over the corner of the picture: the seal every
+        toy box of the era wore, promising the one thing the buyer was
+        actually worried about. Two or three words, and it is drawn only on
+        the cover that asks for one. */
+    burst?: string
+    /** the small print along the foot of the cover — an age rating, a count,
+        the line a box carries because boxes carry one. */
+    footnote?: string
     /** WHICH BOX-ART LAYOUT THIS COVER GETS.
 
         A shelf of real 1992 software is not a product family — it is four
@@ -122,17 +147,22 @@ export type CaseDef = {
         reads `video` directly, so this lets the shelf cover run a different
         cut without touching what's already running on the desktop. */
     shelfVideo?: string
-    /** THE BACK PANEL'S SYSTEM REQUIREMENTS — exactly three rows.
+    /** THE BACK PANEL'S LEDGER — the rows printed under the panel's one
+        heading, pinned to the foot of the board.
 
-        Not a list that happens to be short: a ledger, and the ledger is
-        three lines because a box back has room for three lines of data at
-        a size worth reading. The one-line rule is enforced BY CONSTRUCTION
+        A ROW WITH A VALUE IS A LEDGER LINE: label hard left, figure hard
+        right, one line each. The one-line rule is enforced BY CONSTRUCTION
         (`white-space: nowrap` in shelf.module.css) rather than by
         truncation, which means the discipline lives HERE: a label is one
         or two words, a value is a figure and the shortest phrase that
         makes it mean something. If a value overflows, the copy is wrong —
-        do not shrink the type to rescue it, and never add a fourth row. */
-    requirements?: { label: string; value: string }[]
+        do not shrink the type to rescue it.
+
+        A ROW WITHOUT ONE IS A CONTENTS LINE: the label takes the full
+        width and the panel numbers it, which is how a box lists what is in
+        it rather than what it needs. Don't mix the two kinds in one set —
+        a half-numbered list is neither. */
+    requirements?: { label: string; value?: string }[]
     /** a quote from the work, printed as the review blurb */
     blurb?: { quote: string; source: string }
     /** the case's own thesis line, in Jake's words */
@@ -163,13 +193,22 @@ export const CASES: CaseDef[] = [
       og: { src: '/case/greenlight-invest/og.jpg', w: 1200, h: 571 },
       video: '/case/greenlight-invest/box-film.mp4',
       coverVariant: 'stripe',
-      tagline: 'know why, not just what.',
+      /* THE COVER SELLS THE PRODUCT, THE PANEL RECORDS THE WORK. A cartridge
+         box printed the promise to the buyer — a kid's parent — and the
+         company's name in small type under it; the case study behind it is
+         still Greenlight Invest, which is what the back, the window and the
+         route all say. */
+      coverTitle: 'Investing for Kids',
+      coverEyebrow: 'by Greenlight',
+      tagline: 'Know why, not just what',
+      burst: 'Responsible investing!',
+      footnote: 'ages 6 and up',
       thesis:
         'Regardless of the layout or data, kids told us they didn’t understand, so we got on their level.',
       requirements: [
-        { label: 'Role', value: 'Lead product designer' },
-        { label: 'Trades', value: '3–4× vs. unexposed' },
-        { label: 'Detail views', value: '+355%' },
+        { label: 'Role', value: 'Lead designer' },
+        { label: 'Trades', value: '3–4× higher' },
+        { label: 'Stock detail views', value: '+355%' },
       ],
       blurb: { quote: 'It encouraged conversation.', source: 'Parent, user research' },
     },
@@ -184,6 +223,8 @@ export const CASES: CaseDef[] = [
     component: dynamic(() => import('@/programs/projects/CaseFamilyHub')),
     source: 'family-hub.mdx',
     progress: { pct: 100, phase: 'Shipped. Read it' },
+    /* FIDELITY.SW — the draft/shipped rocker in the window bar (s94b) */
+    titleWidget: FidelitySwitch,
     box: {
       /* the hub dashboard, seated under the blob mask and the airbrush —
          the same treatment the film gets, which is what makes the two
@@ -215,8 +256,8 @@ export const CASES: CaseDef[] = [
         'The all-in-one family organizer, on Greenlight’s first hardware. I was its first skeptic, then ended up leading its design team.',
       requirements: [
         { label: 'Design : eng', value: '1 : 10' },
-        { label: 'Nationwide', value: '7 months from zero' },
-        { label: 'Concept appeal', value: '80%, before price' },
+        { label: 'Nationwide', value: '7 months from no code' },
+        { label: 'Hardware version', value: '1.0' },
       ],
       /* The verbatim, elided rather than rewritten: the words are the
          parent's and in her order, the ellipsis marks where "and a shared
@@ -243,6 +284,17 @@ export const CASES: CaseDef[] = [
     box: {
       art: { src: '/case/tooling/box-art.webp', w: 960, h: 960 },
       coverVariant: 'catalog',
+      thesis:
+        'In order to work better and faster, I have improved processes and workflows for myself and the broader team.',
+      /* a contents list, not a ledger: an unshipped box has no figures to
+         report, so the panel prints what is in the carton and numbers it */
+      requirements: [
+        { label: 'Design-to-code pipeline' },
+        { label: 'Feedback ticket triage' },
+        { label: 'Figma-to-Lottie plugin' },
+        { label: 'Live audit loop' },
+        { label: 'Surprise bonus tool!' },
+      ],
     },
   },
   {
@@ -258,6 +310,14 @@ export const CASES: CaseDef[] = [
     box: {
       art: { src: '/case/interview-pipeline/box-art.webp', w: 1024, h: 1024 },
       coverVariant: 'nocturne',
+      thesis:
+        'I dreaded working on my portfolio, but with new tools I found a way for the process to inspire and excite me. You’re seeing the result of that on the site today.',
+      requirements: [
+        { label: 'Fun', value: '100%+ YOY' },
+        { label: 'Skills', value: 'REAFFIRMED' },
+        { label: 'Still work?', value: 'YES' },
+        { label: 'Feel like work?', value: 'NO' },
+      ],
     },
   },
 ]

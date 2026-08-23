@@ -1,14 +1,15 @@
 /* rubber-stamp block — archival accent vocabulary */
 .stamp {
   display: inline-block;
-  font-family: var(--type-label-family);
-  font-size: var(--type-label-size);
-  font-weight: var(--weight-bold); /* diverges from label's regular weight — stamp reads bolder */
-  letter-spacing: var(--tracking-20); /* diverges from label's tracking-14 — wider track for the stamp */
+  font-family: var(--stamp-text-font-family);
+  font-size: var(--stamp-text-font-size);
+  font-weight: var(--stamp-text-font-weight);
+  letter-spacing: var(--stamp-text-letter-spacing);
+  line-height: var(--stamp-text-line-height);
   text-transform: uppercase;
-  color: var(--accent);
-  border: 2px solid var(--accent);
-  padding: 5px 10px;
+  color: var(--stamp-fg);
+  border: var(--stamp-border-width) solid var(--stamp-border-color);
+  padding: var(--stamp-padding-y) var(--stamp-padding-x);
   transform: rotate(-3deg);
   opacity: 0.85;
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='2'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 .4 .7 1 1 1 1 1'/%3E%3C/feComponentTransfer%3E%3CfeComposite operator='in' in2='SourceGraphic'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E");
@@ -16,8 +17,8 @@
 }
 
 .stampPink {
-  color: var(--content);
-  border-color: var(--accent-expressive);
+  color: var(--stamp-pink-fg);
+  border-color: var(--stamp-pink-border-color);
 }
 
 /* ---------- Button — token-driven, the component-loop demo target ------- */
@@ -28,44 +29,60 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  font-family: var(--mono);
-  font-weight: var(--button-weight);
   text-transform: uppercase;
   border-radius: var(--button-radius);
-  background: var(--surface);
-  color: var(--content);
+  background: var(--button-bg);
+  color: var(--button-fg);
   border-style: solid;
-  border-color: var(--content);
+  border-color: var(--button-stroke);
   cursor: pointer;
   transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 [data-theme='dark'] .btn {
-  border-color: var(--border);
+  --button-stroke: var(--border);
 }
 
+/* The face lives on the SIZE classes, not on .btn: a button's type is one
+   role — sm is type/control-sm, md is type/control — and Button always draws
+   exactly one of the two. */
 .btnSm {
-  font-size: var(--button-sm-font-size);
-  letter-spacing: var(--button-sm-tracking);
+  font-family: var(--button-sm-text-font-family);
+  font-size: var(--button-sm-text-font-size);
+  font-weight: var(--button-sm-text-font-weight);
+  letter-spacing: var(--button-sm-text-letter-spacing);
+  line-height: var(--button-sm-text-line-height);
   padding: var(--button-sm-padding-y) var(--button-sm-padding-x);
   border-width: var(--button-sm-border);
 }
 
 .btnMd {
-  font-size: var(--button-md-font-size);
-  letter-spacing: var(--button-md-tracking);
+  font-family: var(--button-md-text-font-family);
+  font-size: var(--button-md-text-font-size);
+  font-weight: var(--button-md-text-font-weight);
+  letter-spacing: var(--button-md-text-letter-spacing);
+  line-height: var(--button-md-text-line-height);
   padding: var(--button-md-padding-y) var(--button-md-padding-x);
   border-width: var(--button-md-border);
 }
 
-.btnExpressive:hover {
-  background: var(--accent-expressive);
-  color: var(--on-accent-expressive);
+/* The two tone hovers, and the second thing that can turn them on. STYLER's
+   stage offers a STATE modifier, and a button whose hover fill can only be
+   seen by pointing at it is a rebind you cannot review: the bench writes
+   `data-styler-state="hover"` on itself and these answer to that as well as
+   to the pointer. One declaration, not two, so the forced state cannot drift
+   from the real one; `:is()` takes its heaviest branch's specificity, which
+   is the (0,1,0) `:hover` already carried, so `.btnSolid:hover` below still
+   wins the way it did. The long version of this note is in
+   components/shell/shell.module.css, on .iconBtn. */
+.btnExpressive:is(:hover, [data-styler-state='hover'] *) {
+  background: var(--button-expressive-hover-bg);
+  color: var(--button-expressive-hover-fg);
 }
 
-.btnSystem:hover {
-  background: var(--accent);
-  color: var(--surface);
+.btnSystem:is(:hover, [data-styler-state='hover'] *) {
+  background: var(--button-system-hover-bg);
+  color: var(--button-system-hover-fg);
 }
 
 /* solid: the system accent at rest (hub-player's CASE STUDY). Hover spec
@@ -73,8 +90,8 @@
    rules resolve to the same fill. */
 .btnSolid,
 .btnSolid:hover {
-  background: var(--accent);
-  color: var(--surface);
+  background: var(--button-solid-bg);
+  color: var(--button-solid-fg);
 }
 
 /* under-construction plate for stub programs */

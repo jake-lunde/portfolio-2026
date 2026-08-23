@@ -2,17 +2,23 @@ import { NextResponse } from 'next/server'
 import { timingSafeEqual } from 'node:crypto'
 import { GitHub, parseRepo } from '@/lib/github'
 import {
+  applyComponentEdits,
   applyTokenEdits,
   BASE_THEME,
+  componentFilePath,
   isTokenTheme,
   MAX_EDITS,
+  serializeComponentTokens,
   serializeTokens,
   themeFilePath,
+  tierOfRole,
+  validateEdit,
   type TokenEdit,
   type TokenTheme,
   type TokenTree,
 } from '@/lib/tokenEdit'
 import { PALETTE } from '@/lib/palette'
+import { candidatesFor, COMPONENT_IDS, componentIdOf } from '@/lib/styleCandidates'
 import { REPO_SLUG as DEFAULT_REPO } from '@/lib/repo'
 
 export const runtime = 'nodejs'
@@ -24,6 +30,13 @@ export const dynamic = 'force-dynamic'
    tokens/semantic/<theme>.json on a branch, as a PULL REQUEST.
    Jake's ruling: copy commits go straight to main, TOKEN commits do not.
    A token edit moves every skin downstream of it, so it gets reviewed.
+
+   STYLER (s99) sends its rebinds down the same pipe, and the route sorts
+   them by TIER rather than by caller: a semantic role edits the theme file,
+   a component property edits tokens/component/<id>.json. One request can
+   carry both — they are one intent, and splitting them across two PRs would
+   ask a reviewer to hold half a change in their head — so the files are
+   written in ONE commit onto the same branch, and the ledger names each file.
 
    The strict gate is CI, not this route: .github/workflows/tokens-sync.yml
    fires on any PR touching tokens/** and runs
@@ -44,8 +57,8 @@ const BASE_BRANCH = 'main'
     would litter the repo with one-line PRs nobody closes. */
 const PR_BRANCH = 'inspect-tune'
 const PR_BODY_INTRO =
-  'Opened from INSPECT.MODE — a semantic role re-cast to a core primitive in the ' +
-  'live inspector, committed as a token edit.\n\n' +
+  'Opened from the live inspector — a semantic role re-cast to a core primitive, ' +
+  'or a component property re-bound to a semantic role, committed as a token edit.\n\n' +
   'CI regenerates `src/styles/tokens.generated.css` and runs the token doctor ' +
   '(`--strict --parity origin/main`); Chromatic diffs the result.'
 
@@ -103,18 +116,21 @@ async function editableHead(gh: GitHub): Promise<Head> {
   return { ref: pr ? PR_BRANCH : BASE_BRANCH, pr }
 }
 
-/** Read a theme file at `ref` — text and blob sha from one response, so the
+/** Read a token file at `ref` — text and blob sha from one response, so the
     sha the client round-trips as baseSha always describes the text it was
     shown. Null when GitHub says 404. */
-async function readTheme(
+async function readTokenFile(
   gh: GitHub,
-  theme: TokenTheme,
+  path: string,
   ref: string,
 ): Promise<{ sha: string; content: string } | null> {
-  const file = await gh.getFileBase64(themeFilePath(theme), ref)
+  const file = await gh.getFileBase64(path, ref)
   if (!file) return null
   return { sha: file.sha, content: Buffer.from(file.base64, 'base64').toString('utf8') }
 }
+
+const readTheme = (gh: GitHub, theme: TokenTheme, ref: string) =>
+  readTokenFile(gh, themeFilePath(theme), ref)
 
 function parseTree(text: string): TokenTree | null {
   try {
@@ -126,7 +142,24 @@ function parseTree(text: string): TokenTree | null {
   }
 }
 
-const paletteName = (token: string) => PALETTE.find((c) => c.token === token)?.name ?? token
+/** The human name of a target, whichever list it came from: the palette for a
+    semantic re-cast, the row's own candidate list for a component rebind.
+    Falls back to the path so a ledger line is never blank. */
+function targetName(edit: TokenEdit): string {
+  const palette = PALETTE.find((c) => c.token === edit.token)
+  if (palette) return palette.name
+  return candidatesFor(edit.role).find((c) => c.token === edit.token)?.name ?? edit.token
+}
+
+/** One file's worth of applied edits. `label` is what the commit subject names
+    the scope by — the theme for a semantic edit, the component id for a
+    rebind — because that is the word a reviewer scans the subject line for. */
+type Change = {
+  path: string
+  label: string
+  content: string
+  applied: ReadonlyArray<TokenEdit & { materialized: boolean }>
+}
 
 /** House machine voice, and the line a reviewer reads first:
     `tune: re-alias accent → nasa/cobalt (classic-light)`. */
@@ -135,30 +168,56 @@ function summaryLine(edit: TokenEdit): string {
   return `re-alias ${edit.role} → ${short}`
 }
 
-function commitMessage(edits: readonly TokenEdit[], theme: TokenTheme): string {
-  if (edits.length === 1) return `tune: ${summaryLine(edits[0])} (${theme})`
-  return `tune: re-alias ${edits.length} roles (${theme})`
+function commitMessage(changes: readonly Change[]): string {
+  const all = changes.flatMap((ch) => ch.applied)
+  const scope = changes.map((ch) => ch.label).join(', ')
+  if (all.length === 1) return `tune: ${summaryLine(all[0])} (${scope})`
+  return `tune: re-alias ${all.length} roles (${scope})`
 }
 
 /** The per-role ledger, shared by the PR body (on create) and the PR comment
-    (on a second nudge onto an already-open PR). */
-function changesSection(
-  edits: ReadonlyArray<TokenEdit & { materialized: boolean }>,
-  theme: TokenTheme,
-): string {
-  const lines = edits.map(
-    (e) =>
-      `- \`${e.role}\` → \`{${e.token.split('/').join('.')}}\` (${paletteName(e.token)})` +
-      (e.materialized ? ' — new override, materialized in this theme' : ''),
-  )
-  return [`## Changes — \`${themeFilePath(theme)}\``, ...lines].join('\n')
+    (on a second nudge onto an already-open PR). One section per file, so a
+    request that moved both tiers reads as two lists, not one blurred one. */
+function changesSection(changes: readonly Change[]): string {
+  return changes
+    .map((ch) =>
+      [
+        `## Changes — \`${ch.path}\``,
+        ...ch.applied.map(
+          (e) =>
+            `- \`${e.role}\` → \`{${e.token.split('/').join('.')}}\` (${targetName(e)})` +
+            (e.materialized ? ' — new override, materialized in this theme' : ''),
+        ),
+      ].join('\n'),
+    )
+    .join('\n\n')
 }
 
 export async function GET(req: Request) {
   const g = gate(req)
   if ('res' in g) return g.res
 
-  const theme = new URL(req.url).searchParams.get('theme')
+  /* `?component=<id>` serves a component set instead of a theme set — STYLER
+     needs the current file to show what a row is bound to, and it has to read
+     it from the SAME editable head the commit will parent, or the panel would
+     draw values a pending PR has already moved. */
+  const params = new URL(req.url).searchParams
+  const component = params.get('component')
+  if (component !== null) {
+    if (!(COMPONENT_IDS as readonly string[]).includes(component)) {
+      return NextResponse.json({ error: 'unknown component' }, { status: 400 })
+    }
+    try {
+      const head = await editableHead(g.gh)
+      const file = await readTokenFile(g.gh, componentFilePath(component), head.ref)
+      if (!file) return NextResponse.json({ error: 'github read failed' }, { status: 502 })
+      return NextResponse.json({ sha: file.sha, content: file.content })
+    } catch {
+      return NextResponse.json({ error: 'github read failed' }, { status: 502 })
+    }
+  }
+
+  const theme = params.get('theme')
   if (!isTokenTheme(theme)) {
     return NextResponse.json({ error: 'unknown theme' }, { status: 400 })
   }
@@ -199,11 +258,28 @@ export async function POST(req: Request) {
   if (body.edits.length > MAX_EDITS) {
     return NextResponse.json({ error: `too many edits (max ${MAX_EDITS})` }, { status: 400 })
   }
-  // shape only — applyTokenEdits owns the law (semantic tier, palette token)
+  // shape only — the apply functions own the law (tier, ramp, palette)
   const edits: TokenEdit[] = body.edits.map((e: unknown) => ({
     role: String((e as TokenEdit)?.role ?? ''),
     token: String((e as TokenEdit)?.token ?? ''),
   }))
+
+  /* Validate BEFORE splitting. The partition below sorts by tier, and a role
+     the manifest doesn't know has no tier to sort into — filtering first
+     would drop it silently and answer 'no change' to a request that was
+     actually illegal. One gate, then the split. */
+  for (const edit of edits) {
+    const bad = validateEdit(edit)
+    if (bad) return NextResponse.json({ error: bad }, { status: 400 })
+  }
+  /* tierOfRole, not TOKEN_TIERS directly: a text element's Text style row
+     names a composite parent (--stamp-text) that the build expands away and
+     the tier map therefore never lists. Read straight off TOKEN_TIERS, a
+     lawful type-role rebind would pass validateEdit and then match NEITHER
+     filter — dropped between the gate and the writer, answered as 'no
+     change'. One tier function, asked everywhere. */
+  const semanticEdits = edits.filter((e) => tierOfRole(e.role) === 'semantic')
+  const componentEdits = edits.filter((e) => tierOfRole(e.role) === 'component')
 
   let head: Head
   let file: { sha: string; content: string } | null
@@ -235,23 +311,86 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'theme file is not valid JSON' }, { status: 500 })
   }
 
-  const result = applyTokenEdits(target, base, edits)
-  if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: 400 })
+  /* One list of file writes, built tier by tier. A file whose serialization
+     comes back identical is dropped rather than committed — GitHub would take
+     it, but it would put a no-op blob in the tree and a line in the ledger
+     that claims a change nobody made. */
+  const changes: Change[] = []
+
+  if (semanticEdits.length > 0) {
+    const result = applyTokenEdits(target, base, semanticEdits)
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 })
+    }
+    const next = serializeTokens(result.json)
+    if (next !== file.content) {
+      changes.push({
+        path: themeFilePath(theme),
+        label: theme,
+        content: next,
+        applied: result.applied,
+      })
+    }
   }
 
-  const next = serializeTokens(result.json)
-  if (next === file.content) {
+  /* Component edits, grouped by the component they belong to — one file per
+     group, because applyComponentEdits works on exactly one set. The groups
+     are read at the SAME editable head as the theme file, so a rebind stacks
+     onto whatever the open PR already proposed instead of reverting it. */
+  for (const [id, group] of groupByComponent(componentEdits)) {
+    const path = componentFilePath(id)
+    let componentFile: { sha: string; content: string } | null
+    try {
+      componentFile = await readTokenFile(gh, path, head.ref)
+    } catch {
+      return NextResponse.json({ error: 'github read failed' }, { status: 502 })
+    }
+    if (!componentFile) {
+      return NextResponse.json({ error: 'github read failed' }, { status: 502 })
+    }
+    const tree = parseTree(componentFile.content)
+    if (!tree) {
+      return NextResponse.json({ error: 'component file is not valid JSON' }, { status: 500 })
+    }
+    const result = applyComponentEdits(tree, group)
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 })
+    }
+    // component sets are hand-authored and unescaped — see serializeTokens
+    const next = serializeComponentTokens(result.json)
+    if (next !== componentFile.content) {
+      changes.push({ path, label: id, content: next, applied: result.applied })
+    }
+  }
+
+  if (changes.length === 0) {
     return NextResponse.json({ error: 'no change' }, { status: 400 })
   }
 
   try {
-    const pr = await commitAndPr(gh, head, theme, next, result.applied)
+    const pr = await commitAndPr(gh, head, changes)
     return NextResponse.json({ prNumber: pr.number, prUrl: pr.html_url })
   } catch {
     // never echo the token or a raw github body
     return NextResponse.json({ error: 'github commit failed' }, { status: 502 })
   }
+}
+
+/** Component edits in arrival order, bucketed by component id. Insertion
+    order is kept so the ledger reads in the order the visitor made the
+    changes, not alphabetically. */
+function groupByComponent(edits: readonly TokenEdit[]): Map<string, TokenEdit[]> {
+  const groups = new Map<string, TokenEdit[]>()
+  for (const edit of edits) {
+    // validateEdit already refused a component role with no registered
+    // component; the fallback keeps the type honest without inventing a path
+    const id = componentIdOf(edit.role)
+    if (!id) continue
+    const group = groups.get(id)
+    if (group) group.push(edit)
+    else groups.set(id, [edit])
+  }
+  return groups
 }
 
 /* The PR cascade, modelled on the Figma bridge's (figma-plugin/src/code.ts):
@@ -267,9 +406,7 @@ export async function POST(req: Request) {
 async function commitAndPr(
   gh: GitHub,
   head: Head,
-  theme: TokenTheme,
-  content: string,
-  applied: ReadonlyArray<TokenEdit & { materialized: boolean }>,
+  changes: readonly Change[],
 ): Promise<{ number: number; html_url: string }> {
   const existingPr = head.pr
   let branchSha = await gh.refShaOrNull(PR_BRANCH)
@@ -284,21 +421,22 @@ async function commitAndPr(
 
   const parentSha = branchSha ?? (await gh.refSha(BASE_BRANCH))
   const baseTree = await gh.commitTree(parentSha)
-  const treeSha = await gh.createTree(baseTree, [{ path: themeFilePath(theme), content }])
-  const commitSha = await gh.createCommit(commitMessage(applied, theme), treeSha, parentSha)
+  // every touched file in ONE tree, so both tiers of one intent land as one
+  // commit and a reviewer never sees half of it
+  const treeSha = await gh.createTree(
+    baseTree,
+    changes.map((ch) => ({ path: ch.path, content: ch.content })),
+  )
+  const subject = commitMessage(changes)
+  const commitSha = await gh.createCommit(subject, treeSha, parentSha)
 
   if (branchSha) await gh.updateBranch(PR_BRANCH, commitSha)
   else await gh.createBranch(PR_BRANCH, commitSha)
 
-  const changes = changesSection(applied, theme)
+  const ledger = changesSection(changes)
   if (existingPr) {
-    await gh.createPrComment(existingPr.number, changes)
+    await gh.createPrComment(existingPr.number, ledger)
     return { number: existingPr.number, html_url: existingPr.html_url }
   }
-  return gh.createPr(
-    PR_BRANCH,
-    BASE_BRANCH,
-    commitMessage(applied, theme),
-    `${PR_BODY_INTRO}\n\n${changes}`,
-  )
+  return gh.createPr(PR_BRANCH, BASE_BRANCH, subject, `${PR_BODY_INTRO}\n\n${ledger}`)
 }

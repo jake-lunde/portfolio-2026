@@ -27,6 +27,30 @@ body {
   -webkit-font-smoothing: antialiased;
   line-height: var(--leading-normal);
   overflow: hidden; /* the OS owns the viewport; windows scroll internally */
+  /* THE VIEWPORT, NAMED, so a bench can stand in for it.
+     Jake, on STYLER's stage: "I feel like I'm not able to manipulate the
+     mobile view." The pilot components' small-screen rules were viewport
+     @media, and a 360px bench inside a 1440px room is not a 360px viewport,
+     so the stage could never draw the mobile form of the thing it was
+     styling. Those rules are @container now (shell.module.css) and this is
+     the container they measure against on the real desktop; the stage's
+     bench declares the same NAME closer in, so the nearest one wins and the
+     bench overrides the screen (inspect/stylerStage.module.css, .mount).
+
+     WHY BODY AND NOT THE DESKTOP. `container-type: inline-size` carries
+     layout containment, which makes the element the containing block for
+     every `position: fixed` descendant under it — so the container has to
+     be a box that already IS the viewport, or the whole OS moves. `main
+     .desktop` is neither: it starts below the menu bar, INSPECT.MODE insets
+     both its sides (which would put a 1200px screen under the 720px rule
+     the moment the tool opened), and the menu bar is its SIBLING rather
+     than its child, so half the pilot components are outside it. Body is
+     the one element that spans the screen and holds all of them: height
+     100% of an html that is 100% of the viewport, margin 0, and the fixed
+     furniture it now positions lands pixel-for-pixel where it landed
+     before. Verified by rect probe at 1280 and at 400 (s111). */
+  container-name: viewport;
+  container-type: inline-size;
 }
 
 body,
@@ -46,6 +70,20 @@ input {
 body[data-inspectmode='on'] {
   --inspect-left: 244px;
   --inspect-right: 304px;
+}
+
+/* THE AMBIENT CREW'S OWN FLOOR (s88 follow-ups, task 4) — same reasoning
+   as INSPECT.MODE's docks above: AmbientAgents.tsx and its stylesheet
+   (components/shell/shell.module.css) both need the same width and
+   neither can hand it to the other, since a CSS Modules rule with no
+   local class isn't allowed to sit on `:root` in this pipeline (`pure`
+   selector mode) and a media query can't read a custom property anyway.
+   So this lives here instead: the stylesheet's own @media rule still has
+   to spell 900px out as a literal (it says so where it does), and the
+   component reads this property at runtime rather than hand-copying that
+   literal a second time. Change this value and the literal both. */
+:root {
+  --crew-desktop-min: 900px;
 }
 
 a {
@@ -157,9 +195,11 @@ b {
 
 /* ---------- classic-Mac scrollbars ---------- */
 
-/* Firefox only. Chrome/Safari honour the standard properties in preference to
-   ::-webkit-scrollbar-*, so setting them unguarded silently kills every rule
-   below and hands macOS back its overlay scrollbar. */
+/* Firefox only, and two flat colours is the whole of what it can take: no
+   rails, no dither, no inset thumb. Chrome/Safari honour the standard
+   properties in preference to ::-webkit-scrollbar-*, so setting them
+   unguarded silently kills every rule below and hands macOS back its overlay
+   scrollbar. */
 @supports not selector(::-webkit-scrollbar) {
   * {
     scrollbar-width: auto;
@@ -167,51 +207,97 @@ b {
   }
 }
 
-::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
+/* The channel's furniture, hoisted so the vertical bar, the horizontal bar
+   and the corner all draw the same ground. A var() inside a custom property
+   resolves where the property is DECLARED, not where it is used, so these are
+   declared on every element that re-scopes the tokens (the same boundaries
+   tokens.generated.css uses: the root, a skin, a theme) — a nested
+   `data-skin` preview then dithers in its own ink, not the page's. */
+:root,
+[data-skin],
+[data-theme] {
+  --sb-rail-v: repeating-linear-gradient(to bottom, var(--content-muted) 0 1.5px, transparent 1.5px 3px);
+  --sb-rail-h: repeating-linear-gradient(to right, var(--content-muted) 0 1.5px, transparent 1.5px 3px);
+  /* 1px checkerboard, the System 7 dither, held to the 18% strength --border
+     uses so the channel stays ground and the thumb stays figure. A data-URI
+     tile was the other way to draw this, and it cannot take var(): it would
+     need a hex per skin. The arrow glyphs already pay that tax and nothing
+     else should. */
+  --sb-checker: repeating-conic-gradient(
+    color-mix(in srgb, var(--content-muted) 18%, transparent) 0% 25%,
+    transparent 25% 50%
+  );
+  --sb-thumb-inset: 2px;
 }
 
 /* The track is a channel, not a slab: two dotted rails on the long edges,
-   surface between them. 1.5px on, 1.5px off — the same hairline rhythm the
-   window chrome uses. */
-::-webkit-scrollbar-track {
+   1.5px on and 1.5px off (the same hairline rhythm the window chrome uses),
+   dither between them. Rails and dither sit on the scrollbar box rather than
+   on the track, so they run the full height of the frame and pass behind the
+   arrows without a seam. On the track they would restart at every arrow
+   joint, and since the track's length follows the content there is no button
+   height that keeps the two ends in step. */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
   background-color: var(--surface);
-  background-image:
-    repeating-linear-gradient(to bottom, var(--content-muted) 0 1.5px, transparent 1.5px 3px),
-    repeating-linear-gradient(to bottom, var(--content-muted) 0 1.5px, transparent 1.5px 3px);
-  background-size: 1px 3px;
+}
+
+::-webkit-scrollbar:vertical {
+  background-image: var(--sb-rail-v), var(--sb-rail-v), var(--sb-checker);
+  background-size: 1px 3px, 1px 3px, 2px 2px;
   background-position:
     left top,
-    right top;
-  background-repeat: repeat-y;
+    right top,
+    left top;
+  background-repeat: repeat-y, repeat-y, repeat;
+}
+
+::-webkit-scrollbar:horizontal {
+  background-image: var(--sb-rail-h), var(--sb-rail-h), var(--sb-checker);
+  background-size: 3px 1px, 3px 1px, 2px 2px;
+  background-position:
+    left top,
+    left bottom,
+    left top;
+  background-repeat: repeat-x, repeat-x, repeat;
+}
+
+/* the track and the arrow boxes are holes onto the frame underneath */
+::-webkit-scrollbar-track {
+  background: transparent;
   border: none;
 }
 
-::-webkit-scrollbar-track:horizontal {
-  background-image:
-    repeating-linear-gradient(to right, var(--content-muted) 0 1.5px, transparent 1.5px 3px),
-    repeating-linear-gradient(to right, var(--content-muted) 0 1.5px, transparent 1.5px 3px);
-  background-size: 3px 1px;
-  background-position:
-    left top,
-    left bottom;
-  background-repeat: repeat-x;
+/* The thumb rides in the channel instead of filling it, with 2px of ground
+   showing either side. Transparent side borders hold that gap open,
+   background-clip keeps the fill from bleeding under them, and the ring moves
+   to an inset shadow because the border is no longer the thing drawing it. */
+::-webkit-scrollbar-thumb {
+  background-color: var(--surface-raised);
+  background-clip: padding-box;
+  border: 0 solid transparent;
+  border-left-width: var(--sb-thumb-inset);
+  border-right-width: var(--sb-thumb-inset);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 var(--border-width-thick) var(--content);
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--surface-raised);
-  border: var(--border-width-thick) solid var(--content);
-  border-radius: var(--radius-sm);
-  box-shadow: none;
+::-webkit-scrollbar-thumb:horizontal {
+  border-left-width: 0;
+  border-right-width: 0;
+  border-top-width: var(--sb-thumb-inset);
+  border-bottom-width: var(--sb-thumb-inset);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-expressive);
+  background-color: var(--accent-expressive);
 }
 
-/* Bare glyphs — the arrows lost their button boxes, so they read as marks on
-   the surface rather than a second run of chrome. */
+/* Bare glyphs: the arrows lost their button boxes, so they read as marks on
+   the channel rather than a second run of chrome. The box stays transparent
+   for the same reason the track does, which is what lets the rails carry on
+   past them to the ends of the frame. */
 ::-webkit-scrollbar-button {
   /* Chrome reserves no room for a button without an explicit display */
   display: block;
@@ -229,12 +315,20 @@ b {
   width: 10px;
 }
 
-/* One glyph per end — drop the second half of the double-button pair */
+/* One glyph per end: drop the second half of the double-button pair */
 ::-webkit-scrollbar-button:start:increment,
 ::-webkit-scrollbar-button:end:decrement {
   display: none;
 }
 
+/* A data-URI cannot take a var(), so these hexes are baked by hand from the
+   classic --content values: #17150D light, #E9E4D5 dark. Medieval's ink is
+   #241A10, near enough the light one that the arrows read the same on
+   parchment, so medieval borrows this set instead of adding a third. That is
+   also why the dark set below is scoped to classic (the same way
+   tokens.generated.css scopes its dark block): medieval keeps its parchment
+   surface at data-theme='dark', and an unscoped rule put pale arrows on it
+   that all but disappeared. */
 ::-webkit-scrollbar-button:vertical:decrement {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 1L7 6H1z' fill='%2317150D'/%3E%3C/svg%3E");
 }
@@ -251,23 +345,33 @@ b {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M7 4L2 7V1z' fill='%2317150D'/%3E%3C/svg%3E");
 }
 
+/* Where the two bars meet, the ground carries on and the two outer rails turn
+   the corner, so the dotted outline of the channel closes instead of stopping
+   short. The inner rails have nothing to meet here, so they stay out. */
 ::-webkit-scrollbar-corner {
-  background: var(--surface);
+  background-color: var(--surface);
+  background-image: var(--sb-rail-v), var(--sb-rail-h), var(--sb-checker);
+  background-size: 1px 3px, 3px 1px, 2px 2px;
+  background-position:
+    right top,
+    left bottom,
+    left top;
+  background-repeat: repeat-y, repeat-x, repeat;
 }
 
-[data-theme='dark'] ::-webkit-scrollbar-button:vertical:decrement {
+[data-skin='classic'][data-theme='dark'] ::-webkit-scrollbar-button:vertical:decrement {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 1L7 6H1z' fill='%23E9E4D5'/%3E%3C/svg%3E");
 }
 
-[data-theme='dark'] ::-webkit-scrollbar-button:vertical:increment {
+[data-skin='classic'][data-theme='dark'] ::-webkit-scrollbar-button:vertical:increment {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 7L1 2h6z' fill='%23E9E4D5'/%3E%3C/svg%3E");
 }
 
-[data-theme='dark'] ::-webkit-scrollbar-button:horizontal:decrement {
+[data-skin='classic'][data-theme='dark'] ::-webkit-scrollbar-button:horizontal:decrement {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 4L6 1v6z' fill='%23E9E4D5'/%3E%3C/svg%3E");
 }
 
-[data-theme='dark'] ::-webkit-scrollbar-button:horizontal:increment {
+[data-skin='classic'][data-theme='dark'] ::-webkit-scrollbar-button:horizontal:increment {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M7 4L2 7V1z' fill='%23E9E4D5'/%3E%3C/svg%3E");
 }
 

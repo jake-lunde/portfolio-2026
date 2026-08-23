@@ -8,6 +8,8 @@
 type FromPlugin =
   | { type: 'settings'; repo: string; branch: string; hasPat: boolean }
   | { type: 'log'; level: 'info' | 'ok' | 'warn' | 'error'; message: string }
+  // Which bundle Figma is running, and whether the sandbox found it stale.
+  | { type: 'stamp'; label: string; stale: boolean }
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id)
@@ -19,6 +21,7 @@ const patInput = $('pat') as HTMLInputElement
 const repoInput = $('repo') as HTMLInputElement
 const branchInput = $('branch') as HTMLInputElement
 const logEl = $('log')
+const stampEl = $('stamp')
 
 function post(message: unknown): void {
   parent.postMessage({ pluginMessage: message }, '*')
@@ -57,6 +60,9 @@ window.onmessage = (event: MessageEvent) => {
       : 'github_pat_… (stored locally, never shown)'
   } else if (msg.type === 'log') {
     appendLog(msg.level, msg.message)
+  } else if (msg.type === 'stamp') {
+    stampEl.textContent = msg.stale ? `${msg.label} · STALE` : msg.label
+    stampEl.className = msg.stale ? 'stamp stale' : 'stamp'
   }
 }
 

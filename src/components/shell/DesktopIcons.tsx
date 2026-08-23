@@ -2,6 +2,7 @@
 
 import { PROGRAMS } from '@/programs/registry'
 import { useWindows } from '@/store/windows'
+import { useShelfMode } from '@/store/shelfMode'
 import { useSettings } from '@/store/settings'
 import { programName } from '@/lib/skinVocab'
 import { sfx } from '@/lib/sound'
@@ -49,6 +50,7 @@ const dockedRank = (id: string) => {
 
 export function DesktopIcons() {
   const open = useWindows((s) => s.open)
+  const toggleShelf = useShelfMode((s) => s.toggle)
   const skin = useSettings((s) => s.skin)
   const desktopPrograms = PROGRAMS.filter((p) => p.onDesktop)
   const trash = desktopPrograms.find((p) => p.id === 'trash')
@@ -61,22 +63,42 @@ export function DesktopIcons() {
     .filter((p) => DOCKED.has(p.id))
     .sort((a, b) => dockedRank(a.id) - dockedRank(b.id))
 
-  const launch = (id: string) => {
+  /* WORK opens no window from here either — it brings the shelf up on the
+     desk (store/shelfMode.ts, and Dock.tsx has the same fork). This grid
+     is the mobile launcher in practice, where the mode is full-bleed. */
+  const launch = (id: string, from: HTMLElement) => {
+    if (id === 'progress') {
+      toggleShelf(from)
+      return
+    }
     sfx.open()
     open(id)
   }
 
+  /* data-part is the anatomy marker STYLER's bench direct-selects by: one
+     per part the token names already declare (lib/stylerBlocks.ts:
+     layersFor), so ⌘+click on the stage lands on the same layer the left
+     panel lists. An attribute and nothing else — only the stage reads it. */
   const iconBtn = (p: (typeof desktopPrograms)[number], extra = '') => (
-    <button key={p.id} className={`${styles.iconBtn} ${extra}`} onClick={() => launch(p.id)}>
+    <button
+      key={p.id}
+      className={`${styles.iconBtn} ${extra}`}
+      data-part="icon"
+      onClick={(e) => launch(p.id, e.currentTarget)}
+    >
       <Icon name={p.icon} />
-      <span className={styles.iconLabel} data-copy-id={`program.${p.id}.name`}>
+      <span className={styles.iconLabel} data-part="label" data-copy-id={`program.${p.id}.name`}>
         {programName(p.id, p.desktopLabel ?? p.name, skin)}
       </span>
     </button>
   )
 
   return (
-    <nav className={`${styles.icons} ${styles.deskObject}`} aria-label="Programs">
+    <nav
+      className={`${styles.icons} ${styles.deskObject}`}
+      aria-label="Programs"
+      data-component="desktop-icons"
+    >
       {doors.map((p) => iconBtn(p))}
       {dockedForMobile.map((p) => iconBtn(p, styles.dockedGrid))}
       {/* trash joins the grid on mobile only (see .trashGrid) — on desktop
