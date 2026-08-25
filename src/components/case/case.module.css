@@ -1128,43 +1128,30 @@
   }
 }
 
-/* Ambient beats on the audit scene: three overlay groups, one visible
-   at a time, opacity holds only (compositor-friendly). Reduced motion
-   holds beat one. */
-.auditBeat1 {
-  animation: auditBeatA 2400ms infinite;
+/* The audit film: poster underneath as the face, the loop fades in
+   over it on its first painted frame. A failed or refused autoplay
+   never paints broken-media furniture, the poster just stays. */
+.auditFilm {
+  position: relative;
+  display: block;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
 }
 
-.auditBeat2 {
+.auditFilm img,
+.auditFilm video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.auditFilm video {
+  position: absolute;
+  inset: 0;
   opacity: 0;
-  animation: auditBeatB 2400ms infinite;
 }
 
-.auditBeat3 {
-  opacity: 0;
-  animation: auditBeatC 2400ms infinite;
-}
-
-@keyframes auditBeatA {
-  0%, 33.3% { opacity: 1; }
-  33.4%, 100% { opacity: 0; }
-}
-
-@keyframes auditBeatB {
-  0%, 33.3% { opacity: 0; }
-  33.4%, 66.6% { opacity: 1; }
-  66.7%, 100% { opacity: 0; }
-}
-
-@keyframes auditBeatC {
-  0%, 66.6% { opacity: 0; }
-  66.7%, 100% { opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .auditBeat1,
-  .auditBeat2,
-  .auditBeat3 {
-    animation: none;
-  }
+.auditFilm video[data-clear] {
+  opacity: 1;
 }
