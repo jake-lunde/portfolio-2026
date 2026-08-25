@@ -155,6 +155,20 @@ export function Box3D({
   const shadowScale = useTransform(pop, [0, 1], [1, SHADOW_SHRINK])
   const shadowFade = useTransform(pop, [0, 1], [1, SHADOW_FADE])
 
+  /* THE MOVING SHEEN rides the same three springs — light and tilt sharing
+     one source is what keeps them in step. The hotspot FOLLOWS the cursor
+     (the light sits between the reader and the board, so the bright spot is
+     under the finger pressing it), and it fades in with the pop: at rest the
+     face keeps only the printed `--board-sheen`, and the live reflection is
+     part of what "picked up" means.
+
+     ±20% of the glare span, NOT the full face: the travel cap is one of the
+     two throttles that keep the peak out of the type corners — the other is
+     the gradient's own falloff. Both are documented at `.glareClip` in the
+     CSS; move neither without re-measuring the corner contrast. */
+  const glareX = useTransform(ry, [-TILT_CAP, TILT_CAP], ['-20%', '20%'])
+  const glareY = useTransform(rx, [-TILT_CAP, TILT_CAP], ['20%', '-20%'])
+
   /* the box's own rect, read ONCE on enter. Reading it per pointermove is a
      forced layout on every mouse sample, which is exactly the cost this
      effect cannot afford. */
@@ -217,6 +231,17 @@ export function Box3D({
             <Cuboid flipped={flipped} reduced={reduced}>
               {front}
               {back}
+              {/* the moving sheen — tilt-machines only, so touch and
+                  reduced motion never even mount the layer. Inside the
+                  cuboid because a reflection must turn with the solid it
+                  is on; the clip pins it to the front face's plane. */}
+              <span className={styles.glareClip} aria-hidden="true">
+                <motion.span
+                  className={styles.glare}
+                  data-spring="window"
+                  style={{ x: glareX, y: glareY, opacity: pop }}
+                />
+              </span>
             </Cuboid>
           </motion.div>
         ) : (

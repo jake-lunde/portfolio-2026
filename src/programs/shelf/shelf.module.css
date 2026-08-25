@@ -446,10 +446,27 @@
 .side {
   /* THE PRINTING SCREEN. The house 4×4 Bayer, hard-edged, 2px to a cell —
      see the note above for why a periodic lattice is the right answer here
-     and was the wrong one there. */
-  --board-dither: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cpath fill='%236d6d6d' d='M0 0h1v1H0z'/%3E%3Cpath fill='%23818181' d='M1 0h1v1H1z'/%3E%3Cpath fill='%23727272' d='M2 0h1v1H2z'/%3E%3Cpath fill='%23878787' d='M3 0h1v1H3z'/%3E%3Cpath fill='%238c8c8c' d='M0 1h1v1H0z'/%3E%3Cpath fill='%23777777' d='M1 1h1v1H1z'/%3E%3Cpath fill='%23919191' d='M2 1h1v1H2z'/%3E%3Cpath fill='%237c7c7c' d='M3 1h1v1H3z'/%3E%3Cpath fill='%23747474' d='M0 2h1v1H0z'/%3E%3Cpath fill='%23898989' d='M1 2h1v1H1z'/%3E%3Cpath fill='%236f6f6f' d='M2 2h1v1H2z'/%3E%3Cpath fill='%23848484' d='M3 2h1v1H3z'/%3E%3Cpath fill='%23949494' d='M0 3h1v1H0z'/%3E%3Cpath fill='%237f7f7f' d='M1 3h1v1H1z'/%3E%3Cpath fill='%238e8e8e' d='M2 3h1v1H2z'/%3E%3Cpath fill='%237a7a7a' d='M3 3h1v1H3z'/%3E%3C/svg%3E");
-  /* the fibre — coarser and stepped since pass 11 (see above) */
-  --board-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.45' numOctaves='2' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 0.25 0.5 0.75 1'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='.44'/%3E%3C/svg%3E");
+     and was the wrong one there. At 60% since the weave landed (Jake's
+     "level up the textures", s121): an opaque screen over a directional
+     fibre averaged the two back into the very mush the weave replaced.
+     The screen stays the top layer and stays crisp; it just lets the
+     cloth read through it. */
+  --board-dither: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Cg opacity='0.6'%3E%3Cpath fill='%236d6d6d' d='M0 0h1v1H0z'/%3E%3Cpath fill='%23818181' d='M1 0h1v1H1z'/%3E%3Cpath fill='%23727272' d='M2 0h1v1H2z'/%3E%3Cpath fill='%23878787' d='M3 0h1v1H3z'/%3E%3Cpath fill='%238c8c8c' d='M0 1h1v1H0z'/%3E%3Cpath fill='%23777777' d='M1 1h1v1H1z'/%3E%3Cpath fill='%23919191' d='M2 1h1v1H2z'/%3E%3Cpath fill='%237c7c7c' d='M3 1h1v1H3z'/%3E%3Cpath fill='%23747474' d='M0 2h1v1H0z'/%3E%3Cpath fill='%23898989' d='M1 2h1v1H1z'/%3E%3Cpath fill='%236f6f6f' d='M2 2h1v1H2z'/%3E%3Cpath fill='%23848484' d='M3 2h1v1H3z'/%3E%3Cpath fill='%23949494' d='M0 3h1v1H0z'/%3E%3Cpath fill='%237f7f7f' d='M1 3h1v1H1z'/%3E%3Cpath fill='%238e8e8e' d='M2 3h1v1H2z'/%3E%3Cpath fill='%237a7a7a' d='M3 3h1v1H3z'/%3E%3C/g%3E%3C/svg%3E");
+  /* THE FIBRE IS A WEAVE NOW (Jake: "the textures look low res" — the old
+     stepped isotropic noise read as compression mush, not board). Two
+     directional turbulences in one SVG, warp and weft, each stretched 30:1
+     the way threads actually run; their crossing is what reads as cloth.
+     Canvas size buys nothing: Blink samples feTurbulence at device
+     resolution however big the SVG says it is (verified s121 — a 280px
+     canvas at half frequency renders pixel-for-pixel as crisp as this),
+     so the tile is authored at its display size and retina sharpness
+     comes free.
+     ⚠️ AMPLITUDE IS BUDGETED, NOT TASTED: 0.45 alpha per direction lands
+     the composite inside the old grain's measured envelope (probed s121:
+     equal worst-pixel maxima on the dark ground, averages within 1%), so
+     the pass-11 contrast table above still holds. Turning the weave up
+     means re-running that table. */
+  --board-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='wa'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04 1.2' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.45 0'/%3E%3C/filter%3E%3Cfilter id='wb'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2 0.04' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23wa)'/%3E%3Crect width='140' height='140' filter='url(%23wb)'/%3E%3C/svg%3E");
   /* the uneven lay of the ink, a panel wide */
   --board-mottle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='380'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='380' height='380' filter='url(%23m)' opacity='.3'/%3E%3C/svg%3E");
   /* THE RUBBED EDGE. Flips on a white cover — see `--board-wear-ink`. */
@@ -685,6 +702,55 @@
   transform-origin: center bottom;
   transform: translateZ(calc(var(--box-d) / -2)) rotateX(-90deg);
   background-color: color-mix(in srgb, var(--content) 50%, var(--board));
+}
+
+/* --------- the moving sheen ---------
+   A specular highlight that RIDES THE TILT (Jake: "give the boxes a sheen so
+   they feel more real"). `--board-sheen` above is the resting light — a
+   printed gradient that never moves. This is the other half of the material:
+   a soft radial hotspot on the front face that fades in with the hover pop
+   and tracks the cursor with the same springs that drive the tilt, so the
+   light and the turn can never arrive out of step.
+
+   THE CLIP SITS ON THE FRONT FACE'S PLANE, 1px proud of it — coplanar
+   would z-fight the face it is lighting. It is a sibling of the faces
+   inside the cuboid, so it turns with the flip, and `backface-visibility:
+   hidden` retires it for the back half of the turn: a reflection belongs
+   to one plane, and the back panel is small print, not gloss.
+
+   NO BLEND MODE, alpha only. `mix-blend-mode` is a grouping property and
+   would collapse the cuboid from inside — same law as the face's mask note.
+
+   ⚠️ THE HOTSPOT MAY NOT DELIVER ITS PEAK TO A CORNER — the corners are
+   where three covers stand their type, and the static budget there is
+   already spent (see the cap note on `--board-sheen`). Two throttles do it:
+   the gradient dies at 62% of closest-side, and Box3D caps the travel at
+   ±20% of the span, so the centre of the light can reach ~70% of the way
+   to an edge and the worst corner sees only the tail (~3–4%), hover-only.
+   `--board-lit` for the same reason it is the sheen's ink: the one role
+   that is a light colour in every skin. */
+.glareClip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(calc(var(--box-d) / 2 + 1px));
+}
+
+.glare {
+  position: absolute;
+  /* 180% of the face: the gradient needs room to travel without its own
+     rectangle ever showing an edge inside the clip */
+  inset: -40%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--board-lit) 12%, transparent) 0%,
+    color-mix(in srgb, var(--board-lit) 5%, transparent) 38%,
+    transparent 62%
+  );
+  will-change: transform, opacity;
 }
 
 /* --------- reduced motion: the solid collapses ---------
@@ -2377,7 +2443,9 @@
    is coarser and much fainter — mottle rather than tooth — and it has to
    stay out of the way of #lunde-roughen, which is already wavering every
    rule and bar on the tome with a noise of its own. Same tile construction,
-   a third of the frequency and half the strength. */
+   a third of the frequency and half the strength. NOT a weave: vellum has
+   no threads, so the classic layer's directional fibre stops at the skin
+   boundary and this isotropic tooth takes over. */
 :global([data-skin='medieval']) .face,
 :global([data-skin='medieval']) .side {
   --board-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='v'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.3' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23v)' opacity='.22'/%3E%3C/svg%3E");
