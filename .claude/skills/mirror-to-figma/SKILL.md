@@ -145,11 +145,31 @@ The real end-to-end proof: change the bound token in Figma → PUSH → PR →
 merge → the change appears in the Figma mirror, Storybook, Chromatic, and
 production. One value, four surfaces.
 
-## Step 5 — Report
+## Step 5 — Write the map row (the Code Connect we own)
+
+Code Connect's read half is plan-gated, so the repo holds the table it would
+have held: `figma.map.json`, one row per mirror, keyed on the component set's
+**key** (frames are containers; components are the truth). The row is never
+hand-edited — the script writes it from Figma and the flags you pass:
+
+```bash
+node scripts/figma-map.mjs write --node <SET_NODE_ID> \
+  --import src/components/<dir>/<Name> --props <FigmaProp>=<prop>,…
+```
+
+`--props` is only needed where a Figma property name differs from the prop
+(Button's `Size`→`size`, `label`→`children`); matching names map by identity.
+The script prints the description pointer and a `use_figma` snippet that
+sets it as the set's description — the pointer is the whole description, prose lives in the map or the code — run that snippet (REST cannot write
+descriptions). Two writes, one source. Re-running a mirror re-runs this step;
+`node scripts/figma-map.mjs check` verifies every row is still live.
+
+## Step 6 — Report
 
 Summarize: component mirrored, variant axes chosen (and any props
 deliberately *not* mirrored, with why), every binding made, unbound/drift
-items, and the parity table. If you skipped tokenization gaps, say so loudly.
+items, the parity table, and the map row written. If you skipped
+tokenization gaps, say so loudly.
 
 ---
 
