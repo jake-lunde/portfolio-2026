@@ -1,0 +1,25 @@
+{
+  "file": "LQbDBqtpVxCb7QcDgEFQlN",
+  "components": [
+    {
+      "key": "c5531e6f6c182c96620a15ebd2180a9d56b44ed0",
+      "nodeId": "201067:4",
+      "name": "Button",
+      "importPath": "src/components/primitives/Button",
+      "props": {
+        "label": "children",
+        "Size": "size"
+      }
+    },
+    {
+      "key": "b737cb813708a0c588e958506701e4bec0561cab",
+      "nodeId": "201425:1388",
+      "name": "Stamp",
+      "importPath": "src/components/primitives/Stamp",
+      "props": {
+        "children": "children",
+        "tone": "tone"
+      }
+    }
+  ]
+}
