@@ -24,11 +24,11 @@ import { HeroSketch } from '@/components/case/HeroSketch'
 <Hero
   eyebrow="Greenlight · Family Hub · First-party hardware"
   title="Family Hub"
-  thesis={<>One home base for running a family, on Greenlight&rsquo;s first device. Getting it from a vision deck to nationwide meant a lot of judgment calls, and a few of them <span className="hl-pink">went against me</span>. Those are in here too.</>}
+  thesis={<>Another home base to address family chaos, and Greenlight&rsquo;s first device. Going from vision to nationwide required a lot of judgment calls, and the first was <span className="hl-pink">convincing myself</span> that we were making something families needed; something different. I think we did.</>}
   meta={[
     ['Role', 'Staff Product Designer'],
-    ['Partners', '10 engineers · PM · hardware'],
-    ['Timeline', '2025 – 2026'],
+    ['Partners', '10+ engineers · PM · hardware'],
+    ['Timeline', '2025 – Present'],
     ['Shipped', '15.6″ + 10.1″ devices · GL’s first web app · GLOW DS'],
   ]}
   art={<HeroSketch />}
@@ -37,39 +37,32 @@ import { HeroSketch } from '@/components/case/HeroSketch'
 <Section no="01" label="The bet" title="We pitched three, and the family organizer won.">
   <Lead>
     Three of us got asked a pretty fun question: what does Greenlight look
-    like in five years, past the debit card? We came back with three answers.
+    like in five years; beyond the debit card? We came back with three answers.
   </Lead>
 
   <Moves>
     <Move n="01" title="Live Drive" img="/case/family-hub/moves/move-live-drive.webp" imgAlt="Vision-deck still: a teen driver at the wheel at dusk, Live Drive on the dash display">
       CarPlay for new drivers. A drive score on the dash, a family
-      leaderboard. The smaller bet, and I still think it happens at some
+      leaderboard. A smaller bet, but I still think it happens at some
       point.
     </Move>
     <Move n="02" title="Tutor" img="/case/family-hub/moves/move-tutor.webp" imgAlt="Vision-deck still: a kid at a desk with a lesson glowing on a phone, Greenlight Tutor">
-      An AI tutor that reshapes a lesson into whatever format actually works
-      for your kid. A podcast, a quiz, a conversation. Too far ahead for the
-      room.
+      An AI tutor that reshapes a lesson into whatever format your kid understands. A podcast, a quiz, a conversation. Too far ahead for the team, but I still really like this one.
     </Move>
     <Move n="03" title="Family Hub" img="/case/family-hub/moves/move-family-hub.webp" imgAlt="Vision-deck still: a parent in the kitchen glancing at the Family Hub on the wall">
       One home base for running a family. Calendar, chores, location, money.
       A lateral move from family finance to family operating system, and the
-      one everyone could see. It won.
+      one everyone could see. It won. But I wasn't so sure.
     </Move>
   </Moves>
 
   Honestly, I didn&rsquo;t believe in it at first. I drove the concept while
-  kind of convincing myself along the way, right up until I watched families
-  filter a whole household down to one person in a couple of taps. Being the
-  skeptic turned out to be useful. Everything in the pitch had to get past
-  me first.
+  kind of convincing myself along the way, until I saw the interaction model scale from the whole family to one person in a couple of taps. Maybe there was something. But being the skeptic allowed me to scrutinize the real user needs we were trying to solve. Everything in the pitch had to win me over first.
 
-  <PitchDeck
-    caption="The pitch, end to end: the family, the mobile companion, and the hub in every state, straight from the vision deck. Sweep across it."
-  />
+  <PitchDeck/>
 </Section>
 
-<Section no="02" label="The evidence" title="The mental load is real. Parents gave us the brief.">
+<Section no="02" label="The evidence" title="Research showed the mental load is real. Parents gave us the brief: <span className="hl-pink">consolidation and simplicity</span>.">
   <Lead>
     We put the concept in front of 1,200 US parents. The top pains were
     coordinating schedules and remembering everyone&rsquo;s everything, and
@@ -81,35 +74,34 @@ import { HeroSketch } from '@/components/case/HeroSketch'
 
   More than 80% of parents said it appealed to them, and that was before
   we showed a price. It was the strongest concept test Greenlight had run.
-  We didn&rsquo;t follow the data everywhere, though. The chart shows
-  where we overruled it.
+  We didn&rsquo;t follow the data everywhere, though.
 
-  <Plate tag="SEPT 2025" caption="Real survey data. Tap a bar. The dashed ones are where we overruled the research, on purpose.">
+  <Plate tag="SEPT 2025">
     <ResearchBars />
   </Plate>
 
   We also kept the toughest response taped up: *&ldquo;It just looks like
-  an iPad?&rdquo;* Fair point. We designed in the space between those two
-  quotes.
+  an iPad?&rdquo;* That&rsquo;s the fear. We needed to design a digital organizational experience novel enough to offset the familiar hardware.
+
 </Section>
 
-<Section no="03" label="The system" title="Two modes: glance at it, or walk up and use it.">
-  Two modes, really. **Ambient** is the screensaver with a job. It tells the
+<Section no="03" label="The system" title="Three modes: glanceable, active or private.">
+  **Ambient** is the screensaver with a job. It tells the
   house what&rsquo;s next and who&rsquo;s where without anyone asking.
   **Active** is when you walk up and use it. Full dashboard, modal views,
-  and you can filter the whole thing down to one family member.
+  and you can filter the whole thing down to one family member. A workspace, but not in the desktop sense. Still more of a detailed consumption + quick action experience with handoffs to the mobile app.
 
   Then there&rsquo;s the gate. Privacy was the top-ranked function in our
-  research, so adults manage, kids view, and a PIN sits between glancing at
+  research, so adults manage, kids view, and a PIN sits between looking at
   the thing and actually doing something on it. Approving chores, moving
-  money, editing the calendar.
+  money, editing the calendar. All configurable by parents.
 
-  <Plate caption="Pick a mode. The switch in the window bar flips it between the lo-fi diagram and the screens that shipped.">
+  <Plate>
     <HubModes />
   </Plate>
 
-  My first pass focused on radical simplicity. Internally we called it *big dumb
-  buttons.* To be fair, we kind of had to punt on that one. Leadership asked
+  My first pass focused on radical simplicity. Internally we call it *big dumb
+  buttons.* To be fair, our design team uses that approach, but you can&rsquo;t win &rsquo;em all. Leadership asked
   for more capability per screen, and what shipped is a hybrid, somewhere
   between the glanceable dream and a desktop app. That tension is still
   live, and I&rsquo;m okay with that.
@@ -128,8 +120,8 @@ import { HeroSketch } from '@/components/case/HeroSketch'
   The hi-fi build is the one the CEO took to a board meeting in fall 2025.
   By the spring all-hands it was my turn, demoing the near-launch product to
   the whole company. Those same prototypes settled our architecture:
-  Greenlight&rsquo;s first real web app, plus Glow, the web design system I
-  spearheaded. Over-the-air updates made iteration, by my very scientific
+  Greenlight&rsquo;s first real web app, plus GLOW (Greenlight on Web), the web design system I
+  spearheaded. Over-the-air updates made iteration, by my super-duper scientific
   estimate at the time, *&ldquo;a thousand percent&rdquo;* faster.
 
   <Plate cap="Plate 04 · the ladder" caption="The same screen at v0.4 and v0.6, four months apart. Flip the switch in the window bar.">
