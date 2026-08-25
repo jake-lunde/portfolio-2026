@@ -21,6 +21,7 @@ import { LaunchFilm } from '@/components/case/LaunchFilm'
 import { FidelityFrame } from '@/components/case/FidelityFrame'
 import { DemoReel } from '@/components/case/DemoReel'
 import { HeroSketch } from '@/components/case/HeroSketch'
+import { LiveAudit } from '@/components/case/LiveAudit'
 
 <Hero
   eyebrow="Greenlight · Family Hub · First-party hardware"
@@ -219,8 +220,8 @@ import { HeroSketch } from '@/components/case/HeroSketch'
     <FidelityFrame
       vDraft="Build"
       vShipped="Fix"
-      draft={<Placeholder>The desk scene · calendar events overlapping</Placeholder>}
-      shipped={<Placeholder>The desk scene · events stacked, tokens bound</Placeholder>}
+      draft={<LiveAudit mode="build" />}
+      shipped={<LiveAudit mode="fix" />}
     />
   </Plate>
 

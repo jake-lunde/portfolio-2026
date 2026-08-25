@@ -1098,3 +1098,71 @@
     animation: none;
   }
 }
+
+/* §06 live-audit pixel scene: the readout under the art carries the
+   change; it types itself in on every fidelity flip (the pane's
+   display:none swap restarts the animation). Pink tick = the
+   expressive accent, same hex the scene derives (plate ground is
+   theme-fixed). */
+.audit {
+  display: grid;
+  gap: 10px;
+}
+
+.auditReadout {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: auditType 900ms steps(24, jump-none) both;
+}
+
+.auditTick {
+  color: #f2a6c2;
+}
+
+@keyframes auditType {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auditReadout {
+    animation: none;
+  }
+}
+
+/* The audit film: poster underneath as the face, the loop fades in
+   over it on its first painted frame. A failed or refused autoplay
+   never paints broken-media furniture, the poster just stays. */
+.auditFilm {
+  position: relative;
+  display: block;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+}
+
+.auditFilm img,
+.auditFilm video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.auditFilm video {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.auditFilm video[data-clear] {
+  opacity: 1;
+}
