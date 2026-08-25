@@ -195,6 +195,17 @@
   overflow: visible;
 }
 
+/* demo reels (DemoReel.tsx) — the recordings sit on their own
+   pure-black surround (#000 sampled from the recordings' corners,
+   rail law) so the mat matches and the loop is seamless */
+.demoReel {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: #000;
+}
+
 /* plate 01 — transparent wireframe groups sitting directly on the
    plate; the group's deck annotation lives in the cap row above */
 .deck {

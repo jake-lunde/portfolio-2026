@@ -19,6 +19,7 @@ import { CaseFooter } from '@/components/case/CaseFooter'
 import { PitchDeck } from '@/components/case/PitchDeck'
 import { LaunchFilm } from '@/components/case/LaunchFilm'
 import { FidelityFrame } from '@/components/case/FidelityFrame'
+import { DemoReel } from '@/components/case/DemoReel'
 import { HeroSketch } from '@/components/case/HeroSketch'
 
 <Hero
@@ -124,12 +125,24 @@ import { HeroSketch } from '@/components/case/HeroSketch'
   spearheaded. Over-the-air updates made iteration, by my super-duper scientific
   estimate at the time, *&ldquo;a thousand percent&rdquo;* faster.
 
-  <Plate cap="Plate 04 · the ladder">
+  <Plate caption="The proof-of-concept demo, and the hi-fi build the board saw. Flip the switch in the window bar.">
     <FidelityFrame
-      vDraft="v0.4"
+      vDraft="v0.2"
       vShipped="v0.6"
-      draft={<Placeholder>The lo-fi shell · the wireframe build</Placeholder>}
-      shipped={<Placeholder>The hi-fi board build · same screen</Placeholder>}
+      draft={
+        <DemoReel
+          video="demo-poc"
+          poster="poster-poc.webp"
+          alt="Screen recording of the first clickable prototype: clicking through the dark dashboard, the family agenda blocked in as bright color bars."
+        />
+      }
+      shipped={
+        <DemoReel
+          video="demo-hifi"
+          poster="poster-hifi.webp"
+          alt="Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape."
+        />
+      }
     />
   </Plate>
 
