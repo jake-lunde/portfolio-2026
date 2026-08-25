@@ -34,12 +34,17 @@ const MAX_PCT = 62
 
 export function ResearchBars() {
   const [sel, setSel] = useState<Row | null>(null)
+  const [hov, setHov] = useState<Row | null>(null)
   const reduced = useReducedMotion()
 
   const pick = (r: Row) => {
     sfx.tap()
     setSel((cur) => (cur?.id === r.id ? null : r))
   }
+
+  /* hover previews, tap commits — mouse only, so a touch tap's synthetic
+     enter can't pin a row the finger already left */
+  const shown = hov ?? sel
 
   const chartW = W - LABEL_W - 56
   const H = ROWS.length * (BAR_H + GAP) - GAP
@@ -54,7 +59,7 @@ export function ResearchBars() {
       >
         {ROWS.map((r, i) => {
           const y = i * (BAR_H + GAP)
-          const active = sel?.id === r.id
+          const active = shown?.id === r.id
           const honest = r.id === 'ai' || r.id === 'photos'
           const w = (r.pct / MAX_PCT) * chartW
           return (
@@ -63,9 +68,15 @@ export function ResearchBars() {
               className={styles.moatNode}
               role="button"
               tabIndex={0}
-              aria-pressed={active}
+              aria-pressed={sel?.id === r.id}
               aria-label={`${r.label}, ${r.pct} percent essential. ${r.verdict}. ${r.why}`}
               onClick={() => pick(r)}
+              onPointerEnter={(e) => {
+                if (e.pointerType === 'mouse') setHov(r)
+              }}
+              onPointerLeave={(e) => {
+                if (e.pointerType === 'mouse') setHov((cur) => (cur?.id === r.id ? null : cur))
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
@@ -107,11 +118,11 @@ export function ResearchBars() {
       </svg>
 
       <div className={styles.moatWhy} aria-live="polite">
-        {sel ? (
+        {shown ? (
           <>
-            <b>{sel.label}</b> · {sel.verdict.toLowerCase()}
+            <b>{shown.label}</b> · {shown.verdict.toLowerCase()}
             <br />
-            {sel.why}
+            {shown.why}
           </>
         ) : (
           <>Tap a bar. The dashed ones are where we overruled the research, on purpose.</>
