@@ -42,7 +42,7 @@
       },
       "active": {
         "bg": {
-          "$value": "{accent}",
+          "$value": "{accent-expressive}",
           "$type": "color"
         },
         "border-color": {
