@@ -64,6 +64,8 @@ only prose.
 - Crit jargon as headings ("Push," "Sound," "Took"). Section labels are
   plain words a stranger reads once. The review shape is Checks · Keep ·
   Change · Wrong · Next.
+- "mint" or "minted" when referring to creating something
+- "landed" when referring to creating something
 
 ## Rulings (from the redline session, 2026-08-13)
 

@@ -693,6 +693,12 @@
   cursor: pointer;
 }
 
+/* mouse focus lands on the tabbable <g> — the UA default ring is the
+   blue/white bounding box; keyboard keeps the accent ring below */
+.moatNode:focus {
+  outline: none;
+}
+
 .moatNode:focus-visible {
   outline: 2px solid var(--accent-expressive);
   outline-offset: 2px;
