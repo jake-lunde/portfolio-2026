@@ -1127,3 +1127,44 @@
     animation: none;
   }
 }
+
+/* Ambient beats on the audit scene: three overlay groups, one visible
+   at a time, opacity holds only (compositor-friendly). Reduced motion
+   holds beat one. */
+.auditBeat1 {
+  animation: auditBeatA 2400ms infinite;
+}
+
+.auditBeat2 {
+  opacity: 0;
+  animation: auditBeatB 2400ms infinite;
+}
+
+.auditBeat3 {
+  opacity: 0;
+  animation: auditBeatC 2400ms infinite;
+}
+
+@keyframes auditBeatA {
+  0%, 33.3% { opacity: 1; }
+  33.4%, 100% { opacity: 0; }
+}
+
+@keyframes auditBeatB {
+  0%, 33.3% { opacity: 0; }
+  33.4%, 66.6% { opacity: 1; }
+  66.7%, 100% { opacity: 0; }
+}
+
+@keyframes auditBeatC {
+  0%, 66.6% { opacity: 0; }
+  66.7%, 100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auditBeat1,
+  .auditBeat2,
+  .auditBeat3 {
+    animation: none;
+  }
+}
