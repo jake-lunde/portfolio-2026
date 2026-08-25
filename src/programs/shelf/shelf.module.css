@@ -687,6 +687,55 @@
   background-color: color-mix(in srgb, var(--content) 50%, var(--board));
 }
 
+/* --------- the moving sheen ---------
+   A specular highlight that RIDES THE TILT (Jake: "give the boxes a sheen so
+   they feel more real"). `--board-sheen` above is the resting light — a
+   printed gradient that never moves. This is the other half of the material:
+   a soft radial hotspot on the front face that fades in with the hover pop
+   and tracks the cursor with the same springs that drive the tilt, so the
+   light and the turn can never arrive out of step.
+
+   THE CLIP SITS ON THE FRONT FACE'S PLANE, 1px proud of it — coplanar
+   would z-fight the face it is lighting. It is a sibling of the faces
+   inside the cuboid, so it turns with the flip, and `backface-visibility:
+   hidden` retires it for the back half of the turn: a reflection belongs
+   to one plane, and the back panel is small print, not gloss.
+
+   NO BLEND MODE, alpha only. `mix-blend-mode` is a grouping property and
+   would collapse the cuboid from inside — same law as the face's mask note.
+
+   ⚠️ THE HOTSPOT MAY NOT DELIVER ITS PEAK TO A CORNER — the corners are
+   where three covers stand their type, and the static budget there is
+   already spent (see the cap note on `--board-sheen`). Two throttles do it:
+   the gradient dies at 62% of closest-side, and Box3D caps the travel at
+   ±20% of the span, so the centre of the light can reach ~70% of the way
+   to an edge and the worst corner sees only the tail (~3–4%), hover-only.
+   `--board-lit` for the same reason it is the sheen's ink: the one role
+   that is a light colour in every skin. */
+.glareClip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(calc(var(--box-d) / 2 + 1px));
+}
+
+.glare {
+  position: absolute;
+  /* 180% of the face: the gradient needs room to travel without its own
+     rectangle ever showing an edge inside the clip */
+  inset: -40%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--board-lit) 12%, transparent) 0%,
+    color-mix(in srgb, var(--board-lit) 5%, transparent) 38%,
+    transparent 62%
+  );
+  will-change: transform, opacity;
+}
+
 /* --------- reduced motion: the solid collapses ---------
    No turning, no pop, no sides — back to pass 1's two stacked faces
    crossfading in place. Motion drives the opacity; this flattens the
