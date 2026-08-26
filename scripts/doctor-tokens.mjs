@@ -52,7 +52,12 @@ const SELECTOR = {
 
 // Vars consumed from outside the token pipeline (next/font injects these at
 // runtime); never emitted by tokens, and legitimately so.
-const EXTERNAL_VAR_ALLOWLIST = [/^--font-/]
+//   --timeline-row  not consumed at all: PROSE. The live-audit film's readout
+//                   quotes `var(--timeline-row)` as display copy
+//                   (LiveAudit.tsx, echoed into textIndex.generated.ts), and
+//                   the scan cannot tell CSS quoted in a sentence from CSS in
+//                   a style. Drop this line if the readout copy changes.
+const EXTERNAL_VAR_ALLOWLIST = [/^--font-/, /^--timeline-row$/]
 
 // ---------------------------------------------------------------------------
 // Reporting
@@ -807,6 +812,11 @@ async function checkOrphans(emittedNames) {
     for (const m of text.matchAll(LOCAL_DECL_RE_2)) declaredLocally.add(m[1])
     for (const m of text.matchAll(LOCAL_DECL_RE_3)) declaredLocally.add(m[1])
     for (const m of text.matchAll(CONSUMED_RE)) {
+      // `var(--type-${role}-${part})` — a template literal building the name
+      // at runtime (stylerTune.ts does this over the type ramp). The scan can
+      // only see the prefix, which is not a property anything emits, so the
+      // match would mint a phantom orphan. Unverifiable statically; skipped.
+      if (text.startsWith('${', m.index + m[0].length)) continue
       const rel = path.relative(ROOT, file)
       if (!consumedByName.has(m[1])) consumedByName.set(m[1], new Set())
       consumedByName.get(m[1]).add(rel)
@@ -841,7 +851,16 @@ async function main() {
   const args = process.argv.slice(2)
   const strict = args.includes('--strict')
   const parityIdx = args.indexOf('--parity')
-  const parityFile = parityIdx >= 0 ? args[parityIdx + 1] : null
+  const parityRef = parityIdx >= 0 ? args[parityIdx + 1] : null
+  // `--parity` with no ref, followed by another flag, must not eat the flag
+  const parityFile = parityRef && !parityRef.startsWith('--') ? parityRef : null
+  /* --parity-report: parity findings print and count as warnings instead of
+   * gating. For the token-commit route (branch inspect-tune) every save is a
+   * parity change BY DEFINITION — the PR exists to change a computed value —
+   * so parity-as-error would fail the route on its own purpose (Jake,
+   * 2026-08-26 s123). The diff still prints in full; the reviewer reads it on
+   * the PR rather than the doctor guessing which changes were meant. */
+  const parityReport = args.includes('--parity-report')
 
   const model = await loadModel()
 
@@ -869,7 +888,10 @@ async function main() {
 
   // Parity: --parity [ref], ref defaults to `main` (the PR base).
   if (parityIdx >= 0 && currentCss) {
-    await checkParity(parityFile || 'main', currentCss, { err, warn })
+    await checkParity(parityFile || 'main', currentCss, {
+      err: parityReport ? warn : err,
+      warn,
+    })
   }
 
   // ---- report ----
