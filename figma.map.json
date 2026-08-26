@@ -2,13 +2,538 @@
   "file": "LQbDBqtpVxCb7QcDgEFQlN",
   "components": [
     {
+      "key": "62ba759eab39a9acaee435baa37f82ff511a92fa",
+      "nodeId": "201490:15368",
+      "name": "Bubble",
+      "importPath": "src/components/chat/Chat",
+      "props": {
+        "children": "children",
+        "tone": "tone",
+        "machine": "machine",
+        "thinking": "thinking"
+      }
+    },
+    {
       "key": "c5531e6f6c182c96620a15ebd2180a9d56b44ed0",
       "nodeId": "201067:4",
       "name": "Button",
       "importPath": "src/components/primitives/Button",
       "props": {
-        "label": "children",
-        "Size": "size"
+        "children": "children",
+        "size": "size",
+        "variant": "variant"
+      }
+    },
+    {
+      "key": "cc56b4c75eb07e3b95c2e7f780d62610b10e3245",
+      "nodeId": "201516:15448",
+      "name": "CaseFooter",
+      "importPath": "src/components/case/CaseFooter",
+      "props": {
+        "name": "name",
+        "state": "state"
+      }
+    },
+    {
+      "key": "34be3fe9cf6a3e5feae9ef483e52a9ec615f1ee2",
+      "nodeId": "201547:15507",
+      "name": "CommandWidget",
+      "importPath": "src/components/shell/CommandWidget",
+      "props": {
+        "stamp": "stamp",
+        "edgeName": "edgeName",
+        "edgeLabel": "edgeLabel",
+        "panelOpen": "panelOpen",
+        "led": "led",
+        "state": "state",
+        "redacted": "redacted"
+      }
+    },
+    {
+      "key": "7304c524a1ea6551706ba9e1b9c7742c1e4f811c",
+      "nodeId": "201515:1394",
+      "name": "Decide",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "cap": "cap"
+      }
+    },
+    {
+      "key": "1c24881084300466f568563da041bce6c2de401c",
+      "nodeId": "201551:1596",
+      "name": "DesktopIcons",
+      "importPath": "src/components/shell/DesktopIcons",
+      "props": {
+        "density": "density"
+      }
+    },
+    {
+      "key": "e891fd04f889fff4b0ba745554f8f644927af977",
+      "nodeId": "201493:1389",
+      "name": "Feed",
+      "importPath": "src/components/chat/Chat",
+      "props": {
+        "children": "children"
+      }
+    },
+    {
+      "key": "b0cf22dac7d66adf4996f378ceebadc239dda933",
+      "nodeId": "201516:1384",
+      "name": "Hero",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "eyebrow": "eyebrow",
+        "title": "title",
+        "thesis": "thesis",
+        "hasArt": "art",
+        "art": "art"
+      }
+    },
+    {
+      "key": "dea4a7f366a696be2b9d4f16e218376f28fb97b1",
+      "nodeId": "201501:1413",
+      "name": "icon/bike",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "8e7f7b7eb3b691f5e372218d3aea257979a916b9",
+      "nodeId": "201500:1406",
+      "name": "icon/book",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "c207bcc6574f635fddecd8ad32ada0c51f69a122",
+      "nodeId": "201500:1434",
+      "name": "icon/brush",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "6051424723f416fd1c88dda7973c761aaa64ba44",
+      "nodeId": "201502:1434",
+      "name": "icon/bubble",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "cd48dff521e212bf2df760bb97e4ca0b9beaf69f",
+      "nodeId": "201500:1420",
+      "name": "icon/camera",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "7f570124db93d602a73608ac3971355625c368ab",
+      "nodeId": "201501:1399",
+      "name": "icon/chip",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "30308d9cb709c877f1fa1aa641358105456f8501",
+      "nodeId": "201498:1429",
+      "name": "icon/clipboard",
+      "importPath": "src/components/shell/Icon",
+      "props": {}
+    },
+    {
+      "key": "515a2aa75d4a456b11976d23b00495516b50d479",
+      "nodeId": "201501:1427",
+      "name": "icon/disc",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "d5a819914ec65b7166d5e34976972bd876d48c42",
+      "nodeId": "201499:1399",
+      "name": "icon/doc",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "8de4d5299894465731acb516f78b9efd71b0b06a",
+      "nodeId": "201498:1451",
+      "name": "icon/download",
+      "importPath": "src/components/shell/Icon",
+      "props": {}
+    },
+    {
+      "key": "55b4c7c8df6b5cce3f32e6baf2fe51cd693232c9",
+      "nodeId": "201501:1420",
+      "name": "icon/flower",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "1ed23e8a04595093d5a542dcee89197f26fc501c",
+      "nodeId": "201499:1413",
+      "name": "icon/folder",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "e4206f595507c94f20fbe8343c922ceb7b686293",
+      "nodeId": "201499:1427",
+      "name": "icon/ipod",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "039644bd6e42b5b0cde1d3a0973e514830af30c5",
+      "nodeId": "201502:1399",
+      "name": "icon/mountain",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "c8d4ed0a00b939eb9719db5ca95578ec6292b6d1",
+      "nodeId": "201499:1434",
+      "name": "icon/music",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "b0c11504a14c5e16a0d5c5767c3ccda13ae47aee",
+      "nodeId": "201503:1399",
+      "name": "icon/mystery",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "56ca2c1c6f7992a9a7a658f5fc2f30af67797322",
+      "nodeId": "201503:1433",
+      "name": "icon/nodes",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "size": "size",
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "f69797085255bb51b0b42dee964a9ad00d5720f5",
+      "nodeId": "201499:1420",
+      "name": "icon/note",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "b948c1a847119aa7f641cc82ebcb2b3345d51d2e",
+      "nodeId": "201498:1446",
+      "name": "icon/palette",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "size": "size"
+      }
+    },
+    {
+      "key": "52dcbf9acd497ed727c08ee816b35d07bcc1e052",
+      "nodeId": "201501:1434",
+      "name": "icon/plane",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "80da359746e37e03d1aef2f78b093caf1edac2c8",
+      "nodeId": "201498:1406",
+      "name": "icon/printer",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "def222e6530bb9cef7810550b09bb46d6d97da66",
+      "nodeId": "201500:1427",
+      "name": "icon/puzzle",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "c8b35e9fb042348889f5a277d98df5bac349820e",
+      "nodeId": "201498:1419",
+      "name": "icon/reel",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "f88d0bb3914e742030ed47619bcd68b2a1295600",
+      "nodeId": "201499:1406",
+      "name": "icon/resume",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "e9fb8e332cb9f26d36999ccbd040b9f1ad60c260",
+      "nodeId": "201498:1424",
+      "name": "icon/rings",
+      "importPath": "src/components/shell/Icon",
+      "props": {}
+    },
+    {
+      "key": "4a46de71302b076982dfef0669ad987ded48d2be",
+      "nodeId": "201500:1413",
+      "name": "icon/sliders",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "7f0fce5543055425c8cb09ae74e472d89bc1e2e4",
+      "nodeId": "201502:1427",
+      "name": "icon/smiley",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "1d789a8832bf211dc3536fd3cab1f6e20a710c28",
+      "nodeId": "201502:1406",
+      "name": "icon/star",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "64993354a67365627edf486632cea17c2abf9746",
+      "nodeId": "201502:1413",
+      "name": "icon/steps",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "713c27a3a0659d872c98b1c350b98d8f1ba21af4",
+      "nodeId": "201503:1406",
+      "name": "icon/suggest",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "05acd5409eeff2cfe5d0b430b544fea760a40d62",
+      "nodeId": "201502:1420",
+      "name": "icon/swatch",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "dcdbb553ed9b8ca587f6a28ce2c4d40772a38766",
+      "nodeId": "201501:1406",
+      "name": "icon/trash",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "e7ab98ddcda7c7470a52cc4f31d1df42e5269f90",
+      "nodeId": "201500:1399",
+      "name": "icon/wave",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "07d4a6ffb44ab202deeb7c16de6ff092bc096fd5",
+      "nodeId": "201503:1413",
+      "name": "icon/work",
+      "importPath": "src/components/shell/Icon",
+      "props": {
+        "skin": "skin"
+      }
+    },
+    {
+      "key": "44b52bca3a07021536e0ecf20a3bdf7129936228",
+      "nodeId": "201492:15353",
+      "name": "IdentityHeader",
+      "importPath": "src/components/chat/Chat",
+      "props": {
+        "name": "name",
+        "role": "role",
+        "hasRole": "role",
+        "avatar": "avatar"
+      }
+    },
+    {
+      "key": "0985a374e50f0f715cd7f1a3e6ab02fbcb0bdad9",
+      "nodeId": "201530:1492",
+      "name": "IndexRail",
+      "importPath": "src/components/case/CaseIndex",
+      "props": {
+        "expanded": "expanded"
+      }
+    },
+    {
+      "key": "1fbfb65d7b62e0bddf3fbf9c9aa982d7c0be45a1",
+      "nodeId": "201532:15490",
+      "name": "InstallBar",
+      "importPath": "src/programs/shelf/InstallBar",
+      "props": {
+        "striped": "striped",
+        "pct": "pct"
+      }
+    },
+    {
+      "key": "8dc3c8fb059b6b3561aa7bb1f4f45397fd49ea9b",
+      "nodeId": "201473:1386",
+      "name": "Lead",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "children": "children"
+      }
+    },
+    {
+      "key": "2b3f0c6a9f40f93dfb6e950c750fc1a6a0211464",
+      "nodeId": "201554:15654",
+      "name": "MenuBar",
+      "importPath": "src/components/shell/MenuBar",
+      "props": {
+        "clock": "clock",
+        "version": "version",
+        "themeButton": "themeButton",
+        "theme": "theme",
+        "sound": "sound"
+      }
+    },
+    {
+      "key": "d916ea8a0184a33440f2c8b635deb5d63e9a0230",
+      "nodeId": "201514:1450",
+      "name": "Metrics",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "children": "children"
+      }
+    },
+    {
+      "key": "80706c1aaabf23a201339e3bc5fc972f1b266e5c",
+      "nodeId": "201513:1384",
+      "name": "Move",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "n": "n",
+        "title": "title",
+        "img": "img",
+        "children": "children"
+      }
+    },
+    {
+      "key": "e5ba4e1b7fec2dd93eb78202d891ab321e4269a1",
+      "nodeId": "201514:1419",
+      "name": "Moves",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "children": "children"
+      }
+    },
+    {
+      "key": "8f90d25ad16788870b93457e39e967a0b741baf4",
+      "nodeId": "201474:1387",
+      "name": "Placeholder",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "children": "children"
+      }
+    },
+    {
+      "key": "c9f98d7fefecb58c0fa83db0dd010deb7bff2874",
+      "nodeId": "201512:1384",
+      "name": "Plate",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "cap": "cap",
+        "hasCap": "cap",
+        "tag": "tag",
+        "hasTag": "tag",
+        "caption": "caption",
+        "hasCaption": "caption",
+        "children": "children"
+      }
+    },
+    {
+      "key": "d11c6fb53dfd4161a170de0c19518518c7cafb72",
+      "nodeId": "201476:1389",
+      "name": "PullQuote",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "children": "children",
+        "cite": "cite"
+      }
+    },
+    {
+      "key": "f33cfa4d2114d8d0295a6435680548bfdf7533d2",
+      "nodeId": "201529:1449",
+      "name": "ReadMeter",
+      "importPath": "src/components/case/CaseIndex",
+      "props": {}
+    },
+    {
+      "key": "de00ffc226e65078421d21d7010ddb464bcc082b",
+      "nodeId": "201515:1384",
+      "name": "Section",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "no": "no",
+        "label": "label",
+        "title": "title",
+        "children": "children"
+      }
+    },
+    {
+      "key": "cf991b8027eed67591d77fd27f203da88baee61e",
+      "nodeId": "201541:1513",
+      "name": "SkinSwitch",
+      "importPath": "src/components/shell/SkinSwitch",
+      "props": {
+        "open": "open",
+        "activeSkin": "activeSkin"
       }
     },
     {
@@ -19,6 +544,35 @@
       "props": {
         "children": "children",
         "tone": "tone"
+      }
+    },
+    {
+      "key": "d05e1ff3eb0e4f879b945a2732c99b86f906d1cb",
+      "nodeId": "201475:1396",
+      "name": "Stat",
+      "importPath": "src/components/case/CaseComponents",
+      "props": {
+        "big": "big",
+        "label": "label",
+        "secondary": "secondary"
+      }
+    },
+    {
+      "key": "e2eaa22da8c9c0714deb62ae7264f6c6c0e28343",
+      "nodeId": "201464:1384",
+      "name": "UnderConstruction",
+      "importPath": "src/components/primitives/UnderConstruction",
+      "props": {
+        "note": "note"
+      }
+    },
+    {
+      "key": "dd54b3346e22c16b8259042a5b439fb05aab0474",
+      "nodeId": "201531:1476",
+      "name": "VizShell",
+      "importPath": "src/programs/visualizers/VizShell",
+      "props": {
+        "children": "children"
       }
     }
   ]
