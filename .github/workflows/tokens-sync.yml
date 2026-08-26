@@ -41,9 +41,16 @@ jobs:
         # AA-contrast failures + consumed-but-unemitted vars (the A8 symptom)
         # to errors; not-yet-adopted new tokens stay soft warnings. --parity
         # diffs computed values vs main so a stray regression can't slip in
-        # behind an additive PR.
+        # behind an additive PR — except on the token-commit route
+        # (inspect-tune*), where every save is a parity change by definition,
+        # so parity reports instead of gating (Jake, 2026-08-26 s123). The
+        # rest of the doctor still gates those PRs at full strength.
         run: |
-          npm run tokens:doctor -- --strict --parity origin/main
+          case "${{ github.head_ref }}" in
+            inspect-tune*) PARITY_MODE="--parity-report" ;;
+            *)             PARITY_MODE="" ;;
+          esac
+          npm run tokens:doctor -- --strict --parity origin/main $PARITY_MODE
 
       - name: Commit regenerated artifacts if they changed
         # tokens:build emits the CSS and src/lib/motion.generated.ts (springs
