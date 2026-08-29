@@ -89,15 +89,29 @@ export function Desktop({
   /* Keep the URL pointing at what the reader is looking at (deep-linkable
      state). SHELF.MODE wins over the focused window while it is up — it
      covers the desk, so it IS what they are looking at, and leaving puts
-     the window's own path back. */
+     the window's own path back.
+
+     Exception: the boot desk keeps `/`. The address bar is the thing a
+     visitor copies, and rewriting it to the focused window's path on
+     arrival hands them /readme — a link that opens README alone
+     (windowsForPath), without the player the desk booted with. So while
+     the desk still holds exactly the boot arrangement, the URL stays the
+     root; the moment a window closes or focus moves somewhere with a
+     path, the focus-sync takes over as before. */
   useEffect(() => {
     if (!hydrated) return
+    const bootDesk =
+      !shelfMode &&
+      focused === BOOT_WINDOWS[BOOT_WINDOWS.length - 1] &&
+      windows.length === BOOT_WINDOWS.length &&
+      BOOT_WINDOWS.every((id) => windows.some((w) => w.id === id))
     const def = focused ? resolveWindow(focused) : null
-    const path = BASE + (shelfMode ? '/cases' : (def?.path ?? '/'))
+    const path =
+      BASE + (shelfMode ? '/cases' : bootDesk ? '/' : (def?.path ?? '/'))
     if (window.location.pathname !== path) {
       window.history.replaceState(null, '', path)
     }
-  }, [hydrated, focused, shelfMode])
+  }, [hydrated, focused, shelfMode, windows])
 
   return (
     <>
