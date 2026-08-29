@@ -22,6 +22,7 @@ storybook-static/
 
 # local-only source docs — internal metrics, coworker names, reference
 # images. Keep out of the public repo; the case-study MDX is the public copy.
+# Committed agent-skill config lives at root `agents/` + `adr/` instead.
 portfolio-tracker.md
 portfolio-tracker/
 session-log.md

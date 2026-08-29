@@ -60,8 +60,9 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
    content-marker curl (~1min CDN lag). Never force-push without Jake's
    explicit OK.
 3. **Never commit:** `ref/`, `portfolio-tracker.md`, `session-log.md`,
-   `invest-pull-quotes.md`, `docs/`, `.env*`. Grep `git status` before
-   every commit. Secrets stay ephemeral; never echo values.
+   `invest-pull-quotes.md`, `docs/`, `.env*`. (Committed agent config
+   lives at root `agents/` + `adr/`, outside the ban.) Grep
+   `git status` before every commit. Secrets stay ephemeral; never echo values.
 4. Verify with JS probes over screenshots (hidden preview tab freezes
    rAF/Motion/CSS transitions — see memory). Filter tool output
    (grep/head/limits) — never dump unfiltered lists into context.
@@ -153,3 +154,18 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
   a rewrite.
 - When a subsystem must hardcode (canvas/audio/SVG), take values from the
   active skin's token hexes and note the derivation in a comment.
+
+## 6. Agent skills
+
+Engineering flow = the vendored Pocock family (`.claude/skills/`,
+provenance in `.claude/skills/VENDORED.md`); route map: `/ask-jake`.
+
+- **Issue tracker**: the jaique vault — specs and `blocked-by:`-edged
+  ticket notes under `Efforts/Notes/<Effort>/`, statuses as triage
+  roles. Rules: `agents/issue-tracker.md`. Never a second tracker.
+- **Domain docs**: single-context — glossary in root `CONTEXT.md`,
+  ADRs in `adr/`. Consumer rules and the decision lanes (ADR vs
+  vault ruling vs law vs memory): `agents/domain.md`.
+- **Rulings (2026-08-29, s125)**: vault-first tracker (cloud later);
+  TDD parked — raise only when a logic-heavy subsystem makes
+  test-first apt; triage skill not adopted.
