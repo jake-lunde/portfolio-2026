@@ -245,10 +245,13 @@ export function Window({ def, z, active, desktopRef }: Props) {
         <div
           className={styles.titlebar}
           /* the anatomy markers STYLER's bench direct-selects by. One per
-             part the token names already declare (lib/stylerBlocks.ts:
-             layersFor), so ⌘+click on the stage lands on the same layer the
-             left panel lists. Attributes only: nothing here reads them but
-             the stage. */
+             node of the declared tree (lib/stylerAnatomy.ts), named the same
+             word the left panel lists, so ⌘+click on the stage lands on the
+             layer a person can already see. The tree is the DOM's shape now
+             rather than the token names' — the body and the grip are layers
+             that take no token at all — and the test holds the two lists
+             together in both directions. Attributes only: nothing here reads
+             them but the stage. */
           data-part="titlebar"
           onPointerDown={(e) => {
             // free-floating drag is a desktop affordance only
@@ -256,10 +259,10 @@ export function Window({ def, z, active, desktopRef }: Props) {
           }}
           onDoubleClick={() => setZoomed(def.id, !zoomed)}
         >
-          <div className={styles.titleControls}>
+          <div className={styles.titleControls} data-part="controls">
             <button
               className={styles.ctrl}
-              data-part="ctrl"
+              data-part="close"
               aria-label={`Close ${title}`}
               onClick={() => {
                 sfx.close()
@@ -270,7 +273,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
             </button>
             <button
               className={styles.ctrl}
-              data-part="ctrl"
+              data-part="zoom"
               aria-label={zoomed ? `Restore ${title}` : `Zoom ${title}`}
               onClick={() => setZoomed(def.id, !zoomed)}
             >
@@ -344,20 +347,24 @@ export function Window({ def, z, active, desktopRef }: Props) {
               </AnimatePresence>
             </div>
           ) : (
-            <span className={styles.titleMeta} aria-hidden="true">
+            <span className={styles.titleMeta} data-part="meta" aria-hidden="true">
               {def.meta}
             </span>
           )}
         </div>
       )}
       <WindowChromeProvider value={chromeApi}>
-        <div className={`${styles.windowBody} ${def.chrome === 'crt' ? `${styles.crt} crt` : ''}`}>
+        <div
+          className={`${styles.windowBody} ${def.chrome === 'crt' ? `${styles.crt} crt` : ''}`}
+          data-part="body"
+        >
           {def.gated && !unlocked ? <GateSphere /> : Body ? <Body /> : null}
         </div>
       </WindowChromeProvider>
       {!zoomed && !bare && (
         <div
           className={styles.resizeGrip}
+          data-part="grip"
           onPointerDown={startResize}
           role="button"
           aria-label={`Resize ${title}`}

@@ -16,7 +16,7 @@ import { CopyText } from '@/content/CopyText'
 import { registerHotkeys } from '@/lib/hotkeys'
 import { sfx } from '@/lib/sound'
 import { themeFor } from '@/lib/tokenEdit'
-import { layersFor, type StylerLayer } from '@/lib/stylerBlocks'
+import { flattenLayers, layersFor, type StylerLayer } from '@/lib/stylerBlocks'
 import { addRoot, clearHistory, count, removeRoot, resetAll } from '@/lib/stylerTune'
 import type { useCopyEditing } from './useCopyEditing'
 import { InfoTip } from './InfoTip'
@@ -458,15 +458,41 @@ function Grip({
   )
 }
 
-/** THE LEFT PANEL — the component's anatomy, two levels deep.
+/** The marker the bench should answer with for an element under the pointer:
+    the NEAREST `[data-part]` ancestor whose value is a node of the tree on
+    screen, walking on up past the ones that are not.
+
+    Not just `closest`, because a marker is only a layer of THIS component. A
+    window sample holds a whole program's markup, another pilot can be nested
+    inside a bench, and a `data-part` from either would otherwise stop the walk
+    and hand back a part the panel has never heard of. The answer is checked
+    back against the mount on every step too: closest can climb out of the
+    bench and keep going. */
+function nearestPart(
+  mount: HTMLElement,
+  from: Element,
+  layers: readonly StylerLayer[],
+): HTMLElement | null {
+  if (!mount.contains(from)) return null
+  let found = from.closest<HTMLElement>('[data-part]')
+  while (found && mount.contains(found)) {
+    const part = found.dataset.part
+    if (part && layers.some((l) => l.id === part)) return found
+    found = found.parentElement?.closest<HTMLElement>('[data-part]') ?? null
+  }
+  return null
+}
+
+/** THE LEFT PANEL — the component's anatomy, as deep as the component goes.
  *
  * INSPECT's LayersPanel is the precedent, and after Jake's second look it is
  * the precedent down to the wall it hangs on: same side, same width, same
- * head, same tree. Roving tabindex, arrows to walk, the picked row on the
- * accent fill. What it does NOT copy is that panel's Enter, which selects.
- * The s97 hotkey grammar reserves Enter for drilling into children and
- * Shift+Enter for the parent, so selection follows the caret here and Enter
- * means what the grammar says it means. Tab and Shift+Tab step siblings.
+ * head, same tree, same recursive rows drawn from one pre-order list with the
+ * indent coming off the depth. Roving tabindex, arrows to walk, the picked row
+ * on the accent fill. What it does NOT copy is that panel's Enter, which
+ * selects. The s97 hotkey grammar reserves Enter for drilling into children
+ * and Shift+Enter for the parent, so selection follows the caret here and
+ * Enter means what the grammar says it means. Tab and Shift+Tab step siblings.
  *
  * Those four go through the shared registry rather than this element's own
  * onKeyDown, which is the whole reason the registry exists: it sits on
@@ -475,13 +501,27 @@ function Grip({
  * tree, and the sibling keys are guarded on there being a sibling that way —
  * so Tab off the last layer, and Shift+Tab off the first, fall through
  * untouched and the keyboard can always leave. A tree that ate Tab in both
- * directions would be a trap with a lid on it. */
+ * directions would be a trap with a lid on it.
+ *
+ * EVERY NODE IS OPEN. There is no collapse state and no key to make one: the
+ * biggest of the five anatomies is eleven rows, a panel that fits on screen
+ * whole has nothing to gain by hiding half of it, and a collapsed branch is
+ * one more place a pick can be while you cannot see it. The chevron says
+ * "this one has children" and nothing else.
+ *
+ * THE TAIL COUNT is the rows the node takes ITSELF. A node that takes none and
+ * has children that do wears its subtree's count in brackets instead, which is
+ * the same thing the dock does one panel over when you open it — it draws what
+ * the children take and says so. Brackets rather than a dimmed number because
+ * the picked row draws on the accent flood and anything faded there falls
+ * under AA. */
 function StageLayers({
   layers,
   value,
   onPick,
   grip,
 }: {
+  /** the anatomy, pre-order: the order it draws and the order arrows walk */
   layers: StylerLayer[]
   value: string
   onPick: (id: string) => void
@@ -518,43 +558,55 @@ function StageLayers({
       const el = document.activeElement as HTMLElement | null
       return !!el?.closest?.('[data-styler-layers]')
     }
-    /** the parts under the root, and where the caret sits among them */
-    const parts = () => act.current.layers.slice(1)
-    const at = () => parts().findIndex((layer) => layer.id === act.current.value)
-    const onRoot = () => act.current.value === act.current.layers[0]?.id
+    /** the node the caret is on, and the row it sits in among its siblings */
+    const here = () => act.current.layers.find((l) => l.id === act.current.value) ?? null
+    const siblings = (node: StylerLayer) =>
+      act.current.layers.filter((l) => l.parent === node.parent)
+    const step = (by: number) => () => {
+      const node = here()
+      if (!node) return
+      const row = siblings(node)
+      const at = row.findIndex((l) => l.id === node.id)
+      act.current.select(row[at + by].id, true)
+    }
+    const canStep = (by: number) => () => {
+      if (!inTree()) return false
+      const node = here()
+      if (!node) return false
+      const row = siblings(node)
+      const at = row.findIndex((l) => l.id === node.id)
+      return at >= 0 && at + by >= 0 && at + by < row.length
+    }
 
     return registerHotkeys('styler-stage-layers', [
       {
         key: 'Enter',
-        when: () => inTree() && onRoot() && parts().length > 0,
-        run: () => act.current.select(parts()[0].id, true),
+        when: () => inTree() && (here()?.children.length ?? 0) > 0,
+        run: () => act.current.select(here()!.children[0].id, true),
       },
       {
         key: 'Enter',
         shift: true,
-        when: () => inTree() && !onRoot(),
-        run: () => act.current.select(act.current.layers[0].id, true),
+        when: () => inTree() && !!here()?.parent,
+        run: () => act.current.select(here()!.parent!, true),
       },
-      {
-        key: 'Tab',
-        when: () => inTree() && at() >= 0 && at() < parts().length - 1,
-        run: () => act.current.select(parts()[at() + 1].id, true),
-      },
-      {
-        key: 'Tab',
-        shift: true,
-        when: () => inTree() && at() > 0,
-        run: () => act.current.select(parts()[at() - 1].id, true),
-      },
+      { key: 'Tab', when: canStep(1), run: step(1) },
+      { key: 'Tab', shift: true, when: canStep(-1), run: step(-1) },
     ])
   }, [])
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const at = layers.findIndex((layer) => layer.id === value)
     if (at < 0) return
+    const node = layers[at]
     const move = (to: number) => {
       e.preventDefault()
       select(layers[Math.max(0, Math.min(layers.length - 1, to))].id, true)
+    }
+    const go = (id: string | null | undefined) => {
+      if (!id) return
+      e.preventDefault()
+      select(id, true)
     }
     switch (e.key) {
       case 'ArrowDown':
@@ -564,10 +616,11 @@ function StageLayers({
         move(at - 1)
         return
       case 'ArrowRight':
-        if (at === 0) move(1)
+        // every node is open, so the first child is always the next row down
+        go(node.children[0]?.id)
         return
       case 'ArrowLeft':
-        if (at > 0) move(0)
+        go(node.parent)
         return
       case 'Home':
         move(0)
@@ -595,32 +648,40 @@ function StageLayers({
           className={shell.tree}
           onKeyDown={onKeyDown}
         >
-          {layers.map((layer, n) => {
-            const root = n === 0
+          {layers.map((layer) => {
             const on = layer.id === value
+            const row = layers.filter((l) => l.parent === layer.parent)
+            const own = layer.rows.length
+            const under = layer.subtreeRows.length
             return (
               <div
                 key={layer.id}
                 data-layer-key={layer.id}
                 role="treeitem"
                 tabIndex={on ? 0 : -1}
-                aria-level={root ? 1 : 2}
-                aria-posinset={root ? 1 : n}
-                aria-setsize={root ? 1 : layers.length - 1}
+                aria-level={layer.depth + 1}
+                aria-posinset={row.findIndex((l) => l.id === layer.id) + 1}
+                aria-setsize={row.length}
                 aria-selected={on}
-                aria-expanded={root && layers.length > 1 ? true : undefined}
+                aria-expanded={layer.children.length > 0 ? true : undefined}
                 className={shell.row}
                 data-picked={on || undefined}
                 style={{
-                  paddingLeft: `calc(var(--spacing-component-xs) + ${root ? 0 : 12}px)`,
+                  paddingLeft: `calc(var(--spacing-component-xs) + ${layer.depth * 12}px)`,
                 }}
                 onClick={() => select(layer.id, false)}
               >
-                <span className={shell.chevron} aria-hidden="true" data-empty={!root || undefined}>
-                  {root && layers.length > 1 ? '▾' : '·'}
+                <span
+                  className={shell.chevron}
+                  aria-hidden="true"
+                  data-empty={layer.children.length === 0 || undefined}
+                >
+                  {layer.children.length > 0 ? '▾' : '·'}
                 </span>
-                <span className={shell.rowLabel}>{layer.label}</span>
-                <span className={styles.layerCount}>{layer.rows.length}</span>
+                <span className={shell.rowLabel}>{t(layer.name, skin)}</span>
+                <span className={styles.layerCount}>
+                  {own > 0 ? own : under > 0 ? `(${under})` : ''}
+                </span>
               </div>
             )
           })}
@@ -680,11 +741,12 @@ export function StylerStage({
   /* What the bench's own listeners need to know, read through a ref: they arm
      once for the life of the room and everything they ask about — which
      component, which layers, which one is picked — changes underneath them. */
-  const bench = useRef<{ componentId: string; layers: StylerLayer[]; picked: string }>({
-    componentId,
-    layers: [],
-    picked: '',
-  })
+  const bench = useRef<{
+    componentId: string
+    layers: StylerLayer[]
+    root: string
+    picked: string
+  }>({ componentId, layers: [], root: '', picked: '' })
 
   const saver = useTokenSave({
     keyId: KEY_ID,
@@ -768,11 +830,7 @@ export function StylerStage({
 
     const markerFor = (el: Element | null): HTMLElement | null => {
       if (!el || !mount.contains(el)) return null
-      const found = el.closest<HTMLElement>('[data-part]')
-      if (!found || !mount.contains(found)) return null
-      const part = found.dataset.part
-      // a marker naming a layer this component does not list is not ours
-      return part && bench.current.layers.some((l) => l.id === part) ? found : null
+      return nearestPart(mount, el, bench.current.layers)
     }
 
     const show = (el: HTMLElement | null) => {
@@ -824,11 +882,11 @@ export function StylerStage({
   useEffect(() => {
     const mount = benchRef.current
     if (!mount) return
-    const { picked, layers, componentId: id } = bench.current
+    const { picked, root, componentId: id } = bench.current
     if (!picked) return
     const marked = Array.from(
       mount.querySelectorAll<HTMLElement>(
-        picked === layers[0]?.id
+        picked === root
           ? `[data-component="${CSS.escape(id)}"]`
           : `[data-part="${CSS.escape(picked)}"]`,
       ),
@@ -870,9 +928,12 @@ export function StylerStage({
   // skin's voice on the bench that is about to draw it
   const variants = spec.variants(set.skin)
   const variant = variants.find((v) => v.id === wantVariant) ?? variants[0]
-  const layers = layersFor(componentId)
+  /* The declared anatomy, walked flat: the panel draws this list in this
+     order, the bench's two gestures answer out of it, and the dock takes one
+     node id off it. One tree, three readers, no second list to keep in step. */
+  const layers = flattenLayers(layersFor(componentId))
   const layer = layers.find((l) => l.id === wantLayer) ?? layers[0]
-  bench.current = { componentId, layers, picked: layer.id }
+  bench.current = { componentId, layers, root: layers[0].id, picked: layer.id }
 
   /* The two modifiers the SPEC has a say in, resolved the same way every
      other want in this room is: the ask, checked against what is actually on
@@ -884,18 +945,13 @@ export function StylerStage({
   const state = states.find((s) => s.id === wantState) ?? states[0]
 
   /** The deepest layer marker under a pointer, or null when the pointer is
-      not on one. `closest` can walk out of the bench on its way up, so the
-      answer is checked back against the mount — and against this component's
-      own layer list, because a marker belonging to a sample nested inside the
-      bench is not a part of the thing being styled. */
+      not on one. nearestPart is the shared walk — see its note for why the
+      nearest marker is not always the answer. */
   const partAt = (target: EventTarget | null): string | null => {
     const mount = benchRef.current
     const el = target instanceof Element ? target : null
-    if (!mount || !el || !mount.contains(el)) return null
-    const found = el.closest<HTMLElement>('[data-part]')
-    if (!found || !mount.contains(found)) return null
-    const part = found.dataset.part
-    return part && layers.some((l) => l.id === part) ? part : null
+    if (!mount || !el) return null
+    return nearestPart(mount, el, layers)?.dataset.part ?? null
   }
 
   /** Figma's two gestures. Deep takes the part under the pointer and falls
