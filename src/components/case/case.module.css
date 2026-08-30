@@ -1087,6 +1087,29 @@
   display: block;
 }
 
+/* plate 09 — the rein-in (ReinIn.tsx). Every surface's shot stays in
+   the pane, stacked; opacity picks the current one so a tab press
+   swaps with nothing left to load. Contain on device black, same
+   derivation as the reels' #000 (the bezel belongs to the footage). */
+.reinShot {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.reinShot img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+}
+
+.reinShot img[data-on] {
+  opacity: 1;
+}
+
 /* THE LIVING SKETCH (HeroSketch.tsx) — the concept collage in the case
    header, where PROGRESS.VWR used to greet you (s94b). The cutouts
    float straight on the screen's own surface, no artboard (Jake's
