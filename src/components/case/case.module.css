@@ -132,6 +132,23 @@
   border-color: var(--border);
 }
 
+/* the light mat — for recordings that sit on paper-white, the surround
+   matches the footage's own corners (rail law, same derivation as the
+   dark reels' #000). Fixed like the dark plate's ink, not a token:
+   the mat belongs to the footage, not the skin. */
+.plate[data-mat='light'] {
+  background: #fdfdfd; /* sampled: onboarding recordings' corners */
+  color: var(--content);
+}
+
+.plate[data-mat='light'] .fidChipSeg {
+  color: color-mix(in srgb, var(--content) 45%, transparent);
+}
+
+.plate[data-mat='light'] .fidChipSeg[aria-pressed='true'] {
+  color: color-mix(in srgb, var(--content) 90%, transparent);
+}
+
 .plateCap {
   font-family: var(--mono);
   font-size: var(--text-label);

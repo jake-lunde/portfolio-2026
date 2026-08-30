@@ -14,7 +14,6 @@ import {
 } from '@/components/case/CaseComponents'
 import { ResearchBars } from '@/components/case/ResearchBars'
 import { HubModes } from '@/components/case/HubModes'
-import { TandemSetup } from '@/components/case/TandemSetup'
 import { CaseFooter } from '@/components/case/CaseFooter'
 import { PitchDeck } from '@/components/case/PitchDeck'
 import { LaunchFilm } from '@/components/case/LaunchFilm'
@@ -160,8 +159,27 @@ import { LiveAudit } from '@/components/case/LiveAudit'
     shows up on both screens the whole way.
   </Lead>
 
-  <Plate>
-    <TandemSetup />
+  <Plate mat="light" caption="The onboarding flow's first pass, and where it landed.">
+    <FidelityFrame
+      vDraft="v0.5"
+      vShipped="v1.0"
+      draft={
+        <DemoReel
+          video="demo-onboard-initial"
+          poster="poster-onboard-initial.webp"
+          alt="Screen recording of the first onboarding pass: the hub welcome screen serves a QR code while a phone scans it and picks up setup."
+          mat="light"
+        />
+      }
+      shipped={
+        <DemoReel
+          video="demo-onboard-final"
+          poster="poster-onboard-final.webp"
+          alt="Screen recording of the final onboarding flow: the hub boots and pairs with the phone through the full setup."
+          mat="light"
+        />
+      }
+    />
   </Plate>
 
   That QR handoff outlived onboarding. It carries most complex actions in
