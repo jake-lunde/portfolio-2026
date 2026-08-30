@@ -19,6 +19,7 @@ export function DemoReel({
   poster,
   alt,
   mat,
+  frame,
 }: {
   /** basename in evo/ — demo-poc, demo-hifi (mp4 + webm pairs) */
   video: string
@@ -27,6 +28,9 @@ export function DemoReel({
   /** 'light' for recordings on paper-white — the surround matches the
       footage's corners (rail law); default stays the dark reels' #000 */
   mat?: 'light'
+  /** 'phone' seats a portrait screen recording in a device-black
+      bezel, centered on the plate (plate 07's avatar picker) */
+  frame?: 'phone'
 }) {
   const ref = useRef<HTMLVideoElement>(null)
   const reduced = useReducedMotion()
@@ -45,10 +49,10 @@ export function DemoReel({
     return () => io.disconnect()
   }, [reduced])
 
-  return (
+  const reel = (
     <video
       ref={ref}
-      className={styles.demoReel}
+      className={frame === 'phone' ? styles.demoReelPhone : styles.demoReel}
       style={mat === 'light' ? { background: '#fdfdfd' } : undefined}
       poster={`${DIR}/${poster}`}
       muted
@@ -61,4 +65,5 @@ export function DemoReel({
       <source src={`${DIR}/${video}.webm`} type="video/webm" />
     </video>
   )
+  return frame === 'phone' ? <div className={styles.phoneShell}>{reel}</div> : reel
 }
