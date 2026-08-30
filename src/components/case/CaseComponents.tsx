@@ -68,16 +68,18 @@ export function Plate({
   cap,
   tag,
   caption,
+  mat,
   children,
 }: {
   cap?: React.ReactNode /* filled plates drop their "Plate NN" label (Jake's s55 rule); placeholders keep it, and live plates may put dynamic text here */
   tag?: string /* right-hand cap slot: a date, a ticker, a technique. The FIG. specimen letters came off in s89 — plates are numbered by their cap, if at all */
   caption?: string
+  mat?: 'light' /* recordings that sit on paper-white get a matching surround (rail law: the mat matches the footage's corners) */
   children: React.ReactNode
 }) {
   return (
     <figure className={styles.figure}>
-      <div className={styles.plate}>
+      <div className={styles.plate} data-mat={mat}>
         {(cap || tag) && (
           <div className={styles.plateCap}>
             {cap && (typeof cap === 'string' ? <span>{cap}</span> : cap)}

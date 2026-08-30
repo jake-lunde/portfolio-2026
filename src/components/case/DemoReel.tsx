@@ -18,11 +18,15 @@ export function DemoReel({
   video,
   poster,
   alt,
+  mat,
 }: {
   /** basename in evo/ — demo-poc, demo-hifi (mp4 + webm pairs) */
   video: string
   poster: string
   alt: string
+  /** 'light' for recordings on paper-white — the surround matches the
+      footage's corners (rail law); default stays the dark reels' #000 */
+  mat?: 'light'
 }) {
   const ref = useRef<HTMLVideoElement>(null)
   const reduced = useReducedMotion()
@@ -45,6 +49,7 @@ export function DemoReel({
     <video
       ref={ref}
       className={styles.demoReel}
+      style={mat === 'light' ? { background: '#fdfdfd' } : undefined}
       poster={`${DIR}/${poster}`}
       muted
       loop
