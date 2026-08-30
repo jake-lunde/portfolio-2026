@@ -3,7 +3,6 @@ import {
   Section,
   Lead,
   Plate,
-  Placeholder,
   Moves,
   Move,
   PullQuote,
@@ -21,6 +20,7 @@ import { FidelityFrame } from '@/components/case/FidelityFrame'
 import { DemoReel } from '@/components/case/DemoReel'
 import { HeroSketch } from '@/components/case/HeroSketch'
 import { LiveAudit } from '@/components/case/LiveAudit'
+import { ReinIn } from '@/components/case/ReinIn'
 
 <Hero
   eyebrow="Greenlight · Family Hub · First-party hardware"
@@ -146,9 +146,6 @@ import { LiveAudit } from '@/components/case/LiveAudit'
     />
   </Plate>
 
-  <Plate cap="Plate 05 · the cadence" caption="A spread from the monthly leadership decks: the Gantt, per-platform principles, ambient studies.">
-    <Placeholder>Leadership-deck spread</Placeholder>
-  </Plate>
 </Section>
 
 <Section no="05" label="The constraints" title="Design with the grain of the hardware.">
@@ -261,12 +258,7 @@ import { LiveAudit } from '@/components/case/LiveAudit'
   means something. The feedback was right, and the design got better.
 
   <Plate cap="Plate 09 · the rein-in" caption="The early color pass, and where it landed. The pass where the team was right.">
-    <FidelityFrame
-      vDraft="v0.7"
-      vShipped="v1.0"
-      draft={<Placeholder>The loud pass · color everywhere</Placeholder>}
-      shipped={<Placeholder>Color only where it means something</Placeholder>}
-    />
+    <ReinIn />
   </Plate>
 </Section>
 
