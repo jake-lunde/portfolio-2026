@@ -223,6 +223,28 @@
   background: #000;
 }
 
+/* plate 07 — a portrait screen recording seated in a phone. The bezel
+   is the device's ink, not the skin's, so it stays fixed #000 like the
+   mats; a hairline in the plate's own ink keeps it off the dark ground.
+   Radii concentric: screen 34 + 10 bezel = 44 outer. */
+.phoneShell {
+  width: min(280px, 100%);
+  margin: 0 auto;
+  padding: 10px;
+  background: #000;
+  border: 1px solid rgba(231, 225, 210, 0.28);
+  border-radius: 44px;
+}
+
+.demoReelPhone {
+  display: block;
+  width: 100%;
+  aspect-ratio: 351 / 763; /* the recordings' own 702×1526 */
+  object-fit: cover;
+  background: #000;
+  border-radius: 34px;
+}
+
 /* plate 01 — transparent wireframe groups sitting directly on the
    plate; the group's deck annotation lives in the cap row above */
 .deck {
