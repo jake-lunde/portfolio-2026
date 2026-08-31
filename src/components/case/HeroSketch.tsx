@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { SPRINGS } from '@/lib/motion'
+import { useFidelity } from './fidelity'
 import styles from './case.module.css'
 
 /* THE LIVING SKETCH — Jake's concept collage, riding the case header
@@ -12,7 +13,12 @@ import styles from './case.module.css'
    canvas (coords straight from the Figma group), each adrift on its
    own slow loop, shying away from the cursor. Deltas are screen-px and
    small on purpose: ambient, not a parlor trick. Art exports from
-   Figma "scroller viz" (201161-12); swappable like every image (§2). */
+   Figma "scroller viz" (201161-12); swappable like every image (§2).
+
+   The sketch is the DRAFT face of this slot. The case-wide fidelity
+   switch flips it to the shipped device (HubFinal below) — concept
+   collage on one side, the machine that came out of it on the other.
+   Instant swap, FidelityFrame's own law. */
 
 const DIR = '/case/family-hub/evo'
 
@@ -51,9 +57,84 @@ const BITS: Bit[] = [
 
 const NO_PUSH = BITS.map(() => ({ x: 0, y: 0 }))
 
+/* the launch screens riding the shipped bezel, in section order
+   (Figma 201592-38873). Order is the loop; the count is baked into
+   .hubScreen's timing — see case.module.css before adding one. */
+const SCREENS = [
+  'calendar',
+  'chores',
+  'settings',
+  'assistant',
+  'calendar-alt',
+  'safety',
+  'home',
+  'photos',
+  'lists',
+]
+
+/* the shipped device — CSS bezel (case.module.css .hubDevice), the
+   screen cycling the launch states on a slow crossfade loop. The whole
+   device shies from the cursor the way the sketch's cutouts do (Jake,
+   s131) — same radial-shove math, one object instead of fourteen, and
+   fainter: hardware is heavier than paper. */
+function HubFinal() {
+  const ref = useRef<HTMLDivElement>(null)
+  const reduced = useReducedMotion()
+  const [shove, setShove] = useState({ x: 0, y: 0 })
+
+  const onMove = (e: React.PointerEvent) => {
+    if (reduced || !ref.current) return
+    const r = ref.current.getBoundingClientRect()
+    const dx = r.left + r.width / 2 - e.clientX
+    const dy = r.top + r.height / 2 - e.clientY
+    const d = Math.hypot(dx, dy)
+    const radius = r.width * 0.6
+    const max = r.width * 0.015
+    if (d >= radius || d === 0) return setShove({ x: 0, y: 0 })
+    const f = ((radius - d) / radius) * max
+    setShove({ x: (dx / d) * f, y: (dy / d) * f })
+  }
+
+  return (
+    <div
+      className={styles.heroArt}
+      ref={ref}
+      onPointerMove={onMove}
+      onPointerLeave={() => setShove({ x: 0, y: 0 })}
+    >
+      <motion.div
+        className={styles.hubDevice}
+        animate={{ x: shove.x, y: shove.y }}
+        transition={SPRINGS.widget}
+        data-spring="widget"
+        role="img"
+        aria-label="The shipped Family Hub device: its 15.6-inch screen cycling through the launch apps — calendar, chores, settings, assistant, safety, home, photos, lists."
+      >
+        <div className={styles.hubGap}>
+          <div className={styles.hubGlass}>
+            <div className={styles.hubScreen}>
+              {SCREENS.map((f, i) => (
+                <img
+                  key={f}
+                  src={`${DIR}/screens/${f}.webp`}
+                  alt=""
+                  decoding="async"
+                  draggable={false}
+                  style={{ ['--i' as string]: i }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 export function HeroSketch() {
   const sceneRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion()
+  const mode = useFidelity((s) => s.mode)
   const [push, setPush] = useState(NO_PUSH)
 
   // cutouts shy away from the pointer: a gentle radial shove, spring-
@@ -78,6 +159,8 @@ export function HeroSketch() {
       }),
     )
   }
+
+  if (mode === 'shipped') return <HubFinal />
 
   return (
     <div
