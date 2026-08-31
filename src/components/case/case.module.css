@@ -930,10 +930,11 @@
   }
 }
 
-/* HUB MODES (HubModes.tsx) — FIG. C merged FIG. D into itself (s89): one
-   viewport, two controls. The mode tabs at the bottom pick the mode; the
-   view switch at the top flips that mode's lo-fi diagram for the screens
-   that actually shipped in it. Both share a ratio so nothing jumps. */
+/* HUB MODES (HubModes.tsx) — one viewport, two controls (s89). The mode
+   tabs at the bottom pick the mode; the fidelity chip at the top flips
+   that mode's first hi-fi pass for the screens that shipped (s132: the
+   lo-fi SVG diagram retired — both faces are real screens now, riding
+   the hero's .hubDevice bezel so the hub reads as hardware). */
 
 .hubHead {
   display: flex;
@@ -950,31 +951,6 @@
   gap: 14px;
 }
 
-/* text switches, not buttons — the mode tabs below are the heavy control
-   and two boxed rows would read as one confused toolbar */
-.hubView {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 2px 0;
-  background: none;
-  border: 0;
-  border-bottom: 1px solid transparent;
-  color: rgba(231, 225, 210, 0.45);
-  cursor: pointer;
-}
-
-.hubView[aria-pressed='true'] {
-  color: rgba(231, 225, 210, 0.9);
-  border-bottom-color: var(--accent-expressive);
-}
-
-.hubView:focus-visible {
-  outline: 2px solid var(--accent-expressive);
-  outline-offset: 2px;
-}
-
 .hubCount {
   font-family: var(--mono);
   font-size: 9px;
@@ -982,31 +958,43 @@
   color: rgba(231, 225, 210, 0.45);
 }
 
-/* the cycling shipped screen — a button so keyboard and click can step it
-   by hand, since the auto-advance is the only motion in the plate */
+/* the cycling screens — a button so keyboard and click can step the
+   loop by hand; the frame inside is the hero's .hubDevice, unstyled
+   here so the bezel is the only chrome. The margin is the wall: the
+   device's ground shadow needs somewhere to land, and the slot is
+   sized so a room can move in behind it later. */
 .hubShip {
-  position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 560 / 315;
-  padding: 0;
-  border: 1px solid rgba(231, 225, 210, 0.4);
-  background: rgba(19, 24, 17, 0.6);
+  padding: 12px 6% 26px;
+  border: 0;
+  background: none;
   cursor: pointer;
-  overflow: hidden;
-}
-
-.hubShip img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
 .hubShip:focus-visible {
   outline: 2px solid var(--accent-expressive);
   outline-offset: 2px;
+}
+
+/* the panel behind the glass — .hubScreen's geometry without its baked
+   launch loop; HubModes drives these opacities itself (Motion), so a
+   CSS animation here would fight the inline styles and win */
+.hubPanel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1920 / 1080;
+  background: #f3f5f5;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.hubPanel img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .hubTabs {
@@ -1024,21 +1012,6 @@
   }
 }
 
-/* the plate carries both panes at every width (s94b — the rail and its
-   loan retired); the case's fidelity switch picks the pane */
-.hubStage [data-pane='shipped'] {
-  display: none;
-}
-
-.hubStage[data-view='shipped'] [data-pane='diagram'] {
-  display: none;
-}
-
-.hubStage[data-view='shipped'] [data-pane='shipped'] {
-  display: block;
-}
-
-
 /* FidelityFrame — one frame, two states, inside a plate. The chip
    restates the global switch in this pair's own rung labels; panes
    flip instantly (1992 machines don't crossfade). */
@@ -1051,7 +1024,7 @@
   z-index: 1;
 }
 
-/* text switches, same species as .hubView — plate ink, marks-only accent */
+/* text switches, not boxed buttons — plate ink, marks-only accent */
 .fidChipSeg {
   font-family: var(--mono);
   font-size: 9px;
