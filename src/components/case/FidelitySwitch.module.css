@@ -3,6 +3,14 @@
    everything draws in currentColor so the bar's per-skin ink carries
    through, active and inactive alike. */
 
+/* the bubble's anchor — the switch keeps its own box, the wrap only
+   exists so `absolute` below means "under the rocker" */
+.wrap {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+}
+
 .sw {
   flex: 0 0 auto;
   display: inline-flex;
@@ -61,4 +69,54 @@
 .sw:focus-visible {
   outline: 2px solid var(--accent-expressive);
   outline-offset: 2px;
+}
+
+/* THE CALLOUT — the FableMark bubble idiom, hung off the titlebar the
+   way the explainer card is (shell.module.css .explainerPanel): paper
+   card, printed shadow, --content ink so the titlebar's inverse ink
+   stops at the bar. */
+.bubble {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: -4px;
+  z-index: 6; /* over the body content and the resize grip (4) */
+  width: max-content;
+  max-width: min(230px, calc(100vw - 28px));
+  padding: 6px 9px;
+  background: var(--surface-raised);
+  border: var(--border-width-default) solid var(--content);
+  box-shadow: var(--shadow-print);
+  font-family: var(--mono);
+  font-size: var(--text-micro);
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  color: var(--content);
+  cursor: pointer;
+  text-transform: none;
+}
+
+/* tail pointing back up at the rocker — a rotated square wearing only
+   its top and left borders, filled with the bubble's own surface, so
+   the outline reads as one continuous stroke (same trick as FableMark) */
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  /* under the track's middle: the bubble's right edge overhangs the
+     switch by 4, and SHIPPED plus its gap put the track's centre 78 in
+     (measured off the live bar), less half the 10px tail */
+  right: 73px;
+  width: 10px;
+  height: 10px;
+  background: var(--surface-raised);
+  border-top: var(--border-width-default) solid var(--content);
+  border-left: var(--border-width-default) solid var(--content);
+  transform: rotate(45deg);
+}
+
+/* a full-weight --content edge glares in dark — same climb-down as the
+   explainer card */
+[data-theme='dark'] .bubble,
+[data-theme='dark'] .bubble::before {
+  border-color: var(--border);
 }
