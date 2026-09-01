@@ -693,17 +693,28 @@
 /* THE SET (LaunchFilm.tsx) — the launch film left the plate for a
    television (s134-r3). Chassis ink is the CRT law the shell's
    .windowBody.crt already writes: the body is --surface-inverse, and
-   everything on it mixes from --content-inverse. Inline face only; the
-   lightbox below stays clean. */
+   everything on it mixes from --content-inverse.
+
+   s134-r4: the tape overlays are gone (the dub is the footage now, see
+   LaunchFilm.tsx), the tube is 4:3, and the whole set is the button.
+   What's left here is the object — moulded shell, recessed glass, a
+   strip of controls that don't do anything, and feet. Every depth cue
+   is a static shadow or gradient; nothing on the chassis animates. */
 .set {
   position: relative;
   background: var(--surface-inverse);
   border: var(--border-width-default) solid var(--content);
-  border-radius: 10px;
-  padding: 13px 13px 0;
-  /* the set is an object on a surface, not a panel in it — same two-pass
-     ground shadow the hub device carries */
+  border-radius: 14px;
+  /* squarer tube, so the shell reads wider at the sides than the 16:9
+     version needed and the strip below carries the weight */
+  padding: 15px 15px 0;
   box-shadow:
+    /* moulded plastic, lit from above: one bright edge along the top of
+       the shell, one shade under it */
+    inset 0 1px 0 color-mix(in srgb, var(--content-inverse) 17%, transparent),
+    inset 0 -1px 0 rgb(0 0 0 / 0.5),
+    /* the set is an object on a surface, not a panel in it — same two-pass
+       ground shadow the hub device carries */
     0 14px 22px -10px rgb(0 0 0 / 0.3),
     0 30px 45px -18px rgb(0 0 0 / 0.2);
 }
@@ -712,31 +723,66 @@
   border-color: var(--border);
 }
 
-/* the filter lives in the flow but takes no room; display:none would
-   stop some engines resolving url(#…) against it */
-.setFilterDefs {
+/* two moulded feet, so the set stands on the page instead of floating
+   on it. One box, two gradient stops — no extra element for furniture. */
+.set::after {
+  content: '';
   position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
+  left: 14%;
+  right: 14%;
+  bottom: -5px;
+  height: 5px;
+  border-radius: 0 0 3px 3px;
+  background:
+    linear-gradient(var(--surface-inverse), var(--surface-inverse)) left / 24% 100% no-repeat,
+    linear-gradient(var(--surface-inverse), var(--surface-inverse)) right / 24% 100% no-repeat;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.4));
 }
 
-/* the tube: a rectangle pulled at the corners, more curve vertically
-   than horizontally the way a real mask was, with the glass edge as an
-   inner hairline and the well going dark behind it */
+/* the tube — and the only control on the set: pressing the glass opens
+   the film with sound. zoom-in is the house's own affordance for
+   "this opens bigger" (.pinned, .npWidget in the shell). */
 .setTube {
+  display: block;
+  width: 100%;
   position: relative;
-  border-radius: 20px / 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 20px / 26px;
   overflow: hidden;
   background: #000; /* the well behind the picture — footage ground, fixed like the reels' mats */
+  cursor: zoom-in;
   box-shadow:
+    /* the glass edge */
     inset 0 0 0 1px color-mix(in srgb, var(--content-inverse) 14%, transparent),
-    inset 0 2px 12px rgb(0 0 0 / 0.55);
+    /* set into the shell: the picture sits below the plastic, so the
+       recess casts down over the top of the tube */
+    inset 0 4px 16px rgb(0 0 0 / 0.7),
+    /* the lip the tube drops into */
+    0 0 0 1px rgb(0 0 0 / 0.55),
+    0 1px 0 color-mix(in srgb, var(--content-inverse) 10%, transparent);
+  transition: box-shadow 0.16s ease;
 }
 
+.setTube:hover {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--content-inverse) 26%, transparent),
+    inset 0 4px 16px rgb(0 0 0 / 0.7),
+    0 0 0 1px rgb(0 0 0 / 0.55),
+    0 1px 0 color-mix(in srgb, var(--content-inverse) 10%, transparent);
+}
+
+.setTube:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 3px;
+}
+
+/* the reference sets are 4:3 and the spot is 16:9, so the picture is
+   cropped to the glass — which is what a set did to widescreen anyway */
 .setScreen {
+  display: block;
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 3;
 }
 
 .setSignal {
@@ -744,16 +790,26 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  object-fit: cover;
   border: 0;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 
-/* no signal yet — the tube shows snow instead of a hole. The tile is
-   feTurbulence baked into a data URI so the noise costs one decode and
-   no canvas; it lives here rather than in the component because it is a
-   texture, like .halftone and .crt, and because a URI that long reads
-   as prose to the text index. Opacity only, two steps, which is as much
-   as static needs to read as static. */
+.setSignal[data-clear] {
+  opacity: 1;
+}
+
+/* THE FACE. Snow is the poster, not a loader: it is what the tube shows
+   before the film paints and what it keeps showing if autoplay is
+   refused or motion is reduced (s134-r4 — CoverFilm's law, a failure
+   never paints broken-media furniture). The tile is feTurbulence baked
+   into a data URI so the noise costs one decode and no canvas; it lives
+   here rather than in the component because it is a texture, like
+   .halftone and .crt, and because a URI that long reads as prose to the
+   text index. Opacity only, two steps, which is as much as static needs
+   to read as static. */
 .setSnow {
   position: absolute;
   inset: 0;
@@ -765,34 +821,6 @@
 @keyframes setSnow {
   to {
     opacity: 0.8;
-  }
-}
-
-/* the tracking band — a soft bright run walking down the picture, the
-   one artifact a deck couldn't hold steady. Transform only. */
-.setRoll {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 16%;
-  z-index: 2;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    color-mix(in srgb, var(--content-inverse) 7%, transparent),
-    transparent
-  );
-  animation: setRoll 7.5s linear infinite;
-}
-
-@keyframes setRoll {
-  from {
-    transform: translateY(-120%);
-  }
-  to {
-    transform: translateY(740%);
   }
 }
 
@@ -812,8 +840,8 @@
     radial-gradient(120% 120% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.42) 100%);
 }
 
-/* the channel badge, burnt into the corner — over the scanlines, which
-   is why it clears .crt::after's z-index */
+/* the channel badge, burnt into the corner — above the glass, so the
+   falloff never eats it */
 .setOsd {
   position: absolute;
   right: 12px;
@@ -827,60 +855,51 @@
   pointer-events: none;
 }
 
-/* the control strip under the glass: a knob, a run of vents, and the
-   one control that does something */
+/* the control strip under the glass: two knobs and a run of speaker
+   slits, all of it moulding. s134-r4 retired the expand button — the
+   glass is the control now, so nothing down here does anything, which
+   is exactly what a combo set's front panel looked like. */
 .setStrip {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 3px 12px;
+  gap: 9px;
+  padding: 12px 4px 13px;
 }
 
+/* turned dials: a lit top edge and a shadow under, the same overhead
+   light the shell is moulded by */
 .setKnob {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--content-inverse) 26%, transparent);
+  background: color-mix(in srgb, var(--content-inverse) 24%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--content-inverse) 30%, transparent),
+    0 1px 1px rgb(0 0 0 / 0.45);
 }
 
+.setKnob[data-small] {
+  width: 7px;
+  height: 7px;
+}
+
+/* the speaker grille — slits cut into the plastic, so each one is a dark
+   channel with a lit lower lip */
 .setVents {
   flex: 1;
-  height: 7px;
+  height: 9px;
+  border-radius: 1px;
   background: repeating-linear-gradient(
     90deg,
-    color-mix(in srgb, var(--content-inverse) 15%, transparent) 0 2px,
-    transparent 2px 5px
+    rgb(0 0 0 / 0.55) 0 2px,
+    color-mix(in srgb, var(--content-inverse) 13%, transparent) 2px 3px,
+    transparent 3px 5px
   );
 }
 
-.filmExpand {
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 6px 10px;
-  background: var(--accent-expressive);
-  /* the set's own body read back as ink — pink is a mark colour and the
-     chassis ground is the only thing dark enough to sit on it (the same
-     call .plateTab's active pill makes) */
-  color: var(--surface-inverse);
-  border: var(--border-width-default) solid var(--surface-inverse);
-  cursor: pointer;
-}
-
-.filmExpand:focus-visible {
-  outline: 2px solid var(--content-inverse);
-  outline-offset: 2px;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .setSnow,
-  .setRoll {
+  .setSnow {
     animation: none;
-  }
-
-  .setRoll {
-    opacity: 0;
   }
 }
 
@@ -892,6 +911,9 @@
   display: grid;
   place-items: center;
   padding: 4vmin;
+  /* the other half of the tube's zoom-in — the shell's own pattern for
+     an opened thing (.photoZoom, .npZoomed) */
+  cursor: zoom-out;
 }
 
 .filmFrame {

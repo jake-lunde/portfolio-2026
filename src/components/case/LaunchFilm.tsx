@@ -6,40 +6,40 @@ import { useReducedMotion } from 'motion/react'
 import { sfx } from '@/lib/sound'
 import styles from './case.module.css'
 
-/* "The launch film" — Greenlight's official Family Hub spot.
-   Official YouTube embed (nocookie flavor): muted, chromeless and
-   pointer-inert inline — a plate, not a player — with an expand
-   control that opens a lightbox with sound and controls. The iframe
-   mounts only once the plate nears the viewport. The lightbox portals
-   to <body>: the OS window is a transformed ancestor, so a
-   position:fixed overlay inside it would anchor to the window, not
-   the viewport.
+/* "The launch film" — Greenlight's official Family Hub spot, playing on
+   a television. s134-r3 built the set; s134-r4 fixed what was inside it.
 
-   s134-r3 takes it out of the plate and puts it in a television. The
-   spot is the only footage on the page that was made to be broadcast,
-   so it plays on a set from the same parallel 1992 as the rest of the
-   OS: near-black chassis, curved tube, a strip of controls under the
-   glass, and the expand button living on the body where a real one
-   would be.
+   The inline face used to be the YouTube embed dressed in a CSS/SVG
+   approximation of tape: a chroma-fringe filter on the iframe, the
+   global .crt scanlines, a tracking band. All of it is gone, and the
+   reason is the one CoverFilm.tsx already wrote down for the shelf
+   (s52 → s75): the artifacts belong IN the file. box-film.mp4 is this
+   same spot run through ntsc-rs (scripts/ntsc-bake.mjs) for the shelf's
+   cover, so the dub already exists — the inline face is a native
+   <video> pointing at it, one file serving two surfaces. Overlaying
+   fake artifacts on a real dub would only double the medium.
 
-   The signal is presentation only, and it has to be: this is a
-   cross-origin iframe, not a local file, so the ntsc-rs bake the shelf
-   films get (scripts/ntsc-bake.mjs) is off the table — nothing here
-   can touch the pixels. `filter` does apply to an iframe as a whole
-   box, though, so the chroma fringe is an SVG filter on the frame and
-   the rest is leaves laid over it: the global .crt scanlines, a
-   tracking band, the tube's own falloff and sheen.
+   What stays is the television: the tube's falloff, the corner sheen,
+   the channel badge. That is the set, not the tape.
 
-   THE LIGHTBOX STAYS CLEAN. Sound on, controls on, no treatment — it
-   is where you actually watch the film, and dressing it as tape would
-   be dressing the work. */
+   The face underneath is snow, and it is a real poster, not a loader.
+   The film fades in over it on its first painted frame (data-clear,
+   CoverFilm's gate) and the snow simply stays if autoplay is refused or
+   motion is reduced — a failure never paints broken-media furniture.
+
+   THE LIGHTBOX STAYS CLEAN. The whole set is the button now; pressing
+   it portals the untreated YouTube embed with sound and controls to
+   <body> (the OS window is a transformed ancestor, so a position:fixed
+   overlay inside it would anchor to the window, not the viewport).
+   That is where you actually watch the film, and dressing it as tape
+   would be dressing the work. */
 
 const YT = 'G-tWcCCMdGE'
 const TITLE = 'Greenlight Family Hub — launch film'
 
-/* constant, not useId: case components are dynamic imports inside a
-   tree that reshapes at SSR handover, and a generated id mismatches */
-const FRINGE = 'lf-fringe'
+/* the shelf's dub, reused whole — see cases.ts, which points the
+   family-hub box at this same path */
+const FILM = '/case/family-hub/box-film.mp4'
 
 export function LaunchFilm() {
   const ref = useRef<HTMLDivElement>(null)
@@ -47,11 +47,13 @@ export function LaunchFilm() {
   const reduced = useReducedMotion()
   const [near, setNear] = useState(false)
   const [open, setOpen] = useState(false)
+  /** the film has painted a frame — until then the snow is the face */
+  const [clear, setClear] = useState(false)
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    // the film starts only once the plate is genuinely on screen —
+    // the film starts only once the set is genuinely on screen —
     // not on approach (Jake's call: no silent playback out of view)
     const io = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), {
       threshold: 0.35,
@@ -68,65 +70,55 @@ export function LaunchFilm() {
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
 
-  // reduced motion: no silent auto-roll — the poster frame waits for the gesture
-  const inlineSrc = `https://www.youtube-nocookie.com/embed/${YT}?autoplay=${reduced ? 0 : 1}&mute=1&controls=0&loop=1&playlist=${YT}&playsinline=1&rel=0`
   const fullSrc = `https://www.youtube-nocookie.com/embed/${YT}?autoplay=1&mute=0&controls=1&playsinline=1&rel=0`
 
   return (
     <div className={styles.set} ref={ref}>
-      {/* the composite's colour-under smear: red pulled one way, blue the
-          other, green held. Off-screen but never display:none — a hidden
-          filter subtree stops resolving in some engines. */}
-      <svg className={styles.setFilterDefs} aria-hidden="true" focusable="false">
-        <filter id={FRINGE} x="-2%" y="-2%" width="104%" height="104%" colorInterpolationFilters="sRGB">
-          <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
-          <feOffset in="r" dx="-1.1" result="rOff" />
-          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
-          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
-          <feOffset in="b" dx="1.1" result="bOff" />
-          <feBlend in="rOff" in2="g" mode="screen" result="rg" />
-          <feBlend in="rg" in2="bOff" mode="screen" />
-        </filter>
-      </svg>
-
-      <div className={styles.setTube}>
-        <div className={`${styles.setScreen} crt`}>
-          {near ? (
-            <iframe
+      <button
+        type="button"
+        className={styles.setTube}
+        aria-label="Play the launch film with sound"
+        onClick={() => {
+          sfx.open()
+          setOpen(true)
+        }}
+      >
+        <span className={styles.setScreen}>
+          {/* the face: snow until the film paints, and permanently if it
+              never does. A 4:3 tube on 16:9 footage — the picture is
+              cropped to the glass, the way a set always did it. */}
+          <span className={styles.setSnow} aria-hidden="true" />
+          {near && !reduced && (
+            <video
               className={styles.setSignal}
-              src={inlineSrc}
-              title={TITLE}
-              allow="autoplay; encrypted-media; picture-in-picture"
-              style={{ filter: `url(#${FRINGE}) saturate(0.88) contrast(1.06)` }}
+              data-clear={clear ? '' : undefined}
+              src={FILM}
+              muted
+              loop
+              autoPlay
+              playsInline
+              preload="auto"
+              disablePictureInPicture
+              tabIndex={-1}
+              aria-hidden="true"
+              onPlaying={() => setClear(true)}
             />
-          ) : (
-            <span className={styles.setSnow} aria-hidden="true" />
           )}
-          <span className={styles.setRoll} aria-hidden="true" />
           <span className={styles.setGlass} aria-hidden="true" />
           {/* the wink at the parallel 1992 — a channel badge burnt into
               the corner the way a set with no menu had to say it */}
           <span className={styles.setOsd} aria-hidden="true">
             CH 92
           </span>
-        </div>
-      </div>
+        </span>
+      </button>
 
-      {/* the control strip: a knob, a run of vents, and the one button
-          that does something */}
-      <div className={styles.setStrip}>
-        <span className={styles.setKnob} aria-hidden="true" />
-        <span className={styles.setVents} aria-hidden="true" />
-        <button
-          type="button"
-          className={styles.filmExpand}
-          onClick={() => {
-            sfx.open()
-            setOpen(true)
-          }}
-        >
-          Expand · sound on
-        </button>
+      {/* the control strip: two knobs and a run of speaker slits, all of
+          it moulding — the glass above is the only control that works */}
+      <div className={styles.setStrip} aria-hidden="true">
+        <span className={styles.setKnob} />
+        <span className={styles.setKnob} data-small="" />
+        <span className={styles.setVents} />
       </div>
 
       {open &&
