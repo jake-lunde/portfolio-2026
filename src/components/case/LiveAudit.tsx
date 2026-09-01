@@ -21,10 +21,10 @@ import styles from './case.module.css'
 const FILM = '/case/family-hub/live-audit.mp4'
 const POSTER = '/case/family-hub/live-audit-poster.webp'
 
-/* ⚠ placeholder-shaped values: the real ticket numbers are Jake's */
+/* the two tickets the loop actually wrote (s134 — Jake's own) */
 const READOUT = {
-  build: 'EVENT.TOP · 84px · 84px · COLLIDES',
-  fix: 'EVENT.TOP · var(--timeline-row) · STACKS',
+  build: 'feat: add Assistant type tokens [WEB-3877]',
+  fix: 'feat: add avatar prop to CheckListItem [WEB-4121]',
 }
 
 export function LiveAudit({ mode }: { mode: 'build' | 'fix' }) {

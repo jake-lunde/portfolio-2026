@@ -64,26 +64,39 @@ export function Lead({ children }: { children: React.ReactNode }) {
   return <div className={styles.lead}>{children}</div>
 }
 
+/* One anatomy for every plate (Jake's s134 plate grammar): cap row —
+   name left, live readout beside it, when-control right — then the
+   stage, then the pill tabs the stage brings, then the caption. Two
+   control languages, one each: the chip top-right changes WHEN you're
+   looking (fidelity), the pink pills at the bottom change WHAT. */
 export function Plate({
   cap,
+  readout,
   tag,
+  chip,
   caption,
   mat,
+  frame,
   children,
 }: {
-  cap?: React.ReactNode /* filled plates drop their "Plate NN" label (Jake's s55 rule); placeholders keep it, and live plates may put dynamic text here */
-  tag?: string /* right-hand cap slot: a date, a ticker, a technique. The FIG. specimen letters came off in s89 — plates are numbered by their cap, if at all */
+  cap?: React.ReactNode /* the plate's name — names, not numbers (s134, superseding the s55 label rule) */
+  readout?: React.ReactNode /* live data riding beside the name: a shot counter, a ticker */
+  tag?: string /* static right slot: a date, a ticker, a technique. The FIG. specimen letters came off in s89 */
+  chip?: React.ReactNode /* interactive right slot — the fidelity chip, held right like the tag */
   caption?: string
   mat?: 'light' /* recordings that sit on paper-white get a matching surround (rail law: the mat matches the footage's corners) */
+  frame?: 'phone' /* a portrait stage: the plate narrows to hug the phone shell instead of running a full-width dark field */
   children: React.ReactNode
 }) {
   return (
-    <figure className={styles.figure}>
+    <figure className={styles.figure} data-frame={frame}>
       <div className={styles.plate} data-mat={mat}>
-        {(cap || tag) && (
+        {(cap || readout || tag || chip) && (
           <div className={styles.plateCap}>
             {cap && (typeof cap === 'string' ? <span>{cap}</span> : cap)}
+            {readout && <span className={styles.plateReadout}>{readout}</span>}
             {tag && <span className={styles.tag}>{tag}</span>}
+            {chip}
           </div>
         )}
         {children}

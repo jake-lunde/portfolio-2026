@@ -29,7 +29,7 @@ export function DemoReel({
       footage's corners (rail law); default stays the dark reels' #000 */
   mat?: 'light'
   /** 'phone' seats a portrait screen recording in a device-black
-      bezel, centered on the plate (plate 07's avatar picker) */
+      bezel, centered on the plate (the avatar plate's picker) */
   frame?: 'phone'
 }) {
   const ref = useRef<HTMLVideoElement>(null)

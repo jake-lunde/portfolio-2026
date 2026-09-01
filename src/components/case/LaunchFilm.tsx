@@ -6,7 +6,7 @@ import { useReducedMotion } from 'motion/react'
 import { sfx } from '@/lib/sound'
 import styles from './case.module.css'
 
-/* Plate 11 — the launch film, Greenlight's official Family Hub spot.
+/* "The launch film" — Greenlight's official Family Hub spot.
    Official YouTube embed (nocookie flavor): muted, chromeless and
    pointer-inert inline — a plate, not a player — with an expand
    control that opens a lightbox with sound and controls. The iframe
