@@ -81,8 +81,8 @@ export function LaunchFilm() {
         <filter id={FRINGE} x="-2%" y="-2%" width="104%" height="104%" colorInterpolationFilters="sRGB">
           <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
           <feOffset in="r" dx="-1.1" result="rOff" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
+          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
+          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
           <feOffset in="b" dx="1.1" result="bOff" />
           <feBlend in="rOff" in2="g" mode="screen" result="rg" />
           <feBlend in="rg" in2="bOff" mode="screen" />
