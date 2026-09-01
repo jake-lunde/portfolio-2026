@@ -691,98 +691,70 @@
 }
 
 /* THE SET (LaunchFilm.tsx) — the launch film left the plate for a
-   television (s134-r3). Chassis ink is the CRT law the shell's
-   .windowBody.crt already writes: the body is --surface-inverse, and
-   everything on it mixes from --content-inverse.
+   television (s134-r3), and in s134-r5 the television stopped being
+   drawn and became a photograph. The whole CSS chassis retires here the
+   way the CSS tape did in r4: moulded shell, recessed tube, dials,
+   speaker grille and feet were all approximating an object Jake could
+   simply photograph. tv.webp is that object, alpha-cut, and it carries
+   its own stand, grille and dead green tube. Nothing below paints a
+   television; it only places things inside one.
 
-   s134-r4: the tape overlays are gone (the dub is the footage now, see
-   LaunchFilm.tsx), the tube is 4:3, and the whole set is the button.
-   What's left here is the object — moulded shell, recessed glass, a
-   strip of controls that don't do anything, and feet. Every depth cue
-   is a static shadow or gradient; nothing on the chassis animates. */
+   The one thing still painted is the badge, and it stays on tokens. */
 .set {
   position: relative;
-  background: var(--surface-inverse);
-  border: var(--border-width-default) solid var(--content);
-  border-radius: 14px;
-  /* squarer tube, so the shell reads wider at the sides than the 16:9
-     version needed and the strip below carries the weight */
-  padding: 15px 15px 0;
-  box-shadow:
-    /* moulded plastic, lit from above: one bright edge along the top of
-       the shell, one shade under it */
-    inset 0 1px 0 color-mix(in srgb, var(--content-inverse) 17%, transparent),
-    inset 0 -1px 0 rgb(0 0 0 / 0.5),
-    /* the set is an object on a surface, not a panel in it — same two-pass
-       ground shadow the hub device carries */
-    0 14px 22px -10px rgb(0 0 0 / 0.3),
-    0 30px 45px -18px rgb(0 0 0 / 0.2);
+  /* the photo is the layout box. Capped so the square set doesn't tower
+     over the stats beside it once the metrics grid folds to one column. */
+  max-width: 420px;
+  margin-inline: auto;
 }
 
-[data-theme='dark'] .set {
-  border-color: var(--border);
-}
-
-/* two moulded feet, so the set stands on the page instead of floating
-   on it. One box, two gradient stops — no extra element for furniture. */
-.set::after {
-  content: '';
-  position: absolute;
-  left: 14%;
-  right: 14%;
-  bottom: -5px;
-  height: 5px;
-  border-radius: 0 0 3px 3px;
-  background:
-    linear-gradient(var(--surface-inverse), var(--surface-inverse)) left / 24% 100% no-repeat,
-    linear-gradient(var(--surface-inverse), var(--surface-inverse)) right / 24% 100% no-repeat;
-  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.4));
-}
-
-/* the tube — and the only control on the set: pressing the glass opens
-   the film with sound. zoom-in is the house's own affordance for
-   "this opens bigger" (.pinned, .npWidget in the shell). */
-.setTube {
+/* the set is the control: pressing the glass opens the film with sound.
+   zoom-in is the house's own affordance for "this opens bigger"
+   (.pinned, .npWidget in the shell), and the lightbox answers with
+   zoom-out. */
+.setBtn {
   display: block;
-  width: 100%;
   position: relative;
+  width: 100%;
   padding: 0;
   border: 0;
-  border-radius: 20px / 26px;
-  overflow: hidden;
-  background: #000; /* the well behind the picture — footage ground, fixed like the reels' mats */
+  background: none;
   cursor: zoom-in;
-  box-shadow:
-    /* the glass edge */
-    inset 0 0 0 1px color-mix(in srgb, var(--content-inverse) 14%, transparent),
-    /* set into the shell: the picture sits below the plastic, so the
-       recess casts down over the top of the tube */
-    inset 0 4px 16px rgb(0 0 0 / 0.7),
-    /* the lip the tube drops into */
-    0 0 0 1px rgb(0 0 0 / 0.55),
-    0 1px 0 color-mix(in srgb, var(--content-inverse) 10%, transparent);
-  transition: box-shadow 0.16s ease;
 }
 
-.setTube:hover {
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--content-inverse) 26%, transparent),
-    inset 0 4px 16px rgb(0 0 0 / 0.7),
-    0 0 0 1px rgb(0 0 0 / 0.55),
-    0 1px 0 color-mix(in srgb, var(--content-inverse) 10%, transparent);
-}
-
-.setTube:focus-visible {
+.setBtn:focus-visible {
   outline: 2px solid var(--accent-expressive);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
-/* the reference sets are 4:3 and the spot is 16:9, so the picture is
-   cropped to the glass — which is what a set did to widescreen anyway */
-.setScreen {
+/* the drop shadow rides the IMAGE, not the button: it follows the
+   cutout's own silhouette, and keeping the filter off the button means
+   the playing video underneath never joins a filter pass. */
+.setBody {
   display: block;
-  position: relative;
-  aspect-ratio: 4 / 3;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 14px rgb(0 0 0 / 0.22));
+}
+
+/* THE GLASS — measured off tv.webp (1024 square) by scanning the lit
+   tube against the bezel: the glass runs x 170–833 and y 182–713, and
+   it is a photograph, so it carries perspective — the right edge walks
+   in from 833 at the top to about 806 at the bottom. These four numbers
+   are the rect that stays inside it everywhere, corners included:
+   20% / 19% / 80% / 67.5%, which is 1.24:1 and supersedes r4's drawn
+   4:3. The radius follows the tube's rounded corners and covers what
+   perspective leaves over at each one. Isolated, so the sheen below
+   blends against the film in here and not against the page. */
+.setGlass {
+  position: absolute;
+  left: 20%;
+  top: 19%;
+  right: 20%;
+  bottom: 32.5%;
+  overflow: hidden;
+  border-radius: 8% / 10%;
+  isolation: isolate;
 }
 
 .setSignal {
@@ -801,51 +773,42 @@
   opacity: 1;
 }
 
-/* THE FACE. Snow is the poster, not a loader: it is what the tube shows
-   before the film paints and what it keeps showing if autoplay is
-   refused or motion is reduced (s134-r4 — CoverFilm's law, a failure
-   never paints broken-media furniture). The tile is feTurbulence baked
-   into a data URI so the noise costs one decode and no canvas; it lives
-   here rather than in the component because it is a texture, like
-   .halftone and .crt, and because a URI that long reads as prose to the
-   text index. Opacity only, two steps, which is as much as static needs
-   to read as static. */
-.setSnow {
-  position: absolute;
-  inset: 0;
-  opacity: 0.5;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23s)'/%3E%3C/svg%3E");
-  animation: setSnow 240ms steps(2, jump-none) infinite alternate;
-}
+/* THE REFLECTION — tv-glass.webp is the photo's own glass region
+   (source pixels 190,160–875,715) laid back over the film on `screen`,
+   so the window in it and the burnt phosphor streaks ride over the
+   picture instead of being covered by it. The offsets put the crop back
+   exactly where it came from, expressed against this box rather than
+   the photo: the clip is what keeps the blend off the bezel, where
+   screening near-black over near-black would otherwise print a bright
+   rectangle.
 
-@keyframes setSnow {
-  to {
-    opacity: 0.8;
-  }
-}
-
-/* the glass itself: the tube's falloff into the corners, and one sheen
-   off the top-left the way a curved screen catches the room */
-.setGlass {
+   Opacity is well under the 0.5 this started at, and the asset is why:
+   its field is not dark. Mean luminance is ~105 of 255 (a lit dead
+   tube, not a pane of glass), and under `screen` a mid-grey field lifts
+   everything beneath it — at 0.5 the footage goes milky and the streaks
+   punch through it. 0.28 keeps the reflection legible and the blacks
+   close to honest. */
+.setSheen {
   position: absolute;
-  inset: 0;
-  z-index: 2;
+  left: -2.41%;
+  top: -6.96%;
+  width: 111.49%;
+  height: 111.75%;
+  mix-blend-mode: screen;
   pointer-events: none;
-  background:
-    linear-gradient(
-      150deg,
-      color-mix(in srgb, var(--content-inverse) 9%, transparent) 0%,
-      transparent 38%
-    ),
-    radial-gradient(120% 120% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.42) 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 
-/* the channel badge, burnt into the corner — above the glass, so the
-   falloff never eats it */
+.setSheen[data-clear] {
+  opacity: 0.28;
+}
+
+/* the channel badge, over the reflection so the streaks never eat it */
 .setOsd {
   position: absolute;
-  right: 12px;
-  top: 10px;
+  right: 5%;
+  top: 5%;
   z-index: 3;
   font-family: var(--mono);
   font-size: var(--text-label);
@@ -853,54 +816,6 @@
   color: var(--accent-expressive);
   text-shadow: 0 0 8px currentColor;
   pointer-events: none;
-}
-
-/* the control strip under the glass: two knobs and a run of speaker
-   slits, all of it moulding. s134-r4 retired the expand button — the
-   glass is the control now, so nothing down here does anything, which
-   is exactly what a combo set's front panel looked like. */
-.setStrip {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 12px 4px 13px;
-}
-
-/* turned dials: a lit top edge and a shadow under, the same overhead
-   light the shell is moulded by */
-.setKnob {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--content-inverse) 24%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--content-inverse) 30%, transparent),
-    0 1px 1px rgb(0 0 0 / 0.45);
-}
-
-.setKnob[data-small] {
-  width: 7px;
-  height: 7px;
-}
-
-/* the speaker grille — slits cut into the plastic, so each one is a dark
-   channel with a lit lower lip */
-.setVents {
-  flex: 1;
-  height: 9px;
-  border-radius: 1px;
-  background: repeating-linear-gradient(
-    90deg,
-    rgb(0 0 0 / 0.55) 0 2px,
-    color-mix(in srgb, var(--content-inverse) 13%, transparent) 2px 3px,
-    transparent 3px 5px
-  );
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .setSnow {
-    animation: none;
-  }
 }
 
 .filmModal {
