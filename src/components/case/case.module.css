@@ -691,19 +691,40 @@
 }
 
 /* THE SET (LaunchFilm.tsx) — the launch film left the plate for a
-   television (s134-r3), and in s134-r5 the television stopped being
-   drawn and became a photograph. The whole CSS chassis retires here the
-   way the CSS tape did in r4: moulded shell, recessed tube, dials,
-   speaker grille and feet were all approximating an object Jake could
-   simply photograph. tv.webp is that object, alpha-cut, and it carries
-   its own stand, grille and dead green tube. Nothing below paints a
-   television; it only places things inside one.
+   television (s134-r3), the television became a photograph (r5), and in
+   s134-r6 Jake swapped that photograph for one with the tube already
+   cut: the screen is a transparent hole in the alpha. So this file
+   stopped compositing and started stacking. The film sits BEHIND the
+   photo and the bezel crops it; r5's cropped reflection, its `screen`
+   blend, the isolation and the radius that faked a masked tube are all
+   gone, because the alpha does that work now.
 
-   The one thing still painted is the badge, and it stays on tokens. */
+   THE HOLE, scanned off tv.webp (1100 × 1039) — for every row whose
+   transparent run has opaque bezel on both sides: x 92–1007, y 97–782.
+   Against the box that is left 8.36% / right 8.36% / top 9.34% /
+   bottom 24.64%, a 916 × 686 rect at 1.335:1 (it supersedes r5's
+   1.24:1). The corners round over about six pixels — smaller than the
+   bleed below, and carried by the photo's own alpha, so nothing here
+   draws them.
+
+   Two rects follow from it, and both are literal below rather than
+   shared, matching this file's habit of writing the numbers out:
+     · the TUBE rect, the hole grown ~0.6% of the box on each side, used
+       by the backing and the film so neither can open a seam of page at
+       the bezel — left/right 7.8%, top 8.7%, 84.4% × 67.3%.
+     · the GLASS rect, the hole shrunk 0.4%, used by the sheen and the
+       badge, which ride over the photo and so must never touch plastic.
+
+   The things still painted are the tube, the sheen and the badge. */
 .set {
   position: relative;
-  /* the photo is the layout box. Capped so the square set doesn't tower
-     over the stats beside it once the metrics grid folds to one column. */
+  /* the photo is the layout box. Capped so the set doesn't tower over
+     the stats beside it once the metrics grid folds to one column at
+     760px. Re-judged for r6: 1100 × 1039 puts the set at 397px tall at
+     this cap, against r5's square 420, so it fits everywhere the old
+     one did — and the tube inside it is bigger anyway, this photo being
+     nearly all screen. Below 760px the column is the constraint before
+     the cap is, down through 360px. */
   max-width: 420px;
   margin-inline: auto;
 }
@@ -727,41 +748,48 @@
   outline-offset: 4px;
 }
 
-/* the drop shadow rides the IMAGE, not the button: it follows the
-   cutout's own silhouette, and keeping the filter off the button means
-   the playing video underneath never joins a filter pass. */
-.setBody {
-  display: block;
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 10px 14px rgb(0 0 0 / 0.22));
-}
+/* THE DEAD TUBE — the hole's backing, on the TUBE rect, and the face of
+   the set whenever the film is not running: idle, and reduced motion
+   for good. Without it the page reads straight through the cutout.
 
-/* THE GLASS — measured off tv.webp (1024 square) by scanning the lit
-   tube against the bezel: the glass runs x 170–833 and y 182–713, and
-   it is a photograph, so it carries perspective — the right edge walks
-   in from 833 at the top to about 806 at the bottom. These four numbers
-   are the rect that stays inside it everywhere, corners included:
-   20% / 19% / 80% / 67.5%, which is 1.24:1 and supersedes r4's drawn
-   4:3. The radius follows the tube's rounded corners and covers what
-   perspective leaves over at each one. Isolated, so the sheen below
-   blends against the film in here and not against the page. */
-.setGlass {
+   Hardcoded under §5's carve-out, and deliberately not tokenised: this
+   is an object's own colour rather than a semantic role, and it must
+   not flip with the skin — an off CRT is black in all of them. The tint
+   is measured, not invented. r5's photographed tube sampled #657468
+   over its whole face — hue 132°, saturation ~7%, a desaturated
+   green-grey — and this keeps that hue and chroma while dropping the
+   lightness from lit to off, which is the one thing r6's photo changed.
+   The falloff to near-black at the corners is the tube's curvature. For
+   scale: the bezel around it samples #2b2d2f, so the glass sits well
+   under the plastic, the way glass does. */
+.setTube {
   position: absolute;
-  left: 20%;
-  top: 19%;
-  right: 20%;
-  bottom: 32.5%;
-  overflow: hidden;
-  border-radius: 8% / 10%;
-  isolation: isolate;
+  left: 7.8%;
+  top: 8.7%;
+  width: 84.4%;
+  height: 67.3%;
+  z-index: 0;
+  background: radial-gradient(ellipse at 50% 45%, #0e110f 0%, #0a0c0a 55%, #050605 100%);
+  pointer-events: none;
 }
 
+/* THE FILM — behind the photograph, so the bezel crops it and nothing
+   here needs a mask or a radius. On the TUBE rect: the hole grown
+   ~0.6% of the box on every side, which is enough that subpixel
+   rounding can never open a seam of page between film and bezel, and
+   small enough that all of the bleed stays under the plastic.
+
+   Sized with width/height rather than a right/bottom inset on purpose:
+   a replaced element resolves `width: auto` to its intrinsic width and
+   drops the over-constrained inset, so the four-sided form would leave
+   the video at box-film.mp4's own 854 × 480. */
 .setSignal {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  left: 7.8%;
+  top: 8.7%;
+  width: 84.4%;
+  height: 67.3%;
+  z-index: 1;
   object-fit: cover;
   border: 0;
   pointer-events: none;
@@ -773,43 +801,59 @@
   opacity: 1;
 }
 
-/* THE REFLECTION — tv-glass.webp is the photo's own glass region
-   (source pixels 190,160–875,715) laid back over the film on `screen`,
-   so the window in it and the burnt phosphor streaks ride over the
-   picture instead of being covered by it. The offsets put the crop back
-   exactly where it came from, expressed against this box rather than
-   the photo: the clip is what keeps the blend off the bezel, where
-   screening near-black over near-black would otherwise print a bright
-   rectangle.
+/* the photograph, over the film — its alpha is the mask.
 
-   Opacity is well under the 0.5 this started at, and the asset is why:
-   its field is not dark. Mean luminance is ~105 of 255 (a lit dead
-   tube, not a pane of glass), and under `screen` a mid-grey field lifts
-   everything beneath it — at 0.5 the footage goes milky and the streaks
-   punch through it. 0.28 keeps the reflection legible and the blacks
-   close to honest. */
+   The drop shadow still rides the IMAGE rather than the button, so it
+   follows the cutout's silhouette instead of a rectangle. With a hole
+   in that silhouette it now does one thing more: a shadow paints behind
+   its element, and behind this element at the hole is the film, so the
+   bezel lays a soft edge of itself along the inside top of the glass.
+   That is the bezel shadowing the tube — the recess r5 needed a whole
+   reflection asset to suggest — so it stays at r5's values. Nothing
+   floats: the set's base is a full-width plinth, opaque to y 1027. */
+.setBody {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 14px rgb(0 0 0 / 0.22));
+}
+
+/* THE SHEEN — the glass, drawn this time. r5 could crop a reflection
+   out of its own photograph; r6's tube is a hole, so there is nothing
+   to put back and this is one raked diagonal instead, faint enough to
+   read as a pane and not as a wipe. It is over the photograph, so it
+   sits on the GLASS rect — the hole shrunk 0.4%, which is inside the
+   corner rounding and keeps white off the plastic. Unlike r5's it never
+   fades in: an off tube reflects the room too. */
 .setSheen {
   position: absolute;
-  left: -2.41%;
-  top: -6.96%;
-  width: 111.49%;
-  height: 111.75%;
-  mix-blend-mode: screen;
+  left: 8.8%;
+  top: 9.7%;
+  width: 82.4%;
+  height: 65.3%;
+  z-index: 3;
+  background: linear-gradient(
+    116deg,
+    transparent 30%,
+    rgb(255 255 255 / 0.05) 42%,
+    rgb(255 255 255 / 0.08) 48%,
+    rgb(255 255 255 / 0.02) 54%,
+    transparent 64%
+  );
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
 }
 
-.setSheen[data-clear] {
-  opacity: 0.28;
-}
-
-/* the channel badge, over the reflection so the streaks never eat it */
+/* the channel badge, over the sheen so the diagonal never crosses it.
+   Still 5% inside the tube's top-right corner, restated against r6's
+   hole: 8.36% + 5% of the 83.28%-wide hole, 9.34% + 5% of its 66.02%
+   height. */
 .setOsd {
   position: absolute;
-  right: 5%;
-  top: 5%;
-  z-index: 3;
+  right: 12.5%;
+  top: 12.6%;
+  z-index: 4;
   font-family: var(--mono);
   font-size: var(--text-label);
   letter-spacing: 0.18em;

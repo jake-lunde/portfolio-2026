@@ -9,28 +9,28 @@ import styles from './case.module.css'
 /* "The launch film" — Greenlight's official Family Hub spot, playing on
    a television.
 
-   s134-r5: the set stopped being drawn and became a photograph. The CSS
-   chassis retires exactly the way the CSS tape did in r4 — a moulded
-   shell, a recessed tube, dials, a speaker grille and feet, all of it
-   approximating an object Jake could just photograph. tv.webp is his
-   render, cut out with alpha, and it brings its own stand, its own
-   grille, its own dead green tube. Nothing here paints a television any
-   more; it positions one.
+   s134-r6: Jake swapped the set. It is now a product photograph with
+   the tube already cut — the screen is a transparent hole in the
+   alpha — and that inverts everything r5 built. The film goes BEHIND
+   the glass instead of on top of it, and the bezel crops it for free.
+   No mask, no radius on the video, no reflection: tv-glass.webp and the
+   `screen` blend it rode in on are retired with r5, because there is no
+   longer a photographed pane to lay back over the picture.
 
-   Three layers in the glass:
-     1. the photo's own dead screen, which is the idle face. The synthetic
-        snow is gone with the chassis — a burnt phosphor tube is a better
-        poster than generated noise, and it is what a reduced-motion
-        reader keeps.
-     2. the film, seated inside the measured glass rect and fading in on
-        its first painted frame (data-clear, CoverFilm's gate). It is
-        box-film.mp4 — the same spot already run through ntsc-rs for the
-        shelf's cover (r4), so the artifacts stay in the footage.
-     3. tv-glass.webp, the glass region of the photo cropped and laid back
-        over the film on `screen`. The dark glass adds nothing under that
-        blend and the window reflection and phosphor streaks ride over the
-        picture, so the film reads as something behind glass rather than
-        something pasted into a hole.
+   Four layers, stacked instead of composited:
+     1. the dead tube, painted, filling the hole. It is the idle and
+        reduced-motion face — an off television — and without it the
+        page shows straight through the cutout. r5's photograph carried
+        a lit tube of its own; this one carries nothing.
+     2. the film, seated in the hole with a hair of bleed past every
+        edge so no page pixel can peek between it and the bezel. Still
+        box-film.mp4 — the spot already run through ntsc-rs for the
+        shelf's cover (r4), so the artifacts stay in the footage — and
+        still fading in on its first painted frame (data-clear,
+        CoverFilm's gate).
+     3. the photograph, over both. Its alpha is the mask.
+     4. a static sheen inside the glass, and the channel badge, over the
+        photograph so nothing eats them.
 
    The whole set is the button (r4's interaction, unchanged): zoom-in on
    the way in, zoom-out on the lightbox, and the lightbox itself stays
@@ -44,7 +44,6 @@ const TITLE = 'Greenlight Family Hub — launch film'
    family-hub box at this same path */
 const FILM = '/case/family-hub/box-film.mp4'
 const TV = '/case/family-hub/tv.webp'
-const TV_GLASS = '/case/family-hub/tv-glass.webp'
 
 export function LaunchFilm() {
   const ref = useRef<HTMLDivElement>(null)
@@ -88,51 +87,45 @@ export function LaunchFilm() {
           setOpen(true)
         }}
       >
-        {/* the set itself. Empty alt: the button above carries the
-            semantics, and the photograph is furniture. */}
+        {/* the dead tube, backing the cutout. First in the stack and
+            never conditional: it is what the hole shows when the film
+            is not running, and reduced motion keeps it for good. */}
+        <span className={styles.setTube} aria-hidden="true" />
+        {near && !reduced && (
+          <video
+            className={styles.setSignal}
+            data-clear={clear ? '' : undefined}
+            src={FILM}
+            muted
+            loop
+            autoPlay
+            playsInline
+            preload="auto"
+            disablePictureInPicture
+            tabIndex={-1}
+            aria-hidden="true"
+            onPlaying={() => setClear(true)}
+          />
+        )}
+        {/* the set itself, over the film — the alpha does the cropping.
+            Empty alt: the button above carries the semantics, and the
+            photograph is furniture. */}
         <img
           className={styles.setBody}
           src={TV}
           alt=""
-          width={1024}
-          height={1024}
+          width={1100}
+          height={1039}
           draggable={false}
         />
-        <span className={styles.setGlass}>
-          {near && !reduced && (
-            <video
-              className={styles.setSignal}
-              data-clear={clear ? '' : undefined}
-              src={FILM}
-              muted
-              loop
-              autoPlay
-              playsInline
-              preload="auto"
-              disablePictureInPicture
-              tabIndex={-1}
-              aria-hidden="true"
-              onPlaying={() => setClear(true)}
-            />
-          )}
-          {/* the glass put back on top. It rides in with the film and
-              never before it: with no film under it this would only be
-              screening the photo's reflection over itself. */}
-          <img
-            className={styles.setSheen}
-            data-clear={clear ? '' : undefined}
-            src={TV_GLASS}
-            alt=""
-            width={685}
-            height={555}
-            draggable={false}
-            aria-hidden="true"
-          />
-          {/* the wink at the parallel 1992 — a channel badge burnt into
-              the corner the way a set with no menu had to say it */}
-          <span className={styles.setOsd} aria-hidden="true">
-            CH 92
-          </span>
+        {/* the glass, drawn rather than photographed this time: one
+            diagonal, faint, always on. It is the only thing left saying
+            there is a pane in front of the picture. */}
+        <span className={styles.setSheen} aria-hidden="true" />
+        {/* the wink at the parallel 1992 — a channel badge burnt into
+            the corner the way a set with no menu had to say it */}
+        <span className={styles.setOsd} aria-hidden="true">
+          CH 92
         </span>
       </button>
 
