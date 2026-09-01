@@ -121,7 +121,7 @@
 
 .plate {
   background: var(--surface-inverse);
-  color: #e7e1d2;
+  color: var(--content-inverse);
   border: var(--border-width-default) solid var(--content);
   position: relative;
   overflow: hidden;
@@ -141,6 +141,18 @@
   color: var(--content);
 }
 
+/* everything the cap row paints is a content-inverse mix, which is cream
+   — invisible on the mat. The whole row flips to the page's own ink at
+   the same weights (s134-r2; .plateCount takes its colour from
+   .plateReadout, so it follows without a rule of its own). */
+.plate[data-mat='light'] .plateCap {
+  color: color-mix(in srgb, var(--content) 60%, transparent);
+}
+
+.plate[data-mat='light'] .plateReadout {
+  color: color-mix(in srgb, var(--content) 45%, transparent);
+}
+
 .plate[data-mat='light'] .fidChipSeg {
   color: color-mix(in srgb, var(--content) 45%, transparent);
 }
@@ -149,18 +161,39 @@
   color: color-mix(in srgb, var(--content) 90%, transparent);
 }
 
+/* the cap row (s134 plate grammar): the plate's name and its live
+   readout in a left cluster, the when-control — tag or fidelity chip —
+   held right. Plates are named, never numbered. */
 .plateCap {
   font-family: var(--mono);
   font-size: var(--text-label);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(231, 225, 210, 0.6);
+  color: color-mix(in srgb, var(--content-inverse) 60%, transparent);
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   gap: var(--spacing-component-md);
   margin-bottom: 14px;
   position: relative;
   z-index: 1;
+}
+
+/* live data riding beside the name: a shot counter, a deck annotation.
+   Quieter than the name, and it takes the slack so a ticker inside it
+   still has a box to clip against. */
+.plateReadout {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-md);
+  flex: 1;
+  min-width: 0;
+  color: color-mix(in srgb, var(--content-inverse) 45%, transparent);
+}
+
+.plateCount {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
 }
 
 /* the cap's right-hand tag — a date, a ticker, the technique on show.
@@ -179,7 +212,7 @@
 }
 
 .placeholder {
-  border: 1.5px dashed rgba(231, 225, 210, 0.35);
+  border: 1.5px dashed color-mix(in srgb, var(--content-inverse) 35%, transparent);
   border-radius: 3px;
   min-height: 150px;
   display: flex;
@@ -187,7 +220,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: rgba(231, 225, 210, 0.5);
+  color: color-mix(in srgb, var(--content-inverse) 50%, transparent);
   font-family: var(--mono);
   font-size: var(--text-ui);
   letter-spacing: 0.1em;
@@ -202,7 +235,7 @@
 .placeholderStatus {
   font-size: var(--text-label);
   letter-spacing: 0.16em;
-  color: rgba(231, 225, 210, 0.35);
+  color: color-mix(in srgb, var(--content-inverse) 35%, transparent);
 }
 
 .plate svg {
@@ -223,7 +256,7 @@
   background: #000;
 }
 
-/* plate 07 — a portrait screen recording seated in a phone. The bezel
+/* the avatar plate — a portrait screen recording seated in a phone. The bezel
    is the device's ink, not the skin's, so it stays fixed #000 like the
    mats; a hairline in the plate's own ink keeps it off the dark ground.
    Radii concentric: screen 34 + 10 bezel = 44 outer. */
@@ -232,7 +265,7 @@
   margin: 0 auto;
   padding: 10px;
   background: #000;
-  border: 1px solid rgba(231, 225, 210, 0.28);
+  border: 1px solid color-mix(in srgb, var(--content-inverse) 28%, transparent);
   border-radius: 44px;
 }
 
@@ -245,8 +278,8 @@
   border-radius: 34px;
 }
 
-/* plate 01 — transparent wireframe groups sitting directly on the
-   plate; the group's deck annotation lives in the cap row above */
+/* the pitch plate — transparent wireframe groups sitting directly on
+   the plate; the group's deck annotation is the cap row's readout */
 .deck {
   position: relative;
   z-index: 1;
@@ -308,7 +341,7 @@
   font-size: var(--text-label);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(231, 225, 210, 0.6);
+  color: color-mix(in srgb, var(--content-inverse) 60%, transparent);
 }
 
 /* the active group's annotation — one clipped line beside FIG; when it
@@ -375,6 +408,24 @@
   border: var(--border-width-default) solid var(--content);
   background: var(--surface);
   padding: 18px;
+  transition: opacity 320ms ease;
+}
+
+/* §01: the case's one fidelity switch reaches the bet too — on shipped
+   the two pitches that lost fall back and the one that got built holds
+   full (Jake, s134-r2). Opacity only: the cards keep their place, their
+   border and their ink, so nothing reflows and nothing goes muddy.
+   Gated on a winner being named, so a grid that never declared one
+   (greenlight-invest's three moves) is never touched by a switch the
+   reader flipped on another case. */
+.moves[data-fidelity='shipped']:has(.move[data-won]) .move:not([data-won]) {
+  opacity: 0.38;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .move {
+    transition: none;
+  }
 }
 
 [data-theme='dark'] .move {
@@ -483,11 +534,20 @@
 }
 
 /* ledger — mono spec-sheet rows; terse facts instead of paragraphs */
+/* s134-r7: this had margin-top only, and `.section p` carries no top
+   margin at all (it is `0 0 20px`), so prose after a ledger landed hard
+   against the border — §07's "We're not stopping here" is where Jake
+   caught it, but §05's "But, the volume buttons are backwards" was the
+   same gap, so the fix belongs here rather than at either call site.
+   Symmetric now, which is the rule the other blocks that sit in prose
+   already follow for this exact reason (see .moves and .quote). The
+   off-scale 26px goes with it: layout-lg is 32px, the step that gives a
+   fully bordered box a little more air than the quote's rule gets. */
 .ledger {
   border: var(--border-width-default) solid var(--content);
   background: var(--surface);
   padding: 22px;
-  margin-top: 26px;
+  margin: var(--spacing-layout-lg) 0;
 }
 
 [data-theme='dark'] .ledger {
@@ -639,41 +699,228 @@
   cursor: default;
 }
 
-/* plate 11 — the launch film. Inline: muted, chromeless, pointer-inert.
-   Lightbox: sound on, controls on, portal'd past the window transform. */
-.film {
+/* THE SET (LaunchFilm.tsx) — the launch film left the plate for a
+   television (s134-r3), the television became a photograph (r5), and in
+   s134-r6 Jake swapped that photograph for one with the tube already
+   cut: the screen is a transparent hole in the alpha. So this file
+   stopped compositing and started stacking. The film sits BEHIND the
+   photo and the bezel crops it; r5's cropped reflection, its `screen`
+   blend, the isolation and the radius that faked a masked tube are all
+   gone, because the alpha does that work now.
+
+   THE HOLE, scanned off tv.webp (1100 × 1039) — for every row whose
+   transparent run has opaque bezel on both sides: x 92–1007, y 97–782.
+   Against the box that is left 8.36% / right 8.36% / top 9.34% /
+   bottom 24.64%, a 916 × 686 rect at 1.335:1 (it supersedes r5's
+   1.24:1). The corners round over about six pixels — smaller than the
+   bleed below, and carried by the photo's own alpha, so nothing here
+   draws them.
+
+   Two rects follow from it, and both are literal below rather than
+   shared, matching this file's habit of writing the numbers out:
+     · the TUBE rect, the hole grown ~0.6% of the box on each side, used
+       by the backing and the film so neither can open a seam of page at
+       the bezel — left/right 7.8%, top 8.7%, 84.4% × 67.3%.
+     · the GLASS rect, the hole shrunk 0.4%, used by the sheen and the
+       badge, which ride over the photo and so must never touch plastic.
+
+   The things still painted are the tube, the sheen and the badge. */
+.set {
   position: relative;
-  aspect-ratio: 16 / 9;
-  background: #000;
+  /* the photo is the layout box, and s134-r7 takes the whole set to 80%
+     of the size it shipped at, Jake's call on seeing r6 live. That needs
+     both declarations to hold everywhere, because two different things
+     were setting the size: above ~525px of column the cap was, so the
+     cap moves to 420 × 0.8; below it the column was, so the width goes
+     to 80% of the column. Between them they are exactly four fifths at
+     every width. Still centred in its metrics slot, as since r5. */
+  width: 80%;
+  max-width: 336px;
+  margin-inline: auto;
 }
 
-.film iframe {
+/* THE GROUND (s134-r7) — Jake wanted the shadow pushed down the y axis,
+   "to make it look like its sitting on a surface". That could not come
+   from the image's own filter: a drop shadow paints through the cutout,
+   so every pixel of y added there drives the bezel's recess further
+   down over the film as well (the r6 side effect, noted at .setBody).
+   The grounding is therefore its own element, and being its own element
+   it cannot reach the glass at all — the hole ends at 75.4% of the box
+   and this starts at 93.5%.
+
+   Sized to the set's real footprint, measured off the alpha rather than
+   guessed: the plinth runs x 6.7–93.3% and touches down at 99.3%. The
+   box is centred on that contact line and spreads a little wider than
+   the base, so the plinth covers its middle and only what escapes below
+   reads as the table.
+
+   Two gradients rather than one, because a single falloff stays even
+   all the way out and reads as a floating object lit from above — the
+   thing Jake was asking to fix. The tight one is the contact patch
+   directly under the base; the broad one is the ambient it sits in. */
+.set::after {
+  content: '';
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
+  left: 3%;
+  right: 3%;
+  bottom: -4.5%;
+  height: 11%;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse 24% 19% at 50% 50%,
+      rgb(0 0 0 / 0.46) 0%,
+      rgb(0 0 0 / 0.12) 58%,
+      transparent 80%
+    ),
+    radial-gradient(
+      ellipse 50% 50% at 50% 52%,
+      rgb(0 0 0 / 0.24) 0%,
+      rgb(0 0 0 / 0.1) 45%,
+      transparent 78%
+    );
   pointer-events: none;
 }
 
-.filmExpand {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  font-family: var(--mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 6px 10px;
-  background: var(--accent-expressive);
-  color: #17150d;
-  border: var(--border-width-default) solid #17150d;
-  cursor: pointer;
+/* the set is the control: pressing the glass opens the film with sound.
+   zoom-in is the house's own affordance for "this opens bigger"
+   (.pinned, .npWidget in the shell), and the lightbox answers with
+   zoom-out. */
+.setBtn {
+  display: block;
+  position: relative;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
 }
 
-.filmExpand:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+.setBtn:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 4px;
+}
+
+/* THE DEAD TUBE — the hole's backing, on the TUBE rect, and the face of
+   the set whenever the film is not running: idle, and reduced motion
+   for good. Without it the page reads straight through the cutout.
+
+   Hardcoded under §5's carve-out, and deliberately not tokenised: this
+   is an object's own colour rather than a semantic role, and it must
+   not flip with the skin — an off CRT is black in all of them. The tint
+   is measured, not invented. r5's photographed tube sampled #657468
+   over its whole face — hue 132°, saturation ~7%, a desaturated
+   green-grey — and this keeps that hue and chroma while dropping the
+   lightness from lit to off, which is the one thing r6's photo changed.
+   The falloff to near-black at the corners is the tube's curvature. For
+   scale: the bezel around it samples #2b2d2f, so the glass sits well
+   under the plastic, the way glass does. */
+.setTube {
+  position: absolute;
+  left: 7.8%;
+  top: 8.7%;
+  width: 84.4%;
+  height: 67.3%;
+  z-index: 0;
+  background: radial-gradient(ellipse at 50% 45%, #0e110f 0%, #0a0c0a 55%, #050605 100%);
+  pointer-events: none;
+}
+
+/* THE FILM — behind the photograph, so the bezel crops it and nothing
+   here needs a mask or a radius. On the TUBE rect: the hole grown
+   ~0.6% of the box on every side, which is enough that subpixel
+   rounding can never open a seam of page between film and bezel, and
+   small enough that all of the bleed stays under the plastic.
+
+   Sized with width/height rather than a right/bottom inset on purpose:
+   a replaced element resolves `width: auto` to its intrinsic width and
+   drops the over-constrained inset, so the four-sided form would leave
+   the video at box-film.mp4's own 854 × 480. */
+.setSignal {
+  position: absolute;
+  left: 7.8%;
+  top: 8.7%;
+  width: 84.4%;
+  height: 67.3%;
+  z-index: 1;
+  object-fit: cover;
+  border: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.setSignal[data-clear] {
+  opacity: 1;
+}
+
+/* the photograph, over the film — its alpha is the mask.
+
+   The drop shadow still rides the IMAGE rather than the button, so it
+   follows the cutout's silhouette instead of a rectangle. With a hole
+   in that silhouette it now does one thing more: a shadow paints behind
+   its element, and behind this element at the hole is the film, so the
+   bezel lays a soft edge of itself along the inside top of the glass.
+   That is the bezel shadowing the tube — the recess r5 needed a whole
+   reflection asset to suggest — so it is kept deliberately.
+
+   Which is exactly why r7's grounding went to .set::after instead of
+   here, and why this shadow got smaller rather than bigger. A filter
+   works in rendered pixels, so the set shrinking to 80% would have
+   grown this recess by a quarter relative to the glass on its own. The
+   offsets are scaled by the same 0.8 to hold the proportion Jake signed
+   off on at r6 (10 → 8, 14 → 11), then the y is nudged back to 10 for
+   his lean downward: ~5–10% of the glass height, where r6 read 4–9%.
+   All of the new weight is in the ellipse, which cannot spill. */
+.setBody {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 12px rgb(0 0 0 / 0.2));
+}
+
+/* THE SHEEN — the glass, drawn this time. r5 could crop a reflection
+   out of its own photograph; r6's tube is a hole, so there is nothing
+   to put back and this is one raked diagonal instead, faint enough to
+   read as a pane and not as a wipe. It is over the photograph, so it
+   sits on the GLASS rect — the hole shrunk 0.4%, which is inside the
+   corner rounding and keeps white off the plastic. Unlike r5's it never
+   fades in: an off tube reflects the room too. */
+.setSheen {
+  position: absolute;
+  left: 8.8%;
+  top: 9.7%;
+  width: 82.4%;
+  height: 65.3%;
+  z-index: 3;
+  background: linear-gradient(
+    116deg,
+    transparent 30%,
+    rgb(255 255 255 / 0.05) 42%,
+    rgb(255 255 255 / 0.08) 48%,
+    rgb(255 255 255 / 0.02) 54%,
+    transparent 64%
+  );
+  pointer-events: none;
+}
+
+/* the channel badge, over the sheen so the diagonal never crosses it.
+   Still 5% inside the tube's top-right corner, restated against r6's
+   hole: 8.36% + 5% of the 83.28%-wide hole, 9.34% + 5% of its 66.02%
+   height. */
+.setOsd {
+  position: absolute;
+  right: 12.5%;
+  top: 12.6%;
+  z-index: 4;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.18em;
+  color: var(--accent-expressive);
+  text-shadow: 0 0 8px currentColor;
+  pointer-events: none;
 }
 
 .filmModal {
@@ -684,6 +931,9 @@
   display: grid;
   place-items: center;
   padding: 4vmin;
+  /* the other half of the tube's zoom-in — the shell's own pattern for
+     an opened thing (.photoZoom, .npZoomed) */
+  cursor: zoom-out;
 }
 
 .filmFrame {
@@ -744,13 +994,13 @@
 }
 
 .moatWhy {
-  border-top: 1px dashed rgba(231, 225, 210, 0.3);
+  border-top: 1px dashed color-mix(in srgb, var(--content-inverse) 30%, transparent);
   margin-top: 14px;
   padding-top: var(--spacing-component-md);
   font-family: var(--type-label-family);
   font-size: var(--type-label-size); /* 11.5px → 11px */
   line-height: var(--leading-relaxed); /* 1.7 exact — diverges from label's normal leading, extra room for this annotation */
-  color: rgba(231, 225, 210, 0.85);
+  color: color-mix(in srgb, var(--content-inverse) 85%, transparent);
   min-height: 52px;
   position: relative;
   z-index: 1;
@@ -931,32 +1181,12 @@
 }
 
 /* HUB MODES (HubModes.tsx) — one viewport, two controls (s89). The mode
-   tabs at the bottom pick the mode; the fidelity chip at the top flips
-   that mode's first hi-fi pass for the screens that shipped (s132: the
-   lo-fi SVG diagram retired — both faces are real screens now, riding
-   the hero's .hubDevice bezel so the hub reads as hardware). */
-
-.hubHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-component-md);
-  margin-bottom: 8px;
-  position: relative;
-  z-index: 1;
-}
-
-.hubViews {
-  display: flex;
-  gap: 14px;
-}
-
-.hubCount {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  color: rgba(231, 225, 210, 0.45);
-}
+   pills at the bottom pick the mode; the fidelity chip in the cap row
+   flips that mode's first hi-fi pass for the screens that shipped (s132:
+   the lo-fi SVG diagram retired — both faces are real screens now, riding
+   the hero's .hubDevice bezel so the hub reads as hardware). s134 moved
+   the head row into the plate's own cap: counter as .plateReadout, chip
+   as the plate's when-control. */
 
 /* the cycling screens — a button so keyboard and click can step the
    loop by hand; the frame inside is the hero's .hubDevice, unstyled
@@ -997,7 +1227,30 @@
   object-fit: cover;
 }
 
-.hubTabs {
+/* the modest seat: §04's reels and the rein-in's shots take the same
+   bezel as §03 but not its wall (s134-r2 — no room behind them, the
+   hardware is the point). The bottom pad is only what the device's
+   ground shadow needs to land inside the plate's own padding. */
+.hubStand {
+  padding: 2px 2% 18px;
+}
+
+/* a reel seated in the frame — the recordings are 1280×720, the
+   panel's own 16:9, so cover crops nothing and the reel's usual black
+   mat never shows (the panel's screen paper is behind it) */
+.demoReelHub {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* PILL TABS — the plate grammar's what-control (s134): one row under
+   the stage, one implementation for every plate that has one (the hub's
+   modes, the rein-in's surfaces). Pink fill on the active pill; the
+   others are a hairline in the plate's own ink. */
+.plateTabs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
@@ -1007,21 +1260,50 @@
 }
 
 @media (max-width: 640px) {
-  .hubTabs {
+  .plateTabs {
     grid-template-columns: 1fr;
   }
 }
 
-/* FidelityFrame — one frame, two states, inside a plate. The chip
-   restates the global switch in this pair's own rung labels; panes
-   flip instantly (1992 machines don't crossfade). */
+.plateTab {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--content-inverse);
+  border: 1px solid color-mix(in srgb, var(--content-inverse) 40%, transparent);
+  cursor: pointer;
+}
+
+.plateTab[aria-pressed='true'] {
+  background: var(--accent-expressive);
+  /* the plate's own ground, read back as ink: pink is a mark colour, and
+     the ground is the only thing dark enough to sit on it */
+  color: var(--surface-inverse);
+  border-color: var(--accent-expressive);
+}
+
+/* mouse focus lands on the pill — the UA default ring is the blue/white
+   bounding box; keyboard keeps the accent ring below */
+.plateTab:focus {
+  outline: none;
+}
+
+.plateTab:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+/* FidelityChip — the plate grammar's when-control (s134): it rides the
+   cap row's right slot, restating the case's one global switch in this
+   pair's own rung labels. FidelityFrame is the stage alone; panes flip
+   instantly (1992 machines don't crossfade). */
 .fidChip {
   display: flex;
-  justify-content: flex-end;
   gap: 14px;
-  margin-bottom: 10px;
-  position: relative;
-  z-index: 1;
+  margin-left: auto;
 }
 
 /* text switches, not boxed buttons — plate ink, marks-only accent */
@@ -1034,12 +1316,12 @@
   background: none;
   border: 0;
   border-bottom: 1px solid transparent;
-  color: rgba(231, 225, 210, 0.45);
+  color: color-mix(in srgb, var(--content-inverse) 45%, transparent);
   cursor: pointer;
 }
 
 .fidChipSeg[aria-pressed='true'] {
-  color: rgba(231, 225, 210, 0.9);
+  color: color-mix(in srgb, var(--content-inverse) 90%, transparent);
   border-bottom-color: var(--accent-expressive);
 }
 
@@ -1060,14 +1342,15 @@
   display: block;
 }
 
-/* plate 09 — the rein-in (ReinIn.tsx). Every surface's shot stays in
+/* the rein-in plate (ReinIn.tsx). Every surface's shot stays in
    the pane, stacked; opacity picks the current one so a tab press
    swaps with nothing left to load. Contain on device black, same
    derivation as the reels' #000 (the bezel belongs to the footage). */
+/* the shot stack fills the hub panel — the frame owns the ratio and the
+   screen's own paper now, so this brings neither (s134-r2) */
 .reinShot {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  background: #000;
+  position: absolute;
+  inset: 0;
 }
 
 .reinShot img {
@@ -1259,10 +1542,10 @@
 }
 
 /* §06 live-audit pixel scene: the readout under the art carries the
-   change; it types itself in on every fidelity flip (the pane's
-   display:none swap restarts the animation). Pink tick = the
-   expressive accent, same hex the scene derives (plate ground is
-   theme-fixed). */
+   change; it types itself in on every fidelity flip (s134-r2 — one
+   instance now, so React's key remounts it where the pane's
+   display:none swap used to). Pink tick = the expressive accent, same
+   hex the scene derives (plate ground is theme-fixed). */
 .audit {
   display: grid;
   gap: 10px;

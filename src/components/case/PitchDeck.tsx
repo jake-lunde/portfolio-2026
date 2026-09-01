@@ -4,12 +4,14 @@ import { useEffect, useRef, useState } from 'react'
 import { Plate } from './CaseComponents'
 import styles from './case.module.css'
 
-/* Plate 01 — the pitch, one group at a time. Nine groups exported from
-   the vision deck (Figma 201266-2467) with transparent grounds, so the
-   wireframes sit directly on the plate. Each group's deck annotation is
-   live text in the cap row, in line with the FIG marker; annotations
-   wider than the row tick slowly across it, faded at each edge. The
-   intro group keeps its text in the image, so its annotation is empty.
+/* "The pitch" — the deck, one group at a time. Nine groups exported
+   from the vision deck (Figma 201266-2467) with transparent grounds, so
+   the wireframes sit directly on the plate. The plate owns the cap row
+   (s134 grammar): the name left, then the readout — a group counter and
+   the group's own deck annotation as live text. Annotations wider than
+   the row tick slowly across it, faded at each edge. The intro group
+   keeps its text in the image, so its annotation is empty. No right
+   slot: the deck's own footer already carries GLX / 2025.
 
    Two behaviors (Jake's s55 spec): with a fine pointer the stage is a
    hover scrub, cursor x picks the group; on touch it is a snap
@@ -64,7 +66,7 @@ function CapTicker({ text }: { text: string }) {
   )
 }
 
-export function PitchDeck({ tag, caption }: { tag?: string; caption: string }) {
+export function PitchDeck({ caption }: { caption: string }) {
   const [fine, setFine] = useState(false)
   const [on, setOn] = useState(0)
 
@@ -80,7 +82,18 @@ export function PitchDeck({ tag, caption }: { tag?: string; caption: string }) {
     setOn((v) => Math.min(SLIDES.length - 1, Math.max(0, v + d)))
 
   return (
-    <Plate tag={tag} caption={caption} cap={<CapTicker text={SLIDES[on][3]} />}>
+    <Plate
+      cap="The pitch"
+      readout={
+        <>
+          <span className={styles.plateCount}>
+            {String(on + 1).padStart(2, '0')} / {String(SLIDES.length).padStart(2, '0')}
+          </span>
+          <CapTicker text={SLIDES[on][3]} />
+        </>
+      }
+      caption={caption}
+    >
       <div className={styles.deck}>
         {fine ? (
           <div

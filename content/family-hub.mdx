@@ -3,7 +3,6 @@ import {
   Section,
   Lead,
   Plate,
-  Moves,
   Move,
   PullQuote,
   Claim,
@@ -11,12 +10,13 @@ import {
   Metrics,
   Stat,
 } from '@/components/case/CaseComponents'
+import { Moves } from '@/components/case/Moves'
 import { ResearchBars } from '@/components/case/ResearchBars'
 import { HubModes } from '@/components/case/HubModes'
 import { CaseFooter } from '@/components/case/CaseFooter'
 import { PitchDeck } from '@/components/case/PitchDeck'
 import { LaunchFilm } from '@/components/case/LaunchFilm'
-import { FidelityFrame } from '@/components/case/FidelityFrame'
+import { FidelityFrame, FidelityChip } from '@/components/case/FidelityFrame'
 import { DemoReel } from '@/components/case/DemoReel'
 import { HeroSketch } from '@/components/case/HeroSketch'
 import { LiveAudit } from '@/components/case/LiveAudit'
@@ -50,7 +50,7 @@ import { ReinIn } from '@/components/case/ReinIn'
     <Move n="02" title="Tutor" img="/case/family-hub/moves/move-tutor.webp" imgAlt="Vision-deck still: a kid at a desk with a lesson glowing on a phone, Greenlight Tutor">
       An AI tutor that reshapes a lesson into whatever format your kid understands. A podcast, a quiz, a conversation. Too far ahead for the team, but I still really like this one.
     </Move>
-    <Move n="03" title="Family Hub" img="/case/family-hub/moves/move-family-hub.webp" imgAlt="Vision-deck still: a parent in the kitchen glancing at the Family Hub on the wall">
+    <Move won n="03" title="Family Hub" img="/case/family-hub/moves/move-family-hub.webp" imgAlt="Vision-deck still: a parent in the kitchen glancing at the Family Hub on the wall">
       One home base for running a family. Calendar, chores, location, money.
       A lateral move from family finance to family operating system, and the
       one everyone could see. It won. But I wasn&rsquo;t so sure.
@@ -60,7 +60,7 @@ import { ReinIn } from '@/components/case/ReinIn'
   Honestly, I didn&rsquo;t believe in it at first. I drove the concept while
   kind of convincing myself along the way, until I saw the interaction model scale from the whole family to one person in a couple of taps. Maybe there was something. But being the skeptic allowed me to scrutinize the real user needs we were trying to solve. Everything in the pitch had to win me over first.
 
-  <PitchDeck/>
+  <PitchDeck caption="Nine groups from the vision deck." />
 </Section>
 
 <Section no="02" label="The evidence" title="Research showed the mental load is real. Parents gave us the brief: consolidation and simplicity.">
@@ -77,7 +77,7 @@ import { ReinIn } from '@/components/case/ReinIn'
   we showed a price. It was the strongest concept test Greenlight had run.
   We didn&rsquo;t follow the data everywhere, though.
 
-  <Plate tag="PARENT PREFERENCES · SEPT 2025">
+  <Plate cap="The survey" tag="PARENT PREFERENCES · SEPT 2025">
     <ResearchBars />
   </Plate>
 
@@ -97,9 +97,7 @@ import { ReinIn } from '@/components/case/ReinIn'
   the thing and actually doing something on it. Approving chores, moving
   money, editing the calendar. All configurable by parents.
 
-  <Plate caption="The modes on the device itself: the big dumb buttons pass, and the screens that shipped.">
-    <HubModes />
-  </Plate>
+  <HubModes caption="The modes on the device itself: the big dumb buttons pass, and the screens that shipped." />
 
   My first pass focused on radical simplicity. Internally we call it *big dumb
   buttons.* To be fair, our design team uses that approach, but you can&rsquo;t win &rsquo;em all. Leadership asked
@@ -125,12 +123,15 @@ import { ReinIn } from '@/components/case/ReinIn'
   spearheaded. Over-the-air updates made iteration, by my super-duper scientific
   estimate at the time, *&ldquo;a thousand percent&rdquo;* faster.
 
-  <Plate caption="The proof-of-concept demo, and the hi-fi build the board saw. Flip the switch in the window bar.">
+  <Plate
+    cap="The prototype"
+    chip={<FidelityChip vDraft="v0.2" vShipped="v0.6" />}
+    caption="The proof-of-concept demo, and the hi-fi build the board saw. The chip flips between them."
+  >
     <FidelityFrame
-      vDraft="v0.2"
-      vShipped="v0.6"
       draft={
         <DemoReel
+          frame="hub"
           video="demo-poc"
           poster="poster-poc.webp"
           alt="Screen recording of the first clickable prototype: clicking through the dark dashboard, the family agenda blocked in as bright color bars."
@@ -138,6 +139,7 @@ import { ReinIn } from '@/components/case/ReinIn'
       }
       shipped={
         <DemoReel
+          frame="hub"
           video="demo-hifi"
           poster="poster-hifi.webp"
           alt="Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape."
@@ -156,10 +158,13 @@ import { ReinIn } from '@/components/case/ReinIn'
     shows up on both screens the whole way.
   </Lead>
 
-  <Plate mat="light" caption="The onboarding flow's first pass, and where it landed.">
+  <Plate
+    cap="The onboarding"
+    mat="light"
+    chip={<FidelityChip vDraft="v0.5" vShipped="v1.0" />}
+    caption="The onboarding flow's first pass, and where it landed."
+  >
     <FidelityFrame
-      vDraft="v0.5"
-      vShipped="v1.0"
       draft={
         <DemoReel
           video="demo-onboard-initial"
@@ -184,10 +189,12 @@ import { ReinIn } from '@/components/case/ReinIn'
   characters in nine colors, animating in as the family gets set up. Still
   one of my favorite things in the product, and live across the Greenlight ecosystem, can you guess which ones I illustrated?
 
-  <Plate cap="Plate 07 · the avatar system" caption="The avatar picker's first pass on the phone, and the one that shipped.">
+  <Plate
+    cap="The avatar system"
+    chip={<FidelityChip vDraft="v0.7" vShipped="v1.0" />}
+    caption="The avatar picker's first pass on the phone, and the one that shipped."
+  >
     <FidelityFrame
-      vDraft="v0.7"
-      vShipped="v1.0"
       draft={
         <DemoReel
           frame="phone"
@@ -245,19 +252,18 @@ import { ReinIn } from '@/components/case/ReinIn'
 
   <Claim>That&rsquo;s when <em>design engineer</em> stopped being a title I was trying&nbsp;on.</Claim>
 
-  <Plate tag="LIVE.AUDIT">
-    <FidelityFrame
-      vDraft="Build"
-      vShipped="Fix"
-      draft={<LiveAudit mode="build" />}
-      shipped={<LiveAudit mode="fix" />}
-    />
+  <Plate cap="Live audit" chip={<FidelityChip vDraft="Build" vShipped="Fix" />}>
+    <LiveAudit />
   </Plate>
 
   The feedback ran the other way too: my early visual pass was too loud, so I stripped it back so the color shows up where it
   means something. The feedback was right, and the design got better.
 
-  <Plate cap="Plate 09 · the rein-in" caption="The early color pass, and where it landed. The pass where the team was right.">
+  <Plate
+    cap="The rein-in"
+    chip={<FidelityChip vDraft="v0.7" vShipped="v1.0" />}
+    caption="The early color pass, and where it landed. The pass where the team was right."
+  >
     <ReinIn />
   </Plate>
 </Section>
@@ -279,9 +285,7 @@ The call went the other
       <Stat big={<><span className="hl-pink">6</span> months</>} label="from zero lines of code to a device shipping nationwide" />
       <Stat secondary big={<>1 : <span className="hl-pink">10</span></>} label="designer-to-engineer ratio on the build. The new industry standard" />
     </div>
-    <Plate cap="Family Hub Launch Film">
-      <LaunchFilm />
-    </Plate>
+    <LaunchFilm />
   </Metrics>
 
   The first gap is already closing, and it&rsquo;s the one I argued for.

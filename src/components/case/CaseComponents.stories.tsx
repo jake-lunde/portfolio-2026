@@ -5,13 +5,13 @@ import {
   Lead,
   Plate,
   Placeholder,
-  Moves,
   Move,
   Decide,
   PullQuote,
   Metrics,
   Stat,
 } from './CaseComponents'
+import { Moves } from './Moves'
 
 /* Case-study vocabulary (§7 anatomy). These are the static, presentational
    pieces — interactive islands (MoatDiagram, FrequencyBars) live elsewhere.
@@ -82,10 +82,17 @@ export const LeadStory: Story = {
   ),
 }
 
+/* the s134 cap row: name left, live readout beside it, static tag right.
+   Plates are named, never numbered. */
 export const PlateStory: Story = {
   name: 'Plate (with Placeholder)',
   render: () => (
-    <Plate cap="Plate 03 · Onboarding flow" caption="The three-tap setup, end to end.">
+    <Plate
+      cap="The onboarding"
+      readout="03 / 09"
+      tag="SEPT 2025"
+      caption="The three-tap setup, end to end."
+    >
       <Placeholder>
         Screen recording
         <br />
@@ -98,7 +105,7 @@ export const PlateStory: Story = {
 export const PlaceholderStory: Story = {
   name: 'Placeholder',
   render: () => (
-    <Plate cap="Plate 01 · Asset">
+    <Plate cap="The asset">
       <Placeholder>Duotone photo — swappable</Placeholder>
     </Plate>
   ),
@@ -114,7 +121,7 @@ export const MovesStory: Story = {
       <Move n="2" title="Shrink the ask">
         <p>One decision per session. Everything else defers to a smarter default.</p>
       </Move>
-      <Move n="3" title="Close the loop">
+      <Move won n="3" title="Close the loop">
         <p>Every deposit earns an immediate, tactile acknowledgment — the system answers back.</p>
       </Move>
     </Moves>
