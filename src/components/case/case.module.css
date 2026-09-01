@@ -534,11 +534,20 @@
 }
 
 /* ledger — mono spec-sheet rows; terse facts instead of paragraphs */
+/* s134-r7: this had margin-top only, and `.section p` carries no top
+   margin at all (it is `0 0 20px`), so prose after a ledger landed hard
+   against the border — §07's "We're not stopping here" is where Jake
+   caught it, but §05's "But, the volume buttons are backwards" was the
+   same gap, so the fix belongs here rather than at either call site.
+   Symmetric now, which is the rule the other blocks that sit in prose
+   already follow for this exact reason (see .moves and .quote). The
+   off-scale 26px goes with it: layout-lg is 32px, the step that gives a
+   fully bordered box a little more air than the quote's rule gets. */
 .ledger {
   border: var(--border-width-default) solid var(--content);
   background: var(--surface);
   padding: 22px;
-  margin-top: 26px;
+  margin: var(--spacing-layout-lg) 0;
 }
 
 [data-theme='dark'] .ledger {
@@ -718,15 +727,59 @@
    The things still painted are the tube, the sheen and the badge. */
 .set {
   position: relative;
-  /* the photo is the layout box. Capped so the set doesn't tower over
-     the stats beside it once the metrics grid folds to one column at
-     760px. Re-judged for r6: 1100 × 1039 puts the set at 397px tall at
-     this cap, against r5's square 420, so it fits everywhere the old
-     one did — and the tube inside it is bigger anyway, this photo being
-     nearly all screen. Below 760px the column is the constraint before
-     the cap is, down through 360px. */
-  max-width: 420px;
+  /* the photo is the layout box, and s134-r7 takes the whole set to 80%
+     of the size it shipped at, Jake's call on seeing r6 live. That needs
+     both declarations to hold everywhere, because two different things
+     were setting the size: above ~525px of column the cap was, so the
+     cap moves to 420 × 0.8; below it the column was, so the width goes
+     to 80% of the column. Between them they are exactly four fifths at
+     every width. Still centred in its metrics slot, as since r5. */
+  width: 80%;
+  max-width: 336px;
   margin-inline: auto;
+}
+
+/* THE GROUND (s134-r7) — Jake wanted the shadow pushed down the y axis,
+   "to make it look like its sitting on a surface". That could not come
+   from the image's own filter: a drop shadow paints through the cutout,
+   so every pixel of y added there drives the bezel's recess further
+   down over the film as well (the r6 side effect, noted at .setBody).
+   The grounding is therefore its own element, and being its own element
+   it cannot reach the glass at all — the hole ends at 75.4% of the box
+   and this starts at 93.5%.
+
+   Sized to the set's real footprint, measured off the alpha rather than
+   guessed: the plinth runs x 6.7–93.3% and touches down at 99.3%. The
+   box is centred on that contact line and spreads a little wider than
+   the base, so the plinth covers its middle and only what escapes below
+   reads as the table.
+
+   Two gradients rather than one, because a single falloff stays even
+   all the way out and reads as a floating object lit from above — the
+   thing Jake was asking to fix. The tight one is the contact patch
+   directly under the base; the broad one is the ambient it sits in. */
+.set::after {
+  content: '';
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  bottom: -4.5%;
+  height: 11%;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse 24% 19% at 50% 50%,
+      rgb(0 0 0 / 0.46) 0%,
+      rgb(0 0 0 / 0.12) 58%,
+      transparent 80%
+    ),
+    radial-gradient(
+      ellipse 50% 50% at 50% 52%,
+      rgb(0 0 0 / 0.24) 0%,
+      rgb(0 0 0 / 0.1) 45%,
+      transparent 78%
+    );
+  pointer-events: none;
 }
 
 /* the set is the control: pressing the glass opens the film with sound.
@@ -809,15 +862,23 @@
    its element, and behind this element at the hole is the film, so the
    bezel lays a soft edge of itself along the inside top of the glass.
    That is the bezel shadowing the tube — the recess r5 needed a whole
-   reflection asset to suggest — so it stays at r5's values. Nothing
-   floats: the set's base is a full-width plinth, opaque to y 1027. */
+   reflection asset to suggest — so it is kept deliberately.
+
+   Which is exactly why r7's grounding went to .set::after instead of
+   here, and why this shadow got smaller rather than bigger. A filter
+   works in rendered pixels, so the set shrinking to 80% would have
+   grown this recess by a quarter relative to the glass on its own. The
+   offsets are scaled by the same 0.8 to hold the proportion Jake signed
+   off on at r6 (10 → 8, 14 → 11), then the y is nudged back to 10 for
+   his lean downward: ~5–10% of the glass height, where r6 read 4–9%.
+   All of the new weight is in the ellipse, which cannot spill. */
 .setBody {
   position: relative;
   z-index: 2;
   display: block;
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 10px 14px rgb(0 0 0 / 0.22));
+  filter: drop-shadow(0 10px 12px rgb(0 0 0 / 0.2));
 }
 
 /* THE SHEEN — the glass, drawn this time. r5 could crop a reflection
