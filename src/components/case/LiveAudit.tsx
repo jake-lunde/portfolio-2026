@@ -34,15 +34,18 @@ const POSTER = '/case/family-hub/live-audit-poster.webp'
    to 3.60, turns back 3.60–3.82.
 
    Per side: [tread start, tread end, last moment still facing this way].
-   The tread pair sits a beat inside the real stretch so a coarse
-   timeupdate (~4/s) can't sail past it; the third number is the turn's
-   own start, and a seek is only ever allowed before it — so the jump is
-   always from this side to this side, never a cut across the turn. The
-   trailing LEFT stretch is left alone: he is already facing the screen
-   there, and the loop's natural wrap carries him into the window. */
+   The catch window (tread end → turn start) must hold at least two
+   timeupdates at the ~250ms worst case or a lap sails through the turn
+   and he walks off — measured live, a 0.25s window missed every other
+   lap — so tread end sits ≥0.5s before the turn. A seek is only ever
+   allowed before the turn's own start (the third number), so the jump
+   is always from this side to this side, never a cut across the turn.
+   The trailing LEFT stretch is left alone: he is already facing the
+   screen there, and the loop's natural wrap carries him into the
+   window. */
 const FACING = {
-  draft: [0.05, 1.15, 1.4],
-  shipped: [1.7, 3.3, 3.55],
+  draft: [0.05, 0.85, 1.4],
+  shipped: [1.7, 3.0, 3.55],
 } as const
 
 const READOUT = {
