@@ -76,7 +76,6 @@ export function Plate({
   chip,
   caption,
   mat,
-  frame,
   children,
 }: {
   cap?: React.ReactNode /* the plate's name — names, not numbers (s134, superseding the s55 label rule) */
@@ -85,11 +84,10 @@ export function Plate({
   chip?: React.ReactNode /* interactive right slot — the fidelity chip, held right like the tag */
   caption?: string
   mat?: 'light' /* recordings that sit on paper-white get a matching surround (rail law: the mat matches the footage's corners) */
-  frame?: 'phone' /* a portrait stage: the plate narrows to hug the phone shell instead of running a full-width dark field */
   children: React.ReactNode
 }) {
   return (
-    <figure className={styles.figure} data-frame={frame}>
+    <figure className={styles.figure}>
       <div className={styles.plate} data-mat={mat}>
         {(cap || readout || tag || chip) && (
           <div className={styles.plateCap}>
@@ -120,25 +118,27 @@ export function Placeholder({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function Moves({ children }: { children: React.ReactNode }) {
-  return <div className={styles.moves}>{children}</div>
-}
-
+/* The grid that holds these is a client island (Moves.tsx) — it reads
+   the fidelity switch so §01's losing pitches can dim. The card stays
+   static; `won` is just the marker that keeps it lit. */
 export function Move({
   n,
   title,
   img,
   imgAlt,
+  won,
   children,
 }: {
   n: string
   title: string
   img?: string
   imgAlt?: string
+  /** the pitch that got built — held full while the others dim (s134-r2) */
+  won?: boolean
   children: React.ReactNode
 }) {
   return (
-    <div className={styles.move}>
+    <div className={styles.move} data-won={won ? '' : undefined}>
       {img && (
         <img
           className={styles.moveArt}

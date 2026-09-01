@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { sfx } from '@/lib/sound'
 import { FidelityFrame } from './FidelityFrame'
+import { HubFrame } from './HubFrame'
 import styles from './case.module.css'
 
 /* "The rein-in" — three shipped surfaces, each carrying its loud early
@@ -14,7 +15,10 @@ import styles from './case.module.css'
    1086-wide WebP like the shipped screens.
 
    s134: the fidelity chip rides the plate's cap row from the MDX, so
-   this only brings the stage and its what-control pills. */
+   this only brings the stage and its what-control pills. s134-r2 seats
+   the shots in the hub's own bezel (HubFrame) — these are screens on
+   the device, and the exports are 1086×611, the panel's 16:9 to within
+   a rounding hair, so nothing crops. */
 
 const DIR = '/case/family-hub/reinin'
 
@@ -59,23 +63,27 @@ const SURFACES = [
 
 function Shots({ side, idx }: { side: 'draft' | 'shipped'; idx: number }) {
   return (
-    <div className={styles.reinShot}>
-      {SURFACES.map((s, i) => {
-        const shot = s[side]
-        return (
-          <img
-            key={shot.file}
-            src={`${DIR}/${shot.file}.webp`}
-            width={1086}
-            height={611}
-            alt={i === idx ? shot.alt : ''}
-            aria-hidden={i === idx ? undefined : true}
-            data-on={i === idx ? 'true' : undefined}
-            loading="lazy"
-            draggable={false}
-          />
-        )
-      })}
+    <div className={styles.hubStand}>
+      <HubFrame>
+        <div className={styles.reinShot}>
+          {SURFACES.map((s, i) => {
+            const shot = s[side]
+            return (
+              <img
+                key={shot.file}
+                src={`${DIR}/${shot.file}.webp`}
+                width={1086}
+                height={611}
+                alt={i === idx ? shot.alt : ''}
+                aria-hidden={i === idx ? undefined : true}
+                data-on={i === idx ? 'true' : undefined}
+                loading="lazy"
+                draggable={false}
+              />
+            )
+          })}
+        </div>
+      </HubFrame>
     </div>
   )
 }

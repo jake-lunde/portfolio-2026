@@ -3,7 +3,6 @@ import {
   Section,
   Lead,
   Plate,
-  Moves,
   Move,
   PullQuote,
   Claim,
@@ -11,6 +10,7 @@ import {
   Metrics,
   Stat,
 } from '@/components/case/CaseComponents'
+import { Moves } from '@/components/case/Moves'
 import { ResearchBars } from '@/components/case/ResearchBars'
 import { HubModes } from '@/components/case/HubModes'
 import { CaseFooter } from '@/components/case/CaseFooter'
@@ -50,7 +50,7 @@ import { ReinIn } from '@/components/case/ReinIn'
     <Move n="02" title="Tutor" img="/case/family-hub/moves/move-tutor.webp" imgAlt="Vision-deck still: a kid at a desk with a lesson glowing on a phone, Greenlight Tutor">
       An AI tutor that reshapes a lesson into whatever format your kid understands. A podcast, a quiz, a conversation. Too far ahead for the team, but I still really like this one.
     </Move>
-    <Move n="03" title="Family Hub" img="/case/family-hub/moves/move-family-hub.webp" imgAlt="Vision-deck still: a parent in the kitchen glancing at the Family Hub on the wall">
+    <Move won n="03" title="Family Hub" img="/case/family-hub/moves/move-family-hub.webp" imgAlt="Vision-deck still: a parent in the kitchen glancing at the Family Hub on the wall">
       One home base for running a family. Calendar, chores, location, money.
       A lateral move from family finance to family operating system, and the
       one everyone could see. It won. But I wasn&rsquo;t so sure.
@@ -131,6 +131,7 @@ import { ReinIn } from '@/components/case/ReinIn'
     <FidelityFrame
       draft={
         <DemoReel
+          frame="hub"
           video="demo-poc"
           poster="poster-poc.webp"
           alt="Screen recording of the first clickable prototype: clicking through the dark dashboard, the family agenda blocked in as bright color bars."
@@ -138,6 +139,7 @@ import { ReinIn } from '@/components/case/ReinIn'
       }
       shipped={
         <DemoReel
+          frame="hub"
           video="demo-hifi"
           poster="poster-hifi.webp"
           alt="Screen recording of the hi-fi prototype: driving the light dashboard as it takes its shipped shape."
@@ -189,7 +191,6 @@ import { ReinIn } from '@/components/case/ReinIn'
 
   <Plate
     cap="The avatar system"
-    frame="phone"
     chip={<FidelityChip vDraft="v0.7" vShipped="v1.0" />}
     caption="The avatar picker's first pass on the phone, and the one that shipped."
   >
@@ -252,10 +253,7 @@ import { ReinIn } from '@/components/case/ReinIn'
   <Claim>That&rsquo;s when <em>design engineer</em> stopped being a title I was trying&nbsp;on.</Claim>
 
   <Plate cap="Live audit" chip={<FidelityChip vDraft="Build" vShipped="Fix" />}>
-    <FidelityFrame
-      draft={<LiveAudit mode="build" />}
-      shipped={<LiveAudit mode="fix" />}
-    />
+    <LiveAudit />
   </Plate>
 
   The feedback ran the other way too: my early visual pass was too loud, so I stripped it back so the color shows up where it

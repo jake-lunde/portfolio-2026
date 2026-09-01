@@ -5,13 +5,13 @@ import {
   Lead,
   Plate,
   Placeholder,
-  Moves,
   Move,
   Decide,
   PullQuote,
   Metrics,
   Stat,
 } from './CaseComponents'
+import { Moves } from './Moves'
 
 /* Case-study vocabulary (§7 anatomy). These are the static, presentational
    pieces — interactive islands (MoatDiagram, FrequencyBars) live elsewhere.
@@ -121,7 +121,7 @@ export const MovesStory: Story = {
       <Move n="2" title="Shrink the ask">
         <p>One decision per session. Everything else defers to a smarter default.</p>
       </Move>
-      <Move n="3" title="Close the loop">
+      <Move won n="3" title="Close the loop">
         <p>Every deposit earns an immediate, tactile acknowledgment — the system answers back.</p>
       </Move>
     </Moves>

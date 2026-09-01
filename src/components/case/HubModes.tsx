@@ -7,6 +7,7 @@ import { HUB_MODE_LABELS, HUB_SCREENS, HUB_SCREEN_DIR, HUB_SCREEN_MS, type HubMo
 import { useFidelity } from './fidelity'
 import { Plate } from './CaseComponents'
 import { FidelityChip } from './FidelityFrame'
+import { HubFrame } from './HubFrame'
 import styles from './case.module.css'
 
 /* The shipped interaction model: Ambient (the heads-up screensaver) →
@@ -82,31 +83,24 @@ export function HubModes({ caption }: { caption: string }) {
           onFocus={() => setHeld(true)}
           onBlur={() => setHeld(false)}
         >
-          {/* the hero's bezel (case.module.css .hubDevice), reused whole:
-              same hardware, smaller wall */}
-          <div className={styles.hubDevice}>
-            <div className={styles.hubGap}>
-              <div className={styles.hubGlass}>
-                <div className={styles.hubPanel}>
-                  {shots.map((s, i) => (
-                    <motion.img
-                      key={s.file}
-                      src={`${HUB_SCREEN_DIR}/${s.file}.webp`}
-                      width={1440}
-                      height={810}
-                      alt={i === shot ? s.alt : ''}
-                      aria-hidden={i === shot ? undefined : true}
-                      loading="lazy"
-                      draggable={false}
-                      initial={false}
-                      animate={{ opacity: i === shot ? 1 : 0 }}
-                      transition={{ duration: reduced ? 0 : 0.4, ease: 'easeOut' }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* the hero's bezel, reused whole: same hardware, smaller wall */}
+          <HubFrame>
+            {shots.map((s, i) => (
+              <motion.img
+                key={s.file}
+                src={`${HUB_SCREEN_DIR}/${s.file}.webp`}
+                width={1440}
+                height={810}
+                alt={i === shot ? s.alt : ''}
+                aria-hidden={i === shot ? undefined : true}
+                loading="lazy"
+                draggable={false}
+                initial={false}
+                animate={{ opacity: i === shot ? 1 : 0 }}
+                transition={{ duration: reduced ? 0 : 0.4, ease: 'easeOut' }}
+              />
+            ))}
+          </HubFrame>
         </button>
 
         <div className={styles.plateTabs}>

@@ -119,15 +119,6 @@
   margin: 30px 0 6px;
 }
 
-/* a portrait stage (the avatar plate): the whole figure narrows so the
-   dark mat hugs the phone instead of running a full-width field. The
-   number is the shell plus its two plate paddings (280 + 2 × var(--space-5)
-   = 320) with room left for the cap row's name and chip to sit apart. */
-.figure[data-frame='phone'] {
-  max-width: 520px;
-  margin-inline: auto;
-}
-
 .plate {
   background: var(--surface-inverse);
   color: var(--content-inverse);
@@ -148,6 +139,18 @@
 .plate[data-mat='light'] {
   background: #fdfdfd; /* sampled: onboarding recordings' corners */
   color: var(--content);
+}
+
+/* everything the cap row paints is a content-inverse mix, which is cream
+   — invisible on the mat. The whole row flips to the page's own ink at
+   the same weights (s134-r2; .plateCount takes its colour from
+   .plateReadout, so it follows without a rule of its own). */
+.plate[data-mat='light'] .plateCap {
+  color: color-mix(in srgb, var(--content) 60%, transparent);
+}
+
+.plate[data-mat='light'] .plateReadout {
+  color: color-mix(in srgb, var(--content) 45%, transparent);
 }
 
 .plate[data-mat='light'] .fidChipSeg {
@@ -405,6 +408,24 @@
   border: var(--border-width-default) solid var(--content);
   background: var(--surface);
   padding: 18px;
+  transition: opacity 320ms ease;
+}
+
+/* §01: the case's one fidelity switch reaches the bet too — on shipped
+   the two pitches that lost fall back and the one that got built holds
+   full (Jake, s134-r2). Opacity only: the cards keep their place, their
+   border and their ink, so nothing reflows and nothing goes muddy.
+   Gated on a winner being named, so a grid that never declared one
+   (greenlight-invest's three moves) is never touched by a switch the
+   reader flipped on another case. */
+.moves[data-fidelity='shipped']:has(.move[data-won]) .move:not([data-won]) {
+  opacity: 0.38;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .move {
+    transition: none;
+  }
 }
 
 [data-theme='dark'] .move {
@@ -1007,6 +1028,25 @@
   object-fit: cover;
 }
 
+/* the modest seat: §04's reels and the rein-in's shots take the same
+   bezel as §03 but not its wall (s134-r2 — no room behind them, the
+   hardware is the point). The bottom pad is only what the device's
+   ground shadow needs to land inside the plate's own padding. */
+.hubStand {
+  padding: 2px 2% 18px;
+}
+
+/* a reel seated in the frame — the recordings are 1280×720, the
+   panel's own 16:9, so cover crops nothing and the reel's usual black
+   mat never shows (the panel's screen paper is behind it) */
+.demoReelHub {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* PILL TABS — the plate grammar's what-control (s134): one row under
    the stage, one implementation for every plate that has one (the hub's
    modes, the rein-in's surfaces). Pink fill on the active pill; the
@@ -1107,10 +1147,11 @@
    the pane, stacked; opacity picks the current one so a tab press
    swaps with nothing left to load. Contain on device black, same
    derivation as the reels' #000 (the bezel belongs to the footage). */
+/* the shot stack fills the hub panel — the frame owns the ratio and the
+   screen's own paper now, so this brings neither (s134-r2) */
 .reinShot {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  background: #000;
+  position: absolute;
+  inset: 0;
 }
 
 .reinShot img {
@@ -1302,10 +1343,10 @@
 }
 
 /* §06 live-audit pixel scene: the readout under the art carries the
-   change; it types itself in on every fidelity flip (the pane's
-   display:none swap restarts the animation). Pink tick = the
-   expressive accent, same hex the scene derives (plate ground is
-   theme-fixed). */
+   change; it types itself in on every fidelity flip (s134-r2 — one
+   instance now, so React's key remounts it where the pane's
+   display:none swap used to). Pink tick = the expressive accent, same
+   hex the scene derives (plate ground is theme-fixed). */
 .audit {
   display: grid;
   gap: 10px;
