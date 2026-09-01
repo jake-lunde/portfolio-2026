@@ -35,22 +35,21 @@ const POSTER = '/case/family-hub/live-audit-poster.webp'
    LEFT from 3.82 through the wrap to 1.45, turns 1.45–1.62, faces RIGHT
    to 3.60, turns back 3.60–3.82.
 
-   The stretches below are those minus a safety margin at each turn.
-   They are wide — LEFT is most of the loop, RIGHT is 1.85s — which is
-   the whole reason the freeze model is steadier than the treading it
-   replaced: a ~250ms timeupdate cadence could sail through r2's tight
-   catch window, but it cannot miss a stop this size. LEFT is two
-   ranges because the loop wraps inside it, and `loop` stays on for the
-   same reason: a flip out of the late-left stretch crosses the wrap to
-   reach the turn, and native looping is the only seamless way over. */
-const FACES = {
-  draft: (t: number) => t < 1.4 || t >= 3.85,
-  shipped: (t: number) => t >= 1.7 && t <= 3.55,
+   The stills are Jake's own frames (s134-r3b): Fix holds at 2.70,
+   settled at the laptop; Build holds at 4.70, back at the screen after
+   the return turn. A flip plays the real footage between them — Fix →
+   Build runs 2.70–4.70 through the turn back; Build → Fix runs 4.70
+   across the wrap to 2.70 through the turn out, which is why `loop`
+   stays on (native looping is the only seamless way over the wrap).
+   REACHED is a run-out window past each hold, wide enough that a
+   ~250ms timeupdate cadence cannot miss it but closed before the next
+   turn; on arrival the film snaps to the exact hold frame, a same-pose
+   nudge of at most a beat. */
+const HOLD = { draft: 4.7, shipped: 2.7 }
+const REACHED = {
+  draft: (t: number) => t >= 4.7,
+  shipped: (t: number) => t >= 2.7 && t <= 3.55,
 }
-
-/* where to sit when the pose has to be assumed rather than played —
-   first paint, and any flip the reader wasn't watching */
-const PARK = { draft: 0.4, shipped: 2.6 }
 
 const READOUT = {
   draft: 'feat: add Assistant type tokens [WEB-3877]',
@@ -88,7 +87,8 @@ export function LiveAudit() {
         const v = film.current
         if (!v) return
         v.pause()
-        if (!FACES[modeRef.current](v.currentTime)) v.currentTime = PARK[modeRef.current]
+        if (Math.abs(v.currentTime - HOLD[modeRef.current]) > 0.01)
+          v.currentTime = HOLD[modeRef.current]
       },
       { threshold: 0.35 },
     )
@@ -103,9 +103,9 @@ export function LiveAudit() {
   useEffect(() => {
     const el = film.current
     if (!el || reduced || !parked.current) return
-    if (FACES[mode](el.currentTime)) return
+    if (REACHED[mode](el.currentTime)) return
     if (onScreen.current) el.play().catch(() => {})
-    else el.currentTime = PARK[mode]
+    else el.currentTime = HOLD[mode]
   }, [mode, reduced, near])
 
   return (
@@ -125,7 +125,7 @@ export function LiveAudit() {
                the reader is assumed, never performed. */
             onLoadedMetadata={(e) => {
               const el = e.currentTarget
-              if (!FACES[mode](el.currentTime)) el.currentTime = PARK[mode]
+              el.currentTime = HOLD[mode]
               parked.current = true
             }}
             /* paused video never fires onPlaying, so the reveal rides the
@@ -133,7 +133,11 @@ export function LiveAudit() {
             onLoadedData={() => setClear(true)}
             onTimeUpdate={(e) => {
               const el = e.currentTarget
-              if (FACES[mode](el.currentTime)) el.pause()
+              if (!REACHED[mode](el.currentTime)) return
+              el.pause()
+              /* land on Jake's exact still, not wherever the cadence
+                 stopped us — a same-pose nudge of at most a beat */
+              if (Math.abs(el.currentTime - HOLD[mode]) > 0.01) el.currentTime = HOLD[mode]
             }}
           />
         )}
