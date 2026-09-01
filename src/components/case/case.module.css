@@ -690,15 +690,56 @@
   cursor: default;
 }
 
-/* the launch-film plate. Inline: muted, chromeless, pointer-inert.
-   Lightbox: sound on, controls on, portal'd past the window transform. */
-.film {
+/* THE SET (LaunchFilm.tsx) — the launch film left the plate for a
+   television (s134-r3). Chassis ink is the CRT law the shell's
+   .windowBody.crt already writes: the body is --surface-inverse, and
+   everything on it mixes from --content-inverse. Inline face only; the
+   lightbox below stays clean. */
+.set {
   position: relative;
-  aspect-ratio: 16 / 9;
-  background: #000;
+  background: var(--surface-inverse);
+  border: var(--border-width-default) solid var(--content);
+  border-radius: 10px;
+  padding: 13px 13px 0;
+  /* the set is an object on a surface, not a panel in it — same two-pass
+     ground shadow the hub device carries */
+  box-shadow:
+    0 14px 22px -10px rgb(0 0 0 / 0.3),
+    0 30px 45px -18px rgb(0 0 0 / 0.2);
 }
 
-.film iframe {
+[data-theme='dark'] .set {
+  border-color: var(--border);
+}
+
+/* the filter lives in the flow but takes no room; display:none would
+   stop some engines resolving url(#…) against it */
+.setFilterDefs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* the tube: a rectangle pulled at the corners, more curve vertically
+   than horizontally the way a real mask was, with the glass edge as an
+   inner hairline and the well going dark behind it */
+.setTube {
+  position: relative;
+  border-radius: 20px / 30px;
+  overflow: hidden;
+  background: #000; /* the well behind the picture — footage ground, fixed like the reels' mats */
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--content-inverse) 14%, transparent),
+    inset 0 2px 12px rgb(0 0 0 / 0.55);
+}
+
+.setScreen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+
+.setSignal {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -707,24 +748,140 @@
   pointer-events: none;
 }
 
-.filmExpand {
+/* no signal yet — the tube shows snow instead of a hole. The tile is
+   feTurbulence baked into a data URI so the noise costs one decode and
+   no canvas; it lives here rather than in the component because it is a
+   texture, like .halftone and .crt, and because a URI that long reads
+   as prose to the text index. Opacity only, two steps, which is as much
+   as static needs to read as static. */
+.setSnow {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  inset: 0;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23s)'/%3E%3C/svg%3E");
+  animation: setSnow 240ms steps(2, jump-none) infinite alternate;
+}
+
+@keyframes setSnow {
+  to {
+    opacity: 0.8;
+  }
+}
+
+/* the tracking band — a soft bright run walking down the picture, the
+   one artifact a deck couldn't hold steady. Transform only. */
+.setRoll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 16%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--content-inverse) 7%, transparent),
+    transparent
+  );
+  animation: setRoll 7.5s linear infinite;
+}
+
+@keyframes setRoll {
+  from {
+    transform: translateY(-120%);
+  }
+  to {
+    transform: translateY(740%);
+  }
+}
+
+/* the glass itself: the tube's falloff into the corners, and one sheen
+   off the top-left the way a curved screen catches the room */
+.setGlass {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--content-inverse) 9%, transparent) 0%,
+      transparent 38%
+    ),
+    radial-gradient(120% 120% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.42) 100%);
+}
+
+/* the channel badge, burnt into the corner — over the scanlines, which
+   is why it clears .crt::after's z-index */
+.setOsd {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  z-index: 3;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.18em;
+  color: var(--accent-expressive);
+  text-shadow: 0 0 8px currentColor;
+  pointer-events: none;
+}
+
+/* the control strip under the glass: a knob, a run of vents, and the
+   one control that does something */
+.setStrip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 3px 12px;
+}
+
+.setKnob {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--content-inverse) 26%, transparent);
+}
+
+.setVents {
+  flex: 1;
+  height: 7px;
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--content-inverse) 15%, transparent) 0 2px,
+    transparent 2px 5px
+  );
+}
+
+.filmExpand {
   font-family: var(--mono);
   font-size: var(--text-label);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 6px 10px;
   background: var(--accent-expressive);
-  color: #17150d;
-  border: var(--border-width-default) solid #17150d;
+  /* the set's own body read back as ink — pink is a mark colour and the
+     chassis ground is the only thing dark enough to sit on it (the same
+     call .plateTab's active pill makes) */
+  color: var(--surface-inverse);
+  border: var(--border-width-default) solid var(--surface-inverse);
   cursor: pointer;
 }
 
 .filmExpand:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--content-inverse);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .setSnow,
+  .setRoll {
+    animation: none;
+  }
+
+  .setRoll {
+    opacity: 0;
+  }
 }
 
 .filmModal {

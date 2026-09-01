@@ -724,7 +724,6 @@ export const TEXT_INDEX: Record<string, string[]> = {
   "the individual": ["src/programs/ai/answers.ts"],
   "the keyboard path is broken": ["src/components/shell/crewDialog.ts"],
   "the launch": ["content/family-hub.mdx"],
-  "the launch film": ["content/family-hub.mdx"],
   "the level-up moment: you are now a level 2 inves": ["src/programs/trash/ExhibitStack.tsx"],
   "the loud calendar pass: a week view with every e": ["src/components/case/ReinIn.tsx"],
   "the loud chores pass: a column per family member": ["src/components/case/ReinIn.tsx"],
