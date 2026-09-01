@@ -79,7 +79,11 @@
   position: absolute;
   top: calc(100% + 9px);
   right: -4px;
-  z-index: 6; /* over the body content and the resize grip (4) */
+  /* over everything the body pins — the read-o-meter band is sticky at 7
+     (case.module.css .meterSlot) and sat on the bubble at 6. Only the
+     film lightbox (fixed, 1000) stays above, and the press that opens
+     it seals the bubble first. */
+  z-index: 100;
   width: max-content;
   max-width: min(230px, calc(100vw - 28px));
   padding: 6px 9px;

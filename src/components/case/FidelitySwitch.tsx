@@ -20,9 +20,6 @@ import styles from './FidelitySwitch.module.css'
    TitleAction, lets neither fire from inside it. */
 
 const SEEN_KEY = 'fidelity-callout-seen'
-/* the case arrives maximised off a loading bar — a short beat lets the
-   window land before the bubble hangs off its bar */
-const BUBBLE_IN_MS = 1200
 const BUBBLE_LIFE_MS = 8000
 
 export function FidelitySwitch() {
@@ -47,8 +44,17 @@ export function FidelitySwitch() {
     }
   }, [])
 
-  // client-only, post-mount: localStorage and the timer never run on the
-  // server, so there is nothing for hydration to disagree about
+  /* The bubble arrives when READING begins, not on a timer (Jake, s135b):
+     the first real scroll anywhere in this window trips it. Scroll events
+     don't bubble but they do capture, so one document-level capture
+     listener hears the window body's scroller without knowing which
+     element that is — and the same listener hears the page itself on the
+     mobile full-bleed stack, where the document does the scrolling. It
+     unhooks the moment it trips, or on the first scroll after another
+     exit already sealed the offer.
+
+     Client-only, post-mount: localStorage and the listener never run on
+     the server, so there is nothing for hydration to disagree about. */
   useEffect(() => {
     let seen = true
     try {
@@ -57,8 +63,27 @@ export function FidelitySwitch() {
       seen = false
     }
     if (seen) return
-    const show = setTimeout(() => setBubble(true), BUBBLE_IN_MS)
-    return () => clearTimeout(show)
+    const frame = ref.current?.closest('[data-window-id]')
+    const unhook = () =>
+      document.removeEventListener('scroll', onScroll, { capture: true })
+    const onScroll = (e: Event) => {
+      try {
+        if (localStorage.getItem(SEEN_KEY) === '1') {
+          unhook()
+          return
+        }
+      } catch {}
+      const t = e.target
+      const scroller =
+        t === document ? document.scrollingElement : t instanceof HTMLElement ? t : null
+      if (!scroller || scroller.scrollTop <= 0) return
+      // a scroll in some OTHER window's body is not this reader reading
+      if (t !== document && frame && t instanceof Node && !frame.contains(t)) return
+      unhook()
+      setBubble(true)
+    }
+    document.addEventListener('scroll', onScroll, { capture: true, passive: true })
+    return unhook
   }, [])
 
   // every exit is the same exit: 8s, outside pointer, Escape, or a flip
