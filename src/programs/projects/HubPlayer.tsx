@@ -14,10 +14,9 @@ import styles from './player.module.css'
    with a CTA pair. It boots open BEHIND README (resolve.ts BOOT_WINDOWS) — the
    desk is set with the work already running on it.
 
-   This is a TEASER SURFACE, so it is deliberately not gated the way the
-   case window is: the sphere guards the full read, not the trailer.
-   PLAY opens `case:family-hub` — the real, gated case study — through
-   the same store path every other launcher uses.
+   This is a TEASER SURFACE. PLAY opens `case:family-hub` — the full
+   case study, open to everyone since s135 (cases.ts `gated: false`) —
+   through the same store path every other launcher uses.
 
    The screen carries no treatment of its own (s75, Jake: "remove the
    extra filter"). It used to wear a printed halftone dot screen and a
@@ -71,7 +70,7 @@ export function HubPlayer() {
           takes the display face at heading-1 with a NEW pill (the
           expressive accent's marks-only license), and one PLAY becomes a
           CTA pair — VIEW SITE out to the live product, CASE STUDY into
-          the gated read. Meta drops to the sill under both. */}
+          the full read. Meta drops to the sill under both. */}
       <div className={styles.info}>
         <div className={styles.textBlock}>
           <p className={styles.title}>

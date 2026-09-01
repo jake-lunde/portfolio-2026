@@ -50,6 +50,11 @@ export type CaseDef = {
   source?: string
   /** build state, read by the shelf's in-development boxes (WIP-15) */
   progress?: { pct: number; phase: string }
+  /** Does the sphere guard this case? Unset means yes — clearance is the
+      resting state of the wing, and opening a case to everyone is a
+      per-case ruling (family-hub, s135: "it's time"). resolve.ts and the
+      shelf's LaunchOverlay both read this. */
+  gated?: boolean
   /** a live control in the titlebar's right slot, ahead of the doc-id —
       the case's own chrome (family-hub's fidelity switch). Static
       import, not dynamic: a control that pops in after the bar reads
@@ -223,6 +228,8 @@ export const CASES: CaseDef[] = [
     component: dynamic(() => import('@/programs/projects/CaseFamilyHub')),
     source: 'family-hub.mdx',
     progress: { pct: 100, phase: 'Shipped. Read it' },
+    /* open to everyone — no sphere on this one (Jake, s135) */
+    gated: false,
     /* FIDELITY.SW — the draft/shipped rocker in the window bar (s94b) */
     titleWidget: FidelitySwitch,
     box: {

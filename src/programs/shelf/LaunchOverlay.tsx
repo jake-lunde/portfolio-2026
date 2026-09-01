@@ -6,6 +6,7 @@ import { GateSphere } from '@/components/gate/GateSphere'
 import { CopyText as Copy } from '@/content/CopyText'
 import { t } from '@/content/copy'
 import { metric } from '@/lib/metrics'
+import { getCase } from '@/programs/projects/cases'
 import { sfx } from '@/lib/sound'
 import { useGate } from '@/store/gate'
 import { useSettings } from '@/store/settings'
@@ -153,16 +154,19 @@ export function LaunchOverlay({
   }, [hydrate, slug])
 
   // the stepped write. Each tick prints one status line; the bar stalls at
-  // 90% like every loader ever shipped, waiting on the licence.
+  // 90% like every loader ever shipped, waiting on the licence. A case
+  // that isn't gated (cases.ts `gated: false`) never stalls — the bar
+  // runs straight through to done.
   useEffect(() => {
     if (phase !== 'loading') return
     if (step >= STEPS.length) {
-      setPhase(unlocked ? 'done' : 'license')
+      const gated = getCase(slug)?.gated ?? true
+      setPhase(unlocked || !gated ? 'done' : 'license')
       return
     }
     const id = setTimeout(() => setStep((s) => s + 1), reduced ? 0 : STEP_MS)
     return () => clearTimeout(id)
-  }, [phase, step, unlocked, reduced])
+  }, [phase, step, unlocked, reduced, slug])
 
   // the sphere unlocks itself; we only watch for clearance to land
   useEffect(() => {

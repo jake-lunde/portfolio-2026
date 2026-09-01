@@ -60,7 +60,7 @@ export function resolveWindow(id: string): ResolvedWindow | null {
       size: { w: 1280, h: 720 },
       pos: { x: 24, y: 40 },
       path: `/projects/${c.slug}`,
-      gated: true,
+      gated: c.gated ?? true,
     }
   }
   const p = getProgram(id)
