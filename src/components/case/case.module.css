@@ -699,6 +699,70 @@
   cursor: default;
 }
 
+/* RATE THIS CASE (CaseRating.tsx) — a full-width row riding at the top of
+   the footer, above the two doors. flex-basis: 100% makes it take its own
+   line inside the footer's existing wrap, so the doors keep their places.
+
+   The eyebrow borrows .nextlink span's grammar (mono, caps, tracked out,
+   muted) but sits inline here rather than stacking over a label. */
+.rating {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-component-md);
+}
+
+.ratingLabel,
+.ratingCount {
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--content-muted);
+  font-weight: var(--weight-regular);
+}
+
+/* pushed to the right edge of the row, and dropped onto its own line at
+   narrow widths rather than crushing the stars */
+.ratingCount {
+  margin-left: auto;
+}
+
+.ratingStars {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+}
+
+/* globals.css transitions colour on every button; a star is a state, not
+   a fade, so this one opts out. */
+.ratingStar {
+  display: block;
+  line-height: 0;
+  transition: none;
+}
+
+.ratingStar:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+/* 13px grid printed at an exact 2× — whole pixels, no half steps */
+.ratingGlyph {
+  display: block;
+  width: 26px;
+  height: 26px;
+  shape-rendering: crispEdges;
+  fill: currentColor;
+  color: var(--content-muted);
+}
+
+/* a mark, never text, so the expressive accent is in bounds here */
+.ratingGlyph[data-lit] {
+  color: var(--accent-expressive);
+}
+
 /* THE SET (LaunchFilm.tsx) — the launch film left the plate for a
    television (s134-r3), the television became a photograph (r5), and in
    s134-r6 Jake swapped that photograph for one with the tube already
