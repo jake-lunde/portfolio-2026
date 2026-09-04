@@ -3,14 +3,26 @@
 import { useWindows } from '@/store/windows'
 import { useShelfMode } from '@/store/shelfMode'
 import { sfx } from '@/lib/sound'
+import { CaseRating } from './CaseRating'
 import styles from './case.module.css'
 
-export function CaseFooter({ next }: { next: { name: string; live: boolean; slug?: string } }) {
+/* `slug` is the case this footer sits under, and it only buys the star
+   rating — the two doors have never needed to know where they are. The
+   spec sheet renders the footer without one, so it stays optional and the
+   rating simply doesn't come along. */
+export function CaseFooter({
+  next,
+  slug,
+}: {
+  next: { name: string; live: boolean; slug?: string }
+  slug?: string
+}) {
   const open = useWindows((s) => s.open)
   const enterShelf = useShelfMode((s) => s.enter)
 
   return (
     <footer className={styles.caseFooter}>
+      {slug ? <CaseRating slug={slug} /> : null}
       <button
         className={styles.nextlink}
         disabled={!next.live || !next.slug}
