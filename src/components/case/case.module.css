@@ -714,6 +714,7 @@
 }
 
 .ratingLabel,
+.ratingAvg,
 .ratingCount {
   font-family: var(--mono);
   font-size: var(--text-label);
@@ -723,10 +724,15 @@
   font-weight: var(--weight-regular);
 }
 
-/* pushed to the right edge of the row, and dropped onto its own line at
-   narrow widths rather than crushing the stars */
-.ratingCount {
-  margin-left: auto;
+/* the label keeps its distance from the figures (Jake, s138) */
+.ratingLabel {
+  margin-right: var(--spacing-component-md);
+}
+
+/* the average is the one figure that reads as content, not chrome */
+.ratingAvg {
+  color: var(--content);
+  letter-spacing: 0;
 }
 
 .ratingStars {

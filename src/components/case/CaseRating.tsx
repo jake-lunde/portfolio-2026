@@ -10,10 +10,10 @@ import styles from './case.module.css'
    /api/rating. One voter, one vote: the server keys on a hashed IP and a
    second press replaces the first, so nothing here has to police anybody.
 
-   THE AGGREGATE STAYS SHUT until the reader has pressed a star. A number
-   printed above an empty row of stars is an instruction, and the point of
-   asking is to find out what the reader thinks, not what the last twelve
-   people thought.
+   THE ROW READS LIKE A GOOGLE RATING (Jake, s138): the average, the
+   stars, the count in brackets, all showing before the reader votes. The
+   stars idle at the rounded average, preview under the cursor, and hold
+   the reader's own star once pressed.
 
    Everything is instant. Hover fills up to the star under the cursor and
    leaving the row puts it back — no tween, the same rule the index rail
@@ -111,18 +111,16 @@ export function CaseRating({ slug }: { slug: string }) {
       })
   }
 
-  const filled = hover ?? mine ?? 0
   const voted = mine !== null
-  const readout =
-    voted && agg && agg.count > 0
-      ? `${agg.avg.toFixed(1)} · ${agg.count} ${t(agg.count === 1 ? 'case.rating.one' : 'case.rating.many', skin)}`
-      : null
+  const hasVotes = Boolean(agg && agg.count > 0)
+  const filled = hover ?? mine ?? (hasVotes && agg ? Math.round(agg.avg) : 0)
 
   return (
     <div className={styles.rating}>
       <span className={styles.ratingLabel} data-copy-id={voted ? 'case.rating.thanks' : 'case.rating.label'}>
         {t(voted ? 'case.rating.thanks' : 'case.rating.label', skin)}
       </span>
+      {hasVotes && agg ? <span className={styles.ratingAvg}>{agg.avg.toFixed(1)}</span> : null}
       <div
         className={styles.ratingStars}
         role="group"
@@ -143,7 +141,7 @@ export function CaseRating({ slug }: { slug: string }) {
           </button>
         ))}
       </div>
-      {readout ? <span className={styles.ratingCount}>{readout}</span> : null}
+      {agg ? <span className={styles.ratingCount}>({agg.count})</span> : null}
     </div>
   )
 }
