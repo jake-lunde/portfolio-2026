@@ -711,6 +711,12 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--spacing-component-md);
+  /* ruled off from the doors below (Jake, s138: "floating randomly"),
+     with the same 34px breath the footer takes above it; the margin
+     tops up the footer's own gap to match */
+  padding-bottom: 34px;
+  border-bottom: var(--border-width-subtle) solid var(--border);
+  margin-bottom: calc(34px - var(--spacing-component-lg));
 }
 
 .ratingLabel,
