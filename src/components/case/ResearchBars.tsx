@@ -1,13 +1,17 @@
 'use client'
 
-import { useState } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { useEffect, useRef, useState } from 'react'
+import { useReducedMotion } from 'motion/react'
 import { sfx } from '@/lib/sound'
 import styles from './case.module.css'
 
 /* "Most essential features" — Family Hub Exploration Survey, Sept 2025,
    n=1,200 US parents (ref/famhub-pull-quotes.md, verified vs deck).
-   Tap a bar for the honest ledger: what research said vs what shipped. */
+   Tap a bar for the honest ledger: what research said vs what shipped.
+
+   Laid out in real pixels (s140), not one SVG picture scaled to fit —
+   see .survey in case.module.css for the rest state, the reveal and the
+   readout's reserved height. */
 
 type Row = {
   id: string
@@ -26,16 +30,33 @@ const ROWS: Row[] = [
   { id: 'photos', label: 'Photo album', pct: 15, verdict: 'SHIPPED ANYWAY', why: 'Dead last with parents, table stakes in the category. Sometimes the market outvotes the survey.' },
 ]
 
-const W = 640
-const BAR_H = 22
-const GAP = 14
-const LABEL_W = 150
+/* the track's full width is 62% — the scale the chart has always drawn
+   on, a breath above the top bar so 58% doesn't touch the edge */
 const MAX_PCT = 62
 
 export function ResearchBars() {
   const [sel, setSel] = useState<Row | null>(null)
   const [hov, setHov] = useState<Row | null>(null)
   const reduced = useReducedMotion()
+  const chartRef = useRef<HTMLDivElement>(null)
+
+  /* the reveal is switched ON, never waited for: the bars rest full, and
+     this flips the attribute that makes them grow in the first time the
+     chart is seen. No observer, no animation, full chart. */
+  useEffect(() => {
+    const el = chartRef.current
+    if (!el || reduced) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return
+        el.setAttribute('data-reveal', '')
+        io.disconnect()
+      },
+      { threshold: 0.4 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [reduced])
 
   const pick = (r: Row) => {
     sfx.tap()
@@ -46,26 +67,22 @@ export function ResearchBars() {
      enter can't pin a row the finger already left */
   const shown = hov ?? sel
 
-  const chartW = W - LABEL_W - 56
-  const H = ROWS.length * (BAR_H + GAP) - GAP
-
   return (
     <div>
-      <svg
-        viewBox={`0 0 ${W} ${H + 8}`}
-        role="img"
-        aria-label="Survey results, most essential features: calendar 58%, chores 48%, location 46%, grocery lists 44%, AI assistant 34%, photo album 15%. Tap a bar for what shipped."
-        fontFamily="var(--mono)"
+      <div
+        className={styles.survey}
+        ref={chartRef}
+        role="group"
+        aria-label="Survey results, most essential features. Pick a bar for what shipped."
       >
         {ROWS.map((r, i) => {
-          const y = i * (BAR_H + GAP)
           const active = shown?.id === r.id
           const honest = r.id === 'ai' || r.id === 'photos'
-          const w = (r.pct / MAX_PCT) * chartW
           return (
-            <g
+            <div
               key={r.id}
-              className={styles.moatNode}
+              className={`${styles.moatNode} ${styles.surveyRow}`}
+              data-active={active ? '' : undefined}
               role="button"
               tabIndex={0}
               aria-pressed={sel?.id === r.id}
@@ -84,49 +101,43 @@ export function ResearchBars() {
                 }
               }}
             >
-              <text x={0} y={y + BAR_H - 6} fill="#E7E1D2" fontSize="11" opacity={active ? 1 : 0.75}>
+              <span className={styles.surveyLabel} aria-hidden="true">
                 {r.label}
-              </text>
-              <motion.rect
-                x={LABEL_W}
-                y={y}
-                width={w}
-                height={BAR_H}
-                fill={active ? 'var(--accent-expressive)' : '#E7E1D2'}
-                opacity={active ? 1 : honest ? 0.28 : 0.55}
-                strokeDasharray={honest ? '3 3' : undefined}
-                stroke={honest ? '#E7E1D2' : undefined}
-                strokeWidth={honest ? 1 : 0}
-                style={{ originX: `${LABEL_W}px`, transformBox: 'view-box' }}
-                initial={reduced ? undefined : { scaleX: 0 }}
-                whileInView={reduced ? undefined : { scaleX: 1 }}
-                viewport={{ once: true, amount: 0.4 }}
-                transition={{ duration: 0.55, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
-              />
-              <text
-                x={LABEL_W + w + 8}
-                y={y + BAR_H - 6}
-                fill={active ? 'var(--accent-expressive)' : '#E7E1D2'}
-                fontSize="11"
-                opacity={active ? 1 : 0.6}
-              >
+              </span>
+              <span className={styles.surveyTrack}>
+                <span
+                  className={styles.surveyBar}
+                  data-honest={honest ? '' : undefined}
+                  style={{
+                    ['--pct' as string]: `${r.pct / MAX_PCT}`,
+                    ['--i' as string]: i,
+                  }}
+                />
+              </span>
+              <span className={styles.surveyPct} aria-hidden="true">
                 {r.pct}%
-              </text>
-            </g>
+              </span>
+            </div>
           )
         })}
-      </svg>
+      </div>
 
-      <div className={styles.moatWhy} aria-live="polite">
-        {shown ? (
-          <>
-            <b>{shown.label}</b> · {shown.verdict.toLowerCase()}
-            <br />
-            {shown.why}
-          </>
-        ) : (
-          <>Tap a bar. The dashed ones are where we overruled the research, on purpose.</>
-        )}
+      {/* every entry stacked in one cell, so the plate's height is the
+          tallest of them and a tap never moves the prose below */}
+      <div className={`${styles.moatWhy} ${styles.surveyWhy}`} aria-live="polite">
+        <p data-on={shown ? undefined : ''} aria-hidden={shown ? true : undefined}>
+          Tap a bar. The dashed ones are where we overruled the research, on purpose.
+        </p>
+        {ROWS.map((r) => {
+          const on = shown?.id === r.id
+          return (
+            <p key={r.id} data-on={on ? '' : undefined} aria-hidden={on ? undefined : true}>
+              <b>{r.label}</b> · {r.verdict.toLowerCase()}
+              <br />
+              {r.why}
+            </p>
+          )
+        })}
       </div>
     </div>
   )

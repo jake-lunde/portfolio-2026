@@ -10,8 +10,10 @@ import {
   PullQuote,
   Metrics,
   Stat,
+  Ledger,
 } from './CaseComponents'
 import { Moves } from './Moves'
+import styles from './case.module.css'
 
 /* Case-study vocabulary (§7 anatomy). These are the static, presentational
    pieces — interactive islands (MoatDiagram, FrequencyBars) live elsewhere.
@@ -20,11 +22,16 @@ import { Moves } from './Moves'
 const meta = {
   title: 'Case Study/Components',
   parameters: { layout: 'fullscreen' },
+  /* the real article, not a stand-in box: every case breakpoint asks
+     .case's own inline size (s140), so a story that doesn't establish
+     the container can never draw the phone form */
   decorators: [
     (Story) => (
-      <div style={{ maxWidth: 780, margin: '0 auto', padding: '10px 30px' }}>
-        <Story />
-      </div>
+      <article className={styles.case}>
+        <div className={styles.wrap}>
+          <Story />
+        </div>
+      </article>
     ),
   ],
 } satisfies Meta
@@ -159,6 +166,29 @@ export const MetricsStory: Story = {
       <Stat big="3 taps" label="Median time to first deposit" secondary />
     </Metrics>
   ),
+}
+
+const SPEC_ROWS: Array<[string, React.ReactNode]> = [
+  ['Surface', 'iOS · Android · Web'],
+  ['Cadence', 'Two-week trains, one flag per train'],
+  ['Partners', 'Eng, Data, Compliance, Support'],
+  ['Constraint', 'No new permissions, no new screens in onboarding'],
+  ['Handoff', 'Tokens in the repo, not a redline PDF'],
+  ['Open', 'The weekly digest, still a paper prototype'],
+]
+
+export const LedgerStory: Story = {
+  name: 'Ledger (spec sheet)',
+  render: () => <Ledger cap="Build sheet" rows={SPEC_ROWS} />,
+}
+
+/* the phone form: rows stack key over value with a 3px gap, and the key
+   drops the 118px basis it wears as a column — in a vertical flex that
+   width became 118px of height (s139 audit) */
+export const LedgerPhone: Story = {
+  name: 'Ledger — phone',
+  parameters: { viewport: { defaultViewport: 'phone' } },
+  render: () => <Ledger cap="Build sheet" rows={SPEC_ROWS} />,
 }
 
 /* The whole vocabulary composed, to read the vertical rhythm across a theme. */

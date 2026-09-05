@@ -1,4 +1,5 @@
 import type { Preview, Decorator } from '@storybook/react'
+import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport'
 import { useEffect } from 'react'
 import { Geist, Geist_Mono, Eagle_Lake, MedievalSharp, Noto_Sans_JP } from 'next/font/google'
 import localFont from 'next/font/local'
@@ -103,6 +104,20 @@ const preview: Preview = {
   parameters: {
     controls: { matchers: { color: /(background|color)$/i, date: /Date$/i } },
     backgrounds: { disable: true }, // theme decorator owns the background
+    /* `phone` is Jake's own reference handset (iPhone 14 Pro, 393×852) —
+       the width the s139 mobile audit measured and the one the case
+       studies' phone stories render at. Kept beside the stock list so
+       stories that ask for 'mobile1' still find it. */
+    viewport: {
+      viewports: {
+        ...INITIAL_VIEWPORTS,
+        phone: {
+          name: 'Phone — 393×852',
+          type: 'mobile',
+          styles: { width: '393px', height: '852px' },
+        },
+      },
+    },
   },
   initialGlobals: { theme: 'classic-light' },
   globalTypes: {

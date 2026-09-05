@@ -1,17 +1,41 @@
 /* Case-study window body — ported from the approved POC
-   (case-invest-page.html), re-skinned orange → blue/pink. */
+   (case-invest-page.html), re-skinned orange → blue/pink.
+
+   ONE BREAKPOINT SYSTEM (s140): every responsive rule in this file asks
+   the article's own width (@container), never the screen. A case lives
+   in a resizable window, so a narrow window on a desktop must get the
+   phone form — and the STYLER bench can only draw the phone form of a
+   rule that queries a box it can shrink. Same move the shell made in
+   s111, and it carries the same known cost: INSPECT.MODE lists media
+   rules and skips container rules, so these are invisible to it. Only
+   prefers-reduced-motion stays a media query — that one is the reader,
+   not the box. Note the container is .case itself, so a rule ON .case
+   can't be container-queried: the article's side padding therefore
+   lives on .wrap. */
 
 .case {
-  padding: 10px 30px 70px;
+  /* side padding lives on .wrap (see the breakpoint note above) */
+  padding: 10px 0 70px;
   /* the sidecars container-query against the article — the window is
      resizable, so viewport queries can't know */
   position: relative;
   container-type: inline-size;
 }
 
+/* the measure, and the article's gutter with it: 780px of text between
+   30px shoulders (border-box, so the max-width carries both) */
 .wrap {
-  max-width: 780px;
+  max-width: 840px;
+  padding-inline: 30px;
   margin: 0 auto;
+}
+
+/* phone: the gutter drops to the 16px layout step the shelf stack
+   already uses, so plates take the width the screen actually has */
+@container (max-width: 640px) {
+  .wrap {
+    padding-inline: var(--spacing-layout-sm);
+  }
 }
 
 /* hero */
@@ -64,7 +88,7 @@
   margin-bottom: 5px;
 }
 
-@media (max-width: 640px) {
+@container (max-width: 640px) {
   .meta {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px 18px;
@@ -172,7 +196,11 @@
   color: color-mix(in srgb, var(--content-inverse) 60%, transparent);
   display: flex;
   align-items: center;
-  gap: var(--spacing-component-md);
+  /* narrow: the when-control drops onto its own line rather than
+     breaking a tag mid-phrase (s139 — "PARENT PREFERENCES · SEPT /
+     2025"). margin-left:auto still holds it right on the new line. */
+  flex-wrap: wrap;
+  gap: var(--spacing-component-sm) var(--spacing-component-md);
   margin-bottom: 14px;
   position: relative;
   z-index: 1;
@@ -201,6 +229,7 @@
 .plateCap .tag {
   color: var(--accent-expressive);
   margin-left: auto;
+  white-space: nowrap;
 }
 
 .figcap {
@@ -398,7 +427,7 @@
   margin: 26px 0; /* symmetric — the following prose starts with no top margin */
 }
 
-@media (max-width: 760px) {
+@container (max-width: 760px) {
   .moves {
     grid-template-columns: 1fr;
   }
@@ -590,10 +619,18 @@
   line-height: var(--leading-normal);
 }
 
-@media (max-width: 640px) {
+/* narrow: the row stacks key over value. The key has to drop its fixed
+   basis with it — in a vertical flex that 118px column width becomes
+   118px of row HEIGHT, which is what made every spec-sheet row 203px
+   tall on a phone (s139 audit). */
+@container (max-width: 640px) {
   .ledgerRow {
     flex-direction: column;
     gap: 3px;
+  }
+
+  .ledgerKey {
+    flex: 0 0 auto;
   }
 }
 
@@ -630,7 +667,7 @@
   margin: 6px 0 24px;
 }
 
-@media (max-width: 760px) {
+@container (max-width: 760px) {
   .metrics {
     grid-template-columns: 1fr;
   }
@@ -1086,6 +1123,134 @@
   color: var(--accent-expressive);
 }
 
+/* THE SURVEY CHART (ResearchBars.tsx) — laid out by the plate, not
+   scaled as a picture. It used to be one 640-unit SVG squeezed to 43%
+   at phone width, which put its labels at about 5px (s139 audit). Rows
+   are real elements now: a mono label, a track that takes the slack,
+   the figure held right, all at the case's own label size. Ink is the
+   plate's own — content-inverse per the CRT chrome rule — with the
+   expressive accent reserved for the picked row. */
+.survey {
+  display: grid;
+  gap: var(--spacing-component-md);
+}
+
+.surveyRow {
+  display: grid;
+  /* the mono key column, the width the spec sheet gives its own keys */
+  grid-template-columns: 118px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--spacing-component-md);
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.06em;
+}
+
+/* narrow: the label sits ABOVE its bar (Jake's taste call, s140 spec) so
+   the bar keeps nearly the whole width — the difference between 58% and
+   15% is the thing worth seeing on a phone */
+@container (max-width: 640px) {
+  .surveyRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 4px;
+  }
+
+  .surveyLabel {
+    grid-area: 1 / 1 / 2 / -1;
+  }
+}
+
+.surveyLabel {
+  min-width: 0;
+  color: var(--content-inverse);
+  opacity: 0.75;
+}
+
+.surveyRow[data-active] .surveyLabel {
+  opacity: 1;
+}
+
+.surveyTrack {
+  min-width: 0;
+}
+
+.surveyBar {
+  display: block;
+  /* the bar's weight, off the component spacing step (16px) — the SVG's
+     old 22 units came out at 9px on a phone, which is a hairline */
+  height: var(--spacing-component-lg);
+  width: calc(var(--pct) * 100%);
+  background: var(--content-inverse);
+  opacity: 0.55;
+  transform-origin: left center;
+}
+
+/* the two rows where we overruled the research keep the dashed reading */
+.surveyBar[data-honest] {
+  opacity: 0.28;
+  border: var(--border-width-default) dashed var(--content-inverse);
+}
+
+.surveyRow[data-active] .surveyBar {
+  background: var(--accent-expressive);
+  border-color: var(--accent-expressive);
+  opacity: 1;
+}
+
+.surveyPct {
+  color: var(--content-inverse);
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.surveyRow[data-active] .surveyPct {
+  color: var(--accent-expressive);
+  opacity: 1;
+}
+
+/* THE REVEAL SUBTRACTS FROM THE REST STATE. A bar's resting form is
+   full width; the grow-in is an animation the observer switches on when
+   the chart first comes into view. If the observer never fires — the
+   suspect behind the "not loading" report, Safari inside the window's
+   own scroller — the chart is simply already full. It can never be
+   blank. Duration, stagger and ease are the shipped chart's own; the
+   motion tokens carry no 0.55s (DURATIONS covers the shell's chrome,
+   not this one entrance), so they stay literals here. */
+@keyframes surveyGrow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.survey[data-reveal] .surveyBar {
+  animation: surveyGrow 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(var(--i) * 0.07s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .survey[data-reveal] .surveyBar {
+    animation: none;
+  }
+}
+
+/* the readout reserves its tallest entry: every line of copy the chart
+   can show is rendered into the same grid cell, the others hidden, so
+   tapping a bar never changes the plate's height. Measured from the
+   text, never a pixel guess. */
+.surveyWhy {
+  display: grid;
+  min-height: 0;
+}
+
+.surveyWhy > * {
+  grid-area: 1 / 1;
+  margin: 0;
+}
+
+.surveyWhy > :not([data-on]) {
+  visibility: hidden;
+}
+
 /* INDEX + read-o-meter (CaseIndex.tsx) — the case's sidecar contents on
    the left margin, mirroring the evolution rail's OS-window vocabulary,
    and a segmented progress strip pinned under the title bar. */
@@ -1099,8 +1264,9 @@
   top: 0;
   z-index: 7;
   height: 0;
-  /* bleed over .case's own padding — keep in step with .case (10px 30px) */
-  margin: -10px -30px 0;
+  /* bleed over .case's own top padding — keep in step with .case (10px 0);
+     the side gutter moved to .wrap, so the meter is already full-bleed */
+  margin: -10px 0 0;
 }
 
 .meter {
@@ -1335,7 +1501,7 @@
   z-index: 1;
 }
 
-@media (max-width: 640px) {
+@container (max-width: 640px) {
   .plateTabs {
     grid-template-columns: 1fr;
   }
@@ -1380,6 +1546,7 @@
   display: flex;
   gap: 14px;
   margin-left: auto;
+  white-space: nowrap;
 }
 
 /* text switches, not boxed buttons — plate ink, marks-only accent */
@@ -1448,8 +1615,27 @@
    call — same as the rail's old sketch stage). Narrow: full width
    between the thesis and the meta. Wide: it rides the header's right
    side, level with the thesis. */
+/* ONE STAGE, TWO FACES (s140). The slot is a fixed-ratio box both faces
+   render into, so flipping the case never changes the header's height —
+   the fidelity rule stated beside the store in fidelity.ts. The device's
+   ratio wins (it is the taller face, and the hardware is the point); the
+   sketch collage keeps its own 1089/490 and centres in the slack. */
 .heroArt {
   margin-top: 24px;
+  aspect-ratio: 2138 / 1294;
+  display: grid;
+  align-content: center;
+}
+
+/* a grid item's automatic minimum size is not zero, and WebKit transfers
+   it through the item's own aspect ratio: the device pane came out
+   359px wide inside a 347px stage and put 8px back into the header on
+   every flip. Both minimums off, so each face takes the stage's width
+   and derives its height from its ratio — which is the whole point of
+   the stage. */
+.heroArt > * {
+  min-width: 0;
+  min-height: 0;
 }
 
 /* Wide: the header becomes a grid so the art rides beside the text

@@ -664,7 +664,7 @@ export const TEXT_INDEX: Record<string, string[]> = {
   "surface inverse": ["src/lib/styleCandidates.ts"],
   "surface raised": ["src/lib/styleCandidates.ts"],
   "surprise bonus tool": ["src/programs/projects/cases.ts"],
-  "survey results, most essential features: calenda": ["src/components/case/ResearchBars.tsx"],
+  "survey results, most essential features. pick a ": ["src/components/case/ResearchBars.tsx"],
   "sweep the chart — the sky answers where you shin": ["src/programs/visualizers/TaurusViz.tsx"],
   "sync calendars": ["src/components/case/TandemSetup.tsx"],
   "takes the brief, splits it, hands out the ticket": ["src/components/shell/crew.ts"],
