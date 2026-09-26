@@ -26,9 +26,11 @@ file is about which nouns exist, not how they sound.
 - **token** — a named design value in `tokens/` (Tokens Studio JSON),
   built by `npm run tokens:build` into generated CSS/TS. Single source
   of truth; generated files are never hand-edited.
-- **core / semantic** — the two token tiers: core primitives (raw
-  scales) are never consumed directly; product CSS speaks semantic
-  roles (`--surface`, `--content`, `--accent`, `--border`, …).
+- **core / semantic / component** — the three token tiers: core
+  primitives (raw scales) are never consumed directly; product CSS
+  speaks semantic roles (`--surface`, `--content`, `--accent`,
+  `--border`, …); component tokens (`tokens/component/`) hold only
+  real per-component divergences from semantic.
 - **accent / accent-expressive** — the two allowed accents per skin:
   system accent, and the expressive accent (marks-only where AA
   fails). Never a third.
@@ -50,9 +52,11 @@ file is about which nouns exist, not how they sound.
   edits copy. A **pick** is the element currently selected.
 - **doctor** — the token-health gate on inspect/tune PRs (parity
   checks between tokens, CSS, and the Figma mirror).
-- **TOKEN BRIDGE** — the two-way Figma↔code token/component sync: the
-  Storybook set mirrored into Figma plus the plugin that pulls edits
-  back.
+- **TOKEN BRIDGE** — the whole token-editing pipeline: every writer,
+  human or machine (the Figma plugin, the site inspector's SAVE, the
+  future MOTION tab), reaches token files through the same gated-PR
+  pipe; nothing writes main directly. The Figma leg is the Storybook
+  set mirrored into Figma plus the plugin that pulls edits back.
 - **mirror** — a Figma component/variant set generated from a code
   component + its Storybook story (see `/mirror-to-figma`).
 

@@ -59,7 +59,7 @@ vault session number like any other session.
 - **`/tailor-resume`** — application variants under `ref/`.
 - Built-in **`/code-review`** — review a diff/PR/branch.
 
-## Not installed (vendor on demand from `~/Documents/github/skills`)
+## Not installed (vendor on demand from `~/code/skills`)
 
 `wayfinder` (huge foggy efforts — decision maps, not deliverables),
 `research`, `diagnosing-bugs`, `wizard`, `to-questionnaire`, `teach`.

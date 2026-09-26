@@ -2,7 +2,7 @@
 
 These skill folders are vendored from Matt Pocock's engineering skills,
 MIT-licensed: https://github.com/mattpocock/skills — local clone at
-`~/Documents/github/skills`, copied at commit `6654f6b` (2026-08-29).
+`~/code/skills`, copied at commit `6654f6b` (2026-08-29).
 
 Vendored verbatim (minus each skill's `agents/openai.yaml`):
 

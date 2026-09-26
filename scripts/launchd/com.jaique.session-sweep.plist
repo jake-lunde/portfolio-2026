@@ -21,7 +21,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>/usr/local/bin/node</string>
-    <string>/Users/jake/Documents/github/portfolio-2026/scripts/session-sweep.mjs</string>
+    <string>/Users/jake/code/portfolio-2026/scripts/session-sweep.mjs</string>
   </array>
 
   <key>StartInterval</key>
