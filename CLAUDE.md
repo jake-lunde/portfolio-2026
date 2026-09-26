@@ -55,10 +55,10 @@ must stay cheap. Desktop icon order = ORDER array in DesktopIcons.tsx.
 1. Dev server and `npm run build` share `.next` and corrupt each other:
    `preview_stop → build → preview_start`, always. Corruption symptoms →
    stop server, `rm -rf .next`.
-2. Deploy = push to main (gh authed). GitHub combined status stays
+2. A push or PR merge to main deploys lunde.co. Ask Jake before every
+   one, every time (`~/.claude/CLAUDE.md`). GitHub combined status stays
    "pending" while Chromatic runs — verify deploys via Vercel MCP + a
-   content-marker curl (~1min CDN lag). Never force-push without Jake's
-   explicit OK.
+   content-marker curl (~1min CDN lag). Never force-push.
 3. **Never commit:** `ref/`, `portfolio-tracker.md`, `session-log.md`,
    `invest-pull-quotes.md`, `docs/`, `.env*`. (Committed agent config
    lives at root `agents/` + `adr/`, outside the ban.) Grep
