@@ -9,6 +9,7 @@ import { MenuBar } from '@/components/shell/MenuBar'
 import { DesktopIcons } from '@/components/shell/DesktopIcons'
 import { Window } from '@/components/shell/Window'
 import type { ResolvedWindow } from '@/programs/resolve'
+import { ANATOMY, type AnatomyNode } from '@/lib/stylerAnatomy'
 import { CopyText } from '@/content/CopyText'
 import styles from './stylerStage.module.css'
 
@@ -76,6 +77,14 @@ export type StageSpec = {
    *  test asserts every spec that offers HOVER has a `-hover-` role and
    *  every component that has one offers it. */
   states: ReadonlyArray<StageState>
+  /** THE COMPONENT'S PARTS, so a pilot is described in one place.
+   *
+   *  The tree itself lives in lib/stylerAnatomy.ts, because stylerBlocks
+   *  matches rows to it in a plain node harness and this file is JSX over
+   *  five real components. What the spec holds is the POINTER: everything
+   *  the stage needs to know about a pilot — which bench, which variants,
+   *  which states, which parts — is answered from here. */
+  anatomy: AnatomyNode
   variants: (skin: Skin) => StageVariant[]
 }
 
@@ -117,6 +126,7 @@ function WindowPair({ skin, active }: { skin: Skin; active: boolean }) {
 
 export const STAGE_SPECS: Record<string, StageSpec> = {
   button: {
+    anatomy: ANATOMY['button'],
     bench: 'plain',
     states: ['default', 'hover'],
     variants: (skin) => [
@@ -151,6 +161,7 @@ export const STAGE_SPECS: Record<string, StageSpec> = {
   },
 
   stamp: {
+    anatomy: ANATOMY['stamp'],
     bench: 'plain',
     states: ['default'],
     variants: (skin) => [
@@ -160,18 +171,21 @@ export const STAGE_SPECS: Record<string, StageSpec> = {
   },
 
   menubar: {
+    anatomy: ANATOMY['menubar'],
     bench: 'chrome',
     states: ['default'],
     variants: () => [{ id: 'bar', label: 'styler.variant.bar', node: <MenuBar /> }],
   },
 
   'desktop-icons': {
+    anatomy: ANATOMY['desktop-icons'],
     bench: 'desk',
     states: ['default', 'hover'],
     variants: () => [{ id: 'grid', label: 'styler.variant.grid', node: <DesktopIcons /> }],
   },
 
   window: {
+    anatomy: ANATOMY['window'],
     bench: 'plain',
     states: ['default', 'hover'],
     variants: (skin) => [

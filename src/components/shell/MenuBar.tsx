@@ -150,9 +150,12 @@ export function MenuBar() {
     <header className={styles.menubar} data-inspect-self="" data-component="menubar">
       <div className={styles.menuLeft}>
         {/* the anatomy markers STYLER's bench direct-selects by, one per
-            part the token names already declare (lib/stylerBlocks.ts:
-            layersFor) — MENUBAR · MENU · WORDMARK. Attributes only:
-            nothing here reads them but the stage. */}
+            node of the declared tree (lib/stylerAnatomy.ts) — WORDMARK holds
+            VERSION, and the three glyph buttons are named apart because a
+            person pointing at the sound button wants the sound button, not
+            "menu". They share one set of token rows and that is fine: the
+            tree says what the thing IS, the rows say what paints it.
+            Attributes only, nothing here reads them but the stage. */}
         <div className={styles.wordmark} data-part="wordmark">
           {/* the house mark, in system ink — mask-image lets a raster
               PNG take var(--content) and follow dark mode for free
@@ -160,7 +163,9 @@ export function MenuBar() {
               names the machine. */}
           <span className={styles.mark} aria-hidden="true" />
           LUNDE&nbsp;OS
-          <span aria-hidden="true">{OS_VERSION}</span>
+          <span data-part="version" aria-hidden="true">
+            {OS_VERSION}
+          </span>
         </div>
         <SkinSwitch />
       </div>
@@ -256,7 +261,7 @@ export function MenuBar() {
             colour — the slash and the shape change carry it. */}
         <button
           className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
-          data-part="menu"
+          data-part="sound"
           onClick={toggleSound}
           aria-pressed={sound}
           aria-label={`Sound ${sound ? 'on' : 'off'}`}
@@ -267,7 +272,7 @@ export function MenuBar() {
         {skin === 'classic' && (
           <button
             className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
-            data-part="menu"
+            data-part="theme"
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
             title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
@@ -281,7 +286,7 @@ export function MenuBar() {
             the SPEC.SHEET desktop icon both lead to. */}
         <button
           className={`${styles.menuBtn} ${styles.menuGlyphBtn}`}
-          data-part="menu"
+          data-part="palette"
           onClick={() => {
             sfx.open()
             openWindow('spec-sheet')

@@ -48,18 +48,22 @@ const { TOKEN_TIERS, TOKEN_REFS, TOKEN_COMPOSITES, TYPE_ROLES } = await import(t
 const candidatesUrl = moduleUrl('src/lib/styleCandidates.ts', { './tokens.generated': tiersUrl })
 const { COMPONENT_IDS, componentIdOf, familyOf, candidatesFor, CANDIDATES_BY_FAMILY } =
   await import(candidatesUrl)
+const anatomyUrl = moduleUrl('src/lib/stylerAnatomy.ts')
+const { ANATOMY, anatomyOf } = await import(anatomyUrl)
 const blocksUrl = moduleUrl('src/lib/stylerBlocks.ts', {
   './tokens.generated': tiersUrl,
   './styleCandidates': candidatesUrl,
+  './stylerAnatomy': anatomyUrl,
 })
 const {
   STYLER_BLOCKS,
   COMPOSITE_MEMBERS,
   blockOf,
   blocksFor,
+  dockFor,
   fillStrokePair,
+  flattenLayers,
   isCompositeMember,
-  layerLabel,
   layersFor,
   rowLabel,
   rowsFor,
@@ -270,92 +274,260 @@ test('a row is named without the prefix the block already said', () => {
 /* ------------------------------------------------------- the anatomy */
 
 /* THE DRILL. Jake, s105: evaluate at the layer, not at twenty rows at once.
-   The layers are DERIVED from the token names, so the failure to guard is a
-   quiet one: a rule that stops matching drops rows onto the root, the list
-   still draws, and the only symptom is a component that suddenly has no
-   parts. So this is a partition test like the block one above it. */
 
-test('every row lands in exactly one layer, and the layers are the whole set', () => {
+   The layers used to be derived from the token names. They are DECLARED now
+   (lib/stylerAnatomy.ts), one tree per pilot, mirroring the real DOM — which
+   swaps one silent failure for another. The derivation could quietly drop
+   every part onto the root; a declaration can quietly stop claiming a row, or
+   name a part the component does not have, or grow a part with no marker on
+   it. Every one of those still draws a tree, and the only symptom is a click
+   that selects nothing. So: a partition test on the rows, and a BIDIRECTIONAL
+   test on the markers. */
+
+/** Every node of a component's tree, pre-order, as the panel walks it. */
+const nodes = (id) => flattenLayers(layersFor(id))
+
+test('every row lands on at least one node, and no node invents one', () => {
   for (const id of COMPONENT_IDS) {
-    const layers = layersFor(id)
-    const seen = []
-    for (const layer of layers) {
-      assert.ok(layer.rows.length > 0, `${id}/${layer.id} draws no empty layer`)
-      for (const row of layer.rows) {
-        assert.equal(row.layer, layer.id, `${row.role} is filed under ${layer.id}`)
-        seen.push(row.role)
+    const all = rowsFor(id).map((r) => r.role)
+    const seen = new Set()
+    for (const node of nodes(id)) {
+      for (const row of node.rows) {
+        assert.ok(all.includes(row.role), `${row.role} is one of ${id}'s rows`)
+        seen.add(row.role)
       }
     }
-    assert.deepEqual(
-      seen.sort(),
-      rowsFor(id)
-        .map((r) => r.role)
-        .sort(),
-      `${id}'s layers hold its whole set, once each`,
-    )
+    assert.deepEqual([...seen].sort(), all.slice().sort(), `${id} loses no row to the tree`)
   }
 })
 
-test('the root layer comes first and wears the component name', () => {
+test('a row names its primary node, and the node is one that holds it', () => {
   for (const id of COMPONENT_IDS) {
-    const layers = layersFor(id)
-    assert.equal(layers[0].id, id, `${id}'s own rows head the list`)
-    assert.equal(layers[0].label, id.split('-').join(' ').toUpperCase())
+    const at = new Map(nodes(id).map((n) => [n.id, n]))
+    for (const row of rowsFor(id)) {
+      const node = at.get(row.layer)
+      assert.ok(node, `${row.role} names a node ${id} has`)
+      assert.ok(
+        node.rows.some((r) => r.role === row.role),
+        `${row.role}'s node actually holds it`,
+      )
+    }
   }
-  assert.equal(layerLabel('titlebar', 'window'), 'TITLEBAR')
-  assert.equal(layerLabel('desktop-icons', 'desktop-icons'), 'DESKTOP ICONS')
 })
 
-test('the parts come from the token names, not from a hand-kept list', () => {
-  const named = (id) => layersFor(id).map((l) => l.id)
-  assert.deepEqual(named('window'), ['window', 'ctrl', 'title', 'titlebar', 'explainer'])
-  assert.deepEqual(named('menubar'), ['menubar', 'menu', 'wordmark'])
-  assert.deepEqual(named('stamp'), ['stamp', 'pink'])
-  assert.deepEqual(named('desktop-icons'), ['desktop-icons', 'hover', 'icon', 'label'])
+test('the root is the component, and every child knows its parent', () => {
+  for (const id of COMPONENT_IDS) {
+    const root = layersFor(id)
+    assert.equal(root.id, id, `${id}'s root wears the component id`)
+    assert.equal(root.depth, 0)
+    assert.equal(root.parent, null)
+    // one walk, so `includes` below is asking about the same objects
+    const walked = flattenLayers(root)
+    const at = new Map(walked.map((n) => [n.id, n]))
+    for (const node of walked) {
+      if (node.depth === 0) continue
+      const parent = at.get(node.parent)
+      assert.ok(parent, `${id}/${node.id} points at a parent that exists`)
+      assert.equal(node.depth, parent.depth + 1)
+      assert.ok(parent.children.includes(node), `${id}/${node.id} is on its parent's list`)
+    }
+    // ids are the selector the bench picks by, so two nodes cannot share one
+    const ids = walked.map((n) => n.id)
+    assert.equal(new Set(ids).size, ids.length, `${id}'s node ids are unique`)
+  }
+})
 
+test('the tree is nested the way the component is, not flat', () => {
+  const shape = (node) => [node.id, node.children.map(shape)]
+  assert.deepEqual(shape(layersFor('window')), [
+    'window',
+    [
+      [
+        'titlebar',
+        [
+          ['controls', [['close', []], ['zoom', []]]],
+          ['title', []],
+          ['explainer', []],
+          ['meta', []],
+        ],
+      ],
+      ['body', []],
+      ['grip', []],
+    ],
+  ])
+  assert.deepEqual(shape(layersFor('menubar')), [
+    'menubar',
+    [
+      ['wordmark', [['version', []]]],
+      ['sound', []],
+      ['theme', []],
+      ['palette', []],
+    ],
+  ])
+  // one element, one node: the pink stamp is this span with a class on it
+  assert.deepEqual(shape(layersFor('stamp')), ['stamp', []])
+})
+
+test('the longest claim takes the row, and two nodes may share one', () => {
   const layerOf = (id, role) => rowsFor(id).find((r) => r.role === role)?.layer
-  // the property tail comes off and the first segment of what is left is the
-  // layer, whatever else the name carries between them
+  const holders = (id, role) =>
+    nodes(id)
+      .filter((n) => n.rows.some((r) => r.role === role))
+      .map((n) => n.id)
+
+  // a prefix claims everything under it, whatever the name carries between
   assert.equal(layerOf('window', 'window-titlebar-active-bg'), 'titlebar')
   assert.equal(layerOf('window', 'window-titlebar-padding-x'), 'titlebar')
-  assert.equal(layerOf('window', 'window-title-meta-text'), 'title')
-  assert.equal(layerOf('menubar', 'menubar-wordmark-version-margin-left'), 'wordmark')
-  // and a row with no part path at all is the component's own
+  // and it stops at a dash boundary: `title-controls` is not `titlebar`
+  assert.equal(layerOf('window', 'window-title-controls-gap'), 'controls')
+  assert.equal(layerOf('window', 'window-title-text'), 'title')
+  assert.equal(layerOf('window', 'window-title-meta-text'), 'meta')
+  // the deeper of two claims wins: wordmark holds the mark, version the version
+  assert.equal(layerOf('menubar', 'menubar-wordmark-text'), 'wordmark')
+  assert.equal(layerOf('menubar', 'menubar-wordmark-version-text'), 'version')
+  // a row nothing claims is the component's own
   assert.equal(layerOf('window', 'window-fill'), 'window')
-  assert.equal(layerOf('menubar', 'menubar-gap'), 'menubar')
+  assert.equal(layerOf('stamp', 'stamp-pink-fg'), 'stamp')
+  assert.equal(layerOf('button', 'button-md-padding-x'), 'button')
+  // the label is the one thing inside a button, and only the text rows paint it
+  assert.equal(layerOf('button', 'button-md-text'), 'label')
+  assert.equal(layerOf('button', 'button-sm-text'), 'label')
+
+  // one token, two buttons: close and zoom both wear the ctrl rows
+  assert.deepEqual(holders('window', 'window-ctrl-hover-bg'), ['close', 'zoom'])
+  // and the locked dimension goes with them, no special case for having no tail
+  assert.deepEqual(holders('window', 'window-ctrl-size'), ['close', 'zoom'])
+  assert.deepEqual(holders('menubar', 'menubar-h'), ['menubar'])
+  assert.deepEqual(holders('desktop-icons', 'desktop-icons-cell-width'), ['desktop-icons'])
+  // the three glyph buttons share their whole set
+  assert.deepEqual(holders('menubar', 'menubar-menu-btn-padding-x'), ['sound', 'theme', 'palette'])
 })
 
-test('a locked row joins the part it names, or the root when it names none', () => {
-  const layerOf = (id, role) => rowsFor(id).find((r) => r.role === role)?.layer
-  // 'ctrl' is a part the window's other rows already named
-  assert.equal(layerOf('window', 'window-ctrl-size'), 'ctrl')
-  // 'h' and 'cell' name no part, so they stay with the component itself
-  assert.equal(layerOf('menubar', 'menubar-h'), 'menubar')
-  assert.equal(layerOf('desktop-icons', 'desktop-icons-cell-width'), 'desktop-icons')
+test('a node that takes nothing is still a node', () => {
+  const at = new Map(nodes('window').map((n) => [n.id, n]))
+  for (const id of ['body', 'grip']) {
+    assert.ok(at.has(id), `the window's ${id} is on the tree`)
+    assert.equal(at.get(id).rows.length, 0)
+    assert.equal(at.get(id).subtreeRows.length, 0)
+  }
 })
 
-test('the dock scoped to a layer draws that layer and nothing else', () => {
+test('a subtree holds its own rows and its children’s, once each', () => {
   for (const id of COMPONENT_IDS) {
-    const whole = blocksFor(id).flatMap((g) => g.rows.map((r) => r.role))
-    const drilled = []
-    for (const layer of layersFor(id)) {
-      const groups = blocksFor(id, layer.id)
-      for (const group of groups) {
-        assert.ok(group.rows.length > 0, `${id}/${layer.id} draws no empty block`)
-        for (const row of group.rows) {
-          assert.equal(row.layer, layer.id, `${row.role} belongs on this layer`)
-          drilled.push(row.role)
-        }
+    for (const node of nodes(id)) {
+      const want = new Set(node.rows.map((r) => r.role))
+      for (const kid of node.children) for (const row of kid.subtreeRows) want.add(row.role)
+      const got = node.subtreeRows.map((r) => r.role)
+      assert.equal(new Set(got).size, got.length, `${id}/${node.id} lists no row twice`)
+      assert.deepEqual(got.slice().sort(), [...want].sort(), `${id}/${node.id}'s subtree`)
+      // manifest order survives the gathering, which is what the dock draws in
+      const order = rowsFor(id).map((r) => r.role)
+      assert.deepEqual(got, order.filter((role) => got.includes(role)))
+    }
+    // the root's subtree is the whole component, which is the drill's premise
+    assert.equal(layersFor(id).subtreeRows.length, rowsFor(id).length)
+  }
+})
+
+test('the dock draws a node’s own rows, then its children’s, then says so', () => {
+  for (const id of COMPONENT_IDS) {
+    for (const node of nodes(id)) {
+      const { scope, groups } = dockFor(id, node.id)
+      // the dock draws in BLOCK order, so the set is the claim, not the order
+      const drawn = groups.flatMap((g) => g.rows.map((r) => r.role)).sort()
+      if (node.rows.length > 0) {
+        assert.equal(scope, 'own', `${id}/${node.id} has rows of its own`)
+        assert.deepEqual(drawn, node.rows.map((r) => r.role).sort())
+      } else if (node.subtreeRows.length > 0) {
+        assert.equal(scope, 'subtree', `${id}/${node.id} borrows its children's`)
+        assert.deepEqual(drawn, node.subtreeRows.map((r) => r.role).sort())
+      } else {
+        assert.equal(scope, 'empty', `${id}/${node.id} takes nothing at all`)
+        assert.deepEqual(groups, [])
       }
-      // block order survives the scoping
+      // no block heading stands over nothing, and block order survives
       const order = groups.map((g) => g.block)
+      for (const group of groups) assert.ok(group.rows.length > 0)
       assert.deepEqual(order, STYLER_BLOCKS.filter((b) => order.includes(b)))
     }
-    assert.deepEqual(drilled.sort(), whole.slice().sort(), `${id} loses no row to the drill`)
+    // the whole component, flat, is what the inspector's panel used to draw
+    const whole = blocksFor(id).flatMap((g) => g.rows.map((r) => r.role))
+    assert.deepEqual(whole.slice().sort(), rowsFor(id).map((r) => r.role).sort())
   }
-  // the drill is what it was minted for: window's twenty rows, nine at worst
-  const biggest = Math.max(...layersFor('window').map((l) => l.rows.length))
+  // window's controls are the case the fallback was minted for: one gap of
+  // its own would have drawn a column with a single row in it
+  assert.equal(dockFor('window', 'controls').scope, 'own')
+  assert.equal(dockFor('window', 'body').scope, 'empty')
+  // and the drill still does its job: no node is half the component
+  const biggest = Math.max(...nodes('window').map((n) => n.rows.length))
   assert.ok(biggest < rowsFor('window').length / 2, 'no layer is half the component')
+})
+
+/* ---- the tree against the DOM ----
+
+   The declaration and the markup are two halves of one claim, and either half
+   can drift on its own. A node with no `data-part` is a row in the panel that
+   the bench can never select; a `data-part` with no node is a ⌘+click that
+   lands on nothing. So the check runs BOTH ways, off the component sources —
+   the harness has no DOM (see the header) and these files are JSX over five
+   real components. */
+
+const PILOT_SOURCE = {
+  button: 'src/components/primitives/Button.tsx',
+  'desktop-icons': 'src/components/shell/DesktopIcons.tsx',
+  menubar: 'src/components/shell/MenuBar.tsx',
+  stamp: 'src/components/primitives/Stamp.tsx',
+  window: 'src/components/shell/Window.tsx',
+}
+
+/** Every `data-part` written in a file, literal attributes only — the ternary
+    the stamp used to carry is gone with the PINK layer it named. */
+const marksIn = (path) => [...src(path).matchAll(/data-part="([a-z-]+)"/g)].map((m) => m[1])
+
+test('every part of a declared anatomy is an element you can click', () => {
+  for (const [id, path] of Object.entries(PILOT_SOURCE)) {
+    const marks = new Set(marksIn(path))
+    const source = src(path)
+    for (const node of nodes(id)) {
+      if (node.id === id) {
+        // the root is marked by data-component, which is what the bench
+        // outlines when the whole component is picked
+        assert.ok(
+          source.includes(`data-component="${id}"`),
+          `${id}'s root carries data-component`,
+        )
+        continue
+      }
+      assert.ok(marks.has(node.id), `${id}'s "${node.id}" has a marker on it`)
+    }
+  }
+})
+
+test('every marker on a component names a part its anatomy declares', () => {
+  for (const [id, path] of Object.entries(PILOT_SOURCE)) {
+    const known = new Set(nodes(id).map((n) => n.id))
+    const marks = marksIn(path)
+    if (id !== 'stamp') assert.ok(marks.length > 0, `${id} carries markers at all`)
+    for (const part of marks) assert.ok(known.has(part), `${id}'s "${part}" is one of its nodes`)
+  }
+  // the stamp is one element and declares one node, so it writes no data-part
+  assert.deepEqual(marksIn(PILOT_SOURCE.stamp), [])
+})
+
+test('every name on the tree is a copy key, not a word typed into the panel', () => {
+  for (const id of COMPONENT_IDS) {
+    for (const node of nodes(id)) {
+      assert.match(node.name, /^styler\.layer\./, `${id}/${node.id} names a styler.layer key`)
+      assert.ok(node.name in COPY, `${node.name} is in copy.json`)
+    }
+  }
+  // both of the dock's fallback lines, which no anatomy names
+  for (const key of ['styler.layer.inherits', 'styler.layer.empty']) {
+    assert.ok(key in COPY, `${key} is in copy.json`)
+  }
+  // and an id no pilot declares still gets a root rather than nothing
+  assert.equal(anatomyOf('nobody').id, 'nobody')
+  assert.equal(Object.keys(ANATOMY).length, COMPONENT_IDS.length)
 })
 
 /* ------------------------------------------------------ the two axes */
@@ -755,28 +927,21 @@ test('undo and redo sit on the command key, guarded', () => {
   off()
 })
 
-/* ------------------------------------------------ the anatomy markers */
+/* ---------------------------------------------- the bench's two gestures */
 
-test('every anatomy marker on a component names a layer its tokens declare', () => {
-  /* data-part is what the bench direct-selects by, and the only thing that
-     makes it agree with the layer list on the left is the name. A marker
-     naming a part the token files do not have is a click that selects
-     nothing, silently. */
-  const files = {
-    window: 'src/components/shell/Window.tsx',
-    menubar: 'src/components/shell/MenuBar.tsx',
-    'desktop-icons': 'src/components/shell/DesktopIcons.tsx',
-    stamp: 'src/components/primitives/Stamp.tsx',
-  }
-  for (const [id, path] of Object.entries(files)) {
-    // both spellings: a literal attribute, and the ternary Stamp writes
-    const marks = [...src(path).matchAll(/data-part=(?:"([a-z-]+)"|\{[^}]*?'([a-z-]+)')/g)].map(
-      (m) => m[1] ?? m[2],
-    )
-    assert.ok(marks.length > 0, `${id} carries markers at all`)
-    const known = new Set(layersFor(id).map((layer) => layer.id))
-    for (const part of marks) assert.ok(known.has(part), `${id}'s "${part}" is one of its layers`)
-  }
+test('the bench walks up to the nearest marker the tree knows', () => {
+  /* `closest` finds the nearest data-part, which is not always one of THIS
+     component's: a window sample holds a whole program's markup and a pilot
+     can be nested inside a bench. So the walk keeps climbing rather than
+     giving up on the first marker it meets, and every step is checked back
+     against the mount, which closest can climb straight out of. */
+  const walk = stageSrc.slice(stageSrc.indexOf('function nearestPart'))
+  const body = walk.slice(0, walk.indexOf('\n}'))
+  assert.match(body, /while \(found && mount\.contains\(found\)\)/, 'it keeps climbing')
+  assert.match(body, /layers\.some\(\(l\) => l\.id === part\)/, 'past a part the tree lacks')
+  // and both gestures go through it, so hover and pick can never disagree
+  assert.ok(stageSrc.includes('return nearestPart(mount, el, bench.current.layers)'))
+  assert.ok(stageSrc.includes("return nearestPart(mount, el, layers)?.dataset.part ?? null"))
 })
 
 test('the bench picks with Figma’s two gestures, and swallows only one', () => {

@@ -44,11 +44,13 @@ function moduleUrl(path, deps = {}) {
 const tiersUrl = moduleUrl('src/lib/tokens.generated.ts')
 const candidatesUrl = moduleUrl('src/lib/styleCandidates.ts', { './tokens.generated': tiersUrl })
 const { COMPONENT_IDS } = await import(candidatesUrl)
+const anatomyUrl = moduleUrl('src/lib/stylerAnatomy.ts')
 const blocksUrl = moduleUrl('src/lib/stylerBlocks.ts', {
   './tokens.generated': tiersUrl,
   './styleCandidates': candidatesUrl,
+  './stylerAnatomy': anatomyUrl,
 })
-const { layersFor, rowsFor } = await import(blocksUrl)
+const { flattenLayers, layersFor, rowsFor } = await import(blocksUrl)
 const { libraryEntries } = await import(
   moduleUrl('src/lib/stylerLibrary.ts', {
     './styleCandidates': candidatesUrl,
@@ -95,7 +97,9 @@ test('every card opens on the first variant its spec declares', () => {
 
 test('the counts on a card are the component anatomy, not a guess', () => {
   for (const entry of libraryEntries()) {
-    assert.equal(entry.layers, layersFor(entry.id).length)
+    // every NODE of the declared tree, root included — the empty ones too,
+    // because a part that takes no token is still a part of the component
+    assert.equal(entry.layers, flattenLayers(layersFor(entry.id)).length)
     assert.equal(entry.tokens, rowsFor(entry.id).length)
     assert.ok(entry.layers > 0, `${entry.id} has layers`)
     assert.ok(entry.tokens > 0, `${entry.id} has rows`)

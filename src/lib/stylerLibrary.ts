@@ -29,13 +29,13 @@
  */
 
 import { COMPONENT_IDS, type ComponentId } from './styleCandidates'
-import { layersFor, rowsFor } from './stylerBlocks'
+import { flattenLayers, layersFor, rowsFor } from './stylerBlocks'
 
 export type LibraryEntry = {
   id: ComponentId
   /** which of the spec's variants the card draws (see above) */
   variant: number
-  /** how many parts the anatomy splits into */
+  /** how many nodes the declared anatomy has, root included */
   layers: number
   /** how many properties the component declares */
   tokens: number
@@ -49,7 +49,7 @@ export function libraryEntries(): LibraryEntry[] {
   return COMPONENT_IDS.map((id) => ({
     id,
     variant: 0,
-    layers: layersFor(id).length,
+    layers: flattenLayers(layersFor(id)).length,
     tokens: rowsFor(id).length,
   }))
 }
