@@ -676,6 +676,318 @@
   outline-offset: -4px;
 }
 
+/* the Nike page (OverviewPage.tsx): one phone, the overview video in
+   its header, six numbered callouts outside it. Wide, the stage is a
+   row of three tracks: callouts 1, 3, 5 left, the phone, 2, 4, 6 right,
+   with an SVG of leaders over the lot. Narrow, the phone stacks over a
+   numbered list and the leaders give way to dots on the page. */
+.ovpStage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr min(300px, 100%) 1fr;
+  grid-template-rows: repeat(3, 1fr);
+  align-items: center;
+  column-gap: var(--space-5);
+  /* room for the focus ring, which the plate's overflow would clip */
+  padding: 6px;
+  /* the on-page dots stay hidden until the narrow layout asks; a custom
+     property, because the dots sit inside .ovpCell's own container and
+     a container query there would ask the cell, never the article */
+  --ovp-dots: none;
+}
+
+.ovpCell {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  min-width: 0;
+  /* the shell scales off its own cell: 100cqi is the cell's width */
+  container-type: inline-size;
+}
+
+/* .phoneShell, scaled like .lapShell: its 280px drawing (10px bezel,
+   44px outer radius, 34px screen radius) held in proportion */
+.ovpShell {
+  width: 100%;
+  padding: calc(100cqi * 10 / 280);
+  border-radius: calc(100cqi * 44 / 280);
+}
+
+/* one iPhone 14 screen in points, reserved before anything loads: the
+   scroll window over the pinned bottom band, the nav floating on top */
+.ovpScreen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: 390 / 844;
+  overflow: hidden;
+  border-radius: calc(100cqi * 34 / 280);
+}
+
+.ovpScreen:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.ovpScreen img {
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
+.ovpMid {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* fine pointers: cursor y scrubs the slice, transform only */
+.ovpMid[data-scroll='hover'] .ovpSlice {
+  will-change: transform;
+}
+
+/* touch: the scroll window is its own scroll box, momentum and all */
+.ovpMid[data-scroll='native'] {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+/* the page from y 0 to the bottom band's line; everything placed in it
+   takes top as a percent of this box, so nothing measures */
+.ovpSlice {
+  position: relative;
+  overflow: hidden;
+}
+
+/* page.webp carries an 8px shadow either side at 2x: drawn 796/780 of
+   the screen wide and pulled left 8/780, the page meets the glass */
+.ovpPage {
+  width: calc(100% * 796 / 780);
+  max-width: none;
+  height: auto;
+  margin-left: calc(-100% * 8 / 780);
+}
+
+/* the video over the export's placeholder, fading at the foot into the
+   page's own scrim. The box runs to y 500 but the fade ends at the
+   overview card's top, y 464 (92.8%): past it the half-faded video
+   would grey out the card, which sits over the hero in Figma. */
+.ovpVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 92.8%);
+  mask-image: linear-gradient(to bottom, black 82%, transparent 92.8%);
+}
+
+/* the header's chrome over the video: transparent, scrolling with it */
+.ovpOver {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: auto;
+}
+
+.ovpBand {
+  flex: none;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* back, assistant and bookmark, pinned to the glass above everything */
+.ovpNav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  height: auto;
+}
+
+/* narrow only: a numbered dot on the page at each target. The ring is
+   the screenshot's own white, not the skin's, like the bezel's #000. */
+.ovpDot {
+  position: absolute;
+  display: var(--ovp-dots);
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--surface);
+  box-shadow: 0 0 0 1px #fff;
+  font-family: var(--mono);
+  font-size: 7px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* a callout: the number in its circle at the edge nearest the phone,
+   so a leader never crosses the words. Left column reads left-aligned,
+   right column right-aligned. */
+.ovpCallout {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'label num'
+    'text .';
+  gap: var(--space-1) var(--spacing-component-md);
+  align-items: center;
+  padding: var(--spacing-component-sm);
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  /* lit and dimmed: opacity only; globals.css transitions colour on
+     every button, so this replaces it */
+  transition: opacity var(--duration-fade) ease;
+}
+
+.ovpCallout[data-side='left'] {
+  grid-column: 1;
+}
+
+.ovpCallout[data-side='right'] {
+  grid-column: 3;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'num label'
+    '. text';
+  text-align: right;
+}
+
+.ovpCallout[data-row='1'] {
+  grid-row: 1;
+}
+
+.ovpCallout[data-row='2'] {
+  grid-row: 2;
+}
+
+.ovpCallout[data-row='3'] {
+  grid-row: 3;
+}
+
+.ovpCallout:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+.ovpNum {
+  grid-area: num;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--surface);
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  line-height: 1;
+}
+
+.ovpLabel {
+  grid-area: label;
+  font-family: var(--mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--content-inverse) 60%, transparent);
+}
+
+.ovpCallout:hover .ovpLabel {
+  color: color-mix(in srgb, var(--content-inverse) 90%, transparent);
+}
+
+.ovpText {
+  grid-area: text;
+  font-size: var(--type-body-size);
+  line-height: var(--leading-normal);
+  color: color-mix(in srgb, var(--content-inverse) 90%, transparent);
+}
+
+/* the leaders, over the phone and under the callouts. The plate's ink
+   (content-inverse) where the spec named --content: the stage is the
+   dark plate, where --content disappears. Difference blending turns the
+   same stroke dark wherever it crosses the white screen. */
+.ovpLines {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+.ovpLines line {
+  stroke: color-mix(in srgb, var(--content-inverse) 60%, transparent);
+  stroke-width: 1;
+}
+
+.ovpLines circle {
+  fill: color-mix(in srgb, var(--content-inverse) 60%, transparent);
+}
+
+.ovpLines g,
+.ovpLines circle {
+  transition: opacity var(--duration-fade) ease;
+}
+
+@container (max-width: 640px) {
+  .ovpStage {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    row-gap: var(--spacing-component-sm);
+    --ovp-dots: flex;
+  }
+
+  .ovpCell {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: center;
+    width: min(300px, 100%);
+    margin-bottom: var(--spacing-component-md);
+  }
+
+  .ovpCallout[data-side][data-row] {
+    grid-column: 1;
+    grid-row: auto;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'num label'
+      '. text';
+    text-align: left;
+  }
+
+  /* doubled so it outranks `.plate svg`, which sets display on every
+     plate's svg at a higher specificity */
+  .ovpStage .ovpLines {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ovpCallout,
+  .ovpLines g,
+  .ovpLines circle {
+    transition: none;
+  }
+}
+
 /* three moves */
 .moves {
   display: grid;
