@@ -466,7 +466,7 @@ export function LapFlow() {
 
   return (
     <Plate
-      cap="Onboarding, two grades"
+      cap="The first lap"
       readout={
         <span className={styles.plateCount}>
           {long ? `${flow.short} · ${screens(long.h)}` : `${flow.short} ${pad(i + 1)}/${pad(n)}`}
