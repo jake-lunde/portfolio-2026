@@ -579,21 +579,47 @@
   }
 }
 
-/* the scroll tabs: one long screenshot, full width, natural height,
-   clipped to the screen. Overrides the frame rules above. */
+/* the scroll tabs: three clipped boxes stacked in the screen, each
+   holding the same long screenshot at full width and natural height.
+   The top and bottom bands are the page's pinned chrome; their heights
+   ride inline as aspect ratios of the 390pt width, and the middle box
+   takes the rest, so the three sum to the 390/844 screen. */
+.lapScreen[data-kind='long'] {
+  display: flex;
+  flex-direction: column;
+}
+
 .lapScreen[data-kind='long'] img {
   position: static;
   height: auto;
   object-fit: fill;
 }
 
-/* fine pointers: cursor y scrubs the page, transform only */
-.lapScreen[data-scroll='hover'] img {
+.lapBand {
+  flex: none;
+  width: 100%;
+  overflow: hidden;
+}
+
+.lapMid {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* the part of the page between the bands; its own box sets the scroll
+   height on touch, and it clips the img past the bottom band's line */
+.lapSlice {
+  overflow: hidden;
+}
+
+/* fine pointers: cursor y scrubs the slice, transform only */
+.lapMid[data-scroll='hover'] .lapSlice {
   will-change: transform;
 }
 
-/* touch: the screen is its own scroll box, momentum and all */
-.lapScreen[data-scroll='native'] {
+/* touch: the middle box is its own scroll box, momentum and all */
+.lapMid[data-scroll='native'] {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;

@@ -2,11 +2,12 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { LapFlow } from './LapFlow'
 import styles from './case.module.css'
 
-/* The app at two levels. The chip in the cap row picks 4TH (level 1)
-   or 8TH (level 2); the pills under the phone pick the screen.
+/* The app at two levels. The chip in the cap row picks LEVEL 1 (the
+   fourth grader) or LEVEL 2 (the eighth); the pills pick the screen.
    Onboarding plays itself every 4.5s and a tap on either half of the
-   screen steps it; the other three tabs are long pages that scroll in
-   the frame (hover on desktop, native scroll on a phone). The plate
+   screen steps it; the other three tabs are long pages whose top and
+   bottom chrome stay pinned while the middle scrolls (hover on desktop,
+   native scroll on a phone). The plate
    lives inside .case because every case breakpoint asks that box's
    width, not the screen's. */
 

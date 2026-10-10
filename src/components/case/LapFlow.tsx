@@ -17,9 +17,10 @@ import styles from './case.module.css'
 
 /* "Onboarding, two grades": the redesigned app at two levels, one
    phone in the site's phone shell (.phoneShell, scaled to its cell).
-   The chip in the cap row picks the level: 4TH is level 1, 8TH is
-   level 2. Four pill tabs under the stage pick the screen; switching
-   tab keeps the grade.
+   The chip in the cap row picks the level, LEVEL 1 or LEVEL 2, named
+   as in Figma (level 1 is the fourth grader, level 2 the eighth). Four
+   pill tabs under the stage pick the screen; switching tab keeps the
+   level.
 
    ONBOARDING walks the first lap: a fourth grader's flow (33 frames) or
    an eighth grader's (20). Switching grade keeps the proportional
@@ -38,8 +39,9 @@ import styles from './case.module.css'
    swaps. The next two frames preload as it moves.
 
    STOCK DETAILS, SEARCH and DASHBOARD each show one long screenshot
-   that scrolls inside the frame, BeforeSheet's mechanics (LongScreen
-   below). Switching grade there keeps the scroll fraction. */
+   the way the real app does: its top and bottom chrome stay pinned to
+   the frame and only the middle scrolls, BeforeSheet's mechanics
+   (LongScreen below). Switching level there keeps the scroll fraction. */
 
 const BASE = '/case/greenlight-invest/lap'
 
@@ -63,8 +65,8 @@ type Flow = {
 const FLOWS: [Flow, Flow] = [
   {
     id: 'g4',
-    label: '4th grade',
-    short: '4th',
+    label: 'Level 1',
+    short: 'Level 1',
     n: 33,
     regions: [
       [1, 'The fourth grader starts on the Greenlight home screen, where the Invest card offers to get started.'],
@@ -82,8 +84,8 @@ const FLOWS: [Flow, Flow] = [
   },
   {
     id: 'g8',
-    label: '8th grade',
-    short: '8th',
+    label: 'Level 2',
+    short: 'Level 2',
     n: 20,
     regions: [
       [1, 'The eighth grader starts on the Greenlight home screen, where the Invest card offers to get started.'],
@@ -181,23 +183,33 @@ const LONG_BASE = '/case/greenlight-invest/screens'
 
 type LongTab = 'detail' | 'search' | 'dash'
 
-/* [file, height px, alt] per grade, level 1 (4TH) then level 2 (8TH).
-   Every export is 780 wide at 2x; heights are written down so nothing
-   measures at runtime. */
-const LONG: Record<LongTab, [[string, number, string], [string, number, string]]> = {
+/* One page per grade, level 1 then level 2, in 1x points of the 390pt
+   phone (the files are 780 wide at 2x, so every number here is half the
+   file's pixels). h is the whole page; top and bottom are the chrome
+   bands that stay pinned to the frame (status bar, nav title, Search's
+   field; tab bar, Stock details' sticky Buy). Written down so nothing
+   measures at runtime. dash-l2's activity list runs under its tab bar
+   in Figma; the bottom band covers it, which is right. */
+type LongPage = { file: string; h: number; top: number; bottom: number; alt: string }
+
+const LONG: Record<LongTab, [LongPage, LongPage]> = {
   detail: [
-    ['detail-l1', 5426, 'Amazon’s stock page at level 1: a price graph, a plain company overview, analyst opinions, key stats, past performance and the ETFs that include it.'],
-    ['detail-l2', 5896, 'Amazon’s stock page at level 2 covers the same ground with denser stats, adding more graph ranges, extra key stats and earnings targets above the ETFs that include it.'],
+    { file: 'detail-l1', h: 2713, top: 97, bottom: 175, alt: 'Amazon’s stock page at level 1: a price graph, a plain company overview, analyst opinions, key stats, past performance and the ETFs that include it.' },
+    { file: 'detail-l2', h: 2948, top: 97, bottom: 176, alt: 'Amazon’s stock page at level 2 covers the same ground with denser stats, adding more graph ranges, extra key stats and earnings targets above the ETFs that include it.' },
   ],
   search: [
-    ['search-l1', 4562, 'Discover at level 1: top-rated companies, a lesson on how to pick stocks, and categories to browse by theme.'],
-    ['search-l2', 3756, 'Discover at level 2 leads with categories and ETFs, adds picks based on the kid’s spending and a lesson on researching ETFs, and shows price moves on the top-rated companies.'],
+    { file: 'search-l1', h: 2281, top: 158, bottom: 95, alt: 'Discover at level 1: top-rated companies, a lesson on how to pick stocks, and categories to browse by theme.' },
+    { file: 'search-l2', h: 1878, top: 158, bottom: 95, alt: 'Discover at level 2 leads with categories and ETFs, adds picks based on the kid’s spending and a lesson on researching ETFs, and shows price moves on the top-rated companies.' },
   ],
   dash: [
-    ['dash-l1', 6460, 'The kid’s Invest home at level 1: their balance and graph, one holding, level 1 lessons, picks based on their spending and recent activity.'],
-    ['dash-l2', 7400, 'The kid’s Invest home at level 2 carries more sections and denser stats: stocks and ETFs split out, each holding with its cost and shares, level 2 lessons, recommendations by risk and a longer activity list.'],
+    { file: 'dash-l1', h: 3230, top: 101, bottom: 110, alt: 'The kid’s Invest home at level 1: their balance and graph, one holding, level 1 lessons, picks based on their spending and recent activity.' },
+    { file: 'dash-l2', h: 3700, top: 101, bottom: 95, alt: 'The kid’s Invest home at level 2 carries more sections and denser stats: stocks and ETFs split out, each holding with its cost and shares, level 2 lessons, recommendations by risk and a longer activity list.' },
   ],
 }
+
+/* the phone screen in points */
+const PT_W = 390
+const PT_H = 844
 
 const TABS: Array<[id: 'onboarding' | LongTab, label: string]> = [
   ['onboarding', 'Onboarding'],
@@ -209,31 +221,35 @@ type Tab = (typeof TABS)[number][0]
 
 const longSrc = (file: string) => `${LONG_BASE}/${file}.webp`
 
-/* "3.8 screens", "1 screen": the page's length in phone screens */
+/* "3.8 screens", "1 screen": the page's length in phone screens (pt) */
 function screens(h: number) {
-  const n = Math.round((h / H) * 10) / 10
+  const n = Math.round((h / PT_H) * 10) / 10
   return n <= 1 ? '1 screen' : `${n.toFixed(1)} screens`
 }
 
-/* One long screenshot clipped to the phone screen, BeforeSheet's
-   mechanics. Fine pointer: cursor y scrubs it top to bottom (transform
-   only) and leaving eases it back to the top on SPRINGS.window. Touch:
-   the screen is a native scroll box. Up and down arrows nudge half a
-   screen. Keyed by tab, so a grade switch keeps the component and with
-   it the scroll fraction. */
+/* One long screenshot in the phone screen, behaving like the real
+   app: three clipped boxes stacked in the screen, each holding the same
+   img (one fetch, served from cache). The top and bottom boxes show the
+   page's own chrome, pinned to the frame; only the middle box scrolls.
+   Band heights are aspect ratios of the 390pt width, so they track the
+   phone's rendered size and the three always sum to the 390/844 screen.
+
+   The middle box carries BeforeSheet's mechanics. Fine pointer: cursor
+   y over it scrubs the page top to bottom (transform only) and leaving
+   eases it back to the top on SPRINGS.window. Touch: it is the native
+   scroll box. Up and down arrows nudge half the scroll window. Reduced
+   motion jumps. Keyed by tab, so a grade switch keeps the component
+   and with it the scroll fraction. */
 function LongScreen({
-  file,
-  h,
-  alt,
+  page,
   label,
   fine,
 }: {
-  file: string
-  h: number
-  alt: string
+  page: LongPage
   label: string
   fine: boolean
 }) {
+  const { file, h, top, bottom, alt } = page
   const reduced = useReducedMotion()
   const box = useRef<HTMLDivElement>(null)
   const run = useRef<AnimationPlaybackControls | null>(null)
@@ -241,11 +257,15 @@ function LongScreen({
   const p: MotionValue<number> = useMotionValue(0)
   /* touch: the same fraction, read off the native scroll */
   const frac = useRef(0)
-  /* translateY as a percent of the image's own height, so nothing needs
-     measuring: the last screen sits flush when p = 1. Clamped so a
-     spring never opens a gap above the page. Recomputed on render, so a
-     grade switch re-aims the same p at the new height. */
-  const room = Math.max(0, 1 - H / h)
+
+  /* the middle slice of the page, [top, h - bottom], and the window it
+     shows through, [top, 844 - bottom]. The slice moves by p times the
+     difference, h - 844, written as a percent of the slice's own height
+     so nothing needs measuring. Clamped so a spring never opens a gap.
+     Recomputed on render, so a grade switch re-aims the same p. */
+  const slice = h - top - bottom
+  const view = PT_H - top - bottom
+  const room = Math.max(0, (h - PT_H) / slice)
   const y = useTransform(p, (v) => `${-Math.min(1, Math.max(0, v)) * room * 100}%`)
 
   const jump = (v: number) => {
@@ -274,10 +294,10 @@ function LongScreen({
   }, [h, fine])
 
   const nudge = (d: number) => {
-    if (room <= 0) return
+    if (h <= PT_H) return
     if (fine) {
-      /* half a phone screen per press */
-      const step = H / 2 / (h - H)
+      /* half the scroll window per press */
+      const step = view / 2 / (h - PT_H)
       glide(Math.min(1, Math.max(0, p.get() + d * step)))
     } else {
       const el = box.current
@@ -285,43 +305,69 @@ function LongScreen({
     }
   }
 
+  /* the same img in every box; translateY is a percent of the img's own
+     height, so -(pt / h) lifts it to that point on the page */
+  const band = (at: number) => (
+    <img
+      src={longSrc(file)}
+      width={W}
+      height={h * 2}
+      alt=""
+      aria-hidden="true"
+      draggable={false}
+      style={{ transform: `translateY(${(-at / h) * 100}%)` }}
+    />
+  )
+
   return (
     <div
-      ref={box}
       className={styles.lapScreen}
       data-kind="long"
-      data-scroll={fine ? 'hover' : 'native'}
       role="group"
       aria-label={`${label}, ${screens(h)} long. Up and down arrows scroll it.`}
       tabIndex={0}
       onBlur={() => fine && glide(0)}
-      onMouseMove={
-        fine
-          ? (e) => {
-              const r = e.currentTarget.getBoundingClientRect()
-              jump((e.clientY - r.top) / r.height)
-            }
-          : undefined
-      }
-      onMouseLeave={fine ? () => glide(0) : undefined}
-      onScroll={(e) => {
-        const el = e.currentTarget
-        const max = el.scrollHeight - el.clientHeight
-        frac.current = max > 0 ? el.scrollTop / max : 0
-      }}
       onKeyDown={(e) => {
         if (e.key === 'ArrowDown') (e.preventDefault(), nudge(1))
         if (e.key === 'ArrowUp') (e.preventDefault(), nudge(-1))
       }}
     >
-      <motion.img
-        src={longSrc(file)}
-        width={W}
-        height={h}
-        alt={alt}
-        draggable={false}
-        style={{ y }}
-      />
+      <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${top}` }}>
+        {band(0)}
+      </div>
+      <div
+        ref={box}
+        className={styles.lapMid}
+        data-scroll={fine ? 'hover' : 'native'}
+        onMouseMove={
+          fine
+            ? (e) => {
+                const r = e.currentTarget.getBoundingClientRect()
+                jump((e.clientY - r.top) / r.height)
+              }
+            : undefined
+        }
+        onMouseLeave={fine ? () => glide(0) : undefined}
+        onScroll={(e) => {
+          const el = e.currentTarget
+          const max = el.scrollHeight - el.clientHeight
+          frac.current = max > 0 ? el.scrollTop / max : 0
+        }}
+      >
+        <motion.div className={styles.lapSlice} style={{ aspectRatio: `${PT_W} / ${slice}`, y }}>
+          <img
+            src={longSrc(file)}
+            width={W}
+            height={h * 2}
+            alt={alt}
+            draggable={false}
+            style={{ transform: `translateY(${(-top / h) * 100}%)` }}
+          />
+        </motion.div>
+      </div>
+      <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${bottom}` }}>
+        {band(h - bottom)}
+      </div>
     </div>
   )
 }
@@ -390,7 +436,7 @@ export function LapFlow() {
         im.decode?.().catch(() => {})
       }
     } else {
-      new Image().src = longSrc(LONG[tab][1 - g][0])
+      new Image().src = longSrc(LONG[tab][1 - g].file)
     }
   }, [warm, onboarding, tab, flow, i, n, g])
 
@@ -423,11 +469,11 @@ export function LapFlow() {
       cap="Onboarding, two grades"
       readout={
         <span className={styles.plateCount}>
-          {long ? `${flow.short} · ${screens(long[1])}` : `${flow.short} ${pad(i + 1)}/${pad(n)}`}
+          {long ? `${flow.short} · ${screens(long.h)}` : `${flow.short} ${pad(i + 1)}/${pad(n)}`}
         </span>
       }
       chip={
-        <span className={styles.fidChip} role="group" aria-label="Grade">
+        <span className={styles.fidChip} role="group" aria-label="Level">
           {FLOWS.map((f, k) => (
             <button
               key={f.id}
@@ -474,9 +520,7 @@ export function LapFlow() {
             {long ? (
               <LongScreen
                 key={tab}
-                file={long[0]}
-                h={long[1]}
-                alt={long[2]}
+                page={long}
                 label={`${TABS.find(([id]) => id === tab)?.[1]}, ${flow.label}`}
                 fine={fine}
               />
