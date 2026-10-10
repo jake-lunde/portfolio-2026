@@ -587,7 +587,7 @@
   border: var(--border-width-default) solid var(--content);
   background: var(--surface);
   padding: 22px;
-  margin-top: 26px;
+  margin: 26px 0 20px; /* prose follows the box now, so it needs the paragraph gap below */
 }
 
 [data-theme='dark'] .decide {
