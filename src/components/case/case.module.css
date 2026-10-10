@@ -579,6 +579,44 @@
   }
 }
 
+/* the scroll tabs: one long screenshot, full width, natural height,
+   clipped to the screen. Overrides the frame rules above. */
+.lapScreen[data-kind='long'] img {
+  position: static;
+  height: auto;
+  object-fit: fill;
+}
+
+/* fine pointers: cursor y scrubs the page, transform only */
+.lapScreen[data-scroll='hover'] img {
+  will-change: transform;
+}
+
+/* touch: the screen is its own scroll box, momentum and all */
+.lapScreen[data-scroll='native'] {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.lapScreen[data-kind='long']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* four pills where the shared row holds three; two by two when narrow,
+   so the stack never runs four deep under the phone. Doubled class so
+   it outranks .plateTabs, which comes later in this file. */
+.plateTabs.lapTabs {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@container (max-width: 640px) {
+  .plateTabs.lapTabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* the step buttons: each covers half the screen, invisible but real */
 .lapHit {
   position: absolute;
@@ -1707,7 +1745,8 @@
   cursor: pointer;
 }
 
-.plateTab[aria-pressed='true'] {
+.plateTab[aria-pressed='true'],
+.plateTab[aria-selected='true'] {
   background: var(--accent-expressive);
   /* the plate's own ground, read back as ink: pink is a mark colour, and
      the ground is the only thing dark enough to sit on it */
