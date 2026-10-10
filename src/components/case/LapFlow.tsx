@@ -1,35 +1,31 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
 import { sfx } from '@/lib/sound'
 import { Plate } from './CaseComponents'
 import styles from './case.module.css'
 
-/* "Onboarding, two grades": the redesigned first lap, walked twice. A
-   fourth grader's flow on the left, an eighth grader's on the right,
-   each in the site's phone shell (.phoneShell, scaled to its cell).
-   Both read one shared progress value, so they step in lockstep and
-   land on their last frames together even though the flows differ in
-   length (33 frames against 20).
+/* "Onboarding, two grades": the redesigned first lap, one grade at a
+   time in the site's phone shell (.phoneShell, scaled to its cell).
+   Jake ruled two phones at once too busy, so the chip in the cap row
+   picks the grade instead: a fourth grader's flow (33 frames) or an
+   eighth grader's (20). Switching keeps the proportional position, so
+   halfway through one lap lands halfway through the other.
 
-   Progress lives as a step k on the longer flow's grid, 0 to 32, so
-   p = k / 32 and each flow shows frame round(p * (n - 1)) of its own n.
+   The phone plays itself, one frame every 4.5s, looping, while the
+   stage is on screen. Keyboard focus inside the stage pauses it; hover
+   does not. Two invisible buttons cover the screen halves: the right
+   one steps forward, the left one back, both wrapping. The first press
+   hands the reader the wheel: autoplay stops and stays off until the
+   stage leaves the viewport and comes back (Jake, s143). Left and right
+   arrows do the same, Home and End jump.
 
-   Two modes while Jake picks (the chip in the cap row):
-   LOCKED (default) is driven by hand. Fine pointer: cursor x across the
-   stage picks the step, as PitchDeck does, and leaving holds it. Touch:
-   a horizontal drag scrubs (touch-action: pan-y keeps vertical page
-   scroll). Keys: left and right step, Home and End jump.
-   FADE plays itself: one step every 1.4s, looping, each change
-   crossfading over 300ms. Hovering holds it rather than scrubbing, so
-   the reader can stop on a frame; drag and keys still step. It pauses
-   while hovered, focused, dragged or out of view. Reduced motion turns
-   FADE back into LOCKED with instant swaps.
-
-   Rendering keeps two imgs per phone: the frame on show and the one it
-   replaced, underneath, so a frame still decoding never flashes the
-   bezel. The next two frames per flow preload as the step moves. */
+   Every change crossfades over 300ms, opacity only: the new frame
+   waits (invisible) until it has loaded, fades in over the old one,
+   and the old one leaves the DOM when the fade ends, so two frames are
+   never left stacked. Reduced motion: no autoplay, no fade, instant
+   swaps. The next two frames of the active flow preload as it moves. */
 
 const BASE = '/case/greenlight-invest/lap'
 
@@ -37,11 +33,8 @@ const BASE = '/case/greenlight-invest/lap'
 const W = 780
 const H = 1688
 
-/* the longer flow sets the grid: one step per fourth-grade frame */
-const STEPS = 32
-
-/* Jake's spec: one step every 1.4s in FADE */
-const TICK_MS = 1400
+/* Jake's spec: one automatic step every 3.5s */
+const TICK_MS = 4500 /* Jake's pace, s143: 3.5 read as rushed */
 
 type Flow = {
   id: 'g4' | 'g8'
@@ -92,7 +85,6 @@ const FLOWS: [Flow, Flow] = [
   },
 ]
 
-const frameOf = (f: Flow, k: number) => Math.round((k / STEPS) * (f.n - 1))
 const srcOf = (f: Flow, i: number) => `${BASE}/${f.id}-${String(i + 1).padStart(2, '0')}.webp`
 const altOf = (f: Flow, i: number) => {
   let alt = f.regions[0][1]
@@ -100,205 +92,205 @@ const altOf = (f: Flow, i: number) => {
   return alt
 }
 const pad = (v: number) => String(v).padStart(2, '0')
-const clampStep = (v: number) => Math.min(STEPS, Math.max(0, v))
 
-function Phone({
-  flow,
-  i,
-  fading,
-  wrap,
-  warm,
+/* the screen: the frame on show over the one it replaced, until the
+   new one has loaded and faded in */
+function Screen({
+  src,
+  alt,
+  fade,
+  children,
 }: {
-  flow: Flow
-  i: number
-  fading: boolean
-  wrap: boolean
-  warm: boolean
+  src: string
+  alt: string
+  fade: boolean
+  children: React.ReactNode
 }) {
-  /* the frame on show and the one it replaced (React's derived-state
-     pattern: set during render when the index moves) */
-  const [pair, setPair] = useState({ cur: i, prev: i })
-  if (pair.cur !== i) setPair({ cur: i, prev: pair.cur })
+  const [loaded, setLoaded] = useState('')
+  /* React's derived-state pattern: set during render when src moves.
+     The frame underneath is the last one that actually painted, so a
+     quick double press never leaves an unloaded frame as the backdrop. */
+  const [pair, setPair] = useState({ cur: src, prev: '' })
+  if (pair.cur !== src) {
+    setPair({ cur: src, prev: loaded === pair.cur ? pair.cur : pair.prev })
+  }
+  const img = useRef<HTMLImageElement>(null)
 
-  /* preload the next two frames once the plate has been on screen.
-     new Image() fetches into the HTTP cache; decode() readies the
-     pixels so the swap lands on the next paint. */
+  /* a cached frame can finish before the load listener matters */
+  useLayoutEffect(() => {
+    const el = img.current
+    if (el?.complete && el.naturalWidth > 0) setLoaded(pair.cur)
+  }, [pair.cur])
+
+  const ready = loaded === pair.cur
+  const drop = () => setPair((v) => (v.prev ? { cur: v.cur, prev: '' } : v))
+
+  /* no fade (reduced motion, or nothing underneath): the old frame
+     goes the moment the new one can paint */
   useEffect(() => {
-    if (!warm) return
-    for (const d of [1, 2]) {
-      const j = wrap ? (i + d) % flow.n : i + d
-      if (j >= flow.n) continue
-      const im = new Image()
-      im.src = srcOf(flow, j)
-      im.decode?.().catch(() => {})
-    }
-  }, [flow, i, wrap, warm])
+    if (ready && (!fade || !pair.prev)) drop()
+  }, [ready, fade, pair.prev])
 
-  /* same keys for the same frame, so the outgoing img keeps its DOM
-     node (already decoded) as it drops underneath */
   return (
-    <div className={styles.lapCell}>
-      <span className={styles.lapLabel}>{flow.label}</span>
-      <div className={`${styles.phoneShell} ${styles.lapShell}`}>
-        <div className={styles.lapScreen}>
-          {pair.prev !== pair.cur && (
-            <img
-              key={`f${pair.prev}`}
-              src={srcOf(flow, pair.prev)}
-              width={W}
-              height={H}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-            />
-          )}
-          <img
-            key={`f${pair.cur}`}
-            src={srcOf(flow, pair.cur)}
-            width={W}
-            height={H}
-            alt={altOf(flow, pair.cur)}
-            loading="lazy"
-            draggable={false}
-            data-fade={(fading && pair.prev !== pair.cur) || undefined}
-          />
-        </div>
-      </div>
+    <div className={styles.lapScreen}>
+      {pair.prev && (
+        <img
+          key={pair.prev}
+          src={pair.prev}
+          width={W}
+          height={H}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+        />
+      )}
+      <img
+        key={pair.cur}
+        ref={img}
+        src={pair.cur}
+        width={W}
+        height={H}
+        alt={alt}
+        draggable={false}
+        data-state={!ready ? 'wait' : fade && pair.prev ? 'fade' : undefined}
+        onLoad={() => setLoaded(pair.cur)}
+        onAnimationEnd={drop}
+      />
+      {children}
     </div>
   )
 }
 
 export function LapFlow() {
-  const [fine, setFine] = useState(false)
-  const [k, setK] = useState(0)
-  /* TEMPORARY: the LOCKED / FADE chip stays until Jake picks one; the
-     loser and the chip come out together. LOCKED is his default. */
-  const [mode, setMode] = useState<'locked' | 'fade'>('locked')
-  const [hover, setHover] = useState(false)
-  const [focus, setFocus] = useState(false)
-  const [drag, setDrag] = useState(false)
+  const [g, setG] = useState(0)
+  const [i, setI] = useState(0)
+  /* set by the first press; autoplay stays off until the stage leaves
+     the viewport, so a reader who took over is never stepped on */
+  const [taken, setTaken] = useState(false)
+  const [kbFocus, setKbFocus] = useState(false)
   const [inView, setInView] = useState(false)
   const [warm, setWarm] = useState(false)
   const reduced = useReducedMotion()
   const stage = useRef<HTMLDivElement>(null)
-  const grab = useRef<{ id: number; x: number; k: number } | null>(null)
 
-  const fading = mode === 'fade' && !reduced
+  const flow = FLOWS[g]
+  const n = flow.n
 
-  useEffect(() => {
-    const mq = window.matchMedia('(hover: hover) and (pointer: fine)')
-    const sync = () => setFine(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
-
-  /* in view: FADE only runs on screen, and preloading waits for the
-     first sighting so an unread plate costs two images, not six */
+  /* in view: autoplay only runs on screen, and preloading waits for the
+     first sighting */
   useEffect(() => {
     const el = stage.current
     if (!el) return
     const io = new IntersectionObserver(([e]) => {
       setInView(e.isIntersecting)
       if (e.isIntersecting) setWarm(true)
+      else setTaken(false)
     })
     io.observe(el)
     return () => io.disconnect()
   }, [])
 
-  const held = hover || focus || drag
+  /* one step per interval; any change of frame or grade resets it */
   useEffect(() => {
-    if (!fading || !inView || held) return
-    const t = setInterval(() => setK((v) => (v + 1) % (STEPS + 1)), TICK_MS)
-    return () => clearInterval(t)
-  }, [fading, inView, held])
+    if (reduced || !inView || kbFocus || taken) return
+    const t = setTimeout(() => setI((v) => (v + 1) % n), TICK_MS)
+    return () => clearTimeout(t)
+  }, [reduced, inView, kbFocus, taken, i, g, n])
 
-  const [g4, g8] = FLOWS
-  const i4 = frameOf(g4, k)
-  const i8 = frameOf(g8, k)
+  /* preload the next two frames: new Image() fetches into the HTTP
+     cache, decode() readies the pixels for the next paint */
+  useEffect(() => {
+    if (!warm) return
+    for (const d of [1, 2]) {
+      const im = new Image()
+      im.src = srcOf(flow, (i + d) % n)
+      im.decode?.().catch(() => {})
+    }
+  }, [warm, flow, i, n])
+
+  const go = (to: number) => {
+    setI(((to % n) + n) % n)
+    setTaken(true)
+  }
+
+  const pick = (next: number) => {
+    if (next === g) return
+    sfx.tap()
+    /* keep the proportional position across grades */
+    const p = i / (n - 1)
+    setI(Math.round(p * (FLOWS[next].n - 1)))
+    setG(next)
+  }
 
   return (
     <Plate
       cap="Onboarding, two grades"
       readout={
         <span className={styles.plateCount}>
-          {g4.short} {pad(i4 + 1)}/{pad(g4.n)} · {g8.short} {pad(i8 + 1)}/{pad(g8.n)}
+          {flow.short} {pad(i + 1)}/{pad(n)}
         </span>
       }
       chip={
-        <span className={styles.fidChip} role="group" aria-label="Playback">
-          {(['locked', 'fade'] as const).map((id) => (
+        <span className={styles.fidChip} role="group" aria-label="Grade">
+          {FLOWS.map((f, k) => (
             <button
-              key={id}
+              key={f.id}
               type="button"
               className={styles.fidChipSeg}
-              aria-pressed={mode === id}
-              onClick={() => {
-                if (mode === id) return
-                sfx.tap()
-                setMode(id)
-              }}
+              aria-pressed={g === k}
+              aria-label={f.label}
+              onClick={() => pick(k)}
             >
-              {id}
+              {f.short}
             </button>
           ))}
         </span>
       }
-      caption="A fourth grader and an eighth grader walk the same first lap. Scrub across to step both."
+      caption="A fourth grader and an eighth grader walk the same first lap. Tap the right side to step forward, the left to go back."
     >
       <div
         ref={stage}
         className={styles.lapStage}
-        tabIndex={0}
         role="group"
-        aria-label={`The same first lap for a fourth grader and an eighth grader, side by side. Fourth grade screen ${i4 + 1} of ${g4.n}, eighth grade screen ${i8 + 1} of ${g8.n}. Move the cursor across, drag, or use the arrow keys to step both.`}
-        onFocus={() => setFocus(true)}
-        onBlur={() => setFocus(false)}
-        onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(true)}
-        onPointerLeave={(e) => e.pointerType === 'mouse' && setHover(false)}
-        onPointerMove={(e) => {
-          const r = e.currentTarget.getBoundingClientRect()
-          const g = grab.current
-          if (g && g.id === e.pointerId) {
-            /* drag: relative, a full stage width walks the whole lap */
-            setK(clampStep(g.k + Math.round(((e.clientX - g.x) / r.width) * STEPS)))
-            return
-          }
-          /* hover scrub, LOCKED only: equal bins across the width,
-             leaving holds the step (no reset) */
-          if (e.pointerType === 'mouse' && fine && !fading) {
-            setK(clampStep(Math.floor(((e.clientX - r.left) / r.width) * (STEPS + 1))))
-          }
-        }}
-        onPointerDown={(e) => {
-          if (e.pointerType === 'mouse') return
-          grab.current = { id: e.pointerId, x: e.clientX, k }
-          setDrag(true)
-        }}
-        onPointerUp={(e) => {
-          if (grab.current?.id !== e.pointerId) return
-          grab.current = null
-          setDrag(false)
-        }}
-        onPointerCancel={() => {
-          /* the browser took the gesture for a vertical page scroll */
-          grab.current = null
-          setDrag(false)
+        aria-label={`The first lap, ${flow.label}, screen ${i + 1} of ${n}. Left and right arrows step through it.`}
+        /* only keyboard focus pauses: a mouse press on a step button can
+           focus it too, and that must not stop the playback */
+        onFocus={(e) => setKbFocus(e.target.matches(':focus-visible'))}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setKbFocus(false)
         }}
         onKeyDown={(e) => {
           const to =
-            e.key === 'ArrowRight' ? k + 1
-            : e.key === 'ArrowLeft' ? k - 1
+            e.key === 'ArrowRight' ? i + 1
+            : e.key === 'ArrowLeft' ? i - 1
             : e.key === 'Home' ? 0
-            : e.key === 'End' ? STEPS
+            : e.key === 'End' ? n - 1
             : null
           if (to === null) return
           e.preventDefault()
-          setK(clampStep(to))
+          go(to)
         }}
       >
-        <Phone flow={g4} i={i4} fading={fading} wrap={fading} warm={warm} />
-        <Phone flow={g8} i={i8} fading={fading} wrap={fading} warm={warm} />
+        <div className={styles.lapCell}>
+          <div className={`${styles.phoneShell} ${styles.lapShell}`}>
+            <Screen src={srcOf(flow, i)} alt={altOf(flow, i)} fade={!reduced}>
+              <button
+                type="button"
+                className={styles.lapHit}
+                data-side="prev"
+                aria-label="Previous screen"
+                onClick={() => go(i - 1)}
+              />
+              <button
+                type="button"
+                className={styles.lapHit}
+                data-side="next"
+                aria-label="Next screen"
+                onClick={() => go(i + 1)}
+              />
+            </Screen>
+          </div>
+        </div>
       </div>
     </Plate>
   )

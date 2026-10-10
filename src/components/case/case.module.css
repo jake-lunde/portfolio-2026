@@ -507,52 +507,26 @@
   }
 }
 
-/* the first lap (LapFlow.tsx): a fourth grader's and an eighth
-   grader's onboarding in two phone shells, side by side at every width
-   (the comparison is the point, so they never stack). One shared step
-   drives both; the stage scrubs, drags and takes arrow keys. */
+/* the first lap (LapFlow.tsx): one grade's onboarding at a time in
+   the site's phone shell, centered. The cap row's chip picks the grade;
+   two invisible buttons over the screen halves step back and forward. */
 .lapStage {
   position: relative;
   z-index: 1;
   display: flex;
   justify-content: center;
-  gap: var(--spacing-component-md);
   /* room for the focus ring, which the plate's overflow would clip */
   padding: 6px;
-  /* touch: horizontal drags scrub, vertical ones still scroll the page */
-  touch-action: pan-y;
-  user-select: none;
-}
-
-.lapStage:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }
 
 .lapCell {
-  flex: 1 1 0;
-  min-width: 0;
-  max-width: 240px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-component-sm);
+  width: min(300px, 100%);
   /* the shell scales off its own cell: 100cqi is the cell's width */
   container-type: inline-size;
 }
 
-/* machine caps over each phone, the cap row's ink and tracking */
-.lapLabel {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  text-align: center;
-  color: color-mix(in srgb, var(--content-inverse) 60%, transparent);
-}
-
 /* .phoneShell, scaled like .beforeShell: its 280px drawing (10px
-   bezel, 44px outer radius, 34px screen radius) held in proportion
-   down to the ~140px a 360px screen leaves each phone */
+   bezel, 44px outer radius, 34px screen radius) held in proportion */
 .lapShell {
   width: 100%;
   padding: calc(100cqi * 10 / 280);
@@ -568,21 +542,28 @@
   border-radius: calc(100cqi * 34 / 280);
 }
 
-/* the frame on show sits over the one it replaced; a frame still
-   decoding lets the old one show through instead of the bezel */
+/* every frame fills the screen box exactly; cover trims any export
+   that runs a few pixels off ratio instead of leaving a strip */
 .lapScreen img {
   position: absolute;
   inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
   pointer-events: none;
+  user-select: none;
 }
 
-/* FADE: opacity-only crossfade. No motion token sits at 0.3s
-   (DURATIONS covers the shell's chrome), so it stays a literal here,
-   per Jake's spec for this mode. */
-.lapScreen img[data-fade] {
+/* a frame still loading stays invisible over the one before it */
+.lapScreen img[data-state='wait'] {
+  opacity: 0;
+}
+
+/* opacity-only crossfade. No motion token sits at 0.3s (DURATIONS
+   covers the shell's chrome), so it stays a literal here, per Jake's
+   spec. The old frame leaves the DOM when this ends. */
+.lapScreen img[data-state='fade'] {
   animation: lapFade 300ms ease-out both;
 }
 
@@ -593,9 +574,37 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lapScreen img[data-fade] {
+  .lapScreen img[data-state='fade'] {
     animation: none;
   }
+}
+
+/* the step buttons: each covers half the screen, invisible but real */
+.lapHit {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 50%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lapHit[data-side='prev'] {
+  left: 0;
+}
+
+.lapHit[data-side='next'] {
+  right: 0;
+}
+
+/* inset, so the screen's own clip never cuts the ring */
+.lapHit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
 }
 
 /* three moves */
