@@ -677,10 +677,10 @@
 }
 
 /* the Nike page (OverviewPage.tsx): one phone, the overview video in
-   its header, six numbered callouts outside it. Wide, the stage is a
-   row of three tracks: callouts 1, 3, 5 left, the phone, 2, 4, 6 right,
-   with an SVG of leaders over the lot. Narrow, the phone stacks over a
-   numbered list and the leaders give way to dots on the page. */
+   its header, six numbered callouts outside it and a numbered dot on
+   the page beside each target. Wide, the stage is a row of three
+   tracks: callouts 1, 3, 5 left, the phone, 2, 4, 6 right. Narrow, the
+   phone stacks over a numbered list. */
 .ovpStage {
   position: relative;
   z-index: 1;
@@ -691,10 +691,6 @@
   column-gap: var(--space-5);
   /* room for the focus ring, which the plate's overflow would clip */
   padding: 6px;
-  /* the on-page dots stay hidden until the narrow layout asks; a custom
-     property, because the dots sit inside .ovpCell's own container and
-     a container query there would ask the cell, never the article */
-  --ovp-dots: none;
 }
 
 .ovpCell {
@@ -724,11 +720,6 @@
   border-radius: calc(100cqi * 34 / 280);
 }
 
-.ovpScreen:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
-
 .ovpScreen img {
   display: block;
   user-select: none;
@@ -738,19 +729,20 @@
 .ovpMid {
   flex: 1 1 0;
   min-height: 0;
-  overflow: hidden;
-}
-
-/* fine pointers: cursor y scrubs the slice, transform only */
-.ovpMid[data-scroll='hover'] .ovpSlice {
-  will-change: transform;
-}
-
-/* touch: the scroll window is its own scroll box, momentum and all */
-.ovpMid[data-scroll='native'] {
+  /* a plain scroll box for every pointer: wheel, trackpad, touch */
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
+}
+
+.ovpMid::-webkit-scrollbar {
+  display: none;
+}
+
+/* inset, so the screen's own clip never cuts the ring */
+.ovpMid:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
 }
 
 /* the page from y 0 to the bottom band's line; everything placed in it
@@ -808,29 +800,37 @@
   height: auto;
 }
 
-/* narrow only: a numbered dot on the page at each target. The ring is
-   the screenshot's own white, not the skin's, like the bezel's #000. */
+/* a numbered dot beside each target, scrolling with the page. Pink is
+   the expressive accent as a mark; the number takes the ink made for
+   it (--on-accent-expressive), since --content-inverse is light on
+   light here and --content turns light in the dark theme. The ring in
+   --surface parts it from the mint tiles. 80% until its callout is the
+   last one clicked. */
 .ovpDot {
   position: absolute;
-  display: var(--ovp-dots);
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 10px;
-  height: 10px;
-  margin: -5px 0 0 -5px;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
   border-radius: 50%;
-  background: var(--accent);
-  color: var(--surface);
-  box-shadow: 0 0 0 1px #fff;
+  background: var(--accent-expressive);
+  color: var(--on-accent-expressive);
+  box-shadow: 0 0 0 1px var(--surface);
   font-family: var(--mono);
-  font-size: 7px;
+  font-size: var(--text-label);
   line-height: 1;
+  opacity: 0.8;
   pointer-events: none;
 }
 
-/* a callout: the number in its circle at the edge nearest the phone,
-   so a leader never crosses the words. Left column reads left-aligned,
-   right column right-aligned. */
+.ovpDot[data-on='true'] {
+  opacity: 1;
+}
+
+/* a callout: the number in its circle at the edge nearest the phone.
+   Left column reads left-aligned, right column right-aligned. */
 .ovpCallout {
   position: relative;
   z-index: 3;
@@ -851,6 +851,11 @@
   /* lit and dimmed: opacity only; globals.css transitions colour on
      every button, so this replaces it */
   transition: opacity var(--duration-fade) ease;
+}
+
+/* its target is under the nav, under the bottom band, or off screen */
+.ovpCallout[data-lit='false'] {
+  opacity: 0.45;
 }
 
 .ovpCallout[data-side='left'] {
@@ -891,8 +896,8 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--accent);
-  color: var(--surface);
+  background: var(--accent-expressive); /* matches the pink dots on the page: both are marks */
+  color: var(--on-accent-expressive);
   font-family: var(--mono);
   font-size: var(--text-label);
   line-height: 1;
@@ -918,41 +923,11 @@
   color: color-mix(in srgb, var(--content-inverse) 90%, transparent);
 }
 
-/* the leaders, over the phone and under the callouts. The plate's ink
-   (content-inverse) where the spec named --content: the stage is the
-   dark plate, where --content disappears. Difference blending turns the
-   same stroke dark wherever it crosses the white screen. */
-.ovpLines {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-  mix-blend-mode: difference;
-}
-
-.ovpLines line {
-  stroke: color-mix(in srgb, var(--content-inverse) 60%, transparent);
-  stroke-width: 1;
-}
-
-.ovpLines circle {
-  fill: color-mix(in srgb, var(--content-inverse) 60%, transparent);
-}
-
-.ovpLines g,
-.ovpLines circle {
-  transition: opacity var(--duration-fade) ease;
-}
-
 @container (max-width: 640px) {
   .ovpStage {
     grid-template-columns: 1fr;
     grid-template-rows: none;
     row-gap: var(--spacing-component-sm);
-    --ovp-dots: flex;
   }
 
   .ovpCell {
@@ -972,18 +947,10 @@
       '. text';
     text-align: left;
   }
-
-  /* doubled so it outranks `.plate svg`, which sets display on every
-     plate's svg at a higher specificity */
-  .ovpStage .ovpLines {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ovpCallout,
-  .ovpLines g,
-  .ovpLines circle {
+  .ovpCallout {
     transition: none;
   }
 }
