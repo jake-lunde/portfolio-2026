@@ -4,18 +4,16 @@ import {
   Lead,
   Plate,
   Placeholder,
-  Move,
   Decide,
   PullQuote,
   Metrics,
   Stat,
 } from '@/components/case/CaseComponents'
-import { Moves } from '@/components/case/Moves'
+import { BeforeSheet } from '@/components/case/BeforeSheet'
 import { MoatDiagram } from '@/components/case/MoatDiagram'
 import { ScrubGraph } from '@/components/case/ScrubGraph'
 import { FrequencyBars } from '@/components/case/FrequencyBars'
 import { CaseFooter } from '@/components/case/CaseFooter'
-import { BeforeSheet } from '@/components/case/BeforeSheet'
 
 <Hero
   eyebrow="Greenlight · Investing for kids · Fintech"
@@ -29,7 +27,7 @@ import { BeforeSheet } from '@/components/case/BeforeSheet'
   ]}
 />
 
-<Section no="01" label="Before" title="A lot of words, not much to go on.">
+<Section no="01" label="Starting line" title="Lots of words, not much to go on.">
   <Lead>
     When I joined, Invest looked like a balance sheet somebody remade in
     photoshop. Lots of text. Barely any of it a kid could use.
@@ -42,124 +40,173 @@ import { BeforeSheet } from '@/components/case/BeforeSheet'
   on the whole thing got even longer and felt like homework.
 
   <BeforeSheet />
-
-  Still, I think of it as the first draft of what we ended up building.
-  Another designer had already figured out that the numbers needed to mean
-  something to a kid.
 </Section>
 
-<Section no="02" label="The gap" title="We made a prettier balance sheet.">
+<Section no="02" label="The first lap" title="A bit smarter, but not simpler.">
   <Lead>
-    We showed a kid the new stock screen: cleaner charts, better-formatted
-    financials, everything we thought they wanted. They said it was just
-    numbers on a screen. They didn&rsquo;t know what the company was or what
+    We showed kids our new stock details screen: cleaner charts,
+    better-formatted financials, and content we tried to tailor to their
+    grade level. They still didn&rsquo;t know what the company was or what
     to do with any of it.
   </Lead>
 
-  That came out of our first research round, run with the children of
-  Greenlight employees, and we reset the project around it. The old Invest
-  gave you the facts of a company with no path from *I&rsquo;ve heard of
-  Nike* to *I&rsquo;d like to own a piece of it.* Adults bridge that gap
-  with experience. A nine-year-old just gets stuck.
+  Our first round of research, with the children of Greenlight employees,
+  kind of reset the project. The old Invest gave you company facts with no
+  path from *I wear Nike* to *I want to own a piece of it.* It was too much,
+  and nothing on the page connected to what they already knew.
 
-  <Plate cap="Plate 01 · before" caption="Before: financial facts, no path to a decision.">
-    <Placeholder>The old detail screen · before</Placeholder>
+  <Plate cap="Onboarding, two grades" caption="A fourth grader and an eighth grader walk the same flow. Visuals pending.">
+    <Placeholder>The redesigned flow, side by side · fourth grade vs. eighth grade</Placeholder>
   </Plate>
 </Section>
 
-<Section no="03" label="The system" title="Three moves to help a kid decide.">
-  We quit trying to present information and started helping a kid decide
-  something about a company.
+<Section no="03" label="Speaking the same language" title="Making it make sense.">
+  <Lead>
+    Kids needed someone to tell them what a company does and how it makes
+    money, in words they&rsquo;d actually use.
+  </Lead>
 
-  <Moves>
-    <Move n="01" title="Know it">
-      A minute-long overview for every company in the S&amp;P 500: what it
-      makes, how it earns money, why it shows up in a kid&rsquo;s life. We
-      built them from real filings and formatted them like the stories kids
-      already watch.
-    </Move>
-    <Move n="02" title="Size it up">
-      The Economic Moat puts the company at the center of three rings:
-      rivals, competitors, and distant threats. Tap any of them to see
-      <em> why</em> it sits where it does. A hard idea becomes readable at
-      a glance.
-    </Move>
-    <Move n="03" title="Decide it">
-      We can&rsquo;t give a child advice, so we taught them what to ask.
-      <em> Help me decide</em> hands the kid the pieces and reflects their own
-      reasoning back to them.
-    </Move>
-  </Moves>
+  So we made a short overview video for every company in the S&amp;P 500.
+  Each one runs about a minute, comes from the company&rsquo;s real filings,
+  and plays like the stories kids already watch: Nike makes shoes and
+  clothes, sells them all over the world, and that&rsquo;s where the money
+  comes from. We generated them with AI and the data team so we could cover
+  all 500 at once instead of hand-picking a few favorites.
 
-  <Plate cap="Plate 02 · economic moat" tag="NFLX" caption="Netflix at center; tap Comcast to learn it owns Peacock. Built from the same filings data.">
-    <MoatDiagram />
+  <Plate cap="Overview video" tag="NKE" caption="The Nike stock page, with the overview playing in the header. Visuals pending.">
+    <Placeholder>Stock detail header · the overview video animating in</Placeholder>
   </Plate>
+
+  Then we went section by section. Every stat on the page got an AI insight
+  next to it: what the term means and the so what. Under the growth chart, a
+  line says how much Nike&rsquo;s revenue grew over the last four years and
+  whether that&rsquo;s good. It&rsquo;s the learn mode idea from the old app,
+  except it&rsquo;s always on and it&rsquo;s written for a kid.
+</Section>
+
+<Section no="04" label="Calling their own shots" title="Empowering kids to invest responsibly.">
+  <Lead>
+    Once a kid understands what a company does, the next question is
+    whether they want to own a piece of it. We can&rsquo;t answer that for
+    them. We can help them answer it themselves.
+  </Lead>
+
+  We borrowed from how Warren Buffett looks at a company and boiled it down
+  to three questions a kid could actually ask.
 
   <Decide
     cap="Help me decide · the three questions"
     questions={[
-      { n: '01', q: 'Is this a leading company in its industry?', tag: 'P/E · rank' },
-      { n: '02', q: 'Will it keep growing and making money?', tag: 'projections' },
-      { n: '03', q: 'Is it worth buying right now?', tag: 'bulls · bears' },
+      { n: '01', q: 'Do you think they’re a leading company in a thriving industry?', tag: 'rank · industry' },
+      { n: '02', q: 'Do you think they’ll keep growing and making money?', tag: 'growth · earnings' },
+      { n: '03', q: 'Do you think this stock is worth buying right now?', tag: 'bulls · bears' },
     ]}
   />
 
-  Compliance means we can never tell a kid what to buy. So the product plays
-  their own reasoning back to them: *based on your answers, this might be
-  worth considering*, or *this doesn&rsquo;t look like a fit.* Honestly, that
-  constraint made the design better. It pushed us to teach kids how to think
-  about the decision instead of handing them one.
+  Each question comes with the financial data and analyst takes to help
+  answer it: how the company ranks, how it&rsquo;s been growing, what the
+  bulls and bears are saying. The AI insights are in here too, asking a
+  follow-up or explaining a term right where it comes up.
+
+  At the end, it reads their own answers back. Either it might be a match
+  and they should consider investing, or they don&rsquo;t think it&rsquo;s
+  worth it right now, and here are some other stocks and ETFs they might
+  like instead. The product never picks for them. We called it Help me
+  decide, and kids found it on their own.
+
+  <Metrics>
+    <div>
+      <Stat big={<>1 in <span className="hl-pink">10</span></>} label="kids who open a stock page go through Help me decide, ahead of their parents" />
+      <Stat secondary big={<>8.4%</>} label="of parents who used it upgraded their plan" />
+    </div>
+    <Plate cap="Help me decide" caption="The three questions on a phone. Visuals pending.">
+      <Placeholder>Help me decide · question flow and the verdict screen</Placeholder>
+    </Plate>
+  </Metrics>
 </Section>
 
-<Section no="04" label="Built it myself" title="Engineering said the graph was too hard. I disagreed.">
-  I wanted an interactive performance graph: press and hold, scrub across
-  time, feel a haptic tick at each interval. Engineering came back and said
-  it was too hard to build. Every trading app has this interaction, and
-  that answer annoyed me enough to go build it myself.
+<Section no="05" label="Building the moat for kids" title="Their favorite companies in context in the market.">
+  <Lead>
+    Every trading app has a performance graph and a P/E ratio, so we had
+    examples to work from. Nobody had a good picture of a company&rsquo;s
+    economic moat, let alone one for kids. I took that one on myself.
+  </Lead>
 
-  <Plate cap="Plate 03 · performance graph" tag="haptic scrub" caption="Scrub it, and each interval ticks. The shipped SwiftUI version does this under your thumb, with real haptics.">
+  I landed on a bullseye. The company sits in the middle and the
+  competition surrounds it in rings: closest rivals, competitors, farther
+  out. One glance tells you who&rsquo;s crowding Nvidia and who&rsquo;s off
+  in the distance. Tap a competitor and you get why they sit in that ring,
+  plus the top three reasons, generated from the data in plain categories
+  like special technology, famous brand, or cheaper to make stuff.
+
+  <Plate cap="Competitors" tag="NFLX" caption="Netflix at center; tap Comcast to learn it owns Peacock. Built from the same filings data.">
+    <MoatDiagram />
+  </Plate>
+
+  The word moat is nowhere on the screen. A kid can see which companies are
+  exposed and which ones are insulated just by checking the bullseye, and
+  that&rsquo;s the whole idea.
+</Section>
+
+<Section no="06" label="Charting a course to better data viz" title="Eng told me it was too difficult to build, so I did it myself.">
+  <Lead>
+    The design team and I wanted an interactive performance graph. That&rsquo;s
+    a high-impact interaction and it should feel premium: press and hold,
+    scrub across time, and haptics at each interval. Engineering came back
+    and said it was too hard to build, but every trading app has it, and that
+    annoyed me enough to go build it myself.
+  </Lead>
+
+  <Plate cap="Performance graph" tag="haptic scrub" caption="Scrub it, and each interval ticks. The shipped SwiftUI version does this under your thumb, with real haptics.">
     <ScrubGraph />
   </Plate>
 
   I paired with an engineer who gave me access to the real repo and a
-  playground inside it. Using AI coding tools, I wrote the interaction in
-  SwiftUI against our actual codebase, state by state, until it felt right.
-  Most of that code shipped. It was the first haptic feedback anywhere in
-  the app, and the first time the graph felt alive under my thumb.
+  playground inside it. Using Cursor and Xcode, I generated and refined the
+  interaction in SwiftUI against our actual codebase, state by state, until
+  it felt right. Most of that code shipped, including the first haptic
+  feedback anywhere in the app. The first time the graph felt alive under my
+  thumb, I was hooked.
 
-  That&rsquo;s pretty much how I work now. I designed the interaction,
-  specced the logic and taste, and refined with the data team so we could
-  generate at scale. There wasn&rsquo;t really a handoff anywhere in it.
+  I designed the interaction, specced the logic and taste, got the packages
+  to eng and they implemented it. Once I saw the level of control and polish
+  I could affect in actual production code, I could feel my role changing.
+  Looking back, that was the beginning of how I work now as a design
+  engineer.
 </Section>
 
-<Section no="05" label="The call" title="What didn't ship.">
-  The most ambitious idea, *Grows with You*, didn&rsquo;t make it. It would
+<Section no="07" label="The call" title="What we didn't ship.">
+  Our most ambitious idea, *Grows with You*, didn&rsquo;t make it. It would
   have read the whole picture of a young investor, their experience, their
   spending, their family&rsquo;s financial context, and leveled the entire
-  interface up with them: language, data density, and complexity all rising
-  as the kid grew into it.
+  interface up with them: language, data density, and complexity all
+  changing as investors learned and grew.
 
-  We couldn&rsquo;t afford it in the time we had, so we made the hard call
-  and designed for the newest investor instead, simple enough for everyone
-  on day one. I still believe in the adaptive version, and I&rsquo;d like to
-  build it someday. For that timeline, shipping the simple version that
-  worked was the right call.
+  Based on timelines, we made the hard call to design for the newest
+  investor instead; simple enough for everyone on day one. I still believe
+  in that adaptive version, and I think it&rsquo;s more than possible with
+  the tools at our disposal today.
+
+  <Plate cap="Grows with You" caption="The interface leveling up with the investor. Deck frames and a recording pending.">
+    <Placeholder>Grows with You · the UI changing with the kid</Placeholder>
+  </Plate>
 </Section>
 
-<Section no="06" label="What it did" title="Kids traded more, and families talked more.">
+<Section no="08" label="Outcome" title="More kids trading and more families talking.">
   <Metrics>
     <div>
-      <Stat big={<span className="hl-pink">3–4×</span>} label="first-trade rate among kids exposed to the new detail screens vs. those who weren't" />
-      <Stat secondary big={<>355%<span className="hl-pink">↑</span></>} label="growth in detail-screen views" />
+      <Stat big={<span className="hl-pink">3–4×</span>} label="increase in first-trade rate among kids with the new detail screens vs. the old ones" />
+      <Stat secondary big={<>355%<span className="hl-pink">↑</span></>} label="increase in stock detail screen views" />
     </div>
-    <Plate cap="Plate 04 · signal" caption="Stand-in data for now. The real adoption series is pending.">
+    <Plate cap="Signal" caption="Stand-in data for now. The real adoption series is pending.">
       <FrequencyBars />
     </Plate>
   </Metrics>
 
-  The part I keep coming back to is more basic than the numbers. Investing
-  used to be a kid alone with a screen they couldn&rsquo;t read. Now a
-  parent asks *why this one*, and the kid has an answer. They have a
+  The part I keep coming back to is more foundational than the metrics:
+  families connecting and talking about money. Investing used to be a kid
+  alone with a screen they didn&rsquo;t really understand. Now their parent
+  can ask *why this one*, and their kid will have an answer. They have a
   conversation about it now. That&rsquo;s pretty cool.
 
   <PullQuote cite="Parent, user research">&ldquo;It encouraged conversation.&rdquo;</PullQuote>

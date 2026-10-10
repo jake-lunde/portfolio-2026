@@ -134,6 +134,12 @@
   margin-bottom: 0;
 }
 
+/* the lead's inner <p> is its last child, so the section's last-child
+   rule zeroes its margin; the gap to the next paragraph lives here */
+.lead {
+  margin: 0 0 20px;
+}
+
 .lead p {
   font-size: var(--type-body-lg-size); /* 19.5px → 16px — flag: case-study lead paragraph, notable snap */
 }

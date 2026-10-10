@@ -197,7 +197,6 @@ export function BeforeSheet() {
           {name} · {screens(h)}
         </>
       }
-      caption="Five screens from the old flow. Hover or drag to scroll one."
     >
       <div
         className={styles.beforeRow}
