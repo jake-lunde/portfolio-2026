@@ -190,7 +190,22 @@ type LongTab = 'detail' | 'search' | 'dash'
    field; tab bar, Stock details' sticky Buy). Written down so nothing
    measures at runtime. dash-l2's activity list runs under its tab bar
    in Figma; the bottom band covers it, which is right. */
-type LongPage = { file: string; h: number; top: number; bottom: number; alt: string }
+/* top = the pinned header's height in pt; start = where the scrolling
+   middle begins in the page's own file (defaults to top). cap borrows a
+   status bar from another file: `pt` points of `file` from its top, then
+   this page's own file from `from` up to `start`. The dashboard exports
+   draw their clock 12pt lower than the other screens (a taller nav
+   component in Figma), so without this the header jumped between tabs. */
+type LongPage = {
+  file: string
+  h: number
+  top: number
+  bottom: number
+  alt: string
+  start?: number
+  cap?: { file: string; h: number; pt: number; from: number }
+}
+const STATUS_CAP = { file: 'search-l1', h: 2281, pt: 44, from: 48 }
 
 const LONG: Record<LongTab, [LongPage, LongPage]> = {
   detail: [
@@ -202,8 +217,8 @@ const LONG: Record<LongTab, [LongPage, LongPage]> = {
     { file: 'search-l2', h: 1878, top: 158, bottom: 95, alt: 'Discover at level 2 leads with categories and ETFs, adds picks based on the kid’s spending and a lesson on researching ETFs, and shows price moves on the top-rated companies.' },
   ],
   dash: [
-    { file: 'dash-l1', h: 3230, top: 101, bottom: 110, alt: 'The kid’s Invest home at level 1: their balance and graph, one holding, level 1 lessons, picks based on their spending and recent activity.' },
-    { file: 'dash-l2', h: 3700, top: 101, bottom: 95, alt: 'The kid’s Invest home at level 2 carries more sections and denser stats: stocks and ETFs split out, each holding with its cost and shares, level 2 lessons, recommendations by risk and a longer activity list.' },
+    { file: 'dash-l1', h: 3230, top: 97, start: 101, bottom: 110, cap: STATUS_CAP, alt: 'The kid’s Invest home at level 1: their balance and graph, one holding, level 1 lessons, picks based on their spending and recent activity.' },
+    { file: 'dash-l2', h: 3700, top: 97, start: 101, bottom: 95, cap: STATUS_CAP, alt: 'The kid’s Invest home at level 2 carries more sections and denser stats: stocks and ETFs split out, each holding with its cost and shares, level 2 lessons, recommendations by risk and a longer activity list.' },
   ],
 }
 
@@ -249,7 +264,8 @@ function LongScreen({
   label: string
   fine: boolean
 }) {
-  const { file, h, top, bottom, alt } = page
+  const { file, h, top, bottom, alt, cap } = page
+  const start = page.start ?? top
   const reduced = useReducedMotion()
   const box = useRef<HTMLDivElement>(null)
   const run = useRef<AnimationPlaybackControls | null>(null)
@@ -263,9 +279,9 @@ function LongScreen({
      difference, h - 844, written as a percent of the slice's own height
      so nothing needs measuring. Clamped so a spring never opens a gap.
      Recomputed on render, so a grade switch re-aims the same p. */
-  const slice = h - top - bottom
+  const slice = h - start - bottom
   const view = PT_H - top - bottom
-  const room = Math.max(0, (h - PT_H) / slice)
+  const room = Math.max(0, (slice - view) / slice)
   const y = useTransform(p, (v) => `${-Math.min(1, Math.max(0, v)) * room * 100}%`)
 
   const jump = (v: number) => {
@@ -307,15 +323,15 @@ function LongScreen({
 
   /* the same img in every box; translateY is a percent of the img's own
      height, so -(pt / h) lifts it to that point on the page */
-  const band = (at: number) => (
+  const band = (at: number, src = file, of = h) => (
     <img
-      src={longSrc(file)}
+      src={longSrc(src)}
       width={W}
-      height={h * 2}
+      height={of * 2}
       alt=""
       aria-hidden="true"
       draggable={false}
-      style={{ transform: `translateY(${(-at / h) * 100}%)` }}
+      style={{ transform: `translateY(${(-at / of) * 100}%)` }}
     />
   )
 
@@ -332,9 +348,20 @@ function LongScreen({
         if (e.key === 'ArrowUp') (e.preventDefault(), nudge(-1))
       }}
     >
-      <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${top}` }}>
-        {band(0)}
-      </div>
+      {cap ? (
+        <>
+          <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${cap.pt}` }}>
+            {band(0, cap.file, cap.h)}
+          </div>
+          <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${start - cap.from}` }}>
+            {band(cap.from)}
+          </div>
+        </>
+      ) : (
+        <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${top}` }}>
+          {band(0)}
+        </div>
+      )}
       <div
         ref={box}
         className={styles.lapMid}
@@ -361,7 +388,7 @@ function LongScreen({
             height={h * 2}
             alt={alt}
             draggable={false}
-            style={{ transform: `translateY(${(-top / h) * 100}%)` }}
+            style={{ transform: `translateY(${(-start / h) * 100}%)` }}
           />
         </motion.div>
       </div>
