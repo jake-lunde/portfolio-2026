@@ -1,16 +1,7 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import {
-  animate,
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useTransform,
-  type AnimationPlaybackControls,
-  type MotionValue,
-} from 'motion/react'
-import { SPRINGS } from '@/lib/motion'
+import { useReducedMotion } from 'motion/react'
 import { sfx } from '@/lib/sound'
 import { Plate } from './CaseComponents'
 import styles from './case.module.css'
@@ -40,8 +31,9 @@ import styles from './case.module.css'
 
    STOCK DETAILS, SEARCH and DASHBOARD each show one long screenshot
    the way the real app does: its top and bottom chrome stay pinned to
-   the frame and only the middle scrolls, BeforeSheet's mechanics
-   (LongScreen below). Switching level there keeps the scroll fraction. */
+   the frame and only the middle scrolls, a normal scroll box for every
+   pointer (LongScreen below). Switching level there keeps the scroll
+   fraction. */
 
 const BASE = '/case/greenlight-invest/lap'
 
@@ -249,151 +241,75 @@ function screens(h: number) {
    Band heights are aspect ratios of the 390pt width, so they track the
    phone's rendered size and the three always sum to the 390/844 screen.
 
-   The middle box carries BeforeSheet's mechanics. Fine pointer: cursor
-   y over it scrubs the page top to bottom (transform only) and leaving
-   eases it back to the top on SPRINGS.window. Touch: it is the native
-   scroll box. Up and down arrows nudge half the scroll window. Reduced
-   motion jumps. Keyed by tab, so a grade switch keeps the component
-   and with it the scroll fraction. */
-function LongScreen({
-  page,
-  label,
-  fine,
-}: {
-  page: LongPage
-  label: string
-  fine: boolean
-}) {
-  const { file, h, top, bottom, alt, cap } = page
-  const start = page.start ?? top
+   The middle box is a plain scroll container for every pointer, as on
+   OverviewPage: wheel, trackpad and touch scroll it (Jake ruled the old
+   hover scrub felt buggy). Up and down arrows nudge half of it when it
+   has focus, smooth unless motion is reduced. Keyed by tab, so a level
+   switch keeps the component, and the scroll fraction carries over. */
+function LongScreen({ page, label }: { page: LongPage; label: string }) {
+  const { file, h, top, bottom, alt } = page
   const reduced = useReducedMotion()
   const box = useRef<HTMLDivElement>(null)
-  const run = useRef<AnimationPlaybackControls | null>(null)
-  /* fine pointer: p is how far down the page we are, 0 (top) to 1 (end) */
-  const p: MotionValue<number> = useMotionValue(0)
-  /* touch: the same fraction, read off the native scroll */
+  /* how far down the page the reader is, 0 to 1, kept current by every
+     scroll so it holds the value from just before a level switch */
   const frac = useRef(0)
 
-  /* the middle slice of the page, [top, h - bottom], and the window it
-     shows through, [top, 844 - bottom]. The slice moves by p times the
-     difference, h - 844, written as a percent of the slice's own height
-     so nothing needs measuring. Clamped so a spring never opens a gap.
-     Recomputed on render, so a grade switch re-aims the same p. */
-  const slice = h - start - bottom
-  const view = PT_H - top - bottom
-  const room = Math.max(0, (slice - view) / slice)
-  const y = useTransform(p, (v) => `${-Math.min(1, Math.max(0, v)) * room * 100}%`)
+  /* the middle slice of the page, [top, h - bottom] */
+  const slice = h - top - bottom
 
-  const jump = (v: number) => {
-    run.current?.stop()
-    p.set(v)
-  }
-  const glide = (v: number) => {
-    if (reduced) return jump(v)
-    run.current?.stop()
-    /* window: the most damped spring token, so the return settles */
-    run.current = animate(p, v, SPRINGS.window)
-  }
-
-  /* pointer type can flip (a tablet with a trackpad): park the scrub */
-  useEffect(() => {
-    run.current?.stop()
-    p.set(0)
-    frac.current = 0
-  }, [fine, p])
-
-  /* touch: a grade switch keeps the scroll fraction on the new page */
+  /* a level switch: put the new page at the same fraction */
   useLayoutEffect(() => {
     const el = box.current
-    if (!el || fine) return
+    if (!el) return
     el.scrollTop = frac.current * Math.max(0, el.scrollHeight - el.clientHeight)
-  }, [h, fine])
+  }, [h])
 
   const nudge = (d: number) => {
-    if (h <= PT_H) return
-    if (fine) {
-      /* half the scroll window per press */
-      const step = view / 2 / (h - PT_H)
-      glide(Math.min(1, Math.max(0, p.get() + d * step)))
-    } else {
-      const el = box.current
-      if (el) el.scrollBy({ top: (d * el.clientHeight) / 2, behavior: reduced ? 'auto' : 'smooth' })
-    }
+    const el = box.current
+    if (el) el.scrollBy({ top: (d * el.clientHeight) / 2, behavior: reduced ? 'auto' : 'smooth' })
   }
 
   /* the same img in every box; translateY is a percent of the img's own
      height, so -(pt / h) lifts it to that point on the page */
-  const band = (at: number, src = file, of = h) => (
+  const shot = (at: number, text: string) => (
     <img
-      src={longSrc(src)}
+      src={longSrc(file)}
       width={W}
-      height={of * 2}
-      alt=""
-      aria-hidden="true"
+      height={h * 2}
+      alt={text}
+      aria-hidden={text ? undefined : 'true'}
       draggable={false}
-      style={{ transform: `translateY(${(-at / of) * 100}%)` }}
+      style={{ transform: `translateY(${(-at / h) * 100}%)` }}
     />
   )
 
   return (
-    <div
-      className={styles.lapScreen}
-      data-kind="long"
-      role="group"
-      aria-label={`${label}, ${screens(h)} long. Up and down arrows scroll it.`}
-      tabIndex={0}
-      onBlur={() => fine && glide(0)}
-      onKeyDown={(e) => {
-        if (e.key === 'ArrowDown') (e.preventDefault(), nudge(1))
-        if (e.key === 'ArrowUp') (e.preventDefault(), nudge(-1))
-      }}
-    >
-      {cap ? (
-        <>
-          <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${cap.pt}` }}>
-            {band(0, cap.file, cap.h)}
-          </div>
-          <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${start - cap.from}` }}>
-            {band(cap.from)}
-          </div>
-        </>
-      ) : (
-        <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${top}` }}>
-          {band(0)}
-        </div>
-      )}
+    <div className={styles.lapScreen} data-kind="long">
+      <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${top}` }}>
+        {shot(0, '')}
+      </div>
       <div
         ref={box}
         className={styles.lapMid}
-        data-scroll={fine ? 'hover' : 'native'}
-        onMouseMove={
-          fine
-            ? (e) => {
-                const r = e.currentTarget.getBoundingClientRect()
-                jump((e.clientY - r.top) / r.height)
-              }
-            : undefined
-        }
-        onMouseLeave={fine ? () => glide(0) : undefined}
+        role="group"
+        aria-label={`${label}, ${screens(h)} long. Up and down arrows scroll it.`}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowDown') (e.preventDefault(), nudge(1))
+          if (e.key === 'ArrowUp') (e.preventDefault(), nudge(-1))
+        }}
         onScroll={(e) => {
           const el = e.currentTarget
           const max = el.scrollHeight - el.clientHeight
           frac.current = max > 0 ? el.scrollTop / max : 0
         }}
       >
-        <motion.div className={styles.lapSlice} style={{ aspectRatio: `${PT_W} / ${slice}`, y }}>
-          <img
-            src={longSrc(file)}
-            width={W}
-            height={h * 2}
-            alt={alt}
-            draggable={false}
-            style={{ transform: `translateY(${(-start / h) * 100}%)` }}
-          />
-        </motion.div>
+        <div className={styles.lapSlice} style={{ aspectRatio: `${PT_W} / ${slice}` }}>
+          {shot(top, alt)}
+        </div>
       </div>
       <div className={styles.lapBand} style={{ aspectRatio: `${PT_W} / ${bottom}` }}>
-        {band(h - bottom)}
+        {shot(h - bottom, '')}
       </div>
     </div>
   )
@@ -409,7 +325,6 @@ export function LapFlow() {
   const [kbFocus, setKbFocus] = useState(false)
   const [inView, setInView] = useState(false)
   const [warm, setWarm] = useState(false)
-  const [fine, setFine] = useState(false)
   const reduced = useReducedMotion()
   const stage = useRef<HTMLDivElement>(null)
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
@@ -418,14 +333,6 @@ export function LapFlow() {
   const n = flow.n
   const onboarding = tab === 'onboarding'
   const long = onboarding ? null : LONG[tab][g]
-
-  useEffect(() => {
-    const mq = window.matchMedia('(hover: hover) and (pointer: fine)')
-    const sync = () => setFine(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
 
   /* in view: autoplay only runs on screen, and preloading waits for the
      first sighting */
@@ -549,7 +456,6 @@ export function LapFlow() {
                 key={tab}
                 page={long}
                 label={`${TABS.find(([id]) => id === tab)?.[1]}, ${flow.label}`}
-                fine={fine}
               />
             ) : (
               <Screen src={srcOf(flow, i)} alt={altOf(flow, i)} fade={!reduced}>

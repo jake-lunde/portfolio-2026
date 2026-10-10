@@ -6,10 +6,9 @@ import styles from './case.module.css'
    fourth grader) or LEVEL 2 (the eighth); the pills pick the screen.
    Onboarding plays itself every 4.5s and a tap on either half of the
    screen steps it; the other three tabs are long pages whose top and
-   bottom chrome stay pinned while the middle scrolls (hover on desktop,
-   native scroll on a phone). The plate
-   lives inside .case because every case breakpoint asks that box's
-   width, not the screen's. */
+   bottom chrome stay pinned while the middle scrolls like a normal page
+   (wheel, trackpad or touch). The plate lives inside .case because
+   every case breakpoint asks that box's width, not the screen's. */
 
 const meta = {
   title: 'Case Study/Lap Flow',

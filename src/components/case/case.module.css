@@ -465,9 +465,18 @@
   /* one iPhone screen in points: the exports are 375pt frames at 2x,
      750 x 1624 per screen. The recordings' 351/763 is a different crop. */
   aspect-ratio: 375 / 812;
-  overflow: hidden;
   border-radius: calc(100cqi * 34 / 280);
   background: #000; /* the bezel's ink while a screen loads, as .demoReelPhone */
+  /* a plain scroll box for every pointer: wheel, trackpad, touch. A
+     one-screen page simply has nothing to scroll. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.beforeScreen::-webkit-scrollbar {
+  display: none;
 }
 
 .beforeScreen img {
@@ -477,17 +486,6 @@
   user-select: none;
 }
 
-/* fine pointers: cursor y scrubs the page, transform only */
-.beforeRow[data-scroll='hover'] .beforeScreen img {
-  will-change: transform;
-}
-
-/* touch: each screen is its own scroll box, momentum and all; a
-   one-screen page simply has nothing to scroll */
-.beforeRow[data-scroll='native'] .beforeScreen {
-  overflow-y: auto;
-  scrollbar-width: none;
-}
 
 @container (max-width: 640px) {
   .beforeRow {
@@ -604,30 +602,27 @@
 .lapMid {
   flex: 1 1 0;
   min-height: 0;
-  overflow: hidden;
-}
-
-/* the part of the page between the bands; its own box sets the scroll
-   height on touch, and it clips the img past the bottom band's line */
-.lapSlice {
-  overflow: hidden;
-}
-
-/* fine pointers: cursor y scrubs the slice, transform only */
-.lapMid[data-scroll='hover'] .lapSlice {
-  will-change: transform;
-}
-
-/* touch: the middle box is its own scroll box, momentum and all */
-.lapMid[data-scroll='native'] {
+  /* a plain scroll box for every pointer: wheel, trackpad, touch */
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
 }
 
-.lapScreen[data-kind='long']:focus-visible {
+.lapMid::-webkit-scrollbar {
+  display: none;
+}
+
+/* inset, so the screen's own clip never cuts the ring */
+.lapMid:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline-offset: -4px;
+}
+
+/* the part of the page between the bands; its box sets the scroll
+   height, and it clips the img past the bottom band's line */
+.lapSlice {
+  overflow: hidden;
 }
 
 /* four pills where the shared row holds three; two by two when narrow,

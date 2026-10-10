@@ -1,16 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import {
-  animate,
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useTransform,
-  type AnimationPlaybackControls,
-  type MotionValue,
-} from 'motion/react'
-import { SPRINGS } from '@/lib/motion'
+import { useRef, useState } from 'react'
+import { useReducedMotion } from 'motion/react'
 import { Plate } from './CaseComponents'
 import styles from './case.module.css'
 
@@ -20,12 +11,13 @@ import styles from './case.module.css'
    screenshot to one phone screen, so the reader finds out how far each
    page ran by scrolling it.
 
-   Two behaviors, same split as PitchDeck: with a fine pointer, cursor y
-   over a frame scrubs its screen top to bottom (transform only) and
-   leaving eases it back to the top; on touch each screen is a native
-   scroll box. The row lays out by the article's width, not the pointer:
-   wide, all frames share the row; narrow (phones), it becomes a snap
-   carousel, one frame per swipe.
+   Each screen scrolls like a normal page for every pointer: wheel,
+   trackpad and touch all scroll it, and up and down arrows nudge half a
+   screen when its frame has focus (Jake ruled the old hover scrub felt
+   buggy). Left and right arrows move between frames. The readout names
+   the frame last focused or scrolled. The row lays out by the article's
+   width, not the pointer: wide, all frames share the row; narrow
+   (phones), it becomes a snap carousel, one frame per swipe.
 
    Mat: the default dark plate, on purpose. The screenshots are white,
    but they never touch the plate: the bezel does. Rail law matches the
@@ -60,7 +52,6 @@ function Frame({
   name,
   alt,
   i,
-  fine,
   active,
   onActive,
   onArrow,
@@ -71,7 +62,6 @@ function Frame({
   name: string
   alt: string
   i: number
-  fine: boolean
   active: boolean
   onActive: () => void
   onArrow: (d: number) => void
@@ -79,44 +69,11 @@ function Frame({
 }) {
   const reduced = useReducedMotion()
   const screen = useRef<HTMLDivElement>(null)
-  const run = useRef<AnimationPlaybackControls | null>(null)
-  /* p is how far down the page we are, 0 (top) to 1 (last screen) */
-  const p: MotionValue<number> = useMotionValue(0)
-  /* translateY as a percent of the image's own height, so nothing needs
-     measuring: the last screen sits flush when p = 1. Clamped at the top
-     so a spring can never open a gap above the page. */
-  const room = 1 - VIEW / h
-  const y = useTransform(p, (v) => `${-Math.min(1, Math.max(0, v)) * room * 100}%`)
 
-  const jump = (v: number) => {
-    run.current?.stop()
-    p.set(v)
-  }
-  const glide = (v: number) => {
-    if (reduced) return jump(v)
-    run.current?.stop()
-    /* window: the most damped spring token, so the return settles
-       instead of bouncing */
-    run.current = animate(p, v, SPRINGS.window)
-  }
-
-  /* pointer type can flip (a tablet with a trackpad): park the scrub.
-     y stays bound in both modes; on touch p rests at 0, so it is a no-op */
-  useEffect(() => {
-    run.current?.stop()
-    p.set(0)
-  }, [fine, p])
-
+  /* half a phone screen per press, smooth unless motion is reduced */
   const nudge = (d: number) => {
-    if (room <= 0) return
-    if (fine) {
-      /* half a phone screen per press */
-      const step = (VIEW / 2) / (h - VIEW)
-      glide(Math.min(1, Math.max(0, p.get() + d * step)))
-    } else {
-      const el = screen.current
-      if (el) el.scrollBy({ top: (d * el.clientHeight) / 2, behavior: reduced ? 'auto' : 'smooth' })
-    }
+    const el = screen.current
+    if (el) el.scrollBy({ top: (d * el.clientHeight) / 2, behavior: reduced ? 'auto' : 'smooth' })
   }
 
   return (
@@ -128,17 +85,6 @@ function Frame({
         aria-label={`${name}, ${screens(h)} long`}
         tabIndex={active ? 0 : -1}
         onFocus={onActive}
-        onBlur={() => fine && glide(0)}
-        onMouseEnter={onActive}
-        onMouseMove={
-          fine
-            ? (e) => {
-                const r = e.currentTarget.getBoundingClientRect()
-                jump((e.clientY - r.top) / r.height)
-              }
-            : undefined
-        }
-        onMouseLeave={fine ? () => glide(0) : undefined}
         onKeyDown={(e) => {
           if (e.key === 'ArrowRight') (e.preventDefault(), onArrow(1))
           if (e.key === 'ArrowLeft') (e.preventDefault(), onArrow(-1))
@@ -146,15 +92,16 @@ function Frame({
           if (e.key === 'ArrowUp') (e.preventDefault(), nudge(-1))
         }}
       >
-        <div ref={screen} className={styles.beforeScreen}>
-          <motion.img
+        {/* a plain scroll box; its first scroll names this frame in the
+            readout (scroll events don't bubble to the row's carousel) */}
+        <div ref={screen} className={styles.beforeScreen} onScroll={active ? undefined : onActive}>
+          <img
             src={`${BASE}/${file}.webp`}
             width={W}
             height={h}
             alt={alt}
             loading={i === 0 ? undefined : 'lazy'}
             draggable={false}
-            style={{ y }}
           />
         </div>
       </div>
@@ -163,18 +110,9 @@ function Frame({
 }
 
 export function BeforeSheet() {
-  const [fine, setFine] = useState(false)
   const [on, setOn] = useState(0)
   const reduced = useReducedMotion()
   const frames = useRef<Array<HTMLDivElement | null>>([])
-
-  useEffect(() => {
-    const mq = window.matchMedia('(hover: hover) and (pointer: fine)')
-    const sync = () => setFine(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
 
   /* left/right: roving focus along the row; in the carousel the frame
      is brought to centre without nudging the page vertically */
@@ -202,7 +140,6 @@ export function BeforeSheet() {
         className={styles.beforeRow}
         role="group"
         aria-label={`The old Invest flow, ${SCREENS.length} screens. Left and right arrows move between them, up and down scroll one.`}
-        data-scroll={fine ? 'hover' : 'native'}
         onScroll={(e) => {
           /* carousel only: the frame snapped to the middle is the one
              the readout names */
@@ -221,7 +158,6 @@ export function BeforeSheet() {
             name={fname}
             alt={alt}
             i={i}
-            fine={fine}
             active={i === on}
             onActive={() => setOn(i)}
             onArrow={arrow}
