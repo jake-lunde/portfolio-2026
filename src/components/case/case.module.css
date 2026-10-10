@@ -639,6 +639,11 @@
   right: 0;
 }
 
+/* at either end the half is still there for focus, but the hand goes away */
+.lapHit[aria-disabled='true'] {
+  cursor: default;
+}
+
 /* inset, so the screen's own clip never cuts the ring */
 .lapHit:focus-visible {
   outline: 2px solid var(--accent);

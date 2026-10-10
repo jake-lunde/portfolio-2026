@@ -24,10 +24,11 @@ import styles from './case.module.css'
    ONBOARDING walks the first lap: a fourth grader's flow (33 frames) or
    an eighth grader's (20). Switching grade keeps the proportional
    position, so halfway through one lap lands halfway through the other.
-   The phone plays itself, one frame every 4.5s, looping, while the
-   stage is on screen. Keyboard focus inside the stage pauses it; hover
-   does not. Two invisible buttons cover the screen halves: the right
-   one steps forward, the left one back, both wrapping. The first press
+   The phone plays itself, one frame every 4.5s, while the stage is on
+   screen, and rests on the last frame: the lap never loops (Jake, s143).
+   Keyboard focus inside the stage pauses it; hover does not. Two
+   invisible buttons cover the screen halves: the right one steps
+   forward, the left one back, and both stop at the ends. The first press
    hands the reader the wheel: autoplay stops and stays off until the
    stage leaves the viewport and comes back (Jake, s143). Left and right
    arrows do the same, Home and End jump. Every change crossfades over
@@ -371,7 +372,8 @@ export function LapFlow() {
      grade resets it */
   useEffect(() => {
     if (!onboarding || reduced || !inView || kbFocus || taken) return
-    const t = setTimeout(() => setI((v) => (v + 1) % n), TICK_MS)
+    if (i >= n - 1) return
+    const t = setTimeout(() => setI((v) => Math.min(n - 1, v + 1)), TICK_MS)
     return () => clearTimeout(t)
   }, [onboarding, reduced, inView, kbFocus, taken, i, g, n])
 
@@ -383,7 +385,8 @@ export function LapFlow() {
     if (onboarding) {
       for (const d of [1, 2]) {
         const im = new Image()
-        im.src = srcOf(flow, (i + d) % n)
+        if (i + d > n - 1) break
+        im.src = srcOf(flow, i + d)
         im.decode?.().catch(() => {})
       }
     } else {
@@ -391,8 +394,10 @@ export function LapFlow() {
     }
   }, [warm, onboarding, tab, flow, i, n, g])
 
+  /* clamped, never wrapped: back on the first screen and forward on
+     the last are no-ops, though either still hands over the wheel */
   const go = (to: number) => {
-    setI(((to % n) + n) % n)
+    setI(Math.max(0, Math.min(n - 1, to)))
     setTaken(true)
   }
 
@@ -482,6 +487,7 @@ export function LapFlow() {
                   className={styles.lapHit}
                   data-side="prev"
                   aria-label="Previous screen"
+                  aria-disabled={i === 0 || undefined}
                   onClick={() => go(i - 1)}
                 />
                 <button
@@ -489,6 +495,7 @@ export function LapFlow() {
                   className={styles.lapHit}
                   data-side="next"
                   aria-label="Next screen"
+                  aria-disabled={i === n - 1 || undefined}
                   onClick={() => go(i + 1)}
                 />
               </Screen>
