@@ -15,6 +15,7 @@ import { MoatDiagram } from '@/components/case/MoatDiagram'
 import { ScrubGraph } from '@/components/case/ScrubGraph'
 import { FrequencyBars } from '@/components/case/FrequencyBars'
 import { CaseFooter } from '@/components/case/CaseFooter'
+import { BeforeSheet } from '@/components/case/BeforeSheet'
 
 <Hero
   eyebrow="Greenlight · Investing for kids · Fintech"
@@ -28,7 +29,26 @@ import { CaseFooter } from '@/components/case/CaseFooter'
   ]}
 />
 
-<Section no="01" label="The gap" title="We made a prettier balance sheet.">
+<Section no="01" label="Before" title="A lot of words, not much to go on.">
+  <Lead>
+    When I joined, Invest looked like a balance sheet somebody remade in
+    photoshop. Lots of text. Barely any of it a kid could use.
+  </Lead>
+
+  The one place you could get help was a toggle called learn mode. Turn it
+  on and a purple lightbulb went off and added detail: what a Morningstar
+  rating is, what an expense ratio means. It was the right instinct. In
+  practice it was buggy, it only covered part of the page, and once it was
+  on the whole thing got even longer and felt like homework.
+
+  <BeforeSheet />
+
+  Still, I think of it as the first draft of what we ended up building.
+  Another designer had already figured out that the numbers needed to mean
+  something to a kid.
+</Section>
+
+<Section no="02" label="The gap" title="We made a prettier balance sheet.">
   <Lead>
     We showed a kid the new stock screen: cleaner charts, better-formatted
     financials, everything we thought they wanted. They said it was just
@@ -47,7 +67,7 @@ import { CaseFooter } from '@/components/case/CaseFooter'
   </Plate>
 </Section>
 
-<Section no="02" label="The system" title="Three moves to help a kid decide.">
+<Section no="03" label="The system" title="Three moves to help a kid decide.">
   We quit trying to present information and started helping a kid decide
   something about a company.
 
@@ -91,7 +111,7 @@ import { CaseFooter } from '@/components/case/CaseFooter'
   about the decision instead of handing them one.
 </Section>
 
-<Section no="03" label="Built it myself" title="Engineering said the graph was too hard. I disagreed.">
+<Section no="04" label="Built it myself" title="Engineering said the graph was too hard. I disagreed.">
   I wanted an interactive performance graph: press and hold, scrub across
   time, feel a haptic tick at each interval. Engineering came back and said
   it was too hard to build. Every trading app has this interaction, and
@@ -112,7 +132,7 @@ import { CaseFooter } from '@/components/case/CaseFooter'
   generate at scale. There wasn&rsquo;t really a handoff anywhere in it.
 </Section>
 
-<Section no="04" label="The call" title="What didn't ship.">
+<Section no="05" label="The call" title="What didn't ship.">
   The most ambitious idea, *Grows with You*, didn&rsquo;t make it. It would
   have read the whole picture of a young investor, their experience, their
   spending, their family&rsquo;s financial context, and leveled the entire
@@ -126,7 +146,7 @@ import { CaseFooter } from '@/components/case/CaseFooter'
   worked was the right call.
 </Section>
 
-<Section no="05" label="What it did" title="Kids traded more, and families talked more.">
+<Section no="06" label="What it did" title="Kids traded more, and families talked more.">
   <Metrics>
     <div>
       <Stat big={<span className="hl-pink">3–4×</span>} label="first-trade rate among kids exposed to the new detail screens vs. those who weren't" />
