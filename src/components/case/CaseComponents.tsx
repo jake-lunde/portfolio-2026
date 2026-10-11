@@ -217,6 +217,17 @@ export function Metrics({ children }: { children: React.ReactNode }) {
   return <div className={styles.metrics}>{children}</div>
 }
 
+/* the questions on the leading edge, the phone plate on the trailing
+   edge; narrow, they stack (same breakpoint as the Nike page) */
+export function DecideRow({ children }: { children: React.ReactNode }) {
+  return <div className={styles.decideRow}>{children}</div>
+}
+
+/* stats side by side, each in its own box; narrow, they stack */
+export function StatRow({ children }: { children: React.ReactNode }) {
+  return <div className={styles.statRow}>{children}</div>
+}
+
 export function Stat({
   big,
   label,

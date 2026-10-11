@@ -1227,6 +1227,98 @@
   max-width: 28ch;
 }
 
+/* the Help me decide row (DecideRow): the three questions on the
+   leading edge, the phone plate on the trailing edge, centred on each
+   other like the Nike page's stage (.ovpStage — same gap, same 640px
+   stack). The plate keeps its own width: the phone's 280px drawing plus
+   the plate's padding and border either side, so the reel's box is
+   reserved before the poster lands. */
+.decideRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  margin: 26px 0 20px; /* .decide's own margin, now carried by the row */
+}
+
+.decideRow > .decide {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+}
+
+.decideRow > .figure {
+  flex: 0 0 calc(280px + 2 * var(--space-5) + 2 * var(--border-width-default));
+  min-width: 0;
+  margin: 0;
+}
+
+/* in the narrower column the tag can't sit right of the question
+   without squeezing it, so it drops under the question text */
+.decideRow .q {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 14px; /* .q's own gap */
+  row-gap: var(--spacing-component-xs);
+}
+
+.decideRow .qtag {
+  grid-column: 2;
+  margin-left: 0;
+}
+
+@container (max-width: 640px) {
+  .decideRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .decideRow > .decide {
+    flex: 0 0 auto;
+  }
+
+  .decideRow > .figure {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}
+
+/* stats as units (StatRow): each data point in its own box, the same
+   card language as .decide and .ledger — bordered, on the page's
+   surface, square like the plates. Both numbers take the big size;
+   .statBig.secondary stays for the cases that still use it. */
+.statRow {
+  display: flex;
+  gap: var(--space-5);
+  margin: 6px 0 24px; /* .metrics' own margin */
+}
+
+.statRow > * {
+  flex: 1 1 0;
+  min-width: 0;
+  border: var(--border-width-default) solid var(--content);
+  background: var(--surface);
+  padding: var(--spacing-layout-md);
+}
+
+[data-theme='dark'] .statRow > * {
+  border-color: var(--border);
+  background: var(--surface-raised);
+}
+
+.statRow .statLab {
+  margin-top: var(--spacing-component-md);
+}
+
+@container (max-width: 640px) {
+  .statRow {
+    flex-direction: column;
+  }
+
+  .statRow > * {
+    flex: 0 0 auto;
+  }
+}
+
 /* footer */
 .caseFooter {
   padding-top: 34px;
