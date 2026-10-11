@@ -161,12 +161,12 @@ export function Decide({
   cap,
   questions,
 }: {
-  cap: string
+  cap?: string
   questions: Array<{ n: string; q: string; tag: string }>
 }) {
   return (
     <div className={styles.decide}>
-      <p className={styles.decideCap}>{cap}</p>
+      {cap && <p className={styles.decideCap}>{cap}</p>}
       {questions.map((item) => (
         <div key={item.n} className={styles.q}>
           <span className={styles.qn}>{item.n}</span>
