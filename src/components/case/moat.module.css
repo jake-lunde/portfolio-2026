@@ -1,0 +1,336 @@
+/* THE COMPETITORS BULLSEYE (MoatPlate.tsx) — Greenlight's real detailCard
+   and its fly-up sheet, rebuilt from Jake's Figma components
+   (201633:65798 / 201633:65799). The card is Greenlight's product
+   surface, so its colours are Greenlight's values from the Figma spec,
+   scoped to the card as custom properties (CLAUDE.md §5 derivation
+   note: these are not LUNDE OS tokens and never leave the card). The
+   plate and the company picker around it stay on the site's tokens.
+   Greenlight's proprietary face maps to the site's --sans at the spec's
+   sizes and line heights; its 350 "Screen" weight → regular, 500 →
+   medium. */
+
+/* the plate is the container: below 358px of room the card scales down
+   in steps (a transform keeps every chip on its measured spot), and the
+   frame reserves exactly the scaled height so nothing shifts */
+.stage {
+  container-type: inline-size;
+  position: relative;
+  z-index: 1; /* above the plate's halftone overlay */
+}
+
+.frame {
+  --k: 1;
+  position: relative;
+  height: calc(462px * var(--k));
+}
+
+@container (max-width: 357.98px) { .frame { --k: 0.95; } }
+@container (max-width: 339.98px) { .frame { --k: 0.9; } }
+@container (max-width: 321.98px) { .frame { --k: 0.85; } }
+@container (max-width: 303.98px) { .frame { --k: 0.8; } }
+@container (max-width: 285.98px) { .frame { --k: 0.75; } }
+@container (max-width: 267.98px) { .frame { --k: 0.7; } }
+
+.card {
+  /* Greenlight's palette, from the Figma spec (get_variable_defs) */
+  --gl-surface: #ffffff; /* primarySurface */
+  --gl-ink: #111212; /* onPrimarySurface */
+  --gl-line: rgba(52, 54, 54, 0.1); /* Line & Shadow/line #3436361a */
+  --gl-ring-outer: #dff5ff; /* accent2Weakest */
+  --gl-ring-mid: #b2e8ff; /* accent2Weak */
+  --gl-ring-inner: #69cef9; /* accent2Base */
+  --gl-brand-strong: #003835; /* brandStrongest */
+  --gl-brand-weak: #dff6f0; /* brandWeakest */
+  --gl-tertiary: #00d9b4; /* Interaction/Tertiary */
+  --gl-tab: rgba(213, 218, 218, 0.2); /* secondarySurface #d5dada33 */
+  --gl-scrim: rgba(0, 0, 0, 0.4); /* Skrim #00000066 */
+
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 358px;
+  height: 462px;
+  transform: translateX(-50%) scale(var(--k));
+  transform-origin: top center;
+  background: var(--gl-surface);
+  color: var(--gl-ink);
+  border-radius: 16px;
+  overflow: hidden;
+  font-family: var(--sans);
+  font-weight: var(--weight-regular);
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+}
+
+.card :focus-visible {
+  outline: 2px solid var(--gl-brand-strong);
+  outline-offset: 2px;
+}
+
+.content {
+  padding: 16px;
+}
+
+/* titleForCards: 8 + 24 row + 8, then the 40px gap to the chart */
+.titleRow {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  margin: 8px 0 48px;
+}
+
+.title {
+  flex: 1;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.info {
+  display: block;
+  flex: none;
+}
+
+/* ringChart 326x350, centre (163,175) */
+.chart {
+  position: relative;
+  width: 326px;
+  height: 350px;
+}
+
+.ring {
+  position: absolute;
+  left: 50%;
+  border-radius: 50%;
+  opacity: 0.7;
+  transform: translateX(-50%);
+}
+
+.ringOuter { top: 12px; width: 326px; height: 326px; background: var(--gl-ring-outer); }
+.ringMid { top: 54px; width: 242px; height: 242px; background: var(--gl-ring-mid); }
+.ringInner { top: 98px; width: 154px; height: 154px; background: var(--gl-ring-inner); }
+
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.center {
+  position: absolute;
+  left: 131px;
+  top: 143px;
+  width: 64px;
+  height: 64px;
+}
+
+.orbit {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  user-select: none;
+}
+
+/* the GOOG chip: no logo asset, the design's own text chip */
+.textChip {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--gl-brand-strong);
+  color: var(--gl-brand-weak);
+  font-size: 10px;
+  line-height: 8px;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.textChipBig {
+  width: 64px;
+  height: 64px;
+  font-size: 14px;
+  line-height: 14px;
+}
+
+/* ringPill: centred 14px right of the chart's middle, above the chips */
+.pill {
+  position: absolute;
+  left: calc(50% + 14px);
+  transform: translateX(-50%);
+  height: 32px;
+  padding: 7px 8px; /* 8 minus the 1px border, box stays 32 */
+  border: 1px solid var(--gl-line);
+  border-radius: 100px;
+  background: var(--gl-surface);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* the "Tap to learn more" bubble: tooltip-bubble.svg's shape, arrow tip
+   at x 97.5 pointing down at the chip */
+.tooltip {
+  position: absolute;
+  width: 119px;
+  height: 29px;
+  padding-top: 4px;
+  background: url('/case/greenlight-invest/moat/tooltip-bubble.svg') no-repeat top left / 119px 29px;
+  color: var(--gl-surface);
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* fly-up: rises from the card's bottom edge, scrim clipped to the card */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--gl-scrim);
+}
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100% - 16px);
+  padding: 24px 16px 16px;
+  background: var(--gl-surface);
+  border-radius: 16px 16px 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.sheet::-webkit-scrollbar {
+  display: none;
+}
+
+.sheetHead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.sheetTitle {
+  flex: 1;
+  margin: 0;
+  font-size: 24px;
+  line-height: 28px;
+  font-weight: var(--weight-medium);
+}
+
+.close {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.close img {
+  display: block;
+}
+
+/* tabs run to the sheet's edge and scroll sideways */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 4px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  flex: none;
+  height: 38px;
+  padding: 6px 14px; /* 8/16 minus the 2px border, box stays 38 */
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: var(--gl-tab);
+  color: var(--gl-ink);
+  font: inherit;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tab[aria-selected='true'] {
+  background: var(--gl-surface);
+  border-color: var(--gl-tertiary);
+  cursor: default;
+}
+
+.panel {
+  padding-top: 16px;
+}
+
+.why {
+  margin: 8px 0 4px;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: var(--weight-medium);
+}
+
+/* doubled class: the case prose's own `p` rule outranks a single class */
+.sheet .body {
+  margin: 0 0 24px;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.traits {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.traits li {
+  display: grid;
+  gap: 2px;
+}
+
+.traitLabel {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: var(--weight-medium);
+}
+
+.traitText {
+  font-size: 14px;
+  line-height: 18px;
+}
+
+/* the Figma label is "🧠 Special technology": a word space after the
+   emoji, which some emoji glyphs swallow — hold it open explicitly */
+.traitEmoji {
+  margin-right: 0.3em;
+}

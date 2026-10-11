@@ -16,7 +16,7 @@ import { Moves } from './Moves'
 import styles from './case.module.css'
 
 /* Case-study vocabulary (§7 anatomy). These are the static, presentational
-   pieces — interactive islands (MoatDiagram, FrequencyBars) live elsewhere.
+   pieces — interactive islands (MoatPlate, FrequencyBars) live elsewhere.
    Sample content is on-brand but generic. */
 
 const meta = {
