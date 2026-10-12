@@ -130,6 +130,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'AMZN',
         name: 'Amazon',
+        logo: `${LOGO}amzn.png`,
         ring: 2,
         x: 249,
         y: 256,
@@ -143,6 +144,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'GOOG',
         name: 'Google',
+        logo: `${LOGO}goog.png`,
         ring: 2,
         x: 62,
         y: 114,
@@ -165,6 +167,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'GOOG',
         name: 'Google',
+        logo: `${LOGO}goog.png`,
         ring: 1,
         x: 93,
         y: 201,
@@ -178,6 +181,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'MSFT',
         name: 'Microsoft',
+        logo: `${LOGO}msft.png`,
         ring: 1,
         x: 231,
         y: 207,
@@ -191,6 +195,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'AMZN',
         name: 'Amazon',
+        logo: `${LOGO}amzn.png`,
         ring: 2,
         x: 66,
         y: 107,
@@ -217,6 +222,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'SONY',
         name: 'Sony',
+        logo: `${LOGO}sony.png`,
         ring: 3,
         x: 306,
         y: 99,
@@ -230,6 +236,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'DELL',
         name: 'Dell',
+        logo: `${LOGO}dell.png`,
         ring: 3,
         x: 59,
         y: 299,
@@ -245,12 +252,14 @@ export const MOAT_COMPANIES: MoatCompany[] = [
   {
     ticker: 'NKE',
     name: 'Nike',
+    logo: `${LOGO}nke.png`,
     tip: 'PUMSY',
     areas: 'shoes and sportswear',
     competitors: [
       {
         ticker: 'ADDYY',
         name: 'Adidas',
+        logo: `${LOGO}addyy.png`,
         ring: 1,
         x: 233,
         y: 149,
@@ -264,6 +273,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'LULU',
         name: 'Lululemon',
+        logo: `${LOGO}lulu.png`,
         ring: 1,
         x: 93,
         y: 149,
@@ -277,6 +287,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'UAA',
         name: 'Under Armour',
+        logo: `${LOGO}uaa.png`,
         ring: 2,
         x: 73,
         y: 251,
@@ -290,6 +301,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'ONON',
         name: 'On',
+        logo: `${LOGO}onon.png`,
         ring: 2,
         x: 260,
         y: 243,
@@ -303,6 +315,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'SKX',
         name: 'Skechers',
+        logo: `${LOGO}skx.png`,
         ring: 3,
         x: 13,
         y: 236,
@@ -316,6 +329,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'PUMSY',
         name: 'Puma',
+        logo: `${LOGO}pumsy.png`,
         ring: 3,
         x: 306,
         y: 99,
@@ -331,12 +345,14 @@ export const MOAT_COMPANIES: MoatCompany[] = [
   {
     ticker: 'DIS',
     name: 'Disney',
+    logo: `${LOGO}dis.png`,
     tip: 'AAPL',
     areas: 'movies, streaming, and theme parks',
     competitors: [
       {
         ticker: 'NFLX',
         name: 'Netflix',
+        logo: `${LOGO}nflx.png`,
         ring: 1,
         x: 98,
         y: 213,
@@ -350,6 +366,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'WBD',
         name: 'Warner Bros. Discovery',
+        logo: `${LOGO}wbd.png`,
         ring: 1,
         x: 237,
         y: 188,
@@ -376,6 +393,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'PARA',
         name: 'Paramount',
+        logo: `${LOGO}para.png`,
         ring: 2,
         x: 231,
         y: 272,
@@ -403,6 +421,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'AMZN',
         name: 'Amazon',
+        logo: `${LOGO}amzn.png`,
         ring: 3,
         x: 77,
         y: 312,
