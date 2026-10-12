@@ -196,12 +196,17 @@
   background: rgba(9, 12, 10, 0.55);
 }
 
+/* the dialog is a paper card on the gate's always-dark ground, and a
+   paper card is the semantic pair in both modes: --surface under
+   --content. (It used to hardcode light mode's ink, #17150d, which put
+   black text on dark mode's dark --surface.) Frame and stripes are the
+   same ink, as CV.EXE's print dialog draws them. */
 .dialog {
   width: min(340px, 86%);
   background: var(--surface);
-  border: 1.5px solid #17150d;
+  border: var(--border-width-default) solid var(--content);
   box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.45);
-  color: #17150d;
+  color: var(--content);
 }
 
 .dialogBar {
@@ -209,7 +214,7 @@
   align-items: center;
   gap: 10px;
   padding: 5px 10px;
-  border-bottom: 1.5px solid #17150d;
+  border-bottom: var(--border-width-default) solid var(--content);
 }
 
 .dialogStripes {
@@ -217,8 +222,8 @@
   height: 9px;
   background: repeating-linear-gradient(
     to bottom,
-    #17150d 0,
-    #17150d 1px,
+    currentColor 0,
+    currentColor 1px,
     transparent 1px,
     transparent 3px
   );
@@ -256,11 +261,10 @@
   margin: 0;
 }
 
-/* layout only — appearance now comes from the Button primitive (tokens) */
+/* layout only — appearance comes from the Button primitive, whose
+   rest colours are already the dialog's own pair (--surface ground,
+   --content ink and stroke; --border stroke in dark, like every button) */
 .dialogOk {
   margin-left: auto;
   align-self: flex-end;
-  border-color: #17150d; /* dialog sits on paper in both modes */
-  color: #17150d;
-  background: var(--surface);
 }

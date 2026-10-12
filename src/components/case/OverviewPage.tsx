@@ -164,7 +164,6 @@ export function OverviewPage() {
           ))}
         </span>
       }
-      caption="The overview plays in the header, and every number gets a line a kid can repeat. Tap a callout to go there."
     >
       <div className={styles.ovpStage}>
         <div className={styles.ovpCell}>

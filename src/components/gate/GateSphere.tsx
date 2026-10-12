@@ -9,6 +9,7 @@ import { SPRINGS } from '@/lib/motion'
 import { gateSfx } from '@/lib/sound'
 import { GATE } from './gateConfig'
 import { CopyText as Copy } from '@/content/CopyText'
+import { CONTACT } from '@/content/resume'
 import styles from './gate.module.css'
 
 /* THE GATE — macrodata-refinement clearance for the Projects wing.
@@ -252,14 +253,24 @@ export function GateSphere() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase])
 
+  // GRANTED NEEDS NO BUTTON (Jake, Oct 12): the success line shows for a
+  // beat, then the gate lets itself out — unlock() is what the launch
+  // overlay and the window both watch. Its own effect, keyed on the
+  // verdict: the beat above re-runs on the phase it sets, and its cleanup
+  // would cancel a timer started inside it.
+  useEffect(() => {
+    if (verdict !== 'granted') return
+    const t = setTimeout(unlock, reduced ? 300 : 1100)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verdict])
+
+  // denied: the slots empty and the reader is back on the sphere, where
+  // the overlay's CANCEL still waits underneath
   const dismissVerdict = () => {
-    if (verdict === 'granted') {
-      unlock()
-    } else {
-      setSlots(Array(CODE.length).fill(null))
-      setVerdict(null)
-      setPhase('input')
-    }
+    setSlots(Array(CODE.length).fill(null))
+    setVerdict(null)
+    setPhase('input')
   }
 
   const typed = (v: string) => {
@@ -469,7 +480,10 @@ export function GateSphere() {
                   ? { scale: 1, y: 0, x: [0, -7, 7, -4, 4, 0], transition: { x: { duration: 0.4 } } }
                   : { scale: 1, y: 0 }
               }
-              role="alertdialog"
+              /* granted is a message with nothing to answer, so it is
+                 an alert (announced as it mounts); denied asks for an
+                 answer and takes focus on its one button */
+              role={verdict === 'granted' ? 'alert' : 'alertdialog'}
               aria-label={verdict === 'granted' ? 'Access granted' : 'Access denied'}
             >
               <div className={styles.dialogBar}>
@@ -484,19 +498,21 @@ export function GateSphere() {
                 <p className={styles.dialogText}>
                   {verdict === 'granted' ? config.granted : config.denied}
                 </p>
-                <Button
-                  tone="expressive"
-                  size="md"
-                  className={styles.dialogOk}
-                  onClick={dismissVerdict}
-                  autoFocus
-                >
-                  {verdict === 'granted' ? (
-                    <Copy k="gate.enter" as="span" />
-                  ) : (
-                    <Copy k="gate.retry" as="span" />
-                  )}
-                </Button>
+                {/* denied: CONTACT ME, a mail link to Jake. The click also
+                    clears the dialog and the slots, a tick later so the
+                    link has already handed off to the mail app */}
+                {verdict === 'denied' && (
+                  <Button
+                    tone="expressive"
+                    size="md"
+                    className={styles.dialogOk}
+                    href={`mailto:${CONTACT.email}`}
+                    onClick={() => setTimeout(dismissVerdict, 0)}
+                    autoFocus
+                  >
+                    <Copy k="gate.contact" as="span" />
+                  </Button>
+                )}
               </div>
             </motion.div>
           </motion.div>

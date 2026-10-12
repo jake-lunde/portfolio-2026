@@ -10,6 +10,9 @@ import styles from './primitives.module.css'
  * variant: solid = system-accent fill at rest (Jake's hub-player Figma
  *   pass; hover spec still open, so solid holds its rest colors).
  * href: same dress on an external-link anchor (hub-player's VIEW SITE).
+ *   A mailto: href (the gate's CONTACT ME) opens in place, not a new tab:
+ *   a mail link hands off to the mail app, and a _blank one can strand an
+ *   empty tab. The anchor takes the button's onClick and autoFocus too.
  */
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -38,8 +41,18 @@ export function Button({
     .filter(Boolean)
     .join(' ')
   if (href) {
+    const mail = href.startsWith('mailto:')
     return (
-      <a className={cls} href={href} target="_blank" rel="noreferrer" data-component="button">
+      <a
+        className={cls}
+        href={href}
+        target={mail ? undefined : '_blank'}
+        rel={mail ? undefined : 'noreferrer'}
+        data-component="button"
+        /* the same click, on the element it lands on */
+        onClick={rest.onClick as React.MouseEventHandler<HTMLElement> | undefined}
+        autoFocus={rest.autoFocus}
+      >
         {children}
       </a>
     )
