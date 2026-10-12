@@ -16,12 +16,15 @@
    Keyboard: focus lands on the close button when it opens, Escape shuts
    it (and stops there, so the case window behind it, which closes on
    Escape too, stays open), and PinnedSection hands focus back to the
-   chip. It is a non-modal dialog: the article behind stays readable. */
+   chip. It is a non-modal dialog: the article behind stays readable, and
+   with focus back there Escape still shuts this first: Window.tsx looks
+   for [data-plate-window='open'] and presses its [data-plate-close]. */
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import {
   motion,
   useDragControls,
+  useIsPresent,
   useMotionValue,
   useReducedMotion,
 } from 'motion/react'
@@ -53,6 +56,8 @@ export function PlateWindow({
   children: ReactNode
 }) {
   const reduced = useReducedMotion()
+  // 'open' only while it is staying; on its way out it no longer eats Escape
+  const present = useIsPresent()
   const dragControls = useDragControls()
   const x = useMotionValue(0)
   const y = useMotionValue(0)
@@ -82,6 +87,7 @@ export function PlateWindow({
     <motion.div
       id={id}
       role="dialog"
+      data-plate-window={present ? 'open' : 'closing'}
       aria-label={`${label}: ${title}`}
       className={`${shell.window} ${shell.windowActive} ${styles.plateWindow}`}
       style={{ top: geom.top, maxHeight: geom.maxH, x, y }}
@@ -109,6 +115,7 @@ export function PlateWindow({
             type="button"
             className={shell.ctrl}
             aria-label={closeLabel}
+            data-plate-close=""
             onPointerDown={(e) => e.stopPropagation()}
             onClick={onClose}
           >

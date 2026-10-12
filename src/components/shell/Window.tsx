@@ -241,6 +241,14 @@ export function Window({ def, z, active, desktopRef }: Props) {
           setExplaining(false)
           return
         }
+        // so does a case's floating full-size plate (case/PlateWindow.tsx),
+        // wherever focus sits in the case: it shuts, the case stays
+        const plate = ref.current?.querySelector<HTMLElement>("[data-plate-window='open']")
+        if (plate) {
+          e.stopPropagation()
+          plate.querySelector<HTMLButtonElement>('[data-plate-close]')?.click()
+          return
+        }
         sfx.close()
         close(def.id)
       }}
