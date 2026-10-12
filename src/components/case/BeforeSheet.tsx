@@ -5,7 +5,7 @@ import { useReducedMotion } from 'motion/react'
 import { Plate } from './CaseComponents'
 import styles from './case.module.css'
 
-/* "The old Invest": the screens Jake inherited, laid out as a contact
+/* "Greenlight Invest circa 2024": the screens Jake inherited, laid out as a contact
    sheet in the old flow's order. Each one sits in the site's phone
    shell (.phoneShell, scaled down to the cell) and clips its full-length
    screenshot to one phone screen, so the reader finds out how far each
@@ -14,8 +14,9 @@ import styles from './case.module.css'
    Each screen scrolls like a normal page for every pointer: wheel,
    trackpad and touch all scroll it, and up and down arrows nudge half a
    screen when its frame has focus (Jake ruled the old hover scrub felt
-   buggy). Left and right arrows move between frames. The readout names
-   the frame last focused or scrolled. The row lays out by the article's
+   buggy). Left and right arrows move between frames. The cap is static
+   (Jake ruled out the readout); each frame's aria-label still
+   names it and its length for screen readers. The row lays out by the article's
    width, not the pointer: wide, all frames share the row; narrow
    (phones), it becomes a snap carousel, one frame per swipe.
 
@@ -31,13 +32,16 @@ const BASE = '/case/greenlight-invest/before'
 const W = 750
 const VIEW = 1624
 
-/* old flow order. A new screen is one line: [file, height px, name, alt] */
-const SCREENS: Array<[file: string, h: number, name: string, alt: string]> = [
+/* old flow order. A new screen is one line: [file, height px, name, alt,
+   badge?]. The badge is a quiet chip pinned to the frame's top right,
+   outside the scroll box so it stays put while the page scrolls under
+   it; aria-hidden, because the frame's own label already says it. */
+const SCREENS: Array<[file: string, h: number, name: string, alt: string, badge?: string]> = [
   ['01-portfolio', 4708, 'Portfolio', 'The old Invest portfolio dashboard: the balance, cash to invest, each holding with its gain, recurring investments, ways to explore the market, a learning banner and account records, all on one long page'],
   ['02-search', 1624, 'Search', 'The old fund search: an Exchange Traded Funds page with a search field and a list of funds by theme, each with its ticker and a risk label'],
   ['03-detail', 5306, 'Fund detail', 'The old fund detail page: a performance graph, Morningstar and analyst ratings, the fund description, key holdings, additional details, historical performance and a long disclaimer'],
   ['04-amount', 1624, 'Amount', 'The old one-time investment picker: preset dollar amounts, the cash balance it draws from, and a review order button'],
-  ['05-confirm', 1624, 'Confirm', 'The old place order screen: the amount and ticker being bought, the cash balance, the market price with quote notes, and a place order button'],
+  ['05-learn', 7568, 'Learn mode', 'The old Apple stock page with learn mode on: every stat, from ticker symbol, last price and market cap to the Morningstar rating, fair value and P/E ratios, gets a purple label and a lavender box defining it underneath, so the page runs nearly five screens', 'Learn mode active'],
 ]
 
 /* "2.9 screens", "1 screen": the page's length in phone screens */
@@ -51,6 +55,7 @@ function Frame({
   h,
   name,
   alt,
+  badge,
   i,
   active,
   onActive,
@@ -61,6 +66,7 @@ function Frame({
   h: number
   name: string
   alt: string
+  badge?: string
   i: number
   active: boolean
   onActive: () => void
@@ -92,8 +98,9 @@ function Frame({
           if (e.key === 'ArrowUp') (e.preventDefault(), nudge(-1))
         }}
       >
-        {/* a plain scroll box; its first scroll names this frame in the
-            readout (scroll events don't bubble to the row's carousel) */}
+        {/* a plain scroll box; its first scroll makes this frame the
+            roving-focus one (scroll events don't bubble to the row's
+            carousel) */}
         <div ref={screen} className={styles.beforeScreen} onScroll={active ? undefined : onActive}>
           <img
             src={`${BASE}/${file}.webp`}
@@ -104,6 +111,11 @@ function Frame({
             draggable={false}
           />
         </div>
+        {badge && (
+          <span className={styles.beforeBadge} aria-hidden="true">
+            {badge}
+          </span>
+        )}
       </div>
     </div>
   )
@@ -125,24 +137,15 @@ export function BeforeSheet() {
     el.scrollIntoView({ block: 'nearest', inline: 'center', behavior: reduced ? 'auto' : 'smooth' })
   }
 
-  const [, h, name] = SCREENS[on]
-
   return (
-    <Plate
-      cap="The old Invest"
-      readout={
-        <>
-          {name} · {screens(h)}
-        </>
-      }
-    >
+    <Plate cap="Greenlight Invest circa 2024">
       <div
         className={styles.beforeRow}
         role="group"
         aria-label={`The old Invest flow, ${SCREENS.length} screens. Left and right arrows move between them, up and down scroll one.`}
         onScroll={(e) => {
-          /* carousel only: the frame snapped to the middle is the one
-             the readout names */
+          /* carousel only: the frame snapped to the middle takes the
+             roving focus */
           const el = e.currentTarget
           const cell = el.firstElementChild as HTMLElement | null
           if (!cell) return
@@ -150,13 +153,14 @@ export function BeforeSheet() {
           setOn(Math.min(SCREENS.length - 1, Math.max(0, Math.round(el.scrollLeft / stride))))
         }}
       >
-        {SCREENS.map(([file, fh, fname, alt], i) => (
+        {SCREENS.map(([file, fh, fname, alt, badge], i) => (
           <Frame
             key={file}
             file={file}
             h={fh}
             name={fname}
             alt={alt}
+            badge={badge}
             i={i}
             active={i === on}
             onActive={() => setOn(i)}

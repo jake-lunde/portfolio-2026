@@ -3,17 +3,19 @@ import {
   Section,
   Lead,
   Plate,
-  Placeholder,
   Decide,
   PullQuote,
   Metrics,
   Stat,
+  StatRow,
 } from '@/components/case/CaseComponents'
 import { BeforeSheet } from '@/components/case/BeforeSheet'
 import { LapFlow } from '@/components/case/LapFlow'
 import { OverviewPage } from '@/components/case/OverviewPage'
-import { MoatDiagram } from '@/components/case/MoatDiagram'
-import { ScrubGraph } from '@/components/case/ScrubGraph'
+import { DemoReel } from '@/components/case/DemoReel'
+import { LevelsFilm } from '@/components/case/LevelsFilm'
+import { MoatPlate } from '@/components/case/MoatPlate'
+import { GraphPlate } from '@/components/case/GraphPlate'
 import { FrequencyBars } from '@/components/case/FrequencyBars'
 import { CaseFooter } from '@/components/case/CaseFooter'
 
@@ -30,18 +32,17 @@ import { CaseFooter } from '@/components/case/CaseFooter'
 />
 
 <Section no="01" label="Starting line" title="Lots of words, not much to go on.">
-  <Lead>
-    When I joined, Invest looked like a balance sheet somebody remade in
-    photoshop. Lots of text. Barely any of it a kid could use.
-  </Lead>
-
-  The one place you could get help was a toggle called learn mode. Turn it
-  on and a purple lightbulb went off and added detail: what a Morningstar
-  rating is, what an expense ratio means. It was the right instinct. In
-  practice it was buggy, it only covered part of the page, and once it was
-  on the whole thing got even longer and felt like homework.
-
   <BeforeSheet />
+
+  When I joined, Invest looked like a balance sheet somebody remade in
+  photoshop. Lots of text, and almost none of it was kid-friendly.
+
+  The one place you could get help was a &ldquo;learn mode&rdquo; toggle.
+  Turning it on added detail to everything: what a Morningstar rating is,
+  what an expense ratio means, but also things as basic as &ldquo;what is a
+  stock ticker&rdquo;. I think it was the right instinct, but in practice it
+  was buggy, once it was on the whole thing got even longer and felt like
+  homework.
 </Section>
 
 <Section no="02" label="The first lap" title="A bit smarter, but not simpler.">
@@ -85,61 +86,65 @@ import { CaseFooter } from '@/components/case/CaseFooter'
 <Section no="04" label="Calling their own shots" title="Empowering kids to invest responsibly.">
   <Lead>
     Once a kid understands what a company does, the next question is
-    whether they want to own a piece of it. We can&rsquo;t answer that for
-    them. We can help them answer it themselves.
+    whether or not they want to own a piece of it. We can&rsquo;t tell them
+    buy or sell, but we can help them answer the question themselves.
   </Lead>
 
-  We borrowed from how Warren Buffett looks at a company and boiled it down
-  to three questions a kid could actually ask.
+  We looked at how Warren Buffett evaluates potential investments and boiled
+  it down to three simple questions:
 
-  <Decide
-    cap="Help me decide · the three questions"
-    questions={[
-      { n: '01', q: 'Do you think they’re a leading company in a thriving industry?', tag: 'rank · industry' },
-      { n: '02', q: 'Do you think they’ll keep growing and making money?', tag: 'growth · earnings' },
-      { n: '03', q: 'Do you think this stock is worth buying right now?', tag: 'bulls · bears' },
-    ]}
-  />
+  <Plate cap="Help me decide" tag="NVIDIA">
+    <DemoReel
+      frame="phone"
+      dir="/case/greenlight-invest/decide"
+      video="analyze"
+      poster="poster.webp"
+      alt="Screen recording of Help me decide on NVIDIA: three questions, each with the company's competitors, growth, earnings, fair price and the bulls and bears, ending on the verdict that it seems like a match."
+    />
+    <Decide
+      tone="inverse"
+      questions={[
+        { n: '01', q: 'Do you think they’re a leading company in a thriving industry?', tag: 'performance · industry' },
+        { n: '02', q: 'Do you think they’ll keep growing and making money?', tag: 'growth · earnings' },
+        { n: '03', q: 'Do you think this stock is worth buying right now?', tag: 'bulls · bears' },
+      ]}
+    />
+  </Plate>
 
-  Each question comes with the financial data and analyst takes to help
-  answer it: how the company ranks, how it&rsquo;s been growing, what the
-  bulls and bears are saying. The AI insights are in here too, asking a
-  follow-up or explaining a term right where it comes up.
+  Each question comes with financial data and analyst perspectives to help
+  answer it: how the company ranks, if it&rsquo;s been growing, and what the
+  bulls and bears are saying. AI-driven insights help kids understand the
+  &ldquo;so what&rdquo; of a data point or explain a term right where it
+  comes up.
 
-  At the end, it reads their own answers back. Either it might be a match
-  and they should consider investing, or they don&rsquo;t think it&rsquo;s
-  worth it right now, and here are some other stocks and ETFs they might
-  like instead. The product never picks for them. We called it Help me
-  decide, and kids found it on their own.
+  At the end, it reads their own answers back. It might be a match and they
+  should consider investing, or they don&rsquo;t think it&rsquo;s worth it
+  right now, check out some other stocks and ETFs instead. We never pick for
+  them. We called it &ldquo;Help me decide&rdquo;, and 1 in 10 kids use it on
+  every detail page.
 
-  <Metrics>
-    <div>
-      <Stat big={<>1 in <span className="hl-pink">10</span></>} label="kids who open a stock page go through Help me decide, ahead of their parents" />
-      <Stat secondary big={<>8.4%</>} label="of parents who used it upgraded their plan" />
-    </div>
-    <Plate cap="Help me decide" caption="The three questions on a phone. Visuals pending.">
-      <Placeholder>Help me decide · question flow and the verdict screen</Placeholder>
-    </Plate>
-  </Metrics>
+  <StatRow>
+    <Stat big={<>1 in <span className="hl-pink">10</span></>} label="kids who open a stock page go through Help me decide, ahead of their parents" />
+    <Stat big={<><span className="hl-pink">8.4</span>%</>} label="of parents who used it upgraded their plan" />
+  </StatRow>
 </Section>
 
 <Section no="05" label="Building the moat for kids" title="Their favorite companies in context in the market.">
   <Lead>
-    Every trading app has a performance graph and a P/E ratio, so we had
-    examples to work from. Nobody had a good picture of a company&rsquo;s
-    economic moat, let alone one for kids. I took that one on myself.
+    Every trading app has a performance graph, P/E ratio, and ratings for a
+    competitive audit. Nobody had a good visual of a company&rsquo;s economic
+    moat, let alone one for kids. I took that as a challenge, and I think I
+    hit the bullseye (pun intended).
   </Lead>
 
-  I landed on a bullseye. The company sits in the middle and the
-  competition surrounds it in rings: closest rivals, competitors, farther
-  out. One glance tells you who&rsquo;s crowding Nvidia and who&rsquo;s off
-  in the distance. Tap a competitor and you get why they sit in that ring,
-  plus the top three reasons, generated from the data in plain categories
-  like special technology, famous brand, or cheaper to make stuff.
+  Each company sits in the middle and the competition surrounds it in rings:
+  closest rivals, competitors, farther out. One glance tells you who&rsquo;s
+  crowding Nvidia and who&rsquo;s off in the distance. Tap a competitor and
+  you get why they sit in that ring, plus the top three reasons, generated
+  from the data in plain categories like special technology, famous brand,
+  or cheaper to make stuff.
 
-  <Plate cap="Competitors" tag="NFLX" caption="Netflix at center; tap Comcast to learn it owns Peacock. Built from the same filings data.">
-    <MoatDiagram />
-  </Plate>
+  <MoatPlate />
 
   The word moat is nowhere on the screen. A kid can see which companies are
   exposed and which ones are insulated just by checking the bullseye, and
@@ -155,9 +160,7 @@ import { CaseFooter } from '@/components/case/CaseFooter'
     annoyed me enough to go build it myself.
   </Lead>
 
-  <Plate cap="Performance graph" tag="haptic scrub" caption="Scrub it, and each interval ticks. The shipped SwiftUI version does this under your thumb, with real haptics.">
-    <ScrubGraph />
-  </Plate>
+  <GraphPlate />
 
   I paired with an engineer who gave me access to the real repo and a
   playground inside it. Using Cursor and Xcode, I generated and refined the
@@ -185,9 +188,7 @@ import { CaseFooter } from '@/components/case/CaseFooter'
   in that adaptive version, and I think it&rsquo;s more than possible with
   the tools at our disposal today.
 
-  <Plate cap="Grows with You" caption="The interface leveling up with the investor. Deck frames and a recording pending.">
-    <Placeholder>Grows with You · the UI changing with the kid</Placeholder>
-  </Plate>
+  <LevelsFilm />
 </Section>
 
 <Section no="08" label="Outcome" title="More kids trading and more families talking.">

@@ -149,6 +149,13 @@
   margin: 30px 0 6px;
 }
 
+/* a plate straight under the section title drops its own top margin so
+   the title's 20px governs — the same room a lead gets there (the 30px
+   would otherwise win the collapse and open a wider gap) */
+.section h2 + .figure {
+  margin-top: 0;
+}
+
 .plate {
   background: var(--surface-inverse);
   color: var(--content-inverse);
@@ -244,6 +251,18 @@
   color: var(--content-muted);
   letter-spacing: 0.02em;
   margin-top: 9px;
+}
+
+/* a plate with no caption, followed by prose (a paragraph or a lead),
+   keeps the room a caption would take (its 9px + one --text-ui line),
+   so the gap from the plate to the next paragraph matches every
+   captioned plate's */
+.figure:not(:has(> .figcap)):has(+ p, + .lead)::after {
+  content: '';
+  display: block;
+  margin-top: 9px;
+  font-size: var(--text-ui);
+  height: 1lh;
 }
 
 .placeholder {
@@ -450,6 +469,9 @@
 /* .phoneShell, scaled: its 280px drawing (10px bezel, 44px outer
    radius, 34px screen radius) held in proportion at any cell width */
 .beforeShell {
+  /* the badge's anchor: the shell, not the scroll box, so a badge stays
+     pinned while the page scrolls under it */
+  position: relative;
   width: 100%;
   padding: calc(100cqi * 10 / 280);
   border-radius: calc(100cqi * 44 / 280);
@@ -484,6 +506,46 @@
   width: 100%;
   height: auto;
   user-select: none;
+}
+
+/* LEARN MODE ACTIVE: a quiet chip on the learn frame's top right, in
+   the nav row's empty right half, under the status bar. Drawn on the
+   280px shell like the bezel and held in proportion by 100cqi (the
+   cell's width): top = 1px border + 10px bezel + 36px of screen (52pt of
+   the 375pt export, the nav row's top); right = border + bezel + 10px
+   (14pt). Plate ink: the plate's ground, its cream, the bezel's
+   hairline; square like the fidelity chip. */
+.beforeBadge {
+  position: absolute;
+  top: calc(1px + 100cqi * 46 / 280);
+  right: calc(1px + 100cqi * 20 / 280);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  /* the type scales with the frame down to a 5px floor (the five-across
+     row's ~127px cells would otherwise take it to 3px), and everything
+     else is in em so the chip keeps its proportions at the floor */
+  gap: 0.55em;
+  padding: 0.4em 0.8em;
+  font-family: var(--mono);
+  font-size: max(5px, calc(100cqi * 7 / 280));
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: var(--surface-inverse);
+  color: var(--content-inverse);
+  border: 1px solid color-mix(in srgb, var(--content-inverse) 28%, transparent);
+  pointer-events: none;
+}
+
+.beforeBadge::before {
+  content: '';
+  flex: none;
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: var(--radius-circle);
+  background: var(--accent-expressive);
 }
 
 
@@ -1081,6 +1143,60 @@
   text-transform: uppercase;
 }
 
+/* the inverse decide — the questions nested in the plate under the
+   recording they belong to (greenlight-invest §04, a box in a box). The
+   plate body paints --surface-inverse, so the box takes the plate's
+   ink rule: text is --content-inverse, muted text and borders are
+   content-inverse mixes reused from the plate itself (outer border =
+   the pill tabs' 40%, row rules = the phone bezel's 28% hairline, tag =
+   the cap row's 60%), the number takes the cap tag's expressive accent.
+   Transparent, so the plate's own ground shows through; lifted over the
+   halftone like the cap row. Gap from the phone = the plate's padding.
+   Written after the dark-theme .decide rule so it wins at equal
+   specificity. */
+.decide[data-tone='inverse'] {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--content-inverse) 40%, transparent);
+  color: var(--content-inverse);
+  margin: var(--space-5) 0 0;
+  position: relative;
+  z-index: 1;
+}
+
+.decide[data-tone='inverse'] .q {
+  border-bottom-color: color-mix(in srgb, var(--content-inverse) 28%, transparent);
+}
+
+.decide[data-tone='inverse'] .q:last-child {
+  border-bottom: none;
+}
+
+.decide[data-tone='inverse'] .qn {
+  color: var(--accent-expressive);
+}
+
+.decide[data-tone='inverse'] .qtag,
+.decide[data-tone='inverse'] .decideCap {
+  color: color-mix(in srgb, var(--content-inverse) 60%, transparent);
+}
+
+/* narrow article: inside the plate the box loses the plate's padding
+   on top of its own, so a held-right tag squeezes the question to a
+   word a line. The tag drops under the question instead, aligned with
+   its text (the number keeps its own column). */
+@container (max-width: 640px) {
+  .decide[data-tone='inverse'] .q {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: var(--space-1);
+  }
+
+  .decide[data-tone='inverse'] .qtag {
+    grid-column: 2;
+    margin-left: 0;
+  }
+}
+
 /* claim — interstitial display statement, between pull-quote and h2 in the
    hierarchy; carries one beat of the argument in display type */
 .claim {
@@ -1225,6 +1341,49 @@
   text-transform: uppercase;
   margin-top: var(--spacing-component-sm);
   max-width: 28ch;
+}
+
+/* stats as units (StatRow): each data point in its own box, the same
+   card language as .decide and .ledger — bordered, on the page's
+   surface, square like the plates. Both numbers take the big size;
+   .statBig.secondary stays for the cases that still use it. */
+.statRow {
+  display: flex;
+  gap: var(--space-5);
+  margin: 6px 0 24px; /* .metrics' own margin */
+}
+
+.statRow > * {
+  flex: 1 1 0;
+  min-width: 0;
+  border: var(--border-width-default) solid var(--content);
+  background: var(--surface);
+  padding: var(--spacing-layout-md);
+}
+
+[data-theme='dark'] .statRow > * {
+  border-color: var(--border);
+  background: var(--surface-raised);
+}
+
+/* in the boxes the label runs past the numeral above it: 40 characters
+   a line (1ch plus .statLab's 0.06em tracking each, mono), which puts
+   both of §04's labels on two lines at desktop width — 38 is the floor
+   for the longer one, 42 would set the shorter on one. .statLab's 28ch
+   stays for the cases that set stats outside a box. */
+.statRow .statLab {
+  margin-top: var(--spacing-component-md);
+  max-width: calc(40 * (1ch + 0.06em));
+}
+
+@container (max-width: 640px) {
+  .statRow {
+    flex-direction: column;
+  }
+
+  .statRow > * {
+    flex: 0 0 auto;
+  }
 }
 
 /* footer */
@@ -1652,6 +1811,324 @@
 
 .moatWhy b {
   color: var(--accent-expressive);
+}
+
+/* GROWS WITH YOU (LevelsFilm.tsx) — the concept film for the version
+   we didn't ship, full width in the plate at its own 1920 × 1278, then
+   the chapter scrubber under it. The box reserves the film's ratio
+   before a byte loads; the mat is #000, sampled from the film's caption
+   band (the footage's own corners, rail law, as the demo reels). */
+/* the film's own box: the play/pause flash centres over it */
+.levelsStage {
+  position: relative;
+  z-index: 1;
+}
+
+.levelsFilm {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1920 / 1278;
+  object-fit: contain;
+  background: #000;
+  cursor: pointer;
+}
+
+.levelsFilm:focus {
+  outline: none;
+}
+
+.levelsFilm:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+/* the play/pause flash: the plate's ground as a 64px disc with a soft
+   ring of the same, the glyph in plate ink. It pops in on the fade
+   token, then fades out over the rest of the slow token (the component
+   unmounts it at the slow token's end). Never takes the pointer. */
+.levelsFlash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.levelsFlash > span {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--surface-inverse);
+  color: var(--content-inverse);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--surface-inverse) 35%, transparent);
+  animation:
+    levelsFlashPop var(--duration-fade) ease-out both,
+    levelsFlashFade calc(var(--duration-slow) - var(--duration-fade)) ease-in var(--duration-fade) both;
+}
+
+/* the triangle's ink sits left of its box; nudge it to the optical centre */
+.levelsFlash[data-kind='play'] svg {
+  transform: translateX(1px);
+}
+
+@keyframes levelsFlashPop {
+  from {
+    transform: scale(0.8);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes levelsFlashFade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* the chapter title in the cap's readout: on a phone the cap is
+   narrower than the longest title, so it clips with an ellipsis rather
+   than running under the clock (the touch label under the film still
+   names the chapter in full) */
+.levelsReadout {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* the readout's cluster: the chapter arrows hug the title, and the
+   cluster shrinks (the title ellipsizes) before anything wraps */
+.levelsChapter {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  min-width: 0;
+}
+
+/* the chapter arrows: square chips in the plate's mono and ink, with the
+   label's hairline. A 4px skirt takes the hit area to 26px. */
+.levelsStep {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 1;
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--content-inverse) 28%, transparent);
+  color: color-mix(in srgb, var(--content-inverse) 90%, transparent);
+  cursor: pointer;
+}
+
+.levelsStep::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+
+.levelsStep:hover:not([aria-disabled]) {
+  border-color: color-mix(in srgb, var(--content-inverse) 50%, transparent);
+}
+
+/* at the film's ends: the inactive pill's muted ink, inert */
+.levelsStep[aria-disabled] {
+  color: color-mix(in srgb, var(--content-inverse) 30%, transparent);
+  border-color: color-mix(in srgb, var(--content-inverse) 14%, transparent);
+  cursor: default;
+}
+
+.levelsStep:focus {
+  outline: none;
+}
+
+.levelsStep:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+/* the play chip holds PAUSE's width either way, so the clock beside it
+   never shifts when the word changes */
+.levelsPlay {
+  min-width: calc(5ch + 5 * 0.14em);
+  text-align: right;
+}
+
+/* the chip's playing state reads like a pressed fidelity segment: full
+   ink, accent underline */
+.levelsPlay[data-playing] {
+  color: color-mix(in srgb, var(--content-inverse) 90%, transparent);
+  border-bottom-color: var(--accent-expressive);
+}
+
+/* the scrubber: label room on top (reserved, so a label appearing never
+   moves anything), then the track. Mono, plate ink. */
+.levelsScrub {
+  position: relative;
+  z-index: 1;
+  margin-top: var(--spacing-component-md);
+  padding-top: 24px;
+}
+
+/* the chapter's name, above the track: hovered, focused, or (touch, or
+   mid-scrub) the current one. Plate ink on the plate's own ground with
+   the bezel's hairline, square like the fidelity chip and the pills. */
+.levelsLabel {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 3px 6px;
+  background: var(--surface-inverse);
+  color: var(--content-inverse);
+  border: 1px solid color-mix(in srgb, var(--content-inverse) 28%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-fade) ease;
+}
+
+.levelsLabel[data-align='start'] {
+  transform: none;
+}
+
+.levelsLabel[data-align='end'] {
+  transform: translateX(-100%);
+}
+
+.levelsLabel[data-on] {
+  opacity: 1;
+}
+
+/* the track: a 24px hit strip around a 6px bar, so a thumb can find it.
+   touch-action none so a drag scrubs instead of scrolling the page. */
+.levelsTrack {
+  position: relative;
+  height: 24px;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.levelsTrack:focus {
+  outline: none;
+}
+
+.levelsTrack:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+.levelsTrack[data-scrubbing] {
+  cursor: grabbing;
+}
+
+/* one segment per chapter, placed at its span's own percentages so time
+   maps straight across the track; 1px of padding each side is the
+   boundary between chapters */
+.levelsSeg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding-inline: 1px;
+}
+
+/* the bar in the bezel hairline's ink; the current chapter's is a shade
+   brighter and stands a little taller */
+.levelsBar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--content-inverse) 28%, transparent);
+  transition: transform var(--duration-tap) ease;
+}
+
+.levelsSeg[data-current] .levelsBar {
+  background: color-mix(in srgb, var(--content-inverse) 40%, transparent);
+  transform: scaleY(1.5);
+}
+
+.levelsSeg[data-peek] .levelsBar {
+  background: color-mix(in srgb, var(--content-inverse) 50%, transparent);
+}
+
+/* keyboard focus on a chapter's hidden button rings its segment */
+.levelsSeg[data-ring] .levelsBar {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 3px;
+}
+
+/* the played part, pink as a selected pill; written as scaleX by the
+   component every frame while the film plays */
+.levelsFill {
+  position: absolute;
+  inset: 0;
+  background: var(--accent-expressive);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+/* the playhead: a full-width layer translated by the played fraction
+   (a percentage of its own width is the track's width), carrying a 2px
+   mark at its left edge. Transform only, no transition: it follows the
+   film frame by frame. */
+.levelsHead {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translateX(0);
+}
+
+.levelsHead > span {
+  position: absolute;
+  left: -1px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--content-inverse);
+}
+
+/* the chapters again, as buttons for the keyboard and screen readers;
+   visually hidden (focus shows on the segment instead) */
+.levelsChapters {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  list-style: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .levelsLabel,
+  .levelsBar {
+    transition: none;
+  }
+
+  /* the flash holds still, then the component drops it */
+  .levelsFlash > span {
+    animation: none;
+  }
 }
 
 /* THE SURVEY CHART (ResearchBars.tsx) — laid out by the plate, not

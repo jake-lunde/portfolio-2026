@@ -159,14 +159,16 @@ export function Move({
 
 export function Decide({
   cap,
+  tone,
   questions,
 }: {
-  cap: string
+  cap?: string
+  tone?: 'inverse' /* seated inside a dark plate: plate ink, not page ink */
   questions: Array<{ n: string; q: string; tag: string }>
 }) {
   return (
-    <div className={styles.decide}>
-      <p className={styles.decideCap}>{cap}</p>
+    <div className={styles.decide} data-tone={tone}>
+      {cap && <p className={styles.decideCap}>{cap}</p>}
       {questions.map((item) => (
         <div key={item.n} className={styles.q}>
           <span className={styles.qn}>{item.n}</span>
@@ -215,6 +217,11 @@ export function PullQuote({ children, cite }: { children: React.ReactNode; cite:
 
 export function Metrics({ children }: { children: React.ReactNode }) {
   return <div className={styles.metrics}>{children}</div>
+}
+
+/* stats side by side, each in its own box; narrow, they stack */
+export function StatRow({ children }: { children: React.ReactNode }) {
+  return <div className={styles.statRow}>{children}</div>
 }
 
 export function Stat({

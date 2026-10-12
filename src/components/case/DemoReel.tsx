@@ -21,8 +21,9 @@ export function DemoReel({
   alt,
   mat,
   frame,
+  dir = DIR,
 }: {
-  /** basename in evo/ — demo-poc, demo-hifi (mp4 + webm pairs) */
+  /** basename in dir — demo-poc, demo-hifi (mp4 + webm pairs) */
   video: string
   poster: string
   alt: string
@@ -34,6 +35,9 @@ export function DemoReel({
       Hub's own bezel, the same seat §03 wears (s134-r2 — the prototype
       is a hub recording, so it should read as one) */
   frame?: 'phone' | 'hub'
+  /** the public folder the recording lives in; defaults to the Family
+      Hub's evo/, the Invest reels pass their own (s144) */
+  dir?: string
 }) {
   const ref = useRef<HTMLVideoElement>(null)
   const reduced = useReducedMotion()
@@ -58,15 +62,15 @@ export function DemoReel({
       ref={ref}
       className={(frame && REEL_CLASS[frame]) || styles.demoReel}
       style={mat === 'light' ? { background: '#fdfdfd' } : undefined}
-      poster={`${DIR}/${poster}`}
+      poster={`${dir}/${poster}`}
       muted
       loop
       playsInline
       preload="none"
       aria-label={alt}
     >
-      <source src={`${DIR}/${video}.mp4`} type="video/mp4" />
-      <source src={`${DIR}/${video}.webm`} type="video/webm" />
+      <source src={`${dir}/${video}.mp4`} type="video/mp4" />
+      <source src={`${dir}/${video}.webm`} type="video/webm" />
     </video>
   )
   if (frame === 'phone') return <div className={styles.phoneShell}>{reel}</div>

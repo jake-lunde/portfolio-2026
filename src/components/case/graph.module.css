@@ -1,0 +1,411 @@
+/* THE PERFORMANCE GRAPH (GraphPlate.tsx) — Greenlight's "Performance"
+   card, rebuilt from Jake's Figma (201640:59035). The card is
+   Greenlight's product surface, so its colours are Greenlight's values
+   from the Figma spec, scoped to the card as custom properties
+   (CLAUDE.md §5 derivation note: these are not LUNDE OS tokens and never
+   leave the card). The plate and company tabs around it stay on the
+   site's tokens. Greenlight's proprietary face maps to the site's --sans
+   at the spec's sizes and line heights; its 350 "Screen" weight →
+   regular, 400 → regular, 500 → medium (as the bullseye does). The fly-up
+   reuses the bullseye's sheet classes (moat.module.css via GlSheet). */
+
+/* the plate is the container: below 358px of room the card scales down
+   in the bullseye's steps, and the frame reserves exactly the scaled
+   height so nothing shifts */
+.stage {
+  container-type: inline-size;
+  position: relative;
+  z-index: 1; /* above the plate's halftone overlay */
+}
+
+.frame {
+  --k: 1;
+  position: relative;
+  height: calc(637px * var(--k));
+}
+
+@container (max-width: 357.98px) { .frame { --k: 0.95; } }
+@container (max-width: 339.98px) { .frame { --k: 0.9; } }
+@container (max-width: 321.98px) { .frame { --k: 0.85; } }
+@container (max-width: 303.98px) { .frame { --k: 0.8; } }
+@container (max-width: 285.98px) { .frame { --k: 0.75; } }
+@container (max-width: 267.98px) { .frame { --k: 0.7; } }
+
+.card {
+  /* Greenlight's palette, from the Figma spec (get_variable_defs + raw nodes) */
+  --gl-surface: #ffffff; /* primarySurface */
+  --gl-ink: #111212; /* onPrimarySurface */
+  --gl-subdued: #5e6161; /* onPrimarySurfaceSubdued, 6.25:1 on white */
+  --gl-line: rgba(52, 54, 54, 0.1); /* Line & Shadow/line #3436361a */
+  --gl-grid: rgba(94, 97, 97, 0.3); /* gridlines, #5e6161 @ 30% (raw) */
+  --gl-scrub: rgba(52, 54, 54, 0.25); /* scrub line, #343636 @ 25% (raw) */
+  --gl-stock: #7375dc; /* accent1Strong */
+  --gl-spy: #c9cdcd; /* cool neutral/500 */
+  --gl-chart-fill: #838fff; /* area gradient 50% → 0% (raw) */
+  --gl-tab: rgba(26, 53, 56, 0.05); /* secondarySurface #1a35380d */
+  --gl-tab-ink: #122024; /* onSecondarySurface */
+  --gl-tab-on-ink: #1d252c; /* selected tab text (raw) */
+  --gl-tertiary: #00d9b4; /* Interaction/Tertiary */
+  /* positiveStrong is #258960 (4.35:1 on white, under AA for 14px text);
+     text uses the nearest passing shade, the same hue at 98% */
+  --gl-positive: #24865e;
+  --gl-negative: #c83f38; /* the logic section's down red, 4.97:1 on white */
+  --gl-neg-weakest: #fff1ef; /* negativeWeakest */
+  --gl-neg-strongest: #411b15; /* negativeStrongest */
+  --gl-neg-base: #ff867f; /* negativeBase */
+  /* the "better than" tile is not drawn in the file: it mirrors the red
+     one on the logic section's positive values (badge #ccf6e5, line
+     #4ee0a4) with brandStrongest as the pictogram ground */
+  --gl-pos-weakest: #ccf6e5;
+  --gl-pos-strongest: #003835; /* brandStrongest */
+  --gl-pos-base: #4ee0a4;
+  --gl-brand-strong: #003835; /* brandStrongest: focus rings */
+  --gl-brand-weak: #dff6f0;
+  --gl-scrim: rgba(0, 0, 0, 0.4); /* Skrim #00000066 */
+
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 358px;
+  height: 637px;
+  transform: translateX(-50%) scale(var(--k));
+  transform-origin: top center;
+  background: var(--gl-surface);
+  color: var(--gl-ink);
+  border-radius: 16px;
+  overflow: hidden;
+  font-family: var(--sans);
+  font-weight: var(--weight-regular);
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+}
+
+.card :focus-visible {
+  outline: 2px solid var(--gl-brand-strong);
+  outline-offset: 2px;
+}
+
+.content {
+  padding: 16px 0;
+}
+
+/* titleForCards: 8 + 24 row + 8, then the 40px spacer to the price */
+.titleRow {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  margin: 8px 16px 48px;
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0;
+  text-transform: none;
+  color: inherit;
+  white-space: nowrap;
+}
+
+.info {
+  display: block;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.info img {
+  display: block;
+}
+
+/* Fade: the outgoing and incoming value share one grid cell */
+.stack {
+  display: inline-grid;
+}
+
+.stack > * {
+  grid-area: 1 / 1;
+}
+
+/* sharePrice, Display/3 48/56 */
+.price {
+  display: grid;
+  height: 56px;
+  margin: 0 16px;
+  font-size: 48px;
+  line-height: 56px;
+  font-weight: var(--weight-regular);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* stockPerformanceTiles: two 326x38 chartLabels, gap 8 */
+.tiles {
+  display: grid;
+  gap: 8px;
+  margin: 16px 16px 0;
+}
+
+/* 1px inside stroke: padding 10/8 minus the border keeps the box at 38 */
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 38px;
+  padding: 9px 7px;
+  border: 1px solid var(--gl-line);
+  border-radius: 8px;
+}
+
+.tileLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dotStock { background: var(--gl-stock); }
+.dotSpy { background: var(--gl-spy); }
+
+.ticker {
+  font-size: 14px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.scrubbed {
+  color: var(--gl-subdued);
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* performance: arrow 16 + 4 + percent 14/16 medium */
+.perf {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 1px;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.perf img { display: block; }
+.up { color: var(--gl-positive); }
+.down { color: var(--gl-negative); }
+
+/* dateRange 14/18, 16 above and below */
+.date {
+  height: 18px;
+  margin: 16px 16px 0;
+  font-size: 14px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* graphNew: 181 tall at card y 302; the 44px gutter right of the plot
+   holds the axis labels, flush at x 350 */
+.chart {
+  position: relative;
+  height: 181px;
+  margin-top: 16px;
+}
+
+/* baselineNew: a rule from the card's left edge and a label pill hugging
+   x 350, centred on the line (24 tall) */
+.row {
+  position: absolute;
+  left: 0;
+  width: 350px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.rule {
+  flex: 1;
+  height: 1px;
+}
+
+.rowSolid .rule { background: var(--gl-grid); }
+.rowDashed .rule {
+  background: repeating-linear-gradient(to right, var(--gl-grid) 0 2px, transparent 2px 4px);
+}
+
+/* Body/3 12/16, pill with round left corners */
+.axisLabel {
+  flex: none;
+  padding: 4px 0 4px 4px;
+  border-radius: 100px 0 0 100px;
+  background: var(--gl-surface);
+  color: var(--gl-subdued);
+  font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* the 0% pill is 43 wide with its text right-aligned (left padding 25) */
+.axisZero {
+  min-width: 43px;
+  text-align: right;
+}
+
+/* the 0% text hidden (too close to a neighbour): keep the pill's width
+   so the dotted line still ends at x 307, show nothing */
+.axisHidden {
+  visibility: hidden;
+}
+
+.svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.line {
+  fill: none;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lineStock { stroke: var(--gl-stock); }
+.lineSpy { stroke: var(--gl-spy); }
+
+.scrubLine { fill: var(--gl-scrub); }
+.dotRing { fill: var(--gl-surface); }
+.dotStockFill { fill: var(--gl-stock); }
+.dotSpyFill { fill: var(--gl-spy); }
+
+/* the scrub surface: the plot itself (x 15–306), a slider for keys */
+.plot {
+  position: absolute;
+  left: 15px;
+  top: 0;
+  width: 291px;
+  height: 182px;
+  touch-action: none;
+  cursor: crosshair;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.card .plot:focus-visible {
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* tabs: six equal 38px pills, gap 8, 4/16 padding; the frame starts 20
+   below the chart (card y 503) */
+.ranges {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 4px 16px;
+}
+
+.range {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--gl-tab);
+  color: var(--gl-tab-ink);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* selected: white with a 2px outside stroke (the box stays 38) */
+.range[aria-checked='true'] {
+  background: var(--gl-surface);
+  box-shadow: 0 0 0 2px var(--gl-tertiary);
+  color: var(--gl-tab-on-ink);
+  cursor: default;
+}
+
+.card .range:focus-visible {
+  outline-offset: 4px;
+}
+
+/* pictogramTile 326x56, 16 below the tabs */
+.insight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  margin: 16px 16px 0;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.insightDown { --tile: var(--gl-neg-weakest); --pict: var(--gl-neg-strongest); --glyph: var(--gl-neg-base); }
+.insightUp { --tile: var(--gl-pos-weakest); --pict: var(--gl-pos-strongest); --glyph: var(--gl-pos-base); }
+
+.insight {
+  background: var(--tile);
+}
+
+.pictogram {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--pict);
+  color: var(--glyph);
+}
+
+.pictogram svg { display: block; }
+.insightUp .pictogram svg { transform: scaleY(-1); }
+
+.insightText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: var(--weight-medium);
+}
+
+/* reduced motion: the chart is drawn from the first paint, before
+   hydration too (motion's undrawn from-state would otherwise show until
+   it runs its instant `in`) */
+@media (prefers-reduced-motion: reduce) {
+  .line { stroke-dasharray: none !important; stroke-dashoffset: 0 !important; }
+  .area { opacity: 1 !important; }
+}
