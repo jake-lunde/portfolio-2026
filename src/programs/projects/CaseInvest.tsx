@@ -33,8 +33,9 @@ const SHAPES = new Map<unknown, PlateShape>([
   [LevelsFilm, 'wide'],
 ])
 
-/* 04 and 08 are bare Plates in the MDX. 04 seats a phone reel (tall);
-   08 holds the frequency chart, which wants the width (wide). */
+/* 04 is a bare Plate in the MDX seating a phone reel (tall). 08 has no
+   visual since s148: its outcome reads as a StatRow, like 04's. Any other
+   bare Plate pins wide. */
 function shapeOf(el: ReactElement): PlateShape | null {
   const shape = SHAPES.get(el.type)
   if (shape) return shape
