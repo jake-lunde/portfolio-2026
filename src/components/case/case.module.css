@@ -1100,6 +1100,60 @@
   text-transform: uppercase;
 }
 
+/* the inverse decide — the questions nested in the plate under the
+   recording they belong to (greenlight-invest §04, a box in a box). The
+   plate body paints --surface-inverse, so the box takes the plate's
+   ink rule: text is --content-inverse, muted text and borders are
+   content-inverse mixes reused from the plate itself (outer border =
+   the pill tabs' 40%, row rules = the phone bezel's 28% hairline, tag =
+   the cap row's 60%), the number takes the cap tag's expressive accent.
+   Transparent, so the plate's own ground shows through; lifted over the
+   halftone like the cap row. Gap from the phone = the plate's padding.
+   Written after the dark-theme .decide rule so it wins at equal
+   specificity. */
+.decide[data-tone='inverse'] {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--content-inverse) 40%, transparent);
+  color: var(--content-inverse);
+  margin: var(--space-5) 0 0;
+  position: relative;
+  z-index: 1;
+}
+
+.decide[data-tone='inverse'] .q {
+  border-bottom-color: color-mix(in srgb, var(--content-inverse) 28%, transparent);
+}
+
+.decide[data-tone='inverse'] .q:last-child {
+  border-bottom: none;
+}
+
+.decide[data-tone='inverse'] .qn {
+  color: var(--accent-expressive);
+}
+
+.decide[data-tone='inverse'] .qtag,
+.decide[data-tone='inverse'] .decideCap {
+  color: color-mix(in srgb, var(--content-inverse) 60%, transparent);
+}
+
+/* narrow article: inside the plate the box loses the plate's padding
+   on top of its own, so a held-right tag squeezes the question to a
+   word a line. The tag drops under the question instead, aligned with
+   its text (the number keeps its own column). */
+@container (max-width: 640px) {
+  .decide[data-tone='inverse'] .q {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: var(--space-1);
+  }
+
+  .decide[data-tone='inverse'] .qtag {
+    grid-column: 2;
+    margin-left: 0;
+  }
+}
+
 /* claim — interstitial display statement, between pull-quote and h2 in the
    hierarchy; carries one beat of the argument in display type */
 .claim {

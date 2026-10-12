@@ -159,13 +159,15 @@ export function Move({
 
 export function Decide({
   cap,
+  tone,
   questions,
 }: {
   cap?: string
+  tone?: 'inverse' /* seated inside a dark plate: plate ink, not page ink */
   questions: Array<{ n: string; q: string; tag: string }>
 }) {
   return (
-    <div className={styles.decide}>
+    <div className={styles.decide} data-tone={tone}>
       {cap && <p className={styles.decideCap}>{cap}</p>}
       {questions.map((item) => (
         <div key={item.n} className={styles.q}>
