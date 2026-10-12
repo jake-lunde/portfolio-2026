@@ -149,6 +149,13 @@
   margin: 30px 0 6px;
 }
 
+/* a plate straight under the section title drops its own top margin so
+   the title's 20px governs — the same room a lead gets there (the 30px
+   would otherwise win the collapse and open a wider gap) */
+.section h2 + .figure {
+  margin-top: 0;
+}
+
 .plate {
   background: var(--surface-inverse);
   color: var(--content-inverse);
@@ -246,10 +253,11 @@
   margin-top: 9px;
 }
 
-/* a plate with no caption, followed by prose, keeps the room a caption
-   would take (its 9px + one --text-ui line), so the gap from the plate
-   to the next paragraph matches every captioned plate's */
-.figure:not(:has(> .figcap)):has(+ p)::after {
+/* a plate with no caption, followed by prose (a paragraph or a lead),
+   keeps the room a caption would take (its 9px + one --text-ui line),
+   so the gap from the plate to the next paragraph matches every
+   captioned plate's */
+.figure:not(:has(> .figcap)):has(+ p, + .lead)::after {
   content: '';
   display: block;
   margin-top: 9px;
@@ -1238,61 +1246,6 @@
   max-width: 28ch;
 }
 
-/* the Help me decide row (DecideRow): the three questions on the
-   leading edge, the phone plate on the trailing edge, centred on each
-   other like the Nike page's stage (.ovpStage — same gap, same 640px
-   stack). The plate keeps its own width: the phone's 280px drawing plus
-   the plate's padding and border either side, so the reel's box is
-   reserved before the poster lands. */
-.decideRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-5);
-  margin: 26px 0 20px; /* .decide's own margin, now carried by the row */
-}
-
-.decideRow > .decide {
-  flex: 1 1 0;
-  min-width: 0;
-  margin: 0;
-}
-
-.decideRow > .figure {
-  flex: 0 0 calc(280px + 2 * var(--space-5) + 2 * var(--border-width-default));
-  min-width: 0;
-  margin: 0;
-}
-
-/* in the narrower column the tag can't sit right of the question
-   without squeezing it, so it drops under the question text */
-.decideRow .q {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  column-gap: 14px; /* .q's own gap */
-  row-gap: var(--spacing-component-xs);
-}
-
-.decideRow .qtag {
-  grid-column: 2;
-  margin-left: 0;
-}
-
-@container (max-width: 640px) {
-  .decideRow {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .decideRow > .decide {
-    flex: 0 0 auto;
-  }
-
-  .decideRow > .figure {
-    flex: 0 0 auto;
-    width: 100%;
-  }
-}
-
 /* stats as units (StatRow): each data point in its own box, the same
    card language as .decide and .ledger — bordered, on the page's
    surface, square like the plates. Both numbers take the big size;
@@ -1316,8 +1269,14 @@
   background: var(--surface-raised);
 }
 
+/* in the boxes the label runs past the numeral above it: 40 characters
+   a line (1ch plus .statLab's 0.06em tracking each, mono), which puts
+   both of §04's labels on two lines at desktop width — 38 is the floor
+   for the longer one, 42 would set the shorter on one. .statLab's 28ch
+   stays for the cases that set stats outside a box. */
 .statRow .statLab {
   margin-top: var(--spacing-component-md);
+  max-width: calc(40 * (1ch + 0.06em));
 }
 
 @container (max-width: 640px) {

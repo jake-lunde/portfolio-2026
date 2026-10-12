@@ -8,7 +8,6 @@ import {
   PullQuote,
   Metrics,
   Stat,
-  DecideRow,
   StatRow,
 } from '@/components/case/CaseComponents'
 import { BeforeSheet } from '@/components/case/BeforeSheet'
@@ -33,6 +32,8 @@ import { CaseFooter } from '@/components/case/CaseFooter'
 />
 
 <Section no="01" label="Starting line" title="Lots of words, not much to go on.">
+  <BeforeSheet />
+
   <Lead>
     When I joined, Invest looked like a balance sheet somebody remade in
     photoshop. Lots of text. Barely any of it a kid could use.
@@ -43,8 +44,6 @@ import { CaseFooter } from '@/components/case/CaseFooter'
   rating is, what an expense ratio means. It was the right instinct. In
   practice it was buggy, it only covered part of the page, and once it was
   on the whole thing got even longer and felt like homework.
-
-  <BeforeSheet />
 </Section>
 
 <Section no="02" label="The first lap" title="A bit smarter, but not simpler.">
@@ -95,24 +94,22 @@ import { CaseFooter } from '@/components/case/CaseFooter'
   We looked at how Warren Buffett evaluates potential investments and boiled
   it down to three simple questions:
 
-  <DecideRow>
-    <Decide
-      questions={[
-        { n: '01', q: 'Do you think they’re a leading company in a thriving industry?', tag: 'performance · industry' },
-        { n: '02', q: 'Do you think they’ll keep growing and making money?', tag: 'growth · earnings' },
-        { n: '03', q: 'Do you think this stock is worth buying right now?', tag: 'bulls · bears' },
-      ]}
+  <Decide
+    questions={[
+      { n: '01', q: 'Do you think they’re a leading company in a thriving industry?', tag: 'performance · industry' },
+      { n: '02', q: 'Do you think they’ll keep growing and making money?', tag: 'growth · earnings' },
+      { n: '03', q: 'Do you think this stock is worth buying right now?', tag: 'bulls · bears' },
+    ]}
+  />
+  <Plate cap="Help me decide" tag="NVIDIA">
+    <DemoReel
+      frame="phone"
+      dir="/case/greenlight-invest/decide"
+      video="analyze"
+      poster="poster.webp"
+      alt="Screen recording of Help me decide on NVIDIA: three questions, each with the company's competitors, growth, earnings, fair price and the bulls and bears, ending on the verdict that it seems like a match."
     />
-    <Plate cap="Help me decide" tag="NVIDIA">
-      <DemoReel
-        frame="phone"
-        dir="/case/greenlight-invest/decide"
-        video="analyze"
-        poster="poster.webp"
-        alt="Screen recording of Help me decide on NVIDIA: three questions, each with the company's competitors, growth, earnings, fair price and the bulls and bears, ending on the verdict that it seems like a match."
-      />
-    </Plate>
-  </DecideRow>
+  </Plate>
 
   Each question comes with financial data and analyst perspectives to help
   answer it: how the company ranks, if it&rsquo;s been growing, and what the
