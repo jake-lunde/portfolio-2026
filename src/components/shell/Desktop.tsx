@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { AnimatePresence } from 'motion/react'
-import { useWindows } from '@/store/windows'
+import { useWindows, isCase } from '@/store/windows'
 import { useShelfMode } from '@/store/shelfMode'
 import { resolveWindow, BOOT_WINDOWS } from '@/programs/resolve'
 import { BASE } from '@/lib/base'
@@ -86,6 +86,16 @@ export function Desktop({
     : initialWindows[initialWindows.length - 1] ?? null
   const shelfMode = hydrated ? storedShelf : initialShelfMode
 
+  /* CASE FULL-BLEED (s146). While a case window is open and zoomed, the
+     skills ticker stands down and the desk starts right under the
+     menubar, so the case (Window.tsx, .windowFull) gets the whole screen.
+     Before hydration the store has not zoomed anything yet, but
+     setInitial will zoom every case it opens, so a case deep link counts
+     as full from the first paint. Restoring or closing the case brings
+     the ticker back. */
+  const storedZoom = useWindows((s) => s.zoomed)
+  const caseFull = windows.some((w) => isCase(w.id) && (hydrated ? storedZoom[w.id] : true))
+
   /* Keep the URL pointing at what the reader is looking at (deep-linkable
      state). SHELF.MODE wins over the focused window while it is up — it
      covers the desk, so it IS what they are looking at, and leaving puts
@@ -119,7 +129,7 @@ export function Desktop({
           the shell so it covers every program, window and route */}
       <KnightSpeakLayer />
       <MenuBar />
-      <SkillsTicker />
+      {!caseFull && <SkillsTicker />}
       {/* the root of INSPECT.MODE's layer tree — the canvas has to be
           nameable from outside this module (LayersPanel finds it here) */}
       {/* `data-desk-recede` makes the desk's own contents behave like an
@@ -133,6 +143,7 @@ export function Desktop({
         data-desktop-root=""
         data-desk-recede={focused && !shelfMode ? 'on' : 'off'}
         data-shelf-mode={shelfMode ? 'on' : 'off'}
+        data-case-full={caseFull ? 'on' : 'off'}
       >
         {/* EVERYTHING ON THE DESK, IN ONE LAYER — and the dock rail
             deliberately outside it. SHELF.MODE sends this box back on the

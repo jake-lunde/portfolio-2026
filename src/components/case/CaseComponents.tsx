@@ -1,5 +1,6 @@
 import styles from './case.module.css'
 import { CopyText } from '@/content/CopyText'
+import { SectionBody } from './PinnedSection'
 
 /* Static case-study vocabulary (§7 anatomy). Interactive islands live
    in their own 'use client' files. */
@@ -48,13 +49,24 @@ export function Section({
   title: string
   children: React.ReactNode
 }) {
+  /* SectionBody renders this head and the children as they always were,
+     unless the case asked for the pinned layout (PinnedSection.tsx). Same
+     props either way, so the MDX never changes. The head goes over as a
+     list: the pinned grid counts its rows. */
   return (
     <section className={styles.section}>
-      <p className={styles.secNo}>
-        {no} — {label}
-      </p>
-      <h2>{title}</h2>
-      {children}
+      <SectionBody
+        no={no}
+        label={label}
+        head={[
+          <p key="no" className={styles.secNo}>
+            {no} — {label}
+          </p>,
+          <h2 key="title">{title}</h2>,
+        ]}
+      >
+        {children}
+      </SectionBody>
     </section>
   )
 }

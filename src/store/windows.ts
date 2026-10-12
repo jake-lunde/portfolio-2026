@@ -53,8 +53,9 @@ type WindowsState = {
   setInitial: (ids: string[]) => void
 }
 
-/* a case study's window (`case:<slug>`) */
-const isCase = (id: string) => id.startsWith('case:')
+/* a case study's window (`case:<slug>`). Exported for the shell, which
+   runs a zoomed case full-bleed (Desktop.tsx, Window.tsx). */
+export const isCase = (id: string) => id.startsWith('case:')
 
 export const useWindows = create<WindowsState>((set, get) => ({
   windows: [],

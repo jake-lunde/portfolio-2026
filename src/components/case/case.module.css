@@ -2854,3 +2854,181 @@
 .auditFilm video[data-clear] {
   opacity: 1;
 }
+
+/* ================= PINNED LAYOUT (s146) =================
+   PinnedSection.tsx. Out of the s146 prototype on branch
+   proto/plate-windows. Under a PinnedCase every section with a visual
+   renders one tree, in MDX order, with the visual in a .pin box; the
+   layout hangs off [data-pinned], which PinnedCase sets while the
+   article is wide enough for two columns (PIN_MIN there, measured on the
+   article, so the s140 container rule holds). Without it the section
+   stacks and reads as it always did. */
+
+/* the wrap widens so a pinned column fits beside the prose; the wider
+   left shoulder clears the index rail */
+.wrap[data-pinned] {
+  max-width: 1240px;
+  padding-left: 56px;
+}
+
+/* a section with nothing to pin keeps today's 780px measure */
+.wrap[data-pinned] .section {
+  max-width: 780px;
+}
+
+.wrap[data-pinned] .section:has(> .pinned) {
+  max-width: none;
+}
+
+/* ---- stacked: the pin box and its scaler are plain blocks, so the
+   figure's margins collapse through them as before. The two rules that
+   read the figure's neighbours (.section h2 + .figure, and the spacer a
+   captionless plate keeps before prose) see the box now, so they are
+   restated for it. The chip only exists pinned. ---- */
+.pinned:not([data-pinned]) > h2 + .pin > .pinScaler > .figure {
+  margin-top: 0;
+}
+
+.pinned:not([data-pinned]) > .pin:has(+ p, + .lead) > .pinScaler > .figure:not(:has(> .figcap))::after {
+  content: '';
+  display: block;
+  margin-top: 9px;
+  font-size: var(--text-ui);
+  height: 1lh;
+}
+
+.pinned:not([data-pinned]) .pinChip {
+  display: none;
+}
+
+/* ---- pinned: half and half. The text takes the left column a row per
+   child (PinnedSection sets --pin-rows to their count); the pin box
+   spans every row on the right, and the last row, 1fr and empty, takes
+   whatever height the box has beyond the text, so the paragraphs never
+   spread apart to make room for it. ---- */
+.pinned[data-pinned] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: repeat(var(--pin-rows, 1), auto) 1fr;
+  column-gap: var(--spacing-layout-xl);
+}
+
+/* grid items don't collapse margins, so the text keeps only the bottom
+   margins it already spaces itself with. The quote's 30px top would have
+   collapsed into the paragraph's 20px above it: 10px is the difference. */
+.pinned[data-pinned] > :not(.pin) {
+  grid-column: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.pinned[data-pinned] > .quote {
+  margin-top: 10px;
+}
+
+/* the text column is at most 553px (1240 less the shoulders and the gap,
+   halved), under the 640px the stat row stacks at, so pinned it stacks:
+   two boxes side by side broke §04's numerals onto two lines */
+.pinned[data-pinned] > .statRow {
+  flex-direction: column;
+}
+
+.pinned[data-pinned] > .statRow > * {
+  flex: 0 0 auto;
+}
+
+/* under the read-o-meter (sticky top 0, z 7); --pin-top is measured */
+.pinned[data-pinned] > .pin {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  align-self: start;
+  position: sticky;
+  top: var(--pin-top, 41px);
+  z-index: 2;
+  min-width: 0;
+}
+
+/* a wide visual gets its width and zoom inline; a tall one spans the
+   column and only its stage zooms */
+.pinned[data-pinned] .pinScaler {
+  margin-inline: auto;
+}
+
+/* the column carries the spacing; the figure's margins were for flow */
+.pinned[data-pinned] .pinScaler > .figure {
+  margin: 0;
+}
+
+/* every paragraph visible: the one at the reading line in full ink, the
+   rest in the muted role (AA on the window fill in every skin). The
+   attribute comes from PinnedCase's scroll handler. The ink snaps, no
+   colour transition: motion here is transform and opacity only. */
+.pinned[data-pinned] > [data-beat] {
+  color: var(--content-muted);
+}
+
+.pinned[data-pinned] > [data-beat='live'] {
+  color: var(--content);
+}
+
+/* a Metrics left holding one child (08's plate moved to the pin box)
+   gives it the whole row */
+.metrics > :only-child {
+  grid-column: 1 / -1;
+}
+
+/* the small wide visual's way to its full size */
+.pinChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: var(--spacing-component-md) auto 0;
+  padding: 6px 10px;
+  border: var(--border-width-default) solid var(--border);
+  background: var(--surface);
+  color: var(--content);
+  font-family: var(--mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-06);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.pinChip:hover,
+.pinChip[aria-expanded='true'] {
+  border-color: var(--accent);
+}
+
+.pinChip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* PlateWindow.tsx: a shell window floating inside the case window, at
+   the right, the visual at its full size. top and max-height are
+   measured off the case's titlebar. */
+.plateWindow {
+  right: 24px;
+  width: min(820px, calc(100% - 48px));
+  max-width: none;
+  z-index: 20;
+  transform-origin: top right;
+}
+
+.plateWindowBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+}
+
+.plateWindowBody > .figure {
+  margin: 0;
+}
+
+/* the titlebar's right slot, held empty so the title centres */
+.plateWindowBalance {
+  width: var(--window-ctrl-size);
+  flex: 0 0 auto;
+}

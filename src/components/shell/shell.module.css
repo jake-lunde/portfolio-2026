@@ -440,6 +440,12 @@
   background: var(--surface);
 }
 
+/* a case is open full-bleed (Desktop.tsx unmounts the ticker for the
+   same condition): the desk starts right under the menubar */
+.desktop[data-case-full='on'] {
+  top: var(--menubar-h);
+}
+
 /* ---- INSPECT.MODE (SYS-21): the desktop becomes the canvas ----
 
    The compression is an INSET change, never transform: scale(). A scaled
@@ -1325,6 +1331,23 @@
   width: calc(100% - 24px) !important;
   height: calc(100% - 24px) !important;
   transform: none !important;
+}
+
+/* a zoomed CASE goes full-bleed (s146): the desk's 12px margin, the
+   border and the shadow all go, so the case reads as the screen rather
+   than a window on it. Desktop.tsx sets the matching flag on .desktop
+   below. `.window.windowFull` out-specifies the dark-theme shadow rule;
+   on a phone the container rule further down already does the same, so
+   the two agree there. */
+.window.windowFull {
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none;
+  max-height: none;
+  border-width: 0;
+  box-shadow: none;
 }
 
 .titlebar {
