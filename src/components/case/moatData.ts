@@ -209,6 +209,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'META',
         name: 'Meta',
+        logo: `${LOGO}meta.png`,
         ring: 2,
         x: 222,
         y: 277,
@@ -380,6 +381,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
       {
         ticker: 'CMCSA',
         name: 'Comcast',
+        logo: `${LOGO}cmcsa.png`,
         ring: 2,
         x: 66,
         y: 107,
