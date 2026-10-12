@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
+import { DURATIONS } from '@/lib/motion'
 import { Plate } from './CaseComponents'
 import styles from './case.module.css'
 
@@ -26,6 +27,16 @@ import styles from './case.module.css'
    PageDown a chapter, Home/End), and the five chapters are also a
    visually hidden list of buttons; focusing one shows its label and
    rings its segment, so the focus is never invisible.
+
+   The cap row's readout is flanked by two arrows that step a chapter
+   back or on, to its start, and leave the film playing or paused as it
+   was; each is dimmed and inert at its end of the film.
+
+   Toggling the film (a click on it, the chip, Space/Enter on the film)
+   flashes the new state's glyph over the film's centre, the way video
+   players do: a pop, then a fade, keyed on a counter so a rapid second
+   toggle restarts it. It never takes the pointer. Reduced motion holds
+   it still for the same span, then drops it.
 
    60fps: React state only changes once a second (the tag) or once a
    chapter (the readout). The playhead and the played fills are written
@@ -62,6 +73,10 @@ const clock = (t: number) => {
    it, the release is a click on the segment */
 const DRAG_PX = 4
 
+/* the flash lives as long as its fade: the slow duration token, which
+   the CSS splits into the pop (fade token) and the fade out (the rest) */
+const FLASH_MS = parseFloat(DURATIONS.slow) * 1000
+
 export function LevelsFilm() {
   const reduced = useReducedMotion()
   const vid = useRef<HTMLVideoElement>(null)
@@ -81,6 +96,9 @@ export function LevelsFilm() {
   /* the chapter whose hidden button holds keyboard focus: its segment
      wears the focus ring */
   const [ring, setRing] = useState<number | null>(null)
+  /* the play/pause flash over the film: n keys it so a rapid toggle
+     restarts the animation */
+  const [flash, setFlash] = useState<{ n: number; kind: 'play' | 'pause' } | null>(null)
 
   /* the reader paused on purpose: the observer leaves it alone */
   const held = useRef(false)
@@ -123,12 +141,22 @@ export function LevelsFilm() {
   const toggle = useCallback(() => {
     const el = vid.current
     if (!el) return
-    if (el.paused || el.ended) play()
+    const starting = el.paused || el.ended
+    setFlash((f) => ({ n: (f?.n ?? 0) + 1, kind: starting ? 'play' : 'pause' }))
+    if (starting) play()
     else {
       held.current = true
       el.pause()
     }
   }, [play])
+
+  /* the flash unmounts itself once its fade is done; a newer flash
+     resets the clock */
+  useEffect(() => {
+    if (!flash) return
+    const t = window.setTimeout(() => setFlash(null), FLASH_MS)
+    return () => window.clearTimeout(t)
+  }, [flash])
 
   /* the film's own events keep the UI honest, whoever moved it (the
      reader, the observer, a probe setting currentTime) */
@@ -201,6 +229,20 @@ export function LevelsFilm() {
     play()
   }
 
+  /* the cap's arrows: a chapter back or on, to its start, leaving the
+     film as it was. Paused, the seek paints the new frame over the
+     poster; playing, it plays on (asked for again, since a browser may
+     stall a film mid-seek, as Chrome does in a hidden tab). */
+  const step = (d: -1 | 1) => {
+    const to = ch + d
+    if (to < 0 || to >= CHAPTERS.length) return
+    const was = !(vid.current?.paused ?? true)
+    seek(CHAPTERS[to][0])
+    if (was) play()
+  }
+  const atStart = ch === 0
+  const atEnd = ch === CHAPTERS.length - 1
+
   const label = peek ?? (touch || scrubbing ? ch : null)
   const align = label === 0 ? 'start' : label === CHAPTERS.length - 1 ? 'end' : 'center'
   /* the label hangs from its segment: centred over it, but flush with
@@ -214,7 +256,29 @@ export function LevelsFilm() {
   return (
     <Plate
       cap="Grows with You"
-      readout={<span className={`${styles.plateCount} ${styles.levelsReadout}`}>{CHAPTERS[ch][1]}</span>}
+      readout={
+        <span className={styles.levelsChapter}>
+          <button
+            type="button"
+            className={styles.levelsStep}
+            aria-label="Previous chapter"
+            aria-disabled={atStart || undefined}
+            onClick={() => step(-1)}
+          >
+            {'<'}
+          </button>
+          <span className={`${styles.plateCount} ${styles.levelsReadout}`}>{CHAPTERS[ch][1]}</span>
+          <button
+            type="button"
+            className={styles.levelsStep}
+            aria-label="Next chapter"
+            aria-disabled={atEnd || undefined}
+            onClick={() => step(1)}
+          >
+            {'>'}
+          </button>
+        </span>
+      }
       tag={clock(sec)}
       chip={
         <button
@@ -228,19 +292,38 @@ export function LevelsFilm() {
         </button>
       }
     >
-      <video
-        ref={vid}
-        className={styles.levelsFilm}
-        poster={`${DIR}/poster.webp`}
-        muted
-        playsInline
-        preload="none"
-        aria-label="Grows with You concept film, about 80 seconds, captions burned in, no sound: a father follows his son's investing milestones, and the app grows with the son until he unlocks level 2."
-        onClick={toggle}
-      >
-        <source src={`${DIR}/levels.mp4`} type="video/mp4" />
-        <source src={`${DIR}/levels.webm`} type="video/webm" />
-      </video>
+      <div className={styles.levelsStage}>
+        <video
+          ref={vid}
+          className={styles.levelsFilm}
+          poster={`${DIR}/poster.webp`}
+          muted
+          playsInline
+          preload="none"
+          tabIndex={0}
+          aria-label="Grows with You concept film, about 80 seconds, captions burned in, no sound: a father follows his son's investing milestones, and the app grows with the son until he unlocks level 2. Space or Enter plays and pauses."
+          onClick={toggle}
+          onKeyDown={(e) => {
+            if (e.key !== ' ' && e.key !== 'Enter') return
+            e.preventDefault()
+            toggle()
+          }}
+        >
+          <source src={`${DIR}/levels.mp4`} type="video/mp4" />
+          <source src={`${DIR}/levels.webm`} type="video/webm" />
+        </video>
+        {flash && (
+          <span key={flash.n} className={styles.levelsFlash} data-kind={flash.kind} aria-hidden="true">
+            <span>
+              <svg viewBox="0 0 24 24" width="26" height="26" focusable="false">
+                {flash.kind === 'play' ?
+                  <path d="M8 5v14l11-7z" fill="currentColor" />
+                : <path d="M6 5h4v14H6zM14 5h4v14h-4z" fill="currentColor" />}
+              </svg>
+            </span>
+          </span>
+        )}
+      </div>
 
       <div className={styles.levelsScrub}>
         <span

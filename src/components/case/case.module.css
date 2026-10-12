@@ -1818,6 +1818,12 @@
    the chapter scrubber under it. The box reserves the film's ratio
    before a byte loads; the mat is #000, sampled from the film's caption
    band (the footage's own corners, rail law, as the demo reels). */
+/* the film's own box: the play/pause flash centres over it */
+.levelsStage {
+  position: relative;
+  z-index: 1;
+}
+
 .levelsFilm {
   position: relative;
   z-index: 1;
@@ -1829,6 +1835,65 @@
   cursor: pointer;
 }
 
+.levelsFilm:focus {
+  outline: none;
+}
+
+.levelsFilm:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
+}
+
+/* the play/pause flash: the plate's ground as a 64px disc with a soft
+   ring of the same, the glyph in plate ink. It pops in on the fade
+   token, then fades out over the rest of the slow token (the component
+   unmounts it at the slow token's end). Never takes the pointer. */
+.levelsFlash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.levelsFlash > span {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--surface-inverse);
+  color: var(--content-inverse);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--surface-inverse) 35%, transparent);
+  animation:
+    levelsFlashPop var(--duration-fade) ease-out both,
+    levelsFlashFade calc(var(--duration-slow) - var(--duration-fade)) ease-in var(--duration-fade) both;
+}
+
+/* the triangle's ink sits left of its box; nudge it to the optical centre */
+.levelsFlash[data-kind='play'] svg {
+  transform: translateX(1px);
+}
+
+@keyframes levelsFlashPop {
+  from {
+    transform: scale(0.8);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes levelsFlashFade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* the chapter title in the cap's readout: on a phone the cap is
    narrower than the longest title, so it clips with an ellipsis rather
    than running under the clock (the touch label under the film still
@@ -1837,6 +1902,60 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* the readout's cluster: the chapter arrows hug the title, and the
+   cluster shrinks (the title ellipsizes) before anything wraps */
+.levelsChapter {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-component-xs);
+  min-width: 0;
+}
+
+/* the chapter arrows: square chips in the plate's mono and ink, with the
+   label's hairline. A 4px skirt takes the hit area to 26px. */
+.levelsStep {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 1;
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--content-inverse) 28%, transparent);
+  color: color-mix(in srgb, var(--content-inverse) 90%, transparent);
+  cursor: pointer;
+}
+
+.levelsStep::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+
+.levelsStep:hover:not([aria-disabled]) {
+  border-color: color-mix(in srgb, var(--content-inverse) 50%, transparent);
+}
+
+/* at the film's ends: the inactive pill's muted ink, inert */
+.levelsStep[aria-disabled] {
+  color: color-mix(in srgb, var(--content-inverse) 30%, transparent);
+  border-color: color-mix(in srgb, var(--content-inverse) 14%, transparent);
+  cursor: default;
+}
+
+.levelsStep:focus {
+  outline: none;
+}
+
+.levelsStep:focus-visible {
+  outline: 2px solid var(--accent-expressive);
+  outline-offset: 2px;
 }
 
 /* the play chip holds PAUSE's width either way, so the clock beside it
@@ -2004,6 +2123,11 @@
   .levelsLabel,
   .levelsBar {
     transition: none;
+  }
+
+  /* the flash holds still, then the component drops it */
+  .levelsFlash > span {
+    animation: none;
   }
 }
 
