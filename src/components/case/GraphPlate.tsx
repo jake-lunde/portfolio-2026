@@ -26,7 +26,10 @@ import {
    palette (graph.module.css), the company tabs under it stay on the
    site's tokens. Press and drag across the chart to scrub; every
    interval boundary ticks (sound, plus a vibration where the platform
-   has one), the web telling of the shipped SwiftUI haptics.
+   has one), the web telling of the shipped SwiftUI haptics. Tap a tile
+   (the ticker's or the S&P 500's) to solo its series: that tile lifts,
+   the other tile and the other line (and its scrub dot) fall back; tap
+   it again and both come back. A company switch drops the solo.
 
    Graph logic, from Jake's Figma notes: both series start at 0% on the
    first point of the selected range and track percent change from
@@ -339,8 +342,16 @@ function Fade({
   )
 }
 
-/* chartLabel: dot, name, the price at the scrub, change since the range start */
+type Series = 'stock' | 'spy'
+
+/* chartLabel: dot, name, the price at the scrub, change since the range
+   start. It is also the series' solo switch: a button, pressed while its
+   series is the one on show; data-solo marks both tiles once either is
+   pressed ("on" lifts, "off" falls back), and is absent with no solo. */
 function Tile({
+  series,
+  solo,
+  onToggle,
   label,
   dot,
   price,
@@ -348,6 +359,9 @@ function Tile({
   k,
   swap,
 }: {
+  series: Series
+  solo: Series | null
+  onToggle: (s: Series) => void
   label: string
   dot: string
   price: number
@@ -357,7 +371,13 @@ function Tile({
 }) {
   const up = pct >= 0
   return (
-    <div className={styles.tile}>
+    <button
+      type="button"
+      className={styles.tile}
+      aria-pressed={solo === series}
+      data-solo={solo === null ? undefined : solo === series ? 'on' : 'off'}
+      onClick={() => onToggle(series)}
+    >
       <span className={styles.tileLeft}>
         <span className={`${styles.dot} ${dot}`} aria-hidden="true" />
         <span className={styles.ticker}>{label}</span>
@@ -374,7 +394,7 @@ function Tile({
         />
         {fmtPct(pct)}
       </Fade>
-    </div>
+    </button>
   )
 }
 
@@ -405,6 +425,9 @@ function GraphCard({
   const v = useView(ticker, range)
   const [cursor, setCursor] = useState<number | null>(null)
   const [open, setOpen] = useState(false)
+  /* the soloed series (named so it never reads as DOM focus): null is
+     both lines at full */
+  const [solo, setSolo] = useState<Series | null>(null)
   const restore = useRef(false)
   const infoRef = useRef<HTMLButtonElement>(null)
   const plotRef = useRef<HTMLDivElement>(null)
@@ -420,6 +443,20 @@ function GraphCard({
     setCursor(null)
     lastBucket.current = null
   }, [viewKey])
+
+  /* a company switch drops the solo too (a range switch keeps it: same
+     two series, another span) */
+  useEffect(() => {
+    setSolo(null)
+  }, [ticker])
+
+  /* a tile press solos its series; pressing the soloed one clears it */
+  const toggleSolo = (s: Series) => {
+    sfx.tap()
+    setSolo((cur) => (cur === s ? null : s))
+  }
+  const dimStock = solo === 'spy' || undefined
+  const dimSpy = solo === 'stock' || undefined
 
   /* focus goes back to the "i" when the sheet closes */
   useEffect(() => {
@@ -506,8 +543,28 @@ function GraphCard({
             </Fade>
 
             <div className={styles.tiles}>
-              <Tile label={ticker} dot={styles.dotStock} price={stockPrice} pct={stockPct} k={fadeKey} swap={swap} />
-              <Tile label="S&P 500" dot={styles.dotSpy} price={spyPrice} pct={spyPct} k={fadeKey} swap={swap} />
+              <Tile
+                series="stock"
+                solo={solo}
+                onToggle={toggleSolo}
+                label={ticker}
+                dot={styles.dotStock}
+                price={stockPrice}
+                pct={stockPct}
+                k={fadeKey}
+                swap={swap}
+              />
+              <Tile
+                series="spy"
+                solo={solo}
+                onToggle={toggleSolo}
+                label="S&P 500"
+                dot={styles.dotSpy}
+                price={spyPrice}
+                pct={spyPct}
+                k={fadeKey}
+                swap={swap}
+              />
             </div>
 
             <div className={styles.date}>{date}</div>
@@ -541,44 +598,56 @@ function GraphCard({
                     <stop offset="1" stopColor="var(--gl-chart-fill)" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                <motion.path
-                  key={`spy-${viewKey}`}
-                  className={`${styles.line} ${styles.lineSpy}`}
-                  d={v.spyLine}
-                  initial={still ? false : { pathLength: 0 }}
-                  animate={{ pathLength: play ? 1 : 0 }}
-                  transition={draw}
-                />
-                <motion.path
-                  key={`area-${viewKey}`}
-                  className={styles.area}
-                  d={v.area}
-                  fill={`url(#${GRADIENT_ID})`}
-                  initial={still ? false : { opacity: 0 }}
-                  animate={{ opacity: play ? 1 : 0 }}
-                  transition={fillIn}
-                />
-                <motion.path
-                  key={`stock-${viewKey}`}
-                  className={`${styles.line} ${styles.lineStock}`}
-                  d={v.line}
-                  initial={still ? false : { pathLength: 0 }}
-                  animate={{ pathLength: play ? 1 : 0 }}
-                  transition={draw}
-                />
+                {/* each series in its own group, so a solo dims the other
+                    one with a single opacity (the group's, never the
+                    paths', which Motion is drawing; the stock's area fill
+                    rides with its line) */}
+                <g className={styles.series} data-dim={dimSpy}>
+                  <motion.path
+                    key={`spy-${viewKey}`}
+                    className={`${styles.line} ${styles.lineSpy}`}
+                    d={v.spyLine}
+                    initial={still ? false : { pathLength: 0 }}
+                    animate={{ pathLength: play ? 1 : 0 }}
+                    transition={draw}
+                  />
+                </g>
+                <g className={styles.series} data-dim={dimStock}>
+                  <motion.path
+                    key={`area-${viewKey}`}
+                    className={styles.area}
+                    d={v.area}
+                    fill={`url(#${GRADIENT_ID})`}
+                    initial={still ? false : { opacity: 0 }}
+                    animate={{ opacity: play ? 1 : 0 }}
+                    transition={fillIn}
+                  />
+                  <motion.path
+                    key={`stock-${viewKey}`}
+                    className={`${styles.line} ${styles.lineStock}`}
+                    d={v.line}
+                    initial={still ? false : { pathLength: 0 }}
+                    animate={{ pathLength: play ? 1 : 0 }}
+                    transition={draw}
+                  />
+                </g>
                 {cursor !== null && (
                   <g className={styles.scrub}>
                     <rect className={styles.scrubLine} x={v.xs[cursor] - 0.5} y={0} width={1} height={SCRUB_BOT} />
-                    <circle className={styles.dotRing} cx={v.xs[cursor]} cy={v.spyY[cursor]} r={6} />
-                    <circle className={styles.dotSpyFill} cx={v.xs[cursor]} cy={v.spyY[cursor]} r={4} />
-                    <circle className={styles.dotRing} cx={v.xs[cursor]} cy={v.stockY[cursor]} r={6} />
-                    <circle
-                      className={styles.dotStockFill}
-                      data-dot="stock"
-                      cx={v.xs[cursor]}
-                      cy={v.stockY[cursor]}
-                      r={4}
-                    />
+                    <g className={styles.series} data-dim={dimSpy}>
+                      <circle className={styles.dotRing} cx={v.xs[cursor]} cy={v.spyY[cursor]} r={6} />
+                      <circle className={styles.dotSpyFill} cx={v.xs[cursor]} cy={v.spyY[cursor]} r={4} />
+                    </g>
+                    <g className={styles.series} data-dim={dimStock}>
+                      <circle className={styles.dotRing} cx={v.xs[cursor]} cy={v.stockY[cursor]} r={6} />
+                      <circle
+                        className={styles.dotStockFill}
+                        data-dot="stock"
+                        cx={v.xs[cursor]}
+                        cy={v.stockY[cursor]}
+                        r={4}
+                      />
+                    </g>
                   </g>
                 )}
               </svg>
@@ -588,7 +657,7 @@ function GraphCard({
                 className={styles.plot}
                 role="slider"
                 tabIndex={0}
-                aria-label={`${ticker} against the S&P 500 over the past ${RANGE_WORDS[range]}. Drag, or use the arrow keys, to scrub.`}
+                aria-label={`${ticker} against the S&P 500 over the past ${RANGE_WORDS[range]}${solo ? `, ${solo === 'stock' ? ticker : 'the S&P 500'} highlighted` : ''}. Drag, or use the arrow keys, to scrub.`}
                 aria-valuemin={0}
                 aria-valuemax={v.n - 1}
                 aria-valuenow={at}
@@ -670,7 +739,9 @@ function GraphCard({
             <div className={better ? `${styles.insight} ${styles.insightUp}` : `${styles.insight} ${styles.insightDown}`}>
               <span className={styles.pictogram} aria-hidden="true">
                 {/* ic_invest_down (icon-invest-down.svg); the "better" tile
-                    flips it to point up, on the positive colours */}
+                    flips it to point up, on the positive colours. Its
+                    12px is held in the CSS: the plate's own svg rule
+                    would otherwise stretch it to the tile's full 24 */}
                 <svg width="12" height="12" viewBox="0 0 12 12">
                   <path
                     fillRule="evenodd"

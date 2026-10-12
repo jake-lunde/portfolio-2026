@@ -31,18 +31,15 @@ const SLUG = 'family-hub'
 export function HubPlayer() {
   const reduced = useReducedMotion()
   const open = useWindows((s) => s.open)
-  const setZoomed = useWindows((s) => s.setZoomed)
   const c = getCase(SLUG)
   const box = c?.box
   if (!c || !box) return null
 
-  /* Full screen, same as the shelf's launch path (LaunchOverlay): a case
-     study is 1280×720 of window and the reader asked for it, so it arrives
-     maximised. `setZoomed` before `open` so the window mounts already
-     maximised — no frame where it paints at its registry size and snaps. */
+  /* The case arrives full screen, as every case does: that ruling lives
+     in the windows store (`open` maximises any fresh `case:` window), so
+     this only opens it. */
   const play = () => {
     sfx.open()
-    setZoomed(`case:${SLUG}`, true)
     open(`case:${SLUG}`)
   }
 

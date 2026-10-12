@@ -41,8 +41,10 @@ export function Window({ def, z, active, desktopRef }: Props) {
   const skin = useSettings((s) => s.skin)
   const ref = useRef<HTMLElement>(null)
   /* zoom is store state, not component state: a window can be opened
-     already maximised (LaunchOverlay does exactly that with a case study),
-     and the opener is never the window. useWindows.close forgets it. */
+     already maximised (every case study is: useWindows.open sets it in
+     the update that creates the window, so the first render here is
+     already zoomed), and the opener is never the window.
+     useWindows.close forgets it. */
   const zoomed = useWindows((s) => s.zoomed[def.id] ?? false)
   const setZoomed = useWindows((s) => s.setZoomed)
   const [explaining, setExplaining] = useState(false)

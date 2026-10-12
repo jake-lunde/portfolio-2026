@@ -27,10 +27,21 @@ type WindowsState = {
      one the program shipped with. */
   holds: Record<string, Size | null>
   /* ZOOMED IS PER WINDOW AND IT LIVES HERE, not in Window.tsx where it
-     started. A window can now be opened ALREADY maximised — PLAY hands
-     the reader a case study and Jake's ruling is that a case arrives full
-     screen (LaunchOverlay) — and the thing that opens a window is never
-     the window. Same shape as `sizes`: absent means "as it opens". */
+     started, because a window can be opened ALREADY maximised and the
+     thing that opens a window is never the window. Same shape as
+     `sizes`: absent means "as it opens".
+
+     A CASE ALWAYS ARRIVES FULL SCREEN (Jake's ruling, Oct 12). A case
+     study is 1280×720 of window on a desk that may be 1280 wide, so every
+     path that opens one — the shelf's PLAY, the Family Hub player, the
+     Projects list, a footer's "Next project", a deep link — hands it over
+     maximised. The ruling has ONE home: `open` and `setInitial` below set
+     the flag for any `case:` id as the window is created, in the same
+     update that creates it, so Window.tsx reads it on its first render
+     and there is no frame at the registry size that then snaps. A case
+     that is already open keeps whatever the reader made of it (open just
+     raises it), and the flag is forgotten on close, so every reopen is a
+     fresh full-screen arrival. */
   zoomed: Record<string, boolean>
   open: (id: string) => void
   close: (id: string) => void
@@ -42,6 +53,9 @@ type WindowsState = {
   setInitial: (ids: string[]) => void
 }
 
+/* a case study's window (`case:<slug>`) */
+const isCase = (id: string) => id.startsWith('case:')
+
 export const useWindows = create<WindowsState>((set, get) => ({
   windows: [],
   zTop: 10,
@@ -50,12 +64,15 @@ export const useWindows = create<WindowsState>((set, get) => ({
   holds: {},
   zoomed: {},
 
+  /* a deep link's windows (resolve.ts windowsForPath): any case among
+     them arrives full screen, the same as one opened by hand */
   setInitial: (ids) =>
-    set({
+    set((s) => ({
       windows: ids.map((id, i) => ({ id, z: 10 + i })),
       zTop: 10 + ids.length,
       focused: ids[ids.length - 1] ?? null,
-    }),
+      zoomed: { ...s.zoomed, ...Object.fromEntries(ids.filter(isCase).map((id) => [id, true])) },
+    })),
 
   open: (id) => {
     metric('window_open', { id })
@@ -68,11 +85,13 @@ export const useWindows = create<WindowsState>((set, get) => ({
         focused: id,
       })
     } else {
-      set({
+      set((s) => ({
         windows: [...windows, { id, z: next }],
         zTop: next,
         focused: id,
-      })
+        /* a fresh case arrives maximised (the ruling on `zoomed`) */
+        ...(isCase(id) ? { zoomed: { ...s.zoomed, [id]: true } } : {}),
+      }))
     }
   },
 
@@ -81,7 +100,7 @@ export const useWindows = create<WindowsState>((set, get) => ({
     const rest = windows.filter((w) => w.id !== id)
     const top = rest.length ? rest.reduce((a, b) => (a.z > b.z ? a : b)).id : null
     // a closed window forgets it was maximised: the next open is a fresh
-    // arrival, and only whoever opens it gets to say how it arrives
+    // arrival (for a case, full screen again: `open` sets it)
     const nextZoom = { ...zoomed }
     delete nextZoom[id]
     set({ windows: rest, focused: focused === id ? top : focused, zoomed: nextZoom })

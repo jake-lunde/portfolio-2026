@@ -21,16 +21,18 @@ import styles from './case.module.css'
    Under the film, the chapter scrubber: one track cut into Jake's five
    chapters, each segment as wide as its span. The cap row's readout
    names the chapter on show, the tag counts m:ss. Hover a segment for
-   its title above the track (touch shows the current one); click one to
-   jump to its start and play; press and drag to scrub, seeking live.
+   its title above the track (touch, a scrub, or the film playing shows
+   the current one, so a reader watching sees the thing to scrub is down
+   there); click one to jump to its start and play; press and drag to
+   scrub, seeking live.
    The track is a slider for the keyboard (Left/Right 5s, PageUp/
    PageDown a chapter, Home/End), and the five chapters are also a
    visually hidden list of buttons; focusing one shows its label and
    rings its segment, so the focus is never invisible.
 
-   The cap row's readout is flanked by two arrows that step a chapter
-   back or on, to its start, and leave the film playing or paused as it
-   was; each is dimmed and inert at its end of the film.
+   The cap row's readout is just the chapter's title: the arrows that
+   once flanked it to step a chapter back or on are gone (Jake, Oct 12);
+   the track, its segments and PageUp/PageDown do that work.
 
    Toggling the film (a click on it, the chip, Space/Enter on the film)
    flashes the new state's glyph over the film's centre, the way video
@@ -229,21 +231,13 @@ export function LevelsFilm() {
     play()
   }
 
-  /* the cap's arrows: a chapter back or on, to its start, leaving the
-     film as it was. Paused, the seek paints the new frame over the
-     poster; playing, it plays on (asked for again, since a browser may
-     stall a film mid-seek, as Chrome does in a hidden tab). */
-  const step = (d: -1 | 1) => {
-    const to = ch + d
-    if (to < 0 || to >= CHAPTERS.length) return
-    const was = !(vid.current?.paused ?? true)
-    seek(CHAPTERS[to][0])
-    if (was) play()
-  }
-  const atStart = ch === 0
-  const atEnd = ch === CHAPTERS.length - 1
-
-  const label = peek ?? (touch || scrubbing ? ch : null)
+  /* the label: the hovered or focused chapter first; failing that, the
+     current one whenever there's no hover to ask (touch), a scrub is
+     under way, or the film is playing, so the reader watching it sees
+     the chapter tick over on the track and knows that's what to scrub.
+     Mid-play it hops to the next segment at a chapter's boundary: its
+     left isn't animated (only its opacity), so it lands, never slides. */
+  const label = peek ?? (touch || scrubbing || playing ? ch : null)
   const align = label === 0 ? 'start' : label === CHAPTERS.length - 1 ? 'end' : 'center'
   /* the label hangs from its segment: centred over it, but flush with
      the track's ends for the first and last so it never leaves the plate */
@@ -256,29 +250,7 @@ export function LevelsFilm() {
   return (
     <Plate
       cap="Grows with You"
-      readout={
-        <span className={styles.levelsChapter}>
-          <button
-            type="button"
-            className={styles.levelsStep}
-            aria-label="Previous chapter"
-            aria-disabled={atStart || undefined}
-            onClick={() => step(-1)}
-          >
-            {'<'}
-          </button>
-          <span className={`${styles.plateCount} ${styles.levelsReadout}`}>{CHAPTERS[ch][1]}</span>
-          <button
-            type="button"
-            className={styles.levelsStep}
-            aria-label="Next chapter"
-            aria-disabled={atEnd || undefined}
-            onClick={() => step(1)}
-          >
-            {'>'}
-          </button>
-        </span>
-      }
+      readout={<span className={`${styles.plateCount} ${styles.levelsReadout}`}>{CHAPTERS[ch][1]}</span>}
       tag={clock(sec)}
       chip={
         <button
