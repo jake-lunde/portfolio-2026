@@ -2856,12 +2856,13 @@
 }
 
 /* ================= PINNED LAYOUT (s146) =================
-   PinnedSection.tsx: text left, the section's visual pinned right, half
-   and half. Out of the s146 prototype on branch proto/plate-windows.
-   PinnedCase sets [data-pinned] on the wrap only while the article is
-   wide enough for two columns (PIN_MIN there, measured on the article,
-   so the s140 container rule holds); without it nothing here applies
-   and the case stacks as before. */
+   PinnedSection.tsx. Out of the s146 prototype on branch
+   proto/plate-windows. Under a PinnedCase every section with a visual
+   renders one tree, in MDX order, with the visual in a .pin box; the
+   layout hangs off [data-pinned], which PinnedCase sets while the
+   article is wide enough for two columns (PIN_MIN there, measured on the
+   article, so the s140 container rule holds). Without it the section
+   stacks and reads as it always did. */
 
 /* the wrap widens so a pinned column fits beside the prose; the wider
    left shoulder clears the index rail */
@@ -2879,19 +2880,68 @@
   max-width: none;
 }
 
-.pinned {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: var(--spacing-layout-xl);
-  align-items: start;
+/* ---- stacked: the pin box and its scaler are plain blocks, so the
+   figure's margins collapse through them as before. The two rules that
+   read the figure's neighbours (.section h2 + .figure, and the spacer a
+   captionless plate keeps before prose) see the box now, so they are
+   restated for it. The chip only exists pinned. ---- */
+.pinned:not([data-pinned]) > h2 + .pin > .pinScaler > .figure {
+  margin-top: 0;
 }
 
-.pinText {
+.pinned:not([data-pinned]) > .pin:has(+ p, + .lead) > .pinScaler > .figure:not(:has(> .figcap))::after {
+  content: '';
+  display: block;
+  margin-top: 9px;
+  font-size: var(--text-ui);
+  height: 1lh;
+}
+
+.pinned:not([data-pinned]) .pinChip {
+  display: none;
+}
+
+/* ---- pinned: half and half. The text takes the left column a row per
+   child (PinnedSection sets --pin-rows to their count); the pin box
+   spans every row on the right, and the last row, 1fr and empty, takes
+   whatever height the box has beyond the text, so the paragraphs never
+   spread apart to make room for it. ---- */
+.pinned[data-pinned] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: repeat(var(--pin-rows, 1), auto) 1fr;
+  column-gap: var(--spacing-layout-xl);
+}
+
+/* grid items don't collapse margins, so the text keeps only the bottom
+   margins it already spaces itself with. The quote's 30px top would have
+   collapsed into the paragraph's 20px above it: 10px is the difference. */
+.pinned[data-pinned] > :not(.pin) {
+  grid-column: 1;
   min-width: 0;
+  margin-top: 0;
+}
+
+.pinned[data-pinned] > .quote {
+  margin-top: 10px;
+}
+
+/* the text column is at most 553px (1240 less the shoulders and the gap,
+   halved), under the 640px the stat row stacks at, so pinned it stacks:
+   two boxes side by side broke §04's numerals onto two lines */
+.pinned[data-pinned] > .statRow {
+  flex-direction: column;
+}
+
+.pinned[data-pinned] > .statRow > * {
+  flex: 0 0 auto;
 }
 
 /* under the read-o-meter (sticky top 0, z 7); --pin-top is measured */
-.pin {
+.pinned[data-pinned] > .pin {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  align-self: start;
   position: sticky;
   top: var(--pin-top, 41px);
   z-index: 2;
@@ -2900,35 +2950,29 @@
 
 /* a wide visual gets its width and zoom inline; a tall one spans the
    column and only its stage zooms */
-.pinScaler {
+.pinned[data-pinned] .pinScaler {
   margin-inline: auto;
 }
 
 /* the column carries the spacing; the figure's margins were for flow */
-.pinScaler > .figure {
+.pinned[data-pinned] .pinScaler > .figure {
   margin: 0;
 }
 
 /* every paragraph visible: the one at the reading line in full ink, the
-   rest in the muted role (both audited for AA on the surface). The
-   attribute is set from PinnedSection's scroll handler. */
-.pinText > [data-beat] {
+   rest in the muted role (AA on the window fill in every skin). The
+   attribute comes from PinnedCase's scroll handler. The ink snaps, no
+   colour transition: motion here is transform and opacity only. */
+.pinned[data-pinned] > [data-beat] {
   color: var(--content-muted);
-  transition: color var(--duration-tap) ease-out;
 }
 
-.pinText > [data-beat='live'] {
+.pinned[data-pinned] > [data-beat='live'] {
   color: var(--content);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .pinText > [data-beat] {
-    transition: none;
-  }
-}
-
-/* a Metrics left holding one child (08's plate moved to the pinned
-   column) gives it the whole row */
+/* a Metrics left holding one child (08's plate moved to the pin box)
+   gives it the whole row */
 .metrics > :only-child {
   grid-column: 1 / -1;
 }
@@ -2945,7 +2989,7 @@
   color: var(--content);
   font-family: var(--mono);
   font-size: var(--text-caption);
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-06);
   text-transform: uppercase;
   cursor: pointer;
 }

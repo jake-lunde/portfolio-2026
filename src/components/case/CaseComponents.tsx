@@ -50,21 +50,20 @@ export function Section({
   children: React.ReactNode
 }) {
   /* SectionBody renders this head and the children as they always were,
-     unless the case asked for the pinned layout and has room for it
-     (PinnedSection.tsx). Same props either way, so the MDX never changes. */
+     unless the case asked for the pinned layout (PinnedSection.tsx). Same
+     props either way, so the MDX never changes. The head goes over as a
+     list: the pinned grid counts its rows. */
   return (
     <section className={styles.section}>
       <SectionBody
         no={no}
         label={label}
-        head={
-          <>
-            <p className={styles.secNo}>
-              {no} — {label}
-            </p>
-            <h2>{title}</h2>
-          </>
-        }
+        head={[
+          <p key="no" className={styles.secNo}>
+            {no} — {label}
+          </p>,
+          <h2 key="title">{title}</h2>,
+        ]}
       >
         {children}
       </SectionBody>
