@@ -5,7 +5,6 @@ import {
   Plate,
   Decide,
   PullQuote,
-  Metrics,
   Stat,
   StatRow,
 } from '@/components/case/CaseComponents'
@@ -16,7 +15,6 @@ import { DemoReel } from '@/components/case/DemoReel'
 import { LevelsFilm } from '@/components/case/LevelsFilm'
 import { MoatPlate } from '@/components/case/MoatPlate'
 import { GraphPlate } from '@/components/case/GraphPlate'
-import { FrequencyBars } from '@/components/case/FrequencyBars'
 import { CaseFooter } from '@/components/case/CaseFooter'
 import { BoxFilm } from '@/components/case/BoxFilm'
 
@@ -193,16 +191,10 @@ import { BoxFilm } from '@/components/case/BoxFilm'
 </Section>
 
 <Section no="08" label="Outcome" title="More kids trading and more families talking.">
-  <Metrics>
-    <div>
-      <Stat big={<span className="hl-pink">3–4×</span>} label="increase in first-trade rate among kids with the new detail screens vs. the old ones" />
-      <Stat secondary big={<>355%<span className="hl-pink">↑</span></>} label="increase in stock detail screen views" />
-    </div>
-  </Metrics>
-
-  <Plate cap="Signal" caption="Stand-in data for now. The real adoption series is pending.">
-    <FrequencyBars />
-  </Plate>
+  <StatRow>
+    <Stat big={<span className="hl-pink">3–4×</span>} label="increase in first-trade rate among kids with the new detail screens vs. the old ones" />
+    <Stat big={<>355%<span className="hl-pink">↑</span></>} label="increase in stock detail screen views" />
+  </StatRow>
 
   The part I keep coming back to is more foundational than the metrics:
   families connecting and talking about money. Investing used to be a kid

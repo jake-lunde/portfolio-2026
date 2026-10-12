@@ -188,6 +188,8 @@ export const CASES: CaseDef[] = [
     component: dynamic(() => import('@/programs/projects/CaseInvest')),
     source: 'greenlight-invest.mdx',
     progress: { pct: 100, phase: 'Shipped. Read it' },
+    /* open to everyone — no sphere on this one (Jake, s148) */
+    gated: false,
     box: {
       /* the three phones on mint — Jake's own product shot. 2.10:1 into a
          16:9 plate, so it gives up a sliver either side and keeps the
