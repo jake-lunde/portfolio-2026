@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, motion, useInView, useReducedMotion, type Variants } from 'motion/react'
 import { Plate } from './CaseComponents'
-import { SPRINGS } from '@/lib/motion'
+import { DURATIONS, SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
 import caseStyles from './case.module.css'
 import styles from './moat.module.css'
@@ -37,6 +37,41 @@ const tabId = (t: string) => `moat-tab-${t}`
    centred, Figma's spot left ~1px between it and the "Competitors"
    pill. The arrow still lands on the chip (286–326 across). */
 const TIP_NUDGE = 6
+
+/* THE RADIATE: the bullseye grows out of its middle. The centre chip
+   pops first, then the rings grow from the chart's centre, inner to
+   outer, and each chip pops from its own centre as its ring's edge
+   reaches it; the ring pills follow, the tooltip last. It plays once
+   when the card is ~40% in view and again on every company switch,
+   after the old set collapses to the middle. Delays in seconds: a
+   widget-spring ring is ~90% grown about 0.12s after it starts, so a
+   chip waits that long past its ring. Whole run settles under ~0.9s. */
+const CENTRE_AT = 0
+const RING_AT = { 1: 0.04, 2: 0.14, 3: 0.24 } as const
+const CHIP_LAG = 0.12 // ring start → its edge arrives
+const CHIP_STEP = 0.03 // between chips on the same ring
+const PILL_AT = { 1: 0.42, 2: 0.46, 3: 0.5 } as const
+const TIP_AT = 0.58
+const COLLAPSE = parseFloat(DURATIONS.tap) // the old set's exit, a quick tween
+
+/* each part's states: `out` (unplayed), `in` (rest, delay via custom),
+   `gone` (collapsing on a switch). Reduced motion: every change is instant. */
+const parts = (reduced: boolean, spring: object, opacity = 1): Variants => ({
+  out: { scale: 0, opacity: 0 },
+  in: (delay: number) => ({
+    scale: 1,
+    opacity,
+    transition: reduced ? { duration: 0 } : { ...spring, delay },
+  }),
+  gone: {
+    scale: 0,
+    opacity: 0,
+    transition: reduced ? { duration: 0 } : { duration: COLLAPSE, ease: 'easeIn' },
+  },
+})
+
+const RING_CLASS = { 1: styles.ringInner, 2: styles.ringMid, 3: styles.ringOuter } as const
+const PILL_TOP = { 1: 82, 2: 41, 3: 0 } as const
 
 /* which sheet is up: a competitor's (by ticker) or the explainer */
 type Open = { kind: 'competitor'; ticker: string } | { kind: 'info' } | null
@@ -136,6 +171,23 @@ function MoatCard({
   onFirstOpen: () => void
 }) {
   const reduced = useReducedMotion()
+  const frameRef = useRef<HTMLDivElement>(null)
+  /* first time ~40% of the card shows; never replays on scroll */
+  const inView = useInView(frameRef, { once: true, amount: 0.4 })
+  const play = !!reduced || inView
+  /* reduced motion: after the first paint a switched-in set mounts at
+     rest (the first paint keeps `out` so server and client agree; the
+     CSS reduced-motion block holds it at rest until the instant `in`) */
+  const hydrated = useRef(false)
+  useEffect(() => {
+    hydrated.current = true
+  }, [])
+  const ringV = parts(!!reduced, SPRINGS.widget, 0.7)
+  const popV = parts(!!reduced, SPRINGS.rise)
+  const fadeV = parts(!!reduced, SPRINGS.widget)
+  /* a chip's delay: its ring's start, the edge lag, its place on the ring */
+  const chipAt = (c: Competitor) =>
+    RING_AT[c.ring] + CHIP_LAG + company.competitors.filter((o) => o.ring === c.ring).indexOf(c) * CHIP_STEP
   const chipRefs = useRef(new Map<string, HTMLButtonElement>())
   const infoRef = useRef<HTMLButtonElement>(null)
   const opener = useRef<string | null>(null) // a chip's ticker, or 'info'
@@ -182,7 +234,7 @@ function MoatCard({
       role="tabpanel"
       aria-labelledby={tabId(company.ticker)}
     >
-      <div className={styles.frame}>
+      <div ref={frameRef} className={styles.frame}>
         <div className={styles.card}>
           <div className={styles.content} inert={up}>
             <div className={styles.titleRow}>
@@ -214,71 +266,103 @@ function MoatCard({
               role="group"
               aria-label={`${company.name}’s competitors. The closer a company sits to the middle, the more directly it competes.`}
             >
-              <span className={`${styles.ring} ${styles.ringOuter}`} aria-hidden="true" />
-              <span className={`${styles.ring} ${styles.ringMid}`} aria-hidden="true" />
-              <span className={`${styles.ring} ${styles.ringInner}`} aria-hidden="true" />
-
-              <AnimatePresence initial={false}>
+              {/* one keyed set per company: on a switch the old set
+                  collapses to the middle, then the new one radiates out */}
+              <AnimatePresence mode="wait">
                 <motion.div
                   key={company.ticker}
                   className={styles.layer}
-                  initial={{ opacity: 0, scale: 0.94 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.02 }}
-                  transition={swap}
+                  initial={reduced && hydrated.current ? false : 'out'}
+                  animate={play ? 'in' : 'out'}
+                  exit="gone"
                 >
-                  <span className={styles.center} role="img" aria-label={company.name}>
+                  {([3, 2, 1] as const).map((r) => (
+                    <motion.span
+                      key={r}
+                      className={`${styles.ring} ${RING_CLASS[r]}`}
+                      variants={ringV}
+                      custom={RING_AT[r]}
+                      aria-hidden="true"
+                    />
+                  ))}
+                  <motion.span
+                    className={styles.center}
+                    role="img"
+                    aria-label={company.name}
+                    variants={popV}
+                    custom={CENTRE_AT}
+                  >
                     <Chip ticker={company.ticker} logo={company.logo} big />
-                  </span>
+                  </motion.span>
+                  {/* the entrance scales the wrapper; the tap squeeze lives on
+                      the button, so a release never waits out an entrance delay */}
                   {company.competitors.map((c) => (
-                    <motion.button
+                    <motion.span
                       key={c.ticker}
-                      ref={(el: HTMLButtonElement | null) => {
-                        if (el) chipRefs.current.set(c.ticker, el)
-                        else chipRefs.current.delete(c.ticker)
-                      }}
-                      type="button"
                       className={styles.orbit}
                       style={{ left: c.x - 20, top: c.y - 20 }}
-                      aria-label={`${c.name}, ${RING_NAMES[c.ring].one}`}
-                      aria-haspopup="dialog"
-                      whileTap={reduced ? undefined : { scale: 0.92 }}
-                      transition={SPRINGS.deck}
-                      onClick={() => openSheet(c)}
+                      variants={popV}
+                      custom={chipAt(c)}
                     >
-                      <Chip ticker={c.ticker} logo={c.logo} />
-                    </motion.button>
+                      <motion.button
+                        ref={(el: HTMLButtonElement | null) => {
+                          if (el) chipRefs.current.set(c.ticker, el)
+                          else chipRefs.current.delete(c.ticker)
+                        }}
+                        type="button"
+                        className={styles.orbitButton}
+                        aria-label={`${c.name}, ${RING_NAMES[c.ring].one}`}
+                        aria-haspopup="dialog"
+                        whileTap={reduced ? undefined : { scale: 0.92 }}
+                        transition={SPRINGS.deck}
+                        onClick={() => openSheet(c)}
+                      >
+                        <Chip ticker={c.ticker} logo={c.logo} />
+                      </motion.button>
+                    </motion.span>
                   ))}
+
+                  {/* ring labels ride above the chips, centred on the rings'
+                      vertical axis (Figma sets them 14px right of it) */}
+                  {([3, 2, 1] as const).map((r) => (
+                    <motion.span
+                      key={`pill-${r}`}
+                      className={styles.pill}
+                      style={{ top: PILL_TOP[r], x: '-50%' }}
+                      variants={fadeV}
+                      custom={PILL_AT[r]}
+                      aria-hidden="true"
+                    >
+                      {RING_NAMES[r].pill}
+                    </motion.span>
+                  ))}
+
+                  {/* the wrapper rides the radiate (a variant child must not
+                      set its own initial/exit, or it stops inheriting); the
+                      bubble inside fades out once a sheet has been seen */}
+                  {tip && (
+                    <motion.span
+                      className={styles.tipWrap}
+                      style={{ left: tip.x - 99 + TIP_NUDGE, top: tip.y - 52 }}
+                      variants={fadeV}
+                      custom={TIP_AT}
+                      aria-hidden="true"
+                    >
+                      <AnimatePresence initial={false}>
+                        {!seen && (
+                          <motion.span
+                            key="tip"
+                            className={styles.tooltip}
+                            exit={{ opacity: 0 }}
+                            transition={swap}
+                          >
+                            Tap to learn more
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.span>
+                  )}
                 </motion.div>
-              </AnimatePresence>
-
-              {/* ring labels ride above the chips, centred on the rings'
-                  vertical axis (Figma sets them 14px right of it) */}
-              <span className={styles.pill} style={{ top: 0 }} aria-hidden="true">
-                {RING_NAMES[3].pill}
-              </span>
-              <span className={styles.pill} style={{ top: 41 }} aria-hidden="true">
-                {RING_NAMES[2].pill}
-              </span>
-              <span className={styles.pill} style={{ top: 82 }} aria-hidden="true">
-                {RING_NAMES[1].pill}
-              </span>
-
-              <AnimatePresence initial={false}>
-                {!seen && tip && (
-                  <motion.span
-                    key={`tip-${company.ticker}`}
-                    className={styles.tooltip}
-                    style={{ left: tip.x - 99 + TIP_NUDGE, top: tip.y - 52 }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={swap}
-                    aria-hidden="true"
-                  >
-                    Tap to learn more
-                  </motion.span>
-                )}
               </AnimatePresence>
             </div>
           </div>
