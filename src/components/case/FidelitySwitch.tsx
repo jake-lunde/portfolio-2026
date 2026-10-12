@@ -20,7 +20,6 @@ import styles from './FidelitySwitch.module.css'
    TitleAction, lets neither fire from inside it. */
 
 const SEEN_KEY = 'fidelity-callout-seen'
-const BUBBLE_LIFE_MS = 8000
 
 export function FidelitySwitch() {
   const mode = useFidelity((s) => s.mode)
@@ -33,8 +32,10 @@ export function FidelitySwitch() {
   /* THE CALLOUT — a one-time bubble under the switch, the FableMark
      idiom (shell/FableMark.tsx): the rocker is the case's one control
      and a first reader has no reason to look at the titlebar for it.
-     The flag is written on the way OUT, whichever exit it takes, so the
-     offer is made exactly once per browser. */
+     It waits (s150, Jake's call): no timer, no outside-tap dismissal.
+     It leaves when the reader uses the switch, presses the bubble, or
+     hits Escape. The flag is written on the way OUT, whichever exit it
+     takes, so the offer is made exactly once per browser. */
   const seal = useCallback(() => {
     setBubble(false)
     try {
@@ -86,23 +87,14 @@ export function FidelitySwitch() {
     return unhook
   }, [])
 
-  // every exit is the same exit: 8s, outside pointer, Escape, or a flip
+  // Escape is the one exit that isn't the switch or the bubble itself
   useEffect(() => {
     if (!bubble) return
-    const life = setTimeout(() => seal(), BUBBLE_LIFE_MS)
-    const onDown = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) seal()
-    }
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') seal()
     }
-    window.addEventListener('pointerdown', onDown)
     window.addEventListener('keydown', onKey)
-    return () => {
-      clearTimeout(life)
-      window.removeEventListener('pointerdown', onDown)
-      window.removeEventListener('keydown', onKey)
-    }
+    return () => window.removeEventListener('keydown', onKey)
   }, [bubble, seal])
 
   return (
