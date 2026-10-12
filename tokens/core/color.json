@@ -64,8 +64,9 @@
         "$type": "color"
       },
       "soft": {
-        "$value": "#6b5a44",
-        "$type": "color"
+        "$value": "#655540",
+        "$type": "color",
+        "$description": "4.69:1 on parchment.raised (the window fill), so muted text clears AA where case prose sits (s146; was #6b5a44 at 4.33:1)"
       }
     },
     "walnut": {
