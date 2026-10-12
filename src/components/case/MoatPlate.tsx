@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useInView, useReducedMotion, type Variants } from 'motion/react'
 import { Plate } from './CaseComponents'
+import { SheetShell } from './GlSheet'
 import { DURATIONS, SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
 import caseStyles from './case.module.css'
@@ -398,53 +399,6 @@ function MoatCard({
         </div>
       </div>
     </div>
-  )
-}
-
-/* the sheet's shell: rises from the card's bottom edge, Escape closes */
-function SheetShell({
-  titleId,
-  title,
-  onClose,
-  transition,
-  className,
-  closeRef,
-  children,
-}: {
-  titleId: string
-  title: React.ReactNode
-  onClose: () => void
-  transition: object
-  className?: string
-  closeRef?: React.Ref<HTMLButtonElement>
-  children: React.ReactNode
-}) {
-  return (
-    <motion.div
-      className={className ? `${styles.sheet} ${className}` : styles.sheet}
-      role="dialog"
-      aria-labelledby={titleId}
-      initial={{ y: '100%' }}
-      animate={{ y: 0 }}
-      exit={{ y: '100%' }}
-      transition={transition}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') {
-          e.stopPropagation()
-          onClose()
-        }
-      }}
-    >
-      <div className={styles.sheetHead}>
-        <h3 id={titleId} className={styles.sheetTitle}>
-          {title}
-        </h3>
-        <button ref={closeRef} type="button" className={styles.close} aria-label="Close" onClick={onClose}>
-          <img src={`${ASSET}icon-close.svg`} alt="" width={24} height={24} />
-        </button>
-      </div>
-      {children}
-    </motion.div>
   )
 }
 
