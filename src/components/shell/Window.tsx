@@ -11,7 +11,7 @@ import {
 import { SPRINGS } from '@/lib/motion'
 import type { RefObject } from 'react'
 import type { ResolvedWindow } from '@/programs/resolve'
-import { useWindows } from '@/store/windows'
+import { useWindows, isCase } from '@/store/windows'
 import { useSettings } from '@/store/settings'
 import { programName } from '@/lib/skinVocab'
 import { useGate } from '@/store/gate'
@@ -47,6 +47,10 @@ export function Window({ def, z, active, desktopRef }: Props) {
      useWindows.close forgets it. */
   const zoomed = useWindows((s) => s.zoomed[def.id] ?? false)
   const setZoomed = useWindows((s) => s.setZoomed)
+  /* a zoomed case goes past maximised to full-bleed: no desktop margin,
+     no border, no shadow (Jake's ruling, s146). Desktop.tsx drops the
+     ticker for the same condition, so the window meets the menubar. */
+  const full = zoomed && isCase(def.id)
   const [explaining, setExplaining] = useState(false)
 
   // window title + a11y labels follow the active skin's vocabulary
@@ -190,7 +194,7 @@ export function Window({ def, z, active, desktopRef }: Props) {
       aria-label={title}
       data-window-id={def.id}
       data-component="window"
-      className={`${styles.window} ${active ? styles.windowActive : ''} ${zoomed ? styles.windowZoomed : ''} ${bare ? styles.windowBare : ''}`}
+      className={`${styles.window} ${active ? styles.windowActive : ''} ${zoomed ? styles.windowZoomed : ''} ${full ? styles.windowFull : ''} ${bare ? styles.windowBare : ''}`}
       style={{
         /* clamp the resting x so a window's right edge never opens off
            glass on narrow desktops — CSS min(), not innerWidth, so SSR
