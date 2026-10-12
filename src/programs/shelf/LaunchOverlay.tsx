@@ -155,7 +155,9 @@ export function LaunchOverlay({
   // the stepped write. Each tick prints one status line; the bar stalls at
   // 90% like every loader ever shipped, waiting on the licence. A case
   // that isn't gated (cases.ts `gated: false`) never stalls — the bar
-  // runs straight through to done.
+  // runs straight through to done. (Since s149 the shelf opens an ungated
+  // case without this layer at all — Shelf's startPlay — so that branch is
+  // the safety net for any other door, not the usual path.)
   useEffect(() => {
     if (phase !== 'loading') return
     if (step >= STEPS.length) {

@@ -198,6 +198,14 @@ export function ShelfBox({
   const backId = `shelf-${c.slug}-back`
   const box = c.box
   const shipped = c.status === 'live' && Boolean(c.component)
+  /** THE COVER IS THE DOOR (Jake, s149: "kill the box flips for the ones
+      that are ungated"). A shipped case that the sphere does not guard
+      (cases.ts `gated: false`) has nothing on its back worth a turn —
+      PLAY was the reason the box turned over, and with no licence check
+      between the reader and the case the cover can simply BE the play
+      button. Gated boxes, and boxes not out yet, still turn: the back is
+      where the clearance path and the COMING SOON foot live. */
+  const direct = shipped && c.gated === false
 
   /* The cover film mounts on the client only. The shelf window is on screen
      the moment this component exists, so there is nothing to wait for — but
@@ -405,12 +413,22 @@ export function ShelfBox({
                computed, because the cover's own text is a title, an
                eyebrow and a tagline, which read as three labels in a row
                to anyone listening instead of looking. */
-            tabIndex={flipTag ? -1 : undefined}
-            aria-expanded={flipTag ? undefined : flipped}
-            aria-controls={flipTag ? undefined : backId}
-            aria-label={flipTag ? undefined : `${c.name} — ${spoken(t('shelf.tag.back', skin))}`}
+            tabIndex={flipTag && !direct ? -1 : undefined}
+            aria-expanded={flipTag || direct ? undefined : flipped}
+            aria-controls={flipTag || direct ? undefined : backId}
+            aria-label={
+              direct
+                ? /* a door, not a disclosure: it is named for what it opens */
+                  `${c.name} — ${spoken(t('shelf.play', skin))}`
+                : flipTag
+                  ? undefined
+                  : `${c.name} — ${spoken(t('shelf.tag.back', skin))}`
+            }
             inert={flipped}
-            onClick={() => turn(true)}
+            /* an ungated box opens on the cover; everything else turns over
+               to show the way in — see `direct` above. The launch's own tap
+               sound is Shelf's (startPlay), so none is played here. */
+            onClick={(e) => (direct ? onPlay(c.slug, e.currentTarget) : turn(true))}
             initial={faceFade(false)}
             animate={faceFade(false)}
             transition={{ duration: reduced ? 0.14 : 0 }}
