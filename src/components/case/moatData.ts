@@ -39,6 +39,9 @@ export type MoatCompany = {
   logo?: string
   /** ticker of the chip the tooltip points at */
   tip: string
+  /** the explainer sheet's "rivals {name} in areas like …" (NVIDIA's is
+      the Figma copy; the other three are drafts for Jake to confirm) */
+  areas: string
   competitors: Competitor[]
 }
 
@@ -64,6 +67,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
     name: 'NVIDIA',
     logo: `${LOGO}nvda.png`,
     tip: 'AAPL',
+    areas: 'chips and AI',
     competitors: [
       /* Figma's tab order (AMD, AAPL, INTC, QCOM, AMZN); GOOG, untabbed in the design, goes last */
       {
@@ -156,6 +160,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
     name: 'Apple',
     logo: `${LOGO}aapl.png`,
     tip: 'SONY',
+    areas: 'phones and computers',
     competitors: [
       {
         ticker: 'GOOG',
@@ -241,6 +246,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
     ticker: 'NKE',
     name: 'Nike',
     tip: 'PUMSY',
+    areas: 'shoes and sportswear',
     competitors: [
       {
         ticker: 'ADDYY',
@@ -326,6 +332,7 @@ export const MOAT_COMPANIES: MoatCompany[] = [
     ticker: 'DIS',
     name: 'Disney',
     tip: 'AAPL',
+    areas: 'movies, streaming, and theme parks',
     competitors: [
       {
         ticker: 'NFLX',

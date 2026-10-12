@@ -246,6 +246,17 @@
   margin-top: 9px;
 }
 
+/* a plate with no caption, followed by prose, keeps the room a caption
+   would take (its 9px + one --text-ui line), so the gap from the plate
+   to the next paragraph matches every captioned plate's */
+.figure:not(:has(> .figcap)):has(+ p)::after {
+  content: '';
+  display: block;
+  margin-top: 9px;
+  font-size: var(--text-ui);
+  height: 1lh;
+}
+
 .placeholder {
   border: 1.5px dashed color-mix(in srgb, var(--content-inverse) 35%, transparent);
   border-radius: 3px;

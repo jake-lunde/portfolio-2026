@@ -16,51 +16,50 @@ import {
 } from './moatData'
 
 /* The competitors bullseye: a rebuild of Greenlight's real "detailCard"
-   (Figma 201633:65798) and its fly-up sheet (201633:65799). The plate
-   picks the company; the card is Greenlight's own product surface, so
-   it wears Greenlight's palette (moat.module.css) while everything
-   around it stays on the site's tokens. Tap a chip and the sheet rises
-   from the card's bottom edge over a scrim clipped to the card. */
+   (Figma 201633:65798) and its two fly-up sheets: a competitor's
+   (201633:65799) and the chart explainer behind the "i" (201633:65803).
+   The plate picks the company with the plate grammar's pill tabs (the
+   same row as The first lap's); the card is Greenlight's own product
+   surface, so it wears Greenlight's palette (moat.module.css) while
+   everything around it stays on the site's tokens. Tap a chip or the
+   "i" and a sheet rises from the card's bottom edge over a scrim
+   clipped to the card. */
 
 const ASSET = '/case/greenlight-invest/moat/'
 /* constant ids: programs/case islands can't use useId (hydration, see
    memory) and there is one bullseye on the page */
 const TITLE_ID = 'moat-sheet-title'
+const INFO_TITLE_ID = 'moat-info-title'
 const PANEL_ID = 'moat-sheet-panel'
+const STAGE_ID = 'moat-stage'
+const tabId = (t: string) => `moat-tab-${t}`
+/* the bubble sits 6px right of Figma's spot: with the ring pills now
+   centred, Figma's spot left ~1px between it and the "Competitors"
+   pill. The arrow still lands on the chip (286–326 across). */
+const TIP_NUDGE = 6
+
+/* which sheet is up: a competitor's (by ticker) or the explainer */
+type Open = { kind: 'competitor'; ticker: string } | { kind: 'info' } | null
 
 export function MoatPlate() {
   const [ticker, setTicker] = useState(MOAT_COMPANIES[0].ticker)
-  const [open, setOpen] = useState<string | null>(null) // competitor shown in the sheet
-  const [seen, setSeen] = useState(false) // any sheet opened: the tooltip retires
+  const [open, setOpen] = useState<Open>(null)
+  const [seen, setSeen] = useState(false) // any competitor sheet opened: the tooltip retires
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
   const company = MOAT_COMPANIES.find((c) => c.ticker === ticker) ?? MOAT_COMPANIES[0]
 
-  const pickCompany = (t: string) => {
-    if (t === ticker) return
+  /* a switch closes any open sheet; focus stays on the tabs */
+  const pickCompany = (k: number, focus = false) => {
+    const next = MOAT_COMPANIES[k].ticker
+    if (focus) tabRefs.current[k]?.focus()
+    if (next === ticker) return
     sfx.tap()
     setOpen(null)
-    setTicker(t)
+    setTicker(next)
   }
 
   return (
-    <Plate
-      cap="Competitors"
-      chip={
-        <span className={caseStyles.fidChip} role="group" aria-label="Company">
-          {MOAT_COMPANIES.map((c) => (
-            <button
-              key={c.ticker}
-              type="button"
-              className={caseStyles.fidChipSeg}
-              aria-pressed={c.ticker === ticker}
-              aria-label={tickerLabel(c)}
-              onClick={() => pickCompany(c.ticker)}
-            >
-              {c.ticker}
-            </button>
-          ))}
-        </span>
-      }
-    >
+    <Plate cap="Competitors">
       <MoatCard
         company={company}
         open={open}
@@ -68,6 +67,44 @@ export function MoatPlate() {
         seen={seen}
         onFirstOpen={() => setSeen(true)}
       />
+      <div
+        className={`${caseStyles.plateTabs} ${caseStyles.lapTabs}`}
+        role="tablist"
+        aria-label="Company"
+        onKeyDown={(e) => {
+          const k = MOAT_COMPANIES.findIndex((c) => c.ticker === ticker)
+          const n = MOAT_COMPANIES.length
+          const to =
+            e.key === 'ArrowRight' ? (k + 1) % n
+            : e.key === 'ArrowLeft' ? (k - 1 + n) % n
+            : e.key === 'Home' ? 0
+            : e.key === 'End' ? n - 1
+            : null
+          if (to === null) return
+          e.preventDefault()
+          pickCompany(to, true)
+        }}
+      >
+        {MOAT_COMPANIES.map((c, k) => (
+          <button
+            key={c.ticker}
+            ref={(el) => {
+              tabRefs.current[k] = el
+            }}
+            id={tabId(c.ticker)}
+            type="button"
+            role="tab"
+            className={caseStyles.plateTab}
+            aria-selected={c.ticker === ticker}
+            aria-controls={STAGE_ID}
+            aria-label={tickerLabel(c)}
+            tabIndex={c.ticker === ticker ? 0 : -1}
+            onClick={() => pickCompany(k)}
+          >
+            {c.ticker}
+          </button>
+        ))}
+      </div>
     </Plate>
   )
 }
@@ -93,26 +130,35 @@ function MoatCard({
   onFirstOpen,
 }: {
   company: MoatCompany
-  open: string | null
-  setOpen: (t: string | null) => void
+  open: Open
+  setOpen: (o: Open) => void
   seen: boolean
   onFirstOpen: () => void
 }) {
   const reduced = useReducedMotion()
   const chipRefs = useRef(new Map<string, HTMLButtonElement>())
-  const opener = useRef<string | null>(null)
+  const infoRef = useRef<HTMLButtonElement>(null)
+  const opener = useRef<string | null>(null) // a chip's ticker, or 'info'
   const restore = useRef(false)
 
   const swap = reduced ? { duration: 0 } : SPRINGS.widget
   const rise = reduced ? { duration: 0 } : SPRINGS.window
   const tip = company.competitors.find((c) => c.ticker === company.tip)
-  const shown = company.competitors.find((c) => c.ticker === open) ?? null
+  const shown =
+    open?.kind === 'competitor' ? company.competitors.find((c) => c.ticker === open.ticker) ?? null : null
+  const up = shown !== null || open?.kind === 'info'
 
   const openSheet = (c: Competitor) => {
     sfx.tap()
     opener.current = c.ticker
     onFirstOpen()
-    setOpen(c.ticker)
+    setOpen({ kind: 'competitor', ticker: c.ticker })
+  }
+
+  const openInfo = () => {
+    sfx.tap()
+    opener.current = 'info'
+    setOpen({ kind: 'info' })
   }
 
   const close = () => {
@@ -120,20 +166,25 @@ function MoatCard({
     setOpen(null)
   }
 
-  /* focus goes back to the chip that opened the sheet (company switches
-     close it without this, so focus stays on the picker) */
+  /* focus goes back to whatever opened the sheet, a chip or the "i"
+     (company switches close it without this, so focus stays on the tabs) */
   useEffect(() => {
     if (open || !restore.current) return
     restore.current = false
-    const el = opener.current ? chipRefs.current.get(opener.current) : undefined
+    const el = opener.current === 'info' ? infoRef.current : opener.current ? chipRefs.current.get(opener.current) : undefined
     el?.focus({ preventScroll: true })
   }, [open])
 
   return (
-    <div className={styles.stage}>
+    <div
+      id={STAGE_ID}
+      className={styles.stage}
+      role="tabpanel"
+      aria-labelledby={tabId(company.ticker)}
+    >
       <div className={styles.frame}>
         <div className={styles.card}>
-          <div className={styles.content} inert={open !== null}>
+          <div className={styles.content} inert={up}>
             <div className={styles.titleRow}>
               <AnimatePresence initial={false} mode="popLayout">
                 <motion.span
@@ -147,9 +198,17 @@ function MoatCard({
                   {company.ticker}&rsquo;s competitors
                 </motion.span>
               </AnimatePresence>
-              <img className={styles.info} src={`${ASSET}icon-info.svg`} alt="" width={24} height={24} aria-hidden="true" />
+              <button
+                ref={infoRef}
+                type="button"
+                className={styles.info}
+                aria-label="What this chart shows"
+                aria-haspopup="dialog"
+                onClick={openInfo}
+              >
+                <img src={`${ASSET}icon-info.svg`} alt="" width={24} height={24} />
+              </button>
             </div>
-
             <div
               className={styles.chart}
               role="group"
@@ -193,7 +252,8 @@ function MoatCard({
                 </motion.div>
               </AnimatePresence>
 
-              {/* ring labels ride above the chips, as in the Figma card */}
+              {/* ring labels ride above the chips, centred on the rings'
+                  vertical axis (Figma sets them 14px right of it) */}
               <span className={styles.pill} style={{ top: 0 }} aria-hidden="true">
                 {RING_NAMES[3].pill}
               </span>
@@ -209,7 +269,7 @@ function MoatCard({
                   <motion.span
                     key={`tip-${company.ticker}`}
                     className={styles.tooltip}
-                    style={{ left: tip.x - 99, top: tip.y - 52 }}
+                    style={{ left: tip.x - 99 + TIP_NUDGE, top: tip.y - 52 }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -224,7 +284,7 @@ function MoatCard({
           </div>
 
           <AnimatePresence>
-            {shown && (
+            {up && (
               <motion.div
                 key="scrim"
                 className={styles.scrim}
@@ -241,16 +301,115 @@ function MoatCard({
                 key="sheet"
                 company={company}
                 shown={shown}
-                onPick={(t) => setOpen(t)}
+                onPick={(t) => setOpen({ kind: 'competitor', ticker: t })}
                 onClose={close}
                 transition={rise}
                 reduced={!!reduced}
               />
             )}
+            {open?.kind === 'info' && (
+              <InfoSheet key="info" company={company} onClose={close} transition={rise} />
+            )}
           </AnimatePresence>
         </div>
       </div>
     </div>
+  )
+}
+
+/* the sheet's shell: rises from the card's bottom edge, Escape closes */
+function SheetShell({
+  titleId,
+  title,
+  onClose,
+  transition,
+  className,
+  closeRef,
+  children,
+}: {
+  titleId: string
+  title: React.ReactNode
+  onClose: () => void
+  transition: object
+  className?: string
+  closeRef?: React.Ref<HTMLButtonElement>
+  children: React.ReactNode
+}) {
+  return (
+    <motion.div
+      className={className ? `${styles.sheet} ${className}` : styles.sheet}
+      role="dialog"
+      aria-labelledby={titleId}
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      exit={{ y: '100%' }}
+      transition={transition}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation()
+          onClose()
+        }
+      }}
+    >
+      <div className={styles.sheetHead}>
+        <h3 id={titleId} className={styles.sheetTitle}>
+          {title}
+        </h3>
+        <button ref={closeRef} type="button" className={styles.close} aria-label="Close" onClick={onClose}>
+          <img src={`${ASSET}icon-close.svg`} alt="" width={24} height={24} />
+        </button>
+      </div>
+      {children}
+    </motion.div>
+  )
+}
+
+/* the chart explainer behind the "i" (Figma 201633:65803). Copy is the
+   Figma node's, with its stray brackets dropped and the company swapped
+   in. The assistant prompt row is drawn to match the design and does
+   nothing: there is no assistant on this page. */
+function InfoSheet({
+  company,
+  onClose,
+  transition,
+}: {
+  company: MoatCompany
+  onClose: () => void
+  transition: object
+}) {
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const name = company.name
+
+  /* the close button is the sheet's only control: focus lands there */
+  useEffect(() => {
+    closeRef.current?.focus({ preventScroll: true })
+  }, [])
+
+  return (
+    <SheetShell
+      titleId={INFO_TITLE_ID}
+      title={<>{company.ticker}&rsquo;s competitors</>}
+      onClose={onClose}
+      transition={transition}
+      className={styles.infoSheet}
+      closeRef={closeRef}
+    >
+      <div className={styles.explain}>
+        <p>
+          This chart shows how closely other major companies compete with {name}. The closer a logo is to
+          the center, the more directly it rivals {name} in areas like {company.areas}. It helps you see who{' '}
+          {name} is really up against, and who&rsquo;s playing a more distant role in the space.
+        </p>
+        <p>Tap any of the competitors on the chart to learn more about them and how they compare.</p>
+      </div>
+      <div className={styles.prompt}>
+        <img src={`${ASSET}icon-assistant.svg`} alt="" width={40} height={40} />
+        <span className={styles.promptText}>
+          <span>Is {name} a strong company in</span> <span>their industry?</span>
+        </span>
+        <img src={`${ASSET}icon-chevron-right.svg`} alt="" width={24} height={24} />
+      </div>
+    </SheetShell>
   )
 }
 
@@ -308,30 +467,12 @@ function Sheet({
   }
 
   return (
-    <motion.div
-      className={styles.sheet}
-      role="dialog"
-      aria-labelledby={TITLE_ID}
-      initial={{ y: '100%' }}
-      animate={{ y: 0 }}
-      exit={{ y: '100%' }}
+    <SheetShell
+      titleId={TITLE_ID}
+      title={<>{company.ticker}&rsquo;s competitors</>}
+      onClose={onClose}
       transition={transition}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') {
-          e.stopPropagation()
-          onClose()
-        }
-      }}
     >
-      <div className={styles.sheetHead}>
-        <h3 id={TITLE_ID} className={styles.sheetTitle}>
-          {company.ticker}&rsquo;s competitors
-        </h3>
-        <button type="button" className={styles.close} aria-label="Close" onClick={onClose}>
-          <img src={`${ASSET}icon-close.svg`} alt="" width={24} height={24} />
-        </button>
-      </div>
-
       <div ref={strip} className={styles.tabs} role="tablist" aria-label="Competitors">
         {list.map((c) => {
           const on = c.ticker === shown.ticker
@@ -376,6 +517,6 @@ function Sheet({
           ))}
         </ul>
       </div>
-    </motion.div>
+    </SheetShell>
   )
 }

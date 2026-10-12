@@ -4,7 +4,7 @@
    surface, so its colours are Greenlight's values from the Figma spec,
    scoped to the card as custom properties (CLAUDE.md §5 derivation
    note: these are not LUNDE OS tokens and never leave the card). The
-   plate and the company picker around it stay on the site's tokens.
+   plate and the company tabs around it stay on the site's tokens.
    Greenlight's proprietary face maps to the site's --sans at the spec's
    sizes and line heights; its 350 "Screen" weight → regular, 500 →
    medium. */
@@ -91,6 +91,18 @@
 .info {
   display: block;
   flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.info img {
+  display: block;
 }
 
 /* ringChart 326x350, centre (163,175) */
@@ -167,10 +179,12 @@
   line-height: 14px;
 }
 
-/* ringPill: centred 14px right of the chart's middle, above the chips */
+/* ringPill: Figma sets these 14px right of the chart's middle, which
+   reads off-centre; Jake's call: centred on the rings' vertical axis,
+   above the chips */
 .pill {
   position: absolute;
-  left: calc(50% + 14px);
+  left: 50%;
   transform: translateX(-50%);
   height: 32px;
   padding: 7px 8px; /* 8 minus the 1px border, box stays 32 */
@@ -218,6 +232,14 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
+}
+
+/* the explainer sizes to its content (Figma 390x411, home indicator
+   left out as on the competitor sheet), capped at the competitor
+   sheet's height */
+.sheet.infoSheet {
+  height: auto;
+  max-height: calc(100% - 16px);
 }
 
 .sheet::-webkit-scrollbar {
@@ -333,4 +355,54 @@
    emoji, which some emoji glyphs swallow — hold it open explicitly */
 .traitEmoji {
   margin-right: 0.3em;
+}
+
+/* (d2) the explainer: Body/1 16/24, 10 between paragraphs, then 16 to
+   the assistant prompt. Doubled class outranks the case prose `p`. */
+.explain {
+  margin-bottom: 16px;
+}
+
+.explain p,
+.sheet .explain p {
+  margin: 0 0 10px;
+  max-width: none;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.sheet .explain p:last-child {
+  margin-bottom: 0;
+}
+
+/* assistantPrompt: drawn to match, inert (no assistant on this page) */
+.prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 4px 16px 16px;
+  border-radius: 8px;
+  background: var(--gl-brand-strong);
+}
+
+.prompt img {
+  display: block;
+  flex: none;
+}
+
+/* Title/5 14/20 medium, two clipped 20px lines */
+.promptText {
+  flex: 1;
+  min-width: 0;
+  color: var(--gl-tertiary);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: var(--weight-medium);
+}
+
+.promptText > span {
+  display: block;
+  height: 20px;
+  overflow: hidden;
+  white-space: nowrap;
 }
