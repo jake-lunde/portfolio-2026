@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { CopyText as Copy } from '@/content/CopyText'
+import { metric } from '@/lib/metrics'
 import { SPRINGS } from '@/lib/motion'
 import { sfx } from '@/lib/sound'
 import { CASES, getCase } from '@/programs/projects/cases'
+import { useWindows } from '@/store/windows'
 import { useFinePointer } from './Box3D'
 import { LaunchOverlay } from './LaunchOverlay'
 import { ShelfBox } from './ShelfBox'
@@ -138,8 +140,24 @@ export default function Shelf({
     if (row.current) row.current.scrollLeft = 0
   }, [])
 
+  const open = useWindows((s) => s.open)
+
   const startPlay = (slug: string, from: HTMLElement) => {
     trigger.current = from
+    /* NO LOADER FOR AN OPEN DOOR (Jake, s149: "skip the loading bar
+       too"). The launch layer exists to stage the licence check — the
+       stepped write, the stall at 90%, the sphere. A case the sphere does
+       not guard (cases.ts `gated: false`) has nothing to stage, so its
+       cover IS the door (ShelfBox `direct`) and the window opens on the
+       click: same metric, same open sound, same maximised arrival the
+       overlay's `done` phase would have given it, minus the wait. */
+    if (getCase(slug)?.gated === false) {
+      metric('case_play', { slug })
+      sfx.open()
+      open(`case:${slug}`)
+      onLaunched?.()
+      return
+    }
     sfx.tap()
     setPlaying(slug)
   }
